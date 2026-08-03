@@ -15,10 +15,15 @@ class SemesterController extends Controller
     public function index()
     {
         return view('pages.course-management.semester.index', [
+            // Opts this screen into the redesigned module shell.
+            'layout' => 'course-top-menu',
             'title' => 'Course & Semester - London Churchill College',
             'subtitle' => 'Semesters',
+            'cmPageTitle' => 'Semesters',
+            'cmBackUrl' => route('course.management'),
+            'cmBackLabel' => 'Back to Course Management',
             'breadcrumbs' => [
-                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Course Management', 'href' => route('course.management')],
                 ['label' => 'Semesters', 'href' => 'javascript:void(0);']
             ]
         ]);
@@ -29,19 +34,11 @@ class SemesterController extends Controller
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
 
         
-        $total_rows = $count = Semester::count();
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
-
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
         foreach($sorters as $sort):
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
-        
-        $limit = $perpage;
-        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
         $query = Semester::orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
@@ -50,6 +47,22 @@ class SemesterController extends Controller
         if($status == 2):
             $query->onlyTrashed();
         endif;
+
+        // Counted from the *filtered* query. It used to be an unfiltered
+        // Semester::count(), so searching or switching to Archived left the
+        // pager offering pages that could never return a row.
+        $total_rows = (clone $query)->reorder()->count();
+
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true'
+            ? ($total_rows > 0 ? $total_rows : 10)
+            : ($request->size > 0 ? $request->size : 10));
+        // 1, not '' — an empty string reaches Tabulator as NaN and breaks the
+        // pager. Now that the count is filtered, a no-hit search can land here.
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : 1;
+
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
         $Query= $query->skip($offset)
                ->take($limit)
@@ -69,7 +82,7 @@ class SemesterController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'total' => $total_rows, 'data' => $data]);
     }
 
     public function store(SemesterRequests $request){

@@ -1,0 +1,345 @@
+/*
+ * Litepicker — global redesign
+ *
+ * Brings every `.datepicker` field in the app onto the Course Management
+ * calendar design. This is deliberately global: ~90 blades and ~47 scripts open
+ * a Litepicker, and they all share one panel.
+ *
+ * Imported straight after `_litepicker.css` so it wins on source order at equal
+ * specificity; the theme skin is left in place rather than rewritten, which
+ * keeps this revertible by removing a single import.
+ *
+ * Litepicker exposes its own custom properties, so colours are mapped onto
+ * those wherever it supports them and only the shape, typography and controls
+ * are restyled by hand.
+ *
+ * Palette override: a module that wants its own accent can set
+ * `--lcc-cal-accent` (and friends) on any ancestor — e.g. the admission module
+ * could point it at its teal. Everything below reads through these variables.
+ */
+
+:root {
+    --lcc-cal-accent: #16264f;
+    --lcc-cal-accent-ink: #ffffff;
+    --lcc-cal-accent-soft: #f2f4f9;
+    --lcc-cal-gold: #c9a24a;
+    --lcc-cal-surface: #ffffff;
+    --lcc-cal-line: #e6e3dc;
+    --lcc-cal-line-soft: #f0eee9;
+    --lcc-cal-ink: #1b2330;
+    --lcc-cal-muted: #5a626e;
+    --lcc-cal-dim: #a29e94;
+    --lcc-cal-field: #e0dcd3;
+    --lcc-cal-field-bg: #fbfaf7;
+    --lcc-cal-font: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* ------------------------------------------------------------------ *
+ * Panel
+ * ------------------------------------------------------------------ */
+
+.litepicker {
+    --litepicker-container-months-color-bg: transparent;
+    --litepicker-footer-color-bg: transparent;
+    --litepicker-day-color: var(--lcc-cal-ink);
+    --litepicker-day-color-hover: var(--lcc-cal-accent);
+    --litepicker-is-today-color: var(--lcc-cal-gold);
+    --litepicker-is-start-color: var(--lcc-cal-accent-ink);
+    --litepicker-is-start-color-bg: var(--lcc-cal-accent);
+    --litepicker-is-end-color: var(--lcc-cal-accent-ink);
+    --litepicker-is-end-color-bg: var(--lcc-cal-accent);
+    --litepicker-is-in-range-color: var(--lcc-cal-accent-soft);
+    --litepicker-is-locked-color: #c6c2b9;
+    --litepicker-month-header-color: var(--lcc-cal-ink);
+    --litepicker-month-weekday-color: var(--lcc-cal-dim);
+    --litepicker-month-week-number-color: var(--lcc-cal-dim);
+    --litepicker-button-prev-month-color: var(--lcc-cal-muted);
+    --litepicker-button-next-month-color: var(--lcc-cal-muted);
+    --litepicker-button-prev-month-color-hover: var(--lcc-cal-accent);
+    --litepicker-button-next-month-color-hover: var(--lcc-cal-accent);
+    --litepicker-highlighted-day-color: var(--lcc-cal-ink);
+    --litepicker-highlighted-day-color-bg: #f7f1de;
+
+    background: var(--lcc-cal-surface);
+    border: 1px solid var(--lcc-cal-line);
+    border-radius: 14px;
+    box-shadow: 0 22px 48px -18px rgba(10, 20, 50, 0.35);
+    color: var(--lcc-cal-ink);
+    font-family: var(--lcc-cal-font);
+    font-size: 13px;
+    margin-top: 6px;
+    padding: 6px;
+}
+
+/* The theme skin draws a small pointer triangle above the panel; the redesign
+ * is a plain floating card, so both halves of it are removed. */
+.litepicker::before,
+.litepicker::after {
+    display: none !important;
+}
+
+.litepicker .container__main {
+    background: transparent;
+}
+
+.litepicker .container__months {
+    background: transparent;
+    box-shadow: none;
+    padding: 6px 6px 2px;
+}
+
+/* ------------------------------------------------------------------ *
+ * Month header — nav buttons and the month/year dropdowns
+ * ------------------------------------------------------------------ */
+
+.litepicker .container__months .month-item-header {
+    align-items: center;
+    color: var(--lcc-cal-ink);
+    font-weight: 700;
+    justify-content: space-between;
+    padding: 4px 2px 12px;
+}
+
+.litepicker .container__months .month-item-header div > .month-item-name,
+.litepicker .container__months .month-item-header div > .month-item-year {
+    color: var(--lcc-cal-ink);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.litepicker .container__months .month-item-header .button-previous-month,
+.litepicker .container__months .month-item-header .button-next-month {
+    align-items: center;
+    background: var(--lcc-cal-surface);
+    border: 1px solid var(--lcc-cal-field);
+    border-radius: 9px;
+    color: var(--lcc-cal-muted);
+    display: inline-flex;
+    height: 30px;
+    justify-content: center;
+    padding: 0;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    width: 30px;
+}
+
+.litepicker .container__months .month-item-header .button-previous-month:hover,
+.litepicker .container__months .month-item-header .button-next-month:hover {
+    background: var(--lcc-cal-accent-soft);
+    border-color: var(--lcc-cal-accent);
+    color: var(--lcc-cal-accent);
+}
+
+/* Present when Litepicker runs with `dropdowns: {months: true, years: true}`,
+ * which is how the app initialises it. */
+.litepicker .container__months .month-item-header .month-item-name,
+.litepicker .container__months .month-item-header .month-item-year {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: var(--lcc-cal-field-bg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a49a' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right 10px center;
+    background-repeat: no-repeat;
+    background-size: 12px 12px;
+    border: 1px solid var(--lcc-cal-field);
+    border-radius: 9px;
+    color: var(--lcc-cal-ink);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    outline: none;
+    padding: 7px 30px 7px 11px;
+}
+
+.litepicker .container__months .month-item-header .month-item-name:focus,
+.litepicker .container__months .month-item-header .month-item-year:focus {
+    background-color: var(--lcc-cal-surface);
+    border-color: var(--lcc-cal-accent);
+}
+
+/* ------------------------------------------------------------------ *
+ * Weekday row + days
+ * ------------------------------------------------------------------ */
+
+.litepicker .container__months .month-item-weekdays-row {
+    color: var(--lcc-cal-dim);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    padding-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.litepicker .container__months .month-item-weekdays-row > div {
+    padding: 6px 0;
+}
+
+.litepicker .container__days {
+    padding: 0;
+}
+
+.litepicker .container__days .day-item {
+    border-radius: 9px;
+    color: var(--lcc-cal-ink);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 0;
+    transition: background 0.13s ease, color 0.13s ease;
+}
+
+.litepicker .container__days .day-item:hover {
+    background: var(--lcc-cal-accent-soft);
+    box-shadow: none;
+    color: var(--lcc-cal-accent);
+}
+
+.litepicker .container__days .day-item.is-today,
+.litepicker .container__days .day-item.is-today:hover {
+    color: var(--lcc-cal-gold);
+    font-weight: 800;
+}
+
+.litepicker .container__days .day-item.is-start-date,
+.litepicker .container__days .day-item.is-start-date:hover,
+.litepicker .container__days .day-item.is-end-date,
+.litepicker .container__days .day-item.is-end-date:hover {
+    background: var(--lcc-cal-accent);
+    color: var(--lcc-cal-accent-ink);
+    font-weight: 800;
+}
+
+.litepicker .container__days .day-item.is-in-range,
+.litepicker .container__days .day-item.is-in-range:hover {
+    background: var(--lcc-cal-accent-soft);
+    border-radius: 0;
+    color: var(--lcc-cal-accent);
+}
+
+/* Squares off the inner edge so a selected range reads as one band. Only
+ * applies in range mode — `singleMode` never sets both ends. */
+.litepicker .container__days .day-item.is-start-date:not(.is-end-date) {
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.litepicker .container__days .day-item.is-end-date:not(.is-start-date) {
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+}
+
+.litepicker .container__days .day-item.is-locked,
+.litepicker .container__days .day-item.is-locked:hover {
+    background: transparent;
+    color: #c6c2b9;
+}
+
+.litepicker .container__days .week-number {
+    color: var(--lcc-cal-dim);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 9px 0;
+}
+
+/* ------------------------------------------------------------------ *
+ * Footer
+ * ------------------------------------------------------------------ */
+
+.litepicker .container__footer {
+    background: transparent;
+    border-top: 1px solid var(--lcc-cal-line-soft);
+    box-shadow: none;
+    margin: 4px 6px 2px;
+    padding: 12px 0 6px;
+    text-align: right;
+}
+
+.litepicker .container__footer .button-apply,
+.litepicker .container__footer .button-cancel {
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    height: 34px;
+    margin-left: 8px;
+    padding: 0 18px;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.litepicker .container__footer .button-apply {
+    background: var(--lcc-cal-accent);
+    border: 1px solid var(--lcc-cal-accent);
+    color: var(--lcc-cal-accent-ink);
+}
+
+.litepicker .container__footer .button-apply:hover:not(:disabled) {
+    background: #0f1c3c;
+    border-color: #0f1c3c;
+}
+
+.litepicker .container__footer .button-apply:disabled {
+    opacity: 0.45;
+}
+
+.litepicker .container__footer .button-cancel {
+    background: transparent;
+    border: 1px solid var(--lcc-cal-field);
+    color: var(--lcc-cal-muted);
+}
+
+.litepicker .container__footer .button-cancel:hover {
+    background: var(--lcc-cal-field-bg);
+    color: var(--lcc-cal-accent);
+}
+
+.litepicker .container__tooltip {
+    background: var(--lcc-cal-accent);
+    border-radius: 8px;
+    color: var(--lcc-cal-accent-ink);
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 5px 9px;
+}
+
+.litepicker .container__tooltip::before,
+.litepicker .container__tooltip::after {
+    border-top-color: var(--lcc-cal-accent);
+}
+
+/* ------------------------------------------------------------------ *
+ * Dark mode — the theme ships a `.dark` root class
+ * ------------------------------------------------------------------ */
+
+.dark {
+    --lcc-cal-surface: #232d3f;
+    --lcc-cal-line: #303b52;
+    --lcc-cal-line-soft: #2b3549;
+    --lcc-cal-ink: #e2e8f0;
+    --lcc-cal-muted: #a8b3c4;
+    --lcc-cal-dim: #78859b;
+    --lcc-cal-field: #3a465e;
+    --lcc-cal-field-bg: #2a3446;
+    --lcc-cal-accent: #c9a24a;
+    --lcc-cal-accent-ink: #16264f;
+    --lcc-cal-accent-soft: #313c52;
+}
+
+/* ------------------------------------------------------------------ *
+ * Small screens — Litepicker's own day sizing variable
+ * ------------------------------------------------------------------ */
+
+@media (max-width: 640px) {
+    .litepicker {
+        --litepicker-day-width: 34px;
+
+        padding: 4px;
+    }
+
+    .litepicker .container__footer {
+        text-align: center;
+    }
+
+    .litepicker .container__footer .button-apply,
+    .litepicker .container__footer .button-cancel {
+        margin: 0 4px;
+    }
+}

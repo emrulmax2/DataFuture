@@ -23,8 +23,9 @@
     "use strict";
 
     const headers = document.querySelectorAll("[data-global-header]");
+    const searchWidgets = document.querySelectorAll("[data-global-search]");
 
-    if (!headers.length) {
+    if (!headers.length && !searchWidgets.length) {
         return;
     }
 
@@ -132,15 +133,18 @@
         `;
     };
 
-    document.querySelectorAll("[data-global-search]").forEach((search) => {
+    searchWidgets.forEach((search) => {
         const input = search.querySelector("[data-global-search-input]");
         const results = search.querySelector("[data-global-search-results]");
         const searchUrl = search.dataset.searchUrl;
+        const canSearchApplicants = search.dataset.searchApplicants === "1";
         const canSearchStudents = search.dataset.searchStudents === "1";
         const canSearchEmployees = search.dataset.searchEmployees === "1";
-        const emptyLabel = canSearchStudents && canSearchEmployees
-            ? "students or employees"
-            : (canSearchStudents ? "students" : "employees");
+        const emptyLabel = [
+            canSearchApplicants ? "applicants" : "",
+            canSearchStudents ? "live students" : "",
+            canSearchEmployees ? "employees" : "",
+        ].filter(Boolean).join(", ") || "records";
 
         if (!input || !results || !searchUrl) {
             return;
@@ -161,16 +165,22 @@
         };
 
         const renderResults = (payload, query) => {
-            const students = canSearchStudents && Array.isArray(payload.students) ? payload.students : [];
-            const employees = canSearchEmployees && Array.isArray(payload.employees) ? payload.employees : [];
+            const permissions = payload.permissions || {};
+            const applicantsAllowed = canSearchApplicants && permissions.applicants !== false;
+            const studentsAllowed = canSearchStudents && permissions.students !== false;
+            const employeesAllowed = canSearchEmployees && permissions.employees !== false;
+            const applicants = applicantsAllowed && Array.isArray(payload.applicants) ? payload.applicants : [];
+            const students = studentsAllowed && Array.isArray(payload.students) ? payload.students : [];
+            const employees = employeesAllowed && Array.isArray(payload.employees) ? payload.employees : [];
 
-            if (!students.length && !employees.length) {
+            if (!applicants.length && !students.length && !employees.length) {
                 renderEmpty(query);
                 return;
             }
 
             results.innerHTML = [
-                buildGroup(students, "Students", "lcc-global-search__group--students"),
+                buildGroup(applicants, "Applicants", "lcc-global-search__group--applicants"),
+                buildGroup(students, "Live Students", "lcc-global-search__group--students"),
                 buildGroup(employees, "Employees", "lcc-global-search__group--employees"),
             ].join("");
             search.dataset.searchOpen = "true";

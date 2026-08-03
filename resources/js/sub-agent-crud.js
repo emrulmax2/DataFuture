@@ -3,485 +3,558 @@ import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 
 ("use strict");
-var agentTableId = (function () {
-    var _tableGen = function () {
-        // Setup Tabulator
-        let querystr = $("#query-Agent").val() != "" ? $("#query-Agent").val() : "";
-        let status = $("#status-Agent").val() != "" ? $("#status-Agent").val() : "";
-        let id = $("#agentTableId").data('id') != "" ? $("#agentTableId").data('id') : "";
 
-        let tableContent = new Tabulator("#agentTableId", {
-            ajaxURL: route("sub-agent.list"),
-            ajaxParams: { querystr: querystr, status: status,id:id},
+const escapeHtml = (value) => {
+    const div = document.createElement("div");
+    div.textContent = value == null ? "" : String(value);
+    return div.innerHTML;
+};
+
+const palette = ["#0b6b66", "#6d4bb0", "#2f6ea5", "#2b8754", "#c65a2a", "#9f2945"];
+
+const avatarColor = (value) => {
+    const source = String(value || "agent");
+    let hash = 0;
+
+    for (let index = 0; index < source.length; index += 1) {
+        hash = source.charCodeAt(index) + ((hash << 5) - hash);
+    }
+
+    return palette[Math.abs(hash) % palette.length];
+};
+
+const isRealPhoto = (value) => {
+    const photo = String(value || "");
+
+    return photo !== "" && photo.slice(0, 5) !== "data:";
+};
+
+const renderAvatar = (row) => {
+    const name = escapeHtml(row.name || "Sub Agent");
+    const photo = String(row.photo_url || "");
+
+    if (isRealPhoto(photo)) {
+        return `
+            <span class="agm-agent-avatar agm-agent-avatar--photo" style="background:${avatarColor(row.name || row.id)}">
+                <img src="${escapeHtml(photo)}" alt="${name}" data-fallback-text="${escapeHtml(row.initials || "SA")}">
+            </span>
+        `;
+    }
+
+    return `<span class="agm-agent-avatar" style="background:${avatarColor(row.name || row.id)}">${escapeHtml(row.initials || "SA")}</span>`;
+};
+
+const setButtonBusy = ($button, busy) => {
+    const $loader = $button.find("svg").not("[data-lucide]").last();
+
+    $button.prop("disabled", busy);
+    $loader.css("display", busy ? "inline-block" : "none");
+};
+
+const clearFormErrors = ($modal) => {
+    $modal.find(".acc__input-error").html("");
+    $modal.find("input, select, textarea").removeClass("is-invalid border-danger");
+};
+
+const resetStrength = ($form) => {
+    $form.find(".agm-agent-strength span").removeClass("is-danger is-warning is-success");
+};
+
+const passwordStrength = (password) => {
+    let strength = 0;
+
+    if (password.match(/([a-z].*[A-Z])|([A-Z].*[a-z])/)) strength += 1;
+    if (password.match(/([0-9])/)) strength += 1;
+    if (password.match(/([!,%,&,@,#,$,^,*,?,_,~])/)) strength += 1;
+    if (password.length > 7) strength += 1;
+
+    return strength;
+};
+
+const paintPasswordStrength = (input) => {
+    const strength = passwordStrength(input.value || "");
+    const $bars = $(input).closest(".agm-agent-form-field").find(".agm-agent-strength span");
+
+    $bars.removeClass("is-danger is-warning is-success");
+
+    if (strength >= 1) $bars.eq(0).addClass("is-danger");
+    if (strength >= 2) $bars.eq(1).addClass("is-warning");
+    if (strength >= 3) $bars.eq(2).addClass("is-success");
+    if (strength >= 4) $bars.eq(3).addClass("is-success");
+};
+
+var agentTableId = (function () {
+    let tableContent;
+    let totalRows = 0;
+
+    const $table = $("#agentTableId");
+    const listUrl = route("sub-agent.list");
+
+    const getParams = () => ({
+        querystr: ($("#query-Agent").val() || "").trim(),
+        status: $("#status-Agent").val() || "1",
+        id: $table.data("id") || "",
+    });
+
+    const syncFooter = () => {
+        window.requestAnimationFrame(() => {
+            const tableElement = $table.get(0);
+            if (!tableElement || !tableContent) return;
+
+            const paginator = tableElement.querySelector(".tabulator-paginator");
+            const label = paginator?.querySelector("label");
+            const pageSize = paginator?.querySelector(".tabulator-page-size");
+
+            if (!paginator || !label || !pageSize) return;
+
+            label.textContent = "Rows";
+
+            let meta = paginator.querySelector(".agm-agent-page-meta");
+            if (!meta) {
+                meta = document.createElement("span");
+                meta.className = "agm-agent-page-meta";
+                paginator.insertAdjacentElement("afterbegin", meta);
+            }
+
+            let range = paginator.querySelector(".agm-agent-page-range");
+            if (!range) {
+                range = document.createElement("span");
+                range.className = "agm-agent-page-range";
+            }
+
+            meta.appendChild(label);
+            meta.appendChild(pageSize);
+            meta.appendChild(range);
+
+            let pagination = paginator.querySelector(".agm-agent-pagination-control");
+            if (!pagination) {
+                pagination = document.createElement("span");
+                pagination.className = "agm-agent-pagination-control";
+                paginator.appendChild(pagination);
+            }
+
+            Array.from(paginator.children).forEach((child) => {
+                if (child === meta || child === pagination) return;
+                if (child.matches(".tabulator-page, .tabulator-pages")) {
+                    pagination.appendChild(child);
+                }
+            });
+
+            const currentPage = Number(tableContent.getPage ? tableContent.getPage() : 1) || 1;
+            const rawSize = tableContent.getPageSize ? tableContent.getPageSize() : 10;
+            const pageSizeValue = rawSize === true ? totalRows : Number(rawSize) || totalRows || 10;
+            const start = totalRows > 0 ? (currentPage - 1) * pageSizeValue + 1 : 0;
+            const end = totalRows > 0 ? Math.min(currentPage * pageSizeValue, totalRows) : 0;
+
+            range.textContent = `${start}-${end} of ${totalRows}`;
+        });
+    };
+
+    const _tableGen = function () {
+        tableContent = new Tabulator("#agentTableId", {
+            ajaxURL: listUrl,
+            ajaxParams: getParams(),
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSizeSelector: [10, 25, 50, 100, true],
             layout: "fitColumns",
-            responsiveLayout: "collapse",
+            responsiveLayout: false,
             placeholder: "No matching records found",
             columns: [
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
+                    width: 84,
+                    minWidth: 84,
+                    formatter(cell) {
+                        return `<span class="agm-agent-id">${escapeHtml(cell.getValue())}</span>`;
+                    },
                 },
                 {
                     title: "Name",
                     field: "name",
+                    minWidth: 300,
+                    widthGrow: 2.4,
                     headerHozAlign: "left",
+                    formatter(cell) {
+                        const row = cell.getData();
+                        const email = row.email ? `<small>${escapeHtml(row.email)}</small>` : "";
+
+                        return `
+                            <div class="agm-agent-person">
+                                ${renderAvatar(row)}
+                                <div class="agm-agent-person__copy">
+                                    <a href="${route("agent-user.show", row.id)}">${escapeHtml(row.name)}</a>
+                                    ${email}
+                                </div>
+                            </div>
+                        `;
+                    },
                 },
                 {
                     title: "Organization",
                     field: "organization",
+                    minWidth: 260,
+                    widthGrow: 1.8,
                     headerHozAlign: "left",
+                    formatter(cell) {
+                        return `<span class="agm-agent-muted">${escapeHtml(cell.getValue())}</span>`;
+                    },
                 },
                 {
                     title: "Code",
                     field: "code",
+                    minWidth: 130,
+                    widthGrow: 0.8,
                     headerHozAlign: "left",
+                    formatter(cell) {
+                        return `<span class="agm-agent-code">${escapeHtml(cell.getValue())}</span>`;
+                    },
                 },
                 {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
-                    width: "180",
+                    hozAlign: "right",
+                    headerHozAlign: "right",
+                    width: 150,
+                    minWidth: 150,
                     download: false,
-                    formatter(cell, formatterParams) {                        
-                        var btns = "";
-                        if (cell.getData().deleted_at == null) {
-                            btns +='<a href="'+route('agent-user.show', cell.getData().id)+'" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editAgentModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                    formatter(cell) {
+                        const row = cell.getData();
+
+                        if (row.deleted_at == null) {
+                            return `
+                                <span class="agm-agent-actions">
+                                    <a href="${route("agent-user.show", row.id)}" class="agm-agent-action agm-agent-action--view" title="View sub agent profile">
+                                        <i data-lucide="eye"></i>
+                                    </a>
+                                    <button data-id="${escapeHtml(row.id)}" data-tw-toggle="modal" data-tw-target="#editAgentModal" type="button" class="edit_btn agm-agent-action agm-agent-action--edit" title="Edit">
+                                        <i data-lucide="pencil"></i>
+                                    </button>
+                                    <button data-id="${escapeHtml(row.id)}" type="button" class="delete_btn agm-agent-action agm-agent-action--delete" title="Delete">
+                                        <i data-lucide="trash-2"></i>
+                                    </button>
+                                </span>
+                            `;
                         }
-                        
-                        return btns;
+
+                        return `
+                            <span class="agm-agent-actions">
+                                <button data-id="${escapeHtml(row.id)}" type="button" class="restore_btn agm-agent-action agm-agent-action--view" title="Restore">
+                                    <i data-lucide="rotate-cw"></i>
+                                </button>
+                            </span>
+                        `;
                     },
                 },
             ],
+            ajaxResponse: function (url, params, response) {
+                totalRows = response.all_rows && response.all_rows > 0 ? response.all_rows : 0;
+
+                return response;
+            },
+            pageLoaded() {
+                syncFooter();
+            },
             renderComplete() {
+                syncFooter();
+                $table.find(".agm-agent-avatar--photo img").off("error").on("error", function () {
+                    const $img = $(this);
+                    const fallback = $img.attr("data-fallback-text") || "SA";
+                    $img.closest(".agm-agent-avatar").removeClass("agm-agent-avatar--photo").text(fallback);
+                    $img.remove();
+                });
                 createIcons({
                     icons,
-                    "stroke-width": 1.5,
+                    "stroke-width": 1.8,
                     nameAttr: "data-lucide",
                 });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }   
             },
         });
-
-        // Export
-        $("#tabulator-export-csv").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
-        });
-
-        $("#tabulator-export-json").on("click", function (event) {
-            tableContent.download("json", "data.json");
-        });
-
-        $("#tabulator-export-xlsx").on("click", function (event) {
-            window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Agent List",
-            });
-        });
-
-        $("#tabulator-export-html").on("click", function (event) {
-            tableContent.download("html", "data.html", {
-                style: true,
-            });
-        });
-
-        // Print
-        $("#tabulator-print").on("click", function (event) {
-            tableContent.print();
-        });
     };
+
+    const reload = () => {
+        if (!tableContent) {
+            _tableGen();
+            return;
+        }
+
+        tableContent.setData(listUrl, getParams());
+    };
+
     return {
         init: function () {
-            _tableGen();
+            if (tableContent) {
+                reload();
+            } else {
+                _tableGen();
+            }
+        },
+        reload,
+        download(format, filename, options = {}) {
+            if (tableContent) {
+                tableContent.download(format, filename, options);
+            }
+        },
+        print() {
+            if (tableContent) {
+                tableContent.print();
+            }
         },
     };
 })();
-// function checkPasswordStrength(password) {
-//     // Initialize variables
-//     let strength = 0;
-//     let tips = "";
-//     //let lowUpperCase = document.querySelector(".low-upper-case i");
 
-//     //let number = document.querySelector(".one-number i");
-//     //let specialChar = document.querySelector(".one-special-char i");
-//     //let eightChar = document.querySelector(".eight-character i");
-
-//     //If password contains both lower and uppercase characters
-//     if (password.match(/([a-z].*[A-Z])|([A-Z].*[a-z])/)) {
-//         strength += 1;
-//         //lowUpperCase.classList.remove('fa-circle');
-//         //lowUpperCase.classList.add('fa-check');
-//     } else {
-//         //lowUpperCase.classList.add('fa-circle');
-//         //lowUpperCase.classList.remove('fa-check');
-//     }
-//     //If it has numbers and characters
-//     if (password.match(/([0-9])/)) {
-//         strength += 1;
-//         //number.classList.remove('fa-circle');
-//         //number.classList.add('fa-check');
-//     } else {
-//         //number.classList.add('fa-circle');
-//         //number.classList.remove('fa-check');
-//     }
-//     //If it has one special character
-//     if (password.match(/([!,%,&,@,#,$,^,*,?,_,~])/)) {
-//         strength += 1;
-//         //specialChar.classList.remove('fa-circle');
-//         //specialChar.classList.add('fa-check');
-//     } else {
-//         //specialChar.classList.add('fa-circle');
-//         //specialChar.classList.remove('fa-check');
-//     }
-//     //If password is greater than 7
-//     if (password.length > 7) {
-//         strength += 1;
-//         //eightChar.classList.remove('fa-circle');
-//         //eightChar.classList.add('fa-check');
-//     } else {
-//         //eightChar.classList.add('fa-circle');
-//         //eightChar.classList.remove('fa-check');   
-//     }
-   
-//     // Return results
-//     if (strength < 2) {
-//         return strength;
-//     } else if (strength === 2) {
-//         return strength;
-//     } else if (strength === 3) {
-//         return strength;
-//     } else {
-//         return strength;
-//     }
-//     }
 (function () {
-    if($('#agentTableId').length > 0){
-        // Init Table
-        agentTableId.init();
+    if ($("#agentTableId").length <= 0) return;
 
-        // Filter function
-        function filterHTMLForm() {
-            agentTableId.init();
+    agentTableId.init();
+
+    const addAgentModalEl = document.querySelector("#addAgentModal");
+    const editAgentModalEl = document.querySelector("#editAgentModal");
+    const addAgentModal = tailwind.Modal.getOrCreateInstance(addAgentModalEl);
+    const editAgentModal = tailwind.Modal.getOrCreateInstance(editAgentModalEl);
+    const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+
+    const showSuccess = (title, description) => {
+        $("#successModal .successModalTitle").html(title);
+        $("#successModal .successModalDesc").html(description);
+        succModal.show();
+    };
+
+    const showConfirm = (rowID, action, description) => {
+        $("#confirmModal .confModTitle").html("Are you sure?");
+        $("#confirmModal .confModDesc").html(description);
+        $("#confirmModal .agreeWith").attr("data-id", rowID).attr("data-action", action);
+        confirmModal.show();
+    };
+
+    const filterHTMLForm = () => {
+        agentTableId.reload();
+    };
+
+    $("#tabulatorFilterForm-Agent")[0].addEventListener("keypress", function (event) {
+        const keycode = event.keyCode ? event.keyCode : event.which;
+        if (keycode == "13") {
+            event.preventDefault();
+            filterHTMLForm();
         }
+    });
 
-        // On submit filter form
-        $("#tabulatorFilterForm-Agent")[0].addEventListener(
-            "keypress",
-            function (event) {
-                let keycode = event.keyCode ? event.keyCode : event.which;
-                if (keycode == "13") {
-                    event.preventDefault();
-                    filterHTMLForm();
-                }
-            }
-        );
+    $("#tabulator-html-filter-go-Agent").on("click", function () {
+        filterHTMLForm();
+    });
 
-        // On click go button
-        $("#tabulator-html-filter-go-Agent").on("click", function (event) {
-            filterHTMLForm();
+    $("#tabulator-html-filter-reset-Agent").on("click", function () {
+        $("#query-Agent").val("");
+        $("#status-Agent").val("1");
+        filterHTMLForm();
+    });
+
+    $("#tabulator-export-csv").on("click", function () {
+        agentTableId.download("csv", "sub-agent-list.csv");
+    });
+
+    $("#tabulator-export-xlsx").on("click", function () {
+        window.XLSX = xlsx;
+        agentTableId.download("xlsx", "sub-agent-list.xlsx", {
+            sheetName: "Sub Agent List",
         });
+    });
 
-        // On reset filter form
-        $("#tabulator-html-filter-reset-Agent").on("click", function (event) {
-            $("#query-Agent").val("");
-            $("#status-Agent").val("1");
-            filterHTMLForm();
-        });
+    $("#tabulator-print").on("click", function () {
+        agentTableId.print();
+    });
 
+    addAgentModalEl.addEventListener("hide.tw.modal", function () {
+        const $modal = $("#addAgentModal");
+        clearFormErrors($modal);
+        document.getElementById("addAgentForm").reset();
+        resetStrength($modal);
+    });
 
-        const addAgentModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#addAgentModal"));
-        const editAgentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editAgentModal"));
-        const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-        const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+    editAgentModalEl.addEventListener("hide.tw.modal", function () {
+        const $modal = $("#editAgentModal");
+        clearFormErrors($modal);
+        document.getElementById("editAgentForm").reset();
+        $("#editAgentModal input[name='id']").val("0");
+        $("#editAgentModal input[name='parent_id']").val("");
+        resetStrength($modal);
+    });
 
-        let confModalDelTitle = 'Are you sure?';
-        let confModalDelDescription = 'Do you really want to delete these records? <br>This process cannot be undone.';
-        let confModalRestDescription = 'Do you really want to re-store these records? Click agree to continue.';
+    $("#agentTableId").on("click", ".delete_btn", function () {
+        showConfirm($(this).attr("data-id"), "DELETE", "Do you really want to delete this sub agent? This process cannot be undone.");
+    });
 
-        const addAgentModalEl = document.getElementById('addAgentModal')
-        addAgentModalEl.addEventListener('hide.tw.modal', function(event) {
-            let ParentId = $('#addAgentModal input[name="parent_id"]').val();
-            $('#addAgentModal .acc__input-error').html('');
-            $('#addAgentModal input').val('');
-            $('#addAgentModal select').val('');
-            $('#addAgentModal input[name="parent_id"]').val(ParentId);
-        });
-        
-        const editAgentModalEl = document.getElementById('editAgentModal')
-        editAgentModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#editAgentModal .acc__input-error').html('');
-            $('#editAgentModal input').val('');
-            $('#editAgentModal select').val('');
-            $('#editAgentModal input[name="id"]').val('0');
-        });
+    $("#agentTableId").on("click", ".restore_btn", function () {
+        showConfirm($(this).attr("data-id"), "RESTORE", "Do you really want to restore this sub agent?");
+    });
 
+    $("#confirmModal .agreeWith").on("click", function () {
+        const $agreeBTN = $(this);
+        const recordID = $agreeBTN.attr("data-id");
+        const action = $agreeBTN.attr("data-action");
 
-        $('#agentTableId').on('click', '.delete_btn', function(){
-            let $statusBTN = $(this);
-            let rowID = $statusBTN.attr('data-id');
+        $("#confirmModal button").attr("disabled", "disabled");
 
-            confirmModal.show();
-            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-                $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Do you really want to delete these record? If yes, the please click on agree btn.');
-                $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
-            });
-        });
-
-        $('#agentTableId').on('click', '.restore_btn', function(){
-            let $statusBTN = $(this);
-            let rowID = $statusBTN.attr('data-id');
-
-            confirmModal.show();
-            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-                $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Do you really want to restore these record?');
-                $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
-            });
-        });
-
-        // Confirm Modal Action
-        $('#confirmModal .agreeWith').on('click', function(){
-            let $agreeBTN = $(this);
-            let recordID = $agreeBTN.attr('data-id');
-            let action = $agreeBTN.attr('data-action');
-
-            $('#confirmModal button').attr('disabled', 'disabled');
-            if(action == 'DELETE'){
-                axios({
-                    method: 'delete',
-                    url: route('sub-agent.destroy', recordID),
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
-                    if (response.status == 200) {
-                        $('#confirmModal button').removeAttr('disabled');
-                        confirmModal.hide();
-
-                        succModal.show();
-                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                            $('#successModal .successModalTitle').html('Done!');
-                            $('#successModal .successModalDesc').html('Agent data successfully deleted.');
-                        });
-                    }
-                    agentTableId.init();
-                }).catch(error =>{
-                    console.log(error)
-                });
-            } else if(action == 'RESTORE'){
-                axios({
-                    method: 'post',
-                    url: route('sub-agent.restore', recordID),
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
-                    if (response.status == 200) {
-                        $('#confirmModal button').removeAttr('disabled');
-                        confirmModal.hide();
-
-                        succModal.show();
-                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                            $('#successModal .successModalTitle').html('Success!');
-                            $('#successModal .successModalDesc').html('Agent data Successfully Restored!');
-                        });
-                    }
-                    agentTableId.init();
-                }).catch(error =>{
-                    console.log(error)
-                });
-            }
-        })
-
-
-        $("#agentTableId").on("click", ".edit_btn", function () {      
-            let $editBtn = $(this);
-            let editId = $editBtn.attr("data-id");
-
+        if (action == "DELETE") {
             axios({
-                method: "get",
-                url: route("sub-agent.edit", editId),
-                headers: {"X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")},
-            }).then((response) => {
-                if (response.status == 200) {
-                    let dataset = response.data;
-                    $('#editAgentModal input[name="first_name"]').val(dataset.first_name ? dataset.first_name : '');
-                    $('#editAgentModal input[name="last_name"]').val(dataset.last_name ? dataset.last_name : '');
-                    $('#editAgentModal input[name="organization"]').val(dataset.organization ? dataset.organization : '');
-                    $('#editAgentModal input[name="code"]').val(dataset.code ? dataset.code : '');
-                    $('#editAgentModal input[name="email"]').val(dataset.agent_user.email ? dataset.agent_user.email : '');
-                    $('#editAgentModal input[name="id"]').val(editId);
-                    $('#editAgentModal input[name="parent_id"]').val(dataset.agent_user.parent_id);
-                    if(dataset.agent_user.email_verified_at==null) {
-                        let verificationList = $("#verificationEmail");
-                            verificationList.removeClass('text-success');
-                            verificationList.addClass('text-danger');
-                            verificationList.html('<i data-lucide="x-circle" class="w-4 h-4  ml-2 mr-1  "></i>Unverifed');
-                    } else {
-                        let verificationList = $("#verificationEmail");
-                            verificationList.removeClass('text-danger');
-                            verificationList.addClass('text-success');
-                            verificationList.html('<i data-lucide="check-circle" class="w-4 h-4  ml-2 mr-1  "></i>Verified');
+                method: "delete",
+                url: route("sub-agent.destroy", recordID),
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+            })
+                .then((response) => {
+                    $("#confirmModal button").removeAttr("disabled");
+                    if (response.status == 200) {
+                        confirmModal.hide();
+                        showSuccess("Done!", "Sub agent data successfully deleted.");
                     }
+                    agentTableId.reload();
+                })
+                .catch((error) => {
+                    $("#confirmModal button").removeAttr("disabled");
+                    console.log(error);
+                });
+        } else if (action == "RESTORE") {
+            axios({
+                method: "post",
+                url: route("sub-agent.restore", recordID),
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+            })
+                .then((response) => {
+                    $("#confirmModal button").removeAttr("disabled");
+                    if (response.status == 200) {
+                        confirmModal.hide();
+                        showSuccess("Success!", "Sub agent data successfully restored.");
+                    }
+                    agentTableId.reload();
+                })
+                .catch((error) => {
+                    $("#confirmModal button").removeAttr("disabled");
+                    console.log(error);
+                });
+        }
+    });
+
+    $("#agentTableId").on("click", ".edit_btn", function () {
+        const editId = $(this).attr("data-id");
+
+        axios({
+            method: "get",
+            url: route("sub-agent.edit", editId),
+            headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+        })
+            .then((response) => {
+                if (response.status == 200) {
+                    const dataset = response.data;
+                    const agentUser = dataset.agent_user || dataset.AgentUser || {};
+
+                    $("#editAgentModal input[name='first_name']").val(dataset.first_name || "");
+                    $("#editAgentModal input[name='last_name']").val(dataset.last_name || "");
+                    $("#editAgentModal input[name='organization']").val(dataset.organization || "");
+                    $("#editAgentModal input[name='code']").val(dataset.code || "");
+                    $("#editAgentModal input[name='email']").val(agentUser.email || "");
+                    $("#editAgentModal input[name='id']").val(editId);
+                    $("#editAgentModal input[name='parent_id']").val(agentUser.parent_id || "");
+
+                    const verified = agentUser.email_verified_at != null;
+                    $("#verificationEmail")
+                        .removeClass("is-verified is-unverified")
+                        .addClass(verified ? "is-verified" : "is-unverified")
+                        .html(`<i data-lucide="${verified ? "check-circle" : "x-circle"}"></i>${verified ? "Verified" : "Unverified"}`);
+
                     createIcons({
                         icons,
-                        "stroke-width": 1.5,
+                        "stroke-width": 1.8,
                         nameAttr: "data-lucide",
                     });
                 }
-            }).catch((error) => {
+            })
+            .catch((error) => {
                 console.log(error);
             });
+    });
+
+    const applyValidationErrors = ($form, errors) => {
+        Object.entries(errors).forEach(([key, val]) => {
+            $form.find(`[name="${key}"]`).addClass("is-invalid");
+            $form.find(`.error-${key}`).html(val);
         });
+    };
 
-        $('#editAgentForm').on('submit', function(e){
-            e.preventDefault();
-            const form = document.getElementById('editAgentForm');
-        
-            document.querySelector('#updateAgent').setAttribute('disabled', 'disabled');
-            document.querySelector("#updateAgent svg").style.cssText ="display: inline-block;";
-            let agent = $("#editAgentForm input[name=id]").val();
-            let form_data = new FormData(form);
+    $("#editAgentForm").on("submit", function (e) {
+        e.preventDefault();
 
-            axios({
-                method: "post",
-                url: route('sub-agent.update',agent),
-                data: form_data,
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                document.querySelector('#updateAgent').removeAttribute('disabled');
-                document.querySelector("#updateAgent svg").style.cssText = "display: none;";
-                
+        const form = document.getElementById("editAgentForm");
+        const $button = $("#updateAgent");
+        const agent = $("#editAgentForm input[name='id']").val();
+
+        clearFormErrors($("#editAgentModal"));
+        setButtonBusy($button, true);
+
+        axios({
+            method: "post",
+            url: route("sub-agent.update", agent),
+            data: new FormData(form),
+            headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+        })
+            .then((response) => {
+                setButtonBusy($button, false);
                 if (response.status == 200) {
                     editAgentModal.hide();
-
-                    succModal.show();
-                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                        $("#successModal .successModalTitle").html("Congratulations!");
-                        $("#successModal .successModalDesc").html('Agent data successfully updated.');
-                    });                
-                        
+                    showSuccess("Congratulations!", "Sub agent data successfully updated.");
                 }
-                agentTableId.init();
-            }).catch(error => {
-                document.querySelector('#updateAgent').removeAttribute('disabled');
-                document.querySelector("#updateAgent svg").style.cssText = "display: none;";
-                if (error.response) {
-                    if (error.response.status == 422) {
-                        for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#editAgentForm .${key}`).addClass('border-danger')
-                            $(`#editAgentForm  .error-${key}`).html(val)
-                        }
-                    } else {
-                        console.log('error');
-                    }
+                agentTableId.reload();
+            })
+            .catch((error) => {
+                setButtonBusy($button, false);
+                if (error.response && error.response.status == 422) {
+                    applyValidationErrors($("#editAgentForm"), error.response.data.errors);
+                } else {
+                    console.log(error);
                 }
             });
-        });
+    });
 
-        $('#addAgentForm').on('submit', function(e){
-            e.preventDefault();
-            const form = document.getElementById('addAgentForm');
-        
-            document.querySelector('#saveAgent').setAttribute('disabled', 'disabled');
-            document.querySelector("#saveAgent svg").style.cssText ="display: inline-block;";
+    $("#addAgentForm").on("submit", function (e) {
+        e.preventDefault();
 
-            let form_data = new FormData(form);
-            axios({
-                method: "post",
-                url: route('sub-agent.store'),
-                data: form_data,
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                document.querySelector('#saveAgent').removeAttribute('disabled');
-                document.querySelector("#saveAgent svg").style.cssText = "display: none;";
-                
+        const form = document.getElementById("addAgentForm");
+        const $button = $("#saveAgent");
+
+        clearFormErrors($("#addAgentModal"));
+        setButtonBusy($button, true);
+
+        axios({
+            method: "post",
+            url: route("sub-agent.store"),
+            data: new FormData(form),
+            headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+        })
+            .then((response) => {
+                setButtonBusy($button, false);
                 if (response.status == 200) {
                     addAgentModal.hide();
-
-                    succModal.show();
-                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                        $("#successModal .successModalTitle").html("Congratulations!");
-                        $("#successModal .successModalDesc").html('Course creation data successfully inserted.');
-                    });                
-                        
+                    showSuccess("Congratulations!", "Sub agent data successfully inserted.");
                 }
-                agentTableId.init();
-            }).catch(error => {
-                document.querySelector('#saveAgent').removeAttribute('disabled');
-                document.querySelector("#saveAgent svg").style.cssText = "display: none;";
-                if (error.response) {
-                    if (error.response.status == 422) {
-                        for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#addAgentForm .${key}`).addClass('border-danger')
-                            $(`#addAgentForm  .error-${key}`).html(val)
-                        }
-                    } else {
-                        console.log('error');
-                    }
+                agentTableId.reload();
+            })
+            .catch((error) => {
+                setButtonBusy($button, false);
+                if (error.response && error.response.status == 422) {
+                    applyValidationErrors($("#addAgentForm"), error.response.data.errors);
+                } else {
+                    console.log(error);
                 }
             });
-        });
+    });
 
-        // $('#password').on('keyup', function(e) {
-        //     let totalText = this.value
-        //     let strenghtTips = checkPasswordStrength(totalText)
-        //     const box1 = document.getElementById('strength-1');
-        //     const box2 = document.getElementById('strength-2');
-        //     const box3 = document.getElementById('strength-3');
-        //     const box4 = document.getElementById('strength-4');
-
-        //     switch (strenghtTips) {
-        //         case 1:
-        //                 box1.classList.remove('bg-slate-100','dark:bg-darkmode-800')
-        //                 box1.classList.add('bg-danger');
-        //                 break;
-        //         case 2: 
-        //                 box2.classList.remove('bg-slate-100','dark:bg-darkmode-800')
-        //                 box2.classList.add('bg-warning');
-        //                 break;
-        //         case 3: 
-        //                 box3.classList.remove('bg-slate-100','dark:bg-darkmode-800')
-        //                 box3.classList.add('bg-success');
-        //                 break;
-        //         case 4: 
-        //         case 5: 
-        //         case 6: 
-        //         case 7: 
-        //         case 8: 
-        //         case 9: 
-        //                 box4.classList.remove('bg-slate-100','dark:bg-darkmode-800')
-        //                 box4.classList.add('bg-success');
-        //                 break;
-        //         default:
-        //                 box1.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
-        //                 box2.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
-        //                 box3.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
-        //                 box4.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
-                        
-        //                 box1.classList.add('bg-slate-100','dark:bg-darkmode-800');
-        //                 box2.classList.add('bg-slate-100','dark:bg-darkmode-800');
-        //                 box3.classList.add('bg-slate-100','dark:bg-darkmode-800');
-        //                 box4.classList.add('bg-slate-100','dark:bg-darkmode-800');
-        //                 break;
-        //     }
-        // })
-    }
-})()
+    $(".password").on("keyup", function () {
+        paintPasswordStrength(this);
+    });
+})();

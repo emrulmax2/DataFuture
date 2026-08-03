@@ -25,10 +25,15 @@ class TermModuleCreationController extends Controller
     public function index()
     {
         return view('pages.course-management.module-creations.index', [
-            'title' => 'Terms & Modules - London Churchill College',
+            // Opts this screen into the redesigned module shell.
+            'layout' => 'course-top-menu',
+            'title' => 'Term Module Creations - London Churchill College',
             'subtitle' => 'Term Module Creations',
+            'cmPageTitle' => 'Term Module Creations',
+            'cmBackUrl' => route('course.management'),
+            'cmBackLabel' => 'Back to Course Management',
             'breadcrumbs' => [
-                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Course Management', 'href' => route('course.management')],
                 ['label' => 'Term Modules', 'href' => 'javascript:void(0);']
             ],
 
@@ -63,7 +68,8 @@ class TermModuleCreationController extends Controller
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        // 1, not '' — an empty string reaches Tabulator as NaN and breaks the pager.
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : 1;
 
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
@@ -100,15 +106,20 @@ class TermModuleCreationController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'total' => $total_rows, 'data' => $data]);
     }
 
     public function add($instanceTermId, $courseId){
         return view('pages.course-management.module-creations.add', [
-            'title' => 'Terms & Modules - London Churchill College',
+            // Opts this screen into the redesigned module shell.
+            'layout' => 'course-top-menu',
+            'title' => 'Add Term Module Creations - London Churchill College',
             'subtitle' => 'Add Term Module Creations',
+            'cmPageTitle' => 'Add Term Module Creations',
+            'cmBackUrl' => route('term.module.creation'),
+            'cmBackLabel' => 'Back to Term Modules',
             'breadcrumbs' => [
-                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Course Management', 'href' => route('course.management')],
                 ['label' => 'Term Modules', 'href' => route('term.module.creation')],
                 ['label' => 'Add', 'href' => 'javascript:void(0);']
             ],
@@ -196,10 +207,15 @@ class TermModuleCreationController extends Controller
     }
     public function moduleDetails($instanceTermId){
         return view('pages.course-management.module-creations.add-details', [
-            'title' => 'Terms & Modules - London Churchill College',
+            // Opts this screen into the redesigned module shell.
+            'layout' => 'course-top-menu',
+            'title' => 'Term Module Details - London Churchill College',
             'subtitle' => 'Term Module Details',
+            'cmPageTitle' => 'Term Module Details',
+            'cmBackUrl' => route('term.module.creation'),
+            'cmBackLabel' => 'Back to Term Modules',
             'breadcrumbs' => [
-                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Course Management', 'href' => route('course.management')],
                 ['label' => 'Term Modules', 'href' => route('term.module.creation')],
                 ['label' => 'Module Details', 'href' => 'javascript:void(0);']
             ],
@@ -221,10 +237,15 @@ class TermModuleCreationController extends Controller
                     ->where('it.id', $instanceTermId)
                     ->first();
         return view('pages.course-management.module-creations.show', [
-            'title' => 'Terms & Modules - London Churchill College',
+            // Opts this screen into the redesigned module shell.
+            'layout' => 'course-top-menu',
+            'title' => 'Module Creation Details - London Churchill College',
             'subtitle' => 'Module Creation Details',
+            'cmPageTitle' => 'Module Creation Details',
+            'cmBackUrl' => route('term.module.creation'),
+            'cmBackLabel' => 'Back to Term Modules',
             'breadcrumbs' => [
-                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Course Management', 'href' => route('course.management')],
                 ['label' => 'Term Modules', 'href' => route('term.module.creation')],
                 ['label' => 'Details', 'href' => 'javascript:void(0);']
             ],
@@ -248,10 +269,14 @@ class TermModuleCreationController extends Controller
 
         $query = ModuleCreation::where('instance_term_id', $terminstanceid)->orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
-            $query->where('module_name','LIKE','%'.$queryStr.'%');
-            $query->orWhere('code','LIKE','%'.$queryStr.'%');
-            $query->orWhere('status','LIKE','%'.$queryStr.'%');
-            $query->orWhere('moodle_enrollment_key','LIKE','%'.$queryStr.'%');
+            // Grouped: AND binds tighter than OR, so ungrouped orWheres would
+            // escape the instance_term_id filter and return other terms' modules.
+            $query->where(function($q) use ($queryStr){
+                $q->where('module_name','LIKE','%'.$queryStr.'%')
+                  ->orWhere('code','LIKE','%'.$queryStr.'%')
+                  ->orWhere('status','LIKE','%'.$queryStr.'%')
+                  ->orWhere('moodle_enrollment_key','LIKE','%'.$queryStr.'%');
+            });
         endif;
         if($status == 2):
             $query->onlyTrashed();
@@ -260,7 +285,8 @@ class TermModuleCreationController extends Controller
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        // 1, not '' — an empty string reaches Tabulator as NaN and breaks the pager.
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : 1;
 
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
@@ -293,51 +319,34 @@ class TermModuleCreationController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'total' => $total_rows, 'data' => $data]);
     }
 
     public function moduleViewAssessments(Request $request){
         $moduleCreationId = $request->moduleCreationId;
         $moduleCreation = ModuleCreation::find($moduleCreationId);
-        $course_module_id = $moduleCreation->course_module_id;
-        $baseAssessments = CourseModuleBaseAssesment::where('course_module_id', $course_module_id)->get();
-        
-        $html = '';
-        $html .= '<div class="grid grid-cols-12 gap-4">';
-            $html .= '<div class="col-span-12">';
-                $html .= '<div class="overflow-x-auto">';
-                    $html .= '<table class="table  table-striped border-t">';
-                        $html .= '<thead>';
-                            $html .= '<tr>';
-                                $html .= '<th class="whitespace-nowrap">#</th>';
-                                $html .= '<th class="whitespace-nowrap">Name</th>';
-                                $html .= '<th class="whitespace-nowrap">Code</th>';
-                                $html .= '<th class="whitespace-nowrap">&nbsp;</th>';
-                            $html .= '</tr>';
-                        $html .= '</thead>';
-                        $html .= '<tbody>';
-                            if(!empty($baseAssessments)):
-                                $i = 1;
-                                foreach($baseAssessments as $ass):
-                                    $assessment = Assessment::where('course_module_base_assesment_id', $ass->id)->where('module_creation_id', $moduleCreationId)->first();
-                                    $html .= '<tr>';
-                                        $html .= '<td class="whitespace-nowrap">'.$i.'</td>';
-                                        $html .= '<td class="whitespace-nowrap">'.$ass->assesment_name.'</td>';
-                                        $html .= '<td class="whitespace-nowrap">'.$ass->assesment_code.'</td>';
-                                        $html .= '<td class="whitespace-nowrap">';
-                                            $html .= '<div class="form-check form-switch">';
-                                                $html .= '<input '.(!empty($assessment) ? 'checked' : '').' class="cmb_assessment form-check-input" id="cmb_assessment_'.$moduleCreationId.'_'.$ass->id.'" name="cmb_assessment[]" value="'.$ass->id.'" type="checkbox">';
-                                            $html .= '</div>';
-                                        $html .= '</td>';
-                                    $html .= '</tr>';
-                                    $i++;
-                                endforeach;
-                            endif;
-                        $html .= '</tbody>';
-                    $html .= '</table>';
-                $html .= '</div>';
-            $html .= '</div>';
-        $html .= '</div>';
+        $baseAssessments = CourseModuleBaseAssesment::where('course_module_id', $moduleCreation->course_module_id)->get();
+
+        // Which of the module's base assessments are already attached.
+        $attached = Assessment::where('module_creation_id', $moduleCreationId)
+            ->pluck('course_module_base_assesment_id')
+            ->all();
+
+        $rows = $baseAssessments->map(function ($ass) use ($attached) {
+            return [
+                'id' => $ass->id,
+                'name' => $ass->assesment_name,
+                'code' => $ass->assesment_code,
+                'on' => in_array($ass->id, $attached),
+            ];
+        })->all();
+
+        // Markup moved out of this controller into a Blade partial so it shares
+        // the module's styling; the response shape is unchanged.
+        $html = view('pages.course-management.partials.assessment-toggles', [
+            'assessRows' => $rows,
+            'assessOwnerId' => $moduleCreationId,
+        ])->render();
 
         return response()->json(['html' => $html, 'moduleName' => $moduleCreation->module_name], 200);
     }
@@ -345,44 +354,22 @@ class TermModuleCreationController extends Controller
     public function moduleAddAssessments(Request $request){
         $moduleCreationId = $request->moduleCreationId;
         $moduleCreation = ModuleCreation::find($moduleCreationId);
-        $course_module_id = $moduleCreation->course_module_id;
-        $baseAssessments = CourseModuleBaseAssesment::where('course_module_id', $course_module_id)->get();
-        
-        $html = '';
-        $html .= '<div class="grid grid-cols-12 gap-4">';
-            $html .= '<div class="col-span-12">';
-                $html .= '<div class="overflow-x-auto">';
-                    $html .= '<table class="table  table-striped border-t">';
-                        $html .= '<thead>';
-                            $html .= '<tr>';
-                                $html .= '<th class="whitespace-nowrap">#</th>';
-                                $html .= '<th class="whitespace-nowrap">Name</th>';
-                                $html .= '<th class="whitespace-nowrap">Code</th>';
-                                $html .= '<th class="whitespace-nowrap">&nbsp;</th>';
-                            $html .= '</tr>';
-                        $html .= '</thead>';
-                        $html .= '<tbody>';
-                            if(!empty($baseAssessments)):
-                                $i = 1;
-                                foreach($baseAssessments as $ass):
-                                    $html .= '<tr>';
-                                        $html .= '<td class="whitespace-nowrap">'.$i.'</td>';
-                                        $html .= '<td class="whitespace-nowrap">'.$ass->assesment_name.'</td>';
-                                        $html .= '<td class="whitespace-nowrap">'.$ass->assesment_code.'</td>';
-                                        $html .= '<td class="whitespace-nowrap">';
-                                            $html .= '<div class="form-check form-switch">';
-                                                $html .= '<input class="cmb_assessment form-check-input" id="cmb_assessment_'.$moduleCreationId.'_'.$ass->id.'" name="cmb_assessment[]" value="'.$ass->id.'" type="checkbox">';
-                                            $html .= '</div>';
-                                        $html .= '</td>';
-                                    $html .= '</tr>';
-                                    $i++;
-                                endforeach;
-                            endif;
-                        $html .= '</tbody>';
-                    $html .= '</table>';
-                $html .= '</div>';
-            $html .= '</div>';
-        $html .= '</div>';
+        $baseAssessments = CourseModuleBaseAssesment::where('course_module_id', $moduleCreation->course_module_id)->get();
+
+        // Nothing is attached yet on this path, so every row starts off.
+        $rows = $baseAssessments->map(function ($ass) {
+            return [
+                'id' => $ass->id,
+                'name' => $ass->assesment_name,
+                'code' => $ass->assesment_code,
+                'on' => false,
+            ];
+        })->all();
+
+        $html = view('pages.course-management.partials.assessment-toggles', [
+            'assessRows' => $rows,
+            'assessOwnerId' => $moduleCreationId,
+        ])->render();
 
         return response()->json(['html' => $html, 'moduleName' => $moduleCreation->module_name], 200);
     }
@@ -415,36 +402,27 @@ class TermModuleCreationController extends Controller
 
     public function getModulesBaseAssessments(Request $request){
         $course_module_id = $request->course_module_id;
-        $moduleAssessment = CourseModuleBaseAssesment::where('course_module_id', $course_module_id)->orderBy('id', 'ASC')->get();
+        $baseAssessments = CourseModuleBaseAssesment::where('course_module_id', $course_module_id)->get();
 
-        $html = '';
-        if($moduleAssessment->count() > 0):
-            $i = 1;
-            foreach($moduleAssessment as $ass):
-                $html .= '<tr>';
-                    $html .= '<td class="whitespace-nowrap">'.$i.'</td>';
-                    $html .= '<td class="whitespace-nowrap">'.$ass->assesment_name.'</td>';
-                    $html .= '<td class="whitespace-nowrap">'.$ass->assesment_code.'</td>';
-                    $html .= '<td class="whitespace-nowrap">';
-                        $html .= '<div class="form-check form-switch">';
-                            $html .= '<input class="cmb_assessment_indv form-check-input" id="cmb_assessment_indv_'.$course_module_id.'_'.$ass->id.'" name="cmb_assessment[]" value="'.$ass->id.'" type="checkbox">';
-                        $html .= '</div>';
-                    $html .= '</td>';
-                $html .= '</tr>';
+        $rows = $baseAssessments->map(function ($ass) {
+            return [
+                'id' => $ass->id,
+                'name' => $ass->assesment_name,
+                'code' => $ass->assesment_code,
+                'on' => false,
+            ];
+        })->all();
 
-                $i++;
-            endforeach;
-        else:
-            $html .= '<tr>';
-                $html .= '<td colspan="4">';
-                    $html .= '<div class="alert alert-danger-soft show flex items-center mb-2" role="alert">';
-                        $html .= '<i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Module base assessments not found.';
-                    $html .= '</div>';
-                $html .= '</td>';
-            $html .= '</tr>';
-        endif;
+        // Same partial as the other two assessment lists; this flow just wires
+        // its checkboxes to a different hook class.
+        $html = view('pages.course-management.partials.assessment-toggles', [
+            'assessRows' => $rows,
+            'assessOwnerId' => $course_module_id,
+            'assessClass' => 'cmb_assessment_indv',
+            'assessIdPrefix' => 'cmb_assessment_indv',
+        ])->render();
 
-        return response()->json(['htm' => $html], 200);
+        return response()->json(['html' => $html], 200);
     }
 
     public function storeIndividually(IndividualModulCreationRequest $request){

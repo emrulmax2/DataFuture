@@ -153,7 +153,7 @@ var unknownEntryApplicantList = (function () {
         if(ap_an_semester_id > 0){
             $form.find('.error-ap_an_semester_id').html('')
             document.querySelector('#AplicntAnalysisReptBtn').setAttribute('disabled', 'disabled');
-            document.querySelector("#AplicntAnalysisReptBtn svg").style.cssText ="display: inline-block;";
+            document.querySelector("#AplicntAnalysisReptBtn .loaders").style.cssText ="display: inline-block;";
             $('#printPdfAplicntAnalysisBtn').attr('href', 'javascript:void(0);').fadeOut();
             $('#applicantAnalysisReptWrap').fadeOut().html('');
 
@@ -165,7 +165,7 @@ var unknownEntryApplicantList = (function () {
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 document.querySelector('#AplicntAnalysisReptBtn').removeAttribute('disabled');
-                document.querySelector("#AplicntAnalysisReptBtn svg").style.cssText = "display: none;";
+                document.querySelector("#AplicntAnalysisReptBtn .loaders").style.cssText = "display: none;";
                 
                 if (response.status == 200) {
                     //console.log(response.data);
@@ -184,7 +184,7 @@ var unknownEntryApplicantList = (function () {
                 }
             }).catch(error => {
                 document.querySelector('#AplicntAnalysisReptBtn').removeAttribute('disabled');
-                document.querySelector("#AplicntAnalysisReptBtn svg").style.cssText = "display: none;";
+                document.querySelector("#AplicntAnalysisReptBtn .loaders").style.cssText = "display: none;";
                 $('#printPdfAplicntAnalysisBtn').attr('href', 'javascript:void(0);').fadeOut();
                 if (error.response) {
                     console.log('error');

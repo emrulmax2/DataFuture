@@ -181,6 +181,9 @@ class AdmissionController extends Controller
         
         return view('pages.students.admission.index', [
             'title' => 'Recruitment - London Churchill College',
+            // The redesigned admission shell. No applicant in scope here, so
+            // CourseTheme falls back to the default LCC Teal palette.
+            'layout' => 'admission-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Students Admission', 'href' => 'javascript:void(0);']
             ],
@@ -314,7 +317,9 @@ class AdmissionController extends Controller
             endif;
         endif;
         
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        // `total_rows` is additive — Tabulator ignores unknown keys — and
+        // feeds the "Showing x-y of n applications" footer summary.
+        return response()->json(['last_page' => $last_page, 'total_rows' => $total_rows, 'data' => $data]);
     }
 
     private function dataSetList(Request $request){
@@ -477,13 +482,19 @@ class AdmissionController extends Controller
     }
 
     public function show($applicantId){
+        $applicant = Applicant::find($applicantId);
+
         return view('pages.students.admission.show', [
             'title' => 'Recruitment - London Churchill College',
+            // Redesigned admission shell; the palette follows the applicant's
+            // proposed course (Applicant->course->creation->course->color_theme).
+            'layout' => 'admission-top-menu',
+            'admissionThemeApplicant' => $applicant,
             'breadcrumbs' => [
                 ['label' => 'Students Admission', 'href' => route('admission')],
                 ['label' => 'Student Details', 'href' => 'javascript:void(0);'],
             ],
-            'applicant' => Applicant::find($applicantId),
+            'applicant' => $applicant,
             'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
             'titles' => Title::where('active', 1)->get(),
             'country' => Country::where('active', 1)->get(),
@@ -971,6 +982,8 @@ class AdmissionController extends Controller
 
         return view('pages.students.admission.process', [
             'title' => 'Recruitment - London Churchill College',
+            'layout' => 'admission-top-menu',
+            'admissionThemeApplicant' => Applicant::find($applicantId),
             'breadcrumbs' => [
                 ['label' => 'Students Admission', 'href' => route('admission')],
                 ['label' => 'Student Details', 'href' => route('admission.show', $applicantId)],
@@ -1489,6 +1502,8 @@ class AdmissionController extends Controller
     public function admissionUploads($applicantId){
         return view('pages.students.admission.uploads', [
             'title' => 'Recruitment - London Churchill College',
+            'layout' => 'admission-top-menu',
+            'admissionThemeApplicant' => Applicant::find($applicantId),
             'breadcrumbs' => [
                 ['label' => 'Students Admission', 'href' => route('admission')],
                 ['label' => 'Student Details', 'href' => route('admission.show', $applicantId)],
@@ -1603,6 +1618,8 @@ class AdmissionController extends Controller
     public function admissionNotes($applicantId){
         return view('pages.students.admission.notes', [
             'title' => 'Recruitment - London Churchill College',
+            'layout' => 'admission-top-menu',
+            'admissionThemeApplicant' => Applicant::find($applicantId),
             'breadcrumbs' => [
                 ['label' => 'Students Admission', 'href' => route('admission')],
                 ['label' => 'Student Details', 'href' => route('admission.show', $applicantId)],
@@ -1719,7 +1736,7 @@ class AdmissionController extends Controller
             $html .= '</div>';
             if(isset($note->applicant_document_id) && $note->applicant_document_id > 0 && isset($note->document->current_file_name) && !empty($note->document->current_file_name)):
                 //$docURL = (isset($note->document->current_file_name) && !empty($note->document->current_file_name) && Storage::disk('s3')->exists('public/applicants/'.$note->applicant_id.'/'.$note->document->current_file_name) ? Storage::disk('s3')->url('public/applicants/'.$note->applicant_id.'/'.$note->document->current_file_name) : '');
-                $btns .= '<a data-id="'.$note->applicant_document_id.'" href="javascript:void(0);" class="downloadDoc btn btn-primary w-auto inline-flex"><i data-lucide="cloud-lightning" class="w-4 h-4 mr-2"></i>Download Attachment</a>';
+                $btns .= '<a data-id="'.$note->applicant_document_id.'" href="javascript:void(0);" class="downloadDoc adm-note-attachment"><i data-lucide="download" class="w-4 h-4"></i><span>Download Attachment</span></a>';
             endif;
         else:
             $html .= '<div class="alert alert-danger-soft show flex items-start mb-2" role="alert">
@@ -1853,6 +1870,8 @@ class AdmissionController extends Controller
     public function admissionCommunication($applicantId){
         return view('pages.students.admission.communication', [
             'title' => 'Recruitment - London Churchill College',
+            'layout' => 'admission-top-menu',
+            'admissionThemeApplicant' => Applicant::find($applicantId),
             'breadcrumbs' => [
                 ['label' => 'Students Admission', 'href' => route('admission')],
                 ['label' => 'Student Details', 'href' => route('admission.show', $applicantId)],
@@ -3231,49 +3250,44 @@ class AdmissionController extends Controller
     private function getMapScreenshot($latitude, $longitude, $applicant_id)
     {
         $apiKey = env('GOOGLE_MAP_API');
+        $latitude = number_format((float) $latitude, 7, '.', '');
+        $longitude = number_format((float) $longitude, 7, '.', '');
 
-        $url = "https://maps.googleapis.com/maps/api/staticmap?center={$latitude},{$longitude}&zoom=15&size=3400x150&scale=2&markers=color:red%7C{$latitude},{$longitude}&key={$apiKey}";
-
-        $filename = 'location_' . time() . '.png';
+        $filename = 'location_' . md5($latitude . ',' . $longitude) . '.png';
         $folder = 'applicants/' . $applicant_id;
+        $storagePath = $folder . '/' . $filename;
+        $pngPath = storage_path('app/public/' . $storagePath);
 
         if (!Storage::disk('public')->exists($folder)) {
             Storage::disk('public')->makeDirectory($folder, 0775, true);
         }
 
-        $imageData = file_get_contents($url);
+        if (Storage::disk('public')->exists($storagePath)) {
+            return $pngPath;
+        }
+
+        $url = 'https://maps.googleapis.com/maps/api/staticmap?' . http_build_query([
+            'center' => $latitude . ',' . $longitude,
+            'zoom' => 16,
+            'size' => '640x320',
+            'scale' => 2,
+            'format' => 'png32',
+            'markers' => 'color:red|' . $latitude . ',' . $longitude,
+            'key' => $apiKey,
+        ], '', '&', PHP_QUERY_RFC3986);
+
+        $imageData = @file_get_contents($url);
         if ($imageData === false) {
             return false;
         }
 
-        Storage::disk('public')->put($folder . '/' . $filename, $imageData);
-
-        $pngPath = storage_path('app/public/' . $folder . '/' . $filename);
-        $jpgFilename = str_replace('.png', '.jpg', $filename);
-        $jpgPath = storage_path('app/public/' . $folder . '/' . $jpgFilename);
+        Storage::disk('public')->put($storagePath, $imageData);
 
         if (!file_exists($pngPath)) {
             return false;
         }
 
-        $image = imagecreatefrompng($pngPath);
-        if (!$image) {
-            return false;
-        }
-
-        $bg = imagecreatetruecolor(imagesx($image), imagesy($image));
-        $white = imagecolorallocate($bg, 255, 255, 255);
-        imagefill($bg, 0, 0, $white);
-        imagecopy($bg, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
-
-        $success = imagejpeg($bg, $jpgPath, 90);
-
-        imagedestroy($image);
-        imagedestroy($bg);
-
-        unlink($pngPath);
-
-        return $success ? $jpgPath : false;
+        return $pngPath;
     }
 
     public function showEsignature(Request $request, $applicantId)
@@ -3322,8 +3336,14 @@ class AdmissionController extends Controller
 
         return view('pages.students.admission.e-signature-view', [
             'title' => 'E-Signature - London Churchill College',
+            // Shares the applicant hero/tab strip with the other admission
+            // screens, so it needs the same shell and palette.
+            'layout' => 'admission-top-menu',
+            'admissionThemeApplicant' => $applicant,
             'breadcrumbs' => [
-                ['label' => 'Students E-Signature', 'href' => 'javascript:void(0);']
+                ['label' => 'Students Admission', 'href' => route('admission')],
+                ['label' => 'Student Details', 'href' => route('admission.show', $applicant->id)],
+                ['label' => 'E-Signature', 'href' => 'javascript:void(0);'],
             ],
             'applicant' => $applicant,
             'applicantEsign' => $applicantEsign,

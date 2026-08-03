@@ -2,12 +2,154 @@ import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
+import INTAddressLookUps from './address_lookup.js';
 import {createApp} from 'vue'
 
 import IMask from 'imask';
 import { set } from "lodash";
 
 ("use strict");
+
+/**
+ * Tone for an applicant status pill on the redesigned list.
+ *
+ * The list endpoint sends the status *name* (not the id) in `status_id`,
+ * so the match is done on the label. Anything unrecognised falls through
+ * to the amber "pending" tone rather than rendering unstyled.
+ */
+function admissionStatusTone(statusName) {
+    const name = String(statusName || "").trim().toLowerCase();
+
+    // Kept in step with $admStatusTone in show-info.blade.php.
+    if (["accepted", "offer accepted"].includes(name)) return "adm-pill--success";
+    if (["rejected", "offer rejected", "canceled", "cancelled"].includes(name)) return "adm-pill--danger";
+    if (["awating decision", "awaiting decision", "offer placed"].includes(name)) return "adm-pill--progress";
+    if (["new", "submitting"].includes(name)) return "adm-pill--muted";
+
+    return "adm-pill--pending";
+}
+
+/**
+ * Row total from the most recent /admission/list response, used to render
+ * the "Showing x-y of n applications" footer summary. The endpoint sends
+ * `total_rows` alongside `last_page`.
+ */
+let admissionTotalRows = 0;
+
+/** Paint the footer summary that the design shows to the left of the pager. */
+function admissionRenderFooterSummary(table) {
+    const holder = document.querySelector("#admissionListTable .tabulator-footer");
+    if (!holder) return;
+
+    let summary = holder.querySelector(".adm-tablesummary");
+    if (!summary) {
+        summary = document.createElement("div");
+        summary.className = "adm-tablesummary";
+        holder.prepend(summary);
+    }
+
+    const onPage = table.getDataCount ? table.getDataCount("active") : 0;
+
+    if (!admissionTotalRows || !onPage) {
+        summary.textContent = "No applications found";
+        return;
+    }
+
+    const page = table.getPage() || 1;
+    const size = Number(table.getPageSize()) || onPage;
+    const from = (page - 1) * size + 1;
+    const to = from + onPage - 1;
+
+    summary.innerHTML =
+        'Showing <b>' + from + '\u2013' + to + '</b> of ' + admissionTotalRows +
+        ' application' + (admissionTotalRows === 1 ? '' : 's');
+}
+
+function admissionEscape(value) {
+    return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
+
+function admissionInitAddressLookups(attempt = 0) {
+    if (!document.querySelector(".theAddressWrap .theAddressLookup")) return;
+
+    if (window.google && window.google.maps && window.google.maps.places) {
+        INTAddressLookUps();
+        return;
+    }
+
+    if (attempt < 25) {
+        window.setTimeout(function () {
+            admissionInitAddressLookups(attempt + 1);
+        }, 300);
+    }
+}
+
+function admissionSyncInlineAddressAliases(scope) {
+    $(scope).find("[data-address-source]").each(function () {
+        const sourceName = $(this).attr("data-address-source");
+        const $source = $(this)
+            .closest(".theAddressWrap, form")
+            .find('[name="' + sourceName + '"]')
+            .first();
+
+        $(this).val($.trim(($source.val() || "").toString()));
+    });
+}
+
+function admissionSetInlineAddressFields(scope, prefix, values = {}) {
+    const $scope = $(scope);
+    const fieldMap = {
+        address_line_1: `${prefix}_address_line_1`,
+        address_line_2: `${prefix}_address_line_2`,
+        city: `${prefix}_address_city`,
+        state: `${prefix}_address_state`,
+        post_code: `${prefix}_address_postal_zip_code`,
+        country: `${prefix}_address_country`,
+    };
+
+    Object.entries(fieldMap).forEach(([key, name]) => {
+        $scope.find(`[name="${name}"]`).val(values[key] || "");
+    });
+
+    $scope.find(`[name="${prefix}_address_lookup"]`).val("");
+    admissionSyncInlineAddressAliases(scope);
+}
+
+function admissionRenderLucide() {
+    createIcons({
+        icons,
+        "stroke-width": 1.8,
+        nameAttr: "data-lucide",
+    });
+}
+
+function admissionDecorateModalButtons(scope = document) {
+    const buttons = scope.querySelectorAll(
+        ".modal-footer .btn, .modal-body.p-0 .px-5.pb-8.text-center .btn"
+    );
+
+    buttons.forEach(function (button) {
+        if (button.querySelector("svg:not(.adm-btn-loader), i[data-lucide]")) return;
+
+        const text = button.textContent.trim().toLowerCase();
+        let icon = "save";
+
+        if (text.includes("cancel")) icon = "x";
+        if (text.includes("agree") || button.classList.contains("successCloser")) icon = "check";
+
+        const iconEl = document.createElement("i");
+        iconEl.setAttribute("data-lucide", icon);
+        iconEl.className = "adm-btn-icon";
+        button.prepend(iconEl);
+    });
+
+    admissionRenderLucide();
+}
+
 var admissionListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
@@ -27,6 +169,10 @@ var admissionListTable = (function () {
             ajaxParams: { semesters: semesters, courses: courses, statuses: statuses, refno: refno, firstname: firstname, lastname: lastname, dob: dob, agents: agents,email:email,phone:phone},
             ajaxFiltering: true,
             ajaxSorting: true,
+            ajaxResponse(url, params, response) {
+                admissionTotalRows = Number(response && response.total_rows) || 0;
+                return response;
+            },
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
@@ -40,15 +186,24 @@ var admissionListTable = (function () {
                     title: "Ref. No",
                     field: "application_no",
                     headerHozAlign: "left",
-                    formatter(cell, formatterParams) {  
-                        var html = '<div class="block">';
-                                html += '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block">';
-                                    html += '<img alt="'+cell.getData().first_name+'" class="rounded-full shadow" src="'+cell.getData().photo_url+'">';
-                                html += '</div>';
-                                html += '<div class="inline-block relative" style="top: -5px;">';
-                                    html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().application_no+'</div>';
-                                    html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().full_name+'</div>';
-                                html += '</div>';
+                    widthGrow: 2,
+                    minWidth: 195,
+                    cssClass: "adm-cell-ref",
+                    formatter(cell, formatterParams) {
+                        const row = cell.getData();
+                        // photo_url normally falls back to a generated initials
+                        // avatar (App\Support\Avatar::initials); if it is ever
+                        // empty, render initials rather than a broken image.
+                        const initials = (String(row.first_name || "").charAt(0) + String(row.last_name || "").charAt(0)).toUpperCase() || "--";
+                        const avatar = row.photo_url
+                            ? '<img alt="'+admissionEscape(row.first_name)+'" src="'+admissionEscape(row.photo_url)+'">'
+                            : admissionEscape(initials);
+                        var html = '<div class="adm-refcell">';
+                                html += '<span class="adm-refcell__avatar">'+avatar+'</span>';
+                                html += '<span class="adm-refcell__copy">';
+                                    html += '<span class="adm-refcell__ref">'+admissionEscape(row.application_no)+'</span>';
+                                    html += '<span class="adm-refcell__name">'+admissionEscape(row.full_name)+'</span>';
+                                html += '</span>';
                             html += '</div>';
                         return html;
                     }
@@ -57,31 +212,46 @@ var admissionListTable = (function () {
                     title: "First Name",
                     field: "first_name",
                     headerHozAlign: "left",
+                    widthGrow: 1,
+                    minWidth: 105,
                 },
                 {
                     title: "Last Name",
                     field: "last_name",
                     headerHozAlign: "left",
+                    widthGrow: 1,
+                    minWidth: 105,
                 },
                 {
                     title: "DOB",
                     field: "date_of_birth",
                     headerHozAlign: "left",
+                    width: 110,
                 },
                 {
                     title: "Gender",
                     field: "gender",
                     headerHozAlign: "left",
+                    width: 95,
                 },
                 {
                     title: "Semester",
                     field: "semester",
                     headerHozAlign: "left",
+                    width: 145,
                 },
                 {
+                    // Course names run long ("HND in Business (Entrepreneurship
+                    // And Small Business Management)"), so this column takes
+                    // the lion's share of the free width and wraps rather than
+                    // truncating. variableHeight lets the row grow to fit.
                     title: "Course",
                     field: "course",
                     headerHozAlign: "left",
+                    widthGrow: 3,
+                    minWidth: 230,
+                    variableHeight: true,
+                    cssClass: "adm-cell-course",
                 },
                 {
                     title: "Status",
@@ -89,11 +259,16 @@ var admissionListTable = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "180",
+                    // Widest pill is "Awating Decision" at 140px; the cell
+                    // adds 12px + 24px of padding, so 185 keeps every status
+                    // on one line without ellipsis.
+                    width: 185,
+                    minWidth: 185,
+                    cssClass: "adm-cell-status",
                     download: false,
-                    formatter(cell, formatterParams) { 
+                    formatter(cell, formatterParams) {
                         let status = cell.getData().status_id;
-                        let btns = status;
+                        let btns = '<span class="adm-pill '+admissionStatusTone(status)+'"><span class="adm-pill__dot"></span>'+admissionEscape(status)+'</span>';
                         if (cell.getData().create_account == true) {
                             if(cell.getData().apply_ready!=false) {
                                 let url = route('impersonate', { id: cell.getData().apply_ready, guardName: 'applicant' });
@@ -117,6 +292,7 @@ var admissionListTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                admissionRenderFooterSummary(this);
                 const columnLists = this.getColumns();
                 if (columnLists.length > 0) {
                     const lastColumn = columnLists[columnLists.length - 1];
@@ -328,13 +504,13 @@ var educationQualTable = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editQualificationModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editQualificationModal" type="button" class="edit_btn adm-row-action adm-row-action--edit"><i data-lucide="Pencil" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'" class="delete_btn adm-row-action adm-row-action--delete"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'" class="restore_btn adm-row-action adm-row-action--restore"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
                         }
                         
-                        return btns;
+                        return '<div class="adm-row-actions">' + btns + '</div>';
                     },
                 },
             ],
@@ -483,13 +659,13 @@ var employmentHistoryTable = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editEmployementHistoryModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editEmployementHistoryModal" type="button" class="edit_btn adm-row-action adm-row-action--edit"><i data-lucide="Pencil" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'" class="delete_btn adm-row-action adm-row-action--delete"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'" class="restore_btn adm-row-action adm-row-action--restore"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
                         }
                         
-                        return btns;
+                        return '<div class="adm-row-actions">' + btns + '</div>';
                     },
                 },
             ],
@@ -569,10 +745,14 @@ var employmentHistoryTable = (function () {
         },
     };
 
-    $('.admissionDatepicker').each(function(){
+    $('.admissionDatepicker, .datepicker').each(function(){
+        if ($(this).data('litepicker-ready')) return;
+        $(this).data('litepicker-ready', true);
+
         new Litepicker({
             element: this,
             ...admissionDatepickerOpt,
+            format: $(this).data('format') || admissionDatepickerOpt.format,
         });
     })
 
@@ -591,6 +771,54 @@ var employmentHistoryTable = (function () {
         },
     };
 
+    const createAdmissionTomOptions = function (select, baseOptions) {
+        let options = {
+            ...baseOptions,
+            plugins: {
+                ...baseOptions.plugins,
+            },
+        };
+
+        if ($(select).attr("multiple") !== undefined) {
+            options = {
+                ...options,
+                plugins: {
+                    ...options.plugins,
+                    remove_button: {
+                        title: "Remove this item",
+                    },
+                },
+            };
+        }
+
+        return options;
+    };
+
+    const getOrCreateAdmissionTomSelect = function (select, options) {
+        const element = typeof select === "string" ? document.querySelector(select) : select;
+
+        if (!element) return null;
+        if (element.tomselect) {
+            window.setTimeout(function () {
+                if (typeof element.tomselect.sync === "function") element.tomselect.sync();
+                if (typeof element.tomselect.refreshItems === "function") element.tomselect.refreshItems();
+                if (typeof element.tomselect.refreshOptions === "function") element.tomselect.refreshOptions(false);
+                if (typeof element.tomselect.inputState === "function") element.tomselect.inputState();
+                if (typeof element.tomselect.positionDropdown === "function") element.tomselect.positionDropdown();
+            }, 0);
+
+            return element.tomselect;
+        }
+
+        return new TomSelect(element, options);
+    };
+
+    const initAdmissionModalTomSelects = function (scope) {
+        $(scope).find('select.addmissionLccTom').each(function () {
+            getOrCreateAdmissionTomSelect(this, createAdmissionTomOptions(this, tomOptions));
+        });
+    };
+
     if($('.phoneMask').length > 0){
         $('.phoneMask').each(function(){
             IMask(
@@ -603,22 +831,26 @@ var employmentHistoryTable = (function () {
     
     //var employment_status = new TomSelect('#employment_status', tomOptions);
 
-    $('.addmissionLccTom').each(function(){
-        if ($(this).attr("multiple") !== undefined) {
-            tomOptions = {
-                dropdownParent: 'body',
-                dropdownClass: 'ts-dropdown lcc-tom-float',
-                
-                ...tomOptions,
-                plugins: {
-                    ...tomOptions.plugins,
-                    remove_button: {
-                        title: "Remove this item",
-                    },
-                }
-            };
+    initAdmissionModalTomSelects(document);
+    admissionDecorateModalButtons(document);
+
+    admissionInitAddressLookups();
+    document.querySelectorAll(".modal").forEach(function (modalEl) {
+        modalEl.addEventListener("shown.tw.modal", function () {
+            window.setTimeout(function () {
+                initAdmissionModalTomSelects(modalEl);
+                admissionDecorateModalButtons(modalEl);
+            }, 50);
+        });
+    });
+    ["editAdmissionContactDetailsModal", "editAdmissionKinDetailsModal", "addEmployementHistoryModal", "editEmployementHistoryModal"].forEach(function (modalId) {
+        const modalEl = document.getElementById(modalId);
+
+        if (modalEl) {
+            modalEl.addEventListener("shown.tw.modal", function () {
+                admissionInitAddressLookups();
+            });
         }
-        new TomSelect(this, tomOptions);
     });
 
     if($('#admissionListTable').length > 0){
@@ -634,10 +866,10 @@ var employmentHistoryTable = (function () {
                 },
             }
         };
-        var semestersADM = new TomSelect('#semesters-ADM', multiTomOpt);
-        var coursesADM = new TomSelect('#courses-ADM', multiTomOpt);
-        var statusesADM = new TomSelect('#statuses-ADM', multiTomOpt);
-        var agentADM = new TomSelect('#agents-ADM', multiTomOpt);
+        var semestersADM = getOrCreateAdmissionTomSelect('#semesters-ADM', multiTomOpt);
+        var coursesADM = getOrCreateAdmissionTomSelect('#courses-ADM', multiTomOpt);
+        var statusesADM = getOrCreateAdmissionTomSelect('#statuses-ADM', multiTomOpt);
+        var agentADM = getOrCreateAdmissionTomSelect('#agents-ADM', multiTomOpt);
 
         // Init Table
         admissionListTable.init();
@@ -750,7 +982,7 @@ var employmentHistoryTable = (function () {
             const form = document.getElementById('addQualificationForm');
         
             document.querySelector('#saveEducationQualification').setAttribute('disabled', 'disabled');
-            document.querySelector("#saveEducationQualification svg").style.cssText ="display: inline-block;";
+            document.querySelector("#saveEducationQualification .adm-btn-loader").style.cssText ="display: inline-block;";
     
             let form_data = new FormData(form);
             let applicantId = $('[name="applicant_id"]', $form).val();
@@ -762,7 +994,7 @@ var employmentHistoryTable = (function () {
             }).then(response => {
                 if (response.status == 200) {
                     document.querySelector('#saveEducationQualification').removeAttribute('disabled');
-                    document.querySelector("#saveEducationQualification svg").style.cssText = "display: none;";
+                    document.querySelector("#saveEducationQualification .adm-btn-loader").style.cssText = "display: none;";
     
                     addQualificationModal.hide();
     
@@ -776,7 +1008,7 @@ var employmentHistoryTable = (function () {
                 educationQualTable.init();
             }).catch(error => {
                 document.querySelector('#saveEducationQualification').removeAttribute('disabled');
-                document.querySelector("#saveEducationQualification svg").style.cssText = "display: none;";
+                document.querySelector("#saveEducationQualification .adm-btn-loader").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
@@ -825,7 +1057,7 @@ var employmentHistoryTable = (function () {
             const form = document.getElementById("editQualificationForm");
     
             document.querySelector('#updateEducationQualification').setAttribute('disabled', 'disabled');
-            document.querySelector('#updateEducationQualification svg').style.cssText = 'display: inline-block;';
+            document.querySelector('#updateEducationQualification .adm-btn-loader').style.cssText = 'display: inline-block;';
     
             let form_data = new FormData(form);
     
@@ -839,7 +1071,7 @@ var employmentHistoryTable = (function () {
             }).then((response) => {
                 if (response.status == 200) {
                     document.querySelector("#updateEducationQualification").removeAttribute("disabled");
-                    document.querySelector("#updateEducationQualification svg").style.cssText = "display: none;";
+                    document.querySelector("#updateEducationQualification .adm-btn-loader").style.cssText = "display: none;";
                     editQualificationModal.hide();
     
                     successModal.show();
@@ -851,7 +1083,7 @@ var employmentHistoryTable = (function () {
                 educationQualTable.init();
             }).catch((error) => {
                 document.querySelector("#updateEducationQualification").removeAttribute("disabled");
-                document.querySelector("#updateEducationQualification svg").style.cssText = "display: none;";
+                document.querySelector("#updateEducationQualification .adm-btn-loader").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
@@ -988,7 +1220,7 @@ var employmentHistoryTable = (function () {
         });
 
         
-        var employment_status = new TomSelect('#employment_status', tomOptions);
+        var employment_status = getOrCreateAdmissionTomSelect('#employment_status', tomOptions);
 
 
         $('#employment_status').on('change', function(){
@@ -1091,10 +1323,13 @@ var employmentHistoryTable = (function () {
             e.preventDefault();
             var $form = $(this);
             const form = document.getElementById('addEmployementHistoryForm');
+            $form.find('.border-danger').removeClass('border-danger');
+            $form.find('.acc__input-error').html('');
         
             document.querySelector('#saveEmpHistory').setAttribute('disabled', 'disabled');
-            document.querySelector("#saveEmpHistory svg").style.cssText ="display: inline-block;";
+            document.querySelector("#saveEmpHistory .adm-btn-loader").style.cssText ="display: inline-block;";
     
+            admissionSyncInlineAddressAliases(form);
             let form_data = new FormData(form);
             let applicantId = $('[name="applicant_id"]', $form).val();
             axios({
@@ -1105,7 +1340,7 @@ var employmentHistoryTable = (function () {
             }).then(response => { 
                 if (response.status == 200) {
                     document.querySelector('#saveEmpHistory').removeAttribute('disabled');
-                    document.querySelector("#saveEmpHistory svg").style.cssText = "display: none;";
+                    document.querySelector("#saveEmpHistory .adm-btn-loader").style.cssText = "display: none;";
     
                     addEmployementHistoryModal.hide();
     
@@ -1119,7 +1354,7 @@ var employmentHistoryTable = (function () {
                 employmentHistoryTable.init();
             }).catch(error => {
                 document.querySelector('#saveEmpHistory').removeAttribute('disabled');
-                document.querySelector("#saveEmpHistory svg").style.cssText = "display: none;";
+                document.querySelector("#saveEmpHistory .adm-btn-loader").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
@@ -1159,35 +1394,7 @@ var employmentHistoryTable = (function () {
                         $('#editEmployementHistoryModal input[name="end_date"]').val(dataset.end_date ? dataset.end_date : '').removeAttr('disabled');
                     }
     
-                    if(dataset.address_line_1 != '' || dataset.city != '' || dataset.post_code != '' || dataset.country != ''){
-                        var htmls = '';
-                        htmls += '<span class="text-slate-600 font-medium">'+dataset.address_line_1+'</span><br/>';
-                        if(dataset.address_line_2 != ''){
-                            htmls += '<span class="text-slate-600 font-medium">'+dataset.address_line_2+'</span><br/>';
-                        }
-                        htmls += '<span class="text-slate-600 font-medium">'+dataset.city+'</span>, ';
-                        if(dataset.state != ''){
-                            htmls += '<span class="text-slate-600 font-medium">'+dataset.state+'</span>, <br/>';
-                        }else{
-                            htmls += '<br/>';
-                        }
-                        htmls += '<span class="text-slate-600 font-medium">'+dataset.post_code+'</span>,<br/>';
-                        htmls += '<span class="text-slate-600 font-medium">'+dataset.country+'</span><br/>';
-    
-                        htmls += '<input type="hidden" name="employment_address" value="'+dataset.address_line_1+'"/>';
-                        htmls += '<input type="hidden" name="employment_address_line_1" value="'+(dataset.address_line_1 != '' ? dataset.address_line_1 : '')+'"/>';
-                        htmls += '<input type="hidden" name="employment_address_line_2" value="'+(dataset.address_line_2 != '' ? dataset.address_line_2 : '')+'"/>';
-                        htmls += '<input type="hidden" name="employment_address_city" value="'+(dataset.city != '' ? dataset.city : '')+'"/>';
-                        htmls += '<input type="hidden" name="employment_address_state" value="'+(dataset.state != '' ? dataset.state : '')+'"/>';
-                        htmls += '<input type="hidden" name="employment_address_postal_zip_code" value="'+(dataset.post_code != '' ? dataset.post_code : '')+'"/>';
-                        htmls += '<input type="hidden" name="employment_address_country" value="'+(dataset.country != '' ? dataset.country : '')+'"/>';
-    
-                        $('#editEmpHistoryAddress').fadeIn().html(htmls).addClass('active');
-                        $('#editEmployementHistoryModal .addressPopupToggler span').html('Update Address');
-                    }else{
-                        $('#editEmpHistoryAddress').fadeOut().html('').removeClass('active');
-                        $('#editEmployementHistoryModal .addressPopupToggler span').html('Add Address');
-                    }
+                    admissionSetInlineAddressFields('#editEmployementHistoryForm', 'employment', dataset);
     
                     $('#editEmployementHistoryModal input[name="contact_name"]').val(dataset.reference[0].name ? dataset.reference[0].name : '');
                     $('#editEmployementHistoryModal input[name="contact_position"]').val(dataset.reference[0].position ? dataset.reference[0].position : '');
@@ -1205,11 +1412,15 @@ var employmentHistoryTable = (function () {
         $("#editEmployementHistoryForm").on("submit", function (e) {
             e.preventDefault();
             let editId = $('#editEmployementHistoryForm input[name="id"]').val();
+            var $form = $(this);
             const form = document.getElementById("editEmployementHistoryForm");
+            $form.find('.border-danger').removeClass('border-danger');
+            $form.find('.acc__input-error').html('');
     
             document.querySelector('#updateEmpHistory').setAttribute('disabled', 'disabled');
-            document.querySelector('#updateEmpHistory svg').style.cssText = 'display: inline-block;';
+            document.querySelector('#updateEmpHistory .adm-btn-loader').style.cssText = 'display: inline-block;';
     
+            admissionSyncInlineAddressAliases(form);
             let form_data = new FormData(form);
     
             axios({
@@ -1222,7 +1433,7 @@ var employmentHistoryTable = (function () {
             }).then((response) => {
                 if (response.status == 200) {
                     document.querySelector("#updateEmpHistory").removeAttribute("disabled");
-                    document.querySelector("#updateEmpHistory svg").style.cssText = "display: none;";
+                    document.querySelector("#updateEmpHistory .adm-btn-loader").style.cssText = "display: none;";
                     editEmployementHistoryModal.hide();
     
                     successModal.show();
@@ -1234,7 +1445,7 @@ var employmentHistoryTable = (function () {
                 employmentHistoryTable.init();
             }).catch((error) => {
                 document.querySelector("#updateEmpHistory").removeAttribute("disabled");
-                document.querySelector("#updateEmpHistory svg").style.cssText = "display: none;";
+                document.querySelector("#updateEmpHistory .adm-btn-loader").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
@@ -1421,20 +1632,32 @@ var employmentHistoryTable = (function () {
 
     /* Edit Personal Details */
     if($('#editAdmissionPersonalDetailsForm').length > 0){
+        const setAdmissionCheckCardMeta = function (selector, text) {
+            $(selector).closest('.adm-check-card').find('.adm-check-card__meta').text(text);
+        };
+
         $('#disability_status').on('change', function(){
             if($('#disability_status').prop('checked')){
+                setAdmissionCheckCardMeta('#disability_status', 'Yes - select all that apply below');
                 $('.disabilityItems').fadeIn('fast', function(){
                     $('.disabilityItems input[type="checkbox"]').prop('checked', false);
                     $('.disabilityAllowance').fadeOut();
                     $('.disabilityAllowance input[type="checkbox"]').prop('checked', false);
+                    setAdmissionCheckCardMeta('#disabilty_allowance', 'Not claimed');
                 });
             }else{
+                setAdmissionCheckCardMeta('#disability_status', 'No disabilities declared');
                 $('.disabilityItems').fadeOut('fast', function(){
                     $('.disabilityItems input[type="checkbox"]').prop('checked', false);
                     $('.disabilityAllowance').fadeOut();
                     $('.disabilityAllowance input[type="checkbox"]').prop('checked', false);
+                    setAdmissionCheckCardMeta('#disabilty_allowance', 'Not claimed');
                 });
             }
+        });
+
+        $('#disabilty_allowance').on('change', function(){
+            setAdmissionCheckCardMeta('#disabilty_allowance', $(this).prop('checked') ? 'Claimed' : 'Not claimed');
         });
     
         $('.disabilityItems input[type="checkbox"]').on('change', function(){
@@ -1442,11 +1665,13 @@ var employmentHistoryTable = (function () {
                 if(!$('.disabilityAllowance').is(':visible')){
                     $('.disabilityAllowance').fadeIn('fast', function(){
                         $('input[type="checkbox"]', this).prop('checked', false);
+                        setAdmissionCheckCardMeta('#disabilty_allowance', 'Not claimed');
                     });
                 }
             }else{
                 $('.disabilityAllowance').fadeOut('fast', function(){
                     $('input[type="checkbox"]', this).prop('checked', false);
+                    setAdmissionCheckCardMeta('#disabilty_allowance', 'Not claimed');
                 });
             }
         });
@@ -1459,7 +1684,7 @@ var employmentHistoryTable = (function () {
             const form = document.getElementById('editAdmissionPersonalDetailsForm');
         
             document.querySelector('#savePD').setAttribute('disabled', 'disabled');
-            document.querySelector("#savePD svg").style.cssText ="display: inline-block;";
+            document.querySelector("#savePD .adm-btn-loader").style.cssText ="display: inline-block;";
 
             let form_data = new FormData(form);
             let applicantId = $('[name="applicant_id"]', $form).val();
@@ -1471,7 +1696,7 @@ var employmentHistoryTable = (function () {
             }).then(response => {
                 if (response.status == 200) {
                     document.querySelector('#savePD').removeAttribute('disabled');
-                    document.querySelector("#savePD svg").style.cssText = "display: none;";
+                    document.querySelector("#savePD .adm-btn-loader").style.cssText = "display: none;";
 
                     editAdmissionPersonalDetailsModal.hide();
 
@@ -1489,7 +1714,7 @@ var employmentHistoryTable = (function () {
                 }
             }).catch(error => {
                 document.querySelector('#savePD').removeAttribute('disabled');
-                document.querySelector("#savePD svg").style.cssText = "display: none;";
+                document.querySelector("#savePD .adm-btn-loader").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
@@ -1523,10 +1748,13 @@ var employmentHistoryTable = (function () {
             e.preventDefault();
             var $form = $(this);
             const form = document.getElementById('editAdmissionContactDetailsForm');
+            $form.find('.border-danger').removeClass('border-danger');
+            $form.find('.acc__input-error').html('');
         
             document.querySelector('#saveCD').setAttribute('disabled', 'disabled');
-            document.querySelector("#saveCD svg").style.cssText ="display: inline-block;";
+            document.querySelector("#saveCD .adm-btn-loader").style.cssText ="display: inline-block;";
 
+            admissionSyncInlineAddressAliases(form);
             let form_data = new FormData(form);
             axios({
                 method: "post",
@@ -1536,7 +1764,7 @@ var employmentHistoryTable = (function () {
             }).then(response => {
                 if (response.status == 200) {
                     document.querySelector('#saveCD').removeAttribute('disabled');
-                    document.querySelector("#saveCD svg").style.cssText = "display: none;";
+                    document.querySelector("#saveCD .adm-btn-loader").style.cssText = "display: none;";
 
                     editAdmissionContactDetailsModal.hide();
 
@@ -1554,7 +1782,7 @@ var employmentHistoryTable = (function () {
                 }
             }).catch(error => {
                 document.querySelector('#saveCD').removeAttribute('disabled');
-                document.querySelector("#saveCD svg").style.cssText = "display: none;";
+                document.querySelector("#saveCD .adm-btn-loader").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
@@ -1748,7 +1976,7 @@ var employmentHistoryTable = (function () {
             const form = document.getElementById('editAdmissionResidencyCriminalForm');
 
             document.querySelector('#saveResidencyCriminal').setAttribute('disabled', 'disabled');
-            document.querySelector('#saveResidencyCriminal svg').style.cssText = "display: inline-block;";
+            document.querySelector('#saveResidencyCriminal .adm-btn-loader').style.cssText = "display: inline-block;";
 
             let form_data = new FormData(form);
             axios({
@@ -1759,7 +1987,7 @@ var employmentHistoryTable = (function () {
             }).then(response => {
                 if (response.status == 200) {
                     document.querySelector('#saveResidencyCriminal').removeAttribute('disabled');
-                    document.querySelector('#saveResidencyCriminal svg').style.cssText = "display: none;";
+                    document.querySelector('#saveResidencyCriminal .adm-btn-loader').style.cssText = "display: none;";
 
                     editAdmissionResidencyCriminalModal.hide();
 
@@ -1777,7 +2005,7 @@ var employmentHistoryTable = (function () {
                 }
             }).catch(error => {
                 document.querySelector('#saveResidencyCriminal').removeAttribute('disabled');
-                document.querySelector('#saveResidencyCriminal svg').style.cssText = "display: none;";
+                document.querySelector('#saveResidencyCriminal .adm-btn-loader').style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
@@ -1812,10 +2040,13 @@ var employmentHistoryTable = (function () {
             e.preventDefault();
             var $form = $(this);
             const form = document.getElementById('editAdmissionKinDetailsForm');
+            $form.find('.border-danger').removeClass('border-danger');
+            $form.find('.acc__input-error').html('');
         
             document.querySelector('#saveNOK').setAttribute('disabled', 'disabled');
-            document.querySelector("#saveNOK svg").style.cssText ="display: inline-block;";
+            document.querySelector("#saveNOK .adm-btn-loader").style.cssText ="display: inline-block;";
 
+            admissionSyncInlineAddressAliases(form);
             let form_data = new FormData(form);
             axios({
                 method: "post",
@@ -1825,7 +2056,7 @@ var employmentHistoryTable = (function () {
             }).then(response => {
                 if (response.status == 200) {
                     document.querySelector('#saveNOK').removeAttribute('disabled');
-                    document.querySelector("#saveNOK svg").style.cssText = "display: none;";
+                    document.querySelector("#saveNOK .adm-btn-loader").style.cssText = "display: none;";
 
                     editAdmissionKinDetailsModal.hide();
 
@@ -1843,7 +2074,7 @@ var employmentHistoryTable = (function () {
                 }
             }).catch(error => {
                 document.querySelector('#saveNOK').removeAttribute('disabled');
-                document.querySelector("#saveNOK svg").style.cssText = "display: none;";
+                document.querySelector("#saveNOK .adm-btn-loader").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
@@ -1927,9 +2158,9 @@ var employmentHistoryTable = (function () {
     });
 
     if($('#editAdmissionCourseDetailsForm').length > 0){
-        var course_creation_id = new TomSelect('#course_creation_id', tomOptions);
-        var venue_id = new TomSelect('#venue_id', tomOptions);
-        var student_loan = new TomSelect('#student_loan', tomOptions);
+        var course_creation_id = getOrCreateAdmissionTomSelect('#course_creation_id', tomOptions);
+        var venue_id = getOrCreateAdmissionTomSelect('#venue_id', tomOptions);
+        var student_loan = getOrCreateAdmissionTomSelect('#student_loan', tomOptions);
 
         $('#course_creation_id').on('change', function(e){
 
@@ -2044,7 +2275,7 @@ var employmentHistoryTable = (function () {
             const form = document.getElementById('editAdmissionCourseDetailsForm');
         
             document.querySelector('#savePCP').setAttribute('disabled', 'disabled');
-            document.querySelector("#savePCP svg").style.cssText ="display: inline-block;";
+            document.querySelector("#savePCP .adm-btn-loader").style.cssText ="display: inline-block;";
 
             let form_data = new FormData(form);
             axios({
@@ -2055,7 +2286,7 @@ var employmentHistoryTable = (function () {
             }).then(response => {
                 if (response.status == 200) {
                     document.querySelector('#savePCP').removeAttribute('disabled');
-                    document.querySelector("#savePCP svg").style.cssText = "display: none;";
+                    document.querySelector("#savePCP .adm-btn-loader").style.cssText = "display: none;";
 
                     editAdmissionCourseDetailsModal.hide();
 
@@ -2073,7 +2304,7 @@ var employmentHistoryTable = (function () {
                 }
             }).catch(error => {
                 document.querySelector('#savePCP').removeAttribute('disabled');
-                document.querySelector("#savePCP svg").style.cssText = "display: none;";
+                document.querySelector("#savePCP .adm-btn-loader").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
@@ -2242,4 +2473,3 @@ var employmentHistoryTable = (function () {
 
     
 })();
-

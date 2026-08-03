@@ -16,10 +16,15 @@ class CourseManagementController extends Controller
     public function index()
     {
         return view('pages.course-management.index', [
+            // Opts this screen into the redesigned module shell — MenuComposer
+            // honours a view-supplied layout, so every other page is untouched.
+            'layout' => 'course-top-menu',
             'title' => 'Course Management - London Churchill College',
             'subtitle' => 'Dashboard',
+            'cmPageTitle' => 'Course Management',
             'breadcrumbs' => [
-                ['label' => 'Course Management', 'href' => 'javascript:void(0);']
+                ['label' => 'Dashboard', 'href' => route('dashboard')],
+                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
             ],
             'semesters' => Semester::all()->count(),
             'courses' => Course::all()->count(),

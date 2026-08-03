@@ -20,10 +20,15 @@ class CourseController extends Controller
     public function index()
     {
         return view('pages.course-management.courses.index', [
-            'title' => 'Course & Semester - London Churchill College',
+            // Opts this screen into the redesigned module shell.
+            'layout' => 'course-top-menu',
+            'title' => 'Courses - London Churchill College',
             'subtitle' => 'Courses',
+            'cmPageTitle' => 'Courses',
+            'cmBackUrl' => route('course.management'),
+            'cmBackLabel' => 'Back to Course Management',
             'breadcrumbs' => [
-                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Course Management', 'href' => route('course.management')],
                 ['label' => 'Courses', 'href' => 'javascript:void(0);']
             ],
             'bodies' => AwardingBody::orderBy('name', 'asc')->get(),
@@ -43,9 +48,14 @@ class CourseController extends Controller
 
         $query = Course::orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
-            $query->where('name','LIKE','%'.$queryStr.'%');
-            $query->orWhere('degree_offered','LIKE','%'.$queryStr.'%');
-            $query->orWhere('pre_qualification','LIKE','%'.$queryStr.'%');
+            // Grouped: the three OR terms used to sit next to the status filter
+            // as siblings, and AND binds tighter than OR — so a search matched
+            // rows regardless of the Active / Inactive / Archived selection.
+            $query->where(function($q) use ($queryStr) {
+                $q->where('name','LIKE','%'.$queryStr.'%')
+                  ->orWhere('degree_offered','LIKE','%'.$queryStr.'%')
+                  ->orWhere('pre_qualification','LIKE','%'.$queryStr.'%');
+            });
         endif;
         if($status == 2):
             $query->onlyTrashed();
@@ -53,10 +63,13 @@ class CourseController extends Controller
             $query->where('active', $status);
         endif;
 
-        $total_rows = $query->count();
+        $total_rows = (clone $query)->reorder()->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        $perpage = (isset($request->size) && $request->size == 'true'
+            ? ($total_rows > 0 ? $total_rows : 10)
+            : ($request->size > 0 ? $request->size : 10));
+        // 1, not '' — an empty string reaches Tabulator as NaN and breaks the pager.
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : 1;
         
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
@@ -83,7 +96,7 @@ class CourseController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'total' => $total_rows, 'data' => $data]);
     }
 
     public function store(CourseRequests $request){
@@ -144,10 +157,15 @@ class CourseController extends Controller
     public function show($id)
     {
         return view('pages.course-management.courses.show', [
-            'title' => 'Course & Semester - London Churchill College',
+            // Opts this screen into the redesigned module shell.
+            'layout' => 'course-top-menu',
+            'title' => 'Course Details - London Churchill College',
             'subtitle' => 'Courses Details',
+            'cmPageTitle' => 'Course Details',
+            'cmBackUrl' => route('courses'),
+            'cmBackLabel' => 'Back to Courses',
             'breadcrumbs' => [
-                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Course Management', 'href' => route('course.management')],
                 ['label' => 'Courses', 'href' => route('courses')],
                 ['label' => 'Course Details', 'href' => 'javascript:void(0);']
             ],

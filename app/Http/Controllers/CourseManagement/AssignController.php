@@ -39,20 +39,26 @@ class AssignController extends Controller
         $planIds = $modules->pluck('id')->unique()->toArray();
 
         return view('pages.course-management.assign.index', [
-            'title' => 'Course Management - London Churchill College',
+            // Redesigned Course Management shell. Every other screen in the
+            // module already opts in the same way; see layout/course-top-menu.
+            'layout' => 'course-top-menu',
+            'title' => 'Assign / Deassign - London Churchill College',
             'subtitle' => 'Assign / Deassign',
+            'cmPageTitle' => 'Assign / Deassign',
+            'cmBackUrl' => route('class.plan'),
+            'cmBackLabel' => 'Back to list',
             'breadcrumbs' => [
                 ['label' => 'Course Management', 'href' => route('course.management')],
+                ['label' => 'Class Plans', 'href' => route('class.plan')],
                 ['label' => 'Assign / Deassign', 'href' => 'javascript:void(0);']
             ],
-            'termDeclarations' => TermDeclaration::orderBy('id', 'DESC')->get(),
             'semesters' => Semester::orderBy('id', 'DESC')->get(),
             'statuses' => $statuses,
 
             'theAcademicYear' => AcademicYear::find($acid),
             'theTermDeclaration' => TermDeclaration::find($tdid),
             'theCourse' => Course::find($crid),
-            'theGroup' => Group::find($grid),
+            'theGroup' => $theGroup,
             'selectedModules' => $modules,
             'selectedModuleIds' => $planIds,
             'existingStudents' => $this->getExistingStudentsList($planIds),
@@ -60,6 +66,102 @@ class AssignController extends Controller
             'groups' => Group::all()->sortBy('name'),
             'otherGroup' => $this->getOtherAvailableGroups($acid, $tdid, $crid, $theGroup->name)
         ]);
+    }
+
+    /* ------------------------------------------------------------------ *
+     * Markup helpers
+     *
+     * The two transfer columns are filled by the endpoints below, so the row
+     * markup lives here rather than in the blade. A row is a <li> carrying the
+     * student id plus a button; selection is held as `.is-picked` on the <li>,
+     * which is what the Add / Remove / Re-Assign buttons read.
+     *
+     * Nothing here reuses a legacy class name. `datafuture.css` is loaded
+     * app-wide and still carries the old screen's rules — `.addRemoveBtns` is
+     * absolutely positioned, `.assignStudentsList li` repaints every row — and
+     * they outrank single-class `cm-` selectors whatever the load order. Every
+     * hook on this screen is therefore a `cm-` class or a `data-cm-*`
+     * attribute that the old stylesheet cannot reach.
+     * ------------------------------------------------------------------ */
+
+    private function tickGlyph(){
+        return '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>';
+    }
+
+    /**
+     * One student row.
+     *
+     * $opts: locked => cannot be moved (already there, or on another course)
+     *        note   => small line under the name explaining why
+     *        flag   => the student has an attendance issue on this group
+     *        modules => plan ids the student is assigned to, for the "(n)" chip
+     */
+    private function studentRowHtml($student, array $opts = []){
+        $modules = (isset($opts['modules']) && !empty($opts['modules']) ? $opts['modules'] : []);
+        $locked = !empty($opts['locked']);
+        $flag = !empty($opts['flag']);
+        $note = (isset($opts['note']) && $opts['note'] !== '' ? $opts['note'] : '');
+
+        $initials = mb_strtoupper(mb_substr((string) $student->first_name, 0, 1).mb_substr((string) $student->last_name, 0, 1));
+        if(trim($initials) === ''):
+            $initials = mb_strtoupper(mb_substr((string) $student->registration_no, 0, 2));
+        endif;
+
+        // `has-count` reserves the room the "(n)" chip is absolutely positioned
+        // into, so a long name can never run under it.
+        $classes = 'cm-stu'.($locked ? ' is-locked' : '').($flag ? ' is-flagged' : '').(!empty($modules) ? ' has-count' : '');
+
+        $htm = '<li class="'.$classes.'" data-cm-student="'.$student->id.'" data-cm-reg="'.e($student->registration_no).'" data-cm-name="'.e($student->full_name).'">';
+            $htm .= '<button type="button" class="cm-stu__row"'.($locked ? ' disabled' : '').($flag ? ' title="One or more of this student\'s classes has an attendance issue"' : '').'>';
+                $htm .= '<span class="cm-avatar" data-cm-tone="'.((int) $student->id % 6).'">'.e($initials).'</span>';
+                $htm .= '<span class="cm-stu__copy">';
+                    $htm .= '<span class="cm-stu__name"><strong>'.e($student->registration_no).'</strong> &middot; '.e($student->full_name).'</span>';
+                    if($note !== ''):
+                        $htm .= '<span class="cm-stu__note">'.e($note).'</span>';
+                    endif;
+                $htm .= '</span>';
+                $htm .= '<span class="cm-stu__tick" aria-hidden="true">'.$this->tickGlyph().'</span>';
+            $htm .= '</button>';
+            if(!empty($modules)):
+                $htm .= '<button type="button" class="cm-stu__count" data-cm-modules="'.implode(',', $modules).'" title="Show the modules this student is on">('.count($modules).')</button>';
+            endif;
+        $htm .= '</li>';
+
+        return $htm;
+    }
+
+    /** The status caption the potential column groups students under. */
+    private function studentHeadHtml($status, $count = 0){
+        $htm = '<li class="cm-stugroup" data-cm-group="'.$status->id.'">';
+            $htm .= '<span>'.e($status->name).'</span>';
+            $htm .= '<span data-cm-group-count>'.$count.'</span>';
+        $htm .= '</li>';
+
+        return $htm;
+    }
+
+    /** Shown instead of the list when a search would return an unusable number. */
+    private function studentNoticeHtml($count){
+        $htm = '<li class="cm-stunotice">';
+            $htm .= '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01"></path></svg>';
+            $htm .= '<span>Too many students ('.$count.') to show &mdash; narrow the search.</span>';
+        $htm .= '</li>';
+
+        return $htm;
+    }
+
+    /** The course a student is actually on, when it is not the one being assigned. */
+    private function otherCourseNote($student, $courseid){
+        $stdCourseId = (isset($student->activeCR->creation->course_id) && $student->activeCR->creation->course_id > 0 ? $student->activeCR->creation->course_id : 0);
+        if($stdCourseId == $courseid):
+            return ['locked' => false, 'note' => ''];
+        endif;
+
+        // The note is the course name on its own, as in the design — the red
+        // treatment already says "this one cannot be moved".
+        $name = (isset($student->activeCR->creation->course->name) && $student->activeCR->creation->course->name != '' ? $student->activeCR->creation->course->name : 'Another course');
+
+        return ['locked' => true, 'note' => $name];
     }
 
     public function getOtherAvailableGroups($academicYearId, $termDeclaredId, $courseId, $existGroupName){
@@ -113,7 +215,7 @@ class AssignController extends Controller
             $sorts[] = str_replace(['s_', 'c_'], ['s.', 'c.'], $sort['field']).' '.$sort['dir'];
         endforeach;
         $query = DB::table('students as s')
-                 ->select('s.id', 's.registration_no', 'c.name as c_name', 'sts.name as sts_name')
+                 ->select('s.id', 's.registration_no', 's.first_name', 's.last_name', 'c.name as c_name', 'sts.name as sts_name')
                  ->leftJoin('statuses as sts', 's.status_id', '=', 'sts.id')
                  ->leftJoin('student_course_relations as scr', 's.id', '=', 'scr.student_id')
                  ->leftJoin('course_creations as cc', 'scr.course_creation_id', '=', 'cc.id')
@@ -146,6 +248,11 @@ class AssignController extends Controller
                     's_id' => $list->id,
                     'sl' => $i,
                     's_registration_no' => $list->registration_no,
+                    's_first_name' => $list->first_name,
+                    's_last_name' => $list->last_name,
+                    // `photo_url` is an accessor on the model, so it comes off
+                    // the record already loaded above rather than the raw row.
+                    's_photo' => $student->photo_url ?? '',
                     'c_name' => isset($list->c_name) ? $list->c_name : '',
                     'group' => (isset($assign->plan->group->name) && !empty($assign->plan->group->name) ? $assign->plan->group->name : ''),
                     'group_ev_wk' => (isset($assign->id) && $assign->id > 0 ? (isset($assign->plan->group->evening_and_weekend) && $assign->plan->group->evening_and_weekend == 1 ? 'Yes' : 'No') : ''),
@@ -171,15 +278,10 @@ class AssignController extends Controller
             foreach($students as $std):
                 $assignedTo = Assign::select('plan_id')->whereIn('plan_id', $planIds)->where('student_id', $std->id)->groupBy('plan_id')->pluck('plan_id')->unique()->toArray();
                 $checkAttendances = Assign::whereIn('plan_id', $planIds)->where('student_id', $std->id)->where('attendance', 0)->get()->count();
-                $res['htm'] .= '<li data-studentid="'.$std->id.'" data-reg="'.$std->registration_no.'" data-name="'.$std->full_name.'">';
-                    $res['htm'] .= '<input type="checkbox" name="assignedStudents[]" value="'.$std->id.'" id="assignedStudents_'.$std->id.'"/>';
-                    $res['htm'] .= '<label class="'.($checkAttendances > 0 ? 'text-danger' : '').'" for="assignedStudents_'.$std->id.'"><i data-lucide="arrow-right-circle" class="w-4 h-4 mr-1"></i>';
-                        $res['htm'] .= $std->registration_no.' - '.$std->full_name;
-                    $res['htm'] .= '</label>';
-                    if(!empty($assignedTo)):
-                        $res['htm'] .= '&nbsp;<a data-ids="'.implode(',', $assignedTo).'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#showAllModulesModal" class="font-medium text-primary showAllModules">('.count($assignedTo).')</a>';
-                    endif;
-                $res['htm'] .= '</li>';
+                $res['htm'] .= $this->studentRowHtml($std, [
+                    'modules' => $assignedTo,
+                    'flag' => $checkAttendances > 0,
+                ]);
             endforeach;
         endif;
 
@@ -209,17 +311,14 @@ class AssignController extends Controller
         })->orderBy('first_name', 'ASC')->get();
         if($students->count() > 500):
             $res['count'] = $students->count();
-            $res['htm'] .= '<li class="noticeItem">';
-                $res['htm'] .= '<input type="checkbox" name="potentialStudents[]" value="0" id="potentialStudents_0"/>';
-                $res['htm'] .= '<label for="potentialStudents_0"><i data-lucide="alert-octagon" class="w-4 h-4 mr-1 text-danger"></i> Too many students ('.$students->count().') to show, please use the search</label>';
-            $res['htm'] .= '</li>';
+            $res['htm'] .= $this->studentNoticeHtml($students->count());
         else:
             $statuses = Student::where(function($q) use ($theValue){
                             $q->where('registration_no', 'LIKE', '%'.$theValue.'%')
                                 ->orWhere('first_name', 'LIKE', '%'.$theValue.'%')
                                 ->orWhere('last_name', 'LIKE', '%'.$theValue.'%');
                         })->orderBy('status_id', 'ASC')->pluck('status_id')->unique()->toArray();
-            
+
             if(!empty($statuses)):
                 foreach($statuses as $sts):
                     $status = Status::find($sts);
@@ -230,16 +329,14 @@ class AssignController extends Controller
                                 })->orderBy('first_name', 'ASC')->get();
                     if(!empty($students) && $students->count() > 0):
                         $res['count'] += $students->count();
-                        $res['htm'] .= '<li class="headingItem" data-status="'.$status->id.'">';
-                            $res['htm'] .= '<label><i data-lucide="list-checks" class="w-4 h-4 mr-1"></i>'.$status->name.'</label>';
-                        $res['htm'] .= '</li>';
+                        $res['htm'] .= $this->studentHeadHtml($status, $students->count());
                         foreach($students as $std):
-                            $std_course_id = (isset($std->activeCR->creation->course_id) && $std->activeCR->creation->course_id > 0 ? $std->activeCR->creation->course_id : 0);
-                            $std_course_name = (isset($std->activeCR->creation->course->name) && $std->activeCR->creation->course->name != '' ? $std->activeCR->creation->course->name : 0);
-                            $res['htm'] .= '<li class="'.(in_array($std->id, $existingStudents) || $std_course_id != $courseid ? 'existThere' : '').'" data-studentid="'.$std->id.'" data-reg="'.$std->registration_no.'" data-name="'.$std->full_name.'">';
-                                $res['htm'] .= '<input type="checkbox" name="potentialStudents[]" value="'.$std->id.'" id="potentialStudents_'.$std->id.'"/>';
-                                $res['htm'] .= '<label for="potentialStudents_'.$std->id.'"><i data-lucide="arrow-right-circle" class="w-4 h-4 mr-1"></i>'.$std->registration_no.' - '.$std->full_name.($std_course_id != $courseid ? ' - '.$std_course_name : '').'</label>';
-                            $res['htm'] .= '</li>';
+                            $other = $this->otherCourseNote($std, $courseid);
+                            $alreadyHere = in_array($std->id, $existingStudents);
+                            $res['htm'] .= $this->studentRowHtml($std, [
+                                'locked' => $alreadyHere || $other['locked'],
+                                'note' => $alreadyHere ? 'Already in this group' : $other['note'],
+                            ]);
                         endforeach;
                     endif;
                 endforeach;
@@ -265,16 +362,14 @@ class AssignController extends Controller
                     $students = Student::where('status_id', $sts)->whereIn('id', $student_ids)->orderBy('first_name', 'ASC')->get();
                     if(!empty($students) && $students->count() > 0):
                         $res['count'] += $students->count();
-                        $res['htm'] .= '<li class="headingItem" data-status="'.$status->id.'">';
-                            $res['htm'] .= '<label><i data-lucide="list-checks" class="w-4 h-4 mr-1"></i>'.$status->name.'</label>';
-                        $res['htm'] .= '</li>';
+                        $res['htm'] .= $this->studentHeadHtml($status, $students->count());
                         foreach($students as $std):
-                            $std_course_id = (isset($std->activeCR->creation->course_id) && $std->activeCR->creation->course_id > 0 ? $std->activeCR->creation->course_id : 0);
-                            $std_course_name = (isset($std->activeCR->creation->course->name) && $std->activeCR->creation->course->name != '' ? $std->activeCR->creation->course->name : 0);
-                            $res['htm'] .= '<li class="'.(in_array($std->id, $existingStudents) || $std_course_id != $courseid ? 'existThere' : '').'" data-studentid="'.$std->id.'" data-reg="'.$std->registration_no.'" data-name="'.$std->full_name.'">';
-                                $res['htm'] .= '<input type="checkbox" name="potentialStudents[]" value="'.$std->id.'" id="potentialStudents_'.$std->id.'"/>';
-                                $res['htm'] .= '<label for="potentialStudents_'.$std->id.'"><i data-lucide="arrow-right-circle" class="w-4 h-4 mr-1"></i>'.$std->registration_no.' - '.$std->full_name.($std_course_id != $courseid ? ' - '.$std_course_name : '').'</label>';
-                            $res['htm'] .= '</li>';
+                            $other = $this->otherCourseNote($std, $courseid);
+                            $alreadyHere = in_array($std->id, $existingStudents);
+                            $res['htm'] .= $this->studentRowHtml($std, [
+                                'locked' => $alreadyHere || $other['locked'],
+                                'note' => $alreadyHere ? 'Already in this group' : $other['note'],
+                            ]);
                         endforeach;
                     endif;
                 endforeach;
@@ -332,16 +427,27 @@ class AssignController extends Controller
                    ->orderBy('module_creation_id', 'ASC')->get();
         if(!empty($modules)):
             $i = 1;
-            $res['module_html'] .= '<ul>';
+            $res['module_html'] .= '<ul class="cm-sidemods">';
             foreach($modules as $md):
                 $planIds[] = $md->id;
 
-                $res['modules'][$i]['id'] = $md->id;
-                $res['modules'][$i]['name'] = (isset($md->creations->module_name) && !empty($md->creations->module_name) ? $md->creations->module_name : 'Unknown');
+                $name = (isset($md->creations->module_name) && !empty($md->creations->module_name) ? $md->creations->module_name : 'Unknown Module');
+                $count = (isset($md->assign) ? $md->assign->count() : 0);
 
-                $res['module_html'] .= '<li  class="potential_modules_'.$md->id.' active flex items-start mb-2"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> ';
-                    $res['module_html'] .= (isset($md->creations->module_name) ? $md->creations->module_name : 'Unknown Module');
-                    $res['module_html'] .= (isset($md->assign) ? '&nbsp;<strong>('.$md->assign->count().')</strong>' : '&nbsp;<strong>(0)</strong>');
+                $res['modules'][$i]['id'] = $md->id;
+                $res['modules'][$i]['name'] = $name;
+
+                // `is-on` is the default; picking a single module in the search
+                // form dims the rest rather than removing them, so the group's
+                // whole shape stays visible.
+                $res['module_html'] .= '<li class="cm-sidemod is-on" data-cm-sidemod="'.$md->id.'">';
+                    // Tone by position, so a list of similarly-named modules is
+                    // still scannable down the column.
+                    $res['module_html'] .= '<span class="cm-sidemod__tile" data-cm-tone="'.(($i - 1) % 6).'">'.e(mb_strtoupper(mb_substr($name, 0, 1))).'</span>';
+                    $res['module_html'] .= '<span class="cm-sidemod__copy">';
+                        $res['module_html'] .= '<span class="cm-sidemod__name">'.e($name).'</span>';
+                        $res['module_html'] .= '<span class="cm-sidemod__count">'.$count.' '.($count === 1 ? 'student' : 'students').'</span>';
+                    $res['module_html'] .= '</span>';
                 $res['module_html'] .= '</li>';
                 $i++;
             endforeach;
@@ -352,34 +458,27 @@ class AssignController extends Controller
             $student_ids = Assign::whereIn('plan_id', $planIds)->pluck('student_id')->unique()->toArray();
             if(!empty($student_ids) && count($student_ids) > 500):
                 $res['students']['count'] = count($student_ids);
-                $res['students']['htm'] .= '<li class="noticeItem">';
-                    $res['students']['htm'] .= '<input type="checkbox" name="potentialStudents[]" value="0" id="potentialStudents_0"/>';
-                    $res['students']['htm'] .= '<label for="potentialStudents_0"><i data-lucide="alert-octagon" class="w-4 h-4 mr-1 text-danger"></i> Too many students ('.count($student_ids).') to show, please use the search</label>';
-                $res['students']['htm'] .= '</li>';
+                $res['students']['htm'] .= $this->studentNoticeHtml(count($student_ids));
             elseif(!empty($student_ids) && count($student_ids) <= 500):
                 $statuses = Student::whereIn('id', $student_ids)->orderBy('status_id', 'ASC')
                             ->pluck('status_id')->unique()->toArray();
-    
+
                 if(!empty($statuses)):
                     foreach($statuses as $sts):
                         $status = Status::find($sts);
                         $students = Student::where('status_id', $sts)->whereIn('id', $student_ids)->orderBy('first_name', 'ASC')->get();
                         if(!empty($students) && $students->count() > 0):
                             $res['students']['count'] += $students->count();
-                            $res['students']['htm'] .= '<li class="headingItem" data-status="'.$status->id.'">';
-                                $res['students']['htm'] .= '<label><i data-lucide="list-checks" class="w-4 h-4 mr-1"></i>'.$status->name.'</label>';
-                            $res['students']['htm'] .= '</li>';
+                            $res['students']['htm'] .= $this->studentHeadHtml($status, $students->count());
                             foreach($students as $std):
-                                $std_course_id = (isset($std->activeCR->creation->course_id) && $std->activeCR->creation->course_id > 0 ? $std->activeCR->creation->course_id : 0);
-                                $std_course_name = (isset($std->activeCR->creation->course->name) && $std->activeCR->creation->course->name != '' ? $std->activeCR->creation->course_id : 0);
+                                $other = $this->otherCourseNote($std, $courseid);
+                                $alreadyHere = in_array($std->id, $existingStudents);
                                 $assignedTo = Assign::select('plan_id')->whereIn('plan_id', $planIds)->where('student_id', $std->id)->groupBy('plan_id')->pluck('plan_id')->unique()->toArray();
-                                $res['students']['htm'] .= '<li class="'.(in_array($std->id, $existingStudents) || $std_course_id != $courseid ? 'existThere' : '').'" data-studentid="'.$std->id.'" data-reg="'.$std->registration_no.'" data-name="'.$std->full_name.'">';
-                                    $res['students']['htm'] .= '<input type="checkbox" name="potentialStudents[]" value="'.$std->id.'" id="potentialStudents_'.$std->id.'"/>';
-                                    $res['students']['htm'] .= '<label for="potentialStudents_'.$std->id.'"><i data-lucide="arrow-right-circle" class="w-4 h-4 mr-1"></i>'.$std->registration_no.' - '.$std->full_name.($std_course_id != $courseid ? ' - '.$std_course_name : '').'</label>';
-                                    if(!empty($assignedTo)):
-                                        $res['students']['htm'] .= '&nbsp;<a data-ids="'.implode(',', $assignedTo).'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#showAllModulesModal" class="font-medium text-primary showAllModules">('.count($assignedTo).')</a>';
-                                    endif;
-                                $res['students']['htm'] .= '</li>';
+                                $res['students']['htm'] .= $this->studentRowHtml($std, [
+                                    'locked' => $alreadyHere || $other['locked'],
+                                    'note' => $alreadyHere ? 'Already in this group' : $other['note'],
+                                    'modules' => $assignedTo,
+                                ]);
                             endforeach;
                         endif;
                     endforeach;
@@ -414,10 +513,7 @@ class AssignController extends Controller
         $student_ids = Assign::whereIn('plan_id', $moduleid)->pluck('student_id')->unique()->toArray();
         if(!empty($student_ids) && count($student_ids) > 500):
             $res['count'] = count($student_ids);
-            $res['htm'] .= '<li class="noticeItem">';
-                $res['htm'] .= '<input type="checkbox" name="potentialStudents[]" value="0" id="potentialStudents_0"/>';
-                $res['htm'] .= '<label for="potentialStudents_0"><i data-lucide="alert-octagon" class="w-4 h-4 mr-1 text-danger"></i> Too many students ('.count($student_ids).') to show, please use the search</label>';
-            $res['htm'] .= '</li>';
+            $res['htm'] .= $this->studentNoticeHtml(count($student_ids));
         elseif(!empty($student_ids) && count($student_ids) <= 500):
             $statuses = Student::whereIn('id', $student_ids)->orderBy('status_id', 'ASC')
                         ->pluck('status_id')->unique()->toArray();
@@ -428,20 +524,16 @@ class AssignController extends Controller
                     $students = Student::where('status_id', $sts)->whereIn('id', $student_ids)->orderBy('first_name', 'ASC')->get();
                     if(!empty($students) && $students->count() > 0):
                         $res['count'] += $students->count();
-                        $res['htm'] .= '<li class="headingItem" data-status="'.$status->id.'">';
-                            $res['htm'] .= '<label><i data-lucide="list-checks" class="w-4 h-4 mr-1"></i>'.$status->name.'</label>';
-                        $res['htm'] .= '</li>';
+                        $res['htm'] .= $this->studentHeadHtml($status, $students->count());
                         foreach($students as $std):
-                            $std_course_id = (isset($std->activeCR->creation->course_id) && $std->activeCR->creation->course_id > 0 ? $std->activeCR->creation->course_id : 0);
-                            $std_course_name = (isset($std->activeCR->creation->course->name) && $std->activeCR->creation->course->name != '' ? $std->activeCR->creation->course_id : 0);
+                            $other = $this->otherCourseNote($std, $courseid);
+                            $alreadyHere = in_array($std->id, $existingStudents);
                             $assignedTo = Assign::select('plan_id')->whereIn('plan_id', $moduleid)->where('student_id', $std->id)->groupBy('plan_id')->pluck('plan_id')->unique()->toArray();
-                            $res['htm'] .= '<li class="'.(in_array($std->id, $existingStudents) ? 'existThere' : '').'" data-studentid="'.$std->id.'" data-reg="'.$std->registration_no.'" data-name="'.$std->full_name.'">';
-                                $res['htm'] .= '<input type="checkbox" name="potentialStudents[]" value="'.$std->id.'" id="potentialStudents_'.$std->id.'"/>';
-                                $res['htm'] .= '<label for="potentialStudents_'.$std->id.'"><i data-lucide="arrow-right-circle" class="w-4 h-4 mr-1"></i>'.$std->registration_no.' - '.$std->full_name.($std_course_id != $courseid ? ' - '.$std_course_name : '').'</label>';
-                                if(!empty($assignedTo)):
-                                    $res['htm'] .= '&nbsp;<a data-ids="'.implode(',', $assignedTo).'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#showAllModulesModal" class="font-medium text-primary showAllModules">('.count($assignedTo).')</a>';
-                                endif;
-                            $res['htm'] .= '</li>';
+                            $res['htm'] .= $this->studentRowHtml($std, [
+                                'locked' => $alreadyHere,
+                                'note' => $alreadyHere ? 'Already in this group' : $other['note'],
+                                'modules' => $assignedTo,
+                            ]);
                         endforeach;
                     endif;
                 endforeach;
@@ -456,17 +548,22 @@ class AssignController extends Controller
         $html = '';
         if(!empty($ids)):
             $plans = Plan::whereIn('id', $ids)->get();
-            if(!empty($plans)):
-                $html .= '<ul>';
+            if($plans->count() > 0):
+                $html .= '<ul class="cm-modlist">';
                     foreach($plans as $pln):
-                        $html .= '<li class="flex items-start mb-2"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> '.(isset($pln->creations->module_name) ? $pln->creations->module_name : 'Unknown Module').'</li>';
+                        $html .= '<li>';
+                            $html .= '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>';
+                            $html .= '<span>'.e(isset($pln->creations->module_name) ? $pln->creations->module_name : 'Unknown Module');
+                            $html .= (isset($pln->class_type) && !empty($pln->class_type) ? ' <em>'.e($pln->class_type).'</em>' : '');
+                            $html .= '</span>';
+                        $html .= '</li>';
                     endforeach;
                 $html .= '</ul>';
             endif;
         endif;
 
         if(empty($html)):
-            $html .= '<div class="alert alert-warning-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> Module not found!</div>';
+            $html .= '<div class="cm-finder__note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01"></path></svg> No modules found for this student.</div>';
         endif;
 
         return response()->json(['res' => $html], 200);
@@ -520,15 +617,7 @@ class AssignController extends Controller
                 $assignedTo = Assign::select('plan_id')->whereIn('plan_id', $plans_id)->where('student_id', $sid)->groupBy('plan_id')->pluck('plan_id')->unique()->toArray();
                 $theStudent = Student::find($sid);
                 $success['ids'][] = $theStudent->id;
-                $success['htm'] .= '<li data-studentid="'.$theStudent->id.'" data-reg="'.$theStudent->registration_no.'" data-name="'.$theStudent->full_name.'">';
-                    $success['htm'] .= '<input type="checkbox" name="assignedStudents[]" value="'.$theStudent->id.'" id="assignedStudents_'.$theStudent->id.'"/>';
-                    $success['htm'] .= '<label for="assignedStudents_'.$theStudent->id.'"><i data-lucide="arrow-right-circle" class="w-4 h-4 mr-1"></i>';
-                        $success['htm'] .= $theStudent->registration_no;
-                    $success['htm'] .= '</label>';
-                    if(!empty($assignedTo)):
-                        $success['htm'] .= '&nbsp;<a data-ids="'.implode(',', $assignedTo).'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#showAllModulesModal" class="font-medium text-primary showAllModules">('.count($assignedTo).')</a>';
-                    endif;
-                $success['htm'] .= '</li>';
+                $success['htm'] .= $this->studentRowHtml($theStudent, ['modules' => $assignedTo]);
             endforeach;
         endif;
 
@@ -555,18 +644,15 @@ class AssignController extends Controller
                 $status = Status::find($sts);
                 $students = Student::where('status_id', $sts)->whereIn('id', $students_id)->orderBy('first_name', 'ASC')->get();
                 if(!empty($students) && $students->count() > 0):
-                    $res[$sts]['heading'] = '';
-                    $res[$sts]['heading'] .= '<li class="headingItem" data-status="'.$status->id.'">';
-                        $res[$sts]['heading'] .= '<label><i data-lucide="list-checks" class="w-4 h-4 mr-1"></i>'.$status->name.'</label>';
-                    $res[$sts]['heading'] .= '</li>';
+                    // The heading is only used when the potential column has no
+                    // group for this status yet, so its count is the number of
+                    // students arriving with it; the browser re-counts after the
+                    // rows are spliced in.
+                    $res[$sts]['heading'] = $this->studentHeadHtml($status, $students->count());
 
                     $res[$sts]['htm'] = [];
                     foreach($students as $std):
-                        $res[$sts]['htm'][$std->id] = '';
-                        $res[$sts]['htm'][$std->id] .= '<li data-studentid="'.$std->id.'" data-reg="'.$std->registration_no.'" data-name="'.$std->full_name.'">';
-                            $res[$sts]['htm'][$std->id] .= '<input type="checkbox" name="potentialStudents[]" value="'.$std->id.'" id="potentialStudents_'.$std->id.'"/>';
-                            $res[$sts]['htm'][$std->id] .= '<label for="potentialStudents_'.$std->id.'"><i data-lucide="arrow-right-circle" class="w-4 h-4 mr-1"></i>'.$std->registration_no.' - '.$std->full_name.'</label>';
-                        $res[$sts]['htm'][$std->id] .= '</li>';
+                        $res[$sts]['htm'][$std->id] = $this->studentRowHtml($std);
                     endforeach;
                 endif;
             endforeach;
@@ -591,20 +677,13 @@ class AssignController extends Controller
 
         $NM_HTML = '';
         if($newModules->count() > 0):
-            $NM_HTML .= '<div class="relative">';
-                if($newModules->count() > 0):
-                    foreach($newModules as $smd):
-                        $NM_HTML .= '<div class="form-check items-start mb-2">';
-                            $NM_HTML .= '<input id="newAssigndModuleIds_'.$smd->id.'" class="form-check-input newAssigndModuleIds" name="newAssigndModuleIds['.$smd->creations->course_module_id.']['.$smd->class_type.'][]" type="checkbox" value="'.$smd->id.'">';
-                            $NM_HTML .= '<label class="form-check-label" for="newAssigndModuleIds_'.$smd->id.'">';
-                                $NM_HTML .= $smd->id.' - '.$smd->creations->module_name.(isset($smd->class_type) && !empty($smd->class_type) ? ' - '.$smd->class_type.' ' : '') . (isset($smd->assign) ? ' <strong>('.$smd->assign->count().')</strong>' : ' <strong>(0)</strong>');
-                            $NM_HTML .= '</label>';
-                        $NM_HTML .= '</div>';
-                    endforeach;
-                endif;
+            $NM_HTML .= '<div class="cm-checkstack">';
+                foreach($newModules as $smd):
+                    $NM_HTML .= $this->reassignModuleCheck($smd, 'newAssigndModuleIds', false);
+                endforeach;
             $NM_HTML .= '</div>';
         else:
-            $NM_HTML .= '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Module Not found for '.$theNewGroup->name.'</div>';
+            $NM_HTML .= '<div class="cm-finder__note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><path d="M12 9v4M12 17h.01"></path></svg> No modules found for '.e($theNewGroup->name).'.</div>';
         endif;
 
         $theOldGroup = Group::find($old_group_id);
@@ -615,23 +694,43 @@ class AssignController extends Controller
 
         $OM_HTML = '';
         if($OldModules->count() > 0):
-            $OM_HTML .= '<div class="relative">';
-                if($OldModules->count() > 0):
-                    foreach($OldModules as $smd):
-                        $OM_HTML .= '<div class="form-check items-start mb-2">';
-                            $OM_HTML .= '<input checked id="oldAssignedModuleIds_'.$smd->id.'" class="form-check-input oldAssignedModuleIds" name="oldAssignedModuleIds['.$smd->creations->course_module_id.']['.$smd->class_type.'][]" type="checkbox" value="'.$smd->id.'">';
-                            $OM_HTML .= '<label class="form-check-label" for="oldAssignedModuleIds_'.$smd->id.'">';
-                                $OM_HTML .= $smd->id.' - '.$smd->creations->module_name.(isset($smd->class_type) && !empty($smd->class_type) ? ' - '.$smd->class_type.' ' : '') . (isset($smd->assign) ? ' <strong>('.$smd->assign->count().')</strong>' : ' <strong>(0)</strong>');
-                            $OM_HTML .= '</label>';
-                        $OM_HTML .= '</div>';
-                    endforeach;
-                endif;
+            $OM_HTML .= '<div class="cm-checkstack">';
+                foreach($OldModules as $smd):
+                    $OM_HTML .= $this->reassignModuleCheck($smd, 'oldAssignedModuleIds', true);
+                endforeach;
             $OM_HTML .= '</div>';
         else:
-            $OM_HTML .= '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Module Not found for '.$theOldGroup->name.'</div>';
+            $OM_HTML .= '<div class="cm-finder__note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><path d="M12 9v4M12 17h.01"></path></svg> No modules found for '.e($theOldGroup->name).'.</div>';
         endif;
 
         return response()->json(['og_name' => $theOldGroup->name, 'oldModules' => $OM_HTML, 'ng_name' => $theNewGroup->name, 'newModules' => $NM_HTML], 200);
+    }
+
+    /**
+     * One module checkbox inside the re-assign dialog.
+     *
+     * The name keeps its `[course_module_id][class_type][]` shape: the endpoint
+     * pairs the old and new selections by module and class type, so a theory
+     * class can only ever be swapped for another theory class.
+     */
+    private function reassignModuleCheck($plan, $field, $checked){
+        $count = (isset($plan->assign) ? $plan->assign->count() : 0);
+        $id = $field.'_'.$plan->id;
+        $hook = ($field === 'oldAssignedModuleIds' ? 'data-cm-oldmod' : 'data-cm-newmod');
+
+        $htm = '<label class="cm-check" for="'.$id.'">';
+            $htm .= '<input id="'.$id.'" class="cm-check__input" '.$hook.' name="'.$field.'['.$plan->creations->course_module_id.']['.$plan->class_type.'][]" type="checkbox" value="'.$plan->id.'"'.($checked ? ' checked' : '').'>';
+            $htm .= '<span class="cm-check__box">'.$this->tickGlyph().'</span>';
+            $htm .= '<span class="cm-check__label">';
+                $htm .= '<span class="cm-check__id">#'.$plan->id.'</span> '.e($plan->creations->module_name);
+                if(isset($plan->class_type) && !empty($plan->class_type)):
+                    $htm .= ' <span class="cm-check__type">'.e($plan->class_type).'</span>';
+                endif;
+                $htm .= ' <span class="cm-check__count">'.$count.'</span>';
+            $htm .= '</span>';
+        $htm .= '</label>';
+
+        return $htm;
     }
 
     public function reAssignStudentNewGroup(Request $request){

@@ -5,6 +5,133 @@ import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
 
 ("use strict");
+
+function commEscape(value) {
+    return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
+
+function commInitials(name) {
+    const initials = String(name || "")
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part.charAt(0).toUpperCase())
+        .join("");
+
+    return initials || "?";
+}
+
+function commAvatarColor(seed) {
+    const palette = ["#0d7a76", "#6d4bb0", "#2f7d4f", "#c0562a", "#2f8f7d", "#3a6ea5"];
+    const text = String(seed || "");
+    let hash = 0;
+
+    for (let i = 0; i < text.length; i += 1) {
+        hash = (hash + text.charCodeAt(i) * (i + 1)) % palette.length;
+    }
+
+    return palette[hash];
+}
+
+function commFormatFileSize(bytes) {
+    const size = Number(bytes) || 0;
+    if (size < 1024) return size + " B";
+    if (size < 1024 * 1024) return (size / 1024).toFixed(size < 10240 ? 1 : 0) + " KB";
+    return (size / (1024 * 1024)).toFixed(1) + " MB";
+}
+
+function commIssuedByHtml(name, date, seed) {
+    const safeName = commEscape(name || "--");
+    const safeDate = commEscape(date || "");
+
+    return '<div class="adm-comm-by">' +
+        '<span class="adm-comm-by__avatar" style="background:' + commAvatarColor(seed || name) + ';">' + commInitials(name) + '</span>' +
+        '<span class="adm-comm-by__text">' +
+            '<span class="adm-comm-by__name">' + safeName + '</span>' +
+            '<span class="adm-comm-by__date">' + safeDate + '</span>' +
+        '</span>' +
+    '</div>';
+}
+
+function commActionButton(action) {
+    const tag = action.tag || "button";
+    const attrs = [
+        'data-id="' + commEscape(action.id) + '"',
+        'class="' + commEscape(action.className) + ' adm-row-action adm-row-action--' + commEscape(action.type) + '"',
+        'title="' + commEscape(action.title) + '"',
+        'aria-label="' + commEscape(action.title) + '"',
+    ];
+
+    if (tag === "button") attrs.push('type="button"');
+    if (tag === "a") attrs.push('href="javascript:void(0);"');
+    if (action.extra) attrs.push(action.extra);
+
+    return '<' + tag + ' ' + attrs.join(" ") + '>' +
+        '<i data-lucide="' + commEscape(action.icon) + '"></i>' +
+    '</' + tag + '>';
+}
+
+function commActions(actions) {
+    return '<div class="adm-row-actions">' +
+        actions.filter(Boolean).map(commActionButton).join("") +
+    '</div>';
+}
+
+function commRenderLucide() {
+    createIcons({
+        icons,
+        "stroke-width": 1.8,
+        nameAttr: "data-lucide",
+    });
+}
+
+function commPrepareButtonLoaders(scope = document) {
+    scope.querySelectorAll('.modal-footer button svg[viewBox="-2 -2 42 42"]').forEach((svg) => {
+        svg.classList.add("adm-btn-loader");
+    });
+}
+
+function commDecorateModalButtons(scope = document) {
+    commPrepareButtonLoaders(scope);
+
+    scope.querySelectorAll(".modal-footer .btn, .modal-body.p-0 .px-5.pb-8.text-center .btn").forEach((button) => {
+        if (button.querySelector(".adm-btn-icon")) return;
+
+        const text = button.textContent.trim().toLowerCase();
+        let icon = "check";
+
+        if (text.includes("cancel")) icon = "x";
+        else if (text.includes("delete")) icon = "trash-2";
+        else if (text.includes("send")) icon = "send";
+        else if (text.includes("agree") || text.includes("ok") || text.includes("save") || text.includes("update")) icon = "check";
+
+        const iconEl = document.createElement("i");
+        iconEl.setAttribute("data-lucide", icon);
+        iconEl.className = "adm-btn-icon";
+        button.prepend(iconEl);
+    });
+
+    commRenderLucide();
+}
+
+function commSetButtonBusy(selector, busy) {
+    const button = document.querySelector(selector);
+    if (!button) return;
+
+    button.toggleAttribute("disabled", busy);
+    button.classList.toggle("is-busy", busy);
+
+    const loader = button.querySelector(".adm-btn-loader");
+    if (loader) {
+        loader.style.display = busy ? "inline-block" : "none";
+    }
+}
+
 var applicantCommLetterListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
@@ -52,13 +179,7 @@ var applicantCommLetterListTable = (function () {
                     field: "created_by",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
-                        var html = '';
-                        html += '<div>';
-                            html += '<div class="font-medium whitespace-nowrap">'+cell.getData().created_by+'</div>';
-                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().created_at+'</div>';
-                        html += '</div>';
-
-                        return html;
+                        return commIssuedByHtml(cell.getData().created_by, cell.getData().created_at, cell.getData().id);
                     }
                 },
                 {
@@ -67,29 +188,37 @@ var applicantCommLetterListTable = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "230",
+                    width: "130",
                     download: false,
                     formatter(cell, formatterParams) {                        
-                        var btns = "";
-                        if(cell.getData().docurl > 0 ){
-                            btns += '<a href="javascript:void(0);" data-id="'+cell.getData().docurl+'" class="downloadDoc btn btn-twitter text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="cloud-lightning" class="w-4 h-4"></i></a>';
-                        }
-                        if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' + cell.getData().id + '" class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }else if(cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' + cell.getData().id + '" class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
-                        }
-                        
-                        return btns;
+                        return commActions([
+                            cell.getData().docurl > 0 ? {
+                                tag: "a",
+                                type: "download",
+                                className: "downloadDoc",
+                                icon: "download",
+                                id: cell.getData().docurl,
+                                title: "Download",
+                            } : null,
+                            cell.getData().deleted_at == null ? {
+                                type: "delete",
+                                className: "delete_btn",
+                                icon: "trash-2",
+                                id: cell.getData().id,
+                                title: "Delete",
+                            } : {
+                                type: "restore",
+                                className: "restore_btn",
+                                icon: "rotate-cw",
+                                id: cell.getData().id,
+                                title: "Restore",
+                            },
+                        ]);
                     },
                 },
             ],
             renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
+                commRenderLucide();
                 const columnLists = this.getColumns();
                 if (columnLists.length > 0) {
                     const lastColumn = columnLists[columnLists.length - 1];
@@ -102,11 +231,7 @@ var applicantCommLetterListTable = (function () {
         // Redraw table onresize
         window.addEventListener("resize", () => {
             tableContent.redraw();
-            createIcons({
-                icons,
-                "stroke-width": 1.5,
-                nameAttr: "data-lucide",
-            });
+            commRenderLucide();
         });
 
         // Export
@@ -184,13 +309,7 @@ var applicantCommEmailListTable = (function () {
                     field: "created_by",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
-                        var html = '';
-                        html += '<div>';
-                            html += '<div class="font-medium whitespace-nowrap">'+cell.getData().created_by+'</div>';
-                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().created_at+'</div>';
-                        html += '</div>';
-
-                        return html;
+                        return commIssuedByHtml(cell.getData().created_by, cell.getData().created_at, cell.getData().id);
                     }
                 },
                 {
@@ -199,27 +318,41 @@ var applicantCommEmailListTable = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "230",
+                    width: "130",
                     download: false,
                     formatter(cell, formatterParams) {                        
-                        var btns = "";
-                        if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' + cell.getData().id + '" data-tw-toggle="modal" data-tw-target="#viewCommunicationModal"  class="view_btn btn btn-twitter text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="eye-off" class="w-4 h-4"></i></button>';
-                            btns += '<button data-id="' + cell.getData().id + '" class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }else if(cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' + cell.getData().id + '" class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
-                        }
-                        
-                        return btns;
+                        return commActions(
+                            cell.getData().deleted_at == null ? [
+                                {
+                                    type: "view",
+                                    className: "view_btn",
+                                    icon: "eye",
+                                    id: cell.getData().id,
+                                    title: "View",
+                                    extra: 'data-tw-toggle="modal" data-tw-target="#viewCommunicationModal"',
+                                },
+                                {
+                                    type: "delete",
+                                    className: "delete_btn",
+                                    icon: "trash-2",
+                                    id: cell.getData().id,
+                                    title: "Delete",
+                                },
+                            ] : [
+                                {
+                                    type: "restore",
+                                    className: "restore_btn",
+                                    icon: "rotate-cw",
+                                    id: cell.getData().id,
+                                    title: "Restore",
+                                },
+                            ]
+                        );
                     },
                 },
             ],
             renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
+                commRenderLucide();
                 const columnLists = this.getColumns();
                 if (columnLists.length > 0) {
                     const lastColumn = columnLists[columnLists.length - 1];
@@ -232,11 +365,7 @@ var applicantCommEmailListTable = (function () {
         // Redraw table onresize
         window.addEventListener("resize", () => {
             tableContent.redraw();
-            createIcons({
-                icons,
-                "stroke-width": 1.5,
-                nameAttr: "data-lucide",
-            });
+            commRenderLucide();
         });
 
         // Export
@@ -332,13 +461,7 @@ var applicantCommSMSListTable = (function () {
                     headerHozAlign: "left",
                     width: "180",
                     formatter(cell, formatterParams){
-                        var html = '';
-                        html += '<div>';
-                            html += '<div class="font-medium whitespace-nowrap">'+cell.getData().created_by+'</div>';
-                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().created_at+'</div>';
-                        html += '</div>';
-
-                        return html;
+                        return commIssuedByHtml(cell.getData().created_by, cell.getData().created_at, cell.getData().id);
                     }
                 },
                 {
@@ -347,27 +470,41 @@ var applicantCommSMSListTable = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "120",
+                    width: "130",
                     download: false,
                     formatter(cell, formatterParams) {                        
-                        var btns = "";
-                        if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' + cell.getData().id + '" data-tw-toggle="modal" data-tw-target="#viewCommunicationModal"  class="view_btn btn btn-twitter text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="eye-off" class="w-4 h-4"></i></button>';
-                            btns += '<button data-id="' + cell.getData().id + '" class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }else if(cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' + cell.getData().id + '" class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
-                        }
-                        
-                        return btns;
+                        return commActions(
+                            cell.getData().deleted_at == null ? [
+                                {
+                                    type: "view",
+                                    className: "view_btn",
+                                    icon: "eye",
+                                    id: cell.getData().id,
+                                    title: "View",
+                                    extra: 'data-tw-toggle="modal" data-tw-target="#viewCommunicationModal"',
+                                },
+                                {
+                                    type: "delete",
+                                    className: "delete_btn",
+                                    icon: "trash-2",
+                                    id: cell.getData().id,
+                                    title: "Delete",
+                                },
+                            ] : [
+                                {
+                                    type: "restore",
+                                    className: "restore_btn",
+                                    icon: "rotate-cw",
+                                    id: cell.getData().id,
+                                    title: "Restore",
+                                },
+                            ]
+                        );
                     },
                 },
             ],
             renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
+                commRenderLucide();
                 const columnLists = this.getColumns();
                 if (columnLists.length > 0) {
                     const lastColumn = columnLists[columnLists.length - 1];
@@ -380,11 +517,7 @@ var applicantCommSMSListTable = (function () {
         // Redraw table onresize
         window.addEventListener("resize", () => {
             tableContent.redraw();
-            createIcons({
-                icons,
-                "stroke-width": 1.5,
-                nameAttr: "data-lucide",
-            });
+            commRenderLucide();
         });
 
         // Export
@@ -544,6 +677,8 @@ var applicantCommSMSListTable = (function () {
     const smsSMSModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#smsSMSModal"));
     const viewCommunicationModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#viewCommunicationModal"));
 
+    commDecorateModalButtons();
+
     const addLetterModalEl = document.getElementById('addLetterModal')
     addLetterModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#addLetterModal .acc__input-error').html('');
@@ -552,7 +687,7 @@ var applicantCommSMSListTable = (function () {
         $('#addLetterModal .modal-footer input#is_send_email').prop('checked', true);
         $('#addLetterModal .letterEditorArea').fadeOut();
         letterEditor.setData('');
-        letter_set_id.clear(ture);
+        letter_set_id.clear(true);
     });
 
     const sendEmailModalEl = document.getElementById('sendEmailModal')
@@ -560,7 +695,7 @@ var applicantCommSMSListTable = (function () {
         $('#sendEmailModal .acc__input-error').html('');
         $('#sendEmailModal .modal-body input#sendMailsDocument').val('');
         $('#sendEmailModal .modal-body input, #sendEmailModal .modal-body select').val('');
-        $('#addNoteModal .sendMailsDocumentNames').html('').fadeOut();
+        $('#sendEmailModal .sendMailsDocumentNames').html('').fadeOut();
         mailEditor.setData('');
         email_template_id.clear(true);
     });
@@ -598,18 +733,23 @@ var applicantCommSMSListTable = (function () {
 
     $('#sendEmailForm #sendMailsDocument').on('change', function(){
         var inputs = document.getElementById('sendMailsDocument');
-        var html = '';
-        for (var i = 0; i < inputs.files.length; ++i) {
-            var name = inputs.files.item(i).name;
-            html += '<div class="mb-1 text-primary font-medium flex justify-start items-center"><i data-lucide="disc" class="w-3 h3 mr-2"></i>'+name+'</div>';
+        var files = Array.prototype.slice.call(inputs.files || []);
+
+        if (!files.length) {
+            $('#sendEmailForm .sendMailsDocumentNames').html('').fadeOut();
+            return;
         }
 
+        var html = files.map(function(file) {
+            return '<div class="adm-mail-upload__file">' +
+                '<span class="adm-mail-upload__file-icon"><i data-lucide="file"></i></span>' +
+                '<span class="adm-mail-upload__file-name">' + commEscape(file.name) + '</span>' +
+                '<span class="adm-mail-upload__file-size">' + commEscape(commFormatFileSize(file.size)) + '</span>' +
+            '</div>';
+        }).join('');
+
         $('#sendEmailForm .sendMailsDocumentNames').fadeIn().html(html);
-        createIcons({
-            icons,
-            "stroke-width": 1.5,
-            nameAttr: "data-lucide",
-        });
+        commRenderLucide();
     });
 
     $('#successModal .successCloser').on('click', function(e){
@@ -662,8 +802,7 @@ var applicantCommSMSListTable = (function () {
         e.preventDefault();
         const form = document.getElementById('sendEmailForm');
     
-        document.querySelector('#sendEmailBtn').setAttribute('disabled', 'disabled');
-        document.querySelector("#sendEmailBtn svg").style.cssText ="display: inline-block;";
+        commSetButtonBusy('#sendEmailBtn', true);
 
         let form_data = new FormData(form);
         form_data.append('file', $('#sendEmailForm input#sendMailsDocument')[0].files[0]); 
@@ -674,8 +813,7 @@ var applicantCommSMSListTable = (function () {
             data: form_data,
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
-            document.querySelector('#sendEmailBtn').removeAttribute('disabled');
-            document.querySelector("#sendEmailBtn svg").style.cssText = "display: none;";
+            commSetButtonBusy('#sendEmailBtn', false);
             //console.log(response.data.message);
             //return false;
 
@@ -695,8 +833,7 @@ var applicantCommSMSListTable = (function () {
             }
             applicantCommEmailListTable.init();
         }).catch(error => {
-            document.querySelector('#sendEmailBtn').removeAttribute('disabled');
-            document.querySelector("#sendEmailBtn svg").style.cssText = "display: none;";
+            commSetButtonBusy('#sendEmailBtn', false);
             if (error.response) {
                 if (error.response.status == 422) {
                     for (const [key, val] of Object.entries(error.response.data.errors)) {
@@ -754,11 +891,7 @@ var applicantCommSMSListTable = (function () {
                 $('#viewCommunicationModal .modal-header h2').html(response.data.heading);
                 $('#viewCommunicationModal .modal-body').html(response.data.html);
 
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
+                commRenderLucide();
             }
         }).catch(error =>{
             console.log(error)
@@ -807,8 +940,7 @@ var applicantCommSMSListTable = (function () {
         e.preventDefault();
         const form = document.getElementById('smsSMSForm');
     
-        document.querySelector('#sendSMSBtn').setAttribute('disabled', 'disabled');
-        document.querySelector("#sendSMSBtn svg").style.cssText ="display: inline-block;";
+        commSetButtonBusy('#sendSMSBtn', true);
 
         let form_data = new FormData(form);
         axios({
@@ -817,8 +949,7 @@ var applicantCommSMSListTable = (function () {
             data: form_data,
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
-            document.querySelector('#sendSMSBtn').removeAttribute('disabled');
-            document.querySelector("#sendSMSBtn svg").style.cssText = "display: none;";
+            commSetButtonBusy('#sendSMSBtn', false);
 
             if (response.status == 200) {
                 //console.log(response.data);
@@ -837,8 +968,7 @@ var applicantCommSMSListTable = (function () {
             }
             applicantCommSMSListTable.init();
         }).catch(error => {
-            document.querySelector('#sendSMSBtn').removeAttribute('disabled');
-            document.querySelector("#sendSMSBtn svg").style.cssText = "display: none;";
+            commSetButtonBusy('#sendSMSBtn', false);
             if (error.response) {
                 if (error.response.status == 422) {
                     for (const [key, val] of Object.entries(error.response.data.errors)) {
@@ -868,11 +998,7 @@ var applicantCommSMSListTable = (function () {
                 $('#viewCommunicationModal .modal-header h2').html(response.data.heading);
                 $('#viewCommunicationModal .modal-body').html(response.data.html);
 
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
+                commRenderLucide();
             }
         }).catch(error =>{
             console.log(error)
@@ -1108,8 +1234,7 @@ var applicantCommSMSListTable = (function () {
         e.preventDefault();
         const form = document.getElementById('addLetterForm');
     
-        document.querySelector('#sendLetterBtn').setAttribute('disabled', 'disabled');
-        document.querySelector("#sendLetterBtn svg").style.cssText ="display: inline-block;";
+        commSetButtonBusy('#sendLetterBtn', true);
 
         let form_data = new FormData(form);
         form_data.append('letter_body', letterEditor.getData()); 
@@ -1119,8 +1244,7 @@ var applicantCommSMSListTable = (function () {
             data: form_data,
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
-            document.querySelector('#sendLetterBtn').removeAttribute('disabled');
-            document.querySelector("#sendLetterBtn svg").style.cssText = "display: none;";
+            commSetButtonBusy('#sendLetterBtn', false);
 
             if (response.status == 200) {
                 addLetterModal.hide();
@@ -1138,8 +1262,7 @@ var applicantCommSMSListTable = (function () {
             }
             applicantCommLetterListTable.init();
         }).catch(error => {
-            document.querySelector('#sendLetterBtn').removeAttribute('disabled');
-            document.querySelector("#sendLetterBtn svg").style.cssText = "display: none;";
+            commSetButtonBusy('#sendLetterBtn', false);
             if (error.response) {
                 if (error.response.status == 422) {
                     for (const [key, val] of Object.entries(error.response.data.errors)) {

@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Agent;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AgentBankStoreRequest;
+use App\Models\Agent;
 use App\Models\AgentBankDetail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AgentBankDetailController extends Controller
 {
@@ -22,9 +24,11 @@ class AgentBankDetailController extends Controller
 
         $query = AgentBankDetail::orderByRaw(implode(',', $sorts))->where('agent_id', $agent_id);
         if(!empty($queryStr)):
-            $query->where('beneficiary','LIKE','%'.$queryStr.'%');
-            $query->where('sort_code','LIKE','%'.$queryStr.'%');
-            $query->where('ac_no','LIKE','%'.$queryStr.'%');
+            $query->where(function($q) use ($queryStr) {
+                $q->where('beneficiary','LIKE','%'.$queryStr.'%')
+                    ->orWhere('sort_code','LIKE','%'.$queryStr.'%')
+                    ->orWhere('ac_no','LIKE','%'.$queryStr.'%');
+            });
         endif;
         if($status == 2):
             $query->onlyTrashed();
@@ -69,14 +73,17 @@ class AgentBankDetailController extends Controller
         $active = (isset($request->active) && $request->active > 0 ? $request->active : 0);
 
         $request->request->remove('active');
-        $request->request->add(['active' => $active, 'created_by' => auth()->user()->id]);
+        $request->request->add(['active' => $active, 'created_by' => auth()->id()]);
 
-        $bank = AgentBankDetail::create($request->all());
-        $bankId = $bank->id;
+        DB::transaction(function () use ($request, $active, $agent_id) {
+            $this->lockAgentBankSet($agent_id);
 
-        if($active == 1){
-            AgentBankDetail::where('id', '!=', $bankId)->where('agent_id', $agent_id)->where('active', 1)->update(['active' => 0]);
-        }
+            $bank = AgentBankDetail::create($request->all());
+
+            if($active == 1){
+                $this->deactivateOtherActiveBanks($agent_id, $bank->id);
+            }
+        });
 
         return response()->json(['msg' => 'Bank Successfully inserted'], 200);
     }
@@ -90,20 +97,22 @@ class AgentBankDetailController extends Controller
 
     public function update(AgentBankStoreRequest $request){
         $id = $request->id;
-        $agent_id = $request->agent_id;
         $active = (isset($request->active) && $request->active > 0 ? $request->active : 0);
-        $bankOld = AgentBankDetail::find($id);
 
         $request->request->remove('active');
-        $request->request->add(['active' => $active, 'updated_by' => auth()->user()->id]);
+        $request->request->add(['active' => $active, 'updated_by' => auth()->id()]);
 
-        $bank = AgentBankDetail::find($id);
-        $bank->fill($request->input());
-        $bank->save();
+        DB::transaction(function () use ($request, $id, $active) {
+            $bank = AgentBankDetail::findOrFail($id);
+            $this->lockAgentBankSet($bank->agent_id);
 
-        if($active == 1){
-            AgentBankDetail::where('id', '!=', $id)->where('agent_id', $agent_id)->where('active', 1)->update(['active' => 0]);
-        }
+            $bank->fill($request->except('agent_id'));
+            $bank->save();
+
+            if($active == 1){
+                $this->deactivateOtherActiveBanks($bank->agent_id, $bank->id);
+            }
+        });
 
         return response()->json(['msg' => 'Agent Bank Details Successfully updated'], 200);
     }
@@ -123,18 +132,40 @@ class AgentBankDetailController extends Controller
     }
 
     public function changeStatus($id){
-        $title = AgentBankDetail::find($id);
-        $active = (isset($title->active) && $title->active == 1 ? 0 : 1);
+        $bank = AgentBankDetail::findOrFail($id);
 
-        AgentBankDetail::where('id', $id)->update([
-            'active'=> $active,
-            'updated_by' => auth()->user()->id
-        ]);
+        DB::transaction(function () use ($bank) {
+            $this->lockAgentBankSet($bank->agent_id);
+            $bank = AgentBankDetail::whereKey($bank->id)->lockForUpdate()->firstOrFail();
+            $active = (isset($bank->active) && $bank->active == 1 ? 0 : 1);
 
-        if($active == 1):
-            AgentBankDetail::where('id', '!=', $id)->where('active', 1)->update(['active' => 0]);
-        endif;
+            AgentBankDetail::where('id', $bank->id)->update([
+                'active'=> $active,
+                'updated_by' => auth()->id()
+            ]);
+
+            if($active == 1):
+                $this->deactivateOtherActiveBanks($bank->agent_id, $bank->id);
+            endif;
+        });
 
         return response()->json(['message' => 'Status successfully updated'], 200);
+    }
+
+    private function lockAgentBankSet($agent_id)
+    {
+        Agent::whereKey($agent_id)->lockForUpdate()->first();
+    }
+
+    private function deactivateOtherActiveBanks($agent_id, $activeBankId)
+    {
+        AgentBankDetail::withTrashed()
+            ->where('agent_id', $agent_id)
+            ->where('id', '!=', $activeBankId)
+            ->where('active', 1)
+            ->update([
+                'active' => 0,
+                'updated_by' => auth()->id()
+            ]);
     }
 }

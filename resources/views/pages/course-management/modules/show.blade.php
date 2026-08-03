@@ -5,110 +5,232 @@
 @endsection
 
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">{{ $subtitle }}</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('courses.show', $module->course_id) }}" class="add_btn btn btn-primary shadow-md mr-2">Back To List</a>
-        </div>
-    </div>
+    <div class="cm-layout">
+        @include('pages.course-management.partials.sidebar')
 
-    <!-- BEGIN: Settings Page Content -->
-    <div class="grid grid-cols-12 gap-6">
-        <div class="col-span-12 lg:col-span-4 2xl:col-span-3 flex lg:block flex-col-reverse">
-            <!-- BEGIN: Profile Info -->
-            @include('pages.course-management.sidebar')
-            <!-- END: Profile Info -->
-        </div>
+        <div class="cm-layout__content">
+            @include('pages.course-management.partials.detail-header', [
+                'detailBadge' => 'Module',
+                'detailSubtitle' => $module->course->name ?? '',
+                'detailTitle' => $module->name,
+                'detailMeta' => [
+                    ['label' => 'Level', 'value' => $module->level->name ?? '', 'icon' => 'layers'],
+                    ['label' => 'Code', 'value' => $module->code, 'icon' => 'shield'],
+                    ['label' => 'Status', 'value' => ucfirst($module->status), 'icon' => 'check'],
+                    ['label' => 'Credit Value', 'value' => $module->credit_value, 'icon' => 'file'],
+                    ['label' => 'Unit Value', 'value' => $module->unit_value, 'icon' => 'grid'],
+                    ['label' => 'Active Status', 'value' => $module->active == 1 ? 'Active' : 'Inactive', 'icon' => 'pound'],
+                ],
+                'detailTabs' => [
+                    ['key' => 'assessments', 'label' => 'Assesments', 'icon' => 'layers'],
+                    ['key' => 'datafuture', 'label' => 'Datafuture', 'icon' => 'database'],
+                ],
+            ])
 
-        <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
-            <div class="intro-y box px-5 pt-5 mt-5">
-                <div class="flex flex-col lg:flex-row border-b border-slate-200/60 dark:border-darkmode-400 pb-5 -mx-5">
-                    <div class="flex flex-1 px-5 items-center justify-center lg:justify-start">
-                        <div class="ml-auto mr-auto">
-                            <div class="w-auto sm:w-full truncate text-primary sm:whitespace-normal font-bold text-3xl">{{ $module->name }}</div>
-                            <div class="text-slate-500 font-medium">{{ $module->course->name }}</div>
-                        </div>
+            {{-- ---------------------------------------------------------- --}}
+            {{-- Assesments                                                  --}}
+            {{-- ---------------------------------------------------------- --}}
+            <div class="cm-card cm-tablecard" data-cm-tabpanel="assessments">
+                <div class="cm-tablecard__head">
+                    <div class="cm-tablecard__titles">
+                        <h2 class="cm-tablecard__title cm-serif">Assesments</h2>
+                        <span class="cm-tablecard__count" data-cm-count></span>
                     </div>
-                    <div class="mt-6 lg:mt-0 flex-1 px-5 border-l border-slate-200/60 dark:border-darkmode-400 border-t lg:border-t-0 pt-5 lg:pt-0">
-                        <div class="font-medium text-center lg:text-left lg:mt-3">Module Details</div>
-                        <div class="flex flex-col justify-center items-center lg:items-start mt-4">
-                            <div class="truncate sm:whitespace-normal flex items-center">
-                                <i data-lucide="sliders" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">Level:</span> <span class="font-medium ml-2">{{ (isset($module->level->name) && !empty($module->level->name) ? $module->level->name : '---') }}</span>
-                            </div>
-                            <div class="truncate sm:whitespace-normal flex items-center  mt-3">
-                                <i data-lucide="shield" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">Code:</span> <span class="font-medium ml-2">{{ $module->code }}</span>
-                            </div>
-                            <div class="truncate sm:whitespace-normal flex items-center mt-3">
-                                <i data-lucide="zap" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">Status:</span> <span class="font-medium ml-2">{{ ucfirst($module->status) }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-6 lg:mt-0 flex-1 px-5 pt-5 lg:pt-0">
-                        <div class="flex flex-col justify-center items-center lg:items-start mt-8">
-                            <div class="truncate sm:whitespace-normal flex items-center mt-3">
-                                <i data-lucide="codesandbox" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">Credit Value:</span> <span class="font-medium ml-2">{{ $module->credit_value }}</span>
-                            </div>
-                            <div class="truncate sm:whitespace-normal flex items-center mt-3">
-                                <i data-lucide="codepen" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">Unit Value:</span> <span class="font-medium ml-2">{{ $module->unit_value }}</span>
-                            </div>
-                            <div class="truncate sm:whitespace-normal flex items-center mt-3">
-                                <i data-lucide="alert-octagon" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">Active Status:</span> <span class="font-medium ml-2 {{ ($module->active == 1 ? 'text-success' : 'text-danger') }}">{{ ($module->active == 1 ? 'Active' : 'In Active') }}</span>
-                            </div>
-                        </div>
-                    </div>
+                    <button data-tw-toggle="modal" data-tw-target="#moduleAssesmentAddModal" type="button" class="cm-btn cm-btn--pill">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+                        Add Assesment
+                    </button>
                 </div>
-                <ul class="nav nav-link-tabs flex-col sm:flex-row justify-center lg:justify-start text-center" role="tablist">
-                    <li id="moduleAssesment-tab" class="nav-item mr-5" role="presentation">
-                        <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 active" data-tw-target="#moduleAssesment" aria-controls="moduleAssesment" aria-selected="true" role="tab" >
-                            <i data-lucide="layers" class="w-4 h-4 mr-2"></i> Assesments
-                        </a>
-                    </li>
-                    <li id="baseDataFuture-tab" class="nav-item mr-5" role="presentation">
-                        <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0" data-tw-target="#baseDataFuture" aria-controls="baseDataFuture" aria-selected="true" role="tab" >
-                            <i data-lucide="calendar" class="w-4 h-4 mr-2"></i> Datafuture
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            <div class="intro-y tab-content mt-5">
-                <div id="moduleAssesment" class="tab-pane active" role="tabpanel" aria-labelledby="moduleAssesment-tab">
-                    @include('pages.course-management.modules.details.assesments')
-                </div>
-                <div id="baseDataFuture" class="tab-pane" role="tabpanel" aria-labelledby="baseDataFuture-tab">
-                    @include('pages.course-management.modules.details.datafuture')
+
+                @include('pages.course-management.partials.list-toolbar', [
+                    'toolbarSearchLabel' => 'Search assesments',
+                ])
+
+                <div class="cm-tabulator-wrap">
+                    <div id="moduleAssesmentDataTable" data-moduleid="{{ $module->id }}" class="cm-tabulator"></div>
                 </div>
             </div>
 
-            @include('pages.course-management.modules.details.assesment-modal')
-            @include('pages.course-management.modules.details.datafuture-modal')
-        </div>
-    </div>
-    
+            {{-- ---------------------------------------------------------- --}}
+            {{-- Datafuture                                                  --}}
+            {{-- ---------------------------------------------------------- --}}
+            <div class="cm-card cm-tablecard" data-cm-tabpanel="datafuture" hidden>
+                <div class="cm-tablecard__head">
+                    <div class="cm-tablecard__titles">
+                        <h2 class="cm-tablecard__title cm-serif">Datafuture Fields</h2>
+                        <span class="cm-tablecard__count" data-cm-count></span>
+                    </div>
+                    <button data-tw-toggle="modal" data-tw-target="#moduleDataFutureAddModal" type="button" class="cm-btn cm-btn--pill">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+                        Add Datafuture Field
+                    </button>
+                </div>
 
-    <!-- BEGIN: Success Modal Content -->
-    <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitle"></div>
-                        <div class="text-slate-500 mt-2 successModalDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
-                    </div>
+                @include('pages.course-management.partials.list-toolbar', [
+                    'toolbarSearchLabel' => 'Search datafuture fields',
+                ])
+
+                <div class="cm-tabulator-wrap">
+                    <div id="moduleDatafutureDataTable" data-moduleid="{{ $module->id }}" class="cm-tabulator"></div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- END: Success Modal Content -->
+
+    {{-- ---------------------------------------------------------------- --}}
+    {{-- Assesment add / edit                                              --}}
+    {{-- ---------------------------------------------------------------- --}}
+    @foreach(['add', 'edit'] as $asMode)
+        @php
+            $asIsAdd = $asMode === 'add';
+            $asPrefix = $asIsAdd ? 'as_add' : 'as_edit';
+        @endphp
+
+        <div id="{{ $asIsAdd ? 'moduleAssesmentAddModal' : 'moduleAssesmentEditModal' }}" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog cm-modal__dialog cm-modal__dialog--md">
+                <form method="POST" action="#" id="{{ $asIsAdd ? 'moduleAssesmentAddForm' : 'moduleAssesmentEditForm' }}" enctype="multipart/form-data" autocomplete="off">
+                    <div class="modal-content cm-modal">
+                        <div class="cm-modal__head">
+                            <div>
+                                <div class="cm-modal__eyebrow"><span>{{ $asIsAdd ? 'New record' : 'Edit record' }}</span></div>
+                                <h2 class="cm-modal__title cm-serif">{{ $asIsAdd ? 'Add Assesment' : 'Update Assesment' }}</h2>
+                            </div>
+                            <button type="button" data-tw-dismiss="modal" class="cm-modal__close" aria-label="Close">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+
+                        <div class="cm-modal__body">
+                            <div class="cm-field">
+                                <label for="{{ $asPrefix }}_assessment_type_id">Assesment <span>*</span></label>
+                                <select id="{{ $asPrefix }}_assessment_type_id" name="assessment_type_id" class="cm-select assessment_type_id">
+                                    <option value="">Please Select</option>
+                                    @if(!empty($assementTypes))
+                                        @foreach($assementTypes as $t)
+                                            <option value="{{ $t->id }}">{{ $t->name }} - {{ $t->code }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-assessment_type_id"></div>
+                            </div>
+
+                            {{-- The endpoint expects `is_result_segment` as a flag
+                                 alongside `grade[]`; it was a hidden 1 before and
+                                 stays one so the payload is unchanged. --}}
+                            <input type="hidden" name="is_result_segment" value="1">
+
+                            <div class="cm-checklist" data-cm-checklist>
+                                <div class="cm-checklist__head">
+                                    <span>Result set from result segment</span>
+                                    <button type="button" class="cm-checklist__toggle" data-cm-checklist-toggle>Clear all</button>
+                                </div>
+                                <div class="cm-checklist__grid">
+                                    @if(!empty($gradesList))
+                                        @foreach($gradesList as $grade)
+                                            <label class="cm-check">
+                                                <input class="cm-check__input" type="checkbox" name="grade[]" value="{{ $grade->id }}" @if($asIsAdd) checked @endif>
+                                                <span class="cm-check__box">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                                                </span>
+                                                <span class="cm-check__label">{{ $grade->name }}</span>
+                                            </label>
+                                        @endforeach
+                                    @endif
+                                </div>
+                                <div class="acc__input-error error-grade"></div>
+                            </div>
+                        </div>
+
+                        <div class="cm-modal__foot">
+                            <button type="button" data-tw-dismiss="modal" class="cm-btn cm-btn--cancel">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                                Cancel
+                            </button>
+                            <button type="submit" id="{{ $asIsAdd ? 'saveModuleAssesment' : 'updateModuleAssesment' }}" class="cm-btn cm-btn--save">
+                                @include('pages.course-management.partials.save-glyphs')
+                                {{ $asIsAdd ? 'Save' : 'Update' }}
+                            </button>
+                            <input type="hidden" name="course_module_id" value="{{ $module->id }}">
+                            @unless($asIsAdd)
+                                <input type="hidden" name="id" value="0">
+                                {{-- Preserved across an edit so the toggle in the
+                                     list is not reset by a modal save. --}}
+                                <input type="hidden" name="view_in_plan" value="0">
+                            @endunless
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endforeach
+
+    {{-- ---------------------------------------------------------------- --}}
+    {{-- Datafuture add / edit                                             --}}
+    {{-- ---------------------------------------------------------------- --}}
+    @foreach(['add', 'edit'] as $mdfMode)
+        @php
+            $mdfIsAdd = $mdfMode === 'add';
+            $mdfPrefix = $mdfIsAdd ? 'mdf_add' : 'mdf_edit';
+        @endphp
+
+        <div id="{{ $mdfIsAdd ? 'moduleDataFutureAddModal' : 'moduleDataFutureEditModal' }}" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog cm-modal__dialog">
+                <form method="POST" action="#" id="{{ $mdfIsAdd ? 'moduleDataFutureAddForm' : 'moduleDataFutureEditForm' }}" enctype="multipart/form-data" autocomplete="off">
+                    <div class="modal-content cm-modal">
+                        <div class="cm-modal__head">
+                            <div>
+                                <div class="cm-modal__eyebrow"><span>{{ $mdfIsAdd ? 'New record' : 'Edit record' }}</span></div>
+                                <h2 class="cm-modal__title cm-serif">{{ $mdfIsAdd ? 'Add Datafuture Field' : 'Edit Datafuture Field' }}</h2>
+                            </div>
+                            <button type="button" data-tw-dismiss="modal" class="cm-modal__close" aria-label="Close">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+
+                        <div class="cm-modal__body">
+                            <div class="cm-field">
+                                <label for="{{ $mdfPrefix }}_datafuture_field_id">Field <span>*</span></label>
+                                <select id="{{ $mdfPrefix }}_datafuture_field_id" name="datafuture_field_id" class="cm-select datafuture_field_id">
+                                    <option value="">Please Select</option>
+                                    @if(!empty($df_fields))
+                                        @foreach($df_fields as $fld)
+                                            <option data-type="{{ $fld->type }}" value="{{ $fld->id }}">{{ $fld->name }} ({{ strtoupper($fld->type) }}){{ (isset($fld->category->name) && !empty($fld->category->name) ? ' - '.$fld->category->name : '') }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-datafuture_field_id"></div>
+                            </div>
+
+                            <div class="cm-field">
+                                <label for="{{ $mdfPrefix }}_field_value">Field Value</label>
+                                <input id="{{ $mdfPrefix }}_field_value" type="text" name="field_value" class="cm-input field_value">
+                                <div class="acc__input-error error-field_value"></div>
+                            </div>
+                        </div>
+
+                        <div class="cm-modal__foot">
+                            <button type="button" data-tw-dismiss="modal" class="cm-btn cm-btn--cancel">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                                Cancel
+                            </button>
+                            <button type="submit" id="{{ $mdfIsAdd ? 'saveModuleDF' : 'updateModuleDF' }}" class="cm-btn cm-btn--save">
+                                @include('pages.course-management.partials.save-glyphs')
+                                {{ $mdfIsAdd ? 'Save' : 'Update' }}
+                            </button>
+                            <input type="hidden" name="course_module_id" value="{{ $module->id }}">
+                            @unless($mdfIsAdd)
+                                <input type="hidden" name="id" value="0">
+                            @endunless
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endforeach
+
+    @include('pages.course-management.partials.list-dialogs')
 @endsection
 
 @section('script')
-    @vite('resources/js/course-management.js')
-    @vite('resources/js/courses.js')
-    @vite('resources/js/course-module.js')
-    @vite('resources/js/course-module-assesment.js')
-    @vite('resources/js/module-datafuture.js')
+    @vite('resources/js/course-module-detail.js')
 @endsection

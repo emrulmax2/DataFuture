@@ -188,10 +188,12 @@ var liveStudentsListTable = (function () {
                     title: 'Status',
                     field: 'status_id',
                     headerHozAlign: 'left',
-                    width: 142,
+                    width: 180,
+                    variableHeight: true,
+                    cssClass: 'student-live-status-col',
                     formatter(cell, formatterParams) {
                         let status = cell.getValue() || '';
-                        return '<span class="student-live-status-pill"><span></span>' + status + '</span>';
+                        return '<span class="student-live-status-pill" title="' + status + '"><span></span>' + status + '</span>';
                     },
                     cellClick:function(e, cell){
                         let theRow = cell.getRow();

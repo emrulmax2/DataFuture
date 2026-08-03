@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\Applicant;
 use App\Models\Student;
 
 class CourseTheme
@@ -74,6 +75,23 @@ class CourseTheme
     }
 
     /**
+     * Default palette key used whenever a course carries no explicit theme.
+     */
+    public const DEFAULT_KEY = 'lcc_teal';
+
+    /**
+     * Resolve a palette from a raw courses.color_theme key.
+     *
+     * @return array<string, string>
+     */
+    public static function forKey(?string $themeKey): array
+    {
+        $palettes = static::palettes();
+
+        return $palettes[$themeKey ?: static::DEFAULT_KEY] ?? $palettes[static::DEFAULT_KEY];
+    }
+
+    /**
      * Resolve a palette for the student's active/current course.
      *
      * @return array<string, string>
@@ -85,6 +103,52 @@ class CourseTheme
         $themeKey = optional(optional($student?->crel)->course)->color_theme ?: $defaultKey;
 
         return $palettes[$themeKey] ?? $palettes[$defaultKey];
+    }
+
+    /**
+     * Resolve a palette for an applicant's proposed course.
+     *
+     * Relation chain: Applicant -> course (ApplicantProposedCourse)
+     *                           -> creation (CourseCreation)
+     *                           -> course (Course) -> color_theme
+     *
+     * @return array<string, string>
+     */
+    public static function forApplicant(?Applicant $applicant): array
+    {
+        return static::forKey(static::applicantThemeKey($applicant));
+    }
+
+    /**
+     * The raw palette key for an applicant, falling back to the default.
+     */
+    public static function applicantThemeKey(?Applicant $applicant): string
+    {
+        $themeKey = optional(optional(optional($applicant?->course)->creation)->course)->color_theme;
+
+        return array_key_exists((string) $themeKey, static::palettes())
+            ? (string) $themeKey
+            : static::DEFAULT_KEY;
+    }
+
+    /**
+     * Inline `style` attribute payload driving the admission redesign.
+     *
+     * Passing null (the admission list page) yields the default LCC Teal set.
+     */
+    public static function admissionCssVariables(?Applicant $applicant = null): string
+    {
+        $palette = static::forApplicant($applicant);
+
+        return implode('; ', [
+            '--adm-head: '.$palette['hero'],
+            '--adm-head-soft: '.static::mixHex($palette['hero'], '#FFFFFF', 0.08),
+            '--adm-pri: '.$palette['primary'],
+            '--adm-pri-rgb: '.static::hexToRgbString($palette['primary']),
+            '--adm-pri-hover: '.$palette['primary_hover'],
+            '--adm-tint: '.$palette['tint'],
+            '--adm-border: '.$palette['border'],
+        ]);
     }
 
     public static function inlineCssVariables(?Student $student): string

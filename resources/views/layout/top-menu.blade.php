@@ -72,14 +72,12 @@
         }
 
         $hideGlobalHeader = request()->routeIs('hr.portal') || request()->is('hr/portal');
-        $isStaffGuard = Auth::check() && !Auth::guard('agent')->check() && !Auth::guard('applicant')->check() && !Auth::guard('student')->check();
-        $staffPrivileges = $isStaffGuard ? Auth::user()->priv() : [];
-        $canSearchStudents = $isStaffGuard && !empty($staffPrivileges['live']) && $staffPrivileges['live'] != '0';
-        $canSearchEmployees = $isStaffGuard && !empty($staffPrivileges['hr_porta']) && $staffPrivileges['hr_porta'] != '0';
-        $canShowGlobalSearch = $canSearchStudents || $canSearchEmployees;
-        $searchPlaceholder = $canSearchStudents && $canSearchEmployees
-            ? 'Search Student, Staff...'
-            : ($canSearchStudents ? 'Search Student...' : 'Search Staff...');
+        $searchConfig = \App\Support\GlobalSearch::forCurrentUser();
+        $canSearchApplicants = $searchConfig['applicants'];
+        $canSearchStudents = $searchConfig['students'];
+        $canSearchEmployees = $searchConfig['employees'];
+        $canShowGlobalSearch = $searchConfig['show'];
+        $searchPlaceholder = $searchConfig['placeholder'];
 
         if (Auth::guard('agent')->check()) {
             $currentUserName = auth('agent')->user()->email;
@@ -213,7 +211,7 @@
                 </nav>
 
                 @if ($canShowGlobalSearch && Route::has('global.search'))
-                    <div class="lcc-global-header__search" data-global-search data-search-url="{{ route('global.search') }}" data-search-students="{{ $canSearchStudents ? '1' : '0' }}" data-search-employees="{{ $canSearchEmployees ? '1' : '0' }}">
+                    <div class="lcc-global-header__search" data-global-search data-search-url="{{ route('global.search') }}" data-search-applicants="{{ $canSearchApplicants ? '1' : '0' }}" data-search-students="{{ $canSearchStudents ? '1' : '0' }}" data-search-employees="{{ $canSearchEmployees ? '1' : '0' }}">
                         <label class="lcc-global-header__search-box">
                             <i data-lucide="search"></i>
                             <input type="search" autocomplete="off" placeholder="{{ $searchPlaceholder }}" data-global-search-input>

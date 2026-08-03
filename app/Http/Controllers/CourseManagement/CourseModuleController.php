@@ -44,7 +44,8 @@ class CourseModuleController extends Controller
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        // 1, not '' — an empty string reaches Tabulator as NaN and breaks the pager.
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : 1;
         
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
@@ -73,7 +74,7 @@ class CourseModuleController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'total' => $total_rows, 'data' => $data]);
     }
 
     public function store(CourseModuleRequests $request){
@@ -92,10 +93,15 @@ class CourseModuleController extends Controller
         $assementTypes = AssessmentType::all();
         $gradesList = Grade::all();
         return view('pages.course-management.modules.show', [
-            'title' => 'Course & Semester - London Churchill College',
+            // Opts this screen into the redesigned module shell.
+            'layout' => 'course-top-menu',
+            'title' => 'Module Details - London Churchill College',
             'subtitle' => 'Courses Module Details',
+            'cmPageTitle' => 'Module Details',
+            'cmBackUrl' => route('courses.show', $modules->course_id),
+            'cmBackLabel' => 'Back to Course',
             'breadcrumbs' => [
-                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Course Management', 'href' => route('course.management')],
                 ['label' => 'Courses', 'href' => route('courses')],
                 ['label' => 'Course Details', 'href' => route('courses.show', $modules->course_id)],
                 ['label' => 'Module Details', 'href' => 'javascript:void(0);']

@@ -3,375 +3,157 @@
 @section('subhead')
     <title>{{ $title }}</title>
 @endsection
+
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">{{ $subtitle }}</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('dashboard') }}" class="add_btn btn btn-primary shadow-md mr-2">Back To Dashboard</a>
+    @php
+        $canManageTerms = isset(auth()->user()->priv()['terms_and_modules'])
+            && auth()->user()->priv()['terms_and_modules'] == 1;
+
+        // Field layout for the add/edit forms — three columns, in the order the
+        // mock lays them out. `type` maps to the control; `req` adds the marker.
+        $termFields = [
+            ['key' => 'academic_year_id', 'label' => 'Academic Year', 'type' => 'select', 'req' => true, 'options' => 'years'],
+            ['key' => 'name', 'label' => 'Term Name', 'type' => 'text', 'req' => true],
+            ['key' => 'term_type_id', 'label' => 'Term Type', 'type' => 'select', 'req' => true, 'options' => 'types'],
+            ['key' => 'start_date', 'label' => 'Start Date', 'type' => 'date', 'req' => true],
+            ['key' => 'end_date', 'label' => 'End Date', 'type' => 'date', 'req' => true],
+            ['key' => 'total_teaching_weeks', 'label' => 'Total Teaching Weeks', 'type' => 'number', 'req' => true],
+            ['key' => 'teaching_start_date', 'label' => 'Teaching Start Date', 'type' => 'date', 'req' => true],
+            ['key' => 'teaching_end_date', 'label' => 'Teaching End Date', 'type' => 'date', 'req' => true],
+            ['key' => 'revision_start_date', 'label' => 'Revision Start Date', 'type' => 'date', 'req' => true],
+            ['key' => 'revision_end_date', 'label' => 'Revision End Date', 'type' => 'date', 'req' => true],
+            ['key' => 'exam_publish_date', 'label' => 'Exam Publish Date', 'type' => 'date'],
+            ['key' => 'exam_publish_time', 'label' => 'Exam Publish Time', 'type' => 'time'],
+            ['key' => 'exam_resubmission_publish_date', 'label' => 'Resubmission Publish Date', 'type' => 'date'],
+            ['key' => 'exam_resubmission_publish_time', 'label' => 'Resubmission Publish Time', 'type' => 'time'],
+            ['key' => 'stuload', 'label' => 'Term Stuload', 'type' => 'number', 'max' => 100, 'placeholder' => '33'],
+        ];
+    @endphp
+
+    <div class="cm-layout">
+        @include('pages.course-management.partials.sidebar')
+
+        <div class="cm-layout__content">
+            @if($canManageTerms)
+                <div class="cm-card cm-tablecard">
+                    <div class="cm-tablecard__head">
+                        <div class="cm-tablecard__titles">
+                            <h2 class="cm-tablecard__title cm-serif">Term Declarations</h2>
+                            {{-- Filled from the list response so it tracks the active filters. --}}
+                            <span class="cm-tablecard__count" data-cm-count></span>
+                        </div>
+                        <button data-tw-toggle="modal" data-tw-target="#addModal" type="button" class="cm-btn cm-btn--pill">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+                            Add New Term
+                        </button>
+                    </div>
+
+                    @include('pages.course-management.partials.list-toolbar', [
+                        'toolbarSearchLabel' => 'Search term declarations',
+                    ])
+
+                    <div class="cm-tabulator-wrap">
+                        <div id="termTableId" class="cm-tabulator"></div>
+                    </div>
+                </div>
+            @else
+                <div class="cm-card">
+                    <div class="cm-empty">
+                        <span class="cm-empty__icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+                        </span>
+                        <div class="cm-empty__title cm-serif">Permission required</div>
+                        <div class="cm-empty__text">You do not have permission to view term declarations. Use the menu on the left to reach a section you can access.</div>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 
-    <!-- BEGIN: Settings Page Content -->
-    <div class="grid grid-cols-12 gap-6">
-        <div class="col-span-12 lg:col-span-4 2xl:col-span-3 flex lg:block flex-col-reverse">
-            <!-- BEGIN: Profile Info -->
-            @include('pages.course-management.sidebar')
-            <!-- END: Profile Info -->
-        </div>
+    @foreach(['add', 'edit'] as $termMode)
+        @php
+            $termIsAdd = $termMode === 'add';
+            $termPrefix = $termIsAdd ? 'td_add' : 'td_edit';
+        @endphp
 
-        <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
-            <!-- BEGIN: Display Information -->
-            <div class="intro-y box lg:mt-5">
-                <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
-                    <h2 class="font-medium text-base mr-auto">Term Declaration List</h2>
-                    <button data-tw-toggle="modal" data-tw-target="#addModal" type="button" class="add_btn btn btn-primary shadow-md ml-auto">Add New Term</button>
-                </div>
-                <div class="p-5">
-                    <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                        <form id="tabulatorFilterForm" class="xl:flex sm:mr-auto" >
-                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                                <input id="query" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
+        <div id="{{ $termIsAdd ? 'addModal' : 'editModal' }}" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog cm-modal__dialog cm-modal__dialog--wide">
+                <form method="POST" action="#" id="{{ $termIsAdd ? 'addForm' : 'editForm' }}" enctype="multipart/form-data" autocomplete="off">
+                    <div class="modal-content cm-modal">
+                        <div class="cm-modal__head">
+                            <div>
+                                <div class="cm-modal__eyebrow"><span>{{ $termIsAdd ? 'New record' : 'Edit record' }}</span></div>
+                                <h2 class="cm-modal__title cm-serif">{{ $termIsAdd ? 'Add New Term' : 'Edit Term' }}</h2>
                             </div>
-                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                                <select id="status" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                                    <option value="1">Active</option>
-                                    <option value="2">Archived</option>
-                                </select>
-                            </div>
-                            <div class="mt-2 xl:mt-0">
-                                <button id="tabulator-html-filter-go" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                                <button id="tabulator-html-filter-reset" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                            </div>
-                        </form>
-                        <div class="flex mt-5 sm:mt-0">
-                            <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                                <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
+                            <button type="button" data-tw-dismiss="modal" class="cm-modal__close" aria-label="Close">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
                             </button>
-                            <div class="dropdown w-1/2 sm:w-auto">
-                                <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                                </button>
-                                <div class="dropdown-menu w-40">
-                                    <ul class="dropdown-content">
-                                        <li>
-                                            <a id="tabulator-export-csv" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                                            </a>
-                                        </li>
-                                    </ul>
+                        </div>
+
+                        <div class="cm-modal__body cm-modal__body--grid3">
+                            @foreach($termFields as $field)
+                                @php $fieldId = $termPrefix.'_'.$field['key']; @endphp
+                                <div class="cm-field">
+                                    <label for="{{ $fieldId }}">{{ $field['label'] }} @if(!empty($field['req']))<span>*</span>@endif</label>
+
+                                    @if($field['type'] === 'select')
+                                        <select id="{{ $fieldId }}" name="{{ $field['key'] }}" class="cm-select {{ $field['key'] }}">
+                                            <option value="">Please Select</option>
+                                            @if($field['options'] === 'years')
+                                                @foreach($academicYears as $year)
+                                                    <option value="{{ $year->id }}">{{ $year->name }}</option>
+                                                @endforeach
+                                            @else
+                                                @foreach($termTypes as $type)
+                                                    <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                    @elseif($field['type'] === 'date')
+                                        {{-- `datepicker` + the data attributes are what Litepicker
+                                             binds to on load (resources/js/datepicker.js). --}}
+                                        <input id="{{ $fieldId }}" name="{{ $field['key'] }}" type="text"
+                                               class="cm-input datepicker {{ $field['key'] }}"
+                                               data-format="DD-MM-YYYY" data-single-mode="true" placeholder="DD-MM-YYYY">
+                                    @elseif($field['type'] === 'time')
+                                        {{-- `theTimeField` gets an HH:MM IMask in course-term-declaration.js. --}}
+                                        <input id="{{ $fieldId }}" name="{{ $field['key'] }}" type="text"
+                                               class="cm-input theTimeField {{ $field['key'] }}" placeholder="HH:MM">
+                                    @else
+                                        <input id="{{ $fieldId }}" name="{{ $field['key'] }}"
+                                               type="{{ $field['type'] === 'number' ? 'number' : 'text' }}"
+                                               @isset($field['max']) max="{{ $field['max'] }}" @endisset
+                                               class="cm-input {{ $field['key'] }}"
+                                               placeholder="{{ $field['placeholder'] ?? '' }}">
+                                    @endif
+
+                                    <div class="acc__input-error error-{{ $field['key'] }}"></div>
                                 </div>
-                            </div>
+                            @endforeach
                         </div>
-                    </div>
-                    <div class="overflow-x-auto scrollbar-hidden">
-                        <div id="termTableId" class="mt-5 table-report table-report--tabulator"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- BEGIN: Add Modal -->
-    <div id="addModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <form method="POST" action="#" id="addForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Add New Term</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
-                    </div>
-                    <div class="modal-body">
-                        <div class="grid grid-cols-12 gap-4">
-                            <div class="col-span-12 sm:col-span-4">       
-                                <label for="academic_year_id" class="form-label">Academic Year <span class="text-danger">*</span></label>
-                                
-                                <select id="academic_year_id" name="academic_year_id" class="form-control w-full academic_year_id">
-                                    <option value="">Please Select</option>
-                                    @foreach($academicYears as $type)
-                                    <option value="{{ $type->id }}">{{ $type->name }}</option>
-                                    @endforeach    
-                                </select>
-                                <div id="error-academic_year_id" class="acc__input-error error-academic_year_id text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="name" class="form-label"><span class="text-danger">*</span>Term Name</label>
-                                <input id="name" type="text" name="name" class="form-control w-full">
-                                <div class="acc__input-error error-name text-danger mt-2"></div>
-                            </div>      
-                            <div class="col-span-12 sm:col-span-4">       
-                                <label for="term_type_id" class="form-label">Term Type <span class="text-danger">*</span></label>
-                                
-                                <select id="term_type_id" name="term_type_id" class="form-control w-full term_type_id">
-                                    <option value="">Please Select</option>
-                                    @foreach($termTypes as $type)
-                                    <option value="{{ $type->id }}">{{ $type->name }}</option>
-                                    @endforeach    
-                                </select>
-                                <div id="error-term_type_id" class="acc__input-error error-term_type_id text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
-                                <input id="start_date" name="start_date" type="text" class="form-control datepicker" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
-                                <div class="acc__input-error error-start_date text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="end_date" class="form-label">End Date <span class="text-danger">*</span></label>
-                                <input id="end_date" name="end_date" type="text" class="form-control datepicker" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
-                                <div class="acc__input-error error-end_date text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="total_teaching_weeks" class="form-label">Total Teaching Weeks <span class="text-danger">*</span></label>
-                                <input id="total_teaching_weeks" type="number" name="total_teaching_weeks" class="form-control w-full">
-                                <div class="acc__input-error error-total_teaching_weeks text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="teaching_start_date" class="form-label">Teaching Start Date <span class="text-danger">*</span></label>
-                                <input id="teaching_start_date" name="teaching_start_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
-                                <div class="acc__input-error error-teaching_start_date text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="teaching_end_date" class="form-label">Teaching End Date <span class="text-danger">*</span></label>
-                                <input id="teaching_end_date" name="teaching_end_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
-                                <div class="acc__input-error error-teaching_end_date text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="revision_start_date" class="form-label">Revision Start Date <span class="text-danger">*</span></label>
-                                <input id="revision_start_date" name="revision_start_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
-                                <div class="acc__input-error error-revision_start_date text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="revision_end_date" class="form-label">Revision End Date <span class="text-danger">*</span></label>
-                                <input id="revision_end_date" name="revision_end_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
-                                <div class="acc__input-error error-revision_end_date text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="exam_publish_date" class="form-label">Exam Publish Date </label>
-                                <input id="exam_publish_date" name="exam_publish_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
-                                <div class="acc__input-error error-exam_publish_date text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="exam_publish_time" class="form-label">Exam Publish Time </label>
-                                <input id="exam_publish_time" name="exam_publish_time" type="text" class="form-control theTimeField" placeholder="HH:MM">    
-                                <div class="acc__input-error error-exam_publish_time text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="exam_resubmission_publish_date" class="form-label">Resubmission Publish Date </label>
-                                <input id="exam_resubmission_publish_date" name="exam_resubmission_publish_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
-                                <div class="acc__input-error error-exam_resubmission_publish_date text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="exam_resubmission_publish_time" class="form-label">Resubmission Publish Time </label>
-                                <input id="exam_resubmission_publish_time" name="exam_resubmission_publish_time" type="text" class="form-control theTimeField" placeholder="HH:MM" >    
-                                <div class="acc__input-error error-exam_resubmission_publish_time text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="stuload" class="form-label">Term Stuload </label>
-                                <input id="stuload" name="stuload" max="100" type="number" class="form-control" placeholder="33" >    
-                                <div class="acc__input-error error-stuload text-danger mt-2"></div>
-                            </div>
+                        <div class="cm-modal__foot">
+                            <button type="button" data-tw-dismiss="modal" class="cm-btn cm-btn--cancel">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                                Cancel
+                            </button>
+                            <button type="submit" id="{{ $termIsAdd ? 'save' : 'update' }}" class="cm-btn cm-btn--save">
+                                @include('pages.course-management.partials.save-glyphs')
+                                {{ $termIsAdd ? 'Save' : 'Update' }}
+                            </button>
+                            @unless($termIsAdd)
+                                <input type="hidden" name="id" value="0">
+                            @endunless
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal"
-                            class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="save" class="btn btn-primary w-auto">     
-                            Save                      
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    <!-- END: Add Modal -->
-    <!-- BEGIN: Edit Modal -->
-    <div id="editModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <form method="POST" action="#" id="editForm">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Edit Term</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
-                    </div>
-                    <div class="modal-body">
-                        <div class="grid grid-cols-12 gap-4">
-                            <div class="col-span-12 sm:col-span-4">       
-                                <label for="academic_year_id" class="form-label">Academic Year <span class="text-danger">*</span></label>
-                                
-                                <select id="academic_year_id" name="academic_year_id" class="form-control w-full academic_year_id">
-                                    <option value="">Please Select</option>
-                                    @foreach($academicYears as $type)
-                                    <option value="{{ $type->id }}">{{ $type->name }}</option>
-                                    @endforeach    
-                                </select>
-                                <div id="error-academic_year_id" class="acc__input-error error-academic_year_id text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="name" class="form-label"><span class="text-danger">*</span>Term Name</label>
-                                <input id="name" type="text" name="name" class="form-control w-full">
-                                <div class="acc__input-error error-name text-danger mt-2"></div>
-                            </div>      
-                            <div class="col-span-12 sm:col-span-4">       
-                                <label for="term_type_id" class="form-label">Term Type <span class="text-danger">*</span></label>
-                                
-                                <select id="term_type_id" name="term_type_id" class="form-control w-full term_type_id">
-                                    <option value="">Please Select</option>
-                                    @foreach($termTypes as $type)
-                                    <option value="{{ $type->id }}">{{ $type->name }}</option>
-                                    @endforeach    
-                                </select>
-                                <div id="error-term_type_id" class="acc__input-error error-term_type_id text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
-                                <input id="start_date" name="start_date" type="text" class="form-control datepicker" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
-                                <div class="acc__input-error error-start_date text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="end_date" class="form-label">End Date <span class="text-danger">*</span></label>
-                                <input id="end_date" name="end_date" type="text" class="form-control datepicker" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
-                                <div class="acc__input-error error-end_date text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="total_teaching_weeks" class="form-label">Total Teaching Weeks <span class="text-danger">*</span></label>
-                                <input id="total_teaching_weeks" type="number" name="total_teaching_weeks" class="form-control w-full">
-                                <div class="acc__input-error error-total_teaching_weeks text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="teaching_start_date" class="form-label">Teaching Start Date <span class="text-danger">*</span></label>
-                                <input id="teaching_start_date" name="teaching_start_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
-                                <div class="acc__input-error error-teaching_start_date text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="teaching_end_date" class="form-label">Teaching End Date <span class="text-danger">*</span></label>
-                                <input id="teaching_end_date" name="teaching_end_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
-                                <div class="acc__input-error error-teaching_end_date text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="revision_start_date" class="form-label">Revision Start Date <span class="text-danger">*</span></label>
-                                <input id="revision_start_date" name="revision_start_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
-                                <div class="acc__input-error error-revision_start_date text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="revision_end_date" class="form-label">Revision End Date <span class="text-danger">*</span></label>
-                                <input id="revision_end_date" name="revision_end_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
-                                <div class="acc__input-error error-revision_end_date text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="exam_publish_date" class="form-label">Exam Publish Date </label>
-                                <input id="exam_publish_date" name="exam_publish_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
-                                <div class="acc__input-error error-exam_publish_date text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="exam_publish_time" class="form-label">Exam Publish Time </label>
-                                <input id="exam_publish_time" name="exam_publish_time" type="text" class="form-control theTimeField" placeholder="HH:MM">    
-                                <div class="acc__input-error error-exam_publish_time text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="exam_resubmission_publish_date" class="form-label">Resubmission Publish Date </label>
-                                <input id="exam_resubmission_publish_date" name="exam_resubmission_publish_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
-                                <div class="acc__input-error error-exam_resubmission_publish_date text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="exam_resubmission_publish_time" class="form-label">Resubmission Publish Time </label>
-                                <input id="exam_resubmission_publish_time" name="exam_resubmission_publish_time" type="text" class="form-control theTimeField" placeholder="HH:MM" >    
-                                <div class="acc__input-error error-exam_resubmission_publish_time text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="edit_stuload" class="form-label">Term Stuload </label>
-                                <input id="edit_stuload" name="stuload" max="100" type="number" class="form-control" placeholder="33" >    
-                                <div class="acc__input-error error-stuload text-danger mt-2"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal"
-                            class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="update" class="btn btn-primary w-auto">
-                            Update
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                        </button>
-                        <input type="hidden" name="id" value="0" />
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    <!-- END: Edit Modal -->
-    <!-- BEGIN: Success Modal Content -->
-    <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitle"></div>
-                        <div class="text-slate-500 mt-2 successModalDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
-                    </div>
-                </div>
+                </form>
             </div>
         </div>
-    </div>
-    <!-- END: Success Modal Content -->
+    @endforeach
 
-    <!-- BEGIN: Delete Confirm Modal Content -->
-    <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
-                        <div class="text-slate-500 mt-2 confModDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                        <button type="button" data-id="0" data-action="none" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Delete Confirm Modal Content -->
+    @include('pages.course-management.partials.list-dialogs')
 @endsection
 
 @section('script')
-    @vite('resources/js/course-management.js')
-    @vite('resources/js/term-declaration.js')
+    @vite('resources/js/course-term-declaration.js')
 @endsection

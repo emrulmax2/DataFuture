@@ -1,169 +1,285 @@
-import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
-import TomSelect from "tom-select";
 
 ("use strict");
+
+const escapeHtml = (value) => {
+    const div = document.createElement("div");
+    div.textContent = value == null ? "" : String(value);
+    return div.innerHTML;
+};
+
+const statusTone = (status) => {
+    const normalized = String(status || "").toLowerCase();
+
+    if (/(completed|active|progress|current)/.test(normalized)) {
+        return "is-green";
+    }
+
+    if (/(refused|withdrawn|discard|reject|cancel)/.test(normalized)) {
+        return "is-red";
+    }
+
+    return "is-slate";
+};
+
+const amountWithCount = (amount, count) => {
+    const safeAmount = escapeHtml(amount || "£0.00");
+    const safeCount = Number(count || 0);
+
+    return `${safeAmount}${safeCount > 0 ? ` <small>(${safeCount})</small>` : ""}`;
+};
+
 var agentComissionListTable = (function () {
     var _tableGen = function () {
-        // Setup Tabulator
-        let semester_id = $("#agentComissionListTable").attr('data-semester') != "" ? $("#agentComissionListTable").attr('data-semester') : "";
-        let agent_id = $("#agentComissionListTable").attr('data-agent') != "" ? $("#agentComissionListTable").attr('data-agent') : "";
-        let code = $("#agentComissionListTable").attr('data-code') != "" ? $("#agentComissionListTable").attr('data-code') : "";
+        const $table = $("#agentComissionListTable");
+        const semester_id = $table.attr("data-semester") || "";
+        const agent_id = $table.attr("data-agent") || "";
+        const code = $table.attr("data-code") || "";
+        const listUrl = route("agent.management.comission.list");
+        let totalRows = 0;
 
-        let tableContent = new Tabulator("#agentComissionListTable", {
-            ajaxURL: route("agent.management.comission.list"),
-            ajaxParams: { semester_id: semester_id, agent_id: agent_id, code: code },
+        const getParams = () => ({
+            semester_id,
+            agent_id,
+            code,
+            query: ($("#query").val() || "").trim(),
+        });
+
+        let tableContent;
+
+        const syncFooter = () => {
+            window.requestAnimationFrame(() => {
+                const tableElement = $table.get(0);
+                if (!tableElement || !tableContent) return;
+
+                const paginator = tableElement.querySelector(".tabulator-paginator");
+                const label = paginator?.querySelector("label");
+                const pageSize = paginator?.querySelector(".tabulator-page-size");
+
+                if (!paginator || !label || !pageSize) return;
+
+                label.textContent = "Rows";
+
+                let range = paginator.querySelector(".agm-commission-page-range");
+                if (!range) {
+                    range = document.createElement("span");
+                    range.className = "agm-commission-page-range";
+                    pageSize.insertAdjacentElement("afterend", range);
+                }
+
+                const currentPage = Number(tableContent.getPage ? tableContent.getPage() : 1) || 1;
+                const rawSize = tableContent.getPageSize ? tableContent.getPageSize() : 10;
+                const pageSizeValue = rawSize === true ? totalRows : Number(rawSize) || totalRows || 10;
+                const start = totalRows > 0 ? ((currentPage - 1) * pageSizeValue) + 1 : 0;
+                const end = totalRows > 0 ? Math.min(currentPage * pageSizeValue, totalRows) : 0;
+
+                range.textContent = `${start}–${end} of ${totalRows}`;
+            });
+        };
+
+        tableContent = new Tabulator("#agentComissionListTable", {
+            ajaxURL: listUrl,
+            ajaxParams: getParams(),
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
-            paginationSize: true,
-            paginationSizeSelector: [true, 50, 100, 150, 200, 300, 400, 500], 
+            paginationSize: 10,
+            paginationSizeSelector: [10, 25, 50, 100, true],
             layout: "fitColumns",
-            responsiveLayout: "collapse",
+            responsiveLayout: false,
             placeholder: "No matching records found",
-            selectable:true,
+            selectable: true,
             columns: [
                 {
-                    formatter: "rowSelection", 
-                    titleFormatter: "rowSelection", 
-                    hozAlign: "left", 
-                    headerHozAlign: "left",
-                    width: "60",
-                    headerSort: false, 
+                    formatter: "rowSelection",
+                    titleFormatter: "rowSelection",
+                    hozAlign: "center",
+                    headerHozAlign: "center",
+                    width: 56,
+                    headerSort: false,
                     download: false,
-                    cellClick:function(e, cell){
+                    cellClick: function (e, cell) {
                         cell.getRow().toggleSelect();
-                    }
+                    },
                 },
                 {
                     title: "#ID",
                     field: "id",
-                    width: "80",
-                    formatter(cell, formatterParams){
-                        var html = cell.getData().id;
-                            html += '<input type="hidden" name="ids" class="ids" value="'+cell.getData().id+'"/>';
+                    width: 72,
+                    formatter(cell) {
+                        const id = escapeHtml(cell.getData().id);
 
-                        return html;
-                    }
+                        return `<span class="agm-commission-id">${id}<input type="hidden" name="ids" class="ids" value="${id}"></span>`;
+                    },
                 },
                 {
                     title: "REG. No",
                     field: "registration_no",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams){
-                        var html = '';
-                        html += '<div>';
-                            html += '<div class="font-medium whitespace-nowrap">'+cell.getData().registration_no+'</div>';
-                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().application_no+'</div>';
-                        html += '</div>';
+                    minWidth: 145,
+                    widthGrow: 1,
+                    formatter(cell) {
+                        const row = cell.getData();
 
-                        return html;
-                    }
+                        return `
+                            <div class="agm-commission-main">
+                                <strong>${escapeHtml(row.registration_no)}</strong>
+                                <small>${escapeHtml(row.application_no)}</small>
+                            </div>
+                        `;
+                    },
                 },
                 {
                     title: "Student",
                     field: "full_name",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams){
-                        var html = '';
-                        html += '<div>';
-                            html += '<div class="font-medium whitespace-nowrap">'+cell.getData().full_name+'</div>';
-                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().date_of_birth+'</div>';
-                        html += '</div>';
+                    headerSort: false,
+                    minWidth: 205,
+                    widthGrow: 2,
+                    formatter(cell) {
+                        const row = cell.getData();
 
-                        return html;
-                    }
+                        return `
+                            <div class="agm-commission-main">
+                                <strong>${escapeHtml(row.full_name)}</strong>
+                                <small>${escapeHtml(row.date_of_birth)}</small>
+                            </div>
+                        `;
+                    },
                 },
                 {
                     title: "SSN",
                     field: "ssn_no",
-                    headerHozAlign: "left",
+                    minWidth: 128,
+                    widthGrow: 1,
+                    formatter(cell) {
+                        return `<span class="agm-commission-muted">${escapeHtml(cell.getValue())}</span>`;
+                    },
                 },
                 {
                     title: "Course / Status",
                     field: "status",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams){
-                        var html = '';
-                        html += '<div>';
-                            html += '<div class="font-medium whitespace-nowrap">'+cell.getData().status+'</div>';
-                            html += '<div class="text-slate-500 text-xs whitespace-normal">'+cell.getData().course+'</div>';
-                        html += '</div>';
+                    headerSort: false,
+                    minWidth: 260,
+                    widthGrow: 2,
+                    formatter(cell) {
+                        const row = cell.getData();
+                        const status = escapeHtml(row.status);
 
-                        return html;
-                    }
+                        return `
+                            <div class="agm-commission-course">
+                                <span class="agm-commission-status ${statusTone(row.status)}"><i></i>${status}</span>
+                                <small>${escapeHtml(row.course)}</small>
+                            </div>
+                        `;
+                    },
                 },
                 {
                     title: "Course Fees",
                     field: "course_fees",
-                    headerHozAlign: "left",
+                    headerSort: false,
+                    hozAlign: "right",
+                    headerHozAlign: "right",
+                    minWidth: 105,
+                    widthGrow: 1,
+                    formatter(cell) {
+                        return `<span class="agm-commission-money">${escapeHtml(cell.getValue())}</span>`;
+                    },
                 },
                 {
                     title: "Claimed",
                     field: "claimed_amount",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams){
-                        var html = cell.getData().claimed_amount;
-                        if(cell.getData().claimed_count > 0){
-                            html += ' ('+cell.getData().claimed_count+')';
-                        }
-                        return html;
-                    }
+                    headerSort: false,
+                    hozAlign: "right",
+                    headerHozAlign: "right",
+                    minWidth: 118,
+                    widthGrow: 1,
+                    formatter(cell) {
+                        const row = cell.getData();
+
+                        return `<span class="agm-commission-money agm-commission-money--strong">${amountWithCount(row.claimed_amount, row.claimed_count)}</span>`;
+                    },
                 },
                 {
                     title: "Received",
                     field: "receipt_amount",
-                    headerHozAlign: "left",
-                    width: "150",
-                    formatter(cell, formatterParams){
-                        var html = cell.getData().receipt_amount;
-                        if(cell.getData().receipt_count > 0){
-                            html += ' ('+cell.getData().receipt_count+')';
-                        }
-                        return html;
-                    }
+                    headerSort: false,
+                    hozAlign: "right",
+                    headerHozAlign: "right",
+                    minWidth: 118,
+                    widthGrow: 1,
+                    formatter(cell) {
+                        const row = cell.getData();
+
+                        return `<span class="agm-commission-money agm-commission-money--green">${amountWithCount(row.receipt_amount, row.receipt_count)}</span>`;
+                    },
                 },
             ],
             ajaxResponse: function (url, params, response) {
-                var total_rows = response.all_rows && response.all_rows > 0 ? response.all_rows : 0;
+                totalRows = response.all_rows && response.all_rows > 0 ? response.all_rows : 0;
 
-                if (total_rows > 0) {
-                    $('#noOfStdCount').attr('data-total', total_rows).html(total_rows + ' Students');
-                } else {
-                    $('#noOfStdCount').attr('data-total', '0').html('0');
-                }
+                $("#noOfStdCount")
+                    .attr("data-total", totalRows)
+                    .html(totalRows > 0 ? `${totalRows} Students` : "0");
 
                 return response;
             },
+            pageLoaded() {
+                syncFooter();
+            },
             renderComplete() {
+                syncFooter();
                 createIcons({
                     icons,
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
+            },
+            rowSelectionChanged: function (data, rows) {
+                const $button = $("#generateComissionBtn");
+
+                if (rows.length > 0) {
+                    $button.css("display", "inline-flex");
+                } else {
+                    $button.hide();
                 }
             },
-            rowSelectionChanged:function(data, rows){
-                if(rows.length > 0){
-                    $('#generateComissionBtn').fadeIn();
-                }else{
-                    $('#generateComissionBtn').fadeOut();
-                }
+            selectableCheck: function (row) {
+                return row.getData().id > 0;
             },
-            selectableCheck:function(row){
-                return row.getData().id > 0; //allow selection of rows where the age is greater than 18
-            }
         });
 
-        // Redraw table onresize
+        const reloadTable = () => {
+            const $button = $("#tabulator-html-filter-go");
+
+            $button.attr("disabled", "disabled");
+            $button.find("svg.theLoader").fadeIn();
+
+            const request = tableContent.setData(listUrl, getParams());
+            const resetButton = () => {
+                $button.removeAttr("disabled");
+                $button.find("svg.theLoader").fadeOut();
+            };
+
+            if (request && typeof request.finally === "function") {
+                request.finally(resetButton);
+            } else {
+                resetButton();
+            }
+        };
+
+        $("#tabulatorFilterForm").on("submit", function (event) {
+            event.preventDefault();
+            reloadTable();
+        });
+
+        $("#tabulator-html-filter-reset").on("click", function (event) {
+            event.preventDefault();
+            $("#query").val("");
+            reloadTable();
+        });
+
         window.addEventListener("resize", () => {
             tableContent.redraw();
             createIcons({
@@ -173,6 +289,7 @@ var agentComissionListTable = (function () {
             });
         });
     };
+
     return {
         init: function () {
             _tableGen();
@@ -180,57 +297,54 @@ var agentComissionListTable = (function () {
     };
 })();
 
-
-(function(){
+(function () {
     agentComissionListTable.init();
 
-    const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
-    const comissionGenerateModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#comissionGenerateModal"));
+    const comissionGenerateModalEl = document.getElementById("comissionGenerateModal");
 
-    const comissionGenerateModalEl = document.getElementById('comissionGenerateModal')
-    comissionGenerateModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#comissionGenerateModal .acc__input-error').html('');
-        $('#comissionGenerateModal #comissionsPaymentTable tbody').html('');
-        $('#comissionGenerateModal [name="agent_comission_rule_id"]').val('0');
-    });
+    if (comissionGenerateModalEl) {
+        comissionGenerateModalEl.addEventListener("hide.tw.modal", function () {
+            $("#comissionGenerateModal .acc__input-error").html("");
+            $("#comissionGenerateModal #comissionsPaymentTable tbody").html("");
+            $("#comissionGenerateModal [name=\"agent_comission_rule_id\"]").val("0");
+        });
+    }
 
-    $('#generateComissionBtn').on('click', function(e){
+    $("#generateComissionBtn").on("click", function (e) {
         e.preventDefault();
         var $theBtn = $(this);
-        var agentcomissionruleid = $theBtn.attr('data-comissionruleid');
-        $theBtn.find('svg.theLoader').fadeIn();
-        $theBtn.attr('disabled', 'disabled');
+        var agentcomissionruleid = $theBtn.attr("data-comissionruleid");
+        $theBtn.find("svg.theLoader").fadeIn();
+        $theBtn.attr("disabled", "disabled");
 
         var studentids = [];
-        $('#agentComissionListTable').find('.tabulator-row.tabulator-selected').each(function(){
+        $("#agentComissionListTable").find(".tabulator-row.tabulator-selected").each(function () {
             var $row = $(this);
-            studentids.push($row.find('.ids').val());
+            studentids.push($row.find(".ids").val());
         });
 
-        if(studentids.length > 0){
+        if (studentids.length > 0) {
             axios({
                 method: "post",
                 url: route("agent.management.get.payable.comissions"),
-                data: { agentcomissionruleid : agentcomissionruleid, studentids : studentids },
+                data: { agentcomissionruleid: agentcomissionruleid, studentids: studentids },
                 headers: {
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                    "X-CSRF-TOKEN": $("meta[name=\"csrf-token\"]").attr("content"),
                 },
             }).then((response) => {
-                //console.log(response.data);
-                $theBtn.find('svg.theLoader').fadeOut();
-                $theBtn.removeAttr('disabled');
+                $theBtn.find("svg.theLoader").fadeOut();
+                $theBtn.removeAttr("disabled");
                 if (response.status == 200) {
                     window.location.href = response.data.url;
                 }
             }).catch((error) => {
-                $theBtn.find('svg.theLoader').fadeOut();
-                $theBtn.removeAttr('disabled');
+                $theBtn.find("svg.theLoader").fadeOut();
+                $theBtn.removeAttr("disabled");
                 if (error.response) {
                     if (error.response.status == 422) {
                         warningModal.show();
-                        document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                        document.getElementById("warningModal").addEventListener("shown.tw.modal", function () {
                             $("#warningModal .warningModalTitle").html("Error!");
                             $("#warningModal .warningModalDesc").html(error.response.data.msg);
                         });
@@ -239,13 +353,13 @@ var agentComissionListTable = (function () {
                             warningModal.hide();
                         }, 2000);
                     } else {
-                        console.log('error');
+                        console.log("error");
                     }
                 }
             });
-        }else{
-            $theBtn.find('svg.theLoader').fadeOut();
-            $theBtn.removeAttr('disabled');
+        } else {
+            $theBtn.find("svg.theLoader").fadeOut();
+            $theBtn.removeAttr("disabled");
         }
-    })
-})()
+    });
+})();

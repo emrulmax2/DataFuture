@@ -3,39 +3,175 @@
 @section('subhead')
     <title>{{ $title }}</title>
 @endsection
+
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">{{ $subtitle }}</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('dashboard') }}" class="add_btn btn btn-primary shadow-md mr-2">Back To Dashboard</a>
+    <div class="cm-layout">
+        @include('pages.course-management.partials.sidebar')
+
+        <div class="cm-layout__content">
+            <div class="cm-card cm-tablecard">
+                <div class="cm-tablecard__head">
+                    <div class="cm-tablecard__titles">
+                        <h2 class="cm-tablecard__title cm-serif">Groups List</h2>
+                        {{-- Filled from the list response so it tracks the active filters. --}}
+                        <span class="cm-tablecard__count" data-cm-count="group"></span>
+                        <span class="cm-tablecard__sel" data-cm-selcount hidden></span>
+                    </div>
+                    <button data-tw-toggle="modal" data-tw-target="#addModal" type="button" class="cm-btn cm-btn--pill">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+                        Add New Group
+                    </button>
+                </div>
+
+                {{-- Four filters on one row, the way the endpoint takes them. The
+                     Course list narrows to the term's own courses once a term is
+                     picked (`group.courselist.by.term`), as it did before. --}}
+                <form class="cm-groupfilters" id="groupFilterForm" autocomplete="off">
+                    <div class="cm-field cm-groupfilters__query">
+                        <label for="group-query">Query</label>
+                        <span class="cm-inputsearch">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg>
+                            <input id="group-query" name="query" type="search" class="cm-input" placeholder="Search groups">
+                        </span>
+                    </div>
+
+                    <div class="cm-field cm-groupfilters__term">
+                        <label for="group-term">Term</label>
+                        <select id="group-term" name="term" class="cm-select">
+                            <option value="">All terms</option>
+                            @if(!empty($term_decs))
+                                @foreach($term_decs as $td)
+                                    <option value="{{ $td->id }}">{{ $td->name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+
+                    <div class="cm-field cm-groupfilters__course">
+                        <label for="group-course">Course</label>
+                        <select id="group-course" name="course_id" class="cm-select">
+                            <option value="">All courses</option>
+                            @if(!empty($courses))
+                                @foreach($courses as $cr)
+                                    <option value="{{ $cr->id }}">{{ $cr->name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+
+                    <div class="cm-field cm-groupfilters__status">
+                        <label for="group-status">Status</label>
+                        <select id="group-status" name="status" class="cm-select">
+                            <option value="1" selected>Active</option>
+                            <option value="0">Inactive</option>
+                            <option value="2">Archived</option>
+                            <option value="all">All</option>
+                        </select>
+                    </div>
+
+                    <div class="cm-groupfilters__actions">
+                        <button type="submit" id="groupFilterGo" class="cm-btn cm-btn--go">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg>
+                            Go
+                        </button>
+                        <button type="button" id="groupFilterReset" class="cm-btn cm-btn--ghost">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"></path></svg>
+                            Reset
+                        </button>
+                    </div>
+
+                    <div class="cm-groupfilters__tools">
+                        <button type="button" data-cm-print class="cm-pillbtn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                            Print
+                        </button>
+
+                        {{-- Revealed by the table's selection handler; the actions
+                             post to `groups.bulk.action` as they always have. --}}
+                        <div class="dropdown" data-cm-bulk hidden>
+                            <button type="button" id="groupActionDropdown" class="dropdown-toggle cm-btn cm-btn--pill" aria-expanded="false" data-tw-toggle="dropdown">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                Group Actions
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
+                            </button>
+                            <div class="dropdown-menu cm-export-menu cm-actionmenu">
+                                <ul class="dropdown-content">
+                                    <li>
+                                        <a id="activeSelected" data-action="ACTIVEALL" href="javascript:;" class="dropdown-item groupActionBTN">
+                                            <span class="cm-menuicon cm-menuicon--ok">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><path d="M22 4L12 14.01l-3-3"></path></svg>
+                                            </span>
+                                            Mark as Active
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a id="inactiveSelected" data-action="INACTIVEALL" href="javascript:;" class="dropdown-item groupActionBTN">
+                                            <span class="cm-menuicon cm-menuicon--warn">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M15 9l-6 6M9 9l6 6"></path></svg>
+                                            </span>
+                                            Mark as Inactive
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a id="deleteSelected" data-action="DELETEALL" href="javascript:;" class="dropdown-item groupActionBTN">
+                                            <span class="cm-menuicon cm-menuicon--danger">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg>
+                                            </span>
+                                            Move to Archive
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a id="restoreSelected" data-action="RESTOREALL" href="javascript:;" class="dropdown-item groupActionBTN">
+                                            <span class="cm-menuicon cm-menuicon--info">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"></path></svg>
+                                            </span>
+                                            Restore
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="cm-tabulator-wrap">
+                    <div id="groupsTableId" class="cm-tabulator"></div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- BEGIN: Settings Page Content -->
-    <div class="grid grid-cols-12 gap-6">
-        <div class="col-span-12 lg:col-span-4 2xl:col-span-3 flex lg:block flex-col-reverse">
-            <!-- BEGIN: Profile Info -->
-            @include('pages.course-management.sidebar')
-            <!-- END: Profile Info -->
-        </div>
+    {{-- ---------------------------------------------------------------- --}}
+    {{-- Add / edit group — one block, two modals                          --}}
+    {{-- ---------------------------------------------------------------- --}}
+    @foreach(['add', 'edit'] as $groupMode)
+        @php
+            $isAdd = $groupMode === 'add';
+            $modalId = $isAdd ? 'addModal' : 'editModal';
+            $formId = $isAdd ? 'addForm' : 'editForm';
+            $prefix = $isAdd ? 'add' : 'edit';
+        @endphp
 
-        <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
-            <!-- BEGIN: Display Information -->
-            <div class="intro-y box lg:mt-5">
-                <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
-                    <h2 class="font-medium text-base mr-auto">Groups List</h2>
-                    <button data-tw-toggle="modal" data-tw-target="#addModal" type="button" class="add_btn btn btn-primary shadow-md ml-auto">Add New Group</button>
-                </div>
-                <div class="p-5">
-                    <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                        <form id="tabulatorFilterForm" class="xl:flex sm:mr-auto" >
-                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                                <input id="query" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
+        <div id="{{ $modalId }}" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog cm-modal__dialog cm-modal__dialog--md">
+                <form method="POST" action="#" id="{{ $formId }}" enctype="multipart/form-data" autocomplete="off">
+                    <div class="modal-content cm-modal">
+                        <div class="cm-modal__head">
+                            <div>
+                                <div class="cm-modal__eyebrow"><span>{{ $isAdd ? 'New record' : 'Edit record' }}</span></div>
+                                <h2 class="cm-modal__title cm-serif">{{ $isAdd ? 'Add Group' : 'Edit Group' }}</h2>
                             </div>
-                            {{-- <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Terms</label>
-                                <select id="term" name="term" class="tom-selects  w-full mt-2 sm:mt-0 sm:w-auto" >
+                            <button type="button" data-tw-dismiss="modal" class="cm-modal__close" aria-label="Close">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+
+                        <div class="cm-modal__body cm-modal__body--grid2">
+                            <div class="cm-field">
+                                {{-- Marked required because `GroupsRequests` rejects a
+                                     blank term, which the legacy form never said. --}}
+                                <label for="{{ $prefix }}_term_declaration_id">Term <span>*</span></label>
+                                <select id="{{ $prefix }}_term_declaration_id" name="term_declaration_id" class="cm-select term_declaration_id">
                                     <option value="">Please Select</option>
                                     @if(!empty($term_decs))
                                         @foreach($term_decs as $td)
@@ -43,10 +179,12 @@
                                         @endforeach
                                     @endif
                                 </select>
+                                <div class="acc__input-error error-term_declaration_id"></div>
                             </div>
-                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                                <label for="course_id1" class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Course</label>
-                                <select id="course_id1" name="course_id" class="tom-selects w-full mt-2 sm:mt-0 sm:w-auto">
+
+                            <div class="cm-field">
+                                <label for="{{ $prefix }}_course_id">Course <span>*</span></label>
+                                <select id="{{ $prefix }}_course_id" name="course_id" class="cm-select course_id">
                                     <option value="">Please Select</option>
                                     @if(!empty($courses))
                                         @foreach($courses as $cr)
@@ -54,305 +192,81 @@
                                         @endforeach
                                     @endif
                                 </select>
-                                <div class="acc__input-error error-course_id text-danger mt-2"></div>
-                            </div> --}}
+                                <div class="acc__input-error error-course_id"></div>
+                            </div>
 
-                            <div id="term-declaration__box" class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0 w-64">
-                                <label for="term" class="form-label  inline-flex w-12">Term
-                                    <svg id="term-loading" class="w-full h-full mt-2" style="display: none" width="25" viewBox="0 0 120 30" xmlns="http://www.w3.org/2000/svg" fill="1a202c">
-                                        <circle cx="15" cy="15" r="15">
-                                            <animate values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" attributeName="r" from="15" to="15" begin="0s" dur="0.8s" calcMode="linear" repeatCount="indefinite" />
-                                            <animate values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" attributeName="fill-opacity" from="1" to="1" begin="0s" dur="0.8s" calcMode="linear" repeatCount="indefinite" />
-                                        </circle>
-                                        <circle cx="60" cy="15" r="9" fill-opacity="0.3">
-                                            <animate values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" attributeName="r" from="9" to="9" begin="0s" dur="0.8s" calcMode="linear" repeatCount="indefinite" />
-                                            <animate values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" attributeName="fill-opacity" from="0.5" to="0.5" begin="0s" dur="0.8s" calcMode="linear" repeatCount="indefinite" />
-                                        </circle>
-                                        <circle cx="105" cy="15" r="15">
-                                            <animate values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" attributeName="r" from="15" to="15" begin="0s" dur="0.8s" calcMode="linear" repeatCount="indefinite" />
-                                            <animate values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" attributeName="fill-opacity" from="1" to="1" begin="0s" dur="0.8s" calcMode="linear" repeatCount="indefinite" />
-                                        </circle>
-                                    </svg>
-                                </span></label>
-                                <select id="term" name="term" class="form-control w-full lcc-tom-select">
-                                    <option value="">Please Select</option>
-                                    @if(!empty($term_decs))
-                                        @foreach($term_decs as $td)
-                                            <option value="{{ $td->id }}">{{ $td->name }}</option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                                <div class="acc__input-error error-term text-danger mt-2" style="display: none;"></div>
+                            <div class="cm-field cm-field--span2">
+                                <label for="{{ $prefix }}_name">Group Name <span>*</span></label>
+                                <input id="{{ $prefix }}_name" type="text" name="name" class="cm-input name" placeholder="e.g. JAN26-BUS-A">
+                                <div class="acc__input-error error-name"></div>
                             </div>
-                            <div id="course__box" class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0 w-64">
-                                <label for="course_id" class="form-label  inline-flex w-12">Course 
-                                    <svg id="course_id-loading" class="w-full h-full" style="display: none" width="25" viewBox="0 0 120 30" xmlns="http://www.w3.org/2000/svg" fill="1a202c">
-                                        <circle cx="15" cy="15" r="15">
-                                            <animate values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" attributeName="r" from="15" to="15" begin="0s" dur="0.8s" calcMode="linear" repeatCount="indefinite" />
-                                            <animate values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" attributeName="fill-opacity" from="1" to="1" begin="0s" dur="0.8s" calcMode="linear" repeatCount="indefinite" />
-                                        </circle>
-                                        <circle cx="60" cy="15" r="9" fill-opacity="0.3">
-                                            <animate values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" values="9;15;9" attributeName="r" from="9" to="9" begin="0s" dur="0.8s" calcMode="linear" repeatCount="indefinite" />
-                                            <animate values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" values=".5;1;.5" attributeName="fill-opacity" from="0.5" to="0.5" begin="0s" dur="0.8s" calcMode="linear" repeatCount="indefinite" />
-                                        </circle>
-                                        <circle cx="105" cy="15" r="15">
-                                            <animate values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" values="15;9;15" attributeName="r" from="15" to="15" begin="0s" dur="0.8s" calcMode="linear" repeatCount="indefinite" />
-                                            <animate values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" values="1;.5;1" attributeName="fill-opacity" from="1" to="1" begin="0s" dur="0.8s" calcMode="linear" repeatCount="indefinite" />
-                                        </circle>
-                                    </svg>
-                                </span></label>
-                                <select id="course_id" name="course_id" class="form-control w-full lccTom lcc-tom-select">
-                                    <option value="">Please Select</option>
-                                </select>
-                                <div class="acc__input-error error-course_id text-danger mt-2" style="display: none;"></div>
-                            </div>
-                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                                <select id="status" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                                    <option value="1">Active</option>
-                                    <option value="0">Inactive</option>
-                                    <option value="2">Archived</option>
-                                </select>
-                            </div>
-                            <div class="mt-2 xl:mt-0">
-                                <button id="tabulator-html-filter-go" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                                <button id="tabulator-html-filter-reset" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                            </div>
-                        </form>
-                        <div class="flex mt-5 sm:mt-0">
-                            <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto">
-                                <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
+
+                            {{-- Real checkboxes: the controller reads `evening_and_weekend`
+                                 and `active` as posted values, so the payload is
+                                 unchanged from the legacy form. --}}
+                            <label class="cm-switchfield">
+                                <span>Evening &amp; Weekend</span>
+                                <input id="{{ $prefix }}_evening_and_weekend" class="cm-switchcard__input" name="evening_and_weekend" value="1" type="checkbox">
+                                <span class="cm-switchcard">
+                                    <span class="cm-switchcard__tile">
+                                        <svg data-cm-switch-on width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                                        <svg data-cm-switch-off width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                                    </span>
+                                    <span class="cm-switchcard__copy">
+                                        <span class="cm-switchcard__title" data-on="Yes" data-off="No"></span>
+                                        <span class="cm-switchcard__desc" data-on="Evening and weekend delivery" data-off="Weekday delivery only"></span>
+                                    </span>
+                                </span>
+                            </label>
+
+                            <label class="cm-switchfield">
+                                <span>Status</span>
+                                <input id="{{ $prefix }}_active" class="cm-switchcard__input" name="active" value="1" type="checkbox" checked>
+                                <span class="cm-switchcard">
+                                    <span class="cm-switchcard__tile">
+                                        <svg data-cm-switch-on width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                                        <svg data-cm-switch-off width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                                    </span>
+                                    <span class="cm-switchcard__copy">
+                                        <span class="cm-switchcard__title" data-on="Active" data-off="Inactive"></span>
+                                        <span class="cm-switchcard__desc" data-on="Available for planning" data-off="Hidden from planning"></span>
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="cm-modal__foot">
+                            <button type="button" data-tw-dismiss="modal" class="cm-btn cm-btn--cancel">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                                Cancel
                             </button>
-                            <div class="dropdown w-1/2 sm:w-auto groupActions ml-2 hidden">
-                                <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" id="groupActionDropdown" aria-expanded="false" data-tw-toggle="dropdown">
-                                    <i data-lucide="settings" class="w-4 h-4 mr-2"></i> Group Actions <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                                </button>
-                                <div class="dropdown-menu w-40">
-                                    <ul class="dropdown-content">
-                                        <li>
-                                            <a id="activeSelected" data-action="ACTIVEALL" href="javascript:;" class="dropdown-item groupActionBTN">
-                                                <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-success"></i> Mark as Active
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a id="inactiveSelected" data-action="INACTIVEALL" href="javascript:;" class="dropdown-item groupActionBTN">
-                                                <i data-lucide="x-circle" class="w-4 h-4 mr-2 text-warning"></i> Mark as Inactive
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a id="deleteSelected" data-action="DELETEALL" href="javascript:;" class="dropdown-item groupActionBTN">
-                                                <i data-lucide="trash-2" class="w-4 h-4 mr-2 text-danger"></i> Move to Archive
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a id="restoreSelected" data-action="RESTOREALL" href="javascript:;" class="dropdown-item groupActionBTN">
-                                                <i data-lucide="refresh-cw" class="w-4 h-4 mr-2 text-success"></i> Restore
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto scrollbar-hidden">
-                        <div id="groupsTableId" class="mt-5 table-report table-report--tabulator"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- BEGIN: Add Modal -->
-    <div id="addModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <form method="POST" action="#" id="addForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Add Group</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
-                    </div>
-                    <div class="modal-body">
-                        <div>
-                            <label for="term_declaration_id" class="form-label">Term</label>
-                            <select id="term_declaration_id" name="term_declaration_id" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                @if(!empty($term_decs))
-                                    @foreach($term_decs as $td)
-                                        <option value="{{ $td->id }}">{{ $td->name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                        </div>
-                        <div class="mt-3">
-                            <label for="course_id" class="form-label">Course <span class="text-danger">*</span></label>
-                            <select id="course_id" name="course_id" class="tom-selects w-full">
-                                <option value="">Please Select</option>
-                                @if(!empty($courses))
-                                    @foreach($courses as $cr)
-                                        <option value="{{ $cr->id }}">{{ $cr->name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <div class="acc__input-error error-course_id text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="name" class="form-label">Group Name <span class="text-danger">*</span></label>
-                            <input id="name" type="text" name="name" class="form-control w-full">
-                            <div class="acc__input-error error-name text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3 flex items-center">
-                            <label for="evening_and_weekend" class="form-label pt-1 mr-5 mb-0">Evening & Weekend</label>
-                            <div class="form-check form-switch">
-                                <input id="evening_and_weekend" name="evening_and_weekend" class="form-check-input" type="checkbox" value="1">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <div class="form-check form-switch" style="float: left; margin: 7px 0 0;">
-                            <label class="form-check-label mr-3 ml-0" for="active">Active</label>
-                            <input id="active" class="form-check-input m-0" name="active" checked value="1" type="checkbox">
-                        </div>
-                        
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="save" class="btn btn-primary w-auto">
-                            Save
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
+                            <button type="submit" id="{{ $isAdd ? 'save' : 'update' }}" class="cm-btn cm-btn--save">
+                                <svg style="display: none;" class="cm-spinner" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="white">
+                                    <g fill="none" fill-rule="evenodd">
+                                        <g transform="translate(1 1)" stroke-width="4">
+                                            <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                            <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                            </path>
+                                        </g>
                                     </g>
-                                </g>
-                            </svg>
-                        </button>
+                                </svg>
+                                <svg data-cm-btn-icon width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><path d="M17 21v-8H7v8M7 3v5h8"></path></svg>
+                                {{ $isAdd ? 'Save' : 'Update' }}
+                            </button>
+                            @unless($isAdd)
+                                <input type="hidden" name="id" value="0">
+                            @endunless
+                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
-    </div>
-    <!-- END: Add Modal -->
-    <!-- BEGIN: Edit Modal -->
-    <div id="editModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <form method="POST" action="#" id="editForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Edit Group</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
-                    </div>
-                    <div class="modal-body">
-                        <div>
-                            <label for="edit_term_declaration_id" class="form-label">Term</label>
-                            <select id="edit_term_declaration_id" name="term_declaration_id" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                @if(!empty($term_decs))
-                                    @foreach($term_decs as $td)
-                                        <option value="{{ $td->id }}">{{ $td->name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                        </div>
-                        <div class="mt-3">
-                            <label for="edit_course_id" class="form-label">Course <span class="text-danger">*</span></label>
-                            <select id="edit_course_id" name="course_id" class="tom-selects w-full">
-                                <option value="">Please Select</option>
-                                @if(!empty($courses))
-                                    @foreach($courses as $cr)
-                                        <option value="{{ $cr->id }}">{{ $cr->name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <div class="acc__input-error error-course_id text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="name" class="form-label">Group Name <span class="text-danger">*</span></label>
-                            <input id="name" type="text" name="name" class="form-control w-full">
-                            <div class="acc__input-error error-name text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3 flex items-center">
-                            <label for="edit_evening_and_weekend" class="form-label pt-1 mr-5 mb-0">Evening & Weekend</label>
-                            <div class="form-check form-switch">
-                                <input id="edit_evening_and_weekend" name="evening_and_weekend" class="form-check-input" type="checkbox" value="1">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <div class="form-check form-switch" style="float: left; margin: 7px 0 0;">
-                            <label class="form-check-label mr-3 ml-0" for="edit_active">Active</label>
-                            <input id="edit_active" class="form-check-input m-0" name="active" checked value="1" type="checkbox">
-                        </div>
+    @endforeach
 
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="update" class="btn btn-primary w-auto">
-                            Update
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                        </button>
-                        <input type="hidden" name="id" value="0" />
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    <!-- END: Edit Modal -->
-    <!-- BEGIN: Success Modal Content -->
-    <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitle"></div>
-                        <div class="text-slate-500 mt-2 successModalDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Success Modal Content -->
-    <!-- BEGIN: Delete Confirm Modal Content -->
-    <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
-                        <div class="text-slate-500 mt-2 confModDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                        <button type="button" data-id="0" data-action="none" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Delete Confirm Modal Content -->
+    @include('pages.course-management.partials.list-dialogs')
 @endsection
 
 @section('script')
-    @vite('resources/js/course-management.js')
-    @vite('resources/js/groups.js')
+    @vite('resources/js/course-groups.js')
 @endsection

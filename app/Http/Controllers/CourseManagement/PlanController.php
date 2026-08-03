@@ -34,10 +34,15 @@ class PlanController extends Controller
     public function index()
     {
         return view('pages.course-management.plan.index', [
+            // Opts this screen into the redesigned module shell.
+            'layout' => 'course-top-menu',
             'title' => 'Plans - London Churchill College',
             'subtitle' => 'Class Plans',
+            'cmPageTitle' => 'Class Plans',
+            'cmBackUrl' => route('course.management'),
+            'cmBackLabel' => 'Back to Course Management',
             'breadcrumbs' => [
-                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Course Management', 'href' => route('course.management')],
                 ['label' => 'Class Plans', 'href' => 'javascript:void(0);']
             ],
             'courses' => Course::orderBy('name', 'ASC')->get(),
@@ -98,8 +103,9 @@ class PlanController extends Controller
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
-        
+        // 1, not '' — an empty string reaches Tabulator as NaN and breaks the pager.
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : 1;
+
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
@@ -135,7 +141,11 @@ class PlanController extends Controller
                     'module_creation_id'=> $list->module_creation_id,
                     'course'=> isset($list->course->name) ? $list->course->name : '',
                     'module'=> isset($list->creations->module_name) ? $list->creations->module_name : '',
+                    // `room` stays for anything reading the flat label; the split
+                    // pair is what the list renders, room over venue.
                     'room'=> (isset($list->venu->name) ? $list->venu->name : '').' - '.(isset($list->room->name) ? $list->room->name : ''),
+                    'room_name'=> (isset($list->room->name) ? $list->room->name : ''),
+                    'venue_name'=> (isset($list->venu->name) ? $list->venu->name : ''),
                     'time'=> (!empty($list->start_time) ? date('H:i', strtotime($list->start_time)) : '').' - '.(!empty($list->end_time) ? date('H:i', strtotime($list->end_time)) : ''),
                     'module_enrollment_key'=> $list->module_enrollment_key,
                     'submission_date'=> $list->submission_date,
@@ -151,7 +161,8 @@ class PlanController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        // `total` feeds the header count and the "1-10 of N" readout.
+        return response()->json(['last_page' => $last_page, 'total' => $total_rows, 'data' => $data]);
     }
 
     public function update(PlansUpdateRequest $request){
@@ -303,10 +314,15 @@ class PlanController extends Controller
     {
         
         return view('pages.course-management.plan.add', [
+            // Opts this screen into the redesigned module shell.
+            'layout' => 'course-top-menu',
             'title' => 'Plans - London Churchill College',
             'subtitle' => 'Add Class Plans',
+            'cmPageTitle' => 'Add Class Plans',
+            'cmBackUrl' => route('class.plan'),
+            'cmBackLabel' => 'Back to Class Plans',
             'breadcrumbs' => [
-                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Course Management', 'href' => route('course.management')],
                 ['label' => 'Class Plans', 'href' => route('class.plan')],
                 ['label' => 'Add Plan', 'href' => 'javascript:void(0);']
             ],
@@ -330,10 +346,15 @@ class PlanController extends Controller
                     ->pluck('module_creation_id')->unique()->toArray();
 
         return view('pages.course-management.plan.builder', [
+            // Opts this screen into the redesigned module shell.
+            'layout' => 'course-top-menu',
             'title' => 'Plans - London Churchill College',
             'subtitle' => 'Class Plan Builder',
+            'cmPageTitle' => 'Class Plan Builder',
+            'cmBackUrl' => route('class.plan'),
+            'cmBackLabel' => 'Back to Class Plans',
             'breadcrumbs' => [
-                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Course Management', 'href' => route('course.management')],
                 ['label' => 'Class Plans', 'href' => route('class.plan')],
                 ['label' => 'Builder', 'href' => 'javascript:void(0);']
             ],
@@ -352,86 +373,276 @@ class PlanController extends Controller
         ]);
     }
 
+    /**
+     * Saves the class plan builder sheet.
+     *
+     * Two passes on purpose: every row is built and checked first, and nothing
+     * touches the database until all of them are valid. The write then runs in
+     * a transaction, so a sheet is saved completely or not at all — a failure
+     * half way through used to leave some classes written and the rest lost.
+     *
+     * The checking is not cosmetic. This connection runs with strict mode off,
+     * so MySQL silently coerces rather than complaining: `plans.course_id` and
+     * `plans.module_creation_id` are NOT NULL, and a card saved without a module
+     * was writing 0 into both. `class_type` is an ENUM, and anything outside it
+     * was being stored as an empty string.
+     */
     public function store(Request $request){
         $routineData = $request->routineData;
-        $term_declaration_id = $request->term_declaration_id;
-        $academic_year_id = $request->academic_year_id; 
-        $course_creation_id = $request->course_creation_id;
-        $instance_term_id = $request->instance_term_id;
-        $course_id = $request->course_id;
-        $group_id = $request->group_id;
 
+        if (empty($routineData) || !is_array($routineData)) {
+            return response()->json(['message' => 'Add at least one class before saving.'], 422);
+        }
 
-        $days = [ 1 => 'Mon', 2 => 'Tue', 3 => 'Wed', 4 => 'Thu', 5 => 'Fri', 6 => 'Sat', 7 => 'Sun'];
+        // The combination the whole sheet is written against.
+        $scope = [
+            'term_declaration_id' => (int) $request->term_declaration_id,
+            'academic_year_id' => (int) $request->academic_year_id,
+            'course_creation_id' => (int) $request->course_creation_id,
+            'instance_term_id' => (int) $request->instance_term_id,
+            'course_id' => (int) $request->course_id,
+            'group_id' => (int) $request->group_id,
+        ];
+        foreach ($scope as $key => $value) {
+            if ($value <= 0) {
+                return response()->json([
+                    'message' => 'This sheet is missing its '.str_replace('_', ' ', $key).'. Reload the page and try again.',
+                ], 422);
+            }
+        }
+
+        $group = Group::find($scope['group_id']);
+        if (empty($group)) {
+            return response()->json(['message' => 'That group no longer exists. Reload the page and try again.'], 422);
+        }
+
+        $days = [1 => 'Mon', 2 => 'Tue', 3 => 'Wed', 4 => 'Thu', 5 => 'Fri', 6 => 'Sat', 7 => 'Sun'];
+        $classTypes = ['Theory', 'Practical', 'Seminar'];
+
+        // What this sheet is allowed to reference, resolved once.
+        $moduleTypes = ModuleCreation::where('instance_term_id', $scope['instance_term_id'])
+            ->pluck('class_type', 'id')->toArray();
+        $rooms = Room::pluck('venue_id', 'id')->toArray();
+        $roomNames = Room::pluck('name', 'id')->toArray();
+
+        // Groups repeat by name across intakes, so the sheet legitimately holds
+        // plans on any of the same-named groups.
+        $sameNameGroupIds = Group::where('term_declaration_id', $scope['term_declaration_id'])
+            ->where('course_id', $scope['course_id'])
+            ->where('name', $group->name)->pluck('id')->unique()->toArray();
+
+        // Ids this sheet may update — the same set it was rendered from, so an
+        // `existing_id` from elsewhere cannot be used to overwrite another sheet.
+        $ownedPlanIds = Plan::where('term_declaration_id', $scope['term_declaration_id'])
+            ->where('academic_year_id', $scope['academic_year_id'])
+            ->where('course_creation_id', $scope['course_creation_id'])
+            ->where('instance_term_id', $scope['instance_term_id'])
+            ->where('course_id', $scope['course_id'])
+            ->whereIn('group_id', $sameNameGroupIds)
+            ->pluck('id')->toArray();
+
+        $rows = [];
+        $problems = [];
+        $seenIds = [];
+
+        foreach ($routineData as $day => $roomBoxes) {
+            $day = (int) $day;
+            if (!isset($days[$day]) || !is_array($roomBoxes)) {
+                $problems[] = 'One of the classes is on a day this sheet does not have. Reload the page and try again.';
+                continue;
+            }
+
+            foreach ($roomBoxes as $venueRoom => $boxes) {
+                $parts = explode('_', (string) $venueRoom);
+                $room = (int) ($parts[1] ?? 0);
+
+                if ($room <= 0 || !isset($rooms[$room])) {
+                    $problems[] = $days[$day].': one of the classes is in a room that no longer exists.';
+                    continue;
+                }
+                if (!is_array($boxes)) {
+                    continue;
+                }
+
+                // Taken from the room itself, so the pair can never disagree.
+                // Null stays null: the column is nullable and 0 is not a venue.
+                $venue = $rooms[$room] !== null ? (int) $rooms[$room] : null;
+                $where = $days[$day].' · '.($roomNames[$room] ?? ('Room '.$room));
+
+                foreach ($boxes as $box) {
+                    if (!is_array($box)) {
+                        continue;
+                    }
+
+                    $existingId = (int) ($box['existing_id'] ?? 0);
+                    if ($existingId > 0 && !in_array($existingId, $ownedPlanIds)) {
+                        $problems[] = $where.': that class is no longer part of this sheet. Reload the page and try again.';
+                        continue;
+                    }
+
+                    // Module — NOT NULL in the table, and the identity of the class.
+                    $module = (int) ($box['module'] ?? 0);
+                    if ($module <= 0) {
+                        $problems[] = $where.': choose a module.';
+                        continue;
+                    }
+                    if (!array_key_exists($module, $moduleTypes)) {
+                        $problems[] = $where.': that module is not part of this term.';
+                        continue;
+                    }
+
+                    // Class type — an ENUM column; blank falls back to the module's own.
+                    $type = trim((string) ($box['class_type'] ?? ''));
+                    if ($type !== '' && !in_array($type, $classTypes, true)) {
+                        $problems[] = $where.': "'.$type.'" is not a class type.';
+                        continue;
+                    }
+                    if ($type === '') {
+                        $moduleType = (string) ($moduleTypes[$module] ?? '');
+                        $type = in_array($moduleType, ['Theory', 'Practical', 'Tutorial', 'Seminar'], true) ? $moduleType : null;
+                    }
+
+                    // Time — one `HH:MM - HH:MM` range, split into two TIME columns.
+                    $startTime = null;
+                    $endTime = null;
+                    $time = trim((string) ($box['time'] ?? ''));
+                    if ($time !== '') {
+                        if (!preg_match('/^([01][0-9]|2[0-3]):([0-5][0-9]) - ([01][0-9]|2[0-3]):([0-5][0-9])$/', $time, $m)) {
+                            $problems[] = $where.': the time must read HH:MM - HH:MM.';
+                            continue;
+                        }
+                        $startTime = $m[1].':'.$m[2].':00';
+                        $endTime = $m[3].':'.$m[4].':00';
+                    }
+
+                    // Submission — a DATE column, entered as DD-MM-YYYY.
+                    $submission = null;
+                    $submissionRaw = trim((string) ($box['submission'] ?? ''));
+                    if ($submissionRaw !== '') {
+                        $parsed = \DateTime::createFromFormat('d-m-Y', $submissionRaw);
+                        if (!$parsed || $parsed->format('d-m-Y') !== $submissionRaw) {
+                            $problems[] = $where.': the submission date must read DD-MM-YYYY.';
+                            continue;
+                        }
+                        $submission = $parsed->format('Y-m-d');
+                    }
+
+                    // TEXT columns hold 65535 bytes and strict mode is off, so
+                    // anything longer is truncated without a word. Say so instead.
+                    $virtualRoom = (string) ($box['virtual_room'] ?? '');
+                    $note = (string) ($box['note'] ?? '');
+                    if (strlen($virtualRoom) > 65535) {
+                        $problems[] = $where.': the virtual room link is too long.';
+                        continue;
+                    }
+                    if (strlen($note) > 65535) {
+                        $problems[] = $where.': the note is too long.';
+                        continue;
+                    }
+
+                    $tutor = (int) ($box['tutor'] ?? 0);
+                    $personalTutor = (int) ($box['personal_tutor'] ?? 0);
+                    $boxGroup = (int) ($box['group'] ?? 0);
+
+                    $data = [
+                        'term_declaration_id' => $scope['term_declaration_id'],
+                        'academic_year_id' => $scope['academic_year_id'],
+                        'course_creation_id' => $scope['course_creation_id'],
+                        'instance_term_id' => $scope['instance_term_id'],
+                        'course_id' => $scope['course_id'],
+                        'module_creation_id' => $module,
+                        'venue_id' => $venue,
+                        'rooms_id' => $room,
+                        // A stray group id falls back to the sheet's own rather
+                        // than moving the class to another group.
+                        'group_id' => in_array($boxGroup, $sameNameGroupIds) ? $boxGroup : $scope['group_id'],
+                        'name' => null,
+                        'start_time' => $startTime,
+                        'end_time' => $endTime,
+                        'label' => null,
+                        'submission_date' => $submission,
+                        // 0 is not a user; the columns are nullable.
+                        'tutor_id' => $tutor > 0 ? $tutor : null,
+                        'personal_tutor_id' => $personalTutor > 0 ? $personalTutor : null,
+                        'virtual_room' => $virtualRoom,
+                        'note' => $note,
+                        'class_type' => $type,
+                    ];
+
+                    // Exactly one day set. Writing only the new one left the old
+                    // column at 1, so a class moved from Mon to Tue showed on both.
+                    foreach ($days as $dayName) {
+                        $data[strtolower($dayName)] = (strtolower($dayName) === strtolower($days[$day]) ? 1 : 0);
+                    }
+
+                    if ($existingId > 0 && isset($seenIds[$existingId])) {
+                        $problems[] = $where.': the same class appears twice on this sheet. Reload the page and try again.';
+                        continue;
+                    }
+                    if ($existingId > 0) {
+                        $seenIds[$existingId] = true;
+                    }
+
+                    $rows[] = ['existing_id' => $existingId, 'data' => $data];
+                }
+            }
+        }
+
+        if (!empty($problems)) {
+            $problems = array_values(array_unique($problems));
+
+            return response()->json([
+                'message' => count($problems) === 1
+                    ? $problems[0]
+                    : 'Nothing was saved. '.count($problems).' classes need attention.',
+                'errors' => $problems,
+            ], 422);
+        }
+
+        if (empty($rows)) {
+            return response()->json(['message' => 'Add at least one class before saving.'], 422);
+        }
+
         $insertCount = 0;
         $updateCount = 0;
 
-        if(!empty($routineData)){
-            foreach($routineData as $day => $rooms):
-                foreach($rooms as $venueRoom => $boxes):
-                    $venueRooms = explode('_', $venueRoom);
-                    $venue = (isset($venueRooms[0]) && $venueRooms[0] > 0 ? $venueRooms[0] : 0);
-                    $room = (isset($venueRooms[1]) && $venueRooms[1] > 0 ? $venueRooms[1] : 0);
-                    if(!empty($boxes)):
-                        foreach($boxes as $box):
-                            $existing_id = (isset($box['existing_id']) && $box['existing_id'] > 0 ? $box['existing_id'] : 0);
-                            $times = (isset($box['time']) && !empty($box['time']) ? explode(' - ', $box['time']) : []);
-                            $module = (isset($box['module']) && $box['module'] > 0 ? $box['module'] : 0);
-                            $moduleCreation = ModuleCreation::find($module);
-                            $mod_class_type = (isset($moduleCreation->class_type) && !empty($moduleCreation->class_type) ? $moduleCreation->class_type : null);
-                            
-                            $data = [];
-                            $data['term_declaration_id'] = $term_declaration_id;
-                            $data['academic_year_id'] = $academic_year_id;
-                            $data['course_creation_id'] = $course_creation_id;
-                            $data['instance_term_id'] = $instance_term_id;
-                            $data['course_id'] = (isset($box['course']) ? $box['course'] : $course_id);
-                            $data['module_creation_id'] = (isset($box['module']) ? $box['module'] : null);
-                            $data['venue_id'] = $venue;
-                            $data['rooms_id'] = $room;
-                            $data['group_id'] = (isset($box['group']) ? $box['group'] : $group_id);
-                            $data['name'] = null;
-                            $data['start_time'] = (isset($times[0]) && !empty($times[0]) ? $times[0].':00' : null);
-                            $data['end_time'] = (isset($times[1]) && !empty($times[1]) ? $times[1].':00' : null);
-                            $data['label'] = null;
-                            $data[strtolower($days[$day])] = 1;
-                            $data['module_enrollment_key'] = null;
-                            $data['submission_date'] = (isset($box['submission']) && !empty($box['submission']) ? date('Y-m-d', strtotime($box['submission'])) : null);
-                            $data['tutor_id'] = (isset($box['tutor']) ? $box['tutor'] : null);
-                            $data['personal_tutor_id'] = (isset($box['personal_tutor']) ? $box['personal_tutor'] : null);
-                            $data['virtual_room'] = (isset($box['virtual_room']) && !empty($box['virtual_room']) ? $box['virtual_room'] : '');
-                            $data['note'] = (isset($box['note']) && !empty($box['note']) ? $box['note'] : '');
-                            $data['class_type'] = (isset($box['class_type']) && !empty($box['class_type']) ? $box['class_type'] : $mod_class_type);
+        try {
+            DB::transaction(function () use ($rows, &$insertCount, &$updateCount) {
+                foreach ($rows as $row) {
+                    if ($row['existing_id'] > 0) {
+                        // `module_enrollment_key` is deliberately absent from the
+                        // update: it is not editable here, and including it as
+                        // null wiped the stored key on every save.
+                        Plan::where('id', $row['existing_id'])->update(array_merge($row['data'], [
+                            'updated_by' => auth()->user()->id,
+                        ]));
+                        $updateCount++;
+                    } else {
+                        Plan::create(array_merge($row['data'], [
+                            'module_enrollment_key' => null,
+                            'created_by' => auth()->user()->id,
+                        ]));
+                        $insertCount++;
+                    }
+                }
+            });
+        } catch (\Throwable $e) {
+            Log::error('Class plan save failed', [
+                'scope' => $scope,
+                'rows' => count($rows),
+                'error' => $e->getMessage(),
+            ]);
 
-                            if($existing_id > 0):
-                                $data['updated_by'] = auth()->user()->id;
-                                $plans = Plan::where('id', $existing_id)->update($data);
-                                if($plans):
-                                    $updateCount += 1;
-                                endif;
-                            else:
-                                $data['created_by'] = auth()->user()->id;
-                            
-                                $plans = Plan::create($data);
-                                if($plans):
-                                    $insertCount += 1;
-                                endif;
-                            endif;
-                        endforeach;
-                    endif;
-                endforeach;
-            endforeach;
-            if($insertCount > 0 || $updateCount > 0):
-                $msg = '';
-                $msg .= ($insertCount > 0 ? '<strong>'.$insertCount.'</strong> Class Plan successfully inserted. ' : '');
-                $msg .= ($updateCount > 0 ? '<strong>'.$updateCount.'</strong> Class Plan successfully updated. ' : '');
-                return response()->json(['msg' => $msg, 'red' => route('class.plan')], 200);
-            else:
-                return response()->json(['msg' => 'Data not inserted'], 304);
-            endif;
-        }else{
-            return response()->json(['Message' => 'Module not selected'], 422);
+            return response()->json([
+                'message' => 'Nothing was saved. The sheet could not be written — please try again.',
+            ], 500);
         }
+
+        $msg = '';
+        $msg .= ($insertCount > 0 ? '<strong>'.$insertCount.'</strong> Class Plan successfully inserted. ' : '');
+        $msg .= ($updateCount > 0 ? '<strong>'.$updateCount.'</strong> Class Plan successfully updated. ' : '');
+
+        return response()->json(['msg' => $msg, 'red' => route('class.plan')], 200);
     }
 
     public function edit($id){
@@ -520,329 +731,135 @@ class PlanController extends Controller
         response()->json($data);
     }
 
-    public function getExistClassPlanBox($academic, $term, $creation, $group){
-        $plans = [];
+    /**
+     * Renders one class card. Both the page and `class.plan.get.box` go through
+     * here, so there is a single definition of the markup and of the save
+     * contract it carries. The legacy code built this HTML twice by string
+     * concatenation, and the two copies had already drifted.
+     */
+    private function renderClassCard(array $card, $modules, $users)
+    {
+        return view('pages.course-management.plan.partials.class-card', [
+            'card' => $card,
+            'cardModules' => $modules,
+            'cardUsers' => $users,
+        ])->render();
+    }
 
+    /** The combination this builder is scoped to, resolved once. */
+    private function builderContext($academic, $term, $creation, $group)
+    {
         $courseCreation = CourseCreation::find($creation);
-        $creationInstance = CourseCreationInstance::where('course_creation_id', $creation)->where('academic_year_id', $academic)->orderBy('id', 'DESC')->get()->first();
-        $instanceTerm = InstanceTerm::where('course_creation_instance_id', $creationInstance->id)->where('term_declaration_id', $term)->orderBy('id', 'DESC')->get()->first();
-        $moduleCreations = ModuleCreation::where('instance_term_id', $instanceTerm->id)->orderBy('module_name', 'ASC')->get();
+        $creationInstance = CourseCreationInstance::where('course_creation_id', $creation)
+            ->where('academic_year_id', $academic)->orderBy('id', 'DESC')->get()->first();
+        $instanceTerm = InstanceTerm::where('course_creation_instance_id', $creationInstance->id)
+            ->where('term_declaration_id', $term)->orderBy('id', 'DESC')->get()->first();
         $groups = Group::find($group);
-        $sameNameGroupIds = Group::where('term_declaration_id', $term)->where('course_id', $courseCreation->course_id)->where('name', $groups->name)
-                            ->pluck('id')->unique()->toArray();
-        $users = User::where('active', 1)->orderBy('name', 'ASC')->get();
 
-        $days = [ 1 => 'mon', 2 => 'tue', 3 => 'wed', 4 => 'thu', 5 => 'fri', 6 => 'sat', 7 => 'sun'];
-        $rooms = Room::all();
-        foreach($days as $key => $day){
-            if(!empty($rooms)){
-                foreach($rooms as $rms){
-                    $cps = Plan::where('term_declaration_id', $term)->where('academic_year_id', $academic)
-                           ->where('course_creation_id', $creation)->where('instance_term_id', $instanceTerm->id)
-                           ->where('course_id', $courseCreation->course_id)
-                           ->whereIn('group_id', $sameNameGroupIds)
-                           ->where($day, 1)->where('rooms_id', $rms->id)
-                           ->whereNot('class_type', 'Tutorial')
-                           ->get();
-                    if(!empty($cps)):
-                        $r = 1;
-                        foreach($cps as $cp):
-                            $times = (isset($cp->start_time) && !empty($cp->start_time) ? substr($cp->start_time, 0, 5) : '');
-                            $times .= (isset($cp->end_time) && !empty($cp->end_time) ? ' - '.substr($cp->end_time, 0, 5) : '');
-                            $html = '';
-                            $html .= '<div class="routineDayBox" data-day="'.$key.'" data-venue="'.$cp->venue_id.'" data-room="'.$cp->rooms_id.'">';
-                                $html .= '<div class="rdbItem course" data-id="'.$cp->course_id.'" data-label="Course">';
-                                    $html .= '<button type="button" class="btn btn-course inline-flex items-start justify-start w-full px-3 py-1 text-left text-white"><i data-lucide="book" class="w-4 h-4 mr-1"></i> '.$cp->course->name.'</button>';
-                                $html .= '</div>';
-                                
-                                /*$html .= '<div class="rdbItem module" data-id="'.$cp->module_creation_id.'" data-label="Module">';
-                                    $html .= '<button type="button" class="btn btn-module inline-flex items-start justify-start w-full px-3 py-1 text-left text-white"><i data-lucide="git-branch" class="w-4 h-4 mr-1"></i> '.(isset($cp->creations->module_name) ? $cp->creations->module_name : '').'</button>';
-                                $html .= '</div>';*/
-                                
-                                $html .= '<div class="rdbItem group" data-id="'.$groups->id.'" data-label="Group">';
-                                    $html .= '<button type="button" class="btn btn-group inline-flex items-start justify-start w-full px-3 py-1 text-left text-white"><i data-lucide="tag" class="w-4 h-4 mr-1"></i> '.$groups->name.'</button>';
-                                $html .= '</div>';
+        return [
+            'courseCreation' => $courseCreation,
+            'instanceTerm' => $instanceTerm,
+            'group' => $groups,
+            // Groups repeat by name across intakes; a plan on any of the
+            // same-named groups belongs to this sheet.
+            'sameNameGroupIds' => Group::where('term_declaration_id', $term)
+                ->where('course_id', $courseCreation->course_id)
+                ->where('name', $groups->name)->pluck('id')->unique()->toArray(),
+            'modules' => ModuleCreation::where('instance_term_id', $instanceTerm->id)
+                ->orderBy('module_name', 'ASC')->get(),
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
+        ];
+    }
 
-                                $html .= '<div class="rdbItem module dropdownMenus" data-id="'.(isset($cp->module_creation_id) && $cp->module_creation_id > 0 ? $cp->module_creation_id : 0).'" data-label="Module">';
-                                    $html .= '<button type="button" class="DMToggle btn btn-module inline-flex items-start justify-start w-full px-3 py-2 text-left text-white" ><i data-lucide="git-branch" class="w-4 h-4 mr-1"></i> <span>'.(isset($cp->creations->module_name) ? $cp->creations->module_name : '').'</span></button>';
-                                    $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionDropdown"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
-                                    $html .= '<div class="dropdownMenuBox">';
-                                        $html .= '<input type="text" class="form-control form-control-sm dropdownMenuSearch" placeholder="Search here...">';
-                                        $html .= '<ul class="dropdownMenus overflow-y-auto mh-32">';
-                                            if(!empty($moduleCreations) && $moduleCreations->count() > 0):
-                                                foreach($moduleCreations as $mc):
-                                                    $html .= '<li data-value="'.$mc->id.'">'.$mc->module_name.'</li>';
-                                                endforeach;
-                                            endif;
-                                        $html .= '</ul>';
-                                    $html .= '</div>';
-                                $html .= '</div>';
+    /**
+     * Existing plans for this combination, as rendered cards keyed
+     * [day][room][n] — the shape the builder view iterates.
+     */
+    public function getExistClassPlanBox($academic, $term, $creation, $group){
+        $ctx = $this->builderContext($academic, $term, $creation, $group);
+        $days = [1 => 'mon', 2 => 'tue', 3 => 'wed', 4 => 'thu', 5 => 'fri', 6 => 'sat', 7 => 'sun'];
 
-                                /*$html .= '<div class="rdbItem group dropdownMenus" data-id="'.$cp->group_id.'" data-label="Group">';
-                                    $html .= '<button type="button" class="DMToggle btn btn-group inline-flex items-start justify-start w-full px-3 py-2 text-left text-white" ><i data-lucide="tag" class="w-4 h-4 mr-1"></i> <span>'.(isset($cp->group->name) ? $cp->group->name : '').'</span></button>';
-                                    $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionDropdown"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
-                                    $html .= '<div class="dropdownMenuBox">';
-                                        $html .= '<input type="text" class="form-control form-control-sm dropdownMenuSearch" placeholder="Search here...">';
-                                        $html .= '<ul class="dropdownMenus overflow-y-auto mh-32">';
-                                            if(!empty($groups) && $groups->count() > 0):
-                                                foreach($groups as $gr):
-                                                    $html .= '<li data-value="'.$gr->id.'">'.$gr->name.'</li>';
-                                                endforeach;
-                                            endif;
-                                        $html .= '</ul>';
-                                    $html .= '</div>';
-                                $html .= '</div>';*/
+        // One query for the whole sheet rather than 7 x rooms queries; the
+        // legacy version ran `7 * Room::count()` (294 here) selects per load.
+        $cps = Plan::where('term_declaration_id', $term)
+            ->where('academic_year_id', $academic)
+            ->where('course_creation_id', $creation)
+            ->where('instance_term_id', $ctx['instanceTerm']->id)
+            ->where('course_id', $ctx['courseCreation']->course_id)
+            ->whereIn('group_id', $ctx['sameNameGroupIds'])
+            ->whereNot('class_type', 'Tutorial')
+            ->orderBy('id', 'ASC')
+            ->get();
 
-                                $html .= '<div class="rdbItem tutor dropdownMenus" data-id="'.$cp->tutor_id.'" data-label="Tutor">';
-                                    $html .= '<button type="button" class="DMToggle btn btn-tutor inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="user" class="w-4 h-4 mr-1"></i> <span>'.(isset($cp->tutor->name) ? $cp->tutor->name : '').'</span></button>';
-                                    $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionDropdown"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
-                                    $html .= '<div class="dropdownMenuBox">';
-                                        $html .= '<input type="text" class="form-control form-control-sm dropdownMenuSearch" placeholder="Search here...">';
-                                        $html .= '<ul class="dropdownMenus overflow-y-auto mh-32">';
-                                            if(!empty($users)):
-                                                foreach($users as $u):
-                                                    $html .= '<li data-value="'.$u->id.'">'.$u->name.'</li>';
-                                                endforeach;
-                                            endif;
-                                        $html .= '</ul>';
-                                    $html .= '</div>';
-                                $html .= '</div>';
-                                $html .= '<div class="rdbItem personalTutor dropdownMenus" data-id="'.$cp->personal_tutor_id.'" data-label="Personal Tutor">';
-                                    $html .= '<button type="button" class="DMToggle btn btn-ptutor inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="user-check" class="w-4 h-4 mr-1"></i> <span>'.(isset($cp->personalTutor->name) ? $cp->personalTutor->name : '').'</span></button>';
-                                    $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionDropdown"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
-                                    $html .= '<div class="dropdownMenuBox">';
-                                        $html .= '<input type="text" class="form-control form-control-sm dropdownMenuSearch" placeholder="Search here...">';
-                                        $html .= '<ul class="dropdownMenus overflow-y-auto mh-32">';
-                                            if(!empty($users)):
-                                                foreach($users as $u):
-                                                    $html .= '<li data-value="'.$u->id.'">'.$u->name.'</li>';
-                                                endforeach;
-                                            endif;
-                                        $html .= '</ul>';
-                                    $html .= '</div>';
-                                $html .= '</div>';
-                                $html .= '<div class="rdbItem classType dropdownMenus" data-id="'.(!empty($cp->creations->class_type) ? $cp->creations->class_type : 0).'" data-label="Class Type">';
-                                    $html .= '<button type="button" class="DMToggle btn btn-class-type inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="columns" class="w-4 h-4 mr-1"></i> <span>'.(!empty($cp->creations->class_type) ? $cp->creations->class_type : 'Class Type').'</span></button>';
-                                    $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionDropdown"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
-                                    $html .= '<div class="dropdownMenuBox">';
-                                        $html .= '<input type="text" class="form-control form-control-sm dropdownMenuSearch" placeholder="Search here...">';
-                                        $html .= '<ul class="dropdownMenus overflow-y-auto mh-32">';
-                                            $html .= '<li data-value="Theory">Theory</li>';
-                                            $html .= '<li data-value="Practical">Practical</li>';
-                                            //$html .= '<li data-value="Tutorial">Tutorial</li>';
-                                            $html .= '<li data-value="Seminar">Seminar</li>';
-                                        $html .= '</ul>';
-                                    $html .= '</div>';
-                                $html .= '</div>';
-
-                                /*$html .= '<div class="rdbItem rdItemHalf evens enrollmentKey inputFields" data-id="'.(!empty($cp->module_enrollment_key) ? $cp->module_enrollment_key : 0).'" data-label="Enrollment">';
-                                    $html .= '<button type="button" class="inputToggles btn btn-ekey inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="key" class="w-4 h-4 mr-1"></i> <span>'.(!empty($cp->module_enrollment_key) ? $cp->module_enrollment_key : 'Enrollment').'</span></button>';
-                                    $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionInput"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
-                                    $html .= '<div class="inputWraps">';
-                                        $html .= '<input type="text" class="form-control inputFieldsInput" placeholder="Enrollment Key">';
-                                        $html .= '<button type="button" class="okInputValue btn btn-success text-white inline-flex items-start justify-start"><i data-lucide="thumbs-up" class="w-4 h-4"></i></button>';
-                                    $html .= '</div>';
-                                $html .= '</div>';*/
-
-                                $html .= '<div class="rdbItem rdItemHalf odds timePicker inputFields" data-id="'.$times.'" data-label="Time">';
-                                    $html .= '<button type="button" class="inputToggles btn btn-time inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="clock" class="w-4 h-4 mr-1"></i> <span>'.(!empty($times) ? $times : 'Time').'</span></button>';
-                                    $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionInput"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
-                                    $html .= '<div class="inputWraps">';
-                                        $html .= '<input type="text" class="form-control inputFieldsInput timeMask" placeholder="10:15 - 11:15">';
-                                        $html .= '<button type="button" class="okInputValue btn btn-success text-white inline-flex items-start justify-start"><i data-lucide="thumbs-up" class="w-4 h-4"></i></button>';
-                                    $html .= '</div>';
-                                $html .= '</div>';
-                                $html .= '<div class="rdbItem rdItemHalf evens submissionDate inputFields" data-id="'.(!empty($cp->submission_date) ? date('d-m-Y', strtotime($cp->submission_date)) : 0).'" data-label="Submission">';
-                                    $html .= '<button type="button" class="inputToggles btn btn-submission inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="calendar" class="w-4 h-4 mr-1"></i> <span>'.(!empty($cp->submission_date) ? date('d-m-Y', strtotime($cp->submission_date)) : 'Submission').'</span></button>';
-                                    $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionInput"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
-                                    $html .= '<div class="inputWraps">';
-                                        $html .= '<input type="text" class="form-control inputFieldsInput dateMask" placeholder="DD-MM-YYYY">';
-                                        $html .= '<button type="button" class="okInputValue btn btn-success text-white inline-flex items-start justify-start"><i data-lucide="thumbs-up" class="w-4 h-4"></i></button>';
-                                    $html .= '</div>';
-                                $html .= '</div>';
-                                $html .= '<div class="rdbItem virtualRoom inputFields" data-id="'.(!empty($cp->virtual_room) ? $cp->virtual_room : '0').'" data-label="Virtual Room">';
-                                    $html .= '<button type="button" class="inputToggles btn btn-vroom inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="video" class="w-4 h-4 mr-1"></i> <span>'.(!empty($cp->virtual_room) ? $cp->virtual_room : 'Virtual Room').'</span></button>';
-                                    $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionInput"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
-                                    $html .= '<div class="inputWraps">';
-                                        $html .= '<input type="text" class="form-control inputFieldsInput" placeholder="https://virtualroom.com">';
-                                        $html .= '<button type="button" class="okInputValue btn btn-success text-white inline-flex items-start justify-start"><i data-lucide="thumbs-up" class="w-4 h-4"></i></button>';
-                                    $html .= '</div>';
-                                $html .= '</div>';
-                                $html .= '<div class="rdbItem notes inputFields" data-id="'.(!empty($cp->note) ? $cp->note : '0').'" data-label="Note">';
-                                    $html .= '<button type="button" class="inputToggles btn btn-note inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="pencil" class="w-4 h-4 mr-1"></i> <span>'.(!empty($cp->note) ? $cp->note : 'Note').'</span></button>';
-                                    $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionInput"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
-                                    $html .= '<div class="inputWraps">';
-                                        $html .= '<input type="text" class="form-control inputFieldsInput" placeholder="Note">';
-                                        $html .= '<button type="button" class="okInputValue btn btn-success text-white inline-flex items-start justify-start"><i data-lucide="thumbs-up" class="w-4 h-4"></i></button>';
-                                    $html .= '</div>';
-                                $html .= '</div>';
-                                $html .= '<div class="clear-both"></div>';
-                                
-                                $html .= '<a href="javascript:void(0);" class="btn btn-danger text-white w-5 h-5 removePlanBTN"><i data-lucide="x-circle" class="w-5 h-5"></i></a>';
-                                $html .= '<input type="hidden" name="existing_id" class="existing_id" value="'.$cp->id.'"/>';
-                            $html .= '</div>';
-                            $plans[$key][$rms->id][$r] = $html;
-                            $r++;
-                        endforeach;
-                    endif;
+        $plans = [];
+        foreach ($days as $key => $day) {
+            foreach ($cps as $cp) {
+                if ((int) $cp->{$day} !== 1) {
+                    continue;
                 }
+
+                $times = (isset($cp->start_time) && !empty($cp->start_time) ? substr($cp->start_time, 0, 5) : '');
+                $times .= (isset($cp->end_time) && !empty($cp->end_time) ? ' - '.substr($cp->end_time, 0, 5) : '');
+
+                // Cards stacked in one room are tinted by slot so they read
+                // apart at a glance; the palette repeats every six.
+                $plans[$key][$cp->rooms_id][] = $this->renderClassCard([
+                    'tint' => count($plans[$key][$cp->rooms_id] ?? []),
+                    'day' => $key,
+                    'venue_id' => $cp->venue_id,
+                    'room_id' => $cp->rooms_id,
+                    'existing_id' => $cp->id,
+                    'course_id' => $cp->course_id,
+                    'group_id' => $ctx['group']->id,
+                    'module_id' => $cp->module_creation_id,
+                    // Names travel with the ids so the card can keep showing a
+                    // tutor who has since been deactivated, or a module that has
+                    // left this term, instead of silently clearing the field.
+                    'module_name' => $cp->creations->module_name ?? '',
+                    'class_type' => $cp->class_type ?: ($cp->creations->class_type ?? ''),
+                    'tutor_id' => $cp->tutor_id,
+                    'tutor_name' => $cp->tutor->name ?? '',
+                    'personal_tutor_id' => $cp->personal_tutor_id,
+                    'personal_tutor_name' => $cp->personalTutor->name ?? '',
+                    'time' => $times,
+                    'submission' => (!empty($cp->submission_date) && $cp->submission_date != '0000-00-00' ? date('d-m-Y', strtotime($cp->submission_date)) : ''),
+                    'virtual_room' => $cp->virtual_room,
+                    'note' => $cp->note,
+                ], $ctx['modules'], $ctx['users']);
             }
         }
 
         return $plans;
     }
 
+    /** A blank card for the day/venue/room the user clicked "Add class" on. */
     public function getClassPlanBox(Request $request){
-        $term_declaration_id = $request->term_declaration_id;
-        $academic_year_id = $request->academic_year_id;
-        $course_creation_id = $request->course_creation_id;
-        $instance_term_id = $request->instance_term_id; 
-        $course_id = $request->course_id;
-        $group_id = $request->group_id;
+        $ctx = $this->builderContext(
+            $request->academic_year_id,
+            $request->term_declaration_id,
+            $request->course_creation_id,
+            $request->group_id
+        );
 
-        $day = $request->day;
-        $venue = $request->venue; 
-        $room = $request->room;
-
-
-        $course_id = $request->course_id;
-        $course = Course::find($course_id);
-
-        $group = Group::find($group_id);
-        $users = User::where('active', 1)->orderBy('name', 'ASC')->get();
-
-        $moduleCreations = ModuleCreation::where('instance_term_id', $instance_term_id)->orderBy('module_name', 'ASC')->get();
-
-        $html = '';
-        $html .= '<div class="routineDayBox" data-day="'.$day.'" data-venue="'.$venue.'" data-room="'.$room.'">';
-            $html .= '<div class="rdbItem course" data-id="'.$course->id.'" data-label="Course">';
-                $html .= '<button type="button" class="btn btn-course inline-flex items-start justify-start w-full px-3 py-1 text-left text-white"><i data-lucide="book" class="w-4 h-4 mr-1"></i> '.$course->name.'</button>';
-            $html .= '</div>';
-            /*$html .= '<div class="rdbItem module" data-id="'.$moduleCreation->id.'" data-label="Module">';
-                $html .= '<button type="button" class="btn btn-module inline-flex items-start justify-start w-full px-3 py-1 text-left text-white"><i data-lucide="git-branch" class="w-4 h-4 mr-1"></i> '.$moduleCreation->module_name.'</button>';
-            $html .= '</div>';*/
-            $html .= '<div class="rdbItem group" data-id="'.$group->id.'" data-label="Group">';
-                $html .= '<button type="button" class="btn btn-group inline-flex items-start justify-start w-full px-3 py-1 text-left text-white"><i data-lucide="tag" class="w-4 h-4 mr-1"></i> '.$group->name.'</button>';
-            $html .= '</div>';
-
-            $html .= '<div class="rdbItem module dropdownMenus" data-id="0" data-label="Module">';
-                $html .= '<button type="button" class="DMToggle btn btn-module inline-flex items-start justify-start w-full px-3 py-2 text-left text-white" ><i data-lucide="git-branch" class="w-4 h-4 mr-1"></i> <span>Module</span></button>';
-                $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionDropdown"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
-                $html .= '<div class="dropdownMenuBox">';
-                    $html .= '<input type="text" class="form-control form-control-sm dropdownMenuSearch" placeholder="Search here...">';
-                    $html .= '<ul class="dropdownMenus overflow-y-auto mh-32">';
-                        if(!empty($moduleCreations) && $moduleCreations->count() > 0):
-                            foreach($moduleCreations as $mc):
-                                $html .= '<li data-value="'.$mc->id.'">'.$mc->module_name.'</li>';
-                            endforeach;
-                        endif;
-                    $html .= '</ul>';
-                $html .= '</div>';
-            $html .= '</div>';
-
-            /*$html .= '<div class="rdbItem group dropdownMenus" data-id="0" data-label="Group">';
-                $html .= '<button type="button" class="DMToggle btn btn-group inline-flex items-start justify-start w-full px-3 py-2 text-left text-white" ><i data-lucide="tag" class="w-4 h-4 mr-1"></i> <span>Group</span></button>';
-                $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionDropdown"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
-                $html .= '<div class="dropdownMenuBox">';
-                    $html .= '<input type="text" class="form-control form-control-sm dropdownMenuSearch" placeholder="Search here...">';
-                    $html .= '<ul class="dropdownMenus overflow-y-auto mh-32">';
-                        if(!empty($groups) && $groups->count() > 0):
-                            foreach($groups as $gr):
-                                $html .= '<li data-value="'.$gr->id.'">'.$gr->name.'</li>';
-                            endforeach;
-                        endif;
-                    $html .= '</ul>';
-                $html .= '</div>';
-            $html .= '</div>';*/
-
-            $html .= '<div class="rdbItem tutor dropdownMenus" data-id="0" data-label="Tutor">';
-                $html .= '<button type="button" class="DMToggle btn btn-tutor inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="user" class="w-4 h-4 mr-1"></i> <span>Tutor</span></button>';
-                $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionDropdown"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
-                $html .= '<div class="dropdownMenuBox">';
-                    $html .= '<input type="text" class="form-control form-control-sm dropdownMenuSearch" placeholder="Search here...">';
-                    $html .= '<ul class="dropdownMenus overflow-y-auto mh-32">';
-                        if(!empty($users)):
-                            foreach($users as $u):
-                                $html .= '<li data-value="'.$u->id.'">'.$u->name.'</li>';
-                            endforeach;
-                        endif;
-                    $html .= '</ul>';
-                $html .= '</div>';
-            $html .= '</div>';
-            $html .= '<div class="rdbItem personalTutor dropdownMenus" data-id="0" data-label="Personal Tutor">';
-                $html .= '<button type="button" class="DMToggle btn btn-ptutor inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="user-check" class="w-4 h-4 mr-1"></i> <span>Personal Tutor</span></button>';
-                $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionDropdown"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
-                $html .= '<div class="dropdownMenuBox">';
-                    $html .= '<input type="text" class="form-control form-control-sm dropdownMenuSearch" placeholder="Search here...">';
-                    $html .= '<ul class="dropdownMenus overflow-y-auto mh-32">';
-                        if(!empty($users)):
-                            foreach($users as $u):
-                                $html .= '<li data-value="'.$u->id.'">'.$u->name.'</li>';
-                            endforeach;
-                        endif;
-                    $html .= '</ul>';
-                $html .= '</div>';
-            $html .= '</div>';
-            $html .= '<div class="rdbItem classType dropdownMenus" data-id="0" data-label="Class Type">';
-                $html .= '<button type="button" class="DMToggle btn btn-class-type inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="columns" class="w-4 h-4 mr-1"></i> <span>Class Type</span></button>';
-                $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionDropdown"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
-                $html .= '<div class="dropdownMenuBox">';
-                    $html .= '<input type="text" class="form-control form-control-sm dropdownMenuSearch" placeholder="Search here...">';
-                    $html .= '<ul class="dropdownMenus overflow-y-auto mh-32">';
-                        $html .= '<li data-value="Theory">Theory</li>';
-                        $html .= '<li data-value="Practical">Practical</li>';
-                        //$html .= '<li data-value="Tutorial">Tutorial</li>';
-                        $html .= '<li data-value="Seminar">Seminar</li>';
-                    $html .= '</ul>';
-                $html .= '</div>';
-            $html .= '</div>';
-
-            /*$html .= '<div class="rdbItem rdItemHalf evens enrollmentKey inputFields" data-id="0" data-label="Enrollment">';
-                $html .= '<button type="button" class="inputToggles btn btn-ekey inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="key" class="w-4 h-4 mr-1"></i> <span>Enrollment</span></button>';
-                $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionInput"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
-                $html .= '<div class="inputWraps">';
-                    $html .= '<input type="text" class="form-control inputFieldsInput" placeholder="Enrollment Key">';
-                    $html .= '<button type="button" class="okInputValue btn btn-success text-white inline-flex items-start justify-start"><i data-lucide="thumbs-up" class="w-4 h-4"></i></button>';
-                $html .= '</div>';
-            $html .= '</div>';*/
-
-            $html .= '<div class="rdbItem rdItemHalf odds timePicker inputFields" data-id="0" data-label="Time">';
-                $html .= '<button type="button" class="inputToggles btn btn-time inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="clock" class="w-4 h-4 mr-1"></i> <span>Time</span></button>';
-                $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionInput"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
-                $html .= '<div class="inputWraps">';
-                    $html .= '<input type="text" class="form-control inputFieldsInput timeMask" placeholder="10:15 - 11:15">';
-                    $html .= '<button type="button" class="okInputValue btn btn-success text-white inline-flex items-start justify-start"><i data-lucide="thumbs-up" class="w-4 h-4"></i></button>';
-                $html .= '</div>';
-            $html .= '</div>';
-            $html .= '<div class="rdbItem rdItemHalf evens submissionDate inputFields" data-id="0" data-label="Submission">';
-                $html .= '<button type="button" class="inputToggles btn btn-submission inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="calendar" class="w-4 h-4 mr-1"></i> <span>Submission</span></button>';
-                $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionInput"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
-                $html .= '<div class="inputWraps">';
-                    $html .= '<input type="text" class="form-control inputFieldsInput dateMask" placeholder="DD-MM-YYYY">';
-                    $html .= '<button type="button" class="okInputValue btn btn-success text-white inline-flex items-start justify-start"><i data-lucide="thumbs-up" class="w-4 h-4"></i></button>';
-                $html .= '</div>';
-            $html .= '</div>';
-            $html .= '<div class="rdbItem virtualRoom inputFields" data-id="0" data-label="Virtual Room">';
-                $html .= '<button type="button" class="inputToggles btn btn-vroom inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="video" class="w-4 h-4 mr-1"></i> <span>Virtual Room</span></button>';
-                $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionInput"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
-                $html .= '<div class="inputWraps">';
-                    $html .= '<input type="text" class="form-control inputFieldsInput" placeholder="https://virtualroom.com">';
-                    $html .= '<button type="button" class="okInputValue btn btn-success text-white inline-flex items-start justify-start"><i data-lucide="thumbs-up" class="w-4 h-4"></i></button>';
-                $html .= '</div>';
-            $html .= '</div>';
-            $html .= '<div class="rdbItem notes inputFields" data-id="0" data-label="Note">';
-                $html .= '<button type="button" class="inputToggles btn btn-note inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="pencil" class="w-4 h-4 mr-1"></i> <span>Note</span></button>';
-                $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionInput"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
-                $html .= '<div class="inputWraps">';
-                    $html .= '<input type="text" class="form-control inputFieldsInput" placeholder="Note">';
-                    $html .= '<button type="button" class="okInputValue btn btn-success text-white inline-flex items-start justify-start"><i data-lucide="thumbs-up" class="w-4 h-4"></i></button>';
-                $html .= '</div>';
-            $html .= '</div>';
-            $html .= '<div class="clear-both"></div>';
-            
-            $html .= '<a href="javascript:void(0);" class="btn btn-danger text-white w-5 h-5 removePlanBTN"><i data-lucide="x-circle" class="w-5 h-5"></i></a>';
-            $html .= '<input type="hidden" name="existing_id" class="existing_id" value="0"/>';
-        $html .= '</div>';
+        $html = $this->renderClassCard([
+            'day' => $request->day,
+            'venue_id' => $request->venue,
+            'room_id' => $request->room,
+            'existing_id' => 0,
+            'course_id' => $request->course_id,
+            'group_id' => $ctx['group']->id,
+            'module_id' => '',
+            'module_name' => '',
+            'class_type' => '',
+            'tutor_id' => '',
+            'tutor_name' => '',
+            'personal_tutor_id' => '',
+            'personal_tutor_name' => '',
+            'time' => '',
+            'submission' => '',
+            'virtual_room' => '',
+            'note' => '',
+        ], $ctx['modules'], $ctx['users']);
 
         return response()->json(['htmls' => $html], 200);
     }

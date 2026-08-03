@@ -1,6 +1,6 @@
 /* Google Map INIT Code Start */
 export default function INTAddressLookUps(){
-    if (!window.google || !google.maps || !google.maps.places) {
+    if (!window.google || !window.google.maps || !window.google.maps.places) {
         console.warn('Google Places API not loaded');
         return;
     }
@@ -21,16 +21,25 @@ export default function INTAddressLookUps(){
         let address_field = $('.theAddressLookup', $this); 
         let id = address_field.attr('id');
 
-        let autocomplete = new google.maps.places.Autocomplete(
+        if (!parentid || !id || !document.getElementById(id) || $this.data('address-autocomplete-ready')) {
+            return;
+        }
+
+        let autocomplete = new window.google.maps.places.Autocomplete(
             document.getElementById(id),
             { types: ["geocode"], componentRestrictions: {country: 'UK'}}
         );
+        $this.data('address-autocomplete-ready', true);
         autocomplete.setFields(["address_component", 'geometry']);
         autocomplete.addListener('place_changed', function () {
             
             var place = autocomplete.getPlace();
-            var lat = place.geometry.location.lat(),
-                lng = place.geometry.location.lng();
+            if (!place || !place.address_components) {
+                return;
+            }
+
+            var lat = place.geometry && place.geometry.location ? place.geometry.location.lat() : '',
+                lng = place.geometry && place.geometry.location ? place.geometry.location.lng() : '';
             
             $('#'+parentid+' .address_line_1').val('').removeAttr('disabled');
             $('#'+parentid+' .address_line_2').val('').removeAttr('disabled');

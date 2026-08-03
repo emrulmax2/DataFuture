@@ -2,6 +2,21 @@
 
     const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const editContactModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editContactModal"));
+    const setButtonLoading = function(selector, loading) {
+        const button = document.querySelector(selector);
+        if(!button) return;
+
+        const loader = button.querySelector('svg:not([data-lucide])');
+        if(loading) {
+            button.setAttribute('disabled', 'disabled');
+        } else {
+            button.removeAttribute('disabled');
+        }
+
+        if(loader) {
+            loader.style.cssText = loading ? 'display: inline-block;' : 'display: none;';
+        }
+    };
     
 if($('#addressModal').length > 0){
     const addressModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addressModal"));
@@ -77,8 +92,7 @@ if($('#addressModal').length > 0){
         // htmls += '<span class="text-slate-600 font-medium">'+$('#student_address_postal_zip_code', $form).val()+'</span>,<br/>';
         // htmls += '<span class="text-slate-600 font-medium">'+$('#student_address_country', $form).val()+'</span><br/>';
 
-        document.querySelector('#insertAddress').setAttribute('disabled', 'disabled');
-        document.querySelector('#insertAddress svg').style.cssText = 'display: inline-block;';
+        setButtonLoading('#insertAddress', true);
 
         let agentId = $('#addressForm input[name="id"]').val();
         let form_data = new FormData(form);
@@ -89,8 +103,7 @@ if($('#addressModal').length > 0){
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
 
-            document.querySelector('#insertAddress').removeAttribute('disabled');
-            document.querySelector('#insertAddress svg').style.cssText = 'display: none;';
+            setButtonLoading('#insertAddress', false);
             
             if (response.status == 200) {
                 //var dataset = response.data.res;
@@ -106,8 +119,7 @@ if($('#addressModal').length > 0){
             
         }).catch(error => {
 
-            document.querySelector('#insertAddress').removeAttribute('disabled');
-            document.querySelector('#insertAddress svg').style.cssText = 'display: none;';
+            setButtonLoading('#insertAddress', false);
             if(error.response){
                 if(error.response.status == 422){
                     for (const [key, val] of Object.entries(error.response.data.errors)) {
@@ -130,8 +142,7 @@ if($('#addressModal').length > 0){
 
     const form = document.getElementById("editContactModalForm");
 
-    document.querySelector('#update').setAttribute('disabled', 'disabled');
-    document.querySelector('#update svg').style.cssText = 'display: inline-block;';
+    setButtonLoading('#update', true);
 
     let form_data = new FormData(form);
 
@@ -144,8 +155,7 @@ if($('#addressModal').length > 0){
         },
     }).then((response) => {
         if (response.status == 200) {
-            document.querySelector("#update").removeAttribute("disabled");
-            document.querySelector("#update svg").style.cssText = "display: none;";
+            setButtonLoading('#update', false);
             editContactModal.hide();
             $("#successModal .successModalTitle").html("Congratulations!");
             $("#successModal .successModalDesc").html('Data successfully updated.');
@@ -154,13 +164,12 @@ if($('#addressModal').length > 0){
             location.reload();
         }
     }).catch((error) => {
-        document.querySelector("#update").removeAttribute("disabled");
-        document.querySelector("#update svg").style.cssText = "display: none;";
+        setButtonLoading('#update', false);
         if (error.response) {
             if (error.response.status == 422) {
                 for (const [key, val] of Object.entries(error.response.data.errors)) {
-                    $(`#editForm .${key}`).addClass('border-danger')
-                    $(`#editForm  .error-${key}`).html(val)
+                    $(`#editContactModalForm .${key}`).addClass('border-danger')
+                    $(`#editContactModalForm  .error-${key}`).html(val)
                 }
             }else if (error.response.status == 304) {
                 editContactModal.hide();

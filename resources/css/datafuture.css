@@ -672,6 +672,11 @@
         font-weight: 700;
     }
 
+    .lcc-global-search__group--applicants .lcc-global-search__initials {
+        background: #e8edf9;
+        color: #1f4c7f;
+    }
+
     .lcc-global-search__group--employees .lcc-global-search__initials {
         background: #f3ecd8;
         color: #a1802f;
@@ -717,6 +722,11 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+    }
+
+    .lcc-global-search__group--applicants .lcc-global-search__status {
+        background: #e8edf9;
+        color: #1f4c7f;
     }
 
     .lcc-global-search__group--employees .lcc-global-search__status {

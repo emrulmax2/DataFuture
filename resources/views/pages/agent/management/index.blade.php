@@ -5,21 +5,50 @@
 @endsection
 
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Agent Management</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('agent.management.remittance') }}" class="add_btn btn btn-success text-white shadow-md ml-1"><i data-lucide="pound-sterling" class="w-4 h-4 mr-2"></i> Remittance</a>
-            <a href="{{ route('agent-user.index') }}" class="add_btn btn btn-facebook text-white shadow-md ml-1"><i data-lucide="user" class="w-4 h-4 mr-2"></i> Agents</a>
-            <a href="{{ route('agent.management') }}" class="add_btn btn btn-primary text-white shadow-md ml-1"><i data-lucide="user-cog" class="w-4 h-4 mr-2"></i> Back to Management</a>
-        </div>
-    </div>
-    <!-- BEGIN: HTML Table Data -->
-    <div class="intro-y box p-5 mt-5">
-        <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-            <form id="tabulatorFilterForm" class="xl:flex sm:mr-auto" >
-                <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                    <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Intek Semester</label>
-                    <select id="semister_id" name="semister_id" class="tom-selects w-full mt-2 sm:mt-0 sm:w-56" >
+    <div class="agm-page">
+        <section class="agm-hero">
+            <div class="agm-hero__copy">
+                <span class="agm-hero__icon">
+                    <i data-lucide="heart-handshake"></i>
+                </span>
+                <div>
+                    <span class="agm-eyebrow">Referrals &amp; Commission</span>
+                    <h1>Agent Management</h1>
+                    <p>Referral performance and commission rules by intake</p>
+                </div>
+            </div>
+
+            <div class="agm-hero__actions">
+                <a href="{{ route('agent.management.remittance') }}" class="agm-btn agm-btn--soft-gold">
+                    <i data-lucide="badge-pound-sterling"></i>
+                    <span>Remittance</span>
+                </a>
+                <a href="{{ route('agent-user.index') }}" class="agm-btn agm-btn--soft-teal">
+                    <i data-lucide="user-cog"></i>
+                    <span>Agents</span>
+                </a>
+                <a href="{{ route('agent.management') }}" class="agm-btn agm-btn--dark">
+                    <i data-lucide="arrow-left"></i>
+                    <span>Back to Management</span>
+                </a>
+            </div>
+        </section>
+
+        <section class="agm-filter">
+            <div class="agm-step">
+                <span class="agm-step__icon">
+                    <i data-lucide="calendar"></i>
+                </span>
+                <div>
+                    <small>Step 1</small>
+                    <strong>Choose intake</strong>
+                </div>
+            </div>
+
+            <form id="tabulatorFilterForm" class="agm-filter__form">
+                <div class="agm-control">
+                    <label for="semister_id">Intek Semester <span class="agm-required">*</span></label>
+                    <select id="semister_id" name="semister_id" class="tom-selects">
                         <option value="">Please Select</option>
                         @if($semesters->count() > 0)
                             @foreach($semesters as $sem)
@@ -28,126 +57,154 @@
                         @endif
                     </select>
                 </div>
-                <div class="mt-2 xl:mt-0">
-                    <button id="tabulator-html-filter-go" type="button" class="btn btn-primary w-full sm:w-auto" >
-                        Go 
-                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                            stroke="white" class="w-4 h-4 ml-2 theLoader">
-                            <g fill="none" fill-rule="evenodd">
-                                <g transform="translate(1 1)" stroke-width="4">
-                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                    <path d="M36 18c0-9.94-8.06-18-18-18">
-                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                    </path>
-                                </g>
-                            </g>
-                        </svg>
-                    </button>
-                    <button id="tabulator-html-filter-reset" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                </div>
-            </form>
-            <div class="flex mt-5 sm:mt-0">
-                <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto">
-                    <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
-                </button>
-            </div>
-        </div>
-        <div class="overflow-x-auto scrollbar-hidden agentRefListWrap mt-5" style="display: none;"></div>
-    </div>
-    <!-- END: HTML Table Data -->
 
-    <!-- BEGIN: Agent Rule Modal -->
+                <button id="tabulator-html-filter-go" type="button" class="agm-btn agm-btn--primary">
+                    <i data-lucide="arrow-right"></i>
+                    <span>Go</span>
+                    <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                         stroke="white" class="theLoader">
+                        <g fill="none" fill-rule="evenodd">
+                            <g transform="translate(1 1)" stroke-width="4">
+                                <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                <path d="M36 18c0-9.94-8.06-18-18-18">
+                                    <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                      to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                </path>
+                            </g>
+                        </g>
+                    </svg>
+                </button>
+
+                <button id="tabulator-html-filter-reset" type="button" class="agm-btn agm-btn--muted">
+                    <i data-lucide="rotate-ccw"></i>
+                    <span>Reset</span>
+                </button>
+            </form>
+        </section>
+
+        <section class="agm-results">
+            <div class="agentRefListWrap">
+                <div class="agm-empty">
+                    <span class="agm-empty__icon">
+                        <i data-lucide="calendar-days"></i>
+                    </span>
+                    <h2>No intake loaded yet</h2>
+                    <p>Pick an <strong>Intake Semester</strong> above and press <strong>Go</strong> to load agent referrals, student counts and commission figures.</p>
+                    <span class="agm-empty__chip">
+                        <i data-lucide="info"></i>
+                        Results are intake-specific
+                    </span>
+                </div>
+            </div>
+        </section>
+    </div>
+
     <div id="agentRulesModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="#" id="agentRulesForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Agent Rule</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></a>
+                        <a data-tw-dismiss="modal" href="javascript:;" aria-label="Close">
+                            <i data-lucide="x"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
-                        <div>
-                            <label for="comission_mode" class="form-label">Comission <span class="text-danger">*</span></label>
-                            <select id="comission_mode" name="comission_mode" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                <option value="1">Percentage</option>
-                                <option value="2">Fixed Amount</option>
-                            </select>
-                            <div class="acc__input-error error-comission_mode text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3 percentageWrap" style="display: none;">
-                            <label for="percentage" class="form-label">Percentage <span class="text-danger">*</span></label>
-                            <input id="percentage" type="text" name="percentage" class="form-control w-full">
-                            <div class="acc__input-error error-percentage text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3 fixedAmountWrap" style="display: none;">
-                            <label for="amount" class="form-label">Amount <span class="text-danger">*</span></label>
-                            <input id="amount" step="any" type="number" name="amount" class="form-control w-full">
-                            <div class="acc__input-error error-amount text-danger mt-2"></div>
-                        </div>
-                        <div>
-                            <label for="period" class="form-label">Period <span class="text-danger">*</span></label>
-                            <select id="period" name="period" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                <option value="1">Every Year</option>
-                                <option value="2">Year 1</option>
-                            </select>
-                            <div class="acc__input-error error-period text-danger mt-2"></div>
-                        </div>
-                        <div>
-                            <label>Payment</label>
-                            <div class="flex flex-col sm:flex-row mt-2">
-                                <div class="form-check mr-2">
-                                    <input id="payment_type_1" class="form-check-input" type="radio" name="payment_type" value="1">
-                                    <label class="form-check-label" for="payment_type_1">Single Payment</label>
-                                </div>
-                                <div class="form-check mr-2 mt-2 sm:mt-0">
-                                    <input id="payment_type_2" class="form-check-input" type="radio" name="payment_type" value="2">
-                                    <label class="form-check-label" for="payment_type_2">On Receipt</label>
-                                </div>
+                        <div class="agm-rule-grid">
+                            <div class="agm-rule-field">
+                                <label for="comission_mode">Commission <span class="agm-required">*</span></label>
+                                <select id="comission_mode" name="comission_mode" class="form-control w-full">
+                                    <option value="">Please Select</option>
+                                    <option value="1">Percentage</option>
+                                    <option value="2">Fixed Amount</option>
+                                </select>
+                                <div class="acc__input-error error-comission_mode"></div>
                             </div>
-                            <div class="acc__input-error error-payment_type text-danger mt-2"></div>
-                        </div>          
-                        {{--<div>
-                            <label for="payment_type" class="form-label">Payment <span class="text-danger">*</span></label>
-                            <select id="payment_type" name="payment_type" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                <option value="1">Single Payment</option>
-                                <option value="2">On Receipt</option>
-                            </select>
-                            <div class="acc__input-error error-payment_type text-danger mt-2"></div>
-                        </div>--}}
+
+                            <div class="agm-rule-field">
+                                <label for="period">Period <span class="agm-required">*</span></label>
+                                <select id="period" name="period" class="form-control w-full">
+                                    <option value="">Please Select</option>
+                                    <option value="1">Every Year</option>
+                                    <option value="2">Year 1</option>
+                                </select>
+                                <div class="acc__input-error error-period"></div>
+                            </div>
+
+                            <div class="agm-rule-field percentageWrap" style="display: none;">
+                                <label for="percentage">Percentage <span class="agm-required">*</span></label>
+                                <input id="percentage" type="text" name="percentage" class="form-control w-full" placeholder="Percentage">
+                                <div class="acc__input-error error-percentage"></div>
+                            </div>
+
+                            <div class="agm-rule-field fixedAmountWrap" style="display: none;">
+                                <label for="amount">Amount <span class="agm-required">*</span></label>
+                                <input id="amount" step="any" type="number" name="amount" class="form-control w-full" placeholder="Amount">
+                                <div class="acc__input-error error-amount"></div>
+                            </div>
+
+                            <div class="agm-rule-field--wide">
+                                <span class="agm-rule-label">Payment <span class="agm-required">*</span></span>
+                                <div class="agm-payment-options">
+                                    <label class="agm-payment-option" for="payment_type_1">
+                                        <input id="payment_type_1" type="radio" name="payment_type" value="1">
+                                        <span class="agm-payment-card">
+                                            <span class="agm-payment-card__mark">
+                                                <i data-lucide="check"></i>
+                                            </span>
+                                            <span>
+                                                <strong>Single Payment</strong>
+                                                <small>Pay once per rule</small>
+                                            </span>
+                                        </span>
+                                    </label>
+                                    <label class="agm-payment-option" for="payment_type_2">
+                                        <input id="payment_type_2" type="radio" name="payment_type" value="2">
+                                        <span class="agm-payment-card">
+                                            <span class="agm-payment-card__mark">
+                                                <i data-lucide="check"></i>
+                                            </span>
+                                            <span>
+                                                <strong>On Receipt</strong>
+                                                <small>Release after receipt</small>
+                                            </span>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="acc__input-error error-payment_type"></div>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="saveRuleBtn" class="btn btn-primary w-auto">     
-                            Save                    
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary">
+                            <i data-lucide="x"></i>
+                            <span>Cancel</span>
+                        </button>
+                        <button type="submit" id="saveRuleBtn" class="btn btn-primary">
+                            <i data-lucide="check"></i>
+                            <span>Save</span>
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
+                                 stroke="white" class="theLoader">
                                 <g fill="none" fill-rule="evenodd">
                                     <g transform="translate(1 1)" stroke-width="4">
                                         <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
                                         <path d="M36 18c0-9.94-8.06-18-18-18">
                                             <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                                              to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
                                         </path>
                                     </g>
                                 </g>
                             </svg>
                         </button>
-                        <input type="hidden" name="agent_user_id" value="0"/>
-                        <input type="hidden" name="code" value="'"/>
-                        <input type="hidden" name="semester_id" value="0"/>
+                        <input type="hidden" name="agent_user_id" value="0">
+                        <input type="hidden" name="code" value="">
+                        <input type="hidden" name="semester_id" value="0">
                     </div>
                 </div>
             </form>
         </div>
     </div>
-    <!-- END: Agent Rule Modal -->
 
-    
-    <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -164,9 +221,7 @@
             </div>
         </div>
     </div>
-    <!-- END: Success Modal Content -->
 
-    <!-- BEGIN: Delete Confirm Modal Content -->
     <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -184,7 +239,6 @@
             </div>
         </div>
     </div>
-    <!-- END: Delete Confirm Modal Content -->
 @endsection
 
 @section('script')

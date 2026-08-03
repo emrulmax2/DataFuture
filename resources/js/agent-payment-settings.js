@@ -2,56 +2,188 @@ import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 
-
 ("use strict");
-var agentBankListTable = (function () {
-    var _tableGen = function () {
-        // Setup Tabulator
-        let querystr = $("#query").val() != "" ? $("#query").val() : "";
-        let status = $("#status").val() != "" ? $("#status").val() : "1";
-        let agent_id = $("#agentBankListTable").attr('data-agent');
 
-        let tableContent = new Tabulator("#agentBankListTable", {
-            ajaxURL: route("agent-user.bank.list"),
-            ajaxParams: { agent_id: agent_id, querystr: querystr, status: status },
+const escapeHtml = (value) => {
+    const div = document.createElement("div");
+    div.textContent = value == null ? "" : String(value);
+    return div.innerHTML;
+};
+
+const refreshIcons = () => {
+    createIcons({
+        icons,
+        "stroke-width": 1.8,
+        nameAttr: "data-lucide",
+    });
+};
+
+const getModal = (selector) => {
+    const element = document.querySelector(selector);
+    return element ? tailwind.Modal.getOrCreateInstance(element) : null;
+};
+
+const setButtonBusy = ($button, busy) => {
+    const $loader = $button.find("svg").last();
+
+    $button.prop("disabled", busy);
+    $loader.css("display", busy ? "inline-block" : "none");
+};
+
+const setModalCopy = (selector, titleClass, descClass, title, description) => {
+    $(`${selector} ${titleClass}`).html(title);
+    $(`${selector} ${descClass}`).html(description);
+    refreshIcons();
+};
+
+const clearFormErrors = ($form) => {
+    $form.find(".acc__input-error").html("");
+    $form.find("input").removeClass("is-invalid border-danger");
+};
+
+const applyValidationErrors = ($form, errors = {}) => {
+    Object.entries(errors).forEach(([key, value]) => {
+        const message = Array.isArray(value) ? value[0] : value;
+
+        $form.find(`[name="${key}"]`).addClass("is-invalid");
+        $form.find(`.error-${key}`).html(escapeHtml(message));
+    });
+};
+
+var agentBankListTable = (function () {
+    let tableContent;
+
+    const $table = $("#agentBankListTable");
+    const listUrl = route("agent-user.bank.list");
+
+    const getParams = () => ({
+        agent_id: $table.attr("data-agent") || "0",
+        querystr: ($("#query").val() || "").trim(),
+        status: $("#status").val() || "1",
+        size: true,
+    });
+
+    const renderBeneficiary = (row) => {
+        const beneficiary = row.beneficiary || "Not set";
+
+        return `
+            <div class="agm-bank-beneficiary">
+                <span class="agm-bank-icon">
+                    <i data-lucide="landmark"></i>
+                </span>
+                <strong>${escapeHtml(beneficiary)}</strong>
+            </div>
+        `;
+    };
+
+    const renderStatus = (row) => {
+        const id = escapeHtml(row.id);
+
+        if (row.deleted_at != null) {
+            return `
+                <span class="agm-bank-status is-archived">
+                    <i data-lucide="archive"></i>
+                    Archived
+                </span>
+            `;
+        }
+
+        const isActive = Number(row.active) === 1;
+
+        return `
+            <button type="button" data-id="${id}" class="status_updater agm-bank-status ${isActive ? "is-active" : "is-inactive"}" title="Change bank status" aria-label="Change bank status">
+                <b></b>
+                ${isActive ? "Active" : "Inactive"}
+            </button>
+        `;
+    };
+
+    const renderActions = (row) => {
+        const id = escapeHtml(row.id);
+
+        if (row.deleted_at != null) {
+            return `
+                <span class="agm-bank-actions">
+                    <button data-id="${id}" type="button" class="restore_btn agm-agent-action agm-agent-action--view" title="Restore bank" aria-label="Restore bank">
+                        <i data-lucide="rotate-cw"></i>
+                    </button>
+                </span>
+            `;
+        }
+
+        return `
+            <span class="agm-bank-actions">
+                <button data-id="${id}" data-tw-toggle="modal" data-tw-target="#editBankDetailsModal" type="button" class="edit_btn agm-agent-action agm-agent-action--edit" title="Edit bank" aria-label="Edit bank">
+                    <i data-lucide="pencil"></i>
+                </button>
+                <button data-id="${id}" type="button" class="delete_btn agm-agent-action agm-agent-action--delete" title="Delete bank" aria-label="Delete bank">
+                    <i data-lucide="trash-2"></i>
+                </button>
+            </span>
+        `;
+    };
+
+    const _tableGen = function () {
+        tableContent = new Tabulator("#agentBankListTable", {
+            ajaxURL: listUrl,
+            ajaxParams: getParams(),
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
             printStyled: true,
-            pagination: "remote",
-            paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
-            responsiveLayout: "collapse",
-            placeholder: "No matching records found",
+            responsiveLayout: false,
+            placeholder: "No bank details found",
             columns: [
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
+                    width: 110,
+                    minWidth: 95,
+                    headerHozAlign: "left",
+                    formatter(cell) {
+                        return `<span class="agm-agent-id">${escapeHtml(cell.getValue())}</span>`;
+                    },
                 },
                 {
                     title: "Beneficiary Name",
                     field: "beneficiary",
+                    minWidth: 280,
+                    widthGrow: 2.2,
                     headerHozAlign: "left",
+                    formatter(cell) {
+                        return renderBeneficiary(cell.getData());
+                    },
                 },
                 {
                     title: "Sort Code",
                     field: "sort_code",
+                    minWidth: 180,
+                    widthGrow: 1,
                     headerHozAlign: "left",
+                    formatter(cell) {
+                        return `<span class="agm-bank-muted">${escapeHtml(cell.getValue())}</span>`;
+                    },
                 },
                 {
                     title: "A/C No",
                     field: "ac_no",
+                    minWidth: 210,
+                    widthGrow: 1.1,
                     headerHozAlign: "left",
+                    formatter(cell) {
+                        return `<span class="agm-bank-muted">${escapeHtml(cell.getValue())}</span>`;
+                    },
                 },
                 {
                     title: "Status",
                     field: "active",
+                    minWidth: 150,
+                    widthGrow: 0.8,
                     headerHozAlign: "left",
-                    formatter(cell, formatterParams){
-                        return '<div class="form-check form-switch"><input data-id="'+cell.getData().id+'" '+(cell.getData().active == 1 ? 'Checked' : '')+' value="'+cell.getData().active+'" type="checkbox" class="status_updater form-check-input"> </div>';
-                    }
+                    formatter(cell) {
+                        return renderStatus(cell.getData());
+                    },
                 },
                 {
                     title: "Actions",
@@ -59,384 +191,353 @@ var agentBankListTable = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "180",
+                    width: 132,
+                    minWidth: 132,
                     download: false,
-                    formatter(cell, formatterParams) {                        
-                        var btns = "";
-                        if (cell.getData().deleted_at == null) {
-                            btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editBankDetailsModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button>';
-                            btns +='<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                            if(cell.getData().active == 1){
-                                //btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#addBankModal" type="button" class="btn-rounded btn btn-facebook text-white p-0 w-9 h-9 ml-1"><i data-lucide="refresh-ccw" class="w-4 h-4"></i></button>';
-                            }
-                        }  else if (cell.getData().deleted_at != null) {
-                            btns +='<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
-                        }
-                        
-                        return btns;
+                    formatter(cell) {
+                        return renderActions(cell.getData());
                     },
                 },
             ],
+            ajaxResponse(url, params, response) {
+                return response.data || [];
+            },
             renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }
+                refreshIcons();
             },
         });
 
-        // Redraw table onresize
         window.addEventListener("resize", () => {
             tableContent.redraw();
-            createIcons({
-                icons,
-                "stroke-width": 1.5,
-                nameAttr: "data-lucide",
-            });
-        });
-
-        // Export
-        $("#tabulator-export-csv").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
-        });
-
-        $("#tabulator-export-xlsx").on("click", function (event) {
-            window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Groups Details",
-            });
-        });
-
-        // Print
-        $("#tabulator-print").on("click", function (event) {
-            tableContent.print();
+            refreshIcons();
         });
     };
+
+    const reload = () => {
+        if (!tableContent) {
+            _tableGen();
+            return;
+        }
+
+        tableContent.setData(listUrl, getParams());
+    };
+
     return {
         init: function () {
-            _tableGen();
+            if (tableContent) {
+                reload();
+            } else {
+                _tableGen();
+            }
+        },
+        reload,
+        download(format, filename, options = {}) {
+            if (tableContent) {
+                tableContent.download(format, filename, options);
+            }
+        },
+        print() {
+            if (tableContent) {
+                tableContent.print();
+            }
         },
     };
 })();
 
-(function(){
-    if ($("#agentBankListTable").length) {
-        agentBankListTable.init();
+(function () {
+    if (!$("#agentBankListTable").length) return;
 
-        function filterHTMLFormBNK() {
-            agentBankListTable.init();
+    agentBankListTable.init();
+
+    const addBankDetailsModal = getModal("#addBankDetailsModal");
+    const editBankDetailsModal = getModal("#editBankDetailsModal");
+    const successModal = getModal("#successModal");
+    const warningModal = getModal("#warningModal");
+    const confirmModal = getModal("#confirmModal");
+
+    const showSuccess = (title, description, action = "NONE", autoHide = true) => {
+        setModalCopy("#successModal", ".successModalTitle", ".successModalDesc", title, description);
+        $("#successModal .successCloser").attr("data-action", action);
+        successModal?.show();
+
+        if (autoHide) {
+            window.setTimeout(() => successModal?.hide(), 2000);
         }
+    };
 
-        // On submit filter form
-        $("#tabulatorFilterForm")[0].addEventListener(
-            "keypress",
-            function (event) {
-                let keycode = event.keyCode ? event.keyCode : event.which;
-                if (keycode == "13") {
-                    event.preventDefault();
-                    filterHTMLFormBNK();
-                }
-            }
-        );
+    const showWarning = (title, description, autoHide = true) => {
+        setModalCopy("#warningModal", ".warningModalTitle", ".warningModalDesc", title, description);
+        $("#warningModal .warningCloser").attr("data-action", "DISMISS");
+        warningModal?.show();
 
-        // On click go button
-        $("#tabulator-html-filter-go").on("click", function (event) {
-            filterHTMLFormBNK();
-        });
+        if (autoHide) {
+            window.setTimeout(() => warningModal?.hide(), 2400);
+        }
+    };
 
-        // On reset filter form
-        $("#tabulator-html-filter-reset").on("click", function (event) {
-            $("#query").val("");
-            $("#status").val("1");
-            filterHTMLFormBNK();
-        });
-    }
+    const showConfirm = (recordId, action, description) => {
+        $("#confirmModal .confModTitle").html("Are you sure?");
+        $("#confirmModal .confModDesc").html(description);
+        $("#confirmModal .agreeWith")
+            .attr("data-recordid", recordId)
+            .attr("data-status", action)
+            .attr("data-id", recordId)
+            .attr("data-action", action);
+        refreshIcons();
+        confirmModal?.show();
+    };
 
+    const resetBankForm = ($form) => {
+        clearFormErrors($form);
+        $form[0]?.reset();
+    };
 
-    const addBankDetailsModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#addBankDetailsModal"));
-    const editBankDetailsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editBankDetailsModal"));
-    const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-
-    let confModalDelTitle = 'Are you sure?';
-
-
-    const addBankDetailsModalEl = document.getElementById('addBankDetailsModal')
-    addBankDetailsModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#addBankDetailsModal .acc__input-error').html('');
-        $('#addBankDetailsModal .modal-body input').val('');
-        $('#addBankDetailsModal .modal-body select').val('');
-        $('#addBankDetailsModal input[name="active"]').prop('checked', true);
+    $("#tabulatorFilterForm").on("submit", function (event) {
+        event.preventDefault();
+        agentBankListTable.reload();
     });
 
-    const editBankDetailsModalEl = document.getElementById('editBankDetailsModal')
-    editBankDetailsModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#editBankDetailsModal .acc__input-error').html('');
-        $('#editBankDetailsModal .modal-body input').val('');
-        $('#editBankDetailsModal .modal-body select').val('');
-        $('#editBankDetailsModal input[name="active"]').prop('checked', false);
-        $('#editBankDetailsModal [name="id"]').val('0');
+    $("#query").on("keydown", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            agentBankListTable.reload();
+        }
     });
 
-    $('#successModal .successCloser').on('click', function(e){
-        e.preventDefault();
-        if($(this).attr('data-action') == 'RELOAD'){
-            successModal.hide();
+    $("#tabulator-html-filter-go").on("click", function () {
+        agentBankListTable.reload();
+    });
+
+    $("#tabulator-html-filter-reset").on("click", function () {
+        $("#query").val("");
+        $("#status").val("1");
+        agentBankListTable.reload();
+    });
+
+    $("#tabulator-export-csv").on("click", function () {
+        agentBankListTable.download("csv", "agent-bank-details.csv");
+    });
+
+    $("#tabulator-export-xlsx").on("click", function () {
+        window.XLSX = xlsx;
+        agentBankListTable.download("xlsx", "agent-bank-details.xlsx", {
+            sheetName: "Agent Bank Details",
+        });
+    });
+
+    $("#tabulator-print").on("click", function () {
+        agentBankListTable.print();
+    });
+
+    document.getElementById("addBankDetailsModal")?.addEventListener("hide.tw.modal", function () {
+        resetBankForm($("#addBankDetailsForm"));
+        $("#addBankDetailsModal input[name='active']").prop("checked", true);
+        setButtonBusy($("#saveABNK"), false);
+    });
+
+    document.getElementById("editBankDetailsModal")?.addEventListener("hide.tw.modal", function () {
+        resetBankForm($("#editBankDetailsForm"));
+        $("#editBankDetailsModal input[name='active']").prop("checked", false);
+        $("#editBankDetailsModal [name='id']").val("0");
+        setButtonBusy($("#updateABNK"), false);
+    });
+
+    document.getElementById("confirmModal")?.addEventListener("hide.tw.modal", function () {
+        $("#confirmModal .confModDesc").html("");
+        $("#confirmModal .agreeWith")
+            .attr("data-recordid", "0")
+            .attr("data-status", "none")
+            .attr("data-id", "0")
+            .attr("data-action", "none");
+        $("#confirmModal button").removeAttr("disabled");
+    });
+
+    $("#successModal .successCloser").on("click", function (event) {
+        event.preventDefault();
+
+        if ($(this).attr("data-action") === "RELOAD") {
+            successModal?.hide();
             window.location.reload();
-        }else{
-            successModal.hide();
+            return;
         }
+
+        successModal?.hide();
     });
 
-    $('#addBankDetailsForm').on('submit', function(e){
-        e.preventDefault();
-        const form = document.getElementById('addBankDetailsForm');
-    
-        document.querySelector('#saveABNK').setAttribute('disabled', 'disabled');
-        document.querySelector("#saveABNK svg").style.cssText ="display: inline-block;";
+    $("#warningModal .warningCloser").on("click", function (event) {
+        event.preventDefault();
+        warningModal?.hide();
+    });
 
-        let form_data = new FormData(form);
+    $("#confirmModal .disAgreeWith").on("click", function (event) {
+        event.preventDefault();
+        confirmModal?.hide();
+    });
+
+    $("#addBankDetailsForm").on("submit", function (event) {
+        event.preventDefault();
+
+        const form = document.getElementById("addBankDetailsForm");
+        const $form = $(form);
+        const $button = $("#saveABNK");
+
+        clearFormErrors($form);
+        setButtonBusy($button, true);
+
         axios({
             method: "post",
-            url: route('agent-user.store.bank'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            document.querySelector('#saveABNK').removeAttribute('disabled');
-            document.querySelector("#saveABNK svg").style.cssText = "display: none;";
-            
-            if (response.status == 200) {
-                addBankDetailsModal.hide();
-                
-                successModal.show();
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html( "Success!" );
-                    $("#successModal .successModalDesc").html('Agent bank details successfully inserted.');
-                    $("#successModal .successCloser").attr('data-action', 'NONE');
-                });                
-                    
-                setTimeout(function(){
-                    successModal.hide();
-                }, 2000);
-            }
-            agentBankListTable.init();
-        }).catch(error => {
-            document.querySelector('#saveABNK').removeAttribute('disabled');
-            document.querySelector("#saveABNK svg").style.cssText = "display: none;";
-
-            if (error.response) {
-                if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#addBankDetailsForm .${key}`).addClass('border-danger')
-                        $(`#addBankDetailsForm  .error-${key}`).html(val)
-                    }
-                } else {
-                    console.log('error');
+            url: route("agent-user.store.bank"),
+            data: new FormData(form),
+            headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+        })
+            .then((response) => {
+                if (response.status === 200) {
+                    addBankDetailsModal?.hide();
+                    showSuccess("Success!", "Agent bank details successfully inserted.");
+                    agentBankListTable.reload();
                 }
-            }
-        });
+            })
+            .catch((error) => {
+                if (error.response?.status === 422) {
+                    applyValidationErrors($form, error.response.data.errors);
+                } else {
+                    showWarning("Error Found!", "Something went wrong. Please try again or contact administrator.");
+                }
+            })
+            .finally(() => {
+                setButtonBusy($button, false);
+            });
     });
 
-    $('#agentBankListTable').on('click', '.edit_btn', function(){
-        let $editBtn = $(this);
-        let editId = $editBtn.attr("data-id");
+    $("#agentBankListTable").on("click", ".edit_btn", function () {
+        const editId = $(this).attr("data-id");
+
+        clearFormErrors($("#editBankDetailsForm"));
 
         axios({
             method: "post",
             url: route("agent-user.edit.bank"),
-            data: {editId: editId},
-            headers: {"X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")},
-        }).then((response) => {
-            if (response.status == 200) {
-                let dataset = response.data.res;
-                $('#editBankDetailsModal [name="beneficiary"]').val(dataset.beneficiary ? dataset.beneficiary : '');
-                $('#editBankDetailsModal [name="sort_code"]').val(dataset.sort_code ? dataset.sort_code : '');
-                $('#editBankDetailsModal [name="ac_no"]').val(dataset.ac_no ? dataset.ac_no : '');
+            data: { editId },
+            headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+        })
+            .then((response) => {
+                if (response.status === 200) {
+                    const dataset = response.data.res || {};
 
-                if(dataset.active == 1){
-                    $('#editBankDetailsModal input[name="active"]').prop('checked', true);
-                }else{
-                    $('#editBankDetailsModal input[name="active"]').prop('checked', false);
+                    $("#editBankDetailsModal [name='beneficiary']").val(dataset.beneficiary || "");
+                    $("#editBankDetailsModal [name='sort_code']").val(dataset.sort_code || "");
+                    $("#editBankDetailsModal [name='ac_no']").val(dataset.ac_no || "");
+                    $("#editBankDetailsModal input[name='active']").prop("checked", Number(dataset.active) === 1);
+                    $("#editBankDetailsModal input[name='id']").val(editId);
                 }
-
-                $('#editBankDetailsModal input[name="id"]').val(editId);
-            }
-        }).catch((error) => {
-            console.log(error);
-        });
+            })
+            .catch(() => {
+                editBankDetailsModal?.hide();
+                showWarning("Error Found!", "Unable to load this bank detail. Please try again.");
+            });
     });
 
-    $('#editBankDetailsForm').on('submit', function(e){
-        e.preventDefault();
-        const form = document.getElementById('editBankDetailsForm');
-    
-        document.querySelector('#updateABNK').setAttribute('disabled', 'disabled');
-        document.querySelector("#updateABNK svg").style.cssText ="display: inline-block;";
+    $("#editBankDetailsForm").on("submit", function (event) {
+        event.preventDefault();
 
-        let form_data = new FormData(form);
+        const form = document.getElementById("editBankDetailsForm");
+        const $form = $(form);
+        const $button = $("#updateABNK");
+
+        clearFormErrors($form);
+        setButtonBusy($button, true);
+
         axios({
             method: "post",
-            url: route('agent-user.update.bank'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            document.querySelector('#updateABNK').removeAttribute('disabled');
-            document.querySelector("#updateABNK svg").style.cssText = "display: none;";
-            
-            if (response.status == 200) {
-                editBankDetailsModal.hide();
-                
-                successModal.show();
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html( "Success!" );
-                    $("#successModal .successModalDesc").html('Agent bank details successfully updated.');
-                    $("#successModal .successCloser").attr('data-action', 'NONE');
-                });                
-                    
-                setTimeout(function(){
-                    successModal.hide();
-                }, 2000);
-            }
-            agentBankListTable.init();
-        }).catch(error => {
-            document.querySelector('#updateABNK').removeAttribute('disabled');
-            document.querySelector("#updateABNK svg").style.cssText = "display: none;";
-            if (error.response) {
-                if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#editBankDetailsForm .${key}`).addClass('border-danger')
-                        $(`#editBankDetailsForm  .error-${key}`).html(val)
-                    }
+            url: route("agent-user.update.bank"),
+            data: new FormData(form),
+            headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+        })
+            .then((response) => {
+                if (response.status === 200) {
+                    editBankDetailsModal?.hide();
+                    showSuccess("Success!", "Agent bank details successfully updated.");
+                    agentBankListTable.reload();
+                }
+            })
+            .catch((error) => {
+                if (error.response?.status === 422) {
+                    applyValidationErrors($form, error.response.data.errors);
                 } else {
-                    console.log('error');
+                    showWarning("Error Found!", "Something went wrong. Please try again or contact administrator.");
                 }
-            }
-        });
+            })
+            .finally(() => {
+                setButtonBusy($button, false);
+            });
     });
 
+    $("#agentBankListTable").on("click", ".status_updater", function (event) {
+        event.preventDefault();
+        showConfirm($(this).attr("data-id"), "CHANGESTATBNK", "Do you really want to change the status of this bank detail?");
+    });
 
-    $('#confirmModal .agreeWith').on('click', function(e){
-        e.preventDefault();
+    $("#agentBankListTable").on("click", ".delete_btn", function (event) {
+        event.preventDefault();
+        showConfirm($(this).attr("data-id"), "DELETEBNK", "Do you really want to delete this bank detail? This process cannot be undone.");
+    });
 
-        let $agreeBTN = $(this);
-        let recordID = $agreeBTN.attr('data-id');
-        let action = $agreeBTN.attr('data-action');
+    $("#agentBankListTable").on("click", ".restore_btn", function (event) {
+        event.preventDefault();
+        showConfirm($(this).attr("data-id"), "RESTOREBNK", "Do you really want to restore this bank detail?");
+    });
 
-        $('#confirmModal button').attr('disabled', 'disabled');
-        if(action == 'DELETEBNK'){
-            axios({
-                method: 'delete',
-                url: route('agent-user.destroy.bank', recordID),
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
+    $("#confirmModal .agreeWith").on("click", function (event) {
+        event.preventDefault();
 
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Done!');
-                        $('#successModal .successModalDesc').html('Agent Bank details successfully deleted!');
-                        $("#successModal .successCloser").attr('data-action', 'NONE');
-                    });
-                }
-                agentBankListTable.init();
-            }).catch(error =>{
-                console.log(error)
-            });
-        } else if(action == 'RESTOREBNK'){
-            axios({
-                method: 'post',
-                url: route('agent-user.restore.bank', recordID),
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
+        const $agreeButton = $(this);
+        const recordId = $agreeButton.attr("data-recordid") || $agreeButton.attr("data-id");
+        const action = $agreeButton.attr("data-status") || $agreeButton.attr("data-action");
 
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Success!');
-                        $('#successModal .successModalDesc').html('Agent Bank details Successfully Restored!');
-                        $("#successModal .successCloser").attr('data-action', 'NONE');
-                    });
-                }
-                agentBankListTable.init();
-            }).catch(error =>{
-                console.log(error)
-            });
-        } else if(action == 'CHANGESTATBNK'){
-            axios({
-                method: 'post',
-                url: route('agent-user.changestatus.bank', recordID),
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
+        const actionMap = {
+            DELETEBNK: {
+                method: "delete",
+                url: route("agent-user.destroy.bank", recordId),
+                message: "Agent bank details successfully deleted.",
+            },
+            RESTOREBNK: {
+                method: "post",
+                url: route("agent-user.restore.bank", recordId),
+                message: "Agent bank details successfully restored.",
+            },
+            CHANGESTATBNK: {
+                method: "post",
+                url: route("agent-user.changestatus.bank", recordId),
+                message: "Agent bank details status successfully updated.",
+            },
+        };
 
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Success!');
-                        $('#successModal .successModalDesc').html('Agent Bank details status successfully updated!');
-                        $("#successModal .successCloser").attr('data-action', 'NONE');
-                    });
-                }
-                agentBankListTable.init();
-            }).catch(error =>{
-                console.log(error)
-            });
+        const request = actionMap[action];
+
+        if (!recordId || !request) {
+            confirmModal?.hide();
+            return;
         }
-    })
 
-    //Change Status
-    $('#agentBankListTable').on('click', '.status_updater', function(){
-        let $statusBTN = $(this);
-        let rowID = $statusBTN.attr('data-id');
+        $("#confirmModal button").attr("disabled", "disabled");
 
-        confirmModal.show();
-        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html(confModalDelTitle);
-            $('#confirmModal .confModDesc').html('Do you really want to change status of this record? If yes then please click on the agree btn.');
-            $('#confirmModal .agreeWith').attr('data-id', rowID);
-            $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTATBNK');
-        });
+        axios({
+            method: request.method,
+            url: request.url,
+            headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+        })
+            .then((response) => {
+                if (response.status === 200) {
+                    confirmModal?.hide();
+                    showSuccess(action === "DELETEBNK" ? "Done!" : "Success!", request.message);
+                    agentBankListTable.reload();
+                }
+            })
+            .catch(() => {
+                showWarning("Error Found!", "Something went wrong. Please try again or contact administrator.");
+            })
+            .finally(() => {
+                $("#confirmModal button").removeAttr("disabled");
+            });
     });
-
-    // Delete Course
-    $('#agentBankListTable').on('click', '.delete_btn', function(){
-        let $statusBTN = $(this);
-        let rowID = $statusBTN.attr('data-id');
-
-        confirmModal.show();
-        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html(confModalDelTitle);
-            $('#confirmModal .confModDesc').html('Do you really want to delete these record?  If yes, the please click on agree btn.');
-            $('#confirmModal .agreeWith').attr('data-id', rowID);
-            $('#confirmModal .agreeWith').attr('data-action', 'DELETEBNK');
-        });
-    });
-
-    // Restore Course
-    $('#agentBankListTable').on('click', '.restore_btn', function(){
-        let $statusBTN = $(this);
-        let courseID = $statusBTN.attr('data-id');
-
-        confirmModal.show();
-        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html(confModalDelTitle);
-            $('#confirmModal .confModDesc').html('Do you really want to restore this record?');
-            $('#confirmModal .agreeWith').attr('data-id', courseID);
-            $('#confirmModal .agreeWith').attr('data-action', 'RESTOREBNK');
-        });
-    });
-
-
 })();

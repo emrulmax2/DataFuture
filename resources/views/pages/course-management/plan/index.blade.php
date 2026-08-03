@@ -5,407 +5,327 @@
 @endsection
 
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">{{ $subtitle }}</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('dashboard') }}" class="add_btn btn btn-primary shadow-md mr-2">Back To Dashboard</a>
-        </div>
-    </div>
+    @php
+        // The class-day picker below is a chip row writing into a hidden input,
+        // so the posted payload is unchanged from the legacy radio group.
+        $planClassTypes = ['Theory', 'Practical', 'Tutorial', 'Seminar'];
+        $planDays = [
+            'mon' => 'Mon', 'tue' => 'Tue', 'wed' => 'Wed', 'thu' => 'Thu',
+            'fri' => 'Fri', 'sat' => 'Sat', 'sun' => 'Sun',
+        ];
+    @endphp
 
-    <!-- BEGIN: Settings Page Content -->
-    <div class="grid grid-cols-12 gap-6">
-        <div class="col-span-12 lg:col-span-4 2xl:col-span-3 flex lg:block flex-col-reverse">
-            <!-- BEGIN: Profile Info -->
-            @include('pages.course-management.sidebar')
-            <!-- END: Profile Info -->
-        </div>
+    <div class="cm-layout">
+        @include('pages.course-management.partials.sidebar')
 
-        <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
-            <!-- BEGIN: Display Information -->
-            <div class="intro-y box lg:mt-5">
-                <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
-                    <h2 class="font-medium text-base mr-auto">Class plans List</h2>
-                    <a href="{{ route('class.plan.add') }}" class="add_btn btn btn-primary shadow-md ml-auto">Add New Plan</a>
-                </div>
-                <div class="p-5">
-                    <form id="tabulatorFilterForm-CPL">
-                        <div class="grid grid-cols-12 gap-3 gap-y-2">
-                            <div class="col-span-3">
-                                <label class="form-label flex items-center">Courses <i data-loading-icon="three-dots" class="w-6 h-6 ml-3 courseCplLoader hidden"></i></label>
-                                <select id="courses-CPL" name="courses" class="w-full tom-selects">
-                                    <option value="">Please Select</option>
-                                    @if(!empty($courses))
-                                        @foreach($courses as $crs)
-                                            <option value="{{ $crs->id }}">{{ $crs->name }}</option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                            </div>
-                            <div class="col-span-3">
-                                <label class="form-label flex items-center">Terms <i data-loading-icon="three-dots" class="w-6 h-6 ml-3 termCplLoader hidden"></i></label>
-                                <select data-placeholder="Select Term" id="instance_term-CPL" name="term_declaration_id" class="w-full tom-selects">
-                                    <option value="">Please Select</option>
-                                    @if(!empty($terms))
-                                        @foreach($terms as $trm)
-                                            <option value="{{ $trm->id }}">{{ $trm->name }} - {{ $trm->termType->name }}</option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                            </div>
-                            <div class="col-span-3">
-                                <label class="form-label">Groups</label>
-                                <select data-placeholder="Select Group" id="group-CPL" name="groups" class="w-full tom-selects">
-                                    <option value="">Please Select</option>
-                                </select>
-                            </div>
-                            <div class="col-span-3">
-                                <label class="form-label">Tutors</label>
-                                <select data-placeholder="Select Tutor" id="tutor-CPL" name="tutors[]" class="tom-selects w-full" multiple>
-                                    @if(!empty($tutor))
-                                        @foreach($tutor as $tr)
-                                            <option value="{{ $tr->id }}">{{ $tr->name }}</option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                            </div>
-                            <div class="col-span-3">
-                                <label class="form-label">Personal Tutors</label>
-                                <select data-placeholder="Select Tutor" id="ptutor-CPL" name="ptutors[]" class="tom-selects w-full" multiple>
-                                    @if(!empty($ptutor))
-                                        @foreach($ptutor as $ptr)
-                                            <option value="{{ $ptr->id }}">{{ $ptr->name }}</option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                            </div>
-                            <div class="col-span-3">
-                                <label class="form-label">Rooms</label>
-                                <select data-placeholder="Select Room" id="room-CPL" name="rooms[]" class="w-full tom-selects" multiple>
-                                    @if(!empty($room))
-                                        @foreach($room as $rm)
-                                            <option value="{{ $rm->id }}">{{ $rm->venue->name }} - {{ $rm->name }}</option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                            </div>
-                            <div class="col-span-2">
-                                <label class="form-label">Days</label>
-                                <select data-placeholder="Select Tutor" id="days-CPL" name="days[]" class="tom-selects w-full" multiple>
-                                    <option value="mon">Mon</option>
-                                    <option value="tue">Tue</option>
-                                    <option value="wed">Wed</option>
-                                    <option value="thu">Thu</option>
-                                    <option value="fri">Fri</option>
-                                    <option value="sat">Sat</option>
-                                    <option value="sun">Sun</option>
-                                </select>
-                            </div>
-                            <div class="col-span-2">
-                                <label class="form-label">Date</label>
-                                <input type="text" name="date_cpl" id="date-CPL" class="w-full form-control datepicker" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true"/>
-                            </div>
-                            <div class="col-span-2">
-                                <label class="form-label">Status</label>
-                                <select id="statusCPL" name="status" class="w-full form-control">
-                                    <option value="1" selected>Active</option>
-                                    <option value="2">Archived</option>
-                                </select>
-                            </div>
-                            <div class="col-span-2">
-                                <label class="form-label">Views</label>
-                                <select id="view-CPL" name="view" class="w-full form-control">
-                                    <option value="1" selected>List View</option>
-                                    <option value="2">Grid View</option>
-                                    <option value="3">Tree View</option>
-                                </select>
-                            </div>
-                            <div class="col-span-12"></div>
-                            <div class="col-span-6">
-                                <button id="tabulator-html-filter-go-CPL" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                                <button id="tabulator-html-filter-reset-CPL" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                            </div>
-                            <div class="col-span-6 text-right">
-                                <div class="flex mt-5 sm:mt-0 justify-end">
-                                    <button type="button" id="exportPlansXLSX" class="btn btn-outline-secondary w-1/2 sm:w-auto">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XL 
-                                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                            stroke="#164e63e6" class="w-4 h-4 ml-2 theLoader">
-                                            <g fill="none" fill-rule="evenodd">
-                                                <g transform="translate(1 1)" stroke-width="4">
-                                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                                    <path d="M36 18c0-9.94-8.06-18-18-18">
-                                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                                    </path>
-                                                </g>
-                                            </g>
-                                        </svg>
-                                    </button>
-                                    <button id="generateDaysBtn" style="display: none;" type="button" class="btn btn-primary shadow-md ml-2 w-auto">
-                                        Generate Days
-                                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                            stroke="white" class="w-4 h-4 ml-2">
-                                            <g fill="none" fill-rule="evenodd">
-                                                <g transform="translate(1 1)" stroke-width="4">
-                                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                                    <path d="M36 18c0-9.94-8.06-18-18-18">
-                                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                                    </path>
-                                                </g>
-                                            </g>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                    <div class="overflow-x-auto scrollbar-hidden">
-                        <div id="classPlansListTable" class="mt-5 table-report table-report--tabulator"></div>
+        <div class="cm-layout__content">
+            <div class="cm-card cm-tablecard">
+                <div class="cm-tablecard__head">
+                    <div class="cm-tablecard__titles">
+                        <h2 class="cm-tablecard__title cm-serif">Class plans List</h2>
+                        <span class="cm-tablecard__count" data-cm-count="plan"></span>
                     </div>
+                    <a href="{{ route('class.plan.add') }}" class="cm-btn cm-btn--pill">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+                        Add New Plan
+                    </a>
                 </div>
+
+                {{-- The field `name`s are load-bearing: `exportPlans` reads this
+                     form as multipart FormData, so they must stay as they were
+                     (`groups`, `tutors[]`, `date_cpl`, …) even though the list
+                     and grid endpoints take differently-named parameters. --}}
+                <form class="cm-planfilters" id="planFilterForm" autocomplete="off">
+                    <div class="cm-planfilters__grid">
+                        <div class="cm-field">
+                            <label for="plan-courses">Courses</label>
+                            <select id="plan-courses" name="courses" class="cm-select">
+                                <option value="">All</option>
+                                @foreach($courses as $crs)
+                                    <option value="{{ $crs->id }}">{{ $crs->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="cm-field">
+                            <label for="plan-term">Terms</label>
+                            <select id="plan-term" name="term_declaration_id" class="cm-select">
+                                <option value="">All</option>
+                                @foreach($terms as $trm)
+                                    <option value="{{ $trm->id }}">{{ $trm->name }} - {{ $trm->termType->name ?? '' }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Filled from `class.plan.get.group.filter` once both a
+                             course and a term are chosen. --}}
+                        <div class="cm-field">
+                            <label for="plan-group">Groups</label>
+                            <select id="plan-group" name="groups" class="cm-select">
+                                <option value="">All</option>
+                            </select>
+                        </div>
+
+                        <div class="cm-field">
+                            <label for="plan-tutor">Tutors</label>
+                            <select id="plan-tutor" name="tutors[]" class="cm-select" multiple>
+                                @foreach($tutor as $tr)
+                                    <option value="{{ $tr->id }}">{{ $tr->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="cm-field">
+                            <label for="plan-ptutor">Personal Tutors</label>
+                            <select id="plan-ptutor" name="ptutors[]" class="cm-select" multiple>
+                                @foreach($ptutor as $ptr)
+                                    <option value="{{ $ptr->id }}">{{ $ptr->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="cm-field">
+                            <label for="plan-room">Rooms</label>
+                            <select id="plan-room" name="rooms[]" class="cm-select" multiple>
+                                @foreach($room as $rm)
+                                    <option value="{{ $rm->id }}">{{ $rm->venue->name ?? '' }} - {{ $rm->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="cm-field">
+                            <label for="plan-days">Days</label>
+                            <select id="plan-days" name="days[]" class="cm-select" multiple>
+                                @foreach($planDays as $dayValue => $dayLabel)
+                                    <option value="{{ $dayValue }}">{{ $dayLabel }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="cm-field">
+                            <label for="plan-date">Date</label>
+                            <input id="plan-date" name="date_cpl" type="text" class="cm-input datepicker" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true">
+                        </div>
+
+                        {{-- The legacy markup called this `statusCPL` while the
+                             script read `status-CPL`, so `status` was never sent
+                             and Archived plans were unreachable. --}}
+                        <div class="cm-field">
+                            <label for="plan-status">Status</label>
+                            <select id="plan-status" name="status" class="cm-select">
+                                <option value="1" selected>Active</option>
+                                <option value="2">Archived</option>
+                            </select>
+                        </div>
+
+                        <div class="cm-field">
+                            <label for="plan-view">Views</label>
+                            <select id="plan-view" name="view" class="cm-select">
+                                <option value="1" selected>List View</option>
+                                <option value="2">Calendar View</option>
+                                <option value="3">Tree View</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="cm-planfilters__foot">
+                        <button type="submit" id="planFilterGo" class="cm-btn cm-btn--go">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg>
+                            Go
+                        </button>
+                        <button type="button" id="planFilterReset" class="cm-btn cm-btn--ghost">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"></path></svg>
+                            Reset
+                        </button>
+
+                        <span class="cm-planfilters__spacer"></span>
+
+                        {{-- Both buttons carry the `.cm-spinner` / `data-cm-btn-icon`
+                             pair `setBusy()` toggles. --}}
+                        <button type="button" id="exportPlansXLSX" class="cm-pillbtn">
+                            <svg style="display: none;" class="cm-spinner" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="currentColor">
+                                <g fill="none" fill-rule="evenodd"><g transform="translate(1 1)" stroke-width="4"><circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle><path d="M36 18c0-9.94-8.06-18-18-18"><animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform></path></g></g>
+                            </svg>
+                            <svg data-cm-btn-icon width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg>
+                            Export XL
+                        </button>
+
+                        {{-- Revealed by the table's selection handler. --}}
+                        <button type="button" id="generateDaysBtn" class="cm-btn cm-btn--go" hidden>
+                            <svg style="display: none;" class="cm-spinner" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="white">
+                                <g fill="none" fill-rule="evenodd"><g transform="translate(1 1)" stroke-width="4"><circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle><path d="M36 18c0-9.94-8.06-18-18-18"><animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform></path></g></g>
+                            </svg>
+                            <svg data-cm-btn-icon width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4M3 10h18"></path><rect x="3" y="4" width="18" height="18" rx="2"></rect></svg>
+                            Generate Days
+                        </button>
+                    </div>
+                </form>
+
+                {{-- Two hosts, not one: the calendar view is server-rendered HTML
+                     and the legacy code wrote it over the Tabulator element,
+                     which left the table unusable until a full reload. --}}
+                <div class="cm-tabulator-wrap" data-cm-pane="list">
+                    <div id="classPlansListTable" class="cm-tabulator"></div>
+                </div>
+                <div class="cm-planscal" data-cm-pane="grid" hidden></div>
             </div>
         </div>
     </div>
 
-
-    <!-- BEGIN: Add Modal -->
+    {{-- ---------------------------------------------------------------- --}}
+    {{-- Edit plan                                                         --}}
+    {{-- ---------------------------------------------------------------- --}}
     <div id="editPlanModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <form method="POST" action="#" id="editPlanForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Edit Plan</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
+        <div class="modal-dialog cm-modal__dialog cm-modal__dialog--wide">
+            <form method="POST" action="#" id="editPlanForm" enctype="multipart/form-data" autocomplete="off">
+                <div class="modal-content cm-modal">
+                    <div class="cm-modal__head">
+                        <div>
+                            <div class="cm-modal__eyebrow"><span>Class plan</span></div>
+                            <h2 class="cm-modal__title cm-serif">Edit Plan</h2>
+                        </div>
+                        <button type="button" data-tw-dismiss="modal" class="cm-modal__close" aria-label="Close">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                        </button>
                     </div>
-                    <div class="modal-body">
-                    <div class="grid grid-cols-12 gap-3">
-                            <div class="col-span-6">
-                                <div class="grid grid-cols-12 gap-0">
-                                    <label class="col-span-4"><div class="text-left text-slate-500 font-medium">Term</div></label>
-                                    <div class="col-span-8"><div class="text-left font-medium font-bold termName">Term Name</div></div>
-                                </div>
+
+                    <div class="cm-modal__body cm-modal__body--grid3">
+                        <div class="cm-readout">
+                            <span class="cm-readout__label">Term</span>
+                            <span class="cm-readout__value termName">&mdash;</span>
+                        </div>
+                        <div class="cm-readout cm-field--span2">
+                            <span class="cm-readout__label">Course</span>
+                            <span class="cm-readout__value courseName">&mdash;</span>
+                        </div>
+                        <div class="cm-readout cm-field--span3">
+                            <span class="cm-readout__label">Group</span>
+                            <span class="cm-readout__value groupName">&mdash;</span>
+                        </div>
+
+                        <div class="cm-field">
+                            <label for="module_creation_id">Module <span>*</span></label>
+                            {{-- Options arrive from `class.plan.edit` as a ready
+                                 <option> string, keyed to the plan's term. --}}
+                            <select id="module_creation_id" name="module_creation_id" class="cm-select">
+                                <option value="">Please Select</option>
+                            </select>
+                            <div class="acc__input-error error-module_creation_id"></div>
+                        </div>
+
+                        <div class="cm-field">
+                            <label for="rooms_id">Room <span>*</span></label>
+                            <select id="rooms_id" name="rooms_id" class="cm-select">
+                                <option value="">Please Select</option>
+                                @foreach($room as $rm)
+                                    <option value="{{ $rm->id }}">{{ $rm->name }} - {{ $rm->venue->name ?? '' }}</option>
+                                @endforeach
+                            </select>
+                            <div class="acc__input-error error-rooms_id"></div>
+                        </div>
+
+                        <div class="cm-field">
+                            <label for="class_type">Class Type <span>*</span></label>
+                            <select id="class_type" name="class_type" class="cm-select">
+                                <option value="">Please Select</option>
+                                @foreach($planClassTypes as $planType)
+                                    <option value="{{ $planType }}">{{ $planType }}</option>
+                                @endforeach
+                            </select>
+                            <div class="acc__input-error error-class_type"></div>
+                        </div>
+
+                        {{-- Tutorial and Seminar classes are led by the personal
+                             tutor, so the Tutor field is withdrawn for them —
+                             the same split the list's Tutor column uses. --}}
+                        <div class="cm-field tutorWrap">
+                            <label for="tutor_id">Tutor</label>
+                            <select id="tutor_id" name="tutor_id" class="cm-select">
+                                <option value="">Please Select</option>
+                                @foreach($tutor as $tr)
+                                    <option value="{{ $tr->id }}">{{ $tr->name }}</option>
+                                @endforeach
+                            </select>
+                            <div class="acc__input-error error-tutor_id"></div>
+                        </div>
+
+                        <div class="cm-field">
+                            <label for="personal_tutor_id">Personal Tutor</label>
+                            <select id="personal_tutor_id" name="personal_tutor_id" class="cm-select">
+                                <option value="">Please Select</option>
+                                @foreach($ptutor as $ptr)
+                                    <option value="{{ $ptr->id }}">{{ $ptr->name }}</option>
+                                @endforeach
+                            </select>
+                            <div class="acc__input-error error-personal_tutor_id"></div>
+                        </div>
+
+                        <div class="cm-field">
+                            <label for="start_time">Start Time <span>*</span></label>
+                            <input id="start_time" type="text" name="start_time" class="cm-input theTimeField" placeholder="09:15">
+                            <div class="acc__input-error error-start_time"></div>
+                        </div>
+
+                        <div class="cm-field">
+                            <label for="end_time">End Time <span>*</span></label>
+                            <input id="end_time" type="text" name="end_time" class="cm-input theTimeField" placeholder="12:15">
+                            <div class="acc__input-error error-end_time"></div>
+                        </div>
+
+                        <div class="cm-field">
+                            <label for="submission_date">Submission Date</label>
+                            <input id="submission_date" type="text" name="submission_date" class="cm-input datepicker" data-format="DD-MM-YYYY" data-single-mode="true" placeholder="DD-MM-YYYY">
+                            <div class="acc__input-error error-submission_date"></div>
+                        </div>
+
+                        <div class="cm-field cm-field--span3">
+                            <label>Class Day <span>*</span></label>
+                            <div class="cm-optpick" data-cm-optpick="class_day">
+                                @foreach($planDays as $dayValue => $dayLabel)
+                                    <button type="button" class="cm-optpick__btn" data-cm-opt="{{ $dayValue }}">
+                                        <span class="cm-optpick__box">
+                                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                                        </span>
+                                        {{ $dayLabel }}
+                                    </button>
+                                @endforeach
                             </div>
-                            <div class="col-span-6">
-                                <div class="grid grid-cols-12 gap-0">
-                                    <label class="col-span-4"><div class="text-left text-slate-500 font-medium">Course</div></label>
-                                    <div class="col-span-8"><div class="text-left font-medium font-bold courseName">Course Name</div></div>
-                                </div>
-                            </div>
-                            <div class="col-span-6">
-                                <div class="grid grid-cols-12 gap-0">
-                                    <label class="col-span-4"><div class="text-left text-slate-500 font-medium">Group</div></label>
-                                    <div class="col-span-8"><div class="text-left font-medium font-bold groupName">Group Name</div></div>
-                                </div>
-                            </div>
-                            <div class="col-span-6"></div>
-                            <div class="col-span-6 sm:col-span-4">
-                                <label for="module_creation_id" class="form-label">Module <span class="text-danger">*</span></label>
-                                <select id="module_creation_id" name="module_creation_id" class="form-control w-full">
-                                    <option value="">Please Select</option>
-                                </select>
-                                <div class="acc__input-error error-module_creation_id text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-6 sm:col-span-4">
-                                <label for="rooms_id" class="form-label">Room <span class="text-danger">*</span></label>
-                                <select id="rooms_id" name="rooms_id" class="form-control w-full">
-                                    <option value="">Please Select</option>
-                                    @if(!empty($room))
-                                        @foreach($room as $rm)
-                                            <option value="{{ $rm->id }}">{{ $rm->name }} - {{ $rm->venue->name }}</option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                                <div class="acc__input-error error-rooms_id text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-6 sm:col-span-4">
-                                <label for="class_type" class="form-label">Class Type <span class="text-danger">*</span></label>
-                                <select id="class_type" name="class_type" class="form-control w-full">
-                                    <option value="">Please Select</option>
-                                    <option value="Theory">Theory</option>
-                                    <option value="Practical">Practical</option>
-                                    <option value="Tutorial">Tutorial</option>
-                                    <option value="Seminar">Seminar</option>
-                                </select>
-                                <div class="acc__input-error error-class_type text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-6 sm:col-span-4 tutorWrap" style="display: none;">
-                                <label for="tutor_id" class="form-label">Tutor <span class="text-danger">*</span></label>
-                                <select id="tutor_id" name="tutor_id" class="tom-selects w-full">
-                                    <option value="">Please Select</option>
-                                    @if(!empty($tutor))
-                                        @foreach($tutor as $tr)
-                                            <option value="{{ $tr->id }}">{{ $tr->name }}</option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                                <div class="acc__input-error error-tutor_id text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-6 sm:col-span-4 PersonalTutorWrap">
-                                <label for="personal_tutor_id" class="form-label">Personal Tutor</label>
-                                <select id="personal_tutor_id" name="personal_tutor_id" class="tom-selects w-full">
-                                    <option value="">Please Select</option>
-                                    @if(!empty($ptutor))
-                                        @foreach($ptutor as $ptr)
-                                            <option value="{{ $ptr->id }}">{{ $ptr->name }}</option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                                <div class="acc__input-error error-personal_tutor_id text-danger mt-2"></div>
-                            </div>
-                            {{--<div class="col-span-6 sm:col-span-4">
-                                <label for="module_enrollment_key" class="form-label">Enrollment Key <span class="text-danger">*</span></label>
-                                <input id="module_enrollment_key" type="text" name="module_enrollment_key" class="form-control w-full">
-                                <div class="acc__input-error error-module_enrollment_key text-danger mt-2"></div>
-                            </div>--}}
-                            <div class="col-span-6 sm:col-span-4">
-                                <label for="start_time" class="form-label">Start Time <span class="text-danger">*</span></label>
-                                <input id="start_time" type="text" name="start_time" class="form-control w-full theTimeField" placeholder="00:00">
-                                <div class="acc__input-error error-start_time text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-6 sm:col-span-4">
-                                <label for="end_time" class="form-label">End Time <span class="text-danger">*</span></label>
-                                <input id="end_time" type="text" name="end_time" class="form-control w-full theTimeField" placeholder="00:00">
-                                <div class="acc__input-error error-end_time text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-6 sm:col-span-4">
-                                <label for="submission_date" class="form-label">Submission Date</label>
-                                <input id="submission_date" type="text" name="submission_date" class="form-control w-full datepicker" data-format="DD-MM-YYYY" data-single-mode="true" placeholder="DD-MM-YYYY">
-                                <div class="acc__input-error error-submission_date text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12">
-                                <label class="form-label">Class Day <span class="text-danger">*</span></label>
-                                <div class="flex flex-col sm:flex-row mt-2">
-                                    <div class="form-check mr-3">
-                                        <input id="day_mon" class="form-check-input" type="radio" name="class_day" value="mon">
-                                        <label class="form-check-label" for="day_mon">Mon</label>
-                                    </div>
-                                    <div class="form-check mr-3">
-                                        <input id="day_tue" class="form-check-input" type="radio" name="class_day" value="tue">
-                                        <label class="form-check-label" for="day_tue">Tue</label>
-                                    </div>
-                                    <div class="form-check mr-3">
-                                        <input id="day_wed" class="form-check-input" type="radio" name="class_day" value="wed">
-                                        <label class="form-check-label" for="day_wed">Wed</label>
-                                    </div>
-                                    <div class="form-check mr-3">
-                                        <input id="day_thu" class="form-check-input" type="radio" name="class_day" value="thu">
-                                        <label class="form-check-label" for="day_thu">Thu</label>
-                                    </div>
-                                    <div class="form-check mr-3">
-                                        <input id="day_fri" class="form-check-input" type="radio" name="class_day" value="fri">
-                                        <label class="form-check-label" for="day_fri">Fri</label>
-                                    </div>
-                                    <div class="form-check mr-3">
-                                        <input id="day_sat" class="form-check-input" type="radio" name="class_day" value="sat">
-                                        <label class="form-check-label" for="day_sat">Sat</label>
-                                    </div>
-                                    <div class="form-check mr-3">
-                                        <input id="day_sun" class="form-check-input" type="radio" name="class_day" value="sun">
-                                        <label class="form-check-label" for="day_sun">Sun</label>
-                                    </div>
-                                </div>
-                                <div class="acc__input-error error-class_day text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-6">
-                                <label for="virtual_room" class="form-label">Virtual Room</label>
-                                <textarea id="virtual_room" name="virtual_room" class="form-control w-full"></textarea>
-                                <div class="acc__input-error error-virtual_room text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-6">
-                                <label for="note" class="form-label">Note</label>
-                                <textarea id="note" name="note" class="form-control w-full"></textarea>
-                                <div class="acc__input-error error-note text-danger mt-2"></div>
-                            </div>
+                            <input type="hidden" id="class_day" name="class_day" value="">
+                            <div class="acc__input-error error-class_day"></div>
+                        </div>
+
+                        <div class="cm-field">
+                            <label for="virtual_room">Virtual Room</label>
+                            <textarea id="virtual_room" name="virtual_room" class="cm-input cm-textarea"></textarea>
+                            <div class="acc__input-error error-virtual_room"></div>
+                        </div>
+
+                        <div class="cm-field cm-field--span2">
+                            <label for="note">Note</label>
+                            <textarea id="note" name="note" class="cm-input cm-textarea"></textarea>
+                            <div class="acc__input-error error-note"></div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="updatePlans" class="btn btn-primary w-auto">
-                            Save
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
+
+                    <div class="cm-modal__foot">
+                        <button type="button" data-tw-dismiss="modal" class="cm-btn cm-btn--cancel">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                            Cancel
                         </button>
-                        <input type="hidden" name="id" value="0"/>
+                        <button type="submit" id="updatePlans" class="cm-btn cm-btn--save">
+                            @include('pages.course-management.partials.save-glyphs')
+                            Update
+                        </button>
+                        <input type="hidden" name="id" value="0">
                     </div>
                 </div>
             </form>
         </div>
     </div>
-    <!-- END: Add Modal -->
-    
-    
-    <!-- BEGIN: Success Modal Content -->
-    <div id="successModalCP" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitleCP"></div>
-                        <div class="text-slate-500 mt-2 successModalDescCP"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Success Modal Content -->
-    <!-- BEGIN: Delete Confirm Modal Content -->
-    <div id="confirmModalCP" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 confModTitleCP">Are you sure?</div>
-                        <div class="text-slate-500 mt-2 confModDescCP"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                        <button type="button" data-id="0" data-action="none" class="agreeWithCP btn btn-danger w-auto">Yes, I agree</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Delete Confirm Modal Content -->
 
-    <!-- BEGIN: Warning Modal Content -->
-    <div id="warningModalCP" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 warningModalTitleCP">Oops!</div>
-                        <div class="text-slate-500 mt-2 warningModalDescCP"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">OK, Got it</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Warning Modal Content -->
+    @include('pages.course-management.partials.list-dialogs')
 @endsection
 
 @section('script')
-    @vite('resources/js/course-management.js')
-    @vite('resources/js/plan.js')
+    @vite('resources/js/course-plans.js')
 @endsection
