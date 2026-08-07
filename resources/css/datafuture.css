@@ -20731,13 +20731,18 @@ body.employee-public-form-body .dataCollectionFormWrap {
 .att-page .att-row__facts{ font-size:10.5px; color:#8497a4; margin-top:4px; }
 .att-page .att-row__leave{ display:flex; align-items:center; gap:5px; margin-top:5px; font-size:10.5px; color:var(--att-accent); }
 
+/* Sized to hold the longest label on ONE line. The chip lives in a 252px column
+   that leaves it ~166px once the avatar and padding are taken out; at the old 11px
+   that was about 21 characters, and a longer label wrapped and pushed the whole row
+   taller than its neighbours. Trimmed here and capped at 20 characters in
+   recommendation() so the two meet with room to spare. */
 .att-page .att-reco{
-    display:inline-flex; align-items:center; gap:6px; width:fit-content;
-    margin-top:7px; padding:3px 10px 3px 8px;
-    font-size:11px; font-weight:600; border-radius:999px;
+    display:inline-flex; align-items:center; gap:5px; width:fit-content;
+    margin-top:7px; padding:3px 9px 3px 7px;
+    font-size:10.5px; font-weight:600; letter-spacing:-.01em; border-radius:999px;
 }
 .att-page .att-reco__dot{
-    width:7px; height:7px; border-radius:999px; flex:none;
+    width:6px; height:6px; border-radius:999px; flex:none;
     background:currentColor;
 }
 .att-page .att-tone--good{ background:var(--att-good-bg); color:var(--att-good); }
@@ -20819,6 +20824,13 @@ body.employee-public-form-body .dataCollectionFormWrap {
 .att-page .att-noclock__copy{ min-width:0; display:flex; flex-direction:column; gap:1px; }
 .att-page .att-noclock__title{ font-size:12.5px; line-height:1.2; font-weight:700; }
 .att-page .att-noclock__hint{ font-size:10.5px; line-height:1.3; font-weight:500; opacity:.8; white-space:normal; }
+/* The employee's own words, and HR's, each on their own line under the figures.
+   Slightly quieter than the hint above them and given a little air, so a long
+   request reads as prose rather than as more of the same run-on line. */
+.att-page .att-noclock__note{
+    margin-top:3px; font-size:10.5px; line-height:1.45;
+    font-weight:400; opacity:.72; white-space:normal;
+}
 
 /* Leave colours are the portal's own: the same hues the leave calendar and the HR
    attendance report already use (.holidayVacationBG and friends), so one leave type
@@ -21013,6 +21025,11 @@ body.employee-public-form-body .dataCollectionFormWrap {
 .att-page .att-card__line span{ font-size:10px; color:#647889; width:56px; flex:none; }
 .att-page .att-card__line b{ font-family:var(--att-mono); font-size:14px; font-weight:600; }
 .att-page .att-pill{ margin-top:4px; font-size:10.5px; font-weight:600; padding:2px 8px; border-radius:999px; }
+/* Why the recorded time differs from the punch above it. Sits under the state pill
+   as a quiet footnote - it explains a normal outcome, so it must not read as a
+   second warning next to the pill. */
+.att-page .att-card__rule{ margin-top:5px; font-size:10px; line-height:1.4; color:#647889; }
+.att-page .att-card.is-flagged .att-card__rule{ color:#9a6a2e; }
 
 /* A flagged card/breaks block paints a warm (warn) or pink (bad) wash. The muted
    greys above are tuned for the near-white surface and wash out on it, so the

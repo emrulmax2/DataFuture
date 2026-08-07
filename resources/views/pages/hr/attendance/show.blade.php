@@ -60,13 +60,14 @@
                 </div>
 
                 <div class="att-summary__actions">
-                    {{-- Accept-all is scoped to the No issues tab: the JS only reveals it there,
-                         its count is the no-issue rows, and it copies their clocked punches into
-                         the record. Hidden by default; refreshBulkAction() toggles it. --}}
+                    {{-- Scoped to the No issues tab: the JS only reveals it there and its count
+                         is the no-issue rows. It approves them exactly as the sync recorded them
+                         against the clock-in/clock-out conditions - it does NOT re-read the raw
+                         punches. Hidden by default; refreshBulkAction() toggles it. --}}
                     <button type="button" id="attAcceptAll" class="att-btn att-btn--solid" style="display:none;"
-                            title="On the No issues tab, copy each remaining row's clocked punch into its recorded time, then approve it.">
+                            title="On the No issues tab, approve each remaining row with the time already recorded against the HR clock-in / clock-out conditions.">
                         <i data-lucide="check" class="w-4 h-4"></i>
-                        Accept all clocked ( <span id="attNoIssuesCount">{{ $counts['noissues'] }}</span> )
+                        Approve all no-issue ( <span id="attNoIssuesCount">{{ $counts['noissues'] }}</span> )
                     </button>
                 </div>
             </div>

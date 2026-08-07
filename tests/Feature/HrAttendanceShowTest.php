@@ -89,6 +89,28 @@ class HrAttendanceShowTest extends TestCase
         $this->assertStringNotContainsString('clock_in_location', $html);
     }
 
+    /**
+     * The reco chip sits in a 252px column that leaves it roughly 166px of text.
+     * A label past ~20 characters wraps to a second line and pushes that row taller
+     * than every other row on the page, which is how "No break clocked - review"
+     * was spotted. The limit is otherwise held only by a comment, so pin it.
+     */
+    public function test_no_reco_label_is_wide_enough_to_wrap(): void
+    {
+        preg_match_all('/<span class="att-reco[^"]*">\s*<span class="att-reco__dot"><\/span>\s*(.*?)\s*<\/span>/s', $this->html(), $m);
+
+        $this->assertNotEmpty($m[1], 'expected reco chips on the page');
+
+        foreach (array_unique($m[1]) as $label) {
+            $label = trim(html_entity_decode($label));
+            $this->assertLessThanOrEqual(
+                20,
+                mb_strlen($label),
+                "reco label \"{$label}\" is ".mb_strlen($label).' chars and will wrap the chip onto a second line'
+            );
+        }
+    }
+
     public function test_it_does_not_run_a_query_per_row(): void
     {
         $queries = 0;

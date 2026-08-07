@@ -42,6 +42,8 @@
                         $punch = $side === 'in' ? $r['punch_in'] : $r['punch_out'];
                         $state = $side === 'in' ? $r['in_state'] : $r['out_state'];
                         $flagged = $side === 'in' ? $r['clockin_issue'] : $r['clockout_issue'];
+                        $onContract = $side === 'in' ? $r['in_on_contract'] : $r['out_on_contract'];
+                        $grace = $side === 'in' ? $r['grace_in'] : $r['grace_out'];
                     @endphp
                     <div class="att-card {{ $flagged ? 'is-flagged' : '' }}">
                         <div class="att-card__label">{{ $label }}</div>
@@ -52,6 +54,12 @@
                             <span>Clocked</span><b class="att-text--{{ $state['tone'] }}">{{ $punch ?: '—' }}</b>
                         </div>
                         <span class="att-pill att-tone--{{ $state['tone'] }}">{{ $state['label'] }}</span>
+                        {{-- Says why "Recorded for payroll" below reads differently from the punch
+                             just above it. Only shown where the two actually differ, so a normal
+                             card stays as quiet as it was. --}}
+                        @if($onContract)
+                            <span class="att-card__rule">Inside the {{ $grace }} window — recorded at the {{ $sched }} contract time.</span>
+                        @endif
                         @include('pages.hr.attendance.partials.venue', ['loc' => $side === 'in' ? $r['loc_in'] : $r['loc_out']])
                     </div>
                 @endforeach

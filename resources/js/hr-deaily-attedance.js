@@ -336,15 +336,14 @@ import IMask from "imask";
         $editor.find(".att-card, .att-breaks").removeClass("is-flagged");
         $editor.find('input[name="attendance[' + id + '][user_issues]"]').val(0);
 
-        // Reflect a saved note on the leave/absence line without a reload. data-hint-base
-        // is the server-known part (holiday hours, leave comment); the typed note goes
-        // after it, mirroring the Blade. Only leave rows carry that block.
-        const $noclock = $row.find(".att-noclock--leave");
-        if ($noclock.length) {
-            const base = ($noclock.attr("data-hint-base") || "").trim();
+        // Reflect a saved note on the leave/absence block without a reload. The note
+        // owns its own line, so this fills that one element - it no longer rebuilds
+        // the whole hint out of a data-hint-base copy of what the Blade already
+        // rendered, which had to be kept in step with it by hand.
+        const $note = $row.find(".js-noclock-note");
+        if ($note.length) {
             const note = ($editor.find(".rowNote").val() || "").trim();
-            const parts = [base, note].filter(Boolean);
-            $row.find(".att-noclock__hint").text(parts.length ? parts.join(" · ") : "Recorded absence");
+            $note.text(note).toggle(note !== "");
         }
     }
 
@@ -572,36 +571,29 @@ import IMask from "imask";
         pendingRows().filter(function () { return hasBucket($(this), "noissues"); });
 
     /**
-     * Copies each pending no-issue row's clocked punch into its recorded time, then
-     * approves it. That overwrites what is there, so it asks first.
+     * Approves every pending no-issue row exactly as the sync recorded it.
+     *
+     * This used to copy each row's raw punch into its recorded time first, which
+     * threw away the whole point of site-settings/hr-condition: the sync has
+     * ALREADY resolved the punch against the configured windows and written the
+     * contract time where one applies (a 10:05 punch on a 10:00 contract is
+     * recorded as 10:00). Copying the punch back over it re-introduced the 5
+     * minutes the condition exists to absorb, and did it to every no-issue row on
+     * the day in one click. The old screen's "save all" only ever serialised the
+     * fields as they stood; this now does the same.
      */
     $("#attAcceptAll").on("click", function () {
         const $targets = pendingNoIssueRows();
         if (!$targets.length) return;
 
         confirmModal.show();
-        $("#confirmModal .confModTitle").html("Accept all clocked times?");
+        $("#confirmModal .confModTitle").html("Approve all no-issue rows?");
         $("#confirmModal .confModDesc").html(
-            "This copies the clocked punch into the recorded time on <strong>" + $targets.length +
-            "</strong> no-issue row(s) and approves them. Rows with no punch keep the recorded time they have."
+            "This approves <strong>" + $targets.length + "</strong> no-issue row(s) with the times already " +
+            "recorded against the clock-in and clock-out conditions. Nothing is recalculated."
         );
         $("#confirmModal .agreeWith").attr("data-action", "ACCEPT_ALL").attr("data-id", "0").attr("data-date", "");
     });
-
-    function acceptClocked(id) {
-        const $row    = rowOf(id);
-        const $editor = editorOf(id);
-
-        const punchIn  = String($row.attr("data-punch-in")  || "");
-        const punchOut = String($row.attr("data-punch-out") || "");
-
-        // A missing punch would blank the recorded time and pay them nothing, so only
-        // a real HH:MM is copied across.
-        if (punchIn.length === 5)  $editor.find(".clockin_system").val(punchIn);
-        if (punchOut.length === 5) $editor.find(".clockout_system").val(punchOut);
-
-        recalcWork(id);
-    }
 
     /* ---------------------------------------------------------------- break editor */
 
@@ -728,12 +720,12 @@ import IMask from "imask";
         if (action === "ACCEPT_ALL") {
             confirmModal.hide();
             const $targets = pendingNoIssueRows();
-            bulkSave($targets, acceptClocked, function (count, skipped) {
+            bulkSave($targets, null, function (count, skipped) {
                 if (skipped.length) {
                     warn("Approved with exceptions",
                         count + " row(s) approved. Skipped (negative hours): <strong>" + skipped.join(", ") + "</strong>.");
                 } else {
-                    notify("Approved", count + " row(s) approved with their clocked times.");
+                    notify("Approved", count + " row(s) approved as recorded.");
                 }
             });
             return;
