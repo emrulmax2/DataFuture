@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\CourseRequests;
 use App\Http\Requests\CourseUpdateRequests;
 use App\Models\Course;
+use App\Models\CourseBaseDatafutures;
 use App\Models\User;
 use App\Models\AwardingBody;
 use App\Models\DatafutureField;
@@ -172,6 +173,12 @@ class CourseController extends Controller
             'course' => Course::find($id),
             'levels' => ModuleLevel::all(),
             'df_fields' => DatafutureField::whereIn('datafuture_field_category_id', [1,2])->orderBy('name', 'ASC')->get(),
+            'df_parent_fields' => CourseBaseDatafutures::with(['field.category'])
+                ->where('course_id', $id)
+                ->whereNull('parent_id')
+                ->orderBy('datafuture_field_id', 'ASC')
+                ->orderBy('id', 'ASC')
+                ->get(),
             'monitors' => TutorMonitorTeam::all()
         ]);
     }

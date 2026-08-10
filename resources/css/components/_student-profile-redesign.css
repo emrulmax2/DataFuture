@@ -2674,6 +2674,27 @@ body.student-profile-body .modal .ts-dropdown .dropdown-input:focus {
     min-width: 190px;
 }
 
+.student-profile-redesign .student-profile-notes-filter .student-profile-tablefilter-form {
+    flex-wrap: nowrap;
+    min-width: 0;
+}
+
+.student-profile-redesign .student-profile-notes-filter .ts-control.student-profile-tablefilter-term,
+.student-profile-redesign .student-profile-notes-filter .ts-wrapper.student-profile-tablefilter-term {
+    flex: 0 0 220px;
+    max-width: 220px;
+    min-width: 220px;
+    width: 220px !important;
+}
+
+.student-profile-redesign .student-profile-notes-filter .student-profile-tablefilter-search {
+    flex: 0 0 200px;
+}
+
+.student-profile-redesign .student-profile-notes-filter .student-profile-tablefilter-status {
+    flex: 0 0 118px;
+}
+
 .student-profile-redesign .student-profile-tablefilter-date {
     width: 150px;
 }
@@ -2971,9 +2992,12 @@ body.student-profile-body .modal .ts-dropdown .dropdown-input:focus {
 
 .student-profile-redesign #studentNotesListTable .tabulator-cell[tabulator-field="note"] .view_btn {
     color: var(--student-profile-accent);
+    cursor: pointer;
     font-size: 12px;
     font-weight: 800;
+    position: relative;
     text-decoration: none;
+    z-index: 1;
 }
 
 .student-profile-redesign #studentNotesListTable .tabulator-cell[tabulator-field="note"] .view_btn:hover,
@@ -3073,6 +3097,65 @@ body.student-profile-body .modal .ts-dropdown .dropdown-input:focus {
     margin-bottom: 8px;
 }
 
+.student-profile-redesign #studentNotesListTable .tabulator-cell[tabulator-field="followed_up"] {
+    white-space: normal !important;
+}
+
+.student-profile-redesign #studentNotesListTable .student-note-followup-stack {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    width: 100%;
+}
+
+.student-profile-redesign #studentNotesListTable .student-note-followup-row {
+    align-items: flex-start;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+}
+
+.student-profile-redesign #studentNotesListTable .student-note-chip {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    text-align: left;
+    white-space: normal !important;
+}
+
+.student-profile-redesign #studentNotesListTable .student-note-followed-list {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+}
+
+.student-profile-redesign #studentNotesListTable .student-note-followed-list span {
+    display: inline-block;
+    margin: 0 !important;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    white-space: normal !important;
+    word-break: break-word;
+}
+
+.student-profile-redesign #studentNotesListTable .student-note-followup-completed {
+    max-width: 100%;
+    min-width: 0;
+}
+
+.student-profile-redesign #studentNotesListTable .student-note-followup-completed > div {
+    overflow-wrap: anywhere;
+    white-space: normal !important;
+}
+
 .student-profile-redesign #studentNotesListTable .tabulator-cell[tabulator-field="followed_up"] span {
     border-radius: 999px;
     font-size: 11px;
@@ -3136,6 +3219,16 @@ body.student-profile-body #followUpCommentModal #postCommentBtn:focus {
 
     .student-profile-redesign .student-profile-tablefilter .ts-wrapper {
         width: 100%;
+    }
+
+    .student-profile-redesign .student-profile-notes-filter .ts-control.student-profile-tablefilter-term,
+    .student-profile-redesign .student-profile-notes-filter .ts-wrapper.student-profile-tablefilter-term,
+    .student-profile-redesign .student-profile-notes-filter .student-profile-tablefilter-search,
+    .student-profile-redesign .student-profile-notes-filter .student-profile-tablefilter-status {
+        flex: 1 1 auto;
+        max-width: none;
+        min-width: 0;
+        width: 100% !important;
     }
 }
 

@@ -1,6 +1,10 @@
-@if($df_qualification_fields->count() > 0)
+@php
+    $qualificationFields = $qualificationFields ?? $df_qualification_fields;
+@endphp
+
+@if($qualificationFields->count() > 0)
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 gap-y-2">
-        @foreach($df_qualification_fields as $dfld)
+        @foreach($qualificationFields as $dfld)
             @php 
                 $type = (isset($dfld->field->type) && !empty($dfld->field->type) ? $dfld->field->type : 'text');
                 $value = (isset($dfld->field_value) && !empty($dfld->field_value) ? trim($dfld->field_value) : '');

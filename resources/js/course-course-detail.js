@@ -12,6 +12,7 @@
  */
 
 import Tabulator from "tabulator-tables";
+import TomSelect from "tom-select";
 import {
     PAGINATION_LANGS,
     PAGINATION_SIZES,
@@ -37,6 +38,107 @@ import {
     if (!modulesHost) return;
 
     const courseId = modulesHost.getAttribute("data-courseid");
+    let datafutureParentRows = [];
+
+    const tomOptions = {
+        plugins: {
+            dropdown_input: {},
+        },
+        placeholder: "Search here...",
+        dropdownParent: "body",
+        dropdownClass: "ts-dropdown lcc-tom-float",
+        create: false,
+        maxOptions: null,
+        allowEmptyOption: true,
+    };
+
+    function initTomSelect(selector, options = {}) {
+        const el = document.querySelector(selector);
+        if (!el) return null;
+        if (el.tomselect) return el.tomselect;
+
+        return new TomSelect(el, { ...tomOptions, ...options });
+    }
+
+    function setSelectValue(selector, value) {
+        const el = document.querySelector(selector);
+        const next = value === null || value === undefined ? "" : String(value);
+
+        if (el && el.tomselect) {
+            if (next === "") el.tomselect.clear(true);
+            else el.tomselect.setValue(next, true);
+
+            return;
+        }
+
+        $(selector).val(next);
+    }
+
+    function resetTomSelects(form) {
+        form.querySelectorAll("select").forEach((select) => {
+            if (!select.tomselect) return;
+
+            if (select.value === "") select.tomselect.clear(true);
+            else select.tomselect.setValue(select.value, true);
+        });
+    }
+
+    const datafutureSelects = {
+        addField: initTomSelect("#df_add_datafuture_field_id"),
+        editField: initTomSelect("#df_edit_datafuture_field_id"),
+        addParent: initTomSelect("#df_add_parent_id", { placeholder: "Search parent field..." }),
+        editParent: initTomSelect("#df_edit_parent_id", { placeholder: "Search parent field..." }),
+    };
+
+    function syncParentSelect(select, selectedValue = "", excludeId = null) {
+        if (!select) return;
+
+        const nextValue = selectedValue === null || selectedValue === undefined ? "" : String(selectedValue);
+
+        select.clear(true);
+        select.clearOptions();
+        select.addOption({ value: "", text: "No Parent" });
+
+        datafutureParentRows.forEach((row) => {
+            if (excludeId !== null && String(row.id) === String(excludeId)) return;
+
+            select.addOption({
+                value: String(row.id),
+                text: row.parent_label || `#${row.id}`,
+            });
+        });
+
+        select.refreshOptions(false);
+
+        if (nextValue !== "" && select.options[nextValue]) {
+            select.setValue(nextValue, true);
+        } else {
+            select.clear(true);
+        }
+    }
+
+    function refreshParentOptions(selectedEditValue = "", excludeEditId = null) {
+        if (!datafutureSelects.addParent && !datafutureSelects.editParent) return;
+
+        axios({
+            method: "get",
+            url: route("course.datafuture.list"),
+            params: {
+                course: courseId,
+                status: 1,
+                size: "true",
+                parent_only: 1,
+            },
+            headers: csrfHeaders(),
+        }).then((response) => {
+            datafutureParentRows = Array.isArray(response.data.data) ? response.data.data : [];
+
+            syncParentSelect(datafutureSelects.addParent);
+            syncParentSelect(datafutureSelects.editParent, selectedEditValue, excludeEditId);
+        });
+    }
+
+    refreshParentOptions();
 
     /* ------------------------------------------------------------------ *
      * One tab = one table + one toolbar
@@ -238,6 +340,17 @@ import {
                 cssClass: "cm-cell--primary",
             },
             { title: "Field Name", field: "datafuture_field_id", headerHozAlign: "left", widthGrow: 1, minWidth: 150 },
+            {
+                title: "Parent Field",
+                field: "parent_field",
+                headerSort: false,
+                headerHozAlign: "left",
+                widthGrow: 1,
+                minWidth: 180,
+                formatter(cell) {
+                    return cell.getValue() || "";
+                },
+            },
             { title: "Field Type", field: "field_type", headerHozAlign: "left", width: 116 },
             { title: "Field Value", field: "field_value", headerHozAlign: "left", widthGrow: 1, minWidth: 120 },
             { title: "Description", field: "field_desc", headerHozAlign: "left", widthGrow: 1, minWidth: 140, cssClass: "cm-cell--clamp" },
@@ -357,6 +470,7 @@ import {
                 // `reset()` restores the markup defaults, which is right for
                 // every field except the hidden course id.
                 form.querySelector('[name="course_id"]').value = courseField;
+                resetTomSelects(form);
             });
         }
 
@@ -478,7 +592,10 @@ import {
             storeRoute: "course.datafuture.store",
             mode: "add",
             noun: "Field",
-            onDone: () => datafutureTab.rebuild(),
+            onDone: () => {
+                datafutureTab.rebuild();
+                refreshParentOptions();
+            },
         });
 
         wireForm({
@@ -488,7 +605,10 @@ import {
             storeRoute: "course.datafuture.update",
             mode: "edit",
             noun: "Field",
-            onDone: () => datafutureTab.rebuild(),
+            onDone: () => {
+                datafutureTab.rebuild();
+                refreshParentOptions();
+            },
         });
 
         wireEditLoader({
@@ -497,8 +617,10 @@ import {
             formId: "courseDataFutureEditForm",
             fill(row) {
                 const f = "#courseDataFutureEditForm";
-                $(`${f} select[name="datafuture_field_id"]`).val(row.datafuture_field_id ?? "");
+                setSelectValue(`${f} select[name="datafuture_field_id"]`, row.datafuture_field_id ?? "");
+                setSelectValue(`${f} select[name="parent_id"]`, row.parent_id ?? "");
                 $(`${f} input[name="field_value"]`).val(row.field_value ?? "");
+                refreshParentOptions(row.parent_id ?? "", row.id);
             },
         });
     }
@@ -578,13 +700,13 @@ import {
         },
     };
 
-    function wireRowActions(tableId, group, nounLower) {
+    function wireRowActions(tableId, group, nounLower, nameField = "name") {
         $(`#${tableId}`).on("click", ".delete_btn", function () {
             openConfirm({
                 id: $(this).attr("data-id"),
                 action: `${group}:DELETE`,
                 title: `Delete this ${nounLower}?`,
-                message: `“${rowName(this)}” will be moved to the archive and hidden from this list.`,
+                message: `“${rowName(this, nameField)}” will be moved to the archive and hidden from this list.`,
                 confirmLabel: "Delete",
                 tone: "danger",
             });
@@ -595,7 +717,7 @@ import {
                 id: $(this).attr("data-id"),
                 action: `${group}:RESTORE`,
                 title: `Restore this ${nounLower}?`,
-                message: `“${rowName(this)}” will be returned to the active list.`,
+                message: `“${rowName(this, nameField)}” will be returned to the active list.`,
                 confirmLabel: "Restore",
                 tone: "safe",
             });
@@ -603,7 +725,7 @@ import {
     }
 
     wireRowActions("courseModuleTableId", "MODULE", "module");
-    wireRowActions("courseDataFutureTableId", "DF", "field");
+    wireRowActions("courseDataFutureTableId", "DF", "field", "datafuture_field_id");
     wireRowActions("courseMonitorTableId", "MN", "account");
 
     $("#courseModuleTableId").on("click", ".active_updater", function () {
@@ -658,6 +780,7 @@ import {
 
                 const tab = config.tab();
                 if (tab) tab.rebuild();
+                if (group === "DF") refreshParentOptions();
             })
             .catch((error) => {
                 $("#confirmModal button").removeAttr("disabled");

@@ -256,7 +256,7 @@
                         <div class="cm-modal__body">
                             <div class="cm-field">
                                 <label for="{{ $dfPrefix }}_datafuture_field_id">Field <span>*</span></label>
-                                <select id="{{ $dfPrefix }}_datafuture_field_id" name="datafuture_field_id" class="cm-select datafuture_field_id">
+                                <select id="{{ $dfPrefix }}_datafuture_field_id" name="datafuture_field_id" class="cm-select cm-tom-select datafuture_field_id" data-placeholder="Search field">
                                     <option value="">Please Select</option>
                                     @if(!empty($df_fields))
                                         @foreach($df_fields as $fld)
@@ -265,6 +265,24 @@
                                     @endif
                                 </select>
                                 <div class="acc__input-error error-datafuture_field_id"></div>
+                            </div>
+
+                            <div class="cm-field">
+                                <label for="{{ $dfPrefix }}_parent_id">Parent Field</label>
+                                <select id="{{ $dfPrefix }}_parent_id" name="parent_id" class="cm-select cm-tom-select parent_id" data-df-parent-select data-placeholder="Search parent field">
+                                    <option value="">No Parent</option>
+                                    @if(!empty($df_parent_fields))
+                                        @foreach($df_parent_fields as $parentField)
+                                            @php
+                                                $parentLabel = '#'.$parentField->id.' '.(isset($parentField->field->name) && !empty($parentField->field->name) ? $parentField->field->name : 'ID: '.$parentField->datafuture_field_id);
+                                                $parentLabel .= (!empty($parentField->field_value) ? ' - '.$parentField->field_value : '');
+                                                $parentLabel .= (isset($parentField->field->category->name) && !empty($parentField->field->category->name) ? ' ('.$parentField->field->category->name.')' : '');
+                                            @endphp
+                                            <option value="{{ $parentField->id }}">{{ $parentLabel }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-parent_id"></div>
                             </div>
 
                             <div class="cm-field">

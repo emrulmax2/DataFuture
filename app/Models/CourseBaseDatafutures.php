@@ -33,4 +33,16 @@ class CourseBaseDatafutures extends Model
     public function field(){
         return $this->belongsTo(DatafutureField::class, 'datafuture_field_id');
     }
+
+    public function parent(){
+        return $this->belongsTo(self::class, 'parent_id')->withTrashed();
+    }
+
+    public function children(){
+        return $this->hasMany(self::class, 'parent_id');
+    }
+
+    public function childrenWithTrashed(){
+        return $this->hasMany(self::class, 'parent_id')->withTrashed();
+    }
 }

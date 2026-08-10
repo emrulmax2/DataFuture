@@ -74,6 +74,10 @@ class DatafutureController extends Controller
         
         $autoStuloads = $this->autoLoadStudentStuloads($student->id, $student->crel->id);
         $module_ids = $this->getStudentModules($student->id, $student->crel->id, $course_id);
+        $dfQualificationFields = CourseBaseDatafutures::with('field')->whereHas('field', function($q){
+                            $q->where('datafuture_field_category_id', 2);
+                        })->where('course_id', $course_id)->get();
+
         return view('pages.students.live.datafuture', [
             'title' => 'Live Students - London Churchill College',
             'layout' => 'student-top-menu',
@@ -91,9 +95,8 @@ class DatafutureController extends Controller
             'df_course_fields' => CourseBaseDatafutures::with('field')->whereHas('field', function($q){
                             $q->where('datafuture_field_category_id', 1);
                         })->where('course_id', $course_id)->get(),
-            'df_qualification_fields' => CourseBaseDatafutures::with('field')->whereHas('field', function($q){
-                            $q->where('datafuture_field_category_id', 2);
-                        })->where('course_id', $course_id)->get(),
+            'df_qualification_fields' => $dfQualificationFields,
+            'df_qualification_groups' => $this->buildQualificationGroups($dfQualificationFields),
             'df_modules_fields' => CourseModule::whereIn('id', $module_ids)->orderBy('name', 'ASC')->get(),
             'ethnicity' => Ethnicity::where('active', 1)->orderBy('name', 'ASC')->get(),
             'gender' => HesaGender::where('active', 1)->orderBy('name', 'ASC')->get(),
@@ -136,6 +139,41 @@ class DatafutureController extends Controller
             'termDeclarations' => TermDeclaration::orderBy('id', 'DESC')->get(),
             'pcountry' => CountryOfPermanentAddress::orderBy('name', 'ASC')->where('active', 1)->get(),
         ]);
+    }
+
+    private function buildQualificationGroups($qualificationFields)
+    {
+        $awardRows = $qualificationFields->filter(function($dfld) {
+            return empty($dfld->parent_id)
+                && isset($dfld->field->name)
+                && $dfld->field->name == 'QUALAWARDID';
+        })->values();
+
+        if($awardRows->count() == 0):
+            return collect();
+        endif;
+
+        return $awardRows->map(function($awardRow) use ($qualificationFields) {
+            $fields = $qualificationFields->filter(function($dfld) use ($awardRow) {
+                $fieldName = (isset($dfld->field->name) ? $dfld->field->name : '');
+
+                if($dfld->id == $awardRow->id):
+                    return true;
+                endif;
+
+                if(isset($dfld->parent_id) && $dfld->parent_id == $awardRow->id):
+                    return true;
+                endif;
+
+                return empty($dfld->parent_id) && $fieldName != 'QUALAWARDID';
+            })->values();
+
+            return [
+                'award' => $awardRow,
+                'title' => (!empty($awardRow->field_value) ? trim($awardRow->field_value) : 'Qualification'),
+                'fields' => $fields,
+            ];
+        });
     }
 
     public function store(Student $student, Request $request){
