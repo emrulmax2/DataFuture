@@ -42,6 +42,21 @@ use XMLWriter;
 class DatafutureReportController extends Controller
 {
     public function startMultipleStudentsProcess(Request $request){ 
+        $activeExport = DatafutureReportExport::where('created_by', auth()->user()->id)
+                        ->whereIn('status', ['pending', 'processing'])
+                        ->orderBy('id', 'DESC')
+                        ->first();
+
+        if($activeExport):
+            return response()->json([
+                'success' => true,
+                'export_id' => $activeExport->id,
+                'existing' => true,
+                'status' => $activeExport->status,
+                'progress' => $activeExport->progress
+            ], 200);
+        endif;
+
         $fileName = 'Datafuture_XML_' . time() . '.xml';
 
         $export = DatafutureReportExport::create([ 
@@ -53,7 +68,9 @@ class DatafutureReportController extends Controller
             'updated_by' => auth()->user()->id
         ]);
 
-        GenerateDatafutureReportJob::dispatch($export->id);
+        GenerateDatafutureReportJob::dispatch($export->id)
+            ->onConnection(config('queue.datafuture_report_connection', config('queue.default')))
+            ->onQueue(config('queue.datafuture_report_queue', 'default'));
 
         return response()->json([
             'success' => true,
@@ -357,32 +374,35 @@ class DatafutureReportController extends Controller
                 // $dfFields = CourseBaseDatafutures::with('field')->whereHas('field', function($q){
                 //                 $q->where('datafuture_field_category_id', 2);
                 //             })->where('course_id', $course_id)->get();
-                $course = $courses[$course_id] ?? null;
                 $dfFields = $courseDfFields2[$course_id] ?? collect();
                 
-                $QUALIF_XML = '';
-                $QUALIF_ROL = '';
-                $QUALIF_SUB = '';
+                $XML .= $this->buildCourseQualificationsXml($dfFields);
 
-                if($dfFields->count() > 0):
-                    foreach($dfFields as $dfld):
-                        $name = (isset($dfld->field->name) && !empty($dfld->field->name) ? $dfld->field->name : '');
-                        $value = (isset($dfld->field_value) && !empty($dfld->field_value) ? trim($dfld->field_value) : '');
+                /*Single Qualifications */
+                // $course = $courses[$course_id] ?? null;
+                // $QUALIF_XML = '';
+                // $QUALIF_ROL = '';
+                // $QUALIF_SUB = '';
 
-                        if($name == 'AWARDINGBODYID'):
-                            $QUALIF_ROL .= (!empty($name) && !empty($value) ? '<'.$name.'>'.$value.'</'.$name.'>' : '');
-                        elseif($name == 'QUALSUBJECT' || $name == 'QUALPROPORTION'):
-                            $QUALIF_SUB .= (!empty($name) && !empty($value) ? '<'.$name.'>'.$value.'</'.$name.'>' : '');
-                        else:
-                            $QUALIF_XML .= (!empty($name) && !empty($value) ? '<'.$name.'>'.$value.'</'.$name.'>' : '');
-                        endif;
-                    endforeach;
-                endif;
+                // if($dfFields->count() > 0):
+                //     foreach($dfFields as $dfld):
+                //         $name = (isset($dfld->field->name) && !empty($dfld->field->name) ? $dfld->field->name : '');
+                //         $value = (isset($dfld->field_value) && !empty($dfld->field_value) ? trim($dfld->field_value) : '');
 
-                if(!empty($QUALIF_ROL)): $QUALIF_XML .= '<AwardingBodyRole>'.$QUALIF_ROL.'</AwardingBodyRole>'; endif;
-                if(!empty($QUALIF_SUB)): $QUALIF_XML .= '<QualificationSubject>'.$QUALIF_SUB.'</QualificationSubject>'; endif;
+                //         if($name == 'AWARDINGBODYID'):
+                //             $QUALIF_ROL .= (!empty($name) && !empty($value) ? '<'.$name.'>'.$value.'</'.$name.'>' : '');
+                //         elseif($name == 'QUALSUBJECT' || $name == 'QUALPROPORTION'):
+                //             $QUALIF_SUB .= (!empty($name) && !empty($value) ? '<'.$name.'>'.$value.'</'.$name.'>' : '');
+                //         else:
+                //             $QUALIF_XML .= (!empty($name) && !empty($value) ? '<'.$name.'>'.$value.'</'.$name.'>' : '');
+                //         endif;
+                //     endforeach;
+                // endif;
 
-                if(!empty($QUALIF_XML)): $XML .= '<Qualification>'.$QUALIF_XML.'</Qualification>'; endif;
+                // if(!empty($QUALIF_ROL)): $QUALIF_XML .= '<AwardingBodyRole>'.$QUALIF_ROL.'</AwardingBodyRole>'; endif;
+                // if(!empty($QUALIF_SUB)): $QUALIF_XML .= '<QualificationSubject>'.$QUALIF_SUB.'</QualificationSubject>'; endif;
+
+                // if(!empty($QUALIF_XML)): $XML .= '<Qualification>'.$QUALIF_XML.'</Qualification>'; endif;
             endforeach;
         endif;
         /* QUALIFICATIONS XML END */
@@ -745,6 +765,86 @@ class DatafutureReportController extends Controller
         endif;
 
         return $XML;
+    }
+
+    private function buildCourseQualificationsXml($dfFields)
+    {
+        if(!$dfFields || $dfFields->count() == 0):
+            return '';
+        endif;
+
+        $qualificationGroups = $this->buildCourseQualificationGroups($dfFields);
+
+        if($qualificationGroups->count() == 0):
+            $qualificationGroups = collect([$dfFields->values()]);
+        endif;
+
+        $XML = '';
+        foreach($qualificationGroups as $qualificationFields):
+            $QUALIF_XML = $this->buildSingleQualificationXml($qualificationFields);
+
+            if(!empty($QUALIF_XML)):
+                $XML .= '<Qualification>'.$QUALIF_XML.'</Qualification>';
+            endif;
+        endforeach;
+
+        return $XML;
+    }
+
+    private function buildCourseQualificationGroups($qualificationFields)
+    {
+        $awardRows = $qualificationFields->filter(function($dfld) {
+            return empty($dfld->parent_id)
+                && isset($dfld->field->name)
+                && $dfld->field->name == 'QUALAWARDID';
+        })->values();
+
+        if($awardRows->count() == 0):
+            return collect();
+        endif;
+
+        return $awardRows->map(function($awardRow) use ($qualificationFields) {
+            return $qualificationFields->filter(function($dfld) use ($awardRow) {
+                $fieldName = (isset($dfld->field->name) ? $dfld->field->name : '');
+
+                if($dfld->id == $awardRow->id):
+                    return true;
+                endif;
+
+                if(isset($dfld->parent_id) && $dfld->parent_id == $awardRow->id):
+                    return true;
+                endif;
+
+                return empty($dfld->parent_id) && $fieldName != 'QUALAWARDID';
+            })->values();
+        });
+    }
+
+    private function buildSingleQualificationXml($dfFields)
+    {
+        $QUALIF_XML = '';
+        $QUALIF_ROL = '';
+        $QUALIF_SUB = '';
+
+        if($dfFields->count() > 0):
+            foreach($dfFields as $dfld):
+                $name = (isset($dfld->field->name) && !empty($dfld->field->name) ? $dfld->field->name : '');
+                $value = (isset($dfld->field_value) && !empty($dfld->field_value) ? trim($dfld->field_value) : '');
+
+                if($name == 'AWARDINGBODYID'):
+                    $QUALIF_ROL .= (!empty($name) && !empty($value) ? '<'.$name.'>'.$value.'</'.$name.'>' : '');
+                elseif($name == 'QUALSUBJECT' || $name == 'QUALPROPORTION'):
+                    $QUALIF_SUB .= (!empty($name) && !empty($value) ? '<'.$name.'>'.$value.'</'.$name.'>' : '');
+                else:
+                    $QUALIF_XML .= (!empty($name) && !empty($value) ? '<'.$name.'>'.$value.'</'.$name.'>' : '');
+                endif;
+            endforeach;
+        endif;
+
+        if(!empty($QUALIF_ROL)): $QUALIF_XML .= '<AwardingBodyRole>'.$QUALIF_ROL.'</AwardingBodyRole>'; endif;
+        if(!empty($QUALIF_SUB)): $QUALIF_XML .= '<QualificationSubject>'.$QUALIF_SUB.'</QualificationSubject>'; endif;
+
+        return $QUALIF_XML;
     }
 
     public function getAllModuleIds($course_ids, $student_ids, $dateRanges = []){

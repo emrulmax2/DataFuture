@@ -15,6 +15,12 @@ return [
 
     'default' => env('QUEUE_CONNECTION', 'sync'),
 
+    'datafuture_report_connection' => env('DATAFUTURE_REPORT_CONNECTION', env('QUEUE_CONNECTION', 'sync')),
+
+    'datafuture_report_queue' => env('DATAFUTURE_REPORT_QUEUE', 'default'),
+
+    'datafuture_report_timeout' => env('DATAFUTURE_REPORT_TIMEOUT', 1200),
+
     /*
     |--------------------------------------------------------------------------
     | Queue Connections

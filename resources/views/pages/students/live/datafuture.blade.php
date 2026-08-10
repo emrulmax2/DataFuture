@@ -96,19 +96,37 @@
                         </div>
                     </div>
                 </div>
-                <div class="accordion-item">
-                    <div id="df-accr-main-content-3" class="accordion-header">
-                        <button class="accordion-button bg_color_1 collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#df-accr-main-collapse-3" aria-expanded="false" aria-controls="df-accr-main-collapse-3">
-                            Qualifications
-                            <span class="accordionCollaps"></span>
-                        </button>
-                    </div>
-                    <div id="df-accr-main-collapse-3" class="accordion-collapse collapse" aria-labelledby="df-accr-main-content-3" data-tw-parent="#df-accordion-main">
-                        <div class="accordion-body text-slate-600 dark:text-slate-500 leading-relaxed">
-                            @include('pages.students.live.datafuture.qualification')
+                @if(isset($df_qualification_groups) && $df_qualification_groups->count() > 0)
+                    @foreach($df_qualification_groups as $qualificationGroup)
+                        <div class="accordion-item">
+                            <div id="df-accr-main-content-qualification-{{ $loop->iteration }}" class="accordion-header">
+                                <button class="accordion-button bg_color_1 collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#df-accr-main-collapse-qualification-{{ $loop->iteration }}" aria-expanded="false" aria-controls="df-accr-main-collapse-qualification-{{ $loop->iteration }}">
+                                    Qualifications - {{ $qualificationGroup['title'] }}
+                                    <span class="accordionCollaps"></span>
+                                </button>
+                            </div>
+                            <div id="df-accr-main-collapse-qualification-{{ $loop->iteration }}" class="accordion-collapse collapse" aria-labelledby="df-accr-main-content-qualification-{{ $loop->iteration }}" data-tw-parent="#df-accordion-main">
+                                <div class="accordion-body text-slate-600 dark:text-slate-500 leading-relaxed">
+                                    @include('pages.students.live.datafuture.qualification', ['qualificationFields' => $qualificationGroup['fields']])
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                @else
+                    <div class="accordion-item">
+                        <div id="df-accr-main-content-3" class="accordion-header">
+                            <button class="accordion-button bg_color_1 collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#df-accr-main-collapse-3" aria-expanded="false" aria-controls="df-accr-main-collapse-3">
+                                Qualifications
+                                <span class="accordionCollaps"></span>
+                            </button>
+                        </div>
+                        <div id="df-accr-main-collapse-3" class="accordion-collapse collapse" aria-labelledby="df-accr-main-content-3" data-tw-parent="#df-accordion-main">
+                            <div class="accordion-body text-slate-600 dark:text-slate-500 leading-relaxed">
+                                @include('pages.students.live.datafuture.qualification')
+                            </div>
                         </div>
                     </div>
-                </div>
+                @endif
                 <div class="accordion-item">
                     <div id="df-accr-main-content-4" class="accordion-header">
                         <button class="accordion-button bg_color_1 collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#df-accr-main-collapse-4" aria-expanded="false" aria-controls="df-accr-main-collapse-4">

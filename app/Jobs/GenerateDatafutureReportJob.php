@@ -17,7 +17,7 @@ class GenerateDatafutureReportJob implements ShouldQueue
 
     protected $export_id;
 
-    public $timeout = 7200;
+    public $timeout = 1200;
 
     // Don't silently re-run this expensive report on transient release/failure.
     public $tries = 1;
@@ -25,6 +25,7 @@ class GenerateDatafutureReportJob implements ShouldQueue
     public function __construct($export_id)
     {
         $this->export_id = $export_id;
+        $this->timeout = (int) config('queue.datafuture_report_timeout', 1200);
     }
 
     /**
@@ -65,14 +66,9 @@ class GenerateDatafutureReportJob implements ShouldQueue
             $xmlData = app(DatafutureReportController::class)->getMultipleStudentXml($payload);
             $xmlContent .= preg_replace('/&(?!#?[a-z0-9]+;)/', '&amp;', $xmlData);
 
-            for($i = 10; $i <= 90; $i += 10){
-
-                sleep(1);
-
-                $export->update([
-                    'progress' => $i
-                ]);
-            }
+            $export->update([
+                'progress' => 90
+            ]);
 
             $path = 'temp_xml/'.$export->file_name;
 
