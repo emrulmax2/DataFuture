@@ -13,6 +13,10 @@ var studentNotesListTable = (function () {
         let queryStr = $("#query-AN").val() != "" ? $("#query-AN").val() : "";
         let status = $("#status-AN").val() != "" ? $("#status-AN").val() : "1";
         let term = $("#term-SN").val() != "" ? $("#term-SN").val() : "";
+        let flagToneClass = function (color) {
+            let tone = String(color || "danger").trim().toLowerCase();
+            return tone.indexOf("bg-") === 0 ? tone : "bg-" + tone;
+        };
 
         let tableContent = new Tabulator("#studentNotesListTable", {
             ajaxURL: route("student.note.list"),
@@ -53,7 +57,7 @@ var studentNotesListTable = (function () {
                         var html = '<div class="whitespace-normal break-words">';
                                 if(note.length > 250){
                                     html += note.substring(0, 250);
-                                    html += '&nbsp;<a data-id="'+cell.getData().id+'" data-tw-toggle="modal" data-tw-target="#viewNoteModal" href="javascript:void(0);" class="view_btn text-primary font-medium underline">[More]</a>';
+                                    html += '&nbsp;<a data-id="'+cell.getData().id+'" href="javascript:void(0);" class="view_btn text-primary font-medium underline">[More]</a>';
                                 }else{
                                     html += note;
                                 }
@@ -82,33 +86,35 @@ var studentNotesListTable = (function () {
                     title: "Flag & Followed Up",
                     field: "followed_up",
                     headerHozAlign: "left",
-                    minWidth: 180,
+                    width: 280,
+                    minWidth: 240,
+                    variableHeight: true,
                     formatter(cell, formatterParams){
-                        var html = '';
+                        var html = '<div class="student-note-followup-stack">';
                         if(cell.getData().is_flaged == 'Yes' && cell.getData().flaged_status == 'Active'){
-                            var color = cell.getData().flag_color;
-                            html += '<div class="mb-5">';
-                                html += '<span class="bg-'+(color != '' ? color.toLowerCase() : 'bg-danger')+' font-medium text-white px-2 py-1 inline-flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="flag" class="lucide lucide-flag w-4 h-4 mr-2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" x2="4" y1="22" y2="15"></line></svg> '+cell.getData().flag_name+'</span>';
+                            html += '<div class="student-note-followup-row">';
+                                html += '<span class="'+flagToneClass(cell.getData().flag_color)+' student-note-chip student-note-flag-badge font-medium text-white px-2 py-1 inline-flex items-center"><i data-lucide="flag" class="w-4 h-4 mr-2"></i> '+cell.getData().flag_name+'</span>';
                             html += '</div>';
                         }
                         if(cell.getData().followed_up == 'yes'){
-                            html += '<div>';
+                            html += '<div class="student-note-followup-row">';
                                 if(cell.getData().followed_up_status != ''){
-                                    html += '<span class="bg-'+(cell.getData().followed_up_status == 'Pending' ? 'warning' : 'success')+' font-medium text-white px-2 py-1 inline-flex mb-1">'+cell.getData().followed_up_status+'</span>';
+                                    html += '<span class="bg-'+(cell.getData().followed_up_status == 'Pending' ? 'warning' : 'success')+' student-note-chip student-note-followup-status font-medium text-white px-2 py-1 inline-flex">'+cell.getData().followed_up_status+'</span>';
                                 }
                                 if(cell.getData().followed != '' && cell.getData().followed_up_status == 'Pending'){
-                                    html += '<div class="whitespace-normal">';
+                                    html += '<div class="student-note-followed-list">';
                                         html += cell.getData().followed;
                                     html += '</div>';
                                 }
                                 if(cell.getData().followed_up_status == 'Completed'){
-                                    html += '<div class="whitespace-normal">';
-                                        html += (cell.getData().completed_by != '' ? '<div class="font-medium whitespace-nowrap">'+cell.getData().completed_by+'</div>' : '');
-                                        html += (cell.getData().completed_at != '' ? '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().completed_at+'</div>' : '');
+                                    html += '<div class="student-note-followup-completed">';
+                                        html += (cell.getData().completed_by != '' ? '<div class="font-medium">'+cell.getData().completed_by+'</div>' : '');
+                                        html += (cell.getData().completed_at != '' ? '<div class="text-slate-500 text-xs">'+cell.getData().completed_at+'</div>' : '');
                                     html += '</div>';
                                 }
                             html += '</div>';
                         }
+                        html += '</div>';
                         return html;
                     }
                 },
@@ -487,8 +493,13 @@ var studentNotesListTable = (function () {
     });
 
     $('#studentNotesListTable').on('click', '.view_btn', function(e){
+        e.preventDefault();
+        e.stopPropagation();
         var $btn = $(this);
         var noteId = $btn.attr('data-id');
+        $('#viewNoteModal .modal-body').html('<div class="text-slate-500 font-medium">Loading note...</div>');
+        $('#viewNoteModal .modal-footer .footerBtns').html('');
+        viewNoteModal.show();
         axios({
             method: "post",
             url: route('student.show.note'),
@@ -505,7 +516,12 @@ var studentNotesListTable = (function () {
                 nameAttr: "data-lucide",
             });
         }).catch(error => {
-            console.log('error');
+            $('#viewNoteModal .modal-body').html('<div class="alert alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Unable to load this note. Please try again.</div>');
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
         });
     })
 
