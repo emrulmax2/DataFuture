@@ -23,9 +23,11 @@
      data-flags="{{ implode(' ', $r['flags']) }}"
      data-leave-status="{{ $r['leave_status'] }}"
      data-overtime="{{ in_array('overtime', $r['buckets']) ? 1 : 0 }}"
-     data-rostered="{{ $r['rostered_min'] !== null ? $r['rostered_min'] : '' }}"
-     data-punch-in="{{ $r['punch_in'] }}"
-     data-punch-out="{{ $r['punch_out'] }}">
+     {{-- No data-punch-in/out here on purpose. The raw punch is NOT a payroll figure:
+          the sync has already resolved it against the HR clock-in/clock-out
+          conditions into clockin_system / clockout_system. Exposing it on the row is
+          what let the bulk approve copy it back over the recorded time. --}}
+     data-rostered="{{ $r['rostered_min'] !== null ? $r['rostered_min'] : '' }}">
 
     <span class="att-row__edge att-edge--{{ $edge }}"></span>
 
@@ -56,9 +58,15 @@
             @endif
 
             @if($r['leave_status'] > 0)
+                {{-- The note rides along ONLY where the middle column draws a timeline.
+                     The no-clock block already prints it in full, and this narrow
+                     column was repeating the whole paragraph beside it - a two-line
+                     request wrapped to twelve and set the height of the whole row.
+                     A part-day leave that was also worked gets the timeline instead of
+                     that block, so there the note has nowhere else to go. --}}
                 <div class="att-row__leave">
                     <i data-lucide="palmtree" class="w-3 h-3"></i>
-                    <span>{{ $r['leave_name'] }}@if($r['leave_note']) — {{ $r['leave_note'] }}@endif</span>
+                    <span>{{ $r['leave_name'] }}@if($r['leave_note'] && $r['timeline']) — {{ $r['leave_note'] }}@endif</span>
                 </div>
             @endif
         </div>
@@ -88,36 +96,49 @@
                 $hasLeaveHours = $r['leave_day_hour'] && $r['leave_day_hour'] !== '00:00';
                 $noClockTitle = $r['leave_status'] > 0 ? $r['leave_name'] : 'No clocking recorded';
 
-                if ($r['leave_status'] > 0) {
-                    // The detail line reads: [approved-holiday hours] · [leave's own comment] · [HR's note].
-                    // hintBase is everything the server already knows; the note is split out so the
-                    // editor can refresh this line the moment HR saves one, without a reload.
-                    $hintParts = [];
-                    if ($r['leave_status'] === 1 && $hasLeaveHours) {
-                        $hintParts[] = 'Approved holiday · '.$r['leave_day_hour'].' hours';
-                    }
-                    if (trim((string) $r['leave_note']) !== '') {
-                        $hintParts[] = trim((string) $r['leave_note']);
-                    }
-                    $hintBase = implode(' · ', $hintParts);
+                // Three separate things, so three separate lines. Run together on one
+                // "hours · request · HR note" line, a two-sentence leave request pushed
+                // the entitlement off the left and read as one run-on paragraph.
+                //
+                //   hint  the figures - what the leave module already settled
+                //   note  the employee's own words, verbatim
+                //   HR's  whatever HR added here, refreshed live by markReviewed()
+                $noClockHint = '';
+                $leaveNote   = '';
+                $hrNote      = '';
 
-                    if (trim((string) $r['note']) !== '') {
-                        $hintParts[] = trim((string) $r['note']);
+                if ($r['leave_status'] > 0) {
+                    if ($r['leave_status'] === 1 && $hasLeaveHours) {
+                        $noClockHint = 'Approved holiday · '.$r['leave_day_hour'].' hours';
                     }
-                    $noClockHint = !empty($hintParts) ? implode(' · ', $hintParts) : 'Recorded absence';
+                    $leaveNote = trim((string) $r['leave_note']);
+                    $hrNote    = trim((string) $r['note']);
+
+                    // Nothing at all to say: one quiet line beats a bare title.
+                    if ($noClockHint === '' && $leaveNote === '' && $hrNote === '') {
+                        $noClockHint = 'Recorded absence';
+                    }
                 } else {
-                    $hintBase = '';
                     $noClockHint = 'No in/out punch available';
                 }
             @endphp
-            <div class="att-noclock {{ $r['leave_status'] > 0 ? 'att-noclock--leave att-noclock--leave-'.$r['leave_status'] : '' }}"
-                 data-hint-base="{{ $hintBase }}">
+            <div class="att-noclock {{ $r['leave_status'] > 0 ? 'att-noclock--leave att-noclock--leave-'.$r['leave_status'] : '' }}">
                 <span class="att-noclock__icon">
                     <i data-lucide="{{ $r['leave_status'] > 0 ? 'calendar-x' : 'minus-circle' }}" class="w-4 h-4"></i>
                 </span>
                 <span class="att-noclock__copy">
                     <span class="att-noclock__title">{{ $noClockTitle }}</span>
-                    <span class="att-noclock__hint">{{ $noClockHint }}</span>
+                    @if($noClockHint !== '')
+                        <span class="att-noclock__hint">{{ $noClockHint }}</span>
+                    @endif
+                    @if($leaveNote !== '')
+                        <span class="att-noclock__note">{{ $leaveNote }}</span>
+                    @endif
+                    @if($r['leave_status'] > 0)
+                        {{-- Always emitted, hidden while empty, so markReviewed() has somewhere
+                             to write a note the moment HR saves one - no reload, no rebuilt line. --}}
+                        <span class="att-noclock__note js-noclock-note" @if($hrNote === '') style="display:none;" @endif>{{ $hrNote }}</span>
+                    @endif
                 </span>
             </div>
         @endif

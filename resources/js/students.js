@@ -121,7 +121,8 @@ var liveStudentsListTable = (function () {
                     field: 'full_time',
                     headerHozAlign: 'center',
                     hozAlign: 'center',
-                    width: 72,
+                    width: 136,
+                    minWidth: 136,
                     headerSort: false,
                     formatter(cell, formatterParams) {
                         var html = '<div class="student-live-indicators">';

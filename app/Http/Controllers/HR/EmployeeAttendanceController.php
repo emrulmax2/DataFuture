@@ -294,8 +294,87 @@ class EmployeeAttendanceController extends Controller
     private const TIMELINE_START = 420;
     private const TIMELINE_SPAN  = 840;
 
-    /** Minutes a punch may drift from the contract time and still read as "on time". */
+    /**
+     * Fallback drift, in minutes, used only where site-settings/hr-condition has
+     * nothing configured for a frame. Also the slack allowed when comparing the
+     * day's TOTAL against the rostered total, which no condition covers.
+     */
     private const TOLERANCE = 5;
+
+    /**
+     * The configured clock-in / clock-out windows, in minutes, keyed by side.
+     *
+     * site-settings/hr-condition stores one row per time frame:
+     *
+     *   Clock In  1 "Up to"      punched EARLY by up to N minutes
+     *   Clock In  2 "Till"       punched LATE  by up to N minutes
+     *   Clock In  3 "After"      punched LATE  beyond that window
+     *   Clock In  4 "No Clock In"
+     *   Clock Out 1 "Before"     punched EARLY by up to N minutes
+     *   Clock Out 2 "After"      punched LATE  by up to N minutes
+     *   Clock Out 3 "No Clock Out"
+     *
+     * Frames 1 and 2 are the grace windows. Inside them the sync records the
+     * CONTRACT time and raises no issue; outside them it records the ACTUAL punch
+     * and flags the row. This screen has to read a punch against the same
+     * thresholds or it contradicts the figure the sync already stored - a 10:05
+     * punch on a 10:00 contract is recorded as 10:00, and was still being drawn
+     * as "5m late" against a hard-coded 5-minute tolerance.
+     *
+     * Read once and held for the request: show() renders ~90 rows and a
+     * per-row lookup would be four queries each.
+     */
+    private ?array $graceWindows = null;
+
+    private function graceWindows(): array
+    {
+        if ($this->graceWindows !== null) {
+            return $this->graceWindows;
+        }
+
+        $minutes = HrCondition::whereIn('type', ['Clock In', 'Clock Out'])
+            ->get()
+            ->mapWithKeys(fn ($condition) => [
+                $condition->type.'|'.(int) $condition->time_frame => (int) $condition->minutes,
+            ]);
+
+        return $this->graceWindows = [
+            'in' => [
+                'early' => $minutes['Clock In|1'] ?? self::TOLERANCE,
+                'late'  => $minutes['Clock In|2'] ?? self::TOLERANCE,
+            ],
+            'out' => [
+                'early' => $minutes['Clock Out|1'] ?? self::TOLERANCE,
+                'late'  => $minutes['Clock Out|2'] ?? self::TOLERANCE,
+            ],
+        ];
+    }
+
+    /**
+     * Whether a punch landed inside its configured grace window, where "in" and
+     * "out" each have their own allowance in each direction - 15m early / 7m late
+     * on the way in, 5m early / 15m late on the way out, as currently configured.
+     */
+    private function withinGrace(?int $delta, string $side): bool
+    {
+        if ($delta === null) {
+            return false;
+        }
+
+        $window = $this->graceWindows()[$side];
+
+        return $delta <= 0
+            ? abs($delta) <= $window['early']
+            : $delta <= $window['late'];
+    }
+
+    /** "15m early / 7m late" - the window, said plainly, for the editor. */
+    private function graceHint(string $side): string
+    {
+        $window = $this->graceWindows()[$side];
+
+        return $this->humanDelta($window['early']).' early / '.$this->humanDelta($window['late']).' late';
+    }
 
     /**
      * leave_status is a copy of the leave's leave_type.
@@ -475,6 +554,29 @@ class EmployeeAttendanceController extends Controller
         $hasSystem = ($systemIn !== '' || $systemOut !== '');
         $isOnlyLeave = ($punchIn === '' && $punchOut === '' && $workedMin === 0 && $leaveStatus > 0);
 
+        // A break problem is the one flag that never reached the row's face. The clock
+        // states stay green, the bar stays green, and the hours still add up - the
+        // rostered unpaid break is deducted whether or not one was ever punched - so
+        // the row landed in the Issues tab looking completely untouched, and the only
+        // hint was the tinted Breaks block inside the drawer.
+        //
+        // Worded from the data rather than the flag, because break_issue is a single
+        // bit covering three different situations. Mirrors the sync's own rules
+        // (~L1336): it measures the second one against the UNPAID break alone, not
+        // against paid + unpaid, so this does too.
+        $breakNote = '';
+        if (!empty($issueFlags['break_issue'])) {
+            if ($takenBreak === 0 && $unpaidBreak > 0) {
+                $breakNote = 'no break clocked';
+            } elseif ($unpaidBreak > 0 && $takenBreak > $unpaidBreak && ($takenBreak - $unpaidBreak) > 15) {
+                $breakNote = 'break over allowance';
+            } else {
+                // Left over from the pairing loop: a break out with no return, or the
+                // reverse, which the sync stores as a 00:00 end.
+                $breakNote = 'break punch missing';
+            }
+        }
+
         // A punch is compared against the contract, so these describe what actually
         // happened and do not move when HR edits the recorded (system) time.
         $inDelta = ($schedIn !== '' && $punchIn !== '')
@@ -489,8 +591,9 @@ class EmployeeAttendanceController extends Controller
         $inState  = $this->clockState($inDelta, 'in', $schedIn !== '');
         $outState = $this->clockState($outDelta, 'out', $schedOut !== '');
 
-        $isOnTime = $inDelta !== null && $outDelta !== null
-            && abs($inDelta) <= self::TOLERANCE && abs($outDelta) <= self::TOLERANCE;
+        // On time = inside the configured window on BOTH sides, which is exactly the
+        // case where the sync recorded the contract time and raised no issue.
+        $isOnTime = $this->withinGrace($inDelta, 'in') && $this->withinGrace($outDelta, 'out');
 
         $rosteredMin = ($schedIn !== '' && $schedOut !== '')
             ? ($this->convertStringToMinute($schedOut) - $this->convertStringToMinute($schedIn)) - $unpaidBreak
@@ -522,10 +625,10 @@ class EmployeeAttendanceController extends Controller
         if ($isOnTime) {
             $rowFlags[] = 'on-time';
         }
-        if ($inDelta !== null && $inDelta > self::TOLERANCE) {
+        if ($inDelta !== null && $inDelta > 0 && !$this->withinGrace($inDelta, 'in')) {
             $rowFlags[] = 'late-in';
         }
-        if ($outDelta !== null && $outDelta < -self::TOLERANCE) {
+        if ($outDelta !== null && $outDelta < 0 && !$this->withinGrace($outDelta, 'out')) {
             $rowFlags[] = 'early-out';
         }
         if ($isAdjusted) {
@@ -564,6 +667,15 @@ class EmployeeAttendanceController extends Controller
             'out_state' => $outState,
             'bar_tone'  => $barTone,
 
+            // Why the recorded time can differ from the punch. Without this the editor
+            // shows "Clocked 10:05" above "Recorded 10:00" with nothing to explain the
+            // gap - which is what made the recorded figure look wrong and got it
+            // overwritten with the raw punch in the first place.
+            'grace_in'  => $this->graceHint('in'),
+            'grace_out' => $this->graceHint('out'),
+            'in_on_contract'  => $schedIn !== '' && $systemIn !== '' && $systemIn === $schedIn && $systemIn !== $punchIn,
+            'out_on_contract' => $schedOut !== '' && $systemOut !== '' && $systemOut === $schedOut && $systemOut !== $punchOut,
+
             // The left edge and the avatar ring take the TIMELINE BAR's colour, so a
             // row's accent always agrees with the bar sitting next to it. Deliberately
             // NOT the recommendation's tone: the reco is about hours against the
@@ -601,12 +713,20 @@ class EmployeeAttendanceController extends Controller
                     ? 'Same as rostered'
                     : $this->humanDelta($hourDelta).($hourDelta > 0 ? ' more' : ' less')),
 
-            'reco'      => $this->recommendation($isOnTime, $hourDelta, $punchIn, $punchOut),
+            // Both warnings ride on the sync's own flags rather than on re-derived
+            // facts, so approving a row - which clears them - also silences them.
+            'reco'      => $this->recommendation(
+                $isOnTime, $hourDelta, $punchIn, $punchOut, $breakNote,
+                !empty($issueFlags['clockin_system']) || !empty($issueFlags['clockout_system'])
+            ),
             // "No rostered start - no rostered finish" says the same thing twice. When
-            // there is no roster at all, say it once.
-            'fact_line' => ($notRostered && $hasPunch)
+            // there is no roster at all, say it once. The break note is appended rather
+            // than passed in, so it reaches both wordings.
+            'fact_line' => trim((($notRostered && $hasPunch)
                 ? 'Worked outside any rostered shift'
-                : $this->factLine($inDelta, $outDelta, $punchIn, $punchOut),
+                : $this->factLine($inDelta, $outDelta, $punchIn, $punchOut))
+                .($breakNote !== '' ? ' · '.$breakNote : '')),
+            'break_note' => $breakNote,
 
             'timeline' => ($hasPunch || $hasSystem) ? [
                 'sched' => $this->timelineBar($schedIn, $schedOut),
@@ -675,7 +795,15 @@ class EmployeeAttendanceController extends Controller
         return $value;
     }
 
-    /** How far a punch sits from its contract time, in words. */
+    /**
+     * How far a punch sits from its contract time, in words.
+     *
+     * Anything outside the configured window is amber, in either direction: that is
+     * precisely the case the sync records at the ACTUAL punch and flags, so
+     * clocking in half an hour early is as much a thing to look at as clocking in
+     * half an hour late - it is paid from the earlier time. Inside the window the
+     * contract time is what was recorded, so the punch reads as on time.
+     */
     private function clockState(?int $delta, string $side, bool $rostered = true): array
     {
         if ($delta === null) {
@@ -683,23 +811,36 @@ class EmployeeAttendanceController extends Controller
             return ['label' => $rostered ? 'Not punched' : 'Not rostered', 'tone' => 'muted'];
         }
 
-        if (abs($delta) <= self::TOLERANCE) {
+        if ($this->withinGrace($delta, $side)) {
             return ['label' => 'On time', 'tone' => 'good'];
         }
 
         if ($side === 'in') {
             return $delta > 0
                 ? ['label' => $this->humanDelta($delta).' late', 'tone' => $delta >= 60 ? 'bad' : 'warn']
-                : ['label' => $this->humanDelta($delta).' early', 'tone' => 'good'];
+                : ['label' => $this->humanDelta($delta).' early', 'tone' => 'warn'];
         }
 
         return $delta < 0
             ? ['label' => $this->humanDelta($delta).' early', 'tone' => $delta <= -60 ? 'bad' : 'warn']
-            : ['label' => $this->humanDelta($delta).' over', 'tone' => 'neutral'];
+            : ['label' => $this->humanDelta($delta).' over', 'tone' => 'warn'];
     }
 
-    /** The single line HR reads to decide whether a row needs them at all. */
-    private function recommendation(bool $isOnTime, ?int $hourDelta, string $punchIn, string $punchOut): array
+    /**
+     * The single line HR reads to decide whether a row needs them at all.
+     *
+     * Which is why it must never show a green all-clear on a row the sync flagged.
+     * Two ways it used to: a clean shift with no break punched read "Matches
+     * schedule", and a shift that had MOVED read "Hours match schedule" as long as
+     * the total landed - both sat in the Issues tab looking finished.
+     *
+     * Every label is kept to 20 characters. The chip sits in a 252px column that
+     * leaves it about 166px of text, so a longer one wraps to a second line and the
+     * row grows a step taller than its neighbours. The old "- review" suffix is gone
+     * for the same reason: it was on exactly the labels the warn/bad tone already
+     * marks as needing attention, so it cost a line to repeat the colour in words.
+     */
+    private function recommendation(bool $isOnTime, ?int $hourDelta, string $punchIn, string $punchOut, string $breakNote = '', bool $clockFlagged = false): array
     {
         if ($punchIn === '' && $punchOut === '') {
             return ['label' => 'No clocking recorded', 'tone' => 'muted'];
@@ -714,20 +855,33 @@ class EmployeeAttendanceController extends Controller
         }
 
         if ($hourDelta === null) {
-            return ['label' => 'No rostered shift to compare', 'tone' => 'neutral'];
+            return ['label' => 'No rostered shift', 'tone' => 'neutral'];
         }
 
         if ($isOnTime) {
-            return ['label' => 'Matches schedule', 'tone' => 'good'];
+            // Every clock reading is fine, so this is the only line left that can
+            // carry an outstanding break.
+            return $breakNote !== ''
+                ? ['label' => ucfirst($breakNote), 'tone' => 'warn']
+                : ['label' => 'Matches schedule', 'tone' => 'good'];
         }
 
         if (abs($hourDelta) <= self::TOLERANCE) {
-            return ['label' => 'Hours match schedule', 'tone' => 'good'];
+            // Getting here means at least one punch fell outside its configured
+            // window. The day adding up does not make that fine on its own: someone
+            // rostered 09:00-14:00 who worked 12:28-17:32 puts in exactly five hours.
+            // The hours column already says the total is right, so this says the part
+            // it cannot - but only while the sync's flag is still standing. Approving
+            // clears clockin_system/clockout_system, and a row HR has already looked
+            // at and accepted must not keep asking to be reviewed.
+            return $clockFlagged
+                ? ['label' => 'Off schedule', 'tone' => 'warn']
+                : ['label' => 'Hours match schedule', 'tone' => 'good'];
         }
 
         return $hourDelta < 0
-            ? ['label' => $this->humanDelta($hourDelta).' short — review', 'tone' => abs($hourDelta) >= 60 ? 'bad' : 'warn']
-            : ['label' => $this->humanDelta($hourDelta).' over rostered', 'tone' => 'neutral'];
+            ? ['label' => $this->humanDelta($hourDelta).' short', 'tone' => abs($hourDelta) >= 60 ? 'bad' : 'warn']
+            : ['label' => $this->humanDelta($hourDelta).' over', 'tone' => 'neutral'];
     }
 
     private function factLine(?int $inDelta, ?int $outDelta, string $punchIn, string $punchOut): string
@@ -736,7 +890,7 @@ class EmployeeAttendanceController extends Controller
 
         if ($inDelta === null) {
             $parts[] = $punchIn === '' ? 'No clock-in' : 'No rostered start';
-        } elseif (abs($inDelta) <= self::TOLERANCE) {
+        } elseif ($this->withinGrace($inDelta, 'in')) {
             $parts[] = 'In on time';
         } else {
             $parts[] = 'In '.$this->humanDelta($inDelta).($inDelta > 0 ? ' late' : ' early');
@@ -744,7 +898,7 @@ class EmployeeAttendanceController extends Controller
 
         if ($outDelta === null) {
             $parts[] = $punchOut === '' ? 'no clock-out' : 'no rostered finish';
-        } elseif (abs($outDelta) <= self::TOLERANCE) {
+        } elseif ($this->withinGrace($outDelta, 'out')) {
             $parts[] = 'out on time';
         } else {
             $parts[] = 'out '.$this->humanDelta($outDelta).($outDelta < 0 ? ' early' : ' over');
@@ -968,7 +1122,15 @@ class EmployeeAttendanceController extends Controller
                                         $value = date('H:i', strtotime($clocks->time));
                                     }
                                     $system_work_start = $value;
-                                elseif($p_dif != '' && $p_dif > $this->getConditionSet('Clock In', 3, 'minutes', 0)):
+                                /* "After" is whatever falls outside frame 2's window, so the boundary is
+                                   frame 2's minutes - not frame 3's own. Reading frame 3's left a gap:
+                                   with "Till 7" and "After 15", a punch 8-15 minutes late matched neither
+                                   branch, dropped to the else below and was recorded at the actual time
+                                   with nobody notified. Both frames are set to 7 today, so this changes
+                                   nothing until someone widens one of them - which is exactly when it
+                                   would have gone wrong. Mirrors the Clock Out block, which already
+                                   tests its own window on both sides. */
+                                elseif($p_dif != '' && $p_dif > $this->getConditionSet('Clock In', 2, 'minutes', 0)):
                                     $notify = ($this->getConditionSet('Clock In', 3, 'notify', 0) == 1) ? 'notfy_input' : '';
                                     if($this->getConditionSet('Clock In', 3, 'notify', 0) == 1){
                                         $issues += 1;
