@@ -793,29 +793,28 @@ class DatafutureReportController extends Controller
 
     private function buildCourseQualificationGroups($qualificationFields)
     {
-        $awardRows = $qualificationFields->filter(function($dfld) {
+        $titleRows = $qualificationFields->filter(function($dfld) {
             return empty($dfld->parent_id)
-                && isset($dfld->field->name)
-                && $dfld->field->name == 'QUALAWARDID';
+                && ($dfld->datafuture_field_id == 29 || (isset($dfld->field->name) && $dfld->field->name == 'QUALTITLE'));
         })->values();
 
-        if($awardRows->count() == 0):
+        if($titleRows->count() == 0):
             return collect();
         endif;
 
-        return $awardRows->map(function($awardRow) use ($qualificationFields) {
-            return $qualificationFields->filter(function($dfld) use ($awardRow) {
+        return $titleRows->map(function($titleRow) use ($qualificationFields) {
+            return $qualificationFields->filter(function($dfld) use ($titleRow) {
                 $fieldName = (isset($dfld->field->name) ? $dfld->field->name : '');
 
-                if($dfld->id == $awardRow->id):
+                if($dfld->id == $titleRow->id):
                     return true;
                 endif;
 
-                if(isset($dfld->parent_id) && $dfld->parent_id == $awardRow->id):
+                if(isset($dfld->parent_id) && $dfld->parent_id == $titleRow->id):
                     return true;
                 endif;
 
-                return empty($dfld->parent_id) && $fieldName != 'QUALAWARDID';
+                return empty($dfld->parent_id) && $dfld->datafuture_field_id != 29 && $fieldName != 'QUALTITLE';
             })->values();
         });
     }
@@ -831,7 +830,9 @@ class DatafutureReportController extends Controller
                 $name = (isset($dfld->field->name) && !empty($dfld->field->name) ? $dfld->field->name : '');
                 $value = (isset($dfld->field_value) && !empty($dfld->field_value) ? trim($dfld->field_value) : '');
 
-                if($name == 'AWARDINGBODYID'):
+                if($name == 'QUALAWARDID'):
+                    continue;
+                elseif($name == 'AWARDINGBODYID'):
                     $QUALIF_ROL .= (!empty($name) && !empty($value) ? '<'.$name.'>'.$value.'</'.$name.'>' : '');
                 elseif($name == 'QUALSUBJECT' || $name == 'QUALPROPORTION'):
                     $QUALIF_SUB .= (!empty($name) && !empty($value) ? '<'.$name.'>'.$value.'</'.$name.'>' : '');
