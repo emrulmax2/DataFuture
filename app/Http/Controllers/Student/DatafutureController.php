@@ -143,34 +143,33 @@ class DatafutureController extends Controller
 
     private function buildQualificationGroups($qualificationFields)
     {
-        $awardRows = $qualificationFields->filter(function($dfld) {
+        $titleRows = $qualificationFields->filter(function($dfld) {
             return empty($dfld->parent_id)
-                && isset($dfld->field->name)
-                && $dfld->field->name == 'QUALAWARDID';
+                && ($dfld->datafuture_field_id == 29 || (isset($dfld->field->name) && $dfld->field->name == 'QUALTITLE'));
         })->values();
 
-        if($awardRows->count() == 0):
+        if($titleRows->count() == 0):
             return collect();
         endif;
 
-        return $awardRows->map(function($awardRow) use ($qualificationFields) {
-            $fields = $qualificationFields->filter(function($dfld) use ($awardRow) {
+        return $titleRows->map(function($titleRow) use ($qualificationFields) {
+            $fields = $qualificationFields->filter(function($dfld) use ($titleRow) {
                 $fieldName = (isset($dfld->field->name) ? $dfld->field->name : '');
 
-                if($dfld->id == $awardRow->id):
+                if($dfld->id == $titleRow->id):
                     return true;
                 endif;
 
-                if(isset($dfld->parent_id) && $dfld->parent_id == $awardRow->id):
+                if(isset($dfld->parent_id) && $dfld->parent_id == $titleRow->id):
                     return true;
                 endif;
 
-                return empty($dfld->parent_id) && $fieldName != 'QUALAWARDID';
+                return empty($dfld->parent_id) && $dfld->datafuture_field_id != 29 && $fieldName != 'QUALTITLE';
             })->values();
 
             return [
-                'award' => $awardRow,
-                'title' => (!empty($awardRow->field_value) ? trim($awardRow->field_value) : 'Qualification'),
+                'title_row' => $titleRow,
+                'title' => (!empty($titleRow->field_value) ? trim($titleRow->field_value) : 'Qualification'),
                 'fields' => $fields,
             ];
         });
