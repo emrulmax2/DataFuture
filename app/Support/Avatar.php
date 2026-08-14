@@ -37,6 +37,17 @@ class Avatar
     protected static array $brand = ['#0A5E66', '#159FA0'];
 
     /**
+     * Muted palette for modules that draw their own initials chip in CSS
+     * rather than dropping an <img> in — the generated SVG above is a bright,
+     * Arial-set bitmap-ish fallback that reads as foreign next to a designed
+     * type scale. White text passes WCAG AA on every colour here too.
+     */
+    protected static array $soft = [
+        '#0E5A61', '#12777F', '#8A3324', '#5C2E7E', '#1B5E9C',
+        '#8A6A24', '#1B7F5A', '#A8324A', '#3D4E8C', '#6B5B12',
+    ];
+
+    /**
      * Data-URI SVG avatar with a deterministic, per-name background colour.
      */
     public static function initials(?string $name, int $size = 200): string
@@ -51,6 +62,42 @@ class Avatar
     public static function brand(?string $name, int $size = 200): string
     {
         return self::render($name, $size, self::$brand);
+    }
+
+    /**
+     * Deterministic muted colour for a name, for callers that render the
+     * initials themselves (see $soft).
+     */
+    public static function soft(?string $name): string
+    {
+        $clean = trim(preg_replace('/\s+/', ' ', (string) $name));
+        $key = $clean !== '' ? $clean : 'lcc';
+
+        return self::$soft[abs(crc32($key)) % count(self::$soft)];
+    }
+
+    /**
+     * True when the URL is one of the generated fallback avatars above rather
+     * than a real uploaded photo — those callers want to draw their own chip.
+     */
+    public static function isGenerated(?string $url): bool
+    {
+        return empty($url) || str_starts_with($url, 'data:');
+    }
+
+    /** First + last initial, for callers drawing the chip themselves. */
+    public static function initialsOnly(?string $name): string
+    {
+        $clean = trim(preg_replace('/^(Mr|Mrs|Ms|Miss|Dr|Prof)\.?\s+/i', '', trim(preg_replace('/\s+/', ' ', (string) $name))));
+        if ($clean === '') {
+            return 'LC';
+        }
+
+        $parts = explode(' ', $clean);
+        $first = mb_substr($parts[0], 0, 1);
+        $last = count($parts) > 1 ? mb_substr($parts[count($parts) - 1], 0, 1) : '';
+
+        return mb_strtoupper($first.$last);
     }
 
     /** Deterministic palette colour for a given name. */

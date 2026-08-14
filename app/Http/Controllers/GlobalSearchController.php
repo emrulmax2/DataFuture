@@ -49,7 +49,7 @@ class GlobalSearchController extends Controller
             ->limit(6)
             ->get()
             ->map(function (Applicant $applicant) {
-                $name = trim((isset($applicant->title->name) ? $applicant->title->name . ' ' : '') . $applicant->first_name . ' ' . $applicant->last_name);
+                $name = $this->displayName((isset($applicant->title->name) ? $applicant->title->name . ' ' : '') . $applicant->first_name . ' ' . $applicant->last_name);
                 $reference = $applicant->application_no ?: $applicant->id;
 
                 return [
@@ -78,15 +78,14 @@ class GlobalSearchController extends Controller
             ->limit(6)
             ->get()
             ->map(function (Student $student) {
-                $name = trim((isset($student->title->name) ? $student->title->name . ' ' : '') . $student->first_name . ' ' . $student->last_name);
+                $name = $this->displayName((isset($student->title->name) ? $student->title->name . ' ' : '') . $student->first_name . ' ' . $student->last_name);
                 $reference = $student->registration_no ?: $student->application_no ?: $student->df_sid_number;
 
                 return [
                     'name' => $name,
-                    'meta' => collect([
-                        $reference ? '#' . $reference : null,
-                        isset($student->status->name) ? $student->status->name : null,
-                    ])->filter()->implode(' / '),
+                    // Registration number only — the status already reads as the
+                    // tag chip on the right of the row.
+                    'meta' => $reference ? '#' . $reference : '',
                     'status' => isset($student->status->name) ? $student->status->name : 'Student',
                     'initials' => $this->initials($student->first_name, $student->last_name),
                     'url' => route('student.show', $student->id),
@@ -110,7 +109,7 @@ class GlobalSearchController extends Controller
             ->limit(6)
             ->get()
             ->map(function (Employee $employee) {
-                $name = trim((isset($employee->title->name) ? $employee->title->name . ' ' : '') . $employee->first_name . ' ' . $employee->last_name);
+                $name = $this->displayName((isset($employee->title->name) ? $employee->title->name . ' ' : '') . $employee->first_name . ' ' . $employee->last_name);
                 $jobTitle = $employee->employment?->employeeJobTitle?->name;
                 $email = $employee->employment?->email ?: ($employee->email ?: $employee->user?->email);
 
@@ -134,6 +133,17 @@ class GlobalSearchController extends Controller
                 'employees' => $canSearchEmployees,
             ],
         ]);
+    }
+
+    /**
+     * Names are stored shouted in places ("MR MD SOHEL KABIR"), which reads
+     * badly in the header results. CSS `text-transform: capitalize` cannot fix
+     * that — it only touches the first letter of each word — so normalise to
+     * title case here instead.
+     */
+    private function displayName(string $name): string
+    {
+        return Str::title(trim(preg_replace('/\s+/', ' ', $name)));
     }
 
     private function initials(?string $firstName, ?string $lastName): string

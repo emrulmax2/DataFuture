@@ -6,6 +6,34 @@ import TomSelect from "tom-select";
 import { set } from "lodash";
  
 ("use strict");
+
+// Cell contents are built as HTML strings, so anything coming off the record
+// has to be escaped before it is concatenated in.
+const esc = (value) =>
+    String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+
+const initials = (name) =>
+    String(name || "")
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0].toUpperCase())
+        .join("") || "?";
+
+// Inline rather than `data-lucide`, so the row action buttons are painted on
+// the first render instead of waiting for the icon pass in `renderComplete`.
+const ICON_EDIT =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 4.5a2.1 2.1 0 0 1 3 3L9 18l-4 1 1-4 10.5-10.5z"></path></svg>';
+const ICON_DELETE =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 7h15M9.5 7V5h5v2M6.5 7l1 13h9l1-13"></path></svg>';
+const ICON_RESTORE =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5A8 8 0 1 1 17.6 6"></path><path d="M20 4v5h-5"></path></svg>';
+
 var table = (function () {
     var _tableGen = function () {
         // Setup Tabulator
@@ -24,28 +52,52 @@ var table = (function () {
             paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
-            placeholder: "No matching records found",
+            placeholder: "No log entries yet — add the first update to start the trail",
             columns: [
-                
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
+                    width: "110",
+                    formatter(cell) {
+                        return '<span class="rit-cell-id">' + esc(cell.getValue()) + "</span>";
+                    },
                 },
                 {
                     title: "Description",
                     field: "description",
                     headerHozAlign: "left",
+                    minWidth: 240,
+                    cssClass: "rit-col-wrap",
                 },
                 {
                     title: "Last Modified At",
                     field: "created_at",
                     headerHozAlign: "left",
+                    width: "180",
+                    cssClass: "rit-col-num",
                 },
                 {
                     title: "Last Modified By",
                     field: "created_by",
                     headerHozAlign: "left",
+                    minWidth: 200,
+                    cssClass: "rit-col-loose",
+                    formatter(cell) {
+                        const name = cell.getValue() || "";
+                        if (!name) {
+                            return '<span class="rit-noaction">Unknown</span>';
+                        }
+                        // Same person cell as the two list tables — the log
+                        // endpoint returns no job title, so the role line is
+                        // simply left off.
+                        return (
+                            '<span class="rit-person">' +
+                            '<span class="rit-person__avatar">' + esc(initials(name)) + "</span>" +
+                            '<span class="rit-person__body">' +
+                            '<span class="rit-person__name">' + esc(name) + "</span>" +
+                            "</span></span>"
+                        );
+                    },
                 },
                 {
                     title: "Actions",
@@ -53,28 +105,30 @@ var table = (function () {
                     headerSort: false,
                     hozAlign: "center",
                     headerHozAlign: "center",
-                    width: "180",
+                    width: "140",
                     download: false,
-                    formatter(cell, formatterParams) {                        
-                        var btns = "";
-                        if (cell.getData().deleted_at == null) {
+                    formatter(cell) {
+                        const row = cell.getData();
+                        const id = esc(row.id);
+                        let btns = "";
+
+                        if (row.deleted_at == null) {
                             btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '" data-tw-toggle="modal" data-tw-target="#editModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
+                                '<button data-id="' + id + '" data-tw-toggle="modal" data-tw-target="#editModal" type="button" title="Edit" class="edit_btn rit-iconbtn rit-iconbtn--edit">' +
+                                ICON_EDIT +
+                                "</button>";
                             btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }  else if (cell.getData().deleted_at != null) {
+                                '<button data-id="' + id + '" type="button" title="Delete" class="delete_btn rit-iconbtn rit-iconbtn--delete">' +
+                                ICON_DELETE +
+                                "</button>";
+                        } else {
                             btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
-                            
+                                '<button data-id="' + id + '" type="button" title="Restore" class="restore_btn rit-iconbtn rit-iconbtn--restore">' +
+                                ICON_RESTORE +
+                                "</button>";
                         }
-                        
-                        return btns;
+
+                        return '<span class="rit-actions">' + btns + "</span>";
                     },
                 },
             ],

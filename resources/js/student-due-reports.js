@@ -4,7 +4,114 @@ import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
 
 ("use strict");
+
+/* Escape anything that reaches a formatter as raw HTML — course titles and
+   status names are free text entered elsewhere in the system. */
+function sdrEscape(value) {
+    return $("<div/>").text(value == null ? "" : value).html();
+}
+
+/* Status names are user-maintained, so the pill colour is keyed off the words
+   that actually appear rather than an id we cannot rely on. Anything
+   unrecognised falls back to the neutral pill. */
+function sdrStatusPill(status) {
+    let tone = "";
+    const name = (status || "").toLowerCase();
+
+    if (name.includes("active") || name.includes("continu") || name.includes("complet")) {
+        tone = " sdr-pill--green";
+    } else if (name.includes("withdraw") || name.includes("cancel") || name.includes("terminat")) {
+        tone = " sdr-pill--red";
+    } else if (name.includes("defer") || name.includes("suspend") || name.includes("hold") || name.includes("break")) {
+        tone = " sdr-pill--gold";
+    } else if (name.includes("interrupt") || name.includes("transfer") || name.includes("await")) {
+        tone = " sdr-pill--blue";
+    }
+
+    return status ? '<span class="sdr-pill' + tone + '">' + sdrEscape(status) + "</span>" : "";
+}
+
+/* Money arrives pre-formatted ("£1,234.56"), so the numeric test only has to
+   tell a real balance from a zero one to decide whether to shout in red. */
+function sdrIsZeroMoney(value) {
+    const amount = parseFloat(String(value == null ? "" : value).replace(/[^0-9.-]/g, ""));
+    return !amount;
+}
+
+/* The filter line above the table — it should describe what the user actually
+   asked for, so it is read back off the selects rather than the response. */
+function sdrSelectedLabels(selector) {
+    return $(selector + " option:selected").map(function () {
+        return $(this).text().trim();
+    }).get().filter(function (label) {
+        return label !== "" && label !== "Please Select";
+    });
+}
+
+function sdrRenderResultMeta() {
+    const semesters = sdrSelectedLabels("#due_semester_id");
+    const courses = sdrSelectedLabels("#due_course_id");
+    const statuses = sdrSelectedLabels("#due_status_id");
+
+    const summarise = function (labels, all) {
+        if (labels.length === 0) return all;
+        if (labels.length <= 2) return labels.join(", ");
+        return labels.length + " " + all.replace("all ", "");
+    };
+
+    const parts = [summarise(semesters, "all intakes"), summarise(courses, "all courses")];
+    if (statuses.length > 0) parts.push(summarise(statuses, ""));
+
+    $("[data-sdr-result-meta]").text(parts.join(" · "));
+}
+
+/* Tiles describe the whole filtered set. The controller only sends `summary`
+   with the first page — paging cannot change a filter-level total — so later
+   pages simply leave the tiles as they are. */
+function sdrRenderSummary(summary) {
+    if (!summary) return;
+
+    const values = {
+        students: summary.students,
+        claim: summary.claim_total,
+        received: summary.received_total,
+        due: summary.due_total,
+    };
+
+    $.each(values, function (key, value) {
+        $('[data-sdr-stat="' + key + '"]').removeClass("is-loading").text(value == null ? "—" : value);
+    });
+}
+
+/* Tabulator's own footer only carries the pager, so the record range is
+   injected alongside it after each render. */
+function sdrRenderFooterSummary(table, total) {
+    const $footer = $(table.element).find(".tabulator-footer");
+    if (!$footer.length) return;
+
+    let $summary = $footer.find(".sdr-tablesummary");
+    if (!$summary.length) {
+        $summary = $('<div class="sdr-tablesummary"></div>').prependTo($footer);
+    }
+
+    if (!total) {
+        $summary.html("No records");
+        return;
+    }
+
+    const size = table.getPageSize() || total;
+    const page = table.getPage() || 1;
+    const from = (page - 1) * size + 1;
+    const to = Math.min(page * size, total);
+
+    $summary.html("Showing <b>" + from + "–" + to + "</b> of <b>" + total + "</b>");
+}
+
 var studentDueReportList = (function () {
+    /* Held across renders so the footer range survives a redraw, which fires
+       renderComplete without a fresh ajax response. */
+    var _total = 0;
+
     var _tableGen = function () {
         // Setup Tabulator
         let semester_ids = $("#due_semester_id").val() != "" ? $("#due_semester_id").val() : "";
@@ -38,7 +145,7 @@ var studentDueReportList = (function () {
                     headerHozAlign: "left",
                     headerSort: false,
                     formatter(cell, formatterParams) {
-                        return '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().student_id+'</div>';
+                        return '<span class="sdr-id">' + sdrEscape(cell.getData().student_id) + "</span>";
                     },
                 },
                 {
@@ -46,8 +153,9 @@ var studentDueReportList = (function () {
                     field: "course",
                     headerHozAlign: "left",
                     headerSort: false,
+                    cssClass: "sdr-col-wrap",
                     formatter(cell, formatterParams) {
-                        return '<div class="whitespace-normal text-xs">'+cell.getData().course+'</div>';
+                        return '<span class="sdr-course">' + sdrEscape(cell.getData().course) + "</span>";
                     },
                 },
                 {
@@ -71,44 +179,76 @@ var studentDueReportList = (function () {
                     field: "status",
                     headerHozAlign: "left",
                     headerSort: false,
+                    cssClass: "sdr-col-pill",
+                    formatter(cell, formatterParams) {
+                        return sdrStatusPill(cell.getData().status);
+                    },
                 },
                 {
-                    title: "No of Agreement",
+                    title: "Agreements",
                     field: "no_of_agreement",
                     headerHozAlign: "left",
                     headerSort: false,
                     formatter(cell, formatterParams) {
-                        return '<div class="font-medium"><span class="text-danger">'+cell.getData().no_of_agreement+'</span>/<span class="text-success">'+cell.getData().no_of_agreement_all+'</span></div>';
+                        /* "with dues / total" — the second figure is context for
+                           the first, so it is deliberately the quieter one. */
+                        return '<span class="sdr-agreements">' + sdrEscape(cell.getData().no_of_agreement) +
+                            '<span class="sdr-agreements__all">/' + sdrEscape(cell.getData().no_of_agreement_all) + "</span></span>";
                     },
                 },
                 {
                     title: "Claim Total",
                     field: "claim_total",
-                    headerHozAlign: "left",
+                    headerHozAlign: "right",
                     headerSort: false,
+                    cssClass: "sdr-col-num",
                 },
                 {
-                    title: "Received total",
+                    title: "Received",
                     field: "received_total",
-                    headerHozAlign: "left",
+                    headerHozAlign: "right",
                     headerSort: false,
+                    cssClass: "sdr-col-num",
+                    formatter(cell, formatterParams) {
+                        const value = cell.getData().received_total;
+                        return sdrIsZeroMoney(value)
+                            ? sdrEscape(value)
+                            : '<span class="sdr-money--received">' + sdrEscape(value) + "</span>";
+                    },
                 },
                 {
                     title: "Due",
                     field: "due",
-                    headerHozAlign: "left",
+                    headerHozAlign: "right",
                     headerSort: false,
+                    cssClass: "sdr-col-num",
+                    formatter(cell, formatterParams) {
+                        const value = cell.getData().due;
+                        return sdrIsZeroMoney(value)
+                            ? sdrEscape(value)
+                            : '<span class="sdr-money--due">' + sdrEscape(value) + "</span>";
+                    },
                 },
                 {
                     title: "Due Date",
                     field: "due_date",
                     headerHozAlign: "left",
                     headerSort: false,
+                    cssClass: "sdr-col-wrap",
                     formatter(cell, formatterParams) {
-                        return '<div class="whitespace-normal break-words text-xs">'+cell.getData().due_date+'</div>';
+                        return '<span class="sdr-dates">' + sdrEscape(cell.getData().due_date) + "</span>";
                     },
                 },
             ],
+            /* Extra payload rides along with the paged rows: `total` feeds the
+               record count and footer range, `summary` the tiles (first page
+               only). Tabulator still needs the response handed straight back. */
+            ajaxResponse(url, params, response) {
+                _total = response.total || 0;
+                $("[data-sdr-result-count]").text(_total === 1 ? "1 record" : _total + " records");
+                sdrRenderSummary(response.summary);
+                return response;
+            },
             renderComplete() {
                 createIcons({
                     icons,
@@ -120,7 +260,8 @@ var studentDueReportList = (function () {
                     const lastColumn = columnLists[columnLists.length - 1];
                     const currentWidth = lastColumn.getWidth();
                     lastColumn.setWidth(currentWidth - 1);
-                } 
+                }
+                sdrRenderFooterSummary(this, _total);
             },
             rowClick:function(e, row){
                 window.open(row.getData().url, '_blank');
@@ -149,9 +290,14 @@ var studentDueReportList = (function () {
 (function(){
     if ($("#studentDueReportList").length) {
         studentDueReportList.init();
+        sdrRenderResultMeta();
 
         // Filter function
         function filterDueReportHTMLForm() {
+            /* Blank the tiles while the new set is fetched — leaving the
+               previous totals up next to a fresh filter would be misread. */
+            $("[data-sdr-stat]").addClass("is-loading").text("—");
+            sdrRenderResultMeta();
             studentDueReportList.init();
         }
 

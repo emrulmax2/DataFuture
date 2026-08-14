@@ -4,82 +4,98 @@
     <title>{{ $title }}</title>
 @endsection
 
-@section('subcontent')
+@section('body_class', 'rit-page')
 
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Issues Reported by {{ $employee->full_name }}</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('dashboard') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Dashboard</a>
-        </div>
-        @if(isset($priv['show_all_issue']) && $priv['show_all_issue'] == 1)
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-                <button data-tw-toggle="modal" data-tw-target="#addModal" class="add_btn btn btn-primary shadow-md mr-2"><i data-lucide="plus" class="w-4 h-4 mr-2"></i>Add New</button>
-                <a href="{{ route('report.it.all') }}"  class="add_btn btn btn-warning shadow-md mr-2"><i data-lucide="search" class="w-4 h-4 mr-2"></i>Show All</a>
-        </div>
-        @endif
-    </div>
-    <!-- BEGIN: HTML Table Data -->
-    <div class="intro-y box p-5 mt-5">
-        <form id="tabulatorFilterForm">
-            <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-3">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1 whitespace-nowrap">Name.</div>
-                        <input type="text" id="query" name="querystr" placeholder="Full name" value="" class="w-full"/>
-                    </div>
+@section('styles')
+    @vite('resources/css/report-it.css')
+@endsection
+
+@section('subcontent')
+    @php
+        $reporterRole = $employee->employment->employeeJobTitle->name ?? null;
+    @endphp
+
+    <div class="rit">
+        <div class="rit-head">
+            <div>
+                <h1 class="rit-head__title">Issues reported by you</h1>
+                <div class="rit-head__sub">
+                    {{ $employee->full_name }}@if($reporterRole) &middot; {{ $reporterRole }}@endif
                 </div>
-                <div class="col-span-3">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Condition</div>
-                        <select id="statuses" name="statuses[]" class="w-full tom-selects" multiple>
+            </div>
+            <div class="rit-head__actions">
+                <a href="{{ route('dashboard') }}" class="rit-btn rit-btn--ghost">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 6l-6 6 6 6"></path></svg>
+                    Back to Dashboard
+                </a>
+                @if(isset($priv['show_all_issue']) && $priv['show_all_issue'] == 1)
+                    <button type="button" data-tw-toggle="modal" data-tw-target="#addModal" class="rit-btn rit-btn--solid">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5.5v13M5.5 12h13"></path></svg>
+                        Add New
+                    </button>
+                    <a href="{{ route('report.it.all') }}" class="rit-btn rit-btn--gold">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.5 4.5"></path></svg>
+                        Show All
+                    </a>
+                @endif
+            </div>
+        </div>
+
+        <div class="rit-panel rit-panel--filters">
+            <form id="tabulatorFilterForm">
+                <div class="rit-filters">
+                    <div class="rit-field">
+                        <label for="query" class="rit-field__label">Name</label>
+                        <input type="text" id="query" name="querystr" value="" placeholder="Full name" class="rit-input">
+                    </div>
+                    <div class="rit-field">
+                        <label for="statuses" class="rit-field__label">Condition</label>
+                        <select id="statuses" name="statuses[]" class="tom-selects rit-select w-full" multiple>
                             <option value="Pending">Pending</option>
                             <option value="In Progress">In Progress</option>
                             <option value="Resolved">Resolved</option>
                         </select>
                     </div>
-                </div>
-                <div class="col-span-2">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Status</div>
-                        <select id="status" name="status" class="w-full tom-selects" >
+                    <div class="rit-field">
+                        <label for="status" class="rit-field__label">Status</label>
+                        <select id="status" name="status" class="tom-selects rit-select w-full">
                             <option value="1">Active</option>
                             <option value="2">Archived</option>
                         </select>
                     </div>
-                </div>
-                <div class="col-span-12"></div>
-                <div class="col-span-6">
-                    <button id="tabulator-html-filter-go" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                    <button id="tabulator-html-filter-reset" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                </div>
-                <div class="col-span-6 text-right">
-                    <div class="flex mt-5 sm:mt-0 justify-end">
-                        <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                            <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
+                    <div class="rit-filters__actions">
+                        <button id="tabulator-html-filter-go" type="button" class="rit-btn rit-btn--gold">Go</button>
+                        <button id="tabulator-html-filter-reset" type="button" class="rit-btn rit-btn--ghost">Reset</button>
+                    </div>
+                    <div class="rit-filters__tools">
+                        <button id="tabulator-print" type="button" class="rit-btn rit-btn--ghost">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 9V4h11v5"></path><rect x="3.5" y="9" width="17" height="7" rx="2"></rect><path d="M6.5 16h11v4h-11z"></path></svg>
+                            Print
                         </button>
-                        <button id="tabulator-export-xlsx" class="btn btn-outline-secondary w-1/2 sm:w-auto">
-                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export Excel
-                            <svg id="excelExportBtn" style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                            stroke="gray" class="w-4 h-4 ml-2">
-                            <g fill="none" fill-rule="evenodd">
-                                <g transform="translate(1 1)" stroke-width="4">
-                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                    <path d="M36 18c0-9.94-8.06-18-18-18">
-                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                    </path>
+                        <button id="tabulator-export-xlsx" type="button" class="rit-btn rit-btn--ghost">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5L13.5 3z"></path><path d="M13.5 3v5.5H19M9.5 13l5 5M14.5 13l-5 5"></path></svg>
+                            Export Excel
+                            <svg id="excelExportBtn" style="display: none;" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" class="rit-spinner">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
                                 </g>
-                            </g>
-                        </svg>
+                            </svg>
                         </button>
-
                     </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
 
-        <div class="overflow-x-auto scrollbar-hidden">
-            <div id="reportItAllTableId" class="mt-5 table-report table-report--tabulator"></div>
+        <div class="rit-panel">
+            <div class="rit-tablewrap scrollbar-hidden">
+                <div id="reportItAllTableId" class="table-report table-report--tabulator"></div>
+            </div>
         </div>
     </div>
 

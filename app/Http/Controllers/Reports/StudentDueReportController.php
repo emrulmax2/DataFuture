@@ -23,10 +23,10 @@ class StudentDueReportController extends Controller
 {
     public function index(){
         return view('pages.reports.student-due.index', [
-            'title' => 'Attendance Reports - London Churchill College',
+            'title' => 'Student Due Report - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Reports', 'href' => 'javascript:void(0);'],
-                ['label' => 'Attendance Reports', 'href' => 'javascript:void(0);']
+                ['label' => 'Student Due Report', 'href' => 'javascript:void(0);']
             ],
             'semester' => Semester::where('id', '>=', 121)->orderBy('name', 'DESC')->get(),
             'courses' => Course::all(),
@@ -103,13 +103,74 @@ class StudentDueReportController extends Controller
                     'claim_total' => ($totalInstallment > 0 ? Number::currency($totalInstallment, 'GBP') : Number::currency(0, 'GBP')),
                     'received_total' =>  ($receivedTotal > 0 ? Number::currency($receivedTotal, 'GBP') : Number::currency(0, 'GBP')),
                     'due' => ($due > 0 ? Number::currency($due, 'GBP') : Number::currency(0, 'GBP')),
-                    'due_date' => (!empty($installment_dates) ? implode(', ', $installment_dates) : ''),
+                    'due_date' => (!empty($installment_dates) ? implode(', ', array_map(fn($date) => date('d-m-Y', strtotime($date)), $installment_dates)) : ''),
                     'url' => route('student.accounts', $list->id),
                 ];
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+
+        /* The summary tiles describe the whole filtered set, not the page, so they
+           only have to be built once per search — paging through the same filters
+           cannot change them. Skipping the aggregate on pages 2+ keeps remote
+           pagination as cheap as it was before. */
+        $summary = ($page > 1 ? null : $this->summaryTotals($students_ids, $status_ids, $due_date, $total_rows));
+
+        return response()->json(['last_page' => $last_page, 'data' => $data, 'total' => $total_rows, 'summary' => $summary]);
+    }
+
+    /**
+     * Claim / received / outstanding totals across every student the filters match.
+     *
+     * The per-row loop above costs four queries per student, which is far too much
+     * for a whole-set total, so the same figures are derived here from four grouped
+     * queries regardless of how many students match. Each student is then folded in
+     * with the identical arithmetic used for the row — including flooring a negative
+     * balance at zero — so the tiles always reconcile with the Due column below them.
+     */
+    private function summaryTotals(array $students_ids, array $status_ids, string $due_date, int $total_rows): array {
+        $students = Student::with('activeCR')->whereIn('id', (!empty($students_ids) ? $students_ids : [0]))
+                    ->whereIn('status_id', $status_ids)->where('has_due', 1)->get();
+
+        $relation_ids = $students->pluck('activeCR.id')->filter()->unique()->toArray();
+        $student_ids = $students->pluck('id')->toArray();
+
+        $agreements = SlcAgreement::whereIn('student_course_relation_id', (!empty($relation_ids) ? $relation_ids : [0]))
+                        ->whereIn('student_id', (!empty($student_ids) ? $student_ids : [0]))
+                        ->where('date', '<=', $due_date)->where('has_due', 1)->get(['id', 'student_id']);
+        $agreement_ids = $agreements->pluck('id')->unique()->toArray();
+        $agreement_ids = (!empty($agreement_ids) ? $agreement_ids : [0]);
+
+        $claims = SlcInstallment::whereIn('slc_agreement_id', $agreement_ids)->where('installment_date', '<=', $due_date)
+                    ->groupBy('student_id')->selectRaw('student_id, SUM(amount) AS total')->pluck('total', 'student_id');
+
+        $payments = SlcMoneyReceipt::whereIn('slc_agreement_id', $agreement_ids)->where('payment_date', '<=', $due_date)
+                    ->where('payment_type', '!=', 'Refund')
+                    ->groupBy('student_id')->selectRaw('student_id, SUM(amount) AS total')->pluck('total', 'student_id');
+
+        $refunds = SlcMoneyReceipt::whereIn('slc_agreement_id', $agreement_ids)->where('payment_date', '<=', $due_date)
+                    ->where('payment_type', '=', 'Refund')
+                    ->groupBy('student_id')->selectRaw('student_id, SUM(amount) AS total')->pluck('total', 'student_id');
+
+        $claimTotal = 0; $receivedTotal = 0; $dueTotal = 0;
+        foreach($students as $student):
+            $claim = (float) ($claims[$student->id] ?? 0);
+            $paid = (float) ($payments[$student->id] ?? 0);
+            $refund = (float) ($refunds[$student->id] ?? 0);
+            $received = $paid - $refund;
+            $due = $claim - $paid + $refund;
+
+            $claimTotal += ($claim > 0 ? $claim : 0);
+            $receivedTotal += ($received > 0 ? $received : 0);
+            $dueTotal += ($due > 0 ? $due : 0);
+        endforeach;
+
+        return [
+            'students' => $total_rows,
+            'claim_total' => Number::currency($claimTotal, 'GBP'),
+            'received_total' => Number::currency($receivedTotal, 'GBP'),
+            'due_total' => Number::currency($dueTotal, 'GBP'),
+        ];
     }
 
     public function excelDownload(Request $request){

@@ -32,9 +32,9 @@
 
         $subMenuIcon = function ($key) {
             return [
-                'admission' => 'plus',
-                'student' => 'target',
-                'agent_management' => 'users',
+                'admission' => 'file-plus',
+                'student' => 'radio',
+                'agent_management' => 'contact',
             ][$key] ?? 'activity';
         };
 
@@ -130,10 +130,14 @@
             ? strtoupper(mb_substr($initialsFirst, 0, 1).mb_substr($initialsLast, 0, 1))
             : $initialsFromName(trim($initialsFirst.' '.$initialsLast) ?: $currentUserName);
 
+        // Use the employee's (or student's) uploaded photo when there is one.
+        // `photo_url` falls back to a generated `data:` initials avatar, which we
+        // skip so the header keeps its own gold-ringed initials treatment.
         $currentAvatarUrl = null;
+        $currentPhotoUrl = $employee->photo_url ?? ($studentUser->student->photo_url ?? null);
 
-        if (isset($employee) && $employee?->photo && Storage::disk('local')->exists('public/employees/'.$employee->id.'/'.$employee->photo)) {
-            $currentAvatarUrl = Storage::disk('local')->url('public/employees/'.$employee->id.'/'.$employee->photo);
+        if (!empty($currentPhotoUrl) && !str_starts_with($currentPhotoUrl, 'data:')) {
+            $currentAvatarUrl = $currentPhotoUrl;
         }
 
         $breadcrumbsList = [
@@ -164,11 +168,12 @@
         <header class="lcc-global-header" data-global-header>
             <div class="lcc-global-header__frame">
                 <div class="lcc-global-header__main">
+                    {{-- Brand lock-up: the Site Settings "dark logo" already pairs the
+                         crest with the three-line college wordmark, which is exactly the
+                         brand block in the design. --}}
                     <a href="{{ $dashboardUrl }}" class="lcc-global-header__brand" aria-label="London Churchill College dashboard">
                         <img src="{{ $headerLogo }}" alt="London Churchill College">
                     </a>
-
-                <span class="lcc-global-header__divider" aria-hidden="true"></span>
 
                 <nav class="lcc-global-header__nav" aria-label="Primary navigation">
                     @foreach ($top_menu as $menuKey => $menu)
@@ -210,11 +215,15 @@
                     @endforeach
                 </nav>
 
+                <div class="lcc-global-header__end">
                 @if ($canShowGlobalSearch && Route::has('global.search'))
                     <div class="lcc-global-header__search" data-global-search data-search-url="{{ route('global.search') }}" data-search-applicants="{{ $canSearchApplicants ? '1' : '0' }}" data-search-students="{{ $canSearchStudents ? '1' : '0' }}" data-search-employees="{{ $canSearchEmployees ? '1' : '0' }}">
                         <label class="lcc-global-header__search-box">
                             <i data-lucide="search"></i>
-                            <input type="search" autocomplete="off" placeholder="{{ $searchPlaceholder }}" data-global-search-input>
+                            <input type="text" autocomplete="off" placeholder="{{ $searchPlaceholder }}" data-global-search-input>
+                            <button type="button" class="lcc-global-header__search-clear" data-global-search-clear aria-label="Clear search" hidden>
+                                <i data-lucide="x"></i>
+                            </button>
                         </label>
                         <div class="lcc-global-header__search-results" data-global-search-results></div>
                     </div>
@@ -295,6 +304,7 @@
                         </div>
                     </div>
                 </div>
+                </div>
             </div>
 
             <div class="lcc-global-header__context">
@@ -302,10 +312,14 @@
                     @foreach ($breadcrumbsList as $crumbIndex => $crumb)
                         @php $isLastCrumb = $crumbIndex === count($breadcrumbsList) - 1; @endphp
                         @if ($crumbIndex > 0)
-                            <span aria-hidden="true">/</span>
+                            <span class="lcc-global-header__crumb-dot" aria-hidden="true"></span>
                         @endif
 
-                        @if ($isLastCrumb)
+                        @if ($crumbIndex === 0 && $isLastCrumb)
+                            <strong class="lcc-global-header__crumb-home"><i data-lucide="home"></i>{{ $crumb['label'] }}</strong>
+                        @elseif ($crumbIndex === 0)
+                            <a href="{{ $crumb['href'] }}" class="lcc-global-header__crumb-home"><i data-lucide="home"></i>{{ $crumb['label'] }}</a>
+                        @elseif ($isLastCrumb)
                             <strong>{{ $crumb['label'] }}</strong>
                         @else
                             <a href="{{ $crumb['href'] }}">{{ $crumb['label'] }}</a>

@@ -6,6 +6,42 @@ import TomSelect from "tom-select";
 import Dropzone from "dropzone";
  
 ("use strict");
+
+// Cell contents are built as HTML strings, so anything coming off the record
+// has to be escaped before it is concatenated in.
+const esc = (value) =>
+    String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+
+// `photo_url` never comes back empty: both Employee and Student fall back to
+// `App\Support\Avatar::initials()`, which is a data-URI SVG in its own
+// multi-colour palette. That data: prefix is the codebase's own test for
+// "no photo uploaded" (see `getBrandPhotoUrlAttribute`), so it is what
+// decides between the real picture and our green-and-gold disc.
+const hasPhoto = (url) => !!url && !String(url).startsWith("data:");
+
+// Fallback for the avatar when a record carries no photo.
+const initials = (name) =>
+    String(name || "")
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0].toUpperCase())
+        .join("") || "?";
+
+// Inline rather than `data-lucide`, so the row action buttons are painted on
+// the first render instead of waiting for the icon pass in `renderComplete`.
+const ICON_EDIT =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 4.5a2.1 2.1 0 0 1 3 3L9 18l-4 1 1-4 10.5-10.5z"></path></svg>';
+const ICON_DELETE =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 7h15M9.5 7V5h5v2M6.5 7l1 13h9l1-13"></path></svg>';
+const ICON_RESTORE =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5A8 8 0 1 1 17.6 6"></path><path d="M20 4v5h-5"></path></svg>';
+
 var table = (function () {
     var _tableGen = function () {
         // Setup Tabulator
@@ -28,79 +64,91 @@ var table = (function () {
                 {
                     title: "#ID",
                     field: "report_number",
-                    width: "180",
+                    width: "170",
+                    formatter(cell) {
+                        return '<span class="rit-cell-id">' + esc(cell.getValue()) + "</span>";
+                    },
                 },
                 {
                     title: "Issue Type",
                     field: "issue_type",
                     headerHozAlign: "left",
+                    minWidth: 170,
+                    cssClass: "rit-col-wrap",
                 },
-                
                 {
                     title: "Campus",
                     field: "venue",
-                    headerHozAlign: "center",
-                    hozAlign: "center",
+                    headerHozAlign: "left",
+                    minWidth: 130,
+                    cssClass: "rit-col-wrap",
                 },
                 {
                     title: "Location",
                     field: "location",
-                    headerHozAlign: "center",
-                    hozAlign: "center",
+                    headerHozAlign: "left",
+                    minWidth: 120,
+                    cssClass: "rit-col-wrap",
                 },
                 {
                     title: "Report Form",
                     field: "report_form",
                     headerHozAlign: "left",
+                    width: "120",
                 },
                 {
                     title: "Description",
                     field: "description",
                     headerHozAlign: "left",
+                    minWidth: 180,
+                    cssClass: "rit-col-wrap",
                 },
                 {
                     title: "Status",
                     field: "status",
-                    headerHozAlign: "center",
-                    hozAlign: "center",
-                    formatter(cell, formatterParams) {
-                              
-                        var status = cell.getValue();
-                        
-                        var statusClasses = {
-                            Pending: "inline-block px-2 py-1 text-xs font-semibold text-yellow-800 bg-yellow-200 rounded",
-                            InProgress: "inline-block px-2 py-1 text-xs font-semibold text-blue-800 bg-blue-200 rounded",
-                            Resolved: "inline-block px-2 py-1 text-xs font-semibold text-green-800 bg-green-200 rounded",
-                            Rejected: "inline-block px-2 py-1 text-xs font-semibold text-red-800 bg-red-200 rounded",
+                    headerHozAlign: "left",
+                    width: "130",
+                    cssClass: "rit-col-loose",
+                    formatter(cell) {
+                        // The status arrives already ucfirst-ed from the list
+                        // endpoint; the key is slugged so "In Progress" lands
+                        // on a modifier class of its own.
+                        const status = cell.getValue() || "";
+                        const kinds = {
+                            pending: "rit-chip--pending",
+                            "in progress": "rit-chip--progress",
+                            resolved: "rit-chip--resolved",
+                            rejected: "rit-chip--rejected",
                         };
-                        if(status == "In Progress"){ 
-                            let dataStatus = status.replace(" ", "");
-                            var html = '<span class="' + statusClasses[dataStatus] + '">' + status + '</span>';
-                        }
-                        else {
-                            var html = '<span class="' + statusClasses[status] + '">' + status + '</span>';
-                        }
-                        return html;
-                    }
+                        const kind = kinds[status.toLowerCase()] || "";
+                        return (
+                            '<span class="rit-chip ' + kind + '">' + esc(status) + "</span>"
+                        );
+                    },
                 },
                 {
                     title: "Reported By",
                     field: "full_name",
                     headerHozAlign: "left",
-                    formatter(cell, formatterParams) { 
+                    minWidth: 220,
+                    cssClass: "rit-col-loose",
+                    formatter(cell) {
+                        const row = cell.getData();
+                        const name = row.full_name || "";
+                        const role = row.ejt_name ? row.ejt_name : "Unknown";
+                        const avatar = hasPhoto(row.photourl)
+                            ? '<img alt="' + esc(name) + '" src="' + esc(row.photourl) + '">'
+                            : esc(initials(name));
 
-                        
-                        var html = '<div class="block">';
-                                html += '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
-                                    html += '<img alt="'+cell.getData().full_name+'" class="rounded-full shadow" src="'+cell.getData().photourl+'">';
-                                html += '</div>';
-                                html += '<div class="inline-block relative" style="top: -5px;">';
-                                    html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().full_name+'</div>';
-                                    html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+(cell.getData().ejt_name != '' ? cell.getData().ejt_name : 'Unknown')+'</div>';
-                                html += '</div>';
-                            html += '</div>';
-                        return html;
-                    }
+                        return (
+                            '<span class="rit-person">' +
+                            '<span class="rit-person__avatar">' + avatar + "</span>" +
+                            '<span class="rit-person__body">' +
+                            '<span class="rit-person__name">' + esc(name) + "</span>" +
+                            '<span class="rit-person__role">' + esc(role) + "</span>" +
+                            "</span></span>"
+                        );
+                    },
                 },
                 {
                     title: "Actions",
@@ -108,34 +156,34 @@ var table = (function () {
                     headerSort: false,
                     hozAlign: "center",
                     headerHozAlign: "center",
-                    width: "180",
+                    width: "140",
                     download: false,
-                    formatter(cell, formatterParams) {                        
-                        var btns = "";
-                        
-                        if (cell.getData().deleted_at == null) {
-                            if(cell.getData().status == 'Pending'){
-                            btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '" data-tw-toggle="modal" data-tw-target="#editModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            
+                    formatter(cell) {
+                        const row = cell.getData();
+                        const id = esc(row.id);
+                        let btns = "";
+
+                        if (row.deleted_at == null) {
+                            if (row.status == "Pending") {
                                 btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
+                                    '<button data-id="' + id + '" data-tw-toggle="modal" data-tw-target="#editModal" type="button" title="Edit" class="edit_btn rit-iconbtn rit-iconbtn--edit">' +
+                                    ICON_EDIT +
+                                    "</button>";
+                                btns +=
+                                    '<button data-id="' + id + '" type="button" title="Delete" class="delete_btn rit-iconbtn rit-iconbtn--delete">' +
+                                    ICON_DELETE +
+                                    "</button>";
                             } else {
-                                btns +="No action available";
+                                return '<span class="rit-noaction">No action available</span>';
                             }
-                        }  else if (cell.getData().deleted_at != null) {
+                        } else {
                             btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
-                            
+                                '<button data-id="' + id + '" type="button" title="Restore" class="restore_btn rit-iconbtn rit-iconbtn--restore">' +
+                                ICON_RESTORE +
+                                "</button>";
                         }
-                        
-                        return btns;
+
+                        return '<span class="rit-actions">' + btns + "</span>";
                     },
                 },
             ],
