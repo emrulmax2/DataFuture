@@ -1,0 +1,1071 @@
+/*
+ |--------------------------------------------------------------------------
+ | Staff dashboard — editorial redesign
+ |--------------------------------------------------------------------------
+ |
+ | Scoped to the root dashboard (`pages/users/staffs/dashboard/index`) through
+ | the `lccd-page` body class and the `lccd-` prefix so nothing here leaks into
+ | the rest of the application. Markup hooks used by `staff-dashboard.js`
+ | (`.attendance_action_btn`, `.processParents`, `.processTask`, the modal ids)
+ | are untouched — only their presentation changes.
+ |
+ | Type scale, spacing and colour are taken verbatim from the design handoff
+ | ("4a Editorial dashboard"); do not round these values.
+ */
+
+body.lccd-page {
+    background: #f7f4ed;
+}
+
+/* The theme's content wrapper insets, rounds and tints the page (22px sides,
+   slate background, 35px top radius). Cancel it here so the editorial canvas
+   sits flush under the global header — same approach as the accounts shell. */
+body.lccd-page .content.content--top-nav {
+    margin-top: 0;
+    padding: 0 30px;
+    border-radius: 0;
+    background: #f7f4ed;
+}
+
+body.lccd-page .content.content--top-nav::before {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    body.lccd-page .content.content--top-nav {
+        padding: 0 16px;
+    }
+}
+
+.lccd,
+.lccd *,
+.lccd *::before,
+.lccd *::after {
+    box-sizing: border-box;
+}
+
+.lccd {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding: 30px 0;
+    font-family: "Albert Sans", system-ui, sans-serif;
+    color: #1d1a14;
+}
+
+.lccd__cols {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    align-items: start;
+    gap: 30px;
+}
+
+.lccd__main {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    min-width: 0;
+}
+
+.lccd__rail {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    min-width: 0;
+}
+
+@media (max-width: 1279px) {
+    .lccd__cols {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 767px) {
+    .lccd {
+        padding: 20px 0 32px;
+        gap: 24px;
+    }
+}
+
+/* --------------------------------------------------------------- Section */
+
+.lccd-section__head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.lccd-section__title {
+    margin: 0;
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #1d1a14;
+}
+
+/* The uppercase micro-label used for section meta and rail headings. */
+.lccd-section__meta,
+.lccd-card__meta,
+.lccd-rail__label {
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: #6e6754;
+}
+
+/* The section meta sits straight after the heading; only the card meta is
+   pushed out to the right edge. */
+.lccd-section__meta,
+.lccd-card__meta {
+    white-space: nowrap;
+}
+
+.lccd-card__meta {
+    margin-left: auto;
+}
+
+.lccd-rail__label {
+    margin-bottom: 12px;
+}
+
+/* ---------------------------------------------------------- Module tiles */
+
+/* Hairlines are the 1px gap showing the container colour, per the design. That
+   only works while every cell is filled — the row-fill rules below guarantee it.
+   (Drawing the lines as per-tile box-shadows does not work: the next sibling's
+   background paints over them.) */
+.lccd-tiles {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    background: #e4dbc4;
+    border: 1px solid #e4dbc4;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+/* On a break only "My HR" survives the privilege gate. A lone tile would leave
+   two empty cells inside the bordered panel, so the wrap drops its own frame and
+   the tile becomes the box — still one column wide, no blank area beside it. */
+.lccd-tiles:has(.lccd-tile:only-child) {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    overflow: visible;
+}
+
+.lccd-tiles:has(.lccd-tile:only-child) .lccd-tile {
+    border: 1px solid #e4dbc4;
+    border-radius: 4px;
+}
+
+/* Any other count that doesn't fill its last row leaves framed empty cells, so
+   the final tile spans whatever is left. `3n+1`/`3n+2` as the last child is
+   exactly "count not divisible by the column count". */
+.lccd-tiles > .lccd-tile:nth-child(3n + 1):last-child:not(:only-child) {
+    grid-column: span 3;
+}
+
+.lccd-tiles > .lccd-tile:nth-child(3n + 2):last-child {
+    grid-column: span 2;
+}
+
+@media (max-width: 1023px) {
+    .lccd-tiles {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* Two columns now, so the three-column row-fill no longer applies. */
+    .lccd-tiles > .lccd-tile:nth-child(3n + 1):last-child:not(:only-child),
+    .lccd-tiles > .lccd-tile:nth-child(3n + 2):last-child {
+        grid-column: auto;
+    }
+
+    .lccd-tiles > .lccd-tile:nth-child(2n + 1):last-child:not(:only-child) {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 639px) {
+    .lccd-tiles {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .lccd-tiles > .lccd-tile:nth-child(2n + 1):last-child:not(:only-child) {
+        grid-column: auto;
+    }
+}
+
+.lccd-tile {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 22px;
+    background: #fdfcf9;
+    color: #1d1a14;
+    text-decoration: none;
+    transition: background 0.14s ease, box-shadow 0.14s ease;
+}
+
+.lccd-tile:hover {
+    background: #ffffff;
+    color: #1d1a14;
+    box-shadow: inset 3px 0 0 #c6a02c, 0 6px 18px rgba(29, 26, 20, 0.09);
+}
+
+.lccd-tile__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    background: #f1eada;
+    color: #15233f;
+}
+
+.lccd-tile__icon svg {
+    width: 21px;
+    height: 21px;
+    stroke-width: 1.4;
+}
+
+.lccd-tile__label {
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.005em;
+    line-height: 1.3;
+}
+
+.lccd-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    margin-left: auto;
+    padding: 3px 10px;
+    border: 1px solid #e4d3a6;
+    border-radius: 999px;
+    background: #f6edd6;
+    color: #8a6a24;
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.3;
+}
+
+.lccd-chip--count {
+    border-color: #eec7bf;
+    background: #f7e4e0;
+    color: #8e2c22;
+}
+
+/* ------------------------------------------------------------ Rail: shift */
+
+.lccd-shift {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.lccd-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 1;
+    padding: 12px 0;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-family: "Albert Sans", system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.14s ease, border-color 0.14s ease, color 0.14s ease;
+}
+
+.lccd-btn svg {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    stroke-width: 1.6;
+}
+
+.lccd-btn--outline {
+    background: #fdfcf9;
+    border-color: #ded3b8;
+    color: #1d1a14;
+}
+
+.lccd-btn--outline:hover {
+    background: #f4efe3;
+    border-color: #c6a02c;
+    color: #1d1a14;
+}
+
+.lccd-btn--danger {
+    background: #8e2c22;
+    border-color: #8e2c22;
+    color: #f7f4ed;
+}
+
+.lccd-btn--danger:hover {
+    background: #7a241b;
+    border-color: #7a241b;
+    color: #f7f4ed;
+}
+
+.lccd-btn--danger svg {
+    stroke-width: 1.7;
+}
+
+.lccd-btn--go {
+    background: #0f4c33;
+    border-color: #0f4c33;
+    color: #f7f4ed;
+}
+
+.lccd-btn--go:hover {
+    background: #0c3c29;
+    border-color: #0c3c29;
+    color: #f7f4ed;
+}
+
+.lccd-btn.disabled {
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+/* ---------------------------------------------------- Rail: quick actions */
+
+.lccd-actions {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e4dbc4;
+    border-radius: 4px;
+    background: #fdfcf9;
+}
+
+.lccd-action {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 13px 16px;
+    border-bottom: 1px solid #ede5d0;
+    background: transparent;
+    color: #1d1a14;
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.3;
+    text-decoration: none;
+    transition: background 0.14s ease, box-shadow 0.14s ease;
+}
+
+.lccd-action:last-child {
+    border-bottom: 0;
+}
+
+.lccd-action:hover {
+    background: #f4efe3;
+    color: #1d1a14;
+    box-shadow: inset 3px 0 0 #c6a02c;
+}
+
+.lccd-action > svg {
+    width: 17px;
+    height: 17px;
+    flex: none;
+    stroke-width: 1.6;
+    color: #15233f;
+}
+
+.lccd-action__label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* The label already claims the free space, so chips sit flush to the right
+   without fighting each other over `margin-left: auto`. */
+.lccd-action .lccd-chip {
+    margin-left: 0;
+    padding: 2px 9px;
+    font-size: 11.5px;
+}
+
+.lccd-action--danger {
+    color: #8e2c22;
+}
+
+.lccd-action--danger:hover {
+    background: #f9eeeb;
+    color: #8e2c22;
+    box-shadow: inset 3px 0 0 #8e2c22;
+}
+
+.lccd-action--danger > svg {
+    color: currentColor;
+}
+
+/* ------------------------------------------------------------- Card shell */
+
+.lccd-card {
+    border: 1px solid #e4dbc4;
+    border-radius: 4px;
+    background: #fdfcf9;
+}
+
+.lccd-card__head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding: 20px 26px 16px;
+    border-bottom: 1px solid #ede5d0;
+}
+
+.lccd-card__title {
+    margin: 0;
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    color: #1d1a14;
+}
+
+.lccd-card__hint {
+    font-size: 12.5px;
+    line-height: 1.3;
+    color: #6e6754;
+}
+
+/* --------------------------------------------------------------- Processes */
+
+.lccd-process {
+    border-bottom: 1px solid #ede5d0;
+}
+
+.lccd-process__row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 26px;
+    color: #1d1a14;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.14s ease, box-shadow 0.14s ease;
+}
+
+.lccd-process__row:hover {
+    background: #f9f6ee;
+    color: #1d1a14;
+    box-shadow: inset 3px 0 0 #c6a02c;
+}
+
+.lccd-process__count {
+    flex: none;
+    min-width: 70px;
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 34px;
+    font-weight: 600;
+    line-height: 1;
+    color: #15233f;
+}
+
+.lccd-process__copy {
+    min-width: 0;
+}
+
+.lccd-process__name {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1.25;
+    color: #1d1a14;
+}
+
+.lccd-process__subcount {
+    display: block;
+    margin-top: 2px;
+    font-size: 12.5px;
+    line-height: 1.25;
+    color: #6e6754;
+}
+
+.lccd-process__toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    flex: none;
+    color: #8a6a24;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.lccd-process__toggle > span {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.lccd-process__toggle svg {
+    width: 22px;
+    height: 22px;
+    stroke-width: 1.7;
+}
+
+.lccd-process__row .lccd-when-open,
+.lccd-process__row.active .lccd-when-closed {
+    display: none;
+}
+
+.lccd-process__subs {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 14px;
+    /* Collapsed the wrapper must take no vertical room, so the open padding is
+       conditional. Two independent triggers, because either one alone can miss:
+       the `active` class the toggle puts on the row, and the presence of a card
+       that jQuery has un-hidden (it writes `display: none` inline while closed). */
+    padding: 0 26px;
+}
+
+.lccd-process__row.active + .lccd-process__subs,
+.lccd-process__subs:has(.processTask:not([style*="display: none"])) {
+    padding: 30px 26px 30px;
+}
+
+@media (max-width: 1599px) {
+    .lccd-process__subs {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1023px) {
+    .lccd-process__subs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.lccd-process__sub {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 120px;
+    padding: 18px 16px 16px;
+    border-radius: 10px;
+    background: #1b2a52;
+    color: #f4efe3;
+    text-decoration: none;
+    transition: background 0.12s ease, transform 0.12s ease;
+}
+
+.lccd-process__sub:hover {
+    background: #233563;
+    color: #f4efe3;
+    transform: translateY(-2px);
+}
+
+.lccd-process__sub-name {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    line-height: 1.35;
+    text-transform: uppercase;
+    color: #f4efe3;
+}
+
+.lccd-process__sub-count {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: flex-start;
+    margin-top: auto;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: #c25a0f;
+    color: #ffffff;
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* ---------------------------------------------------------- Today's classes */
+
+.lccd-classes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 14px;
+}
+
+.lccd-class {
+    padding: 18px 20px;
+    border: 1px solid #cfe2d6;
+    border-radius: 4px;
+    background: #eaf3ed;
+}
+
+.lccd-class__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.lccd-class__name {
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.005em;
+    line-height: 1.35;
+    color: #0f3a2b;
+}
+
+.lccd-class__time {
+    flex: none;
+    margin-left: auto;
+    font-size: 11.5px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.35;
+    color: #0f4c33;
+}
+
+.lccd-class__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.lccd-class__actions .lccd-btn {
+    flex: 0 0 auto;
+    padding: 9px 14px;
+    font-size: 12.5px;
+}
+
+.lccd-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 10px 12px;
+    border: 1px solid #eec7bf;
+    border-radius: 4px;
+    background: #f9eeeb;
+    color: #8e2c22;
+    font-size: 12.5px;
+    line-height: 1.4;
+}
+
+.lccd-note svg {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    margin-top: 1px;
+    stroke-width: 1.6;
+}
+
+.lccd-note--muted {
+    border-color: #e0d6be;
+    background: #f4efe3;
+    color: #6e6754;
+}
+
+/* ------------------------------------------------------------------ Modals */
+/*
+ | The theme moves `.modal` to <body> when it opens, so none of these rules can
+ | hang off the page wrapper — they all ride on `.lccd-modal`, a class on the
+ | modal element itself.
+ |
+ | Buttons deliberately avoid `.btn`/`.btn-primary`: datafuture.css pins those
+ | to the legacy brand teal with `!important`, and the submit handlers toggle
+ | `#<btn> svg` for their spinner, so no icon may precede that spinner.
+ */
+
+.lccd-modal {
+    background: rgba(29, 26, 20, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+
+    --lccd-tone: #15233f;
+    --lccd-tone-soft: #f1eada;
+    --lccd-tone-hover: #1b2a52;
+}
+
+.lccd-modal--go {
+    --lccd-tone: #0f4c33;
+    --lccd-tone-soft: #eaf3ed;
+    --lccd-tone-hover: #0c3c29;
+}
+
+.lccd-modal--danger {
+    --lccd-tone: #8e2c22;
+    --lccd-tone-soft: #f7e4e0;
+    --lccd-tone-hover: #7a241b;
+}
+
+.lccd-modal--gold {
+    --lccd-tone: #8a6a24;
+    --lccd-tone-soft: #f6edd6;
+    --lccd-tone-hover: #75591e;
+}
+
+.lccd-modal .modal-content {
+    background: #fdfcf9;
+    border: 1px solid #e0d6be;
+    border-radius: 20px;
+    box-shadow: 0 26px 64px -14px rgba(29, 26, 20, 0.4);
+    color: #1d1a14;
+    font-family: "Albert Sans", system-ui, sans-serif;
+}
+
+/* ------------------------------------------------------- confirm / prompt */
+
+.lccd-modal--confirm .modal-body {
+    padding: 30px 28px 26px;
+    text-align: center;
+}
+
+@media (min-width: 640px) {
+    .lccd-modal--confirm .modal-dialog {
+        width: 380px;
+    }
+}
+
+.lccd-modal__medallion {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: var(--lccd-tone-soft);
+    color: var(--lccd-tone);
+}
+
+.lccd-modal__medallion svg {
+    width: 52px;
+    height: 52px;
+    stroke-width: 1.5;
+}
+
+/* The clock face is drawn at its intended size rather than as an icon. */
+.lccd-modal__medallion--clock svg {
+    width: 96px;
+    height: 96px;
+    stroke-width: initial;
+}
+
+.lccd-modal__time {
+    font-size: 28px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    color: #1d1a14;
+}
+
+.lccd-modal__title {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #1d1a14;
+}
+
+.lccd-modal__meta {
+    margin-top: 6px;
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: #6e6754;
+}
+
+.lccd-modal__body {
+    margin: 18px 0 22px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #4a4536;
+}
+
+.lccd-modal__field {
+    margin: 0 0 20px;
+    text-align: left;
+}
+
+.lccd-modal__primary,
+.lccd-modal__ghost {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    font-family: "Albert Sans", system-ui, sans-serif;
+    cursor: pointer;
+}
+
+.lccd-modal__primary {
+    height: 50px;
+    border: 1px solid var(--lccd-tone);
+    border-radius: 14px;
+    background: var(--lccd-tone);
+    color: #f7f4ed;
+    font-size: 15px;
+    font-weight: 700;
+    transition: background 0.14s ease, border-color 0.14s ease;
+}
+
+.lccd-modal__primary:hover:not([disabled]) {
+    background: var(--lccd-tone-hover);
+    border-color: var(--lccd-tone-hover);
+    color: #f7f4ed;
+}
+
+.lccd-modal__primary[disabled] {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.lccd-modal__ghost {
+    height: 40px;
+    margin-top: 6px;
+    border: 0;
+    background: transparent;
+    color: #6e6754;
+    font-size: 14px;
+    font-weight: 700;
+    transition: color 0.14s ease;
+}
+
+.lccd-modal__ghost:hover {
+    color: #1d1a14;
+}
+
+/* The submit spinners are `<svg style="display:none">` toggled by JS, so they
+   must not pick up the flex gap when hidden. */
+.lccd-modal__primary svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ------------------------------------------------------------- form modals */
+
+.lccd-modal .modal-header {
+    padding: 18px 24px;
+    background: #f7f2e6;
+    border-bottom: 1px solid #efe8d8;
+    border-radius: 20px 20px 0 0;
+}
+
+.lccd-modal .modal-header h2 {
+    /* Keeps the `mr-auto` that pushes the dismiss control to the right edge. */
+    margin: 0 auto 0 0;
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #1d1a14;
+}
+
+.lccd-modal .modal-header [data-tw-dismiss="modal"] svg {
+    width: 18px;
+    height: 18px;
+    color: #8a7f63;
+}
+
+.lccd-modal .modal-body {
+    padding: 22px 24px;
+}
+
+.lccd-modal .modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    background: #f7f2e6;
+    border-top: 1px solid #efe8d8;
+    border-radius: 0 0 20px 20px;
+}
+
+.lccd-modal .modal-footer .lccd-modal__primary,
+.lccd-modal .modal-footer .lccd-modal__ghost {
+    width: auto;
+    min-width: 150px;
+    margin-top: 0;
+    padding: 0 22px;
+}
+
+.lccd-modal .modal-footer .lccd-modal__ghost {
+    min-width: 110px;
+}
+
+.lccd-modal .form-label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: #8a7f63;
+}
+
+.lccd-modal .form-label .text-danger {
+    color: #8e2c22;
+}
+
+.lccd-modal .form-control,
+.lccd-modal textarea.form-control,
+.lccd-modal .ts-wrapper .ts-control {
+    border-color: #e0d6be;
+    border-radius: 10px;
+    background: #fdfcf9;
+    color: #1d1a14;
+    font-family: "Albert Sans", system-ui, sans-serif;
+    font-size: 14px;
+}
+
+.lccd-modal .form-control:focus,
+.lccd-modal .ts-wrapper.focus .ts-control {
+    border-color: #c6a02c;
+    box-shadow: none;
+}
+
+.lccd-modal .acc__input-error {
+    font-size: 12px;
+    color: #8e2c22;
+}
+
+.lccd-modal .lccd-modal__upload {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    height: 40px;
+    padding: 0 16px;
+    border: 1px solid #ded3b8;
+    border-radius: 10px;
+    background: #fdfcf9;
+    color: #4a4536;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.14s ease, border-color 0.14s ease;
+}
+
+.lccd-modal .lccd-modal__upload:hover {
+    background: #f4efe3;
+    border-color: #c6a02c;
+    color: #15233f;
+}
+
+.lccd-modal .lccd-modal__upload svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 1.7;
+}
+
+.lccd-modal .sendMailsDocumentNames > div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+    color: #4a4536;
+    font-size: 12.5px;
+    font-weight: 500;
+}
+
+/* ------------------------------------------------------------- Locked state */
+/*
+ | While `work_history_lock` is set (not clocked in, or on a break) the modules,
+ | quick actions and processes are withheld — long-standing behaviour. Without a
+ | notice the page just reads as broken, so say why and put the shift action here
+ | rather than in the rail.
+ */
+
+.lccd-locked {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 22px 26px;
+    border: 1px solid #e4d3a6;
+    border-radius: 4px;
+    background: #f6edd6;
+}
+
+.lccd-locked__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: #efe1bf;
+    color: #8a6a24;
+}
+
+.lccd-locked__icon svg {
+    width: 22px;
+    height: 22px;
+    stroke-width: 1.6;
+}
+
+.lccd-locked__copy {
+    flex: 1;
+    min-width: 0;
+}
+
+.lccd-locked__title {
+    margin: 0;
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #1d1a14;
+}
+
+.lccd-locked__body {
+    margin: 5px 0 0;
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: #6e6754;
+}
+
+.lccd-locked .lccd-shift {
+    flex: none;
+    width: auto;
+}
+
+.lccd-locked .lccd-btn {
+    flex: 0 0 auto;
+    min-width: 168px;
+}
+
+@media (max-width: 767px) {
+    .lccd-locked {
+        flex-wrap: wrap;
+    }
+
+    .lccd-locked .lccd-shift {
+        width: 100%;
+    }
+}

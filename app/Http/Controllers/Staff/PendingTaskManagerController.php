@@ -76,14 +76,20 @@ class PendingTaskManagerController extends Controller
     public function index()
     {
         $userData = \Auth::guard('web')->user();
-        
+        $mytasks = $this->getUserPendingTask();
+
         return view('pages.users.staffs.task.index', [
             'title' => 'User Task Manager - London Churchill College',
+            // Runs on the same redesigned shell as the detail screen. This is
+            // the root of the module, so no `tkmCrumbCurrent` is passed — the
+            // top bar then leaves "Task Manager" as the current crumb.
+            'layout' => 'task-manager-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Task Manager', 'href' => 'javascript:void(0);'],
             ],
             'user' => $userData,
-            'mytasks' => $this->getUserPendingTask(),
+            'mytasks' => $mytasks,
+            'pendingTotal' => array_sum(array_map(fn ($task) => (int) $task->pending_task, $mytasks)),
         ]);
     }
 
@@ -92,7 +98,10 @@ class PendingTaskManagerController extends Controller
         $assignedTaskIds = TaskListUser::where('user_id', auth()->user()->id)->pluck('task_list_id')->unique()->toArray();
 
         if(!empty($assignedTaskIds)):
-            $assignedTasks = TaskList::whereIn('id', $assignedTaskIds)->orderBy('name', 'ASC')->get();
+            // `processlist` is read on the list screen to say whether a task
+            // queues applicants or students; eager-load it rather than firing
+            // a query per card.
+            $assignedTasks = TaskList::with('processlist')->whereIn('id', $assignedTaskIds)->orderBy('name', 'ASC')->get();
             if(!empty($assignedTasks)):
                 foreach($assignedTasks as $atsk):
                     $aplPendingTask = ApplicantTask::where('task_list_id', $atsk->id)->whereIn('status', ['Pending', 'In Progress'])->get();
@@ -109,13 +118,23 @@ class PendingTaskManagerController extends Controller
     }
 
     public function show($id){
+        $task = TaskList::find($id);
+
         return view('pages.users.staffs.task.details', [
-            'title' => 'User Task Manager - London Churchill College',
-            'breadcrumbs' => [
-                ['label' => 'Task Manager', 'href' => route('task.manager')],
-                ['label' => 'Details', 'href' => 'javascript:void(0);'],
-            ],
-            'task' => TaskList::find($id),
+            'title' => (isset($task->name) ? $task->name.' - ' : '').'Task Manager - London Churchill College',
+            // The detail screen runs on its own redesigned shell (see
+            // layout/task-manager-top-menu.blade.php); the rest of Task
+            // Manager still rides the shared `top-menu` chrome.
+            'layout' => 'task-manager-top-menu',
+            'breadcrumbs' => [],
+            'tkmCrumbCurrent' => (isset($task->name) && !empty($task->name) ? $task->name : 'Details'),
+            'task' => $task,
+            // Document-request rows are a property of the individual
+            // StudentTask, not of the TaskList, so the view cannot tell from
+            // $task alone whether it needs the request/letter dialogs.
+            'hasDocumentRequests' => StudentTask::where('task_list_id', $id)
+                ->whereNotNull('student_document_request_form_id')
+                ->exists(),
             'courses' => Course::where('active', 1)->orderBy('name', 'ASC')->get(),
             'statuses' => Status::where('type', 'Student')->orderBy('name', 'ASC')->get(),
             'terms' => TermDeclaration::orderBy('id', 'DESC')->get(),
@@ -206,10 +225,21 @@ class PendingTaskManagerController extends Controller
                         endif;
                     endif;
 
+                    // `downloads` is pre-rendered markup kept for the legacy
+                    // table; `taskDocuments` is the same set as plain data so
+                    // the redesigned detail screen can draw its own chips.
+                    $taskDocuments = [];
                     $taskDownloads = '';
                     if(isset($theApplicantTask->documents) && !empty($theApplicantTask->documents)):
                         $taskDownloads .= '<div class="flex">';
                             foreach($theApplicantTask->documents as $tdoc):
+                                if(isset($tdoc->current_file_name) && !empty($tdoc->current_file_name) && isset($tdoc->id) && $tdoc->id > 0):
+                                    $taskDocuments[] = [
+                                        'id' => $tdoc->id,
+                                        'name' => (!empty($tdoc->display_file_name) ? $tdoc->display_file_name : $tdoc->current_file_name),
+                                        'type' => (in_array($tdoc->doc_type, ['jpg', 'jpeg', 'png', 'gif']) ? 'image' : 'file'),
+                                    ];
+                                endif;
                                 if($tdoc->doc_type == 'jpg' || $tdoc->doc_type == 'jpeg' || $tdoc->doc_type == 'png' || $tdoc->doc_type == 'gif'):
                                     if(isset($tdoc->current_file_name) && !empty($tdoc->current_file_name) && isset($tdoc->id) && $tdoc->id > 0):
                                         $taskDownloads .= '<a data-phase="'.$phase.'" data-id="'.$tdoc->id.'" class="downloadTaskDoc w-6 h-6 mr-1 zoom-in inline-flex rounded-md btn-primary-soft justify-center items-center" href="javascript:void(0);">';
@@ -251,6 +281,7 @@ class PendingTaskManagerController extends Controller
                         'outcome' => ($task->interview != 'Yes' && isset($theApplicantTask->task_status_id) && isset($theApplicantTask->applicatnTaskStatus->name) && !empty($theApplicantTask->applicatnTaskStatus->name) ? $theApplicantTask->applicatnTaskStatus->name : ''),
                         'is_completable' => ($task->interview != 'Yes' &&  ($theApplicantTask->task->status == 'No' || ($theApplicantTask->task->status == 'Yes' && $theApplicantTask->task_status_id > 0)) && ($theApplicantTask->task->upload == 'No' || ($theApplicantTask->task->upload == 'Yes' && $theApplicantTask->documents->count() > 0)) ? 1 : 0),
                         'downloads' => $taskDownloads,
+                        'task_documents' => $taskDocuments,
                         'task_excuse' => 'No',
                         'task_address_request' => 'No',
                         'student_task_id' => (isset($theApplicantTask->id) && $theApplicantTask->id > 0 ? $theApplicantTask->id : 0),
@@ -324,10 +355,20 @@ class PendingTaskManagerController extends Controller
                         $createOrUpdate = (isset($theStudentTask->created_at) && !empty($theStudentTask->created_at) ? date('jS M, Y', strtotime($theStudentTask->created_at)) : '');
                     endif;
 
+                    // See the Applicant branch above: `task_documents` mirrors
+                    // `downloads` as plain data for the redesigned screen.
+                    $taskDocuments = [];
                     $taskDownloads = '';
                     if(isset($theStudentTask->documents) && !empty($theStudentTask->documents)):
                         $taskDownloads .= '<div class="flex">';
                             foreach($theStudentTask->documents as $tdoc):
+                                if(isset($tdoc->current_file_name) && !empty($tdoc->current_file_name) && isset($tdoc->id) && $tdoc->id > 0):
+                                    $taskDocuments[] = [
+                                        'id' => $tdoc->id,
+                                        'name' => (!empty($tdoc->display_file_name) ? $tdoc->display_file_name : $tdoc->current_file_name),
+                                        'type' => (in_array($tdoc->doc_type, ['jpg', 'jpeg', 'png', 'gif']) ? 'image' : 'file'),
+                                    ];
+                                endif;
                                 if($tdoc->doc_type == 'jpg' || $tdoc->doc_type == 'jpeg' || $tdoc->doc_type == 'png' || $tdoc->doc_type == 'gif'):
                                     if(isset($tdoc->current_file_name) && !empty($tdoc->current_file_name) && isset($tdoc->id) && $tdoc->id > 0):
                                         $taskDownloads .= '<a data-phase="'.$phase.'" data-id="'.$tdoc->id.'" class="downloadTaskDoc w-6 h-6 mr-1 zoom-in inline-flex rounded-md btn-primary-soft justify-center items-center" href="javascript:void(0);">';
@@ -378,6 +419,7 @@ class PendingTaskManagerController extends Controller
                                 'outcome' => ($task->interview != 'Yes' && isset($theStudentTask->task_status_id) && isset($theStudentTask->studentTaskStatus->name) && !empty($theStudentTask->studentTaskStatus->name) ? $theStudentTask->studentTaskStatus->name : ''),
                                 'is_completable' => ($task->interview != 'Yes' &&  ($theStudentTask->task->status == 'No' || ($theStudentTask->task->status == 'Yes' && $theStudentTask->task_status_id > 0)) && ($theStudentTask->task->upload == 'No' || ($theStudentTask->task->upload == 'Yes' && $theStudentTask->documents->count() > 0)) ? 1 : 0),
                                 'downloads' => $taskDownloads,
+                                'task_documents' => $taskDocuments,
                                 'task_excuse' => (isset($task->attendance_excuses) && $task->attendance_excuses == 'Yes' ? 'Yes' : 'No'),
                                 'task_address_request' => 'No',
                                 'student_task_id' => (isset($theStudentTaskId) && $theStudentTaskId > 0 ? $theStudentTaskId : 0),
@@ -413,6 +455,7 @@ class PendingTaskManagerController extends Controller
                             'outcome' => ($task->interview != 'Yes' && isset($theStudentTask->task_status_id) && isset($theStudentTask->studentTaskStatus->name) && !empty($theStudentTask->studentTaskStatus->name) ? $theStudentTask->studentTaskStatus->name : ''),
                             'is_completable' => ($task->interview != 'Yes' &&  ($theStudentTask->task->status == 'No' || ($theStudentTask->task->status == 'Yes' && $theStudentTask->task_status_id > 0)) && ($theStudentTask->task->upload == 'No' || ($theStudentTask->task->upload == 'Yes' && $theStudentTask->documents->count() > 0)) ? 1 : 0),
                             'downloads' => $taskDownloads,
+                            'task_documents' => $taskDocuments,
                             'task_excuse' => (isset($task->attendance_excuses) && $task->attendance_excuses == 'Yes' ? 'Yes' : 'No'),
                             'task_address_request' => (isset($task->address_request) && $task->address_request == 'Yes' ? 'Yes' : 'No'),
                             'student_task_id' => (isset($theStudentTask->id) && $theStudentTask->id > 0 ? $theStudentTask->id : 0),
@@ -426,7 +469,7 @@ class PendingTaskManagerController extends Controller
         endif;
 
         
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'total' => ($total_rows ?? 0), 'data' => $data]);
     }
 
     public function allTasks(){

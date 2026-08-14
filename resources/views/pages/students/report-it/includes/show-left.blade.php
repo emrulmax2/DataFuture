@@ -1,59 +1,59 @@
-<div class="intro-y box mt-5">
-    <div class="flex flex-col sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
-        <h2 class="font-medium text-base mr-auto">
-            @if($reportItAll->status == 'Resolved' || $reportItAll->status == 'Rejected')
-            Report Logs <span class="inline-block px-2 py-1 text-xs font-semibold text-green-800 bg-green-200 rounded">Case Closed By {{ $reportItAll->employee_name }}</span>
+@php
+    $ritClosed = in_array($reportItAll->status, ['Resolved', 'Rejected'], true);
+@endphp
+
+<div class="rit-panel">
+    <div class="rit-panel__head">
+        <h2 class="rit-panel__title">Report logs</h2>
+        @if($ritClosed && !empty($reportItAll->employee_name))
+            <span class="rit-chip rit-chip--resolved">Closed by {{ $reportItAll->employee_name }}</span>
+        @endif
+        <div class="rit-panel__actions">
+            @if($ritClosed)
+                <a href="javascript:;" class="click-open rit-btn rit-btn--ghost" data-id="{{ $reportItAll->id }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5A8 8 0 1 1 17.6 6"></path><path d="M20 4v5h-5"></path></svg>
+                    Re-open case
+                </a>
             @else
-            Report Logs 
+                <a href="javascript:;" class="click-close rit-btn rit-btn--danger" data-id="{{ $reportItAll->id }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"></circle><path d="m8.8 8.8 6.4 6.4"></path></svg>
+                    Close / Resolve
+                </a>
+                <a href="javascript:;" class="rit-btn rit-btn--solid" data-tw-toggle="modal" data-tw-target="#addModal">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5.5v13M5.5 12h13"></path></svg>
+                    Add New
+                </a>
             @endif
-        </h2>
-        @if($reportItAll->status != 'Resolved' && $reportItAll->status != 'Rejected')
-        <a href="javascript:;" class="flex btn btn-danger mr-2 click-close" data-id="{{ $reportItAll->id }}">
-            <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Close/Resolved
-        </a>
-        @else
-           <a href="javascript:;" class="flex btn btn-primary mr-2 click-open" data-id="{{ $reportItAll->id }}">
-                <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Re-Open Case
-                
-            </a> 
-        @endif
-        @if($reportItAll->status != 'Resolved' && $reportItAll->status != 'Rejected')
-        <a href="javascript:;" class="flex btn btn-primary" data-tw-toggle="modal" data-tw-target="#addModal">
-            <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Add New
-        </a>
-        @endif
+        </div>
     </div>
-    <div class="p-5">
+
+    <div class="rit-panel__filters">
         <form id="tabulatorFilterForm">
-            <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-3">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1 whitespace-nowrap">Log Entry By</div>
-                        <input type="text" id="query" name="querystr" placeholder="Full name" value="" class="w-full"/>
-                    </div>
+            <div class="rit-filters rit-filters--logs">
+                <div class="rit-field">
+                    <label for="query" class="rit-field__label">Log entry by</label>
+                    <input type="text" id="query" name="querystr" value="" placeholder="Full name" class="rit-input">
                 </div>
-                <div class="col-span-2">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Status</div>
-                        <select id="status" name="status" class="w-full tom-selects" >
-                            <option value="1">Active</option>
-                            <option value="2">Archived</option>
-                        </select>
-                    </div>
+                <div class="rit-field">
+                    <label for="status" class="rit-field__label">Status</label>
+                    <select id="status" name="status" class="tom-selects rit-select w-full">
+                        <option value="1">Active</option>
+                        <option value="2">Archived</option>
+                    </select>
                 </div>
-                <div class="col-span-3">
-                    <button id="tabulator-html-filter-go" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                    <button id="tabulator-html-filter-reset" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
+                <div class="rit-filters__actions">
+                    <button id="tabulator-html-filter-go" type="button" class="rit-btn rit-btn--gold">Go</button>
+                    <button id="tabulator-html-filter-reset" type="button" class="rit-btn rit-btn--ghost">Reset</button>
                 </div>
-                <div class="col-span-4 text-right">
-                    <div class="flex mt-5 sm:mt-0 justify-end">
-                        <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                            <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
-                        </button>
-                        <button id="tabulator-export-xlsx" class="btn btn-outline-secondary w-1/2 sm:w-auto">
-                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export Excel
-                            <svg id="excelExportBtn" style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                            stroke="gray" class="w-4 h-4 ml-2">
+                <div class="rit-filters__tools">
+                    <button id="tabulator-print" type="button" class="rit-btn rit-btn--ghost">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 9V4h11v5"></path><rect x="3.5" y="9" width="17" height="7" rx="2"></rect><path d="M6.5 16h11v4h-11z"></path></svg>
+                        Print
+                    </button>
+                    <button id="tabulator-export-xlsx" type="button" class="rit-btn rit-btn--ghost">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5L13.5 3z"></path><path d="M13.5 3v5.5H19M9.5 13l5 5M14.5 13l-5 5"></path></svg>
+                        Export Excel
+                        <svg id="excelExportBtn" style="display: none;" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" class="rit-spinner">
                             <g fill="none" fill-rule="evenodd">
                                 <g transform="translate(1 1)" stroke-width="4">
                                     <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
@@ -64,14 +64,13 @@
                                 </g>
                             </g>
                         </svg>
-                        </button>
-
-                    </div>
+                    </button>
                 </div>
             </div>
         </form>
-        <div class="overflow-x-auto scrollbar-hidden">
-            <div id="reportItAllTableId" data-report_id="{{ $reportItAll->id }}" class="mt-5 table-report table-report--tabulator"></div>
-        </div>
+    </div>
+
+    <div class="rit-tablewrap scrollbar-hidden">
+        <div id="reportItAllTableId" data-report_id="{{ $reportItAll->id }}" class="table-report table-report--tabulator"></div>
     </div>
 </div>

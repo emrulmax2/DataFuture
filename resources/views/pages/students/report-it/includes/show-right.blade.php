@@ -1,76 +1,90 @@
-<div class="intro-y box mt-5">
-    <div class="flex flex-col sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
-        <h2 class="font-medium text-base mr-auto">
-            Report details
-        </h2>
-    </div>
-    <div class="p-5">
-        <div class="grid grid-cols-12 gap-5">
-            <div class="col-span-12 lg:col-span-6">
-                @if(isset($reportItAll))
-                <!-- Display report details only show data needed no input text-->
+@php
+    $ritModifiedBy = $reportItAll->employee_name ?? null;
+    $ritModifiedInitials = collect(preg_split('/\s+/', trim((string) $ritModifiedBy)))
+        ->filter()
+        ->take(2)
+        ->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))
+        ->implode('') ?: '?';
 
-                <div class="mb-3">
-                    <div class="font-medium text-md">Issue Type</div>
-                    <div class="my-2 mx-3">{{ $reportItAll->issueType->name ?? 'N/A' }}</div>
-                </div>
-                <div class="mb-3">
-                    <div  class="font-medium text-md">Venue</div>
-                    <div  class="my-2 mx-3">{{ $reportItAll->venue->name ?? 'N/A' }}</div>
-                </div>
-                <div class="mb-3">
-                    <div class="font-medium text-md">Description</div>
-                    <div class="my-2 mx-3">{{ $reportItAll->description }}</div>
-                </div>
-                <div class="mb-3">
-                    <div class="font-medium text-md">Created At</div>
-                    <div class="my-2 mx-3">{{ $reportItAll->created_at }}</div>
-                </div>
-                <div class="mb-3">
-                    <div class="font-medium text-md">Last Modified By</div>
-                    <div class="my-2 mx-3"><span class="inline-block px-2 py-1 text-xs font-semibold text-blue-800 bg-blue-200 rounded"> {{ $reportItAll->employee_name }}</span></div>
-                </div>
-                
-                @endif
-            </div>
+    $ritUploads = $reportItAll->uploads ?? collect();
+@endphp
+
+<div class="rit-panel">
+    <div class="rit-panel__head">
+        <h2 class="rit-panel__title rit-panel__title--sm">Report details</h2>
+    </div>
+    <div class="rit-detaillist">
+        <div class="rit-detail">
+            <div class="rit-detail__label">Issue type</div>
+            <div class="rit-detail__value">{{ $reportItAll->issueType->name ?? 'N/A' }}</div>
+        </div>
+        <div class="rit-detail">
+            <div class="rit-detail__label">Venue</div>
+            <div class="rit-detail__value">{{ $reportItAll->venue->name ?? 'N/A' }}</div>
+        </div>
+        <div class="rit-detail">
+            <div class="rit-detail__label">Location</div>
+            <div class="rit-detail__value">{{ $reportItAll->location ?: 'N/A' }}</div>
+        </div>
+        <div class="rit-detail">
+            <div class="rit-detail__label">Description</div>
+            <div class="rit-detail__value">{{ $reportItAll->description }}</div>
+        </div>
+        <div class="rit-detail">
+            <div class="rit-detail__label">Created at</div>
+            <div class="rit-detail__value rit-detail__value--num">{{ $reportItAll->created_at }}</div>
+        </div>
+        <div class="rit-detail">
+            <div class="rit-detail__label">Last modified by</div>
+            @if($ritModifiedBy)
+                <span class="rit-miniperson">
+                    <span class="rit-miniperson__avatar">{{ $ritModifiedInitials }}</span>
+                    <span class="rit-miniperson__name">{{ $ritModifiedBy }}</span>
+                </span>
+            @else
+                <div class="rit-detail__value">N/A</div>
+            @endif
         </div>
     </div>
 </div>
-<div class="intro-y box my-5">
-    <div class="flex flex-col sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
-        <h2 class="font-medium text-base mr-auto">
-            Attachments
-        </h2>
-    </div>
-    <div class="p-5">
-        <div class="grid grid-cols-12 gap-5">
-            <div class="col-span-12">
-                <div id="addItems" class="col-span-12 w-full mt-3 xl:mt-0 flex-1 border-2 border-dashed dark:border-darkmode-400 rounded-md py-4">
-                    <div id="AddItemBox" class="grid grid-cols-10 gap-5 pl-4 pr-5">
-                        
-                    @foreach($reportItAll->uploads as $upload)
-                            
-                            @if($upload->file_type == 'image' )
-                                
-                                <div class="col-span-5 h-28 relative image-fit cursor-pointer zoom-in">
-                                    <img class="rounded-md w-full h-full object-cover" data-action="zoom" alt="{{ $upload->file_name }}" src="{{ isset($upload->file_image_url) ? $upload->file_image_url : asset('dist/images/profile-10.jpg') }}">
-                                </div>
 
-                            @elseif($upload->file_type == 'document')
-                             <div class="col-span-10 h-10 relative flex items-center border border-gray-300 rounded-md p-2">
-                                <i data-lucide="file-text" class="w-6 h-6 text-gray-500 mr-2"></i>
-                                <a href="{{ asset('storage/'.$upload->file_path) }}" target="_blank" class="text-blue-600 hover:underline">{{ $upload->file_name }}</a>
-                             </div>
-                            @else
-                                <div class="col-span-10 h-10 relative flex items-center border border-gray-300 rounded-md p-2">
-                                <i data-lucide="file" class="w-6 h-6 text-gray-500 mr-2"></i>
-                                <a href="{{ asset('storage/'.$upload->file_path) }}" target="_blank" class="text-blue-600 hover:underline">{{ $upload->file_name }}</a>
-                                </div>
-                            @endif
-                    @endforeach
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="rit-panel">
+    <div class="rit-panel__head">
+        <h2 class="rit-panel__title rit-panel__title--sm">Attachments</h2>
+        <span class="rit-panel__count">{{ $ritUploads->count() }}</span>
     </div>
+    @if($ritUploads->isNotEmpty())
+        <div class="rit-files">
+            @foreach($ritUploads as $upload)
+                @php
+                    $isImage = $upload->file_type == 'image';
+                    $fileUrl = $isImage && !empty($upload->file_image_url)
+                        ? $upload->file_image_url
+                        : asset('storage/' . $upload->file_path);
+                    $ext = strtoupper(pathinfo($upload->file_name, PATHINFO_EXTENSION)) ?: 'FILE';
+                @endphp
+                <a href="{{ $fileUrl }}" target="_blank" rel="noopener" class="rit-file">
+                    <span class="rit-file__icon">
+                        @if($isImage && !empty($upload->file_image_url))
+                            <img alt="{{ $upload->file_name }}" src="{{ $upload->file_image_url }}">
+                        @elseif($isImage)
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="9" cy="10" r="1.8"></circle><path d="m4 17 5-4 4 3 3-2 4 3"></path></svg>
+                        @else
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5L13.5 3z"></path><path d="M13.5 3v5.5H19"></path></svg>
+                        @endif
+                    </span>
+                    <span class="rit-file__body">
+                        <span class="rit-file__name">{{ $upload->file_name }}</span>
+                        <span class="rit-file__meta">{{ $ext }}</span>
+                    </span>
+                    <svg class="rit-file__go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.5 11l4.5 4.5 4.5-4.5M5 20h14"></path></svg>
+                </a>
+            @endforeach
+        </div>
+    @else
+        <div class="rit-empty">
+            <div class="rit-empty__title">No attachments</div>
+            <div class="rit-empty__desc">Nothing was uploaded with this report</div>
+        </div>
+    @endif
 </div>

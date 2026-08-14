@@ -1,0 +1,868 @@
+/*
+ |--------------------------------------------------------------------------
+ | Student Due Report — editorial content area
+ |--------------------------------------------------------------------------
+ |
+ | Scoped to `pages/reports/student-due/index` through the `sdr-page` body
+ | class and the `sdr-` prefix, so nothing here reaches the rest of the app.
+ | The global header, top navigation and breadcrumb are untouched — this
+ | sheet only restyles what sits inside `@yield('subcontent')`.
+ |
+ | Colour, type scale and the 1px-gap hairline grid follow the same editorial
+ | system as the staff dashboard (`staff-dashboard.css`): Albert Sans for UI,
+ | Source Serif 4 for headings, cream canvas, gold accent.
+ |
+ | The markup hooks the report's JS depends on (#studentDueReportForm,
+ | #due_semester_id, #due_course_id, #due_status_id, #accDueSubmitBtn,
+ | #downloadXl, #studentDueReportList, .theLoader) are unchanged — only
+ | their presentation differs.
+ */
+
+body.sdr-page {
+    --sdr-canvas: #f7f4ed;
+    --sdr-surface: #fdfcf9;
+    --sdr-strip: #f7f2e6;
+    --sdr-line: #e4dbc4;
+    --sdr-line-soft: #efe8d8;
+    --sdr-field: #e0d6be;
+    --sdr-ink: #1d1a14;
+    --sdr-ink-2: #3e3a2e;
+    --sdr-muted: #6e6754;
+    --sdr-faint: #8a7f63;
+    --sdr-navy: #15233f;
+    --sdr-gold: #c6a02c;
+    --sdr-gold-dark: #b08c22;
+    --sdr-green: #0f4c33;
+    --sdr-red: #8e2c22;
+
+    background: var(--sdr-canvas);
+}
+
+/* The theme's content wrapper insets, rounds and tints the page (22px sides,
+   slate background, 35px top radius). Cancel it so the editorial canvas sits
+   flush under the global header — same approach as the staff dashboard. */
+body.sdr-page .content.content--top-nav {
+    margin-top: 0;
+    padding: 0 30px;
+    border-radius: 0;
+    background: var(--sdr-canvas);
+}
+
+body.sdr-page .content.content--top-nav::before {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    body.sdr-page .content.content--top-nav {
+        padding: 0 16px;
+    }
+}
+
+.sdr,
+.sdr *,
+.sdr *::before,
+.sdr *::after {
+    box-sizing: border-box;
+}
+
+.sdr {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    padding: 30px 0;
+    font-family: "Albert Sans", system-ui, sans-serif;
+    color: var(--sdr-ink);
+}
+
+@media (max-width: 767px) {
+    .sdr {
+        padding: 20px 0 32px;
+    }
+}
+
+/* ------------------------------------------------------------------ Head */
+
+.sdr-head {
+    display: flex;
+    align-items: flex-end;
+    gap: 24px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--sdr-line);
+}
+
+.sdr-head__title {
+    margin: 0;
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--sdr-ink);
+}
+
+.sdr-head__sub {
+    margin-top: 5px;
+    font-size: 13px;
+    color: var(--sdr-muted);
+}
+
+.sdr-head__actions {
+    margin-left: auto;
+    display: flex;
+    gap: 10px;
+    flex: 0 0 auto;
+}
+
+@media (max-width: 767px) {
+    .sdr-head {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+
+    .sdr-head__title {
+        font-size: 24px;
+    }
+
+    .sdr-head__actions {
+        margin-left: 0;
+        flex-wrap: wrap;
+    }
+}
+
+/* --------------------------------------------------------------- Buttons */
+
+/* Deliberately not `.btn` — the legacy sheet pins the old brand teal onto
+   every `.btn-*` with `!important`, which a scoped override can only win by
+   shouting back. Owning the class avoids that fight entirely. */
+.sdr-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 38px;
+    padding: 0 18px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.14s ease, border-color 0.14s ease, color 0.14s ease;
+}
+
+.sdr-btn svg {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 auto;
+}
+
+.sdr-btn--ghost {
+    background: var(--sdr-surface);
+    border-color: #ded3b8;
+    color: var(--sdr-ink);
+    font-weight: 600;
+}
+
+.sdr-btn--ghost:hover {
+    background: #f4efe3;
+    border-color: var(--sdr-gold);
+    color: var(--sdr-navy);
+}
+
+.sdr-btn--solid {
+    background: var(--sdr-green);
+    color: #f7f4ed;
+}
+
+.sdr-btn--solid:hover {
+    background: #0b3a27;
+    color: #fff;
+}
+
+.sdr-btn--gold {
+    background: var(--sdr-gold);
+    color: #fff;
+}
+
+.sdr-btn--gold:hover {
+    background: var(--sdr-gold-dark);
+    color: #fff;
+}
+
+/* `#downloadXl` gets `.disabled` added by the report JS while the export
+   builds; the spinner inside it is toggled by the same handler. */
+.sdr-btn.disabled,
+.sdr-btn:disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.sdr-btn .theLoader {
+    width: 15px;
+    height: 15px;
+}
+
+/* --------------------------------------------------------------- Summary */
+
+/* Hairlines are the 1px gap showing the container colour, so every cell has
+   to be filled for the grid to read as a continuous rule. */
+.sdr-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--sdr-line);
+    border: 1px solid var(--sdr-line);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+@media (max-width: 1023px) {
+    .sdr-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 559px) {
+    .sdr-summary {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.sdr-stat {
+    background: var(--sdr-surface);
+    padding: 18px 20px;
+    min-width: 0;
+}
+
+.sdr-stat__label {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--sdr-faint);
+}
+
+.sdr-stat__value {
+    margin-top: 6px;
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--sdr-navy);
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+}
+
+.sdr-stat--received .sdr-stat__value {
+    color: var(--sdr-green);
+}
+
+.sdr-stat--due .sdr-stat__value {
+    color: var(--sdr-red);
+}
+
+/* Placeholder dashes while the first search is still in flight. */
+.sdr-stat__value.is-loading {
+    color: #c0b79e;
+}
+
+/* ---------------------------------------------------------------- Panels */
+
+.sdr-panel {
+    background: var(--sdr-surface);
+    border: 1px solid var(--sdr-line);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+/* The filters panel has to let the TomSelect dropdowns escape it, so it opts
+   out of the clipping the other panels use to round their corners — and sits
+   above the results panel so an open dropdown is never painted under it. */
+.sdr-panel--filters {
+    overflow: visible;
+    position: relative;
+    z-index: 20;
+}
+
+.sdr-panel__head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--sdr-line-soft);
+}
+
+.sdr-panel__title {
+    margin: 0;
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--sdr-ink);
+}
+
+.sdr-panel__meta {
+    font-size: 12.5px;
+    color: var(--sdr-muted);
+    min-width: 0;
+}
+
+.sdr-panel__count {
+    margin-left: auto;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--sdr-faint);
+    white-space: nowrap;
+    flex: 0 0 auto;
+}
+
+/* --------------------------------------------------------------- Filters */
+
+.sdr-filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 18px;
+    padding: 20px 22px;
+}
+
+@media (max-width: 1023px) {
+    .sdr-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .sdr-filters__actions {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 559px) {
+    .sdr-filters {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.sdr-field {
+    min-width: 0;
+}
+
+.sdr-field__label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--sdr-faint);
+}
+
+.sdr-field__req {
+    color: var(--sdr-red);
+}
+
+/* The search button sits on the same baseline as the selects, so it borrows
+   their height and corner radius instead of the pill used up in the header. */
+.sdr-filters__actions {
+    display: flex;
+    gap: 10px;
+}
+
+.sdr-filters__actions .sdr-btn {
+    height: 40px;
+    border-radius: 8px;
+}
+
+/* ------------------------------------------------------------- TomSelect */
+
+/* TomSelect 1.7.8: the wrapper is `.ts-control` (it inherits the original
+   select's classes) and `.ts-input` is the visible box — there is no
+   `.ts-wrapper` in this version. Styling both would nest a box inside a box,
+   so the wrapper is flattened and all chrome lives on `.ts-input`.
+   `!important` is required throughout because the theme's own skin
+   (css/components/_tom-select.css) carries its own. */
+body.sdr-page .ts-control.sdr-select {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    width: 100%;
+}
+
+body.sdr-page .ts-control.sdr-select .ts-input {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 40px;
+    padding: 8px 34px 8px 12px !important;
+    background-color: var(--sdr-surface) !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a7f63' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+    background-position: right 13px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 12px 12px !important;
+    border: 1px solid var(--sdr-field) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    color: var(--sdr-ink);
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 500;
+}
+
+body.sdr-page .ts-control.sdr-select.focus .ts-input,
+body.sdr-page .ts-control.sdr-select .ts-input.focus,
+body.sdr-page .ts-control.sdr-select .ts-input.dropdown-active {
+    background-color: #fff !important;
+    border-color: var(--sdr-gold) !important;
+    box-shadow: none !important;
+}
+
+/* The library draws its own caret; ours is the background image above. */
+body.sdr-page .ts-control.sdr-select .ts-input::after,
+body.sdr-page .ts-control.sdr-select .ts-input::before {
+    display: none !important;
+}
+
+body.sdr-page .ts-control.sdr-select .ts-input > input {
+    flex: 1;
+    min-width: 90px;
+    color: var(--sdr-ink);
+    font-family: inherit;
+    font-size: inherit;
+}
+
+body.sdr-page .ts-control.sdr-select .ts-input > input::placeholder {
+    color: #a49c88;
+    opacity: 1;
+}
+
+body.sdr-page .ts-control.sdr-select.disabled .ts-input {
+    background-color: #f2efe6 !important;
+    opacity: 1;
+    cursor: not-allowed;
+}
+
+/* Each selection is a chip; the box wraps and grows rather than clipping. */
+body.sdr-page .ts-control.sdr-select .ts-input .item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0 !important;
+    padding: 3px 5px 3px 10px;
+    background: #f1ead9;
+    border: 1px solid #e0d6be;
+    border-radius: 999px;
+    color: var(--sdr-navy);
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+/* The `remove_button` plugin's ×. */
+body.sdr-page .ts-control.sdr-select .ts-input .item .remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 17px;
+    height: 17px;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 50%;
+    color: var(--sdr-muted);
+    line-height: 1;
+    text-decoration: none;
+}
+
+body.sdr-page .ts-control.sdr-select .ts-input .item .remove:hover {
+    background: #f4dcd7;
+    color: var(--sdr-red);
+}
+
+body.sdr-page .ts-control.sdr-select .ts-dropdown {
+    z-index: 30;
+    margin-top: 6px;
+    background: var(--sdr-surface);
+    border: 1px solid var(--sdr-field);
+    border-radius: 10px;
+    box-shadow: 0 16px 40px rgba(29, 26, 20, 0.14);
+    overflow: hidden;
+}
+
+body.sdr-page .ts-control.sdr-select .ts-dropdown .option {
+    padding: 9px 13px;
+    color: var(--sdr-ink-2);
+    font-size: 13.5px;
+}
+
+body.sdr-page .ts-control.sdr-select .ts-dropdown .option.active {
+    background: #f4efe3;
+    color: var(--sdr-navy);
+}
+
+body.sdr-page .ts-control.sdr-select .ts-dropdown .option.selected {
+    background: #f1ead9;
+    font-weight: 600;
+}
+
+body.sdr-page .ts-control.sdr-select .ts-dropdown .no-results {
+    padding: 12px 13px;
+    color: var(--sdr-muted);
+    font-size: 13px;
+}
+
+body.sdr-page .ts-control.sdr-select .ts-dropdown .dropdown-input-wrap {
+    padding: 8px;
+    border-bottom: 1px solid var(--sdr-line-soft);
+}
+
+body.sdr-page .ts-control.sdr-select .ts-dropdown .dropdown-input {
+    width: 100%;
+    padding: 8px 11px;
+    background: #fff;
+    border: 1px solid var(--sdr-field) !important;
+    border-radius: 8px;
+    box-shadow: none !important;
+    color: var(--sdr-ink);
+    font-family: inherit;
+    font-size: 13.5px;
+}
+
+/* ------------------------------------------------------- Results / table */
+
+.sdr-tablewrap {
+    overflow-x: auto;
+}
+
+body.sdr-page .tabulator {
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    font-size: 13.5px;
+}
+
+body.sdr-page .tabulator .tabulator-header {
+    background: var(--sdr-strip);
+    border-top: none;
+    border-bottom: 1px solid var(--sdr-line);
+    color: var(--sdr-faint);
+}
+
+body.sdr-page .tabulator .tabulator-header .tabulator-col {
+    background: transparent;
+    border-right: none;
+}
+
+body.sdr-page .tabulator .tabulator-header .tabulator-col-content {
+    padding: 13px 12px;
+}
+
+body.sdr-page .tabulator .tabulator-header .tabulator-col:first-child .tabulator-col-content {
+    padding-left: 22px;
+}
+
+body.sdr-page .tabulator .tabulator-header .tabulator-col:last-child .tabulator-col-content {
+    padding-right: 22px;
+}
+
+body.sdr-page .tabulator .tabulator-header .tabulator-col-title {
+    color: var(--sdr-faint);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+}
+
+/* Money columns are right-aligned, so their headings follow. */
+body.sdr-page .tabulator .tabulator-header .tabulator-col.sdr-col-num .tabulator-col-content .tabulator-col-title {
+    text-align: right;
+}
+
+body.sdr-page .tabulator .tabulator-row {
+    background: var(--sdr-surface);
+    border-bottom: 1px solid var(--sdr-line-soft);
+    transition: background 0.14s ease;
+}
+
+body.sdr-page .tabulator .tabulator-row.tabulator-row-even {
+    background: var(--sdr-surface);
+}
+
+/* Every row opens the student's account page, so it has to read as a target. */
+body.sdr-page .tabulator .tabulator-row:hover {
+    background: #fbf8f1;
+    cursor: pointer;
+}
+
+body.sdr-page .tabulator .tabulator-row .tabulator-cell {
+    padding: 15px 12px;
+    border-right: none;
+    color: var(--sdr-ink-2);
+    vertical-align: top;
+}
+
+body.sdr-page .tabulator .tabulator-row .tabulator-cell:first-child {
+    padding-left: 22px;
+}
+
+body.sdr-page .tabulator .tabulator-row .tabulator-cell:last-child {
+    padding-right: 22px;
+}
+
+/* Tabulator sets nowrap + ellipsis on every cell; the long columns opt out. */
+body.sdr-page .tabulator .tabulator-cell.sdr-col-wrap {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    line-height: 1.45;
+    word-break: break-word;
+}
+
+body.sdr-page .tabulator .tabulator-cell.sdr-col-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+body.sdr-page .tabulator .tabulator-cell.sdr-col-pill {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+}
+
+.sdr-id {
+    font-weight: 700;
+    color: var(--sdr-navy);
+    white-space: nowrap;
+}
+
+.sdr-course {
+    display: block;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.sdr-dates {
+    display: block;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--sdr-muted);
+}
+
+.sdr-money--received {
+    color: var(--sdr-green);
+}
+
+.sdr-money--due {
+    font-weight: 700;
+    color: var(--sdr-red);
+}
+
+.sdr-agreements {
+    font-weight: 700;
+    color: #8a6a24;
+    white-space: nowrap;
+}
+
+.sdr-agreements__all {
+    color: var(--sdr-faint);
+    font-weight: 600;
+}
+
+.sdr-pill {
+    display: inline-block;
+    padding: 3px 11px;
+    border-radius: 999px;
+    border: 1px solid #d8d2c0;
+    background: #f2efe6;
+    color: var(--sdr-ink-2);
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.sdr-pill--green {
+    background: #eaf3ed;
+    border-color: #cfe2d6;
+    color: var(--sdr-green);
+}
+
+.sdr-pill--blue {
+    background: #eaf0f7;
+    border-color: #cfdcec;
+    color: #1b3a66;
+}
+
+.sdr-pill--red {
+    background: #f9eeeb;
+    border-color: #ebd2cb;
+    color: var(--sdr-red);
+}
+
+.sdr-pill--gold {
+    background: #f6edd6;
+    border-color: #e4d3a6;
+    color: #8a6a24;
+}
+
+body.sdr-page .tabulator .tabulator-placeholder .tabulator-placeholder-contents,
+body.sdr-page .tabulator .tabulator-placeholder span {
+    padding: 34px 22px;
+    color: var(--sdr-muted);
+    font-size: 13.5px;
+    font-weight: 500;
+}
+
+/* ---------------------------------------------------------------- Footer */
+
+body.sdr-page .tabulator .tabulator-footer {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-between;
+    padding: 13px 22px;
+    background: var(--sdr-strip);
+    border-top: 1px solid var(--sdr-line-soft);
+    /* app.css sets margin-top: .5rem on .tabulator-footer, which left a gap
+       between the last row and the footer inside the panel. */
+    margin-top: 0 !important;
+    color: var(--sdr-muted);
+}
+
+.sdr-tablesummary {
+    font-size: 12.5px;
+    color: var(--sdr-muted);
+}
+
+.sdr-tablesummary b {
+    color: var(--sdr-ink);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+body.sdr-page .tabulator .tabulator-footer .tabulator-paginator {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-end;
+    margin-left: auto;
+    color: var(--sdr-muted);
+    font-size: 12.5px;
+}
+
+body.sdr-page .tabulator .tabulator-footer .tabulator-page-size {
+    height: 32px;
+    padding: 0 30px 0 12px;
+    background-color: var(--sdr-surface);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a7f63' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right 10px center;
+    background-repeat: no-repeat;
+    background-size: 12px 12px;
+    border: 1px solid var(--sdr-field);
+    border-radius: 8px;
+    color: var(--sdr-ink);
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+/* Tabulator gives each page button `margin: 0 2px` and wraps the numbers in a
+   `.tabulator-pages` span with `margin: 0 7px`; stacked on the flex gap that
+   produced uneven spacing either side of the number group. */
+body.sdr-page .tabulator .tabulator-footer .tabulator-paginator .tabulator-page,
+body.sdr-page .tabulator .tabulator-footer .tabulator-paginator .tabulator-pages {
+    margin: 0 !important;
+}
+
+body.sdr-page .tabulator .tabulator-footer .tabulator-paginator .tabulator-pages {
+    display: flex;
+    gap: 6px;
+}
+
+/* First / Prev / Next / Last render as chevrons. */
+body.sdr-page .tabulator .tabulator-footer .tabulator-page[data-page="first"],
+body.sdr-page .tabulator .tabulator-footer .tabulator-page[data-page="prev"],
+body.sdr-page .tabulator .tabulator-footer .tabulator-page[data-page="next"],
+body.sdr-page .tabulator .tabulator-footer .tabulator-page[data-page="last"] {
+    font-size: 0 !important;
+    position: relative;
+}
+
+body.sdr-page .tabulator .tabulator-footer .tabulator-page[data-page="first"]::before,
+body.sdr-page .tabulator .tabulator-footer .tabulator-page[data-page="prev"]::before,
+body.sdr-page .tabulator .tabulator-footer .tabulator-page[data-page="next"]::before,
+body.sdr-page .tabulator .tabulator-footer .tabulator-page[data-page="last"]::before {
+    font-size: 18px;
+    line-height: 1;
+}
+
+body.sdr-page .tabulator .tabulator-footer .tabulator-page[data-page="first"]::before {
+    content: "\00AB";
+}
+
+body.sdr-page .tabulator .tabulator-footer .tabulator-page[data-page="prev"]::before {
+    content: "\2039";
+}
+
+body.sdr-page .tabulator .tabulator-footer .tabulator-page[data-page="next"]::before {
+    content: "\203A";
+}
+
+body.sdr-page .tabulator .tabulator-footer .tabulator-page[data-page="last"]::before {
+    content: "\00BB";
+}
+
+/* The legacy sheet pins the old brand teal onto the paginator with
+   `!important`, so these have to match it to take effect. */
+body.sdr-page .tabulator .tabulator-footer .tabulator-page,
+body.sdr-page .tabulator .tabulator-footer .tabulator-paginator .tabulator-page {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 9px;
+    background: var(--sdr-surface) !important;
+    border: 1px solid var(--sdr-field) !important;
+    border-radius: 8px !important;
+    color: var(--sdr-ink-2) !important;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+body.sdr-page .tabulator .tabulator-footer .tabulator-page:hover:not(.active):not(:disabled),
+body.sdr-page .tabulator .tabulator-footer .tabulator-paginator .tabulator-page:hover:not(.active):not(:disabled) {
+    background: #f4efe3 !important;
+    border-color: var(--sdr-gold) !important;
+    color: var(--sdr-navy) !important;
+}
+
+body.sdr-page .tabulator .tabulator-footer .tabulator-page:disabled,
+body.sdr-page .tabulator .tabulator-footer .tabulator-paginator .tabulator-page:disabled {
+    color: #c0b79e !important;
+    cursor: not-allowed;
+    opacity: 1;
+}
+
+body.sdr-page .tabulator .tabulator-footer .tabulator-page.active,
+body.sdr-page .tabulator .tabulator-footer .tabulator-page.active:hover,
+body.sdr-page .tabulator .tabulator-footer .tabulator-paginator .tabulator-page.active,
+body.sdr-page .tabulator .tabulator-footer .tabulator-paginator .tabulator-page.active:hover {
+    background: var(--sdr-gold) !important;
+    border-color: var(--sdr-gold) !important;
+    color: #fff !important;
+    font-weight: 700;
+}

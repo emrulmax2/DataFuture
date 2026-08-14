@@ -3043,6 +3043,10 @@ Route::middleware('auth')->group(function() {
         Route::post('programme-dashboard/get-undecided-class', 'getUndecidedClass')->name('programme.dashboard.get.undecided.class'); 
 
         Route::get('programme-dashboard/tutors/export/{id}/{course?}', 'tutorsExport')->name('programme.dashboard.tutors.export');
+
+        Route::get('programme-dashboard/absent-rows', 'absentRows')->name('programme.dashboard.absent.rows');
+        Route::post('programme-dashboard/remind-tutor', 'remindTutor')->name('programme.dashboard.remind.tutor');
+        Route::get('programme-dashboard/report', 'report')->name('programme.dashboard.report');
     });
 
     Route::controller(DatafutureFieldCategoryController::class)->group(function() {

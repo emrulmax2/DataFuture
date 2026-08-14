@@ -127,7 +127,10 @@
 
         return `
             <div class="lcc-global-search__group ${modifierClass}">
-                <div class="lcc-global-search__group-title">${label} &middot; ${items.length}</div>
+                <div class="lcc-global-search__group-title">
+                    <span class="lcc-global-search__group-label">${label}</span>
+                    <span class="lcc-global-search__group-count">${items.length}</span>
+                </div>
                 ${rows}
             </div>
         `;
@@ -136,6 +139,7 @@
     searchWidgets.forEach((search) => {
         const input = search.querySelector("[data-global-search-input]");
         const results = search.querySelector("[data-global-search-results]");
+        const clearButton = search.querySelector("[data-global-search-clear]");
         const searchUrl = search.dataset.searchUrl;
         const canSearchApplicants = search.dataset.searchApplicants === "1";
         const canSearchStudents = search.dataset.searchStudents === "1";
@@ -154,13 +158,42 @@
         let activeController = null;
         let lastQuery = "";
 
+        // The clear chip only exists once the field carries a query, matching
+        // the design's search pill.
+        const syncClearButton = () => {
+            if (clearButton) {
+                clearButton.hidden = input.value.length === 0;
+            }
+        };
+
         const clearResults = () => {
             results.innerHTML = "";
             search.dataset.searchOpen = "false";
         };
 
+        if (clearButton) {
+            clearButton.addEventListener("click", (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                input.value = "";
+                lastQuery = "";
+                if (activeController) {
+                    activeController.abort();
+                    activeController = null;
+                }
+                clearResults();
+                syncClearButton();
+                input.focus();
+            });
+        }
+
         const renderEmpty = (query) => {
-            results.innerHTML = `<div class="lcc-global-search__empty">No ${emptyLabel} match "${escapeHtml(query)}".</div>`;
+            results.innerHTML = `
+                <div class="lcc-global-search__empty">
+                    <strong>No matches</strong>
+                    <small>Try a name, student ID or email address</small>
+                </div>
+            `;
             search.dataset.searchOpen = "true";
         };
 
@@ -178,10 +211,13 @@
                 return;
             }
 
+            const total = applicants.length + students.length + employees.length;
+
             results.innerHTML = [
                 buildGroup(applicants, "Applicants", "lcc-global-search__group--applicants"),
                 buildGroup(students, "Live Students", "lcc-global-search__group--students"),
                 buildGroup(employees, "Employees", "lcc-global-search__group--employees"),
+                `<div class="lcc-global-search__footer"><span>${total} ${total === 1 ? "match" : "matches"}</span></div>`,
             ].join("");
             search.dataset.searchOpen = "true";
         };
@@ -246,9 +282,12 @@
         };
 
         const queueSearch = () => {
+            syncClearButton();
             clearTimeout(timeoutId);
             timeoutId = setTimeout(runSearch, 220);
         };
+
+        syncClearButton();
 
         input.addEventListener("keyup", (event) => {
             if (event.key === "Escape") {

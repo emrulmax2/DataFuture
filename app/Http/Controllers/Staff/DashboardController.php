@@ -258,41 +258,26 @@ class DashboardController extends Controller
             $row['name'] = '';
         endif;
 
+        // Markup follows the editorial dashboard shift panel. The JS contract is
+        // the `attendance_action_btn` class plus `data-value` (1 in, 2 break,
+        // 3 return, 4 out) — both are preserved.
+        $button = function ($value, $label, $icon, $variant) {
+            return '<a href="javascript:void(0);" class="lccd-btn lccd-btn--'.$variant.' attendance_action_btn" data-value="'.$value.'">'
+                .'<i data-lucide="'.$icon.'"></i><span>'.$label.'</span></a>';
+        };
+
         $html = '';
         if($loc == 0):
-            $html .= '<a href="javascript:void(0);" class="block col-span-6 2xl:col-span-4 attendance_action_btn" data-value="1">';
-                $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.asset('build/assets/images/hr/Clock_In.png').'">';
-            $html .= '</a>';
-        elseif($loc == 1):
-            $html .= '<a href="javascript:void(0);" class="block col-span-6 2xl:col-span-4 attendance_action_btn" data-value="2">';
-                $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.asset('build/assets/images/hr/Break.png').'">';
-            $html .= '</a>';
-            $html .= '<a href="javascript:void(0);" class="block col-span-6 2xl:col-span-4 attendance_action_btn" data-value="4">';
-                $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.asset('build/assets/images/hr/Clock_Out.png').'">';
-            $html .= '</a>';
+            $html .= $button(1, 'Clock In', 'play', 'go');
+        elseif($loc == 1 || $loc == 3):
+            $html .= $button(2, 'Break', 'coffee', 'outline');
+            $html .= $button(4, 'Clock Out', 'log-out', 'danger');
         elseif($loc == 2):
-            $html .= '<a href="javascript:void(0);" class="block col-span-6 2xl:col-span-4 attendance_action_btn" data-value="3">';
-                $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.asset('build/assets/images/hr/Return.png').'">';
-            $html .= '</a>';
-        elseif($loc == 3):
-            $html .= '<a href="javascript:void(0);" class="block col-span-6 2xl:col-span-4 attendance_action_btn" data-value="2">';
-                $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.asset('build/assets/images/hr/Break.png').'">';
-            $html .= '</a>';
-            $html .= '<a href="javascript:void(0);" class="block col-span-6 2xl:col-span-4 attendance_action_btn" data-value="4">';
-                $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.asset('build/assets/images/hr/Clock_Out.png').'">';
-            $html .= '</a>';
+            $html .= $button(3, 'Return', 'rotate-ccw', 'go');
         elseif($loc == 4):
-            $html .= '<div class="col-span-12">';
-                $html .= '<div class="alert alert-danger-soft show flex items-center mb-2" role="alert">';
-                    $html .= '<i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> It seems that you are already clocked out for the day.';
-                $html .= '</div>';
-            $html .= '</div>';
+            $html .= '<div class="lccd-note"><i data-lucide="alert-octagon"></i><span>It seems that you are already clocked out for the day.</span></div>';
         else:
-            $html .= '<div class="col-span-12">';
-                $html .= '<div class="alert alert-danger-soft show flex items-center mb-2" role="alert">';
-                    $html .= '<i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Something went wrong. Please Try Later.';
-                $html .= '</div>';
-            $html .= '</div>';
+            $html .= '<div class="lccd-note"><i data-lucide="alert-octagon"></i><span>Something went wrong. Please Try Later.</span></div>';
         endif;
 
         $res = [];
@@ -318,16 +303,16 @@ class DashboardController extends Controller
             $parentLinks = InternalLink::whereIn('id', $parentLinkIds)->get();
             if($parentLinks->count() > 0):
                 foreach($parentLinks as $link):
-                    if((empty($link->start_date) || empty($link->end_date)) || ((!empty($link->start_date) && !empty($link->end_date)) && ($link->start_date <= $today && $link->end_date >= $today))): 
-                        if(isset($link->children) && $link->children->count() > 0):
-                            $html .= '<a href="'.route('dashboard.internal-link.parent', $link->id).'" target="_blank" class="block relative col-span-6 2xl:col-span-4 mb-3" data-value="1">';
-                        else:
-                            $html .= '<a href="'.$link->link.'" target="_blank" class="block col-span-6 2xl:col-span-4 mb-3 relative" data-value="1">';
-                        endif;
-                            if(empty($link->image)):
-                                $html .= '<h6 class="absolute text-sm w-full text-center uppercase text-white font-medium z-10 px-2" style="top: 50%; transform:translateY(-50%);">'.$link->name.'</h6>';
-                            endif;
-                            $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.(!empty($link->image) ? $link->image : asset('build/assets/images/blan_logo.png')).'">';
+                    if((empty($link->start_date) || empty($link->end_date)) || ((!empty($link->start_date) && !empty($link->end_date)) && ($link->start_date <= $today && $link->end_date >= $today))):
+                        // Rendered as a quick-action row for the editorial dashboard.
+                        // Href/target/data-value stay exactly as before.
+                        $hasChildren = isset($link->children) && $link->children->count() > 0;
+                        $href = $hasChildren ? route('dashboard.internal-link.parent', $link->id) : $link->link;
+                        $icon = $hasChildren ? 'folder' : 'external-link';
+
+                        $html .= '<a href="'.$href.'" target="_blank" class="lccd-action" data-value="1">';
+                            $html .= '<i data-lucide="'.$icon.'"></i>';
+                            $html .= '<span class="lccd-action__label">'.e($link->name).'</span>';
                         $html .= '</a>';
                     endif;
                 endforeach;

@@ -4,109 +4,109 @@
     <title>{{ $title }}</title>
 @endsection
 
-@section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">All reported Issue For Both Employee and Students</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('dashboard') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Dashboard</a>
-        </div>
-        {{-- <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-                <button data-tw-toggle="modal" data-tw-target="#addModal" class="add_btn btn btn-primary shadow-md mr-2"><i data-lucide="plus" class="w-4 h-4 mr-2"></i>Add New</button>
-        </div> --}}
-    </div>
-    <!-- BEGIN: HTML Table Data -->
-    <div class="intro-y box p-5 mt-5">
-        <form id="tabulatorFilterForm">
-            <div class="grid grid-cols-12 gap-4">
-                <!--Add Reference number/report number filter-->
-                <div class="col-span-3">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Ref.</div>
-                        <input type="text" id="report_number" name="report_number" placeholder="Reference Number" value="" class="w-full"/>
-                    </div>
-                </div>
+@section('body_class', 'rit-page')
 
-                <div class="col-span-2">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1 whitespace-nowrap">Name.</div>
-                        <input type="text" id="query" name="querystr" placeholder="Full name" value="" class="w-full"/>
+@section('styles')
+    @vite('resources/css/report-it.css')
+@endsection
+
+@section('subcontent')
+    <div class="rit">
+        <div class="rit-head">
+            <div>
+                <h1 class="rit-head__title">All reported issues</h1>
+                <div class="rit-head__sub">Reports raised by employees and students, across every campus</div>
+            </div>
+            <div class="rit-head__actions">
+                <a href="{{ route('report.any.it.employee') }}" class="rit-btn rit-btn--ghost">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 6l-6 6 6 6"></path></svg>
+                    My reports
+                </a>
+                <a href="{{ route('dashboard') }}" class="rit-btn rit-btn--solid">Back to Dashboard</a>
+            </div>
+        </div>
+
+        <div class="rit-panel rit-panel--filters">
+            <form id="tabulatorFilterForm">
+                <div class="rit-filters rit-filters--wide">
+                    <div class="rit-field">
+                        <label for="report_number" class="rit-field__label">Reference</label>
+                        <input type="text" id="report_number" name="report_number" value="" placeholder="Reference number" class="rit-input">
                     </div>
-                </div>
-                <div class="col-span-2">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">From</div>
-                        <select id="reportFrom" name="reportFrom[]" class="w-full tom-selects" multiple>
-                            <option value="">Please Select </option>
+                    <div class="rit-field">
+                        <label for="query" class="rit-field__label">Name</label>
+                        <input type="text" id="query" name="querystr" value="" placeholder="Full name" class="rit-input">
+                    </div>
+                    <div class="rit-field rit-field--wide">
+                        <label for="reportFrom" class="rit-field__label">From</label>
+                        <select id="reportFrom" name="reportFrom[]" class="tom-selects rit-select w-full" multiple>
+                            <option value="">Please Select</option>
                             <option value="Employee">Employee</option>
                             <option value="Student">Student</option>
                         </select>
                     </div>
-                </div>
-                <div class="col-span-3">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Type</div>
-                        <select id="issue_type_id" name="issue_type_id[]" class="w-full tom-selects">
+                    <div class="rit-field rit-field--wide">
+                        <label for="issue_type_id" class="rit-field__label">Type</label>
+                        <select id="issue_type_id" name="issue_type_id[]" class="tom-selects rit-select w-full">
                             <option value="">Please Select</option>
                             @foreach($issueList as $issue)
                                 <option value="{{ $issue->id }}">{{ $issue->name }}</option>
                             @endforeach
                         </select>
                     </div>
-                </div>
-                <div class="col-span-2">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Conditions</div>
-                        <select id="statuses" name="statuses[]" class="w-full tom-selects" multiple>
+                    <div class="rit-field rit-field--wide">
+                        <label for="statuses" class="rit-field__label">Condition</label>
+                        <select id="statuses" name="statuses[]" class="tom-selects rit-select w-full" multiple>
                             <option value="Pending">Pending</option>
                             <option value="In Progress">In Progress</option>
                             <option value="Resolved">Resolved</option>
                         </select>
                     </div>
-                </div>
-                <div class="col-span-3">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Status</div>
-                        <select id="status" name="status" class="w-full tom-selects" >
+                    <div class="rit-field">
+                        <label for="status" class="rit-field__label">Status</label>
+                        <select id="status" name="status" class="tom-selects rit-select w-full">
                             <option value="1">Active</option>
                             <option value="2">Archived</option>
                         </select>
                     </div>
-                </div>
-                <div class="col-span-4">
-                    <button id="tabulator-html-filter-go" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                    <button id="tabulator-html-filter-reset" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                </div>
-                <div class="col-span-5 text-right">
-                    <div class="flex mt-5 sm:mt-0 justify-end">
-                        <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                            <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
-                        </button>
-                        <button id="tabulator-export-xlsx" class="btn btn-outline-secondary w-1/2 sm:w-auto">
-                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export Excel
-                            <svg id="excelExportBtn" style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                            stroke="gray" class="w-4 h-4 ml-2">
-                            <g fill="none" fill-rule="evenodd">
-                                <g transform="translate(1 1)" stroke-width="4">
-                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                    <path d="M36 18c0-9.94-8.06-18-18-18">
-                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                    </path>
-                                </g>
-                            </g>
-                        </svg>
-                        </button>
 
+                    <div class="rit-filters__actions">
+                        <button id="tabulator-html-filter-go" type="button" class="rit-btn rit-btn--gold">Go</button>
+                        <button id="tabulator-html-filter-reset" type="button" class="rit-btn rit-btn--ghost">Reset</button>
+                    </div>
+                    <div class="rit-filters__tools">
+                        <button id="tabulator-print" type="button" class="rit-btn rit-btn--ghost">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 9V4h11v5"></path><rect x="3.5" y="9" width="17" height="7" rx="2"></rect><path d="M6.5 16h11v4h-11z"></path></svg>
+                            Print
+                        </button>
+                        <button id="tabulator-export-xlsx" type="button" class="rit-btn rit-btn--ghost">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5L13.5 3z"></path><path d="M13.5 3v5.5H19M9.5 13l5 5M14.5 13l-5 5"></path></svg>
+                            Export Excel
+                            <svg id="excelExportBtn" style="display: none;" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" class="rit-spinner">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
                     </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
 
-        <div class="overflow-x-auto scrollbar-hidden">
-            <div id="reportItAllTableId" class="mt-5 table-report table-report--tabulator"></div>
+        <div class="rit-panel">
+            <div class="rit-tablewrap scrollbar-hidden">
+                <div id="reportItAllTableId" class="table-report table-report--tabulator"></div>
+            </div>
         </div>
     </div>
 
+    {{-- Shared with the detail page, which is on the same shell. --}}
     @include('pages.students.report-it.modals.add-edit')
     @include('pages.students.report-it.modals.confirmation')
     @include('pages.students.report-it.modals.success')

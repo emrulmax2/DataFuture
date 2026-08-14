@@ -1,0 +1,1852 @@
+/* =========================================================================
+   Report IT — editorial LCC skin
+
+   Scoped to `body.rit-page` for the page itself and to `.rit-modal` for the
+   dialogs. The two scopes are deliberate: the Midone modal JS re-parents a
+   modal to `<body>` when it opens, so anything that relied on sitting inside
+   `.rit` would lose both the cascade and the custom properties. Declaring the
+   tokens on the modal as well lets the dialogs travel intact.
+   ========================================================================= */
+
+body.rit-page,
+.rit-modal {
+    --rit-canvas: #f7f4ed;
+    --rit-surface: #fdfcf9;
+    --rit-strip: #f7f2e6;
+    --rit-header: #f4efe3;
+    --rit-line: #e4dbc4;
+    --rit-line-soft: #efe8d8;
+    --rit-field: #e0d6be;
+    --rit-ghost: #ded3b8;
+    --rit-ink: #1d1a14;
+    --rit-ink-2: #3e3a2e;
+    --rit-muted: #6e6754;
+    --rit-faint: #8a7f63;
+    --rit-navy: #15233f;
+    --rit-gold: #c6a02c;
+    --rit-gold-dark: #b08c22;
+    --rit-gold-ink: #8a6a24;
+    --rit-green: #0f4c33;
+    --rit-green-dark: #0b3a27;
+    --rit-red: #8e2c22;
+    --rit-red-dark: #7a241b;
+    --rit-row-hover: #fbf8f1;
+}
+
+body.rit-page {
+    background: var(--rit-canvas);
+}
+
+/* Cancel the theme's inset/rounded/tinted content wrapper so the page runs
+   edge to edge on the cream canvas. */
+body.rit-page .content.content--top-nav {
+    margin-top: 0;
+    padding: 0 30px;
+    border-radius: 0;
+    background: var(--rit-canvas);
+}
+
+body.rit-page .content.content--top-nav::before {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    body.rit-page .content.content--top-nav {
+        padding: 0 16px;
+    }
+}
+
+.rit,
+.rit *,
+.rit *::before,
+.rit *::after {
+    box-sizing: border-box;
+}
+
+.rit {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 30px 0;
+    font-family: "Albert Sans", system-ui, sans-serif;
+    color: var(--rit-ink);
+}
+
+/* ------------------------------------------------------------------ Head */
+
+.rit-head {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--rit-line);
+}
+
+.rit-head__title {
+    margin: 0;
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 29px;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--rit-ink);
+}
+
+.rit-head__sub {
+    margin-top: 5px;
+    font-size: 13px;
+    color: var(--rit-muted);
+}
+
+.rit-head__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-left: auto;
+}
+
+/* --------------------------------------------------------------- Buttons */
+
+/* Deliberately not `.btn` — datafuture.css pins the old brand teal onto every
+   `.btn-*` with `!important`, which a scoped override can only win by
+   shouting back. Owning the class avoids that fight entirely. */
+.rit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 38px;
+    padding: 0 18px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.14s ease, border-color 0.14s ease, color 0.14s ease;
+}
+
+.rit-btn svg {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 auto;
+}
+
+.rit-btn--ghost {
+    background: var(--rit-surface);
+    border-color: var(--rit-ghost);
+    color: var(--rit-ink);
+    font-weight: 600;
+    padding: 0 16px;
+}
+
+.rit-btn--ghost:hover {
+    background: var(--rit-header);
+    border-color: var(--rit-gold);
+    color: var(--rit-navy);
+}
+
+.rit-btn--solid {
+    background: var(--rit-green);
+    color: #f7f4ed;
+}
+
+.rit-btn--solid:hover {
+    background: var(--rit-green-dark);
+    color: #fff;
+}
+
+.rit-btn--gold {
+    background: var(--rit-gold);
+    color: #fff;
+    padding: 0 20px;
+}
+
+.rit-btn--gold:hover {
+    background: var(--rit-gold-dark);
+    color: #fff;
+}
+
+.rit-btn--danger {
+    background: var(--rit-red);
+    color: #f7f4ed;
+}
+
+.rit-btn--danger:hover {
+    background: var(--rit-red-dark);
+    color: #fff;
+}
+
+.rit-btn.disabled,
+.rit-btn:disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.rit-btn .rit-spinner {
+    width: 15px;
+    height: 15px;
+}
+
+/* A borderless, gold-ink text action — used for "Add attachments". */
+.rit-linkbtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    align-self: flex-start;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--rit-gold-ink);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.rit-linkbtn:hover {
+    color: var(--rit-gold-dark);
+}
+
+.rit-linkbtn svg {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 auto;
+}
+
+/* -------------------------------------------------- Detail page: ref head */
+
+.rit-refhead {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.rit-refhead__ref {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    min-width: 0;
+}
+
+.rit-refhead__label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--rit-faint);
+    white-space: nowrap;
+}
+
+.rit-refhead__value {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--rit-navy);
+    overflow-wrap: anywhere;
+}
+
+.rit-refhead__actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-left: auto;
+}
+
+/* The status is read-only here — closing and re-opening are the two buttons
+   in the Report logs header, so this never needed to be a dropdown. */
+.rit-statuspill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 38px;
+    padding: 0 16px;
+    border: 1px solid #d8d2c0;
+    border-radius: 999px;
+    background: #f2efe6;
+    color: var(--rit-ink-2);
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.rit-statuspill::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    flex: 0 0 auto;
+}
+
+.rit-statuspill--pending {
+    background: #f6edd6;
+    border-color: #e4d3a6;
+    color: var(--rit-gold-ink);
+}
+
+.rit-statuspill--progress {
+    background: #eaf0f7;
+    border-color: #cfdcec;
+    color: #1b3a66;
+}
+
+.rit-statuspill--resolved {
+    background: #eaf3ed;
+    border-color: #cfe2d6;
+    color: var(--rit-green);
+}
+
+.rit-statuspill--rejected {
+    background: #f9eeeb;
+    border-color: #ebd2cb;
+    color: var(--rit-red);
+}
+
+/* ------------------------------------------------- Detail page: reporter */
+
+.rit-profile {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 26px;
+    padding: 22px;
+    background: var(--rit-surface);
+    border: 1px solid var(--rit-line);
+    border-radius: 4px;
+}
+
+@media (max-width: 1023px) {
+    .rit-profile {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 20px;
+    }
+}
+
+.rit-profile__who {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+}
+
+.rit-profile__avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--rit-green);
+    border: 2px solid var(--rit-gold);
+    color: #f4efe3;
+    font-size: 20px;
+    font-weight: 700;
+    flex: 0 0 auto;
+    overflow: hidden;
+}
+
+.rit-profile__avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.rit-profile__name {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--rit-navy);
+}
+
+.rit-profile__role {
+    margin-top: 2px;
+    font-size: 12.5px;
+    line-height: 1.4;
+    color: var(--rit-muted);
+}
+
+.rit-profile__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 7px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: #eaf3ed;
+    border: 1px solid #cfe2d6;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--rit-green);
+}
+
+.rit-profile__tag--off {
+    background: #f9eeeb;
+    border-color: #ebd2cb;
+    color: var(--rit-red);
+}
+
+.rit-profile__col {
+    min-width: 0;
+    padding-left: 26px;
+    border-left: 1px solid var(--rit-line-soft);
+}
+
+@media (max-width: 1023px) {
+    .rit-profile__col {
+        padding-left: 0;
+        padding-top: 20px;
+        border-left: 0;
+        border-top: 1px solid var(--rit-line-soft);
+    }
+}
+
+.rit-profile__label {
+    margin-bottom: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--rit-faint);
+}
+
+.rit-profile__lines {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    font-size: 13px;
+    color: var(--rit-ink-2);
+}
+
+.rit-profile__line {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    min-width: 0;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.rit-profile__line svg {
+    width: 15px;
+    height: 15px;
+    margin-top: 1px;
+    flex: 0 0 auto;
+    color: var(--rit-faint);
+}
+
+/* Anything the record simply does not carry reads as absent, not as data. */
+.rit-profile__line--empty {
+    color: #9a937e;
+}
+
+.rit-profile__line--missing {
+    color: var(--rit-red);
+    font-weight: 600;
+}
+
+.rit-profile__line--missing svg {
+    color: currentColor;
+}
+
+/* --------------------------------------------- Detail page: two columns */
+
+.rit-detailgrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 20px;
+    align-items: start;
+}
+
+@media (max-width: 1279px) {
+    .rit-detailgrid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.rit-aside {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+}
+
+/* --------------------------------------------------------------- Panels */
+
+.rit-panel {
+    background: var(--rit-surface);
+    border: 1px solid var(--rit-line);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+/* The filter panel has to let the TomSelect dropdowns escape it, so it opts
+   out of the clipping the table panel uses to round its corners. */
+.rit-panel--filters {
+    overflow: visible;
+    position: relative;
+    z-index: 20;
+}
+
+.rit-panel__head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #ede5d0;
+}
+
+.rit-panel__title {
+    margin: 0;
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--rit-ink);
+}
+
+.rit-panel__title--sm {
+    font-size: 17px;
+}
+
+.rit-panel__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: var(--rit-line-soft);
+    color: var(--rit-muted);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.rit-panel__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-left: auto;
+}
+
+/* The logs filter row lives inside the panel rather than in one of its own,
+   so it carries the rule that separates it from the table. */
+.rit-panel__filters {
+    border-bottom: 1px solid #ede5d0;
+}
+
+/* -------------------------------------------------------------- Filters */
+
+.rit-filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.2fr) minmax(0, 1fr) auto auto;
+    align-items: end;
+    gap: 16px;
+    padding: 20px;
+}
+
+@media (max-width: 1279px) {
+    .rit-filters {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .rit-filters__actions,
+    .rit-filters__tools {
+        grid-column: span 3;
+    }
+
+    .rit-filters__tools {
+        margin-left: 0;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 767px) {
+    .rit-filters {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .rit-filters__actions,
+    .rit-filters__tools {
+        grid-column: span 1;
+    }
+}
+
+/* The all-issues screen carries six filters instead of three, so it drops the
+   fixed grid for a wrapping row: the fields share the leftover width and the
+   buttons sit inline at the end, exactly as they do with three. When the row
+   runs out of room the buttons fall to a line of their own rather than
+   squeezing the fields down to nothing. */
+.rit-filters--wide {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 14px;
+}
+
+/* The logs table sits inside its panel, so its filter row is narrower and
+   carries only two fields. */
+.rit-filters--logs {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto auto;
+    gap: 14px;
+    padding: 18px 20px;
+}
+
+@media (max-width: 1023px) {
+    .rit-filters--logs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 559px) {
+    .rit-filters--logs {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* Reference / Name / Status hold a short value; From, Type and Condition hold
+   chips and long issue-type labels, so they take roughly twice the width. */
+.rit-filters--wide .rit-field {
+    flex: 1 1 130px;
+}
+
+.rit-filters--wide .rit-field--wide {
+    flex: 2 1 200px;
+}
+
+.rit-filters--wide .rit-filters__actions,
+.rit-filters--wide .rit-filters__tools {
+    flex: 0 0 auto;
+    margin-left: 0;
+}
+
+@media (max-width: 559px) {
+    .rit-filters--wide .rit-field {
+        flex-basis: 100%;
+    }
+}
+
+.rit-field {
+    min-width: 0;
+    position: relative;
+}
+
+.rit-field__label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--rit-faint);
+}
+
+.rit-field__req {
+    color: var(--rit-red);
+}
+
+.rit-filters__actions,
+.rit-filters__tools {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+/* These sit on the same baseline as the inputs, so they borrow the field
+   corner radius instead of the pill used up in the page header. */
+.rit-filters .rit-btn {
+    border-radius: 8px;
+}
+
+.rit-filters__tools {
+    margin-left: auto;
+}
+
+/* --------------------------------------------------------- Form controls */
+
+.rit-input,
+.rit-textarea,
+body.rit-page input.rit-input,
+.rit-modal input.rit-input,
+.rit-modal textarea.rit-textarea {
+    width: 100%;
+    height: 38px;
+    padding: 0 13px;
+    background: var(--rit-surface);
+    border: 1px solid var(--rit-field);
+    border-radius: 8px;
+    box-shadow: none;
+    color: var(--rit-ink);
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 400;
+    outline: none;
+    transition: border-color 0.14s ease, background 0.14s ease;
+}
+
+.rit-textarea,
+.rit-modal textarea.rit-textarea {
+    height: 110px;
+    padding: 11px 13px;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+.rit-textarea--tall,
+.rit-modal textarea.rit-textarea--tall {
+    height: 120px;
+}
+
+.rit-input:focus,
+.rit-textarea:focus,
+body.rit-page input.rit-input:focus,
+.rit-modal input.rit-input:focus,
+.rit-modal textarea.rit-textarea:focus {
+    background: #fff;
+    border-color: var(--rit-gold);
+    box-shadow: none;
+}
+
+.rit-input::placeholder,
+.rit-textarea::placeholder {
+    color: #a49c88;
+    opacity: 1;
+}
+
+/* Field-level validation text emitted by the axios 422 handler. */
+.rit-error {
+    margin-top: 6px;
+    color: var(--rit-red);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.rit-error:empty {
+    display: none;
+}
+
+/* Radio cards for the issue-type picker. The native input is hidden but kept
+   in the DOM — the page JS reads and resets it by name. */
+.rit-radios {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.rit-radio {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    margin: 0;
+    padding: 12px 14px;
+    background: var(--rit-surface);
+    border: 1px solid var(--rit-line);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.14s ease, background 0.14s ease;
+}
+
+.rit-radio:hover {
+    border-color: var(--rit-gold);
+}
+
+.rit-radio__input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    margin: 0;
+    pointer-events: none;
+}
+
+.rit-radio__dot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    border: 2px solid #cfc7af;
+    border-radius: 50%;
+    flex: 0 0 auto;
+    transition: border-color 0.14s ease;
+}
+
+.rit-radio__dot::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--rit-gold);
+    transform: scale(0);
+    transition: transform 0.14s ease;
+}
+
+.rit-radio__text {
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--rit-ink);
+}
+
+.rit-radio__input:checked ~ .rit-radio__dot {
+    border-color: var(--rit-gold);
+}
+
+.rit-radio__input:checked ~ .rit-radio__dot::after {
+    transform: scale(1);
+}
+
+.rit-radio:has(.rit-radio__input:checked) {
+    background: #fbf6e8;
+    border-color: var(--rit-gold);
+}
+
+.rit-radio:has(.rit-radio__input:checked) .rit-radio__text {
+    font-weight: 600;
+}
+
+/* ------------------------------------------------------------- TomSelect */
+
+/* TomSelect 1.7.8: the wrapper is `.ts-control` (it inherits the original
+   select's classes) and `.ts-input` is the visible box. `!important` is
+   required throughout because the theme's own skin carries its own. */
+body.rit-page .ts-control.rit-select,
+.rit-modal .ts-control.rit-select {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    width: 100%;
+}
+
+/* Fixed height, never wrapping: a filter row only reads as a row while every
+   control is the same height, and a multi-select that grows with each chip
+   drags its label out of line with the others. Overflowing chips and long
+   option labels are handled below instead of by growing the box. */
+body.rit-page .ts-control.rit-select .ts-input,
+.rit-modal .ts-control.rit-select .ts-input {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 6px;
+    height: 38px;
+    overflow: hidden;
+    padding: 7px 32px 7px 13px !important;
+    background-color: var(--rit-surface) !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%238a7f63' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+    background-position: right 12px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 13px 13px !important;
+    border: 1px solid var(--rit-field) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    color: var(--rit-ink);
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 400;
+}
+
+body.rit-page .ts-control.rit-select.focus .ts-input,
+body.rit-page .ts-control.rit-select .ts-input.focus,
+body.rit-page .ts-control.rit-select .ts-input.dropdown-active,
+.rit-modal .ts-control.rit-select.focus .ts-input,
+.rit-modal .ts-control.rit-select .ts-input.focus,
+.rit-modal .ts-control.rit-select .ts-input.dropdown-active {
+    background-color: #fff !important;
+    border-color: var(--rit-gold) !important;
+    box-shadow: none !important;
+}
+
+/* The library draws its own caret; ours is the background image above. */
+body.rit-page .ts-control.rit-select .ts-input::after,
+body.rit-page .ts-control.rit-select .ts-input::before,
+.rit-modal .ts-control.rit-select .ts-input::after,
+.rit-modal .ts-control.rit-select .ts-input::before {
+    display: none !important;
+}
+
+/* The `dropdown_input` plugin moves typing into the dropdown, so the control's
+   own input is only a focus target — it must not reserve width and shove the
+   chips out of a non-wrapping strip. */
+body.rit-page .ts-control.rit-select .ts-input > input,
+.rit-modal .ts-control.rit-select .ts-input > input {
+    flex: 1 1 auto;
+    min-width: 0;
+    color: var(--rit-ink);
+    font-family: inherit;
+    font-size: inherit;
+}
+
+body.rit-page .ts-control.rit-select .ts-input > input::placeholder,
+.rit-modal .ts-control.rit-select .ts-input > input::placeholder {
+    color: #a49c88;
+    opacity: 1;
+}
+
+/* A single-choice select reads as a plain value, not a chip — TomSelect still
+   wraps it in `.item`, so the chip skin is opted into by mode instead of
+   applied to every selection. (`.ts-control` carries `single` / `multi`.) */
+body.rit-page .ts-control.rit-select.single .ts-input .item,
+.rit-modal .ts-control.rit-select.single .ts-input .item {
+    min-width: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    color: var(--rit-ink);
+    font-size: 13.5px;
+    font-weight: 400;
+    /* Issue-type labels run long ("Facility issue (building, furniture…)"),
+       so the value is trimmed rather than wrapped onto a second line. */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Each selection in a multi-select is a chip. Chips keep their full size and
+   the strip scrolls sideways past the third or fourth one, so picking several
+   values never changes the height of the control. */
+body.rit-page .ts-control.rit-select.multi .ts-input,
+.rit-modal .ts-control.rit-select.multi .ts-input {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+}
+
+body.rit-page .ts-control.rit-select.multi .ts-input::-webkit-scrollbar,
+.rit-modal .ts-control.rit-select.multi .ts-input::-webkit-scrollbar {
+    display: none;
+}
+
+body.rit-page .ts-control.rit-select.multi .ts-input .item,
+.rit-modal .ts-control.rit-select.multi .ts-input .item {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: 5px;
+    margin: 0 !important;
+    padding: 2px 5px 2px 10px;
+    background: #f1ead9;
+    border: 1px solid var(--rit-field);
+    border-radius: 999px;
+    color: var(--rit-navy);
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+body.rit-page .ts-control.rit-select.multi .ts-input .item .remove,
+.rit-modal .ts-control.rit-select.multi .ts-input .item .remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 17px;
+    height: 17px;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 50%;
+    color: var(--rit-muted);
+    line-height: 1;
+    text-decoration: none;
+}
+
+body.rit-page .ts-control.rit-select.multi .ts-input .item .remove:hover,
+.rit-modal .ts-control.rit-select.multi .ts-input .item .remove:hover {
+    background: #f4dcd7;
+    color: var(--rit-red);
+}
+
+/* Dropdowns are portalled to `<body>` (dropdownParent: 'body'), so they are
+   matched on the shared float class rather than through the page scope. */
+body.rit-page .ts-dropdown.lcc-tom-float,
+.ts-dropdown.lcc-tom-float.rit-dropdown {
+    z-index: 200;
+    margin-top: 6px;
+    background: #fdfcf9;
+    border: 1px solid #e0d6be;
+    border-radius: 10px;
+    box-shadow: 0 16px 40px rgba(29, 26, 20, 0.14);
+    overflow: hidden;
+}
+
+body.rit-page .ts-dropdown.lcc-tom-float .option {
+    padding: 9px 13px;
+    color: #3e3a2e;
+    font-size: 13.5px;
+}
+
+body.rit-page .ts-dropdown.lcc-tom-float .option.active {
+    background: #f4efe3;
+    color: #15233f;
+}
+
+body.rit-page .ts-dropdown.lcc-tom-float .option.selected {
+    background: #f1ead9;
+    font-weight: 600;
+}
+
+body.rit-page .ts-dropdown.lcc-tom-float .no-results {
+    padding: 12px 13px;
+    color: #6e6754;
+    font-size: 13px;
+}
+
+body.rit-page .ts-dropdown.lcc-tom-float .dropdown-input-wrap {
+    padding: 8px;
+    border-bottom: 1px solid #efe8d8;
+}
+
+body.rit-page .ts-dropdown.lcc-tom-float .dropdown-input {
+    width: 100%;
+    padding: 8px 11px;
+    background: #fff;
+    border: 1px solid #e0d6be !important;
+    border-radius: 8px;
+    box-shadow: none !important;
+    color: #1d1a14;
+    font-family: inherit;
+    font-size: 13.5px;
+}
+
+/* ----------------------------------------------------------------- Table */
+
+.rit-tablewrap {
+    overflow-x: auto;
+}
+
+body.rit-page .tabulator {
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    font-size: 13.5px;
+}
+
+body.rit-page .tabulator .tabulator-header {
+    background: var(--rit-strip);
+    border-top: none;
+    border-bottom: 1px solid var(--rit-line);
+    color: var(--rit-faint);
+}
+
+body.rit-page .tabulator .tabulator-header .tabulator-col {
+    background: transparent;
+    border-right: none;
+}
+
+body.rit-page .tabulator .tabulator-header .tabulator-col-content {
+    padding: 12px 16px;
+}
+
+body.rit-page .tabulator .tabulator-header .tabulator-col-title {
+    color: var(--rit-faint);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+}
+
+body.rit-page .tabulator .tabulator-row {
+    background: var(--rit-surface);
+    border-bottom: 1px solid var(--rit-line-soft);
+    transition: background 0.14s ease;
+}
+
+body.rit-page .tabulator .tabulator-row.tabulator-row-even {
+    background: var(--rit-surface);
+}
+
+body.rit-page .tabulator .tabulator-row:hover {
+    background: var(--rit-row-hover);
+}
+
+body.rit-page .tabulator .tabulator-row .tabulator-cell {
+    padding: 14px 16px;
+    border-right: none;
+    color: var(--rit-ink-2);
+    vertical-align: middle;
+}
+
+body.rit-page .tabulator .tabulator-placeholder .tabulator-placeholder-contents,
+body.rit-page .tabulator .tabulator-placeholder span {
+    padding: 34px 20px;
+    color: var(--rit-muted);
+    font-size: 13.5px;
+    font-weight: 500;
+}
+
+/* Cell contents ---------------------------------------------------------- */
+
+.rit-cell-id {
+    font-weight: 700;
+    color: var(--rit-navy);
+    white-space: nowrap;
+}
+
+/* Tabulator sets nowrap + ellipsis on every cell; the prose columns opt out
+   so a long issue type or description wraps instead of being clipped. */
+body.rit-page .tabulator .tabulator-cell.rit-col-wrap {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    line-height: 1.45;
+    word-break: break-word;
+}
+
+body.rit-page .tabulator .tabulator-cell.rit-col-loose {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+}
+
+body.rit-page .tabulator .tabulator-cell.rit-col-num {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.rit-chip {
+    display: inline-block;
+    padding: 3px 11px;
+    border-radius: 999px;
+    border: 1px solid #d8d2c0;
+    background: #f2efe6;
+    color: var(--rit-ink-2);
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.rit-chip--pending {
+    background: #f6edd6;
+    border-color: #e4d3a6;
+    color: var(--rit-gold-ink);
+}
+
+.rit-chip--progress {
+    background: #eaf0f7;
+    border-color: #cfdcec;
+    color: #1b3a66;
+}
+
+.rit-chip--resolved {
+    background: #eaf3ed;
+    border-color: #cfe2d6;
+    color: var(--rit-green);
+}
+
+.rit-chip--rejected {
+    background: #f9eeeb;
+    border-color: #ebd2cb;
+    color: var(--rit-red);
+}
+
+.rit-person {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rit-person__avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--rit-green);
+    border: 2px solid var(--rit-gold);
+    color: #f4efe3;
+    font-size: 11.5px;
+    font-weight: 700;
+    flex: 0 0 auto;
+    overflow: hidden;
+}
+
+.rit-person__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.rit-person__body {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+    min-width: 0;
+}
+
+.rit-person__name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--rit-navy);
+    text-transform: uppercase;
+}
+
+.rit-person__role {
+    font-size: 11.5px;
+    color: var(--rit-muted);
+}
+
+.rit-actions {
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+}
+
+.rit-iconbtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid var(--rit-field);
+    border-radius: 8px;
+    background: var(--rit-surface);
+    color: var(--rit-muted);
+    cursor: pointer;
+    transition: transform 0.14s ease, background 0.14s ease;
+}
+
+.rit-iconbtn:hover {
+    transform: translateY(-1px);
+}
+
+.rit-iconbtn svg,
+.rit-iconbtn i {
+    width: 15px;
+    height: 15px;
+}
+
+.rit-iconbtn--edit {
+    background: #f6edd6;
+    border-color: #e4d3a6;
+    color: var(--rit-gold-ink);
+}
+
+.rit-iconbtn--delete {
+    background: #f9eeeb;
+    border-color: #ebd2cb;
+    color: var(--rit-red);
+}
+
+.rit-iconbtn--view {
+    background: #eaf3ed;
+    border-color: #cfe2d6;
+    color: var(--rit-green);
+}
+
+.rit-iconbtn--restore {
+    background: #eaf3ed;
+    border-color: #cfe2d6;
+    color: var(--rit-green);
+}
+
+.rit-noaction {
+    font-size: 12.5px;
+    color: #a49c88;
+    white-space: nowrap;
+}
+
+/* --------------------------------------------- Detail page: aside panels */
+
+.rit-detaillist {
+    padding: 6px 18px 16px;
+}
+
+.rit-detail {
+    padding: 12px 0;
+    border-bottom: 1px solid #f2ecdd;
+}
+
+.rit-detail:last-child {
+    border-bottom: 0;
+}
+
+.rit-detail__label {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--rit-faint);
+}
+
+.rit-detail__value {
+    margin-top: 4px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--rit-ink);
+    overflow-wrap: anywhere;
+}
+
+.rit-detail__value--num {
+    font-variant-numeric: tabular-nums;
+}
+
+.rit-miniperson {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 7px;
+}
+
+.rit-miniperson__avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--rit-green);
+    color: #f4efe3;
+    font-size: 10px;
+    font-weight: 700;
+    flex: 0 0 auto;
+}
+
+.rit-miniperson__name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--rit-navy);
+}
+
+.rit-files {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+}
+
+.rit-file {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid var(--rit-line);
+    border-radius: 10px;
+    color: var(--rit-ink);
+    text-decoration: none;
+    transition: background 0.14s ease, border-color 0.14s ease;
+}
+
+.rit-file:hover {
+    background: var(--rit-header);
+    border-color: var(--rit-gold);
+}
+
+.rit-file__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: #f1eada;
+    color: var(--rit-navy);
+    flex: 0 0 auto;
+    overflow: hidden;
+}
+
+.rit-file__icon svg {
+    width: 17px;
+    height: 17px;
+}
+
+.rit-file__icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.rit-file__body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.rit-file__name {
+    font-size: 13.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rit-file__meta {
+    font-size: 11.5px;
+    color: var(--rit-muted);
+}
+
+.rit-file__go {
+    width: 15px;
+    height: 15px;
+    margin-left: auto;
+    flex: 0 0 auto;
+    color: #b3a98d;
+}
+
+/* Static empty state for the aside panels — the log table has Tabulator's
+   own placeholder. */
+.rit-empty {
+    padding: 30px 18px;
+    text-align: center;
+}
+
+.rit-empty__title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--rit-ink);
+}
+
+.rit-empty__desc {
+    margin-top: 4px;
+    font-size: 12.5px;
+    color: var(--rit-muted);
+}
+
+/* ------------------------------------------------------------ Pagination */
+
+body.rit-page .tabulator .tabulator-footer {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-between;
+    padding: 13px 20px;
+    background: var(--rit-strip);
+    border-top: 1px solid #ede5d0;
+    /* app.css sets margin-top: .5rem on .tabulator-footer, which left a gap
+       between the last row and the footer inside the panel. */
+    margin-top: 0 !important;
+    color: var(--rit-muted);
+    font-family: inherit;
+}
+
+/* Tabulator emits the page-size label, its select and the page buttons as one
+   flat run inside the paginator. Spanning the footer and letting the select
+   claim the leftover space splits them: size on the left, paging on the
+   right, per the design. */
+body.rit-page .tabulator .tabulator-footer .tabulator-paginator {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-start;
+    width: 100%;
+    margin-left: 0;
+    color: var(--rit-muted);
+    font-size: 12.5px;
+}
+
+body.rit-page .tabulator .tabulator-footer .tabulator-paginator label {
+    margin: 0 8px 0 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #4a4536;
+}
+
+body.rit-page .tabulator .tabulator-footer .tabulator-page-size {
+    margin-right: auto;
+    height: 32px;
+    padding: 0 30px 0 12px;
+    background-color: var(--rit-surface);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%238a7f63' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right 10px center;
+    background-repeat: no-repeat;
+    background-size: 13px 13px;
+    border: 1px solid var(--rit-field);
+    border-radius: 8px;
+    color: var(--rit-ink);
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+/* Tabulator gives each page button `margin: 0 2px` and wraps the numbers in a
+   `.tabulator-pages` span with `margin: 0 7px`; stacked on the flex gap that
+   produced uneven spacing either side of the number group. */
+body.rit-page .tabulator .tabulator-footer .tabulator-paginator .tabulator-page,
+body.rit-page .tabulator .tabulator-footer .tabulator-paginator .tabulator-pages {
+    margin: 0 !important;
+}
+
+body.rit-page .tabulator .tabulator-footer .tabulator-paginator .tabulator-pages {
+    display: flex;
+    gap: 6px;
+}
+
+/* First / Prev / Next / Last render as chevrons. */
+body.rit-page .tabulator .tabulator-footer .tabulator-page[data-page="first"],
+body.rit-page .tabulator .tabulator-footer .tabulator-page[data-page="prev"],
+body.rit-page .tabulator .tabulator-footer .tabulator-page[data-page="next"],
+body.rit-page .tabulator .tabulator-footer .tabulator-page[data-page="last"] {
+    font-size: 0 !important;
+    position: relative;
+}
+
+body.rit-page .tabulator .tabulator-footer .tabulator-page[data-page="first"]::before,
+body.rit-page .tabulator .tabulator-footer .tabulator-page[data-page="prev"]::before,
+body.rit-page .tabulator .tabulator-footer .tabulator-page[data-page="next"]::before,
+body.rit-page .tabulator .tabulator-footer .tabulator-page[data-page="last"]::before {
+    font-size: 18px;
+    line-height: 1;
+}
+
+body.rit-page .tabulator .tabulator-footer .tabulator-page[data-page="first"]::before {
+    content: "\00AB";
+}
+
+body.rit-page .tabulator .tabulator-footer .tabulator-page[data-page="prev"]::before {
+    content: "\2039";
+}
+
+body.rit-page .tabulator .tabulator-footer .tabulator-page[data-page="next"]::before {
+    content: "\203A";
+}
+
+body.rit-page .tabulator .tabulator-footer .tabulator-page[data-page="last"]::before {
+    content: "\00BB";
+}
+
+/* The legacy sheet pins the old brand teal onto the paginator with
+   `!important`, so these have to match it to take effect. */
+body.rit-page .tabulator .tabulator-footer .tabulator-page,
+body.rit-page .tabulator .tabulator-footer .tabulator-paginator .tabulator-page {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 10px;
+    background: var(--rit-surface) !important;
+    border: 1px solid var(--rit-field) !important;
+    border-radius: 8px !important;
+    color: var(--rit-ink-2) !important;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+body.rit-page .tabulator .tabulator-footer .tabulator-page:hover:not(.active):not(:disabled),
+body.rit-page .tabulator .tabulator-footer .tabulator-paginator .tabulator-page:hover:not(.active):not(:disabled) {
+    background: var(--rit-header) !important;
+    border-color: var(--rit-gold) !important;
+    color: var(--rit-navy) !important;
+}
+
+body.rit-page .tabulator .tabulator-footer .tabulator-page:disabled,
+body.rit-page .tabulator .tabulator-footer .tabulator-paginator .tabulator-page:disabled {
+    color: #c0b79e !important;
+    cursor: not-allowed;
+    opacity: 1;
+}
+
+body.rit-page .tabulator .tabulator-footer .tabulator-page.active,
+body.rit-page .tabulator .tabulator-footer .tabulator-page.active:hover,
+body.rit-page .tabulator .tabulator-footer .tabulator-paginator .tabulator-page.active,
+body.rit-page .tabulator .tabulator-footer .tabulator-paginator .tabulator-page.active:hover {
+    background: var(--rit-gold) !important;
+    border-color: var(--rit-gold) !important;
+    color: #fff !important;
+}
+
+/* ---------------------------------------------------------------- Modals */
+
+/* Midone's `.modal` ships with no z-index, so a `position: relative` app
+   header would paint over the dialog. */
+.rit-modal.modal {
+    z-index: 100;
+    background: rgba(29, 26, 20, 0.5);
+    font-family: "Albert Sans", system-ui, sans-serif;
+    color: var(--rit-ink);
+}
+
+/* Width only — the theme drives the drop-in with `-mt-16` → `mt-16` on
+   `.modal.show > .modal-dialog`, so the margins are left alone. */
+.rit-modal .modal-dialog {
+    width: 520px;
+    max-width: calc(100vw - 40px);
+}
+
+.rit-modal--narrow .modal-dialog {
+    width: 460px;
+}
+
+.rit-modal--confirm .modal-dialog {
+    width: 420px;
+}
+
+.rit-modal--wide .modal-dialog {
+    width: 640px;
+}
+
+/* The theme drops the dialog in 4rem from the top, so the usable height is
+   the viewport less that offset and a matching gap at the bottom. */
+.rit-modal .modal-content {
+    max-height: calc(100vh - 9rem);
+    overflow: auto;
+    background: var(--rit-surface);
+    border: 1px solid var(--rit-field);
+    border-radius: 14px;
+    box-shadow: 0 24px 60px rgba(29, 26, 20, 0.3);
+}
+
+.rit-modal .modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 22px;
+    border-bottom: 1px solid #ede5d0;
+}
+
+.rit-modal .modal-title {
+    margin: 0;
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--rit-ink);
+}
+
+.rit-modal__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    background: var(--rit-surface);
+    border: 1px solid var(--rit-field);
+    border-radius: 8px;
+    color: var(--rit-muted);
+    cursor: pointer;
+    transition: background 0.14s ease;
+}
+
+.rit-modal__close:hover {
+    background: var(--rit-header);
+}
+
+.rit-modal__close svg {
+    width: 13px;
+    height: 13px;
+}
+
+.rit-modal .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px 22px;
+}
+
+.rit-modal .modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 22px;
+    background: var(--rit-strip);
+    border-top: 1px solid #ede5d0;
+}
+
+.rit-modal--confirm .modal-footer {
+    justify-content: center;
+}
+
+/* Centred icon + copy used by the confirm / success / error dialogs. */
+.rit-notice {
+    padding: 30px 28px 24px;
+    text-align: center;
+}
+
+.rit-notice__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    margin: 0 auto;
+    border-radius: 50%;
+    background: #f2efe6;
+    border: 1px solid var(--rit-line);
+    color: var(--rit-muted);
+}
+
+.rit-notice__icon svg,
+.rit-notice__icon i {
+    width: 24px;
+    height: 24px;
+}
+
+.rit-notice__icon--danger {
+    background: #f9eeeb;
+    border-color: #ebd2cb;
+    color: var(--rit-red);
+}
+
+.rit-notice__icon--success {
+    background: #eaf3ed;
+    border-color: #cfe2d6;
+    color: var(--rit-green);
+}
+
+.rit-notice__icon--gold {
+    background: #f6edd6;
+    border-color: #e4d3a6;
+    color: var(--rit-gold-ink);
+}
+
+.rit-notice__title {
+    margin: 16px 0 0;
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--rit-ink);
+}
+
+.rit-notice__desc {
+    margin: 8px 0 0;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--rit-muted);
+}
+
+/* -------------------------------------------------------- Attachments UI */
+
+.rit-dropzone.dropzone {
+    min-height: 190px;
+    padding: 8px;
+    background: var(--rit-strip);
+    border: 1px dashed var(--rit-ghost);
+    border-radius: 10px;
+}
+
+.rit-dropzone .dz-message {
+    margin: 0;
+    padding: 34px 20px;
+    text-align: center;
+}
+
+.rit-dropzone__title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--rit-ink);
+}
+
+.rit-dropzone__title em {
+    color: var(--rit-gold-ink);
+    font-style: normal;
+    font-weight: 700;
+}
+
+.rit-dropzone__hint {
+    margin-top: 5px;
+    font-size: 12.5px;
+    color: var(--rit-muted);
+}
+
+/* The upload/edit previews are appended by the page JS, which finds and
+   removes them by `.col-span-5` — the class stays, the look does not. */
+.rit-thumbs {
+    display: block;
+    padding: 14px;
+    background: var(--rit-strip);
+    border: 1px dashed var(--rit-ghost);
+    border-radius: 10px;
+}
+
+.rit-thumbs.hidden {
+    display: none;
+}
+
+.rit-thumbs__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 14px;
+}
+
+.rit-modal .rit-thumbs .col-span-5 {
+    position: relative;
+    height: 90px;
+    border-radius: 10px;
+    overflow: visible;
+    cursor: pointer;
+}
+
+.rit-modal .rit-thumbs .col-span-5 img {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    border: 1px solid var(--rit-ghost);
+    object-fit: cover;
+}
+
+.rit-modal .rit-thumbs .col-span-5 .tooltip {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--rit-red);
+    color: #fff;
+    cursor: pointer;
+}
+
+.rit-modal .rit-thumbs .col-span-5 .tooltip i {
+    width: 12px;
+    height: 12px;
+}
+
+/* Dropzone's own error/success banners are prepended to `.modal-content`. */
+.rit-modal .alert.uploadError {
+    margin: 0;
+    border-radius: 14px 14px 0 0;
+}
+
+/* Shown while the edit form is being populated. jQuery's `.show()` restores
+   `display: block`, so the row is laid out with inline children rather than
+   flex — otherwise the alignment would be dropped the moment it appears. */
+.rit-loading {
+    display: none;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--rit-muted);
+}
+
+.rit-loading svg {
+    width: 14px;
+    height: 14px;
+    margin-right: 7px;
+    vertical-align: -2px;
+}

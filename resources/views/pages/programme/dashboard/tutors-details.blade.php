@@ -1,215 +1,274 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Programme Dashboard - Welcome to London churchill college</title>
+    <title>{{ $title }}</title>
 @endsection
 
 @section('subcontent')
-    <div class="grid grid-cols-12 gap-6">
-        <div class="col-span-12 2xl:col-span-9 pt-5 relative">
-            <div class="grid grid-cols-12 gap-3">
-                <div class="col-span-12">  
-                    <div id="term-dropdown" class="dropdown w-1/2 sm:w-auto mr-auto"  data-tw-placement="bottom-start">
-                        <button id="selected-term" class="dropdown-toggle btn btn-outline-secondary bg-white w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                            <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> <i data-loading-icon="oval" class="w-4 h-4 mr-2 hidden"  data-color="white"></i> <span>{{ $termDeclaration->name }}</span> <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                        </button>
-                        <div class="dropdown-menu w-80">
-                            <ul class="dropdown-content max-h-96" style="overflow-x: hidden; overflow-y: auto;">
-                                @if(!empty($termDeclarations) && $termDeclarations->count() > 0)
-                                    @foreach($termDeclarations as $tds)
-                                        <li>
-                                            <a href="{{ route('programme.dashboard.tutors.details', [$tds->id, $p_tutor_id]) }}" class="dropdown-item term-select {{ ($termDeclaration->id == $tds->id ? ' dropdown-active ' : '') }}">
-                                                <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>  {{ $tds->name }}
-                                            </a>
-                                        </li>
-                                    @endforeach
-                                @endif
-                            </ul>
-                        </div>
-                    </div>       
-                </div>
-                <div class="col-span-12 mt-5">
-                    <div class="intro-y overflow-auto lg:overflow-visible mt-8 sm:mt-0">
-                        <table class="table table-report sm:mt-2">
-                            <thead>
-                                <tr>
-                                    <th class="whitespace-nowrap">Tutors <span class="pl-[35px]">Moudel Name</span></th>
-                                    <th class="whitespace-nowrap">Group</th>
-                                    <th class="whitespace-nowrap">Attendance Rate</th>
-                                    <th class="whitespace-nowrap">Exp. Submission</th>
-                                    <th class="whitespace-nowrap">Submission Rate</th>
-                                    <th class="whitespace-nowrap">Achivement Rate</th>
-                                    <th class="whitespace-nowrap">&nbsp;</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="intro-x">
-                                    <td class="font-medium">Overall</td>
-                                    <td class="font-medium"></td>
-                                    <td class="font-medium overAllAttendanceRate"></td>
-                                    <td class="font-medium"></td>
-                                    <td class="font-medium"></td>
-                                    <td class="font-medium"></td>
-                                    <td class="font-medium"></td>
-                                </tr>
-                                @php 
-                                    $P = $O = $L = $E = $M = $H = $OVERALLTOTAL = 0;
-                                @endphp
-                                @if(!empty($plans))
-                                    @foreach($plans as $pln)
-                                        <tr class="intro-x">
-                                            <td class="font-medium">
-                                                <div class="block">
-                                                    <div class="mr-4 inline-flex intro-x w-[60px]">
-                                                        <div class="w-10 h-10 image-fit zoom-in z-10 hover:z-30">
-                                                            <img alt="{{ (isset($pln->tutor->employee->full_name) ? ' - '.$pln->tutor->employee->full_name : '') }}" title="{{ (isset($pln->tutor->employee->full_name) ? $pln->tutor->employee->full_name : 'Unknown') }}" class="rounded-full tooltip" src="{{ (isset($pln->tutor->employee->photo_url) && !empty($pln->tutor->employee->photo_url) ? $pln->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
-                                                        </div>
-                                                        @if(isset($pln->tutorial->personal_tutor_id) && $pln->tutorial->personal_tutor_id > 0)
-                                                        <div class="w-10 h-10 image-fit zoom-in -ml-5 z-20 hover:z-30">
-                                                            <img alt="{{ (isset($pln->tutorial->personalTutor->employee->full_name) ? ' - '.$pln->tutorial->personalTutor->employee->full_name : '') }}" title="{{ (isset($pln->tutorial->personalTutor->employee->full_name) ? $pln->tutorial->personalTutor->employee->full_name : 'Unknown') }}" class="rounded-full shadow tooltip" src="{{ (isset($pln->tutorial->personalTutor->employee->photo_url) && !empty($pln->tutorial->personalTutor->employee->photo_url) ? $pln->tutorial->personalTutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
-                                                        </div>
-                                                        @endif
-                                                    </div>
-                                                    {{--<div class="w-10 h-10 intro-x image-fit mr-4 inline-block">
-                                                        <img alt="{{ (isset($pln->tutor->employee->full_name) ? ' - '.$pln->tutor->employee->full_name : '') }}" title="{{ (isset($pln->tutor->employee->full_name) ? $pln->tutor->employee->full_name : 'Unknown') }}" class="rounded-full shadow tooltip" src="{{ (isset($pln->tutor->employee->photo_url) && !empty($pln->tutor->employee->photo_url) ? $pln->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
-                                                    </div>--}}
-                                                    <div class="inline-block relative" style="top: -5px;">
-                                                        <div class="font-medium whitespace-nowrap uppercase">{{ (isset($pln->creations->module->name) ? $pln->creations->module->name : '') }}</div>
-                                                        <div class="font-medium whitespace-nowrap uppercase">{{ (isset($pln->class_type) ? $pln->class_type : '') }}</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="font-medium">
-                                                @if(isset($pln->group->name) && !empty($pln->group->name))
-                                                    @if(strlen($pln->group->name) > 2)
-                                                    <div class="rounded text-lg bg-success text-white cursor-pointer font-medium w-auto h-auto inline-flex justify-center items-center px-3 py-1">
-                                                    @else
-                                                    <div class="rounded-full text-lg bg-success text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">
-                                                    @endif
-                                                        {{ $pln->group->name }}
-                                                    </div>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @php
-                                                    $attendances = $pln->attendances;
+@php
+    $pgdTone = function ($pct) {
+        return $pct >= 75 ? 'good' : ($pct >= 50 ? 'mid' : 'bad');
+    };
+    $pgdToneDot = ['good' => '#1B7F5A', 'mid' => '#C9922B', 'bad' => '#B3261E'];
 
-                                                    $attendance = 0;
-                                                    $attendance += (isset($attendances->P) && $attendances->P > 0 ? $attendances->P : 0);
-                                                    $P += (isset($attendances->P) && $attendances->P > 0 ? $attendances->P : 0);
-                                                    $attendance += (isset($attendances->O) && $attendances->O > 0 ? $attendances->O : 0);
-                                                    $O += (isset($attendances->O) && $attendances->O > 0 ? $attendances->O : 0);
-                                                    $attendance += (isset($attendances->L) && $attendances->L > 0 ? $attendances->L : 0);
-                                                    $L += (isset($attendances->L) && $attendances->L > 0 ? $attendances->L : 0);
-                                                    $attendance += (isset($attendances->E) && $attendances->E > 0 ? $attendances->L : 0);
-                                                    $E += (isset($attendances->E) && $attendances->E > 0 ? $attendances->L : 0);
-                                                    $attendance += (isset($attendances->M) && $attendances->M > 0 ? $attendances->M : 0);
-                                                    $M += (isset($attendances->M) && $attendances->M > 0 ? $attendances->M : 0);
-                                                    $attendance += (isset($attendances->H) && $attendances->H > 0 ? $attendances->H : 0);
-                                                    $H += (isset($attendances->H) && $attendances->H > 0 ? $attendances->H : 0);
+    // Overall figures are accumulated as the module rows are walked, exactly as
+    // the previous table did, so the "Overall" line keeps agreeing with them.
+    $P = $O = $L = $E = $M = $H = $TOTAL = 0;
+    $expectedTotal = 0;
+    $moduleRows = [];
 
-                                                    $OVERALLTOTAL += (isset($attendances->TOTAL) && $attendances->TOTAL > 0) ? $attendances->TOTAL : 0;
-                                                    $attendanceTotal = (isset($attendances->TOTAL) && $attendances->TOTAL > 0) ? $attendances->TOTAL : 0;
-                                                    if($attendance > 0 && $attendanceTotal > 0):
-                                                        echo number_format($attendance / $attendanceTotal * 100, 2).'%';
-                                                    else:
-                                                        echo '0.00%';
-                                                    endif;
-                                                @endphp
-                                            </td>
-                                            <td>{{ (isset($pln->expected_submission) && $pln->expected_submission > 0 ? $pln->expected_submission : 0) }}</td>
-                                            <td>0%</td>
-                                            <td></td>
-                                            <td>
-                                                <a href="{{ route('tutor-dashboard.plan.module.show', $pln->id) }}" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9"><i data-lucide="eye-off" class="w-4 h-4"></i></a>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                @endif
-                                @php 
-                                    $overAllAttendance = $P + $O + $L + $E + $M + $H;
-                                    if($overAllAttendance > 0 && $OVERALLTOTAL > 0):
-                                        $overallRate = number_format($overAllAttendance / $OVERALLTOTAL * 100, 2).'%';
-                                    else:
-                                        $overallRate = '0.00%';
-                                    endif;
-                                @endphp
-                            </tbody>
-                        </table>
-                    </div>
+    foreach($plans as $pln):
+        $attendances = $pln->attendances;
+
+        $attended = 0;
+        $attended += (isset($attendances->P) && $attendances->P > 0 ? $attendances->P : 0);
+        $P += (isset($attendances->P) && $attendances->P > 0 ? $attendances->P : 0);
+        $attended += (isset($attendances->O) && $attendances->O > 0 ? $attendances->O : 0);
+        $O += (isset($attendances->O) && $attendances->O > 0 ? $attendances->O : 0);
+        $attended += (isset($attendances->L) && $attendances->L > 0 ? $attendances->L : 0);
+        $L += (isset($attendances->L) && $attendances->L > 0 ? $attendances->L : 0);
+        $attended += (isset($attendances->E) && $attendances->E > 0 ? $attendances->L : 0);
+        $E += (isset($attendances->E) && $attendances->E > 0 ? $attendances->L : 0);
+        $attended += (isset($attendances->M) && $attendances->M > 0 ? $attendances->M : 0);
+        $M += (isset($attendances->M) && $attendances->M > 0 ? $attendances->M : 0);
+        $attended += (isset($attendances->H) && $attendances->H > 0 ? $attendances->H : 0);
+        $H += (isset($attendances->H) && $attendances->H > 0 ? $attendances->H : 0);
+
+        $planTotal = (isset($attendances->TOTAL) && $attendances->TOTAL > 0) ? $attendances->TOTAL : 0;
+        $TOTAL += $planTotal;
+
+        $expected = (isset($pln->expected_submission) && $pln->expected_submission > 0 ? $pln->expected_submission : 0);
+        $expectedTotal += $expected;
+
+        $moduleRows[] = [
+            'id' => $pln->id,
+            'module' => (isset($pln->creations->module->name) ? $pln->creations->module->name : 'Unknown'),
+            'type' => (isset($pln->class_type) ? strtoupper($pln->class_type) : ''),
+            'group' => (isset($pln->group->name) ? $pln->group->name : ''),
+            'people' => (isset($pln->people) ? $pln->people : []),
+            'rate' => ($attended > 0 && $planTotal > 0 ? $attended / $planTotal * 100 : 0),
+            'expected' => $expected,
+        ];
+    endforeach;
+
+    $overallAttended = $P + $O + $L + $E + $M + $H;
+    $overallRate = ($overallAttended > 0 && $TOTAL > 0 ? $overallAttended / $TOTAL * 100 : 0);
+
+    $chours = explode(':', $contractedHour);
+    $contractedMinutes = (isset($chours[0]) ? (int) $chours[0] * 60 : 0) + (isset($chours[1]) ? (int) $chours[1] : 0);
+    $load = ($contractedMinutes > 0 ? $classMinutes / $contractedMinutes : 0);
+    $loadColor = ($load > 0.8 ? '#B3261E' : ($load > 0.5 ? '#C9922B' : '#0E5A61'));
+    $loadNote = ($load > 0.8 ? 'at capacity' : ($load > 0.5 ? 'balanced' : 'capacity available'));
+    $groupCount = collect($moduleRows)->pluck('group')->filter()->unique()->count();
+
+    $termMeta = collect($termColours)->first() ?? ['name' => ($termDeclaration->name ?? 'Term'), 'dot' => '#0E5A61'];
+    $tutorName = (isset($tutor->employee->full_name) ? $tutor->employee->full_name : 'Unknown Employee');
+    $tutorRole = trim((isset($tutor->employee->employment->employeeWorkType->name) ? $tutor->employee->employment->employeeWorkType->name : '')
+        .(isset($tutor->employee->employment->employeeJobTitle->name) ? ' - '.$tutor->employee->employment->employeeJobTitle->name : ''));
+
+    $address = collect([
+        $tutor->employee->address->address_line_1 ?? null,
+        $tutor->employee->address->address_line_2 ?? null,
+        $tutor->employee->address->city ?? null,
+        $tutor->employee->address->state ?? null,
+        $tutor->employee->address->post_code ?? null,
+        $tutor->employee->address->country ?? null,
+    ])->filter()->implode(', ');
+@endphp
+
+<main class="pgd-page pgd-page--split">
+    <div style="min-width: 0;">
+        <div class="pgd-detailhead">
+            <div>
+                <h1>{{ $tutorName }}</h1>
+                <div class="pgd-detailhead__tags">
+                    <span class="pgd-detailhead__role">{{ $tutorRole !== '' ? $tutorRole : 'Staff' }}</span>
+                    <span class="pgd-detailhead__sum">{{ count($moduleRows) }} {{ count($moduleRows) == 1 ? 'module' : 'modules' }} · {{ $termDeclaration->name ?? '' }}</span>
                 </div>
             </div>
+            <div class="pgd-detailhead__actions">
+                <a href="{{ route('programme.dashboard.tutors', $termDeclaration->id) }}" class="pgd-btn pgd-btn--ghost">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+                    All tutors
+                </a>
+            </div>
         </div>
-        <div class="col-span-12 2xl:col-span-3">
-            <div class="2xl:border-l -mb-10 pb-10">
-                <div class="2xl:pl-6 grid grid-cols-12 gap-x-6 2xl:gap-x-0 gap-y-6">
-                    <div class="col-span-12 md:col-span-6 xl:col-span-12 mt-3 2xl:mt-5">
-                        <div class="intory-x box zoom-in p-5">
-                            <div class="text-center pt-5 pb-3">
-                                <div class="w-20 h-20 sm:w-24 sm:h-24 flex-none lg:w-32 lg:h-32 image-fit relative ml-auto mr-auto">
-                                    <img alt="{{ (isset($tutor->employee->full_name) ? $tutor->employee->full_name : '') }}" class="rounded-full" src="{{ (isset($tutor->employee->photo_url) ? $tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
-                                </div>
-                                <div class="mt-3 text-center">
-                                    <div class="truncate sm:whitespace-normal font-medium text-lg">{{ (isset($tutor->employee->full_name) ? $tutor->employee->full_name : 'Unknown Employee') }}</div>
-                                    <div class="text-slate-500">
-                                        @if(isset($tutor->employee->address->address_line_1) && $tutor->employee->address->address_line_1 > 0)
-                                            @if(isset($tutor->employee->address->address_line_1) && !empty($tutor->employee->address->address_line_1))
-                                                {{ $tutor->employee->address->address_line_1 }}, 
-                                            @endif
-                                            @if(isset($tutor->employee->address->address_line_2) && !empty($tutor->employee->address->address_line_2))
-                                                {{ $tutor->employee->address->address_line_2 }},
-                                            @endif
-                                            @if(isset($tutor->employee->address->city) && !empty($tutor->employee->address->city))
-                                                {{ $tutor->employee->address->city }}, 
-                                            @endif
-                                            @if(isset($tutor->employee->address->state) && !empty($tutor->employee->address->state))
-                                                {{ $tutor->employee->address->state }}, 
-                                            @endif
-                                            @if(isset($tutor->employee->address->post_code) && !empty($tutor->employee->address->post_code))
-                                                {{ $tutor->employee->address->post_code }}, 
-                                            @endif
-                                            @if(isset($tutor->employee->address->country) && !empty($tutor->employee->address->country))
-                                                {{ $tutor->employee->address->country }}
-                                            @endif
-                                        @endif
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-12 gap-3 mt-5">
-                                    <div class="col-span-12 sm:col-span-6 text-left">
-                                        <div class="truncate sm:whitespace-normal break-all inline-flex items-start">
-                                            <i data-lucide="mail" class="w-4 h-4 mr-2"></i> {{ (isset($tutor->employee->email) ? $tutor->employee->email : '---') }}
-                                        </div>
-                                    </div>
-                                    <div class="col-span-12 sm:col-span-6 text-left">
-                                        <div class="truncate sm:whitespace-normal break-all inline-flex items-start">
-                                            <i data-lucide="mail" class="w-4 h-4 mr-2"></i> {{ (isset($tutor->email) ? $tutor->email : '---') }}
-                                        </div>
-                                    </div>
-                                    <div class="col-span-12 sm:col-span-6 text-left">
-                                        <div class="truncate sm:whitespace-normal break-all inline-flex items-start">
-                                            <i data-lucide="smartphone" class="w-4 h-4 mr-2"></i> {{ (isset($tutor->employee->mobile) ? $tutor->employee->mobile : '---') }}
-                                        </div>
-                                    </div>
-                                    @if(isset($tutor->employee->employment->office_telephone) && !empty($tutor->employee->employment->office_telephone))
-                                    <div class="col-span-12 sm:col-span-6 text-left">
-                                        <div class="truncate sm:whitespace-normal break-all inline-flex items-start">
-                                            <i data-lucide="tablet-smartphone" class="w-4 h-4 mr-2"></i> {{ (isset($tutor->employee->employment->office_telephone) ? $tutor->employee->employment->office_telephone : '---') }}
-                                        </div>
-                                    </div>
+
+        <div class="pgd-kpis">
+            <div class="pgd-kpi">
+                <div class="pgd-kpi__label"><span style="background: {{ $pgdToneDot[$pgdTone($overallRate)] }};"></span>Attendance</div>
+                <div class="pgd-kpi__value"><strong>{{ number_format($overallRate, 1) }}%</strong><span>across modules</span></div>
+                <div class="pgd-kpi__bar"><span style="width: {{ min(100, round($overallRate)) }}%; background: {{ $pgdToneDot[$pgdTone($overallRate)] }};"></span></div>
+            </div>
+            <div class="pgd-kpi">
+                <div class="pgd-kpi__label"><span style="background: #B3261E;"></span>Submission</div>
+                <div class="pgd-kpi__value"><strong>0.0%</strong><span>of {{ number_format($expectedTotal) }} expected</span></div>
+                <div class="pgd-kpi__bar"><span style="width: 2%; background: #B3261E;"></span></div>
+            </div>
+            <div class="pgd-kpi">
+                <div class="pgd-kpi__label"><span style="background: #B3261E;"></span>Achievement</div>
+                <div class="pgd-kpi__value"><strong>0.0%</strong><span>graded work</span></div>
+                <div class="pgd-kpi__bar"><span style="width: 2%; background: #B3261E;"></span></div>
+            </div>
+            <div class="pgd-kpi">
+                <div class="pgd-kpi__label"><span style="background: {{ $loadColor }};"></span>Load</div>
+                <div class="pgd-kpi__value"><strong>{{ number_format($load, 2) }}</strong><span>of contract</span></div>
+                <div class="pgd-kpi__bar"><span style="width: {{ min(100, round($load * 100)) }}%; background: {{ $loadColor }};"></span></div>
+            </div>
+        </div>
+
+        <section class="pgd-table">
+            <div class="pgd-table__head pgd-cols-detail">
+                <span></span>
+                <span>Module name</span>
+                <span>Group</span>
+                <span class="pgd-t-right pgd-t-nowrap">Attendance</span>
+                <span class="pgd-t-right pgd-t-nowrap">Exp. sub.</span>
+                <span class="pgd-t-right pgd-t-nowrap">Submission</span>
+                <span class="pgd-t-right pgd-t-nowrap">Achievement</span>
+                <span></span>
+            </div>
+
+            <div class="pgd-table__row pgd-table__row--total pgd-cols-detail">
+                <span></span>
+                <span>Overall</span>
+                <span></span>
+                <span class="pgd-t-right" style="color: #0E5A61; font-variant-numeric: tabular-nums;">{{ number_format($overallRate, 2) }}%</span>
+                <span class="pgd-t-right" style="font-variant-numeric: tabular-nums;">{{ number_format($expectedTotal) }}</span>
+                <span class="pgd-t-right pgd-num--muted" style="font-variant-numeric: tabular-nums;">0.0%</span>
+                <span class="pgd-t-right pgd-num--muted" style="font-variant-numeric: tabular-nums;">0.0%</span>
+                <span></span>
+            </div>
+
+            @forelse($moduleRows as $row)
+                <div class="pgd-table__row pgd-cols-detail">
+                    {{-- Both faces when the tutor and the personal tutor differ,
+                         each captioned on hover. --}}
+                    <span class="pgd-people">
+                        @forelse($row['people'] as $person)
+                            <span class="pgd-people__face" data-pgd-tooltip="{{ $person['role'] }} · {{ $person['name'] }}">
+                                <span class="pgd-avatar" style="background: {{ $person['color'] }};">
+                                    @if(!empty($person['photo']))
+                                        <img src="{{ $person['photo'] }}" alt="{{ $person['name'] }}">
+                                    @else
+                                        {{ $person['initials'] }}
                                     @endif
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                </span>
+                            </span>
+                        @empty
+                            <span class="pgd-people__face" data-pgd-tooltip="Tutor · {{ $tutorName }}">
+                                <span class="pgd-avatar" style="background: {{ \App\Support\Avatar::soft($tutorName) }};">{{ $tutorInitials }}</span>
+                            </span>
+                        @endforelse
+                    </span>
+                    <span style="min-width: 0;">
+                        <span class="pgd-mod__name">{{ $row['module'] }}</span>
+                        <span class="pgd-mod__meta">
+                            <span class="pgd-mod__type">{{ $row['type'] }}</span>
+                            <span class="pgd-mod__term"><span style="background: {{ $termMeta['dot'] }};"></span>{{ $termMeta['name'] }}</span>
+                        </span>
+                    </span>
+                    <span>@if(!empty($row['group']))<span class="pgd-group">{{ $row['group'] }}</span>@endif</span>
+                    <span class="pgd-t-right">
+                        <span class="pgd-rate pgd-rate--{{ $pgdTone($row['rate']) }}"><span></span>{{ number_format($row['rate'], 2) }}%</span>
+                    </span>
+                    <span class="pgd-num pgd-t-right">{{ $row['expected'] }}</span>
+                    <span class="pgd-num pgd-num--muted pgd-t-right">0.0%</span>
+                    <span class="pgd-num pgd-num--muted pgd-t-right">0.0%</span>
+                    <span class="pgd-t-center">
+                        <a href="{{ route('tutor-dashboard.plan.module.show', $row['id']) }}" class="pgd-eye" data-pgd-tooltip="Open module details">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5Z"></path><circle cx="12" cy="12" r="1.7"></circle></svg>
+                        </a>
+                    </span>
                 </div>
-            </div>
-        </div>
+            @empty
+                <div class="pgd-table__empty">No modules for this tutor in the selected term.</div>
+            @endforelse
+        </section>
     </div>
-@endsection
-@section('script')
-    <script type="module">
-        (function(){
-            $('.overAllAttendanceRate').html('<?php echo $overallRate; ?>');
-        })();
-    </script>
+
+    <aside style="position: sticky; top: 126px; display: flex; flex-direction: column; gap: 14px;">
+        <section class="pgd-profilecard">
+            <div class="pgd-profilecard__top">
+                <span class="pgd-profilecard__avatar" style="background: {{ \App\Support\Avatar::soft($tutorName) }};">
+                    @if(!\App\Support\Avatar::isGenerated($tutor->employee->photo_url ?? null))
+                        <img src="{{ $tutor->employee->photo_url }}" alt="{{ $tutorName }}">
+                    @else
+                        {{ $tutorInitials }}
+                    @endif
+                </span>
+                <div class="pgd-profilecard__name">{{ $tutorName }}</div>
+                <div class="pgd-profilecard__role">{{ $tutorRole !== '' ? $tutorRole : 'Staff' }}</div>
+            </div>
+            <div class="pgd-profilecard__body">
+                @if(!empty($address))
+                    <div class="pgd-contact">
+                        <span class="pgd-contact__icon">⌂</span>
+                        <span>
+                            <span class="pgd-contact__label">Address</span>
+                            <span class="pgd-contact__value">{{ $address }}</span>
+                        </span>
+                    </div>
+                @endif
+                <div class="pgd-contact">
+                    <span class="pgd-contact__icon">@</span>
+                    <span>
+                        <span class="pgd-contact__label">Personal email</span>
+                        <span class="pgd-contact__value">{{ $tutor->employee->email ?? '—' }}</span>
+                    </span>
+                </div>
+                <div class="pgd-contact">
+                    <span class="pgd-contact__icon">@</span>
+                    <span>
+                        <span class="pgd-contact__label">Work email</span>
+                        <span class="pgd-contact__value">{{ $tutor->email ?? '—' }}</span>
+                    </span>
+                </div>
+                <div class="pgd-contact">
+                    <span class="pgd-contact__icon">☎</span>
+                    <span>
+                        <span class="pgd-contact__label">Mobile</span>
+                        <span class="pgd-contact__value">{{ $tutor->employee->mobile ?? '—' }}</span>
+                    </span>
+                </div>
+                @if(!empty($tutor->employee->employment->office_telephone))
+                    <div class="pgd-contact">
+                        <span class="pgd-contact__icon">☏</span>
+                        <span>
+                            <span class="pgd-contact__label">Office telephone</span>
+                            <span class="pgd-contact__value">{{ $tutor->employee->employment->office_telephone }}</span>
+                        </span>
+                    </div>
+                @endif
+                @if(!empty($tutor->employee->id))
+                    <div class="pgd-contact">
+                        <span class="pgd-contact__icon">#</span>
+                        <span>
+                            <span class="pgd-contact__label">Staff reference</span>
+                            <span class="pgd-contact__value">{{ $tutor->employee->id }}</span>
+                        </span>
+                    </div>
+                @endif
+            </div>
+        </section>
+
+
+        <section class="pgd-workload">
+            <div class="pgd-workload__head">
+                <h2>Workload</h2>
+                <span>{{ $loadNote }}</span>
+            </div>
+            <div class="pgd-workload__meter">
+                <div><div style="width: {{ min(100, round($load * 100)) }}%; background: {{ $loadColor }};"></div></div>
+                <strong>{{ number_format($load, 2) }}</strong>
+            </div>
+            <div class="pgd-workload__row"><span>Contracted hours</span><strong>{{ $contractedHour }}</strong></div>
+            <div class="pgd-workload__row"><span>Timetabled class hours</span><strong>{{ $classHours }}</strong></div>
+            <div class="pgd-workload__row"><span>Modules taught</span><strong>{{ count($moduleRows) }}</strong></div>
+            <div class="pgd-workload__row"><span>Groups</span><strong>{{ $groupCount }}</strong></div>
+            <div class="pgd-workload__row"><span>Expected submissions</span><strong>{{ number_format($expectedTotal) }}</strong></div>
+            <div class="pgd-workload__row"><span>Term</span><strong>{{ $termDeclaration->name ?? '—' }}</strong></div>
+        </section>
+    </aside>
+</main>
 @endsection

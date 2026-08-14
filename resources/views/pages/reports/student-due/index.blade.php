@@ -4,78 +4,115 @@
     <title>{{ $title }}</title>
 @endsection
 
+@section('body_class', 'sdr-page')
+
+@section('styles')
+    @vite('resources/css/student-due-report.css')
+@endsection
+
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Student Due Report</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('dashboard') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Dashboard</a>
-        </div>
-    </div>
-    <!-- BEGIN: HTML Table Data -->
-    <div class="intro-y box p-5 mt-5">
-        <form method="post" action="#" id="studentDueReportForm">
-            <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-4">
-                    <label for="due_semester_id" class="form-label semesterLabel inline-flex items-center">Intake Semester <span class="text-danger">*</span></label>
-                    <select name="due_semester_id[]" multiple class="tom-selects w-full" id="due_semester_id">
-                        <option value="">Please Select</option>
-                        @if($semester->count() > 0)
-                            @foreach($semester as $sem)
-                                <option value="{{ $sem->id }}">{{ $sem->name }}</option>
-                            @endforeach
-                        @endif
-                    </select>
-                </div>
-                <div class="col-span-4">
-                    <label for="due_course_id" class="form-label courseLabel inline-flex items-center">Course</label>
-                    <select name="due_course_id[]" multiple class="tom-selects w-full" id="due_course_id">
-                        <option value="">Please Select</option>
-                        @if($courses->count() > 0)
-                            @foreach($courses as $crs)
-                                <option value="{{ $crs->id }}">{{ $crs->name }}</option>
-                            @endforeach
-                        @endif
-                    </select>
-                </div>
-                <div class="col-span-2">
-                    <label for="due_status_id" class="form-label">Status</label>
-                    <select name="due_status_id[]" multiple class="tom-selects w-full" id="due_status_id">
-                        <option value="">Please Select</option>
-                        @if($status->count() > 0)
-                            @foreach($status as $sts)
-                                <option value="{{ $sts->id }}">{{ $sts->name }}</option>
-                            @endforeach
-                        @endif
-                    </select>
-                </div>
-                <!-- <div class="col-span-2">
-                    <label for="due_date" class="form-label">Due Until</label>
-                    <input type="text" name="due_date" class="form-control w-full datepicker" id="due_date" value="" data-date-format="DD-MM-YYYY" data-single-mode="true"/>
-                </div> -->
-                <div class="col-span-2 text-right" style="padding-top: 31px;">
-                    <button type="button" id="accDueSubmitBtn" class="btn btn-primary text-white w-auto ml-2"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search</button>
-                    <button type="button" id="downloadXl" class="btn btn-success text-white w-auto ml-2">
-                        <i class="w-4 h-4 mr-2" data-lucide="file-text"></i> XL Export
-                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                            stroke="white" class="w-4 h-4 ml-2 theLoader">
-                            <g fill="none" fill-rule="evenodd">
-                                <g transform="translate(1 1)" stroke-width="4">
-                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                    <path d="M36 18c0-9.94-8.06-18-18-18">
-                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                    </path>
-                                </g>
-                            </g>
-                        </svg>
-                    </button>
-                </div>
+    <div class="sdr">
+        <div class="sdr-head">
+            <div>
+                <h1 class="sdr-head__title">Student Due Report</h1>
+                <div class="sdr-head__sub">Outstanding balances across intakes &middot; generated {{ now()->format('H:i, d M Y') }}</div>
             </div>
-        </form>
-    </div>
-    <div class="intro-y box p-5 mt-5">
-        <div class="overflow-x-auto scrollbar-hidden">
-            <div id="studentDueReportList" class="table-report table-report--tabulator"></div>
+            <div class="sdr-head__actions">
+                <a href="{{ route('dashboard') }}" class="sdr-btn sdr-btn--ghost">
+                    <i data-lucide="chevron-left" class="w-4 h-4"></i> Back to Dashboard
+                </a>
+                <button type="button" id="downloadXl" class="sdr-btn sdr-btn--solid">
+                    <i data-lucide="file-text" class="w-4 h-4"></i> XL Export
+                    <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                        stroke="white" class="w-4 h-4 theLoader">
+                        <g fill="none" fill-rule="evenodd">
+                            <g transform="translate(1 1)" stroke-width="4">
+                                <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                <path d="M36 18c0-9.94-8.06-18-18-18">
+                                    <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                        to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                </path>
+                            </g>
+                        </g>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        {{-- Totals for the whole filtered set; populated from the list response. --}}
+        <div class="sdr-summary">
+            <div class="sdr-stat">
+                <div class="sdr-stat__label">Students with dues</div>
+                <div class="sdr-stat__value is-loading" data-sdr-stat="students">&mdash;</div>
+            </div>
+            <div class="sdr-stat">
+                <div class="sdr-stat__label">Claim total</div>
+                <div class="sdr-stat__value is-loading" data-sdr-stat="claim">&mdash;</div>
+            </div>
+            <div class="sdr-stat sdr-stat--received">
+                <div class="sdr-stat__label">Received</div>
+                <div class="sdr-stat__value is-loading" data-sdr-stat="received">&mdash;</div>
+            </div>
+            <div class="sdr-stat sdr-stat--due">
+                <div class="sdr-stat__label">Outstanding</div>
+                <div class="sdr-stat__value is-loading" data-sdr-stat="due">&mdash;</div>
+            </div>
+        </div>
+
+        <div class="sdr-panel sdr-panel--filters">
+            <form method="post" action="#" id="studentDueReportForm">
+                <div class="sdr-filters">
+                    <div class="sdr-field">
+                        <label for="due_semester_id" class="sdr-field__label semesterLabel">Intake Semester <span class="sdr-field__req">*</span></label>
+                        <select name="due_semester_id[]" multiple class="tom-selects sdr-select w-full" id="due_semester_id">
+                            <option value="">Please Select</option>
+                            @if($semester->count() > 0)
+                                @foreach($semester as $sem)
+                                    <option value="{{ $sem->id }}">{{ $sem->name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+                    <div class="sdr-field">
+                        <label for="due_course_id" class="sdr-field__label courseLabel">Course</label>
+                        <select name="due_course_id[]" multiple class="tom-selects sdr-select w-full" id="due_course_id">
+                            <option value="">Please Select</option>
+                            @if($courses->count() > 0)
+                                @foreach($courses as $crs)
+                                    <option value="{{ $crs->id }}">{{ $crs->name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+                    <div class="sdr-field">
+                        <label for="due_status_id" class="sdr-field__label">Status</label>
+                        <select name="due_status_id[]" multiple class="tom-selects sdr-select w-full" id="due_status_id">
+                            <option value="">Please Select</option>
+                            @if($status->count() > 0)
+                                @foreach($status as $sts)
+                                    <option value="{{ $sts->id }}">{{ $sts->name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+                    <div class="sdr-filters__actions">
+                        <button type="button" id="accDueSubmitBtn" class="sdr-btn sdr-btn--gold">
+                            <i data-lucide="search" class="w-4 h-4"></i> Search
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="sdr-panel">
+            <div class="sdr-panel__head">
+                <h2 class="sdr-panel__title">Results</h2>
+                <span class="sdr-panel__meta" data-sdr-result-meta>All intakes &middot; all courses</span>
+                <span class="sdr-panel__count" data-sdr-result-count></span>
+            </div>
+            <div class="sdr-tablewrap scrollbar-hidden">
+                <div id="studentDueReportList" class="table-report table-report--tabulator"></div>
+            </div>
         </div>
     </div>
 
