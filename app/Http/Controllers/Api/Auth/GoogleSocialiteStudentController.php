@@ -16,7 +16,9 @@ class GoogleSocialiteStudentController extends Controller
     public function redirectToGoogleAPI()
     {
         config(['services.google.redirect' => env('GOOGLE_STUDENT_REDIRECT_URL_API')]);
-        return Socialite::driver('google')->stateless()->redirect();
+        return response()->json([
+            'redirect_url' => route('api.google.callback'),
+        ]);
     }
 
     public function handleGoogleCallbackAPI(Request $request)
@@ -44,11 +46,10 @@ class GoogleSocialiteStudentController extends Controller
                 ], 401);
             }
         
-            $user = new stdClass();
-            $user->id = $payload['sub'] ?? null;
-            $user->email = $payload['email'] ?? null;
+            $user_id = $payload['sub'] ?? null;
+            $user_email = $payload['email'] ?? null;
             
-            $finduser = isset($user->id) ? StudentUser::where('social_id', $user->id)->first() : null;
+            $finduser = isset($user_id) ? StudentUser::where('social_id', $user_id)->first() : null;
 
             if($finduser) {
 
@@ -68,7 +69,7 @@ class GoogleSocialiteStudentController extends Controller
 
             } else {
 
-                $finduser = StudentUser::where('email', $user->email)->first();
+                $finduser = StudentUser::where('email', $user_email)->first();
                 
                 if (!$finduser) {
                     return response()->json([
@@ -76,7 +77,7 @@ class GoogleSocialiteStudentController extends Controller
                     ], 404);
                 }
 
-                $finduser->social_id = $user->id;
+                $finduser->social_id = $user_id;
                 $finduser->social_type = 'google';
                 $finduser->last_login_ip = $request->getClientIp();
                 $finduser->last_login_at = Carbon::now();
