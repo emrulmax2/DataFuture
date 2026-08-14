@@ -8,6 +8,7 @@
         "php": "^8.0.2",
         "barryvdh/laravel-dompdf": "^2.0",
         "doctrine/dbal": "^3.6",
+        "google/apiclient": "^2.19",
         "guzzlehttp/guzzle": "^7.2",
         "jenssegers/agent": "^2.6",
         "lab404/laravel-impersonate": "^1.7",
