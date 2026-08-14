@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers\Api\Auth;
 use App\Http\Controllers\Controller;
-use Socialite;
+
+use Google\Client as GoogleClient;
 use Exception;
 use Carbon\Carbon;
 use App\Models\StudentUser;
@@ -10,6 +11,7 @@ use Illuminate\Http\Request;
 
 class GoogleSocialiteStudentController extends Controller
 {
+    
 
     public function redirectToGoogleAPI()
     {
@@ -19,19 +21,44 @@ class GoogleSocialiteStudentController extends Controller
 
     public function handleGoogleCallbackAPI(Request $request)
     {
+        $request->validate([
+            'id_token' => 'required|string',
+        ]);
+
         try {
 
-            config(['services.google.redirect' => env('GOOGLE_STUDENT_REDIRECT_URL_API')]);
-            $user = Socialite::driver('google')->stateless()->user();
-            $finduser = StudentUser::where('social_id', $user->id)->first();
+            $client = new GoogleClient([
+                'client_id' => config('services.google.client_id'),
+            ]);
 
-            if($finduser){
+            // Verify Google ID token
+            $payload = $client->verifyIdToken(
+                $request->id_token
+            );
+
+            if (!$payload) {
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid Google ID token',
+                ], 401);
+            }
+        
+            $user = new stdClass();
+            $user->id = $payload['sub'] ?? null;
+            $user->email = $payload['email'] ?? null;
+            
+            $finduser = isset($user->id) ? StudentUser::where('social_id', $user->id)->first() : null;
+
+            if($finduser) {
+
                 $token = $finduser->createToken('student-token')->accessToken;
-
+                
                 $finduser->update([
                     'last_login_ip' => $request->getClientIp(),
                     'last_login_at' => Carbon::now()
                 ]);
+
                 return response()->json([
                     'message' => 'Login successful',
                     'token' => $token,
@@ -40,12 +67,15 @@ class GoogleSocialiteStudentController extends Controller
                 ], 200);
 
             } else {
+
                 $finduser = StudentUser::where('email', $user->email)->first();
+                
                 if (!$finduser) {
                     return response()->json([
                         'message' => 'No user found with this email.',
                     ], 404);
                 }
+
                 $finduser->social_id = $user->id;
                 $finduser->social_type = 'google';
                 $finduser->last_login_ip = $request->getClientIp();
@@ -53,12 +83,14 @@ class GoogleSocialiteStudentController extends Controller
                 $finduser->save();
 
                 $token = $finduser->createToken('student-token')->accessToken;
+                
                 return response()->json([
                     'message' => 'Login successful',
                     'token' => $token,
                     'user' => new \App\Http\Resources\StudentUserResource($finduser),
                     'redirect_url' => route('api.user.dashboard'),
                 ], 200);
+
             }
 
         } catch (\Exception $e) {
@@ -67,7 +99,7 @@ class GoogleSocialiteStudentController extends Controller
                 'message' => 'Google authentication failed',
                 'error' => $e->getMessage(),
             ], 500);
-            
+
         }
     }
 }
