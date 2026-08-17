@@ -26,6 +26,7 @@ class GoogleSocialiteStudentController extends Controller
         $request->validate([
             'id_token' => 'required|string',
         ]);
+        dd($request->all());
         try {
 
             $client = new GoogleClient([
