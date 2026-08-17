@@ -33,8 +33,15 @@ return [
 
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
+        'ios_client_id' => env('GOOGLE_STUDENT_IOS_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URL'),
+    ],
+
+    'google_student' => [
+        'client_id' => env('GOOGLE_STUDENT_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_STUDENT_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_STUDENT_REDIRECT_URL'),
     ],
 
     'microsoft' => [
