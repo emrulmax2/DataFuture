@@ -92,10 +92,7 @@ Route::prefix('/v1')->name('api.')->group(function() {
     });
     Route::post('/login', [LoginController::class, 'login']);
 
-
-Route::get('auth/google', [APIAuthGoogleSocialiteStudentController::class, 'redirectToGoogleAPI']);
-Route::get('auth/google/callback', [APIAuthGoogleSocialiteStudentController::class, 'handleGoogleCallbackAPI']);
-
+    Route::get('auth/google/callback', [APIAuthGoogleSocialiteStudentController::class, 'handleGoogleCallbackAPI']);
 
 
     // Protected routes (require Bearer Token)
