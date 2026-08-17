@@ -128,6 +128,7 @@ class DashboardController extends Controller
             'proxyClasses' => $this->getMyProxyClassForTheDay(),
             'myfollowups' => $myFollowups->count(),
             'myunreadcomments' => $myUnreadNoteCount,
+            'sso_operations_auth_link'     => config('sso.operations_link'),
             'hasDocumentReminder' => $this->getFileManagerReminderCount()
         ]);
     }

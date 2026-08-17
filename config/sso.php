@@ -58,6 +58,19 @@ return [
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | Outbound links
+    |--------------------------------------------------------------------------
+    |
+    | Entry point staff use to hop straight into the Operations application.
+    | Held in config so a local instance can point at localhost instead of the
+    | production host. Set it empty to hide the dashboard tile entirely.
+    |
+    */
+
+    'operations_link' => env('SSO_OPERATIONS_LINK', ''),
+
     'clients' => [
 
         'lcc-operations' => [
