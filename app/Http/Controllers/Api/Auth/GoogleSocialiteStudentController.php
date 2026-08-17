@@ -60,6 +60,7 @@ class GoogleSocialiteStudentController extends Controller
                 ]);
 
                 return response()->json([
+                    'success' => true,
                     'message' => 'Login successful',
                     'token' => $token,
                     'user' => new \App\Http\Resources\StudentUserResource($finduser),
@@ -72,6 +73,7 @@ class GoogleSocialiteStudentController extends Controller
                 
                 if (!$finduser) {
                     return response()->json([
+                        'success' => false,
                         'message' => 'No user found with this email.',
                     ], 404);
                 }
@@ -85,6 +87,7 @@ class GoogleSocialiteStudentController extends Controller
                 $token = $finduser->createToken('student-token')->accessToken;
                 
                 return response()->json([
+                    'success' => true,
                     'message' => 'Login successful',
                     'token' => $token,
                     'user' => new \App\Http\Resources\StudentUserResource($finduser),
@@ -96,6 +99,7 @@ class GoogleSocialiteStudentController extends Controller
         } catch (\Exception $e) {
 
             return response()->json([
+                'success' => false,
                 'message' => 'Google authentication failed',
                 'error' => $e->getMessage(),
             ], 500);
