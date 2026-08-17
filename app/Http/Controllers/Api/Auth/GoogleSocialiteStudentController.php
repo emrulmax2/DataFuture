@@ -26,11 +26,11 @@ class GoogleSocialiteStudentController extends Controller
         $request->validate([
             'id_token' => 'required|string',
         ]);
-        dd(config('services.google.client_id'));
+        dd(config('services.google_student.client_id'));
         try {
 
             $client = new GoogleClient([
-                'client_id' => config('services.google.client_id'),
+                'client_id' => config('services.google_student.client_id'),
             ]);
 
             // Verify Google ID token
