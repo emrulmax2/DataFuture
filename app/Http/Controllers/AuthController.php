@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Option;
 use App\Models\User;
 use App\Services\AuthLogService;
+use App\Services\Sso\LogoutBroadcaster;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -118,11 +119,19 @@ class AuthController extends Controller
      */
     public function logout()
     {
+        // Captured before the session is torn down so relying applications can
+        // be told which user, and which identity-provider session, is ending.
+        $ssoEmail = \Auth::check() ? auth()->user()->email : null;
+        $ssoSid   = session('sso_sid');
+
         if (\Auth::check()) {
             AuthLogService::logLogout(auth()->user()->id, 'user', AuthLogService::REASON_MANUAL);
         }
         \Auth::logout();
         Cache::flush();
+
+        LogoutBroadcaster::broadcast($ssoEmail, $ssoSid);
+
         return redirect('login');
     }
 }

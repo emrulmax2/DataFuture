@@ -80,6 +80,7 @@ use App\Http\Controllers\Applicant\Auth\RegisterController;
 
 use App\Http\Controllers\Auth\GoogleSocialiteController;
 use App\Http\Controllers\Auth\MicrosoftSocialiteController;
+use App\Http\Controllers\Auth\SsoServerController;
 
 use App\Http\Controllers\Auth\GoogleSocialiteStudentController;
 use App\Http\Controllers\Auth\MicrosoftSocialiteStudentController;
@@ -398,6 +399,13 @@ Route::controller(AuthController::class)->middleware('loggedin')->group(function
     Route::get('login', 'loginView')->name('login.index');
     Route::post('login', 'login')->name('login.check');
 });
+
+// Single sign-on: relying applications send the browser here to pick up a
+// ticket. Deliberately outside the 'loggedin' group - an already-signed-in
+// staff user is exactly the case this endpoint exists to serve.
+Route::get('sso/authorize', [SsoServerController::class, 'authorizeClient'])
+    ->middleware('throttle:60,1')
+    ->name('sso.authorize');
 // First-login welcome interstitial for staff (behind auth so the shell can show the welcome state).
 Route::get('welcome', [AuthController::class, 'welcomeView'])->middleware('auth')->name('welcome.first');
 Route::controller(StudentController::class)->group(function() {
