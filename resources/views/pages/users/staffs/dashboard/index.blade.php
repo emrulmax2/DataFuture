@@ -55,6 +55,19 @@
             }
         }
 
+        // Operations Management lives on another domain and is entered through
+        // single sign-on, so it carries an absolute URL rather than a route
+        // name and cannot go through the privilege-gated list above. It still
+        // respects the same clock-in gate as its neighbours.
+        if ($lccdUnlocked && !empty($sso_operations_auth_link)) {
+            $lccdModules[] = [
+                'label' => 'Operations',
+                'icon' => 'building-2',
+                'href' => $sso_operations_auth_link,
+                'count' => null,
+            ];
+        }
+
         // Shift panel visibility — unchanged from the previous markup.
         $lccdShowShift = Auth::user()
             && (Route::currentRouteName() == 'dashboard' || Route::currentRouteName() == 'staff.dashboard')
