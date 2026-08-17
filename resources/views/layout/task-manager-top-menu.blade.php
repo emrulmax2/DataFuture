@@ -1,10 +1,15 @@
 {{--
-    Shell for the redesigned Task Manager detail screen.
+    Shell for the redesigned Task Manager screens.
 
     Extends `layout/base` directly, skipping `layout/main` + `layout/top-menu`,
     so none of the legacy theme chrome loads on this page. Controllers opt in
     with `'layout' => 'task-manager-top-menu'`; the MenuComposer passes that
     through and the page view does `@extends('../layout/' . $layout)`.
+
+    The header is the shared `components/global-header` — the same markup the
+    dashboard renders, styled by app.css, which `layout/base` already loads.
+    It hides below 768px and this module is desktop-only (`.tkm-body` has a
+    1240px floor), so `components/mobile-menu` is deliberately not included.
 --}}
 @extends('../layout/base')
 
@@ -23,7 +28,7 @@
     <body class="tkm-body">
         @include('../layout/components/preloader')
 
-        @include('../layout/components/task-manager-top-bar')
+        @include('../layout/components/global-header')
 
         @yield('subcontent')
 
