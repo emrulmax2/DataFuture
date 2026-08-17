@@ -54,6 +54,16 @@ return [
             'path' => storage_path('framework/cache/data'),
         ],
 
+        /*
+         | Single sign-on handoff tickets live in their own store so that the
+         | Cache::flush() performed on sign-out cannot destroy tickets that
+         | other users have in flight at that moment.
+         */
+        'sso' => [
+            'driver' => 'file',
+            'path' => storage_path('framework/cache/sso'),
+        ],
+
         'memcached' => [
             'driver' => 'memcached',
             'persistent_id' => env('MEMCACHED_PERSISTENT_ID'),

@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\Auth\GoogleSocialiteStudentController as APIAuthGoo
 use App\Http\Controllers\Api\ApplicantInterviewDocumentSyncController;
 use App\Http\Controllers\Api\ApplicantSyncController;
 use App\Http\Controllers\Api\Auth\LoginController;
+use App\Http\Controllers\Auth\SsoServerController;
 use App\Http\Controllers\Api\AcademicYearSyncController;
 use App\Http\Controllers\Api\BookLocationSyncController;
 use App\Http\Controllers\Api\CourseSyncController;
@@ -38,6 +39,13 @@ use Stripe\PaymentIntent;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+// Single sign-on back-channel. Relying applications redeem the ticket they
+// received at /sso/authorize here, authenticating with their client secret.
+// Stateless by design - no session, no CSRF token.
+Route::post('sso/token', [SsoServerController::class, 'token'])
+    ->middleware('throttle:120,1')
+    ->name('sso.token');
 // Route::post('/create-payment-intent', function (\Illuminate\Http\Request $request) {
 //     Stripe::setApiKey(env('STRIPE_SECRET'));
 
