@@ -126,8 +126,10 @@ class PendingTaskManagerController extends Controller
             // layout/task-manager-top-menu.blade.php); the rest of Task
             // Manager still rides the shared `top-menu` chrome.
             'layout' => 'task-manager-top-menu',
-            'breadcrumbs' => [],
-            'tkmCrumbCurrent' => (isset($task->name) && !empty($task->name) ? $task->name : 'Details'),
+            'breadcrumbs' => [
+                ['label' => 'Task Manager', 'href' => route('task.manager')],
+                ['label' => (isset($task->name) && !empty($task->name) ? $task->name : 'Details'), 'href' => 'javascript:void(0);'],
+            ],
             'task' => $task,
             // Document-request rows are a property of the individual
             // StudentTask, not of the TaskList, so the view cannot tell from

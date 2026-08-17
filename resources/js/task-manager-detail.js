@@ -101,11 +101,11 @@ async function download(url, params, filename) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Chrome — nav dropdowns, profile menu, clock, shared dismiss         */
+/* Chrome — row menus and their shared dismiss                        */
 /* ------------------------------------------------------------------ */
 
 function closePopovers(except = null) {
-    $$(".tkm-pop.is-open, .tkm-nav__group.is-open, .tkm-profile.is-open").forEach((node) => {
+    $$(".tkm-pop.is-open").forEach((node) => {
         if (except && node === except) return;
         node.classList.remove("is-open", "tkm-pop--up");
         const trigger = $("[aria-expanded]", node);
@@ -129,14 +129,6 @@ function togglePopover(node) {
             node.classList.add("tkm-pop--up");
         }
     }
-}
-
-function initClock() {
-    const el = $("#theClock");
-    if (!el) return;
-    setInterval(() => {
-        el.textContent = new Date().toTimeString().slice(0, 8);
-    }, 1000);
 }
 
 /* ------------------------------------------------------------------ */
@@ -793,9 +785,7 @@ async function loadSlot(name, url, payload, onLoaded) {
 /* ------------------------------------------------------------------ */
 
 const ACTIONS = {
-    /* chrome */
-    "nav-toggle": (button) => togglePopover(button.closest("[data-tkm-navgroup]")),
-    "profile-toggle": (button) => togglePopover(button.closest("[data-tkm-profile]")),
+    /* chrome — the page header is the shared global header and brings its own JS */
     "pop-toggle": (button) => togglePopover(button.closest("[data-tkm-pop]")),
 
     /* dialogs */
@@ -1271,8 +1261,6 @@ const FORMS = {
 function boot() {
     if (!document.body.classList.contains("tkm-body")) return;
 
-    initClock();
-
     // The task list (module index) shares this shell for the header, nav and
     // profile menu, but has no table to fill — everything below the header
     // wiring is skipped there.
@@ -1282,7 +1270,7 @@ function boot() {
     const isValueControl = (node) =>
         node.tagName === "SELECT" || (node.tagName === "INPUT" && (node.type === "checkbox" || node.type === "radio"));
 
-    const TOGGLES = ["pop-toggle", "nav-toggle", "profile-toggle"];
+    const TOGGLES = ["pop-toggle"];
 
     document.addEventListener("click", (event) => {
         const trigger = event.target.closest("[data-tkm-act]");

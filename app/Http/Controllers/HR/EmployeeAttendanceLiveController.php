@@ -107,7 +107,7 @@ class EmployeeAttendanceLiveController extends Controller
                 $day = $this->getTheDayStatusWithSchedule($list->id, $theDate);
                 $department = (isset($list->employment->department->name) ? $list->employment->department->name : '');
                 $job_title = (isset($list->employment->employeeJobTitle->name) ? $list->employment->employeeJobTitle->name : '');
-                $hasTooltip = ($day['working_status'] && $day['attendances']->count() > 0  && !empty($day['tooltip']) ? true : false);
+                $hasTooltip = ($day['attendances']->count() > 0 && !empty($day['tooltip']) ? true : false);
                 $statusKey = $this->getLiveAttendanceStatusKey($day);
                 $countKey = $this->getLiveAttendanceCountKey($statusKey);
                 $meta[$countKey]++;
@@ -118,20 +118,13 @@ class EmployeeAttendanceLiveController extends Controller
                 $html .= '<tr class="hr-live-row hr-live-row--'.$statusKey.' '.($i % 2 === 0 ? 'hr-live-row--even' : 'hr-live-row--odd').'">';
 
                     $html .= '<td class="hr-live-name-cell">';
-                        $html .= '<a href="javascript:void(0);" '.($hasTooltip ? ' title="Attendance Details" data-tooltip-content="#live-tooltip-'.$list->id.'" ' : '').' class="hr-live-person '.($hasTooltip ? 'tooltip' : '').'">';
+                        $html .= '<span class="hr-live-person">';
                             $html .= '<span class="hr-live-avatar" style="'.$this->getLiveAttendancePaletteStyle($list->full_name).'">'.$this->getLiveAttendanceInitials($list->full_name).'</span>';
                             $html .= '<span class="hr-live-person__copy">';
                                 $html .= '<strong>'.e($list->full_name).'</strong>';
                                 $html .= '<small>'.e($roleText).'</small>';
                             $html .= '</span>';
-                        $html .= '</a>';
-                        if($hasTooltip):
-                            $html .= '<div class="tooltip-content">';
-                                $html .= '<div id="live-tooltip-'.$list->id.'" class="relative py-1">';
-                                    $html .= $day['tooltip'];
-                                $html .= '</div>';
-                            $html .= '</div>';
-                        endif;
+                        $html .= '</span>';
                     $html .= '</td>';
 
                     $html .= '<td class="hr-live-contact-cell">';
@@ -144,11 +137,18 @@ class EmployeeAttendanceLiveController extends Controller
                     $html .= '</td>';
 
                     $html .= '<td class="hr-live-status-cell">';
-                        $html .= '<div class="hr-live-status">';
-                            $html .= '<span class="hr-live-status-pill hr-live-status-pill--'.$statusKey.'"><span></span>'.e($displayLabel).'</span>';
+                        $html .= '<div class="hr-live-status'.($hasTooltip ? ' hr-live-status--has-tip tooltip' : '').'"'.($hasTooltip ? ' title="Attendance Details" data-tooltip-content="#live-tooltip-'.$list->id.'"' : '').'>';
+                            $html .= '<span class="hr-live-status-pill hr-live-status-pill--'.$statusKey.'"><span></span>'.e($displayLabel).($hasTooltip ? '<i data-lucide="info"></i>' : '').'</span>';
                             $html .= (isset($day['where']) && !empty($day['where']) ? '<span class="hr-live-status__detail">'.e($day['where']).'</span>' : '');
                             $html .= (isset($day['since']) && !empty($day['since']) ? '<span class="hr-live-status__sub"><i data-lucide="clock"></i>'.e($day['since']).'</span>' : '');
                         $html .= '</div>';
+                        if($hasTooltip):
+                            $html .= '<div class="tooltip-content">';
+                                $html .= '<div id="live-tooltip-'.$list->id.'">';
+                                    $html .= $day['tooltip'];
+                                $html .= '</div>';
+                            $html .= '</div>';
+                        endif;
                     $html .= '</td>';
 
                     $html .= '<td class="hr-live-action-cell">';
@@ -364,31 +364,56 @@ class EmployeeAttendanceLiveController extends Controller
         $res['leave_status'] = $leaveStatus;
         $res['attendances'] = $todaysAttendances;
 
-        if($res['working_status'] && $todaysAttendances->count() > 0):
-            $html = '<div class="grid grid-cols-12 gap-x-4 gap-y-1 items-center">';
-                foreach($todaysAttendances as $attn):
-                    $attendance_type = $attn->attendance_type;
-                    $attendance_label = '';
-                    switch($attendance_type):
-                        case(1):
-                            $attendance_label = 'Clock In';
-                            break;
-                        case(2):
-                            $attendance_label = 'Break';
-                            break;
-                        case(3):
-                            $attendance_label = 'Return';
-                            break;
-                        case(4):
-                            $attendance_label = 'Clock Out';
-                            break;
-                        default:
-                            $attendance_label = 'Unknown';
-                            break;
-                    endswitch;
-                    $html .= '<div class="col-span-6 font-medium text-slate-500">'.$attendance_label.'</div>';
-                    $html .= '<div class="col-span-6 font-medium">'.(isset($attn->time) && !empty($attn->time) ? date('H:i', strtotime($attn->time)) : '').'</div>';
-                endforeach;
+        if($todaysAttendances->count() > 0):
+            $rows = '';
+            foreach($todaysAttendances as $attn):
+                $attendance_type = $attn->attendance_type;
+                switch($attendance_type):
+                    case(1):
+                        $attendance_label = 'Clock In';
+                        $attendance_key = 'in';
+                        break;
+                    case(2):
+                        $attendance_label = 'Break';
+                        $attendance_key = 'break';
+                        break;
+                    case(3):
+                        $attendance_label = 'Return';
+                        $attendance_key = 'return';
+                        break;
+                    case(4):
+                        $attendance_label = 'Clock Out';
+                        $attendance_key = 'out';
+                        break;
+                    default:
+                        $attendance_label = 'Unknown';
+                        $attendance_key = 'neutral';
+                        break;
+                endswitch;
+
+                $rows .= '<li class="hr-live-tip__row hr-live-tip__row--'.$attendance_key.'">';
+                    $rows .= '<span class="hr-live-tip__dot"></span>';
+                    $rows .= '<span class="hr-live-tip__label">'.$attendance_label.'</span>';
+                    $rows .= '<span class="hr-live-tip__time">'.(isset($attn->time) && !empty($attn->time) ? date('H:i', strtotime($attn->time)) : '--:--').'</span>';
+                $rows .= '</li>';
+            endforeach;
+
+            $html = '<div class="hr-live-tip">';
+                $html .= '<div class="hr-live-tip__head">';
+                    $html .= '<span class="hr-live-tip__eyebrow">Attendance Details</span>';
+                    $html .= '<span class="hr-live-tip__date">'.date('D, jS M Y', strtotime($theDate)).'</span>';
+                $html .= '</div>';
+                $html .= '<ul class="hr-live-tip__list">'.$rows.'</ul>';
+                if($schedule != '---' || !empty($where)):
+                    $html .= '<div class="hr-live-tip__foot">';
+                        if($schedule != '---'):
+                            $html .= '<span class="hr-live-tip__meta"><i data-lucide="clock"></i>'.e($schedule).'</span>';
+                        endif;
+                        if(!empty($where)):
+                            $html .= '<span class="hr-live-tip__meta"><i data-lucide="map-pin"></i>'.e($where).'</span>';
+                        endif;
+                    $html .= '</div>';
+                endif;
             $html .= '</div>';
             $res['tooltip'] = $html;
         else:

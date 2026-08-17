@@ -83,8 +83,10 @@ import tippy, { roundArrow } from "tippy.js";
                 tippy(this, {
                     arrow: roundArrow,
                     animation: "shift-away",
-                    theme: 'light',
-                    placement: 'top-start',
+                    theme: 'light hr-live',
+                    placement: 'left',
+                    interactive: false,
+                    maxWidth: 300,
                     ...thTippyOptions,
                 });
             })
