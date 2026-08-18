@@ -97,10 +97,11 @@ class EmployeeAttendanceLiveController extends Controller
             'absent' => 0,
             'off' => 0,
             'leave' => 0,
-            'shownCount' => $Query->count(),
+            'shownCount' => 0,
             'totalCount' => $Query->count(),
         ];
         $html = '';
+        $shownCount = 0;
         if(!empty($Query) && $Query->count() > 0):
             $i = 0;
             foreach($Query as $list):
@@ -115,7 +116,15 @@ class EmployeeAttendanceLiveController extends Controller
                 $roleText = trim($job_title.(!empty($department) ? ' - '.$department : ''));
                 $schedule = (isset($day['schedule']) && !empty($day['schedule']) && $day['schedule'] != '---') ? $day['schedule'] : '—';
 
-                $html .= '<tr class="hr-live-row hr-live-row--'.$statusKey.' '.($i % 2 === 0 ? 'hr-live-row--even' : 'hr-live-row--odd').'">';
+                /* HR request: "Not Working Today" staff are counted in the summary but not listed as rows.
+                   Comment out the three lines below to bring those rows back into the table. */
+                if($statusKey == 'off'):
+                    continue;
+                endif;
+
+                $shownCount++;
+
+                $html .= '<tr class="hr-live-row hr-live-row--'.$statusKey.' '.($i % 2 === 0 ? 'hr-live-row--even' : 'hr-live-row--odd').'" data-status-group="'.$countKey.'">';
 
                     $html .= '<td class="hr-live-name-cell">';
                         $html .= '<span class="hr-live-person">';
@@ -137,7 +146,7 @@ class EmployeeAttendanceLiveController extends Controller
                     $html .= '</td>';
 
                     $html .= '<td class="hr-live-status-cell">';
-                        $html .= '<div class="hr-live-status'.($hasTooltip ? ' hr-live-status--has-tip tooltip' : '').'"'.($hasTooltip ? ' title="Attendance Details" data-tooltip-content="#live-tooltip-'.$list->id.'"' : '').'>';
+                        $html .= '<div class="hr-live-status'.($hasTooltip ? ' hr-live-status--has-tip hr-live-tip-trigger' : '').'"'.($hasTooltip ? ' title="Attendance Details" data-tooltip-content="#live-tooltip-'.$list->id.'"' : '').'>';
                             $html .= '<span class="hr-live-status-pill hr-live-status-pill--'.$statusKey.'"><span></span>'.e($displayLabel).($hasTooltip ? '<i data-lucide="info"></i>' : '').'</span>';
                             $html .= (isset($day['where']) && !empty($day['where']) ? '<span class="hr-live-status__detail">'.e($day['where']).'</span>' : '');
                             $html .= (isset($day['since']) && !empty($day['since']) ? '<span class="hr-live-status__sub"><i data-lucide="clock"></i>'.e($day['since']).'</span>' : '');
@@ -161,9 +170,13 @@ class EmployeeAttendanceLiveController extends Controller
 
                 $i++;
             endforeach;
-        else:
-            $html .= '<tr class="hr-live-empty-row"><td colspan="4">No staff match the current filters.</td></tr>';
         endif;
+
+        if(empty($html)):
+            $html = '<tr class="hr-live-empty-row"><td colspan="4">No staff match the current filters.</td></tr>';
+        endif;
+
+        $meta['shownCount'] = $shownCount;
 
         return [
             'html' => $html,
