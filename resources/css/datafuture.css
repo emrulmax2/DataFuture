@@ -4439,16 +4439,52 @@ body.hr-live-attendance-body .content.content--top-nav::before {
     padding: 5px 11px;
     border: 1px solid;
     border-radius: 999px;
+    font-family: inherit;
     font-size: 12px;
     font-weight: 600;
     line-height: 1.2;
     white-space: nowrap;
+    cursor: pointer;
+    transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease;
+}
+
+.hr-live-stat:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 12px -6px rgba(18, 49, 46, .5);
+}
+
+.hr-live-stat:focus-visible {
+    outline: 2px solid #0d7c73;
+    outline-offset: 2px;
+}
+
+.hr-live-stat--active,
+.hr-live-stat--active:hover {
+    box-shadow: 0 0 0 2px #fff, 0 0 0 3px currentColor;
+}
+
+.hr-live-stat--muted {
+    opacity: .45;
+}
+
+.hr-live-stat--muted:hover {
+    opacity: 1;
 }
 
 .hr-live-stat > span {
     width: 7px;
     height: 7px;
     border-radius: 999px;
+}
+
+.hr-live-stat--all {
+    border-color: #d8ded9;
+    background: #fff;
+    color: #3f524f;
+}
+
+.hr-live-stat--all > span {
+    background: #8b9995;
 }
 
 .hr-live-stat--working {
@@ -4718,6 +4754,10 @@ body.hr-live-attendance-body .content.content--top-nav::before {
 
 .hr-live-row--leave {
     --hr-live-row-accent: #7a4fa3;
+}
+
+.hr-live-row--filtered-out {
+    display: none !important;
 }
 
 .hr-live-person {

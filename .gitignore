@@ -30,3 +30,15 @@ composer.lock
 app/.DS_Store
 .DS_Store
 .claude/skills/
+
+# macOS finder metadata
+.DS_Store
+**/.DS_Store
+
+# Archives
+*.zip
+
+# Storage runtime artefacts — keep the Laravel directory placeholders
+/storage/**
+!/storage/**/
+!/storage/**/.gitignore

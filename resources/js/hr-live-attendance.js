@@ -63,35 +63,82 @@ import tippy, { roundArrow } from "tippy.js";
         });
 
         setTimeout(() => {
-            $('#liveAttendanceTable tbody').find('.tooltip').each(function(){
+            $('#liveAttendanceTable tbody').find('.hr-live-tip-trigger').each(function(){
+                let contentEl = null;
+
+                // tippy moves the content node out of the document and into its own popper,
+                // so take it back off any existing instance before that instance is destroyed.
                 if (this._tippy) {
+                    contentEl = (this._tippy.props.content instanceof Element ? this._tippy.props.content : null);
                     this._tippy.destroy();
                 }
 
-                let thTippyOptions = {
-                    dropdownParent: 'body',
-                    dropdownClass: 'ts-dropdown lcc-tom-float',
-                    
-                    content: $(this).attr("title"),
-                };
-                if ($(this).data("tooltip-content") !== undefined) {
-                    thTippyOptions.content = $($(this).data("tooltip-content"))[0];
+                if (contentEl === null && $(this).data("tooltip-content") !== undefined) {
+                    contentEl = $($(this).data("tooltip-content"))[0] || null;
+                }
+
+                if (contentEl === null) {
+                    return;
                 }
 
                 $(this).removeAttr("title");
 
                 tippy(this, {
+                    content: contentEl,
                     arrow: roundArrow,
                     animation: "shift-away",
                     theme: 'light hr-live',
                     placement: 'left',
                     interactive: false,
                     maxWidth: 300,
-                    ...thTippyOptions,
                 });
             })
         }, 10);
     }
+
+    let activeStatusFilter = '';
+
+    function applyLiveStatusFilter() {
+        const $rows = $('#liveAttendanceTable tbody tr.hr-live-row');
+        let shown = 0;
+
+        $rows.each(function(){
+            const visible = (activeStatusFilter === '' || $(this).attr('data-status-group') === activeStatusFilter);
+
+            $(this).toggleClass('hr-live-row--filtered-out', !visible)
+                   .removeClass('hr-live-row--even hr-live-row--odd');
+
+            if (visible) {
+                $(this).addClass(shown % 2 === 0 ? 'hr-live-row--even' : 'hr-live-row--odd');
+                shown++;
+            }
+        });
+
+        $('#liveAttendanceTable tbody tr.hr-live-filter-empty').remove();
+        if ($rows.length > 0 && shown === 0) {
+            $('#liveAttendanceTable tbody').append('<tr class="hr-live-empty-row hr-live-filter-empty"><td colspan="4">No staff match the current filters.</td></tr>');
+        }
+
+        $('.hr-live-stat').each(function(){
+            const isActive = (($(this).attr('data-live-filter') || '') === activeStatusFilter);
+
+            $(this).toggleClass('hr-live-stat--active', isActive)
+                   .toggleClass('hr-live-stat--muted', activeStatusFilter !== '' && !isActive)
+                   .attr('aria-pressed', isActive ? 'true' : 'false');
+        });
+
+        if ($rows.length > 0) {
+            $('#liveShownCount').text(shown);
+            $('#liveCountAll').text($rows.length);
+        }
+    }
+
+    $('.hr-live-stats').on('click', '.hr-live-stat', function(){
+        const filterKey = $(this).attr('data-live-filter') || '';
+
+        activeStatusFilter = (activeStatusFilter === filterKey ? '' : filterKey);
+        applyLiveStatusFilter();
+    });
 
     function updateLiveAttendanceMeta(meta) {
         if (!meta) {
@@ -102,6 +149,7 @@ import tippy, { roundArrow } from "tippy.js";
         $('#liveCountAbsent').text(meta.absent ?? 0);
         $('#liveCountOff').text(meta.off ?? 0);
         $('#liveCountLeave').text(meta.leave ?? 0);
+        $('#liveCountAll').text(meta.shownCount ?? 0);
         $('#liveShownCount').text(meta.shownCount ?? 0);
         $('#liveTotalCount').text(meta.totalCount ?? 0);
     }
@@ -111,6 +159,7 @@ import tippy, { roundArrow } from "tippy.js";
         $('#liveAttendanceTable tbody').html(res.htm);
         updateLiveAttendanceMeta(res.meta);
         initLiveAttendanceRows();
+        applyLiveStatusFilter();
     }
 
     const senMailModalEl = document.getElementById('senMailModal')
@@ -144,6 +193,7 @@ import tippy, { roundArrow } from "tippy.js";
         ...dateOption
     });
     initLiveAttendanceRows();
+    applyLiveStatusFilter();
 
     liveAttendanceDate.on('selected', (date) => {
         if($('#liveAttendanceTable').length > 0){
