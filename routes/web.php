@@ -169,6 +169,7 @@ use App\Http\Controllers\PlanContentUploadController;
 use App\Http\Controllers\PlanParticipantController;
 use App\Http\Controllers\PlanTaskController;
 use App\Http\Controllers\PlanTaskUploadController;
+use App\Http\Controllers\GroupLeader\DashboardController as GroupLeaderDashboardController;
 use App\Http\Controllers\CourseManagement\PlanTreeController;
 use App\Http\Controllers\Programme\DashboardController as ProgrammeDashboardController;
 use App\Http\Controllers\Settings\ConsentPolicyController;
@@ -1004,6 +1005,11 @@ Route::middleware('auth')->group(function() {
         Route::post('course-management/plans/tree/get-assign-details', 'getAssignDetails')->name('plans.get.assign.details');
         Route::post('course-management/plans/tree/assign-participants', 'assignParticipants')->name('plans.assign.participants');
         Route::post('course-management/plans/tree/update-visibility', 'updateVisibility')->name('plans.update.visibility');
+
+        Route::post('course-management/plans/tree/get-group-leader', 'getGroupLeaderDetails')->name('plans.get.group.leader');
+        Route::post('course-management/plans/tree/assign-group-leader', 'assignGroupLeader')->name('plans.assign.group.leader');
+        Route::post('course-management/plans/tree/deassign-group-leader', 'deassignGroupLeader')->name('plans.deassign.group.leader');
+        Route::post('course-management/plans/tree/group-leader-logs', 'getGroupLeaderLogs')->name('plans.group.leader.logs');
 
         Route::get('course-management/plans/tree/assigned-list', 'assignedList')->name('plans.tree.assigned.list');
 
@@ -3032,6 +3038,22 @@ Route::middleware('auth')->group(function() {
 
         Route::post('personal-tutor-dashboard/get-term-statistics', 'getTermStatistics')->name('pt.dashboard.get.term.statistics'); 
         
+    });
+
+    /*
+     * Group Leader dashboard. Every endpoint re-derives the caller's own group
+     * assignments from `group_leaders`, so no id in the payload can widen what
+     * they see.
+     */
+    Route::controller(GroupLeaderDashboardController::class)->group(function() {
+        Route::get('group-leader-dashboard', 'index')->name('gl.dashboard');
+        Route::post('group-leader-dashboard/groups', 'getGroups')->name('gl.dashboard.groups');
+
+        Route::get('group-leader-dashboard/group/{group}', 'show')->name('gl.dashboard.group');
+        Route::post('group-leader-dashboard/students', 'getStudents')->name('gl.dashboard.students');
+        Route::post('group-leader-dashboard/today', 'getToday')->name('gl.dashboard.today');
+        Route::post('group-leader-dashboard/student', 'getStudent')->name('gl.dashboard.student');
+        Route::post('group-leader-dashboard/contact', 'storeContact')->name('gl.dashboard.contact');
     });
 
     Route::controller(ProgrammeDashboardController::class)->group(function() {

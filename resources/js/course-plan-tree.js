@@ -1008,6 +1008,212 @@ const TABLE_ID = "#classPlanTreeListTable";
         openAssign(this, ASSIGN_AUDITOR, "Audit User");
     });
 
+    /* ---- Group leader: assign, deassign, history ----------------------- *
+     *
+     * Group leaders live in `group_leaders`, keyed by the group itself rather
+     * than by each of its plans, so these flows send the tree coordinates the
+     * tile already carries instead of a plan id list. A group with no plans yet
+     * can still have a leader, which is why there is no plan-count guard like
+     * the one on the manager flow.
+     *
+     * The controls sit on the Group Leader tile in the panel header, not in the
+     * tree's settings menu, so every handler here is delegated from `document`
+     * — the tile is server-rendered markup that is swapped wholesale after each
+     * change.
+     */
+
+    let groupLeaderSelect = null;
+
+    function groupLeaderControl() {
+        const select = document.querySelector("#group_leader_ids");
+        if (!select) return null;
+
+        if (!groupLeaderSelect) {
+            groupLeaderSelect = new TomSelect(select, {
+                placeholder: "Search people…",
+                dropdownParent: "body",
+                dropdownClass: "ts-dropdown cm-tom-dropdown",
+                plugins: ["remove_button"],
+                maxOptions: 500,
+            });
+        }
+
+        return groupLeaderSelect;
+    }
+
+    /** Prefers the server's own wording — a 403 explains which key is missing. */
+    function serverMessage(error, fallback) {
+        const data = error && error.response ? error.response.data : null;
+
+        return (data && data.message) || fallback;
+    }
+
+    /** The four ids every group-leader endpoint is scoped by. */
+    function leaderCoords(el) {
+        return {
+            yearid: el.getAttribute("data-yearid"),
+            termid: el.getAttribute("data-attendanceSemester"),
+            courseid: el.getAttribute("data-courseid"),
+            groupid: el.getAttribute("data-groupid"),
+        };
+    }
+
+    /**
+     * Swaps the tile for the freshly rendered one the server sent back, so a
+     * change shows without refetching the whole panel.
+     */
+    function paintLeaderTile(html) {
+        const tile = document.querySelector("[data-cm-leader-tile]");
+        if (tile && html) tile.outerHTML = html;
+    }
+
+    $(document).on("click", ".assignGroupLeader", function (event) {
+        event.preventDefault();
+
+        const users = groupLeaderControl();
+        const coords = leaderCoords(this);
+
+        axios({ method: "post", url: route("plans.get.group.leader"), data: coords, headers: csrfHeaders() })
+            .then((response) => {
+                clearErrors("#assignGroupLeaderForm");
+
+                $("[data-cm-leader-eyebrow]").html(String(response.data.title || "") || "Group");
+
+                Object.keys(coords).forEach((key) => {
+                    $(`#assignGroupLeaderForm input[name="${key}"]`).val(coords[key] || "");
+                });
+
+                // Existing leaders come back selected: a save writes the
+                // selection verbatim, so anything missing from it is a removal.
+                if (users) {
+                    users.clear(true);
+                    (response.data.leaders || []).forEach((id) => users.addItem(String(id), true));
+                }
+
+                modal("assignGroupLeaderModal").show();
+            })
+            .catch((error) => {
+                showSuccess("Something went wrong", serverMessage(error, "The group leaders could not be loaded."), "warn");
+            });
+    });
+
+    $("#assignGroupLeaderForm").on("submit", function (event) {
+        event.preventDefault();
+        clearErrors("#assignGroupLeaderForm");
+
+        const form = this;
+        setBusy("#assignGroupLeaderBtn", true);
+
+        axios({
+            method: "post",
+            url: route("plans.assign.group.leader"),
+            data: {
+                yearid: $('input[name="yearid"]', form).val(),
+                termid: $('input[name="termid"]', form).val(),
+                courseid: $('input[name="courseid"]', form).val(),
+                groupid: $('input[name="groupid"]', form).val(),
+                group_leader_ids: groupLeaderSelect ? groupLeaderSelect.getValue() : $("#group_leader_ids").val() || [],
+            },
+            headers: csrfHeaders(),
+        })
+            .then((response) => {
+                setBusy("#assignGroupLeaderBtn", false);
+                modal("assignGroupLeaderModal").hide();
+                paintLeaderTile(response.data && response.data.leaders);
+                showSuccess("Congratulations!", (response.data && response.data.message) || "The group leaders were saved.");
+            })
+            .catch((error) => {
+                setBusy("#assignGroupLeaderBtn", false);
+
+                const status = error.response ? error.response.status : 0;
+                if (status === 422) {
+                    const data = error.response.data || {};
+                    paintErrors(
+                        "#assignGroupLeaderForm",
+                        data.errors || { group_leader_ids: data.message || "The group leaders could not be saved." }
+                    );
+
+                    return;
+                }
+
+                // 403 and anything else is about the request, not a field.
+                modal("assignGroupLeaderModal").hide();
+                showSuccess(
+                    status === 403 ? "Not permitted" : "Something went wrong",
+                    serverMessage(error, "The group leaders could not be saved."),
+                    "warn"
+                );
+            });
+    });
+
+    /* Deassigning removes one person and leaves the rest alone, so it does not
+     * go through the modal's replace-the-whole-set save. */
+    let pendingDeassign = null;
+
+    $(document).on("click", ".deassignGroupLeader", function (event) {
+        event.preventDefault();
+
+        const name = this.getAttribute("data-username") || "this person";
+        pendingDeassign = { ...leaderCoords(this), userid: this.getAttribute("data-userid") };
+
+        openConfirm({
+            id: pendingDeassign.userid,
+            action: "DEASSIGN_LEADER",
+            title: "Deassign group leader?",
+            message: `${name} will lose the Group Leader dashboard for this group. The change is recorded in the group's history.`,
+            confirmLabel: "Deassign",
+        });
+    });
+
+    $("#confirmModal .agreeWith").on("click", function () {
+        if ($(this).attr("data-action") !== "DEASSIGN_LEADER" || !pendingDeassign) return;
+
+        setBusy("#confirmModal .agreeWith", true);
+        axios({
+            method: "post",
+            url: route("plans.deassign.group.leader"),
+            data: pendingDeassign,
+            headers: csrfHeaders(),
+        })
+            .then((response) => {
+                setBusy("#confirmModal .agreeWith", false);
+                hideConfirm();
+                pendingDeassign = null;
+                paintLeaderTile(response.data && response.data.leaders);
+                showSuccess("Done", (response.data && response.data.message) || "The group leader was removed.");
+            })
+            .catch((error) => {
+                setBusy("#confirmModal .agreeWith", false);
+                hideConfirm();
+                pendingDeassign = null;
+
+                showSuccess(
+                    error.response && error.response.status === 403 ? "Not permitted" : "Something went wrong",
+                    serverMessage(error, "The group leader could not be removed."),
+                    "warn"
+                );
+            });
+    });
+
+    $(document).on("click", ".groupLeaderLog", function (event) {
+        event.preventDefault();
+
+        axios({
+            method: "post",
+            url: route("plans.group.leader.logs"),
+            data: leaderCoords(this),
+            headers: csrfHeaders(),
+        })
+            .then((response) => {
+                $("[data-cm-leaderlog-eyebrow]").text(response.data.subtitle || "Group");
+                $("[data-cm-leaderlog-body]").html(response.data.htm || "");
+                modal("groupLeaderLogModal").show();
+            })
+            .catch((error) => {
+                showSuccess("Something went wrong", serverMessage(error, "The history could not be loaded."), "warn");
+            });
+    });
+
     $("#assignManagerOrCoOrdinatorForm").on("submit", function (event) {
         event.preventDefault();
         clearErrors("#assignManagerOrCoOrdinatorForm");
