@@ -398,6 +398,30 @@
                                                         </div>
                                                         <div class="col-span-12 sm:col-span-3">
                                                             <div class="flex items-center">
+                                                                <input id="dashboard-group-leader-{{ $department->id }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][dashboard_group_leader]" {{ isset($permissions[$department->id]['dashboard_group_leader']) && $permissions[$department->id]['dashboard_group_leader'] ? 'checked' : '' }}>
+                                                                <label for="dashboard-group-leader-{{ $department->id }}" class="ml-2 font-medium">Group Leader</label>
+                                                            </div>
+                                                            <div class="pl-8 mt-2">
+                                                                <div class="flex items-center mt-2">
+                                                                    <input id="group-leader-view-{{ $department->id }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][dashboard_group_leader_view]" {{ isset($permissions[$department->id]['dashboard_group_leader_view']) && $permissions[$department->id]['dashboard_group_leader_view'] ? 'checked' : '' }}>
+                                                                    <label for="group-leader-view-{{ $department->id }}" class="ml-2">View</label>
+                                                                </div>
+                                                                <div class="flex items-center mt-2">
+                                                                    <input id="group-leader-add-{{ $department->id }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][dashboard_group_leader_add]" {{ isset($permissions[$department->id]['dashboard_group_leader_add']) && $permissions[$department->id]['dashboard_group_leader_add'] ? 'checked' : '' }}>
+                                                                    <label for="group-leader-add-{{ $department->id }}" class="ml-2">Add</label>
+                                                                </div>
+                                                                <div class="flex items-center mt-2">
+                                                                    <input id="group-leader-edit-{{ $department->id }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][dashboard_group_leader_edit]" {{ isset($permissions[$department->id]['dashboard_group_leader_edit']) && $permissions[$department->id]['dashboard_group_leader_edit'] ? 'checked' : '' }}>
+                                                                    <label for="group-leader-edit-{{ $department->id }}" class="ml-2">Edit</label>
+                                                                </div>
+                                                                <div class="flex items-center mt-2">
+                                                                    <input id="group-leader-delete-{{ $department->id }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][dashboard_group_leader_delete]" {{ isset($permissions[$department->id]['dashboard_group_leader_delete']) && $permissions[$department->id]['dashboard_group_leader_delete'] ? 'checked' : '' }}>
+                                                                    <label for="group-leader-delete-{{ $department->id }}" class="ml-2">Delete</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-span-12 sm:col-span-3">
+                                                            <div class="flex items-center">
                                                                  <input id="dashboard-programme-{{ $department->id }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][dashboard_programme]" {{ isset($permissions[$department->id]['dashboard_programme']) && $permissions[$department->id]['dashboard_programme'] ? 'checked' : '' }}>
                                                                 <label for="dashboard-programme-{{ $department->id }}" class="ml-2 font-medium">Programme Dashboard</label>
                                                             </div>

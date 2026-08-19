@@ -229,6 +229,30 @@
             </div>
             <div class="col-span-12 sm:col-span-3">
                 <div class="form-check form-switch">
+                    <input {{ $on('dashboard_group_leader') }} id="dashboard-group-leader-{{ $d }}" class="form-check-input parentPermissionItem" type="checkbox" value="1" name="permissions[{{ $d }}][dashboard_group_leader]">
+                    <label class="form-check-label ml-4" for="dashboard-group-leader-{{ $d }}">Group Leader</label>
+                </div>
+                <div class="childrenPermissionWrap pt-4 pl-12">
+                    <div class="form-check form-switch mb-4">
+                        <input {{ $on('dashboard_group_leader_view') }} {{ $off('dashboard_group_leader') }} id="group-leader-view-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][dashboard_group_leader_view]">
+                        <label class="form-check-label ml-4" for="group-leader-view-{{ $d }}">View</label>
+                    </div>
+                    <div class="form-check form-switch mb-4">
+                        <input {{ $on('dashboard_group_leader_add') }} {{ $off('dashboard_group_leader') }} id="group-leader-add-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][dashboard_group_leader_add]">
+                        <label class="form-check-label ml-4" for="group-leader-add-{{ $d }}">Add</label>
+                    </div>
+                    <div class="form-check form-switch mb-4">
+                        <input {{ $on('dashboard_group_leader_edit') }} {{ $off('dashboard_group_leader') }} id="group-leader-edit-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][dashboard_group_leader_edit]">
+                        <label class="form-check-label ml-4" for="group-leader-edit-{{ $d }}">Edit</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input {{ $on('dashboard_group_leader_delete') }} {{ $off('dashboard_group_leader') }} id="group-leader-delete-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][dashboard_group_leader_delete]">
+                        <label class="form-check-label ml-4" for="group-leader-delete-{{ $d }}">Delete</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-span-12 sm:col-span-3">
+                <div class="form-check form-switch">
                     <input {{ $on('dashboard_interviews') }} id="dashboard-interviews-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][dashboard_interviews]">
                     <label class="form-check-label ml-4" for="dashboard-interviews-{{ $d }}">Required Interviews</label>
                 </div>

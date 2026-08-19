@@ -2135,6 +2135,14 @@
     color: var(--cm-danger);
 }
 
+/* Explains what a field's value goes on to do; sits under the control. */
+.cm-field__hint {
+    color: var(--cm-muted);
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 0;
+}
+
 .cm-input {
     background: var(--cm-field-bg);
     border: 1px solid var(--cm-field);
@@ -7911,4 +7919,186 @@ select.cm-classinput {
         flex-wrap: wrap;
         width: 100%;
     }
+}
+
+/* ---------------------------------------------------------------------------
+ * Group leader tile
+ *
+ * The one meta tile in the plan panel header you can act on: it carries assign
+ * and history buttons next to its label, and each assigned leader is a chip
+ * with its own deassign control.
+ * ------------------------------------------------------------------------- */
+
+.cm-meta__label--tools {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    min-height: 18px;
+}
+
+.cm-metatools {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.cm-metatool {
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--cm-line-2);
+    border-radius: 7px;
+    color: var(--cm-muted);
+    cursor: pointer;
+    display: inline-flex;
+    height: 22px;
+    justify-content: center;
+    transition: background .12s ease, border-color .12s ease, color .12s ease;
+    width: 22px;
+}
+
+.cm-metatool:hover {
+    background: var(--cm-gold-tint);
+    border-color: var(--cm-gold);
+    color: var(--cm-gold-ink);
+}
+
+.cm-leaders {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.cm-leader {
+    align-items: center;
+    background: var(--cm-field-bg);
+    border: 1px solid var(--cm-line-2);
+    border-radius: 999px;
+    display: inline-flex;
+    gap: 6px;
+    padding: 3px 5px 3px 11px;
+}
+
+.cm-leader__name {
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+/* No deassign control (no delete privilege) leaves the chip lopsided. */
+.cm-leader__name:last-child {
+    padding-right: 6px;
+}
+
+.cm-leader__x {
+    align-items: center;
+    background: none;
+    border: 0;
+    border-radius: 50%;
+    color: var(--cm-muted);
+    cursor: pointer;
+    display: inline-flex;
+    flex: 0 0 auto;
+    height: 18px;
+    justify-content: center;
+    padding: 0;
+    transition: background .12s ease, color .12s ease;
+    width: 18px;
+}
+
+.cm-leader__x:hover {
+    background: rgba(179, 38, 30, .1);
+    color: var(--cm-danger);
+}
+
+.cm-leaders__empty {
+    color: var(--cm-muted);
+    font-weight: 600;
+}
+
+/* ------------------------------------------------------------ history list */
+
+.cm-modal__body--scroll {
+    max-height: min(60vh, 460px);
+    overflow-y: auto;
+}
+
+.cm-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.cm-timeline__item {
+    align-items: flex-start;
+    border-bottom: 1px solid var(--cm-line-2);
+    display: flex;
+    gap: 12px;
+    padding: 11px 2px;
+}
+
+.cm-timeline__item:last-child {
+    border-bottom: 0;
+}
+
+.cm-timeline__dot {
+    align-items: center;
+    border-radius: 50%;
+    display: inline-flex;
+    flex: 0 0 auto;
+    height: 24px;
+    justify-content: center;
+    margin-top: 1px;
+    width: 24px;
+}
+
+.cm-timeline__item.is-on .cm-timeline__dot {
+    background: rgba(26, 127, 90, .12);
+    color: #14664a;
+}
+
+.cm-timeline__item.is-off .cm-timeline__dot {
+    background: rgba(179, 38, 30, .1);
+    color: var(--cm-danger);
+}
+
+.cm-timeline__body {
+    min-width: 0;
+}
+
+.cm-timeline__title {
+    color: var(--cm-ink);
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.cm-timeline__meta {
+    align-items: center;
+    color: var(--cm-muted);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 11.5px;
+    gap: 4px 10px;
+    margin-top: 3px;
+}
+
+.cm-timeline__tag {
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    padding: 2px 8px;
+    text-transform: uppercase;
+}
+
+.cm-timeline__item.is-on .cm-timeline__tag {
+    background: rgba(26, 127, 90, .12);
+    color: #14664a;
+}
+
+.cm-timeline__item.is-off .cm-timeline__tag {
+    background: rgba(179, 38, 30, .1);
+    color: var(--cm-danger);
 }

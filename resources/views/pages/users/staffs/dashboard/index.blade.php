@@ -68,6 +68,22 @@
             ];
         }
 
+        // Two gates, not one: the Group Leader "view" privilege says the person
+        // may use the screen at all, and the assignment says they have a group
+        // to look at. Either alone would be wrong — a privilege with no group
+        // opens an empty dashboard, and a group with no privilege ignores what
+        // HR set. That pairing is why this cannot sit in the list above.
+        if ($lccdUnlocked
+            && \App\Models\GroupLeader::can('view')
+            && \App\Models\GroupLeader::isLeader(auth()->id())) {
+            $lccdModules[] = [
+                'label' => 'Group Leader',
+                'icon' => 'user-check',
+                'href' => route('gl.dashboard'),
+                'count' => null,
+            ];
+        }
+
         // Shift panel visibility — unchanged from the previous markup.
         $lccdShowShift = Auth::user()
             && (Route::currentRouteName() == 'dashboard' || Route::currentRouteName() == 'staff.dashboard')

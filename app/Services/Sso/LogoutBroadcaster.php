@@ -25,6 +25,12 @@ class LogoutBroadcaster
             return;
         }
 
+        // Normalised before it is signed. Staff addresses are stored with
+        // whatever casing they were created with - 93 of them carry capitals -
+        // and the relying application lowercases before it verifies, so an
+        // un-normalised address here produces a signature that cannot match.
+        $email = strtolower(trim($email));
+
         $timeout = max(1, (int) config('sso.logout_timeout', 5));
 
         foreach (ClientRegistry::all() as $client) {

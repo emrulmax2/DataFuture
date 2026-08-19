@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\CourseManagement;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AssignGroupLeaderRequest;
 use App\Http\Requests\PlanAssignParticipantRequest;
 use App\Http\Requests\PlansUpdateRequest;
 use App\Http\Requests\StoreTutorialPlanRequest;
@@ -15,6 +16,8 @@ use App\Models\Course;
 use App\Models\CourseCreation;
 use App\Models\CourseCreationInstance;
 use App\Models\Group;
+use App\Models\GroupLeader;
+use App\Models\GroupLeaderLog;
 use App\Models\InstanceTerm;
 use App\Models\ModuleCreation;
 use App\Models\Plan;
@@ -43,6 +46,9 @@ class PlanTreeController extends Controller
         foreach($academicYears as $year):
             $yearPush[] = $year->academic_year_id;
         endforeach;       
+        $staff = User::with('employee')->where('active', 1)->get()
+            ->sortBy('full_name', SORT_NATURAL | SORT_FLAG_CASE)->values();
+
         return view('pages.course-management.plan.tree.index', [
             // Opts this screen into the redesigned module shell.
             'layout' => 'course-top-menu',
@@ -61,9 +67,12 @@ class PlanTreeController extends Controller
             'terms' => InstanceTerm::all(),
             'room' => Room::all(),
             'group' => Group::all(),
-            'tutor' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
-            'ptutor' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
-            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
+            // Staff are shown by their employee name, not their login name, so
+            // the employee comes with them (without it every option in every
+            // dropdown lazy-loads one) and the sort follows what is displayed.
+            'tutor' => $staff,
+            'ptutor' => $staff,
+            'users' => $staff,
         ]);
     }
 
@@ -286,6 +295,10 @@ class PlanTreeController extends Controller
                             $html .= '</div>';
                         $html .= '</div>';
                     endforeach;
+
+                    // Group leader is the one tile you can act on, so it brings
+                    // its own assign / deassign / history controls with it.
+                    $html .= $this->groupLeaderTileHtml($academicYearId, $termDeclaredData, $courseId, $group->id);
                 $html .= '</div>';
 
                 if($plans->count() > 0):
@@ -607,6 +620,352 @@ class PlanTreeController extends Controller
         else:
             return response()->json(['message' => 'Something went wrong. Please try later'], 422);
         endif;
+    }
+
+    /**
+     * The group ids the tree treats as one node.
+     *
+     * A group node is (course + term + name); the same name can exist as more
+     * than one `groups` row, and the plan list already unions them, so leader
+     * assignments have to cover the whole set too.
+     */
+    private function sameNameGroupIds($courseid, $termid, $groupid)
+    {
+        $group = Group::find($groupid);
+        if (empty($group)) {
+            return [];
+        }
+
+        return Group::where('term_declaration_id', $termid)
+            ->where('course_id', $courseid)
+            ->where('name', $group->name)
+            ->pluck('id')->unique()->toArray();
+    }
+
+    /**
+     * Refuses an action the signed-in user lacks the privilege for.
+     *
+     * The tile already hides the control, but hiding is not enforcing: these
+     * endpoints are reachable directly, so each one re-checks its own key.
+     * Returns the failure rather than throwing so the caller can answer with
+     * the JSON shape its dialog expects.
+     */
+    private function groupLeaderDenied(string $action)
+    {
+        return response()->json([
+            'message' => 'You are not permitted to '.$action.' group leaders.',
+        ], 403);
+    }
+
+    /** Null when the action is allowed, otherwise the 403 to return. */
+    private function groupLeaderDenial(string $action)
+    {
+        return GroupLeader::can($action) ? null : $this->groupLeaderDenied($action);
+    }
+
+    /**
+     * Who currently leads the group behind a tree node, plus the trail the
+     * modal shows as its eyebrow.
+     */
+    public function getGroupLeaderDetails(Request $request)
+    {
+        // Opening the picker is the first half of assigning or editing.
+        if (!GroupLeader::can('add') && !GroupLeader::can('edit')) {
+            return $this->groupLeaderDenied('assign');
+        }
+
+        $yearid = $request->yearid;
+        $termid = $request->termid;
+        $courseid = $request->courseid;
+        $groupid = $request->groupid;
+
+        $ACYear = AcademicYear::find($yearid);
+        $term = TermDeclaration::find($termid);
+        $course = Course::find($courseid);
+        $group = Group::find($groupid);
+
+        $title = '';
+        $title .= '<u>'.($ACYear->name ?? '').'</u> > ';
+        $title .= '<u>'.($term->name ?? '').'</u> > ';
+        $title .= '<u>'.($course->name ?? '').'</u>';
+        $title .= (isset($group->name) && !empty($group->name) ? ' > <u>'.$group->name.'</u>' : '');
+
+        $groupIds = $this->sameNameGroupIds($courseid, $termid, $groupid);
+        $leaders = !empty($groupIds)
+            ? GroupLeader::whereIn('group_id', $groupIds)->where('term_declaration_id', $termid)
+                ->pluck('user_id')->unique()->values()->toArray()
+            : [];
+
+        return response()->json(['leaders' => $leaders, 'title' => $title], 200);
+    }
+
+    /**
+     * Replaces the group's leaders with whoever the modal sent.
+     *
+     * Written once per same-name group id so the dashboard can pivot straight
+     * off `group_id` without re-deriving the name set. Old rows are removed
+     * outright rather than soft-deleted; the audit trail lives in
+     * `group_leader_logs`, which is what the history dialog reads.
+     */
+    public function assignGroupLeader(AssignGroupLeaderRequest $request)
+    {
+        $yearid = (int) $request->yearid;
+        $termid = (int) $request->termid;
+        $courseid = (int) $request->courseid;
+        $groupid = (int) $request->groupid;
+        $userIds = array_values(array_unique(array_map('intval', (array) $request->group_leader_ids)));
+
+        $groupIds = $this->sameNameGroupIds($courseid, $termid, $groupid);
+        $group = Group::find($groupid);
+        if (empty($groupIds) || empty($group)) {
+            return response()->json(['message' => 'The group could not be found.'], 422);
+        }
+
+        // Only what actually changed is logged, so re-saving an unchanged
+        // selection does not fill the history with noise.
+        $before = GroupLeader::whereIn('group_id', $groupIds)->where('term_declaration_id', $termid)
+            ->pluck('user_id')->unique()->map(function ($id) { return (int) $id; })->toArray();
+
+        $added = array_values(array_diff($userIds, $before));
+        $removed = array_values(array_diff($before, $userIds));
+
+        // Each half of the change carries its own key, and touching a group
+        // that already has leaders is an edit whichever way it moves. Checking
+        // the diff rather than the request means a save that changes nothing
+        // never trips a privilege the user does not need.
+        if (!empty($before) && (!empty($added) || !empty($removed))) {
+            if ($denied = $this->groupLeaderDenial('edit')) {
+                return $denied;
+            }
+        }
+        if (!empty($added) && ($denied = $this->groupLeaderDenial('add'))) {
+            return $denied;
+        }
+        if (!empty($removed) && ($denied = $this->groupLeaderDenial('delete'))) {
+            return $denied;
+        }
+
+        DB::transaction(function () use ($groupIds, $termid, $yearid, $courseid, $userIds, $added, $removed, $group) {
+            GroupLeader::whereIn('group_id', $groupIds)->where('term_declaration_id', $termid)->forceDelete();
+
+            foreach ($groupIds as $gid) {
+                foreach ($userIds as $uid) {
+                    GroupLeader::create([
+                        'user_id' => $uid,
+                        'academic_year_id' => $yearid,
+                        'term_declaration_id' => $termid,
+                        'course_id' => $courseid,
+                        'group_id' => $gid,
+                        'created_by' => auth()->user()->id,
+                    ]);
+                }
+            }
+
+            $scope = [
+                'academic_year_id' => $yearid,
+                'term_declaration_id' => $termid,
+                'course_id' => $courseid,
+            ];
+
+            foreach (User::whereIn('id', $added)->get() as $user) {
+                GroupLeaderLog::record('Assigned', $user, $group, $scope);
+            }
+            foreach (User::whereIn('id', $removed)->get() as $user) {
+                GroupLeaderLog::record('Deassigned', $user, $group, $scope);
+            }
+        });
+
+        return response()->json([
+            'message' => $this->assignmentMessage(count($added), count($removed)),
+            'leaders' => $this->groupLeaderTileHtml($yearid, $termid, $courseid, $groupid),
+        ], 200);
+    }
+
+    /** Says what the save actually did, rather than a flat "saved". */
+    private function assignmentMessage(int $added, int $removed): string
+    {
+        if ($added === 0 && $removed === 0) {
+            return 'No changes were made.';
+        }
+
+        $parts = [];
+        if ($added > 0) {
+            $parts[] = $added.' '.($added === 1 ? 'leader' : 'leaders').' assigned';
+        }
+        if ($removed > 0) {
+            $parts[] = $removed.' '.($removed === 1 ? 'leader' : 'leaders').' deassigned';
+        }
+
+        return ucfirst(implode(' and ', $parts)).'.';
+    }
+
+    /** Removes one leader from a group without touching the others. */
+    public function deassignGroupLeader(Request $request)
+    {
+        if ($denied = $this->groupLeaderDenial('delete')) {
+            return $denied;
+        }
+
+        $yearid = (int) $request->yearid;
+        $termid = (int) $request->termid;
+        $courseid = (int) $request->courseid;
+        $groupid = (int) $request->groupid;
+        $userid = (int) $request->userid;
+
+        $groupIds = $this->sameNameGroupIds($courseid, $termid, $groupid);
+        $group = Group::find($groupid);
+        $user = User::find($userid);
+
+        if (empty($groupIds) || empty($group) || empty($user)) {
+            return response()->json(['message' => 'That group leader could not be found.'], 422);
+        }
+
+        $removed = GroupLeader::whereIn('group_id', $groupIds)->where('term_declaration_id', $termid)
+            ->where('user_id', $userid)->forceDelete();
+
+        if ($removed) {
+            GroupLeaderLog::record('Deassigned', $user, $group, [
+                'academic_year_id' => $yearid,
+                'term_declaration_id' => $termid,
+                'course_id' => $courseid,
+            ]);
+        }
+
+        return response()->json([
+            'message' => $user->full_name.' is no longer a group leader for '.$group->name.'.',
+            'leaders' => $this->groupLeaderTileHtml($yearid, $termid, $courseid, $groupid),
+        ], 200);
+    }
+
+    /** The assignment history behind the log dialog, newest first. */
+    public function getGroupLeaderLogs(Request $request)
+    {
+        if ($denied = $this->groupLeaderDenial('view')) {
+            return $denied;
+        }
+
+        $termid = (int) $request->termid;
+        $courseid = (int) $request->courseid;
+        $groupid = (int) $request->groupid;
+
+        $groupIds = $this->sameNameGroupIds($courseid, $termid, $groupid);
+        $group = Group::find($groupid);
+
+        $logs = !empty($groupIds)
+            ? GroupLeaderLog::whereIn('group_id', $groupIds)->where('term_declaration_id', $termid)
+                ->orderBy('id', 'DESC')->get()
+            : collect();
+
+        $html = '';
+        if ($logs->count() > 0) {
+            $html .= '<ul class="cm-timeline">';
+            foreach ($logs as $log) {
+                $on = ($log->action === 'Assigned');
+
+                $html .= '<li class="cm-timeline__item '.($on ? 'is-on' : 'is-off').'">';
+                    $html .= '<span class="cm-timeline__dot" aria-hidden="true">';
+                        $html .= ($on
+                            ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>'
+                            : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>');
+                    $html .= '</span>';
+                    $html .= '<div class="cm-timeline__body">';
+                        $html .= '<div class="cm-timeline__title">'.e($log->user_name ?: ($log->user->full_name ?? 'Unknown user')).'</div>';
+                        $html .= '<div class="cm-timeline__meta">';
+                            $html .= '<span class="cm-timeline__tag">'.e($log->action).'</span>';
+                            $html .= '<span>'.e($log->created_at ? $log->created_at->format('d M Y, H:i') : '').'</span>';
+                            if (!empty($log->performed_by_name)) {
+                                $html .= '<span>by '.e($log->performed_by_name).'</span>';
+                            }
+                        $html .= '</div>';
+                    $html .= '</div>';
+                $html .= '</li>';
+            }
+            $html .= '</ul>';
+        } else {
+            $html .= '<div class="cm-finder__note" style="margin:0;">';
+                $html .= '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01"></path></svg>';
+                $html .= 'No group leader has been assigned or deassigned for this group yet.';
+            $html .= '</div>';
+        }
+
+        return response()->json([
+            'htm' => $html,
+            'title' => 'Group Leader History',
+            'subtitle' => ($group->name ?? ''),
+        ], 200);
+    }
+
+    /**
+     * The Group Leader tile in the plan panel header.
+     *
+     * It carries its own controls rather than living in the tree's settings
+     * menu, so it is rebuilt and swapped in place after every assign or
+     * deassign — which is why it is a method and not inline markup.
+     */
+    private function groupLeaderTileHtml($year, $term, $course, $group)
+    {
+        $groupIds = $this->sameNameGroupIds($course, $term, $group);
+        $leaders = !empty($groupIds)
+            ? GroupLeader::with('user.employee')->whereIn('group_id', $groupIds)
+                ->where('term_declaration_id', $term)->get()
+                ->pluck('user')->filter()->unique('id')->values()
+            : collect();
+
+        $attrs = 'data-yearid="'.$year.'" data-attendanceSemester="'.$term.'" data-courseid="'.$course.'" data-groupid="'.$group.'"';
+
+        // Which controls appear is a privilege question, and the endpoints
+        // behind them re-check the same keys — this only decides what is worth
+        // showing. Changing an existing set is an edit, so a group that already
+        // has leaders needs `edit` rather than `add` to open the modal.
+        $canAssign = $leaders->isEmpty()
+            ? GroupLeader::can('add')
+            : (GroupLeader::can('add') || GroupLeader::can('edit'));
+        $canDelete = GroupLeader::can('delete');
+        $canViewLog = GroupLeader::can('view');
+
+        $html = '<div class="cm-meta cm-meta--leader" data-cm-leader-tile '.$attrs.'>';
+            $html .= '<span class="cm-meta__icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9.5" cy="7" r="4"></circle><path d="M19 2l1.4 2.9 3.1.5-2.3 2.2.6 3.1L19 9.2l-2.8 1.5.6-3.1-2.3-2.2 3.1-.5z"></path></svg></span>';
+            $html .= '<div style="min-width:0;">';
+                $html .= '<div class="cm-meta__label cm-meta__label--tools">';
+                    $html .= '<span>Group Leader</span>';
+                    if ($canAssign || $canViewLog) {
+                        $html .= '<span class="cm-metatools">';
+                            if ($canAssign) {
+                                $html .= '<button type="button" '.$attrs.' class="cm-metatool assignGroupLeader" title="'.($leaders->isEmpty() ? 'Assign group leader' : 'Change group leaders').'">';
+                                    $html .= '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6M22 11h-6"></path></svg>';
+                                $html .= '</button>';
+                            }
+                            if ($canViewLog) {
+                                $html .= '<button type="button" '.$attrs.' class="cm-metatool groupLeaderLog" title="Assignment history">';
+                                    $html .= '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"></path><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"></path><path d="M12 7v5l4 2"></path></svg>';
+                                $html .= '</button>';
+                            }
+                        $html .= '</span>';
+                    }
+                $html .= '</div>';
+
+                $html .= '<div class="cm-meta__value">';
+                    if ($leaders->count() > 0) {
+                        $html .= '<span class="cm-leaders">';
+                        foreach ($leaders as $leader) {
+                            $html .= '<span class="cm-leader">';
+                                $html .= '<span class="cm-leader__name">'.e($leader->full_name).'</span>';
+                                if ($canDelete) {
+                                    $html .= '<button type="button" '.$attrs.' data-userid="'.$leader->id.'" data-username="'.e($leader->full_name).'" class="cm-leader__x deassignGroupLeader" title="Deassign '.e($leader->full_name).'">';
+                                        $html .= '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>';
+                                    $html .= '</button>';
+                                }
+                            $html .= '</span>';
+                        }
+                        $html .= '</span>';
+                    } else {
+                        $html .= '<span class="cm-leaders__empty">Not assigned</span>';
+                    }
+                $html .= '</div>';
+            $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
     }
 
     public function getTermVisibility($academicYear, $termDeclarationId){

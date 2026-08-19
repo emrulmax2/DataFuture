@@ -64,6 +64,13 @@ class LegacyPrivilegeMap
         'dashboard.live' => 'dashboard_live_student',
         'dashboard.tutor_2' => 'dashboard_tutor',
         'dashboard.personal_tutor' => 'dashboard_personal_tutor',
+        // Group leader. The parent is the umbrella switch; the four below are
+        // the actions it gates — see GroupLeader::can().
+        'dashboard.group_leader' => 'dashboard_group_leader',
+        'dashboard.group_leader_view' => 'dashboard_group_leader_view',
+        'dashboard.group_leader_add' => 'dashboard_group_leader_add',
+        'dashboard.group_leader_edit' => 'dashboard_group_leader_edit',
+        'dashboard.group_leader_delete' => 'dashboard_group_leader_delete',
         'dashboard.req_interview' => 'dashboard_interviews',
         'dashboard.hr_porta' => 'dashboard_hr_portal',
         'dashboard.programme_dashboard' => 'dashboard_programme',

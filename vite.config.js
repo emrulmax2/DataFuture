@@ -27,6 +27,7 @@ export default defineConfig({
                 'resources/css/staff-dashboard.css',
                 'resources/css/report-it.css',
                 'resources/css/programme-dashboard.css',
+                'resources/css/group-leader-dashboard.css',
                 'resources/css/task-manager-detail.css',
                 'resources/js/app.js',
                 'resources/js/ckeditor-classic.js',
@@ -174,6 +175,7 @@ export default defineConfig({
 
                 'resources/js/tutor-dashboard.js',
                 'resources/js/tutor-personal.js',
+                'resources/js/group-leader-dashboard.js',
                 'resources/js/tutor-dashboard-new.js',
                 'resources/js/attendance-feed.js',
                 'resources/js/tutor-attendance-feed.js',

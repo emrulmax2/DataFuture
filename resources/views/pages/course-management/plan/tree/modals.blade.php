@@ -67,7 +67,7 @@
                         <label for="tp_tutor_id">Tutor</label>
                         <select id="tp_tutor_id" name="tutor_id" class="cm-select tutor_id">
                             <option value="">Please Select</option>
-                            @foreach($users as $u)<option value="{{ $u->id }}">{{ $u->name }}</option>@endforeach
+                            @foreach($users as $u)<option value="{{ $u->id }}">{{ $u->full_name }}</option>@endforeach
                         </select>
                         <div class="acc__input-error error-tutor_id"></div>
                     </div>
@@ -76,7 +76,7 @@
                         <label for="tp_personal_tutor_id">Personal Tutor</label>
                         <select id="tp_personal_tutor_id" name="personal_tutor_id" class="cm-select personal_tutor_id">
                             <option value="">Please Select</option>
-                            @foreach($users as $u)<option value="{{ $u->id }}">{{ $u->name }}</option>@endforeach
+                            @foreach($users as $u)<option value="{{ $u->id }}">{{ $u->full_name }}</option>@endforeach
                         </select>
                         <div class="acc__input-error error-personal_tutor_id"></div>
                     </div>
@@ -179,7 +179,7 @@
                         <label for="tu_personal_tutor_id">Personal Tutor <span>*</span></label>
                         <select id="tu_personal_tutor_id" name="personal_tutor_id" class="cm-select">
                             <option value="">Please Select</option>
-                            @foreach($users as $u)<option value="{{ $u->id }}">{{ $u->name }}</option>@endforeach
+                            @foreach($users as $u)<option value="{{ $u->id }}">{{ $u->full_name }}</option>@endforeach
                         </select>
                         <div class="acc__input-error error-personal_tutor_id"></div>
                     </div>
@@ -324,7 +324,7 @@
                     <div class="cm-field">
                         <label for="assigned_user_ids">People <span>*</span></label>
                         <select id="assigned_user_ids" name="assigned_user_ids[]" class="cm-select assigned_user_ids" multiple>
-                            @foreach($users as $u)<option value="{{ $u->id }}">{{ $u->name }}</option>@endforeach
+                            @foreach($users as $u)<option value="{{ $u->id }}">{{ $u->full_name }}</option>@endforeach
                         </select>
                         <div class="acc__input-error error-assigned_user_ids"></div>
                     </div>
@@ -345,5 +345,78 @@
                 </div>
             </div>
         </form>
+    </div>
+</div>
+
+{{-- Group leader. Kept apart from the Manager / Audit User modal because it
+     writes to `group_leaders` (group-scoped) rather than `plan_participants`
+     (plan-scoped), and so it carries the group coordinates, not plan ids. --}}
+<div id="assignGroupLeaderModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog cm-modal__dialog cm-modal__dialog--md">
+        <form method="POST" action="#" id="assignGroupLeaderForm" autocomplete="off">
+            <div class="modal-content cm-modal">
+                <div class="cm-modal__head">
+                    <div>
+                        <div class="cm-modal__eyebrow"><span data-cm-leader-eyebrow>Group</span></div>
+                        <h2 class="cm-modal__title cm-serif">Assign Group Leader</h2>
+                    </div>
+                    <button type="button" data-tw-dismiss="modal" class="cm-modal__close" aria-label="Close">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <div class="cm-modal__body">
+                    <div class="cm-field">
+                        <label for="group_leader_ids">Group leader</label>
+                        <select id="group_leader_ids" name="group_leader_ids[]" class="cm-select group_leader_ids" multiple>
+                            @foreach($users as $u)<option value="{{ $u->id }}">{{ $u->full_name }}</option>@endforeach
+                        </select>
+                        <div class="acc__input-error error-group_leader_ids"></div>
+                        <p class="cm-field__hint">
+                            A group leader sees this group, its class plans and its attendance on their
+                            Group Leader dashboard. Saving with nobody selected clears the group's leaders.
+                        </p>
+                    </div>
+                </div>
+                <div class="cm-modal__foot">
+                    <button type="button" data-tw-dismiss="modal" class="cm-btn cm-btn--cancel">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                        Cancel
+                    </button>
+                    <button type="submit" id="assignGroupLeaderBtn" class="cm-btn cm-btn--save">
+                        @include('pages.course-management.partials.save-glyphs')
+                        Save
+                    </button>
+                    <input type="hidden" name="yearid" value="">
+                    <input type="hidden" name="termid" value="">
+                    <input type="hidden" name="courseid" value="">
+                    <input type="hidden" name="groupid" value="">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Group leader assignment history. Read-only: the rows come from
+     `group_leader_logs`, which nothing edits or deletes. --}}
+<div id="groupLeaderLogModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog cm-modal__dialog cm-modal__dialog--md">
+        <div class="modal-content cm-modal">
+            <div class="cm-modal__head">
+                <div>
+                    <div class="cm-modal__eyebrow"><span data-cm-leaderlog-eyebrow>Group</span></div>
+                    <h2 class="cm-modal__title cm-serif">Group Leader History</h2>
+                </div>
+                <button type="button" data-tw-dismiss="modal" class="cm-modal__close" aria-label="Close">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="cm-modal__body cm-modal__body--scroll" data-cm-leaderlog-body></div>
+            <div class="cm-modal__foot">
+                <button type="button" data-tw-dismiss="modal" class="cm-btn cm-btn--cancel">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                    Close
+                </button>
+            </div>
+        </div>
     </div>
 </div>
