@@ -55,6 +55,9 @@ import IMask from 'imask';
         ...tomDropdownHooks,
     };
     const plainTomSelectIds = ['notice-period', 'employment-period', 'ssp-term'];
+    /* Venues are a fixed list. With create:true a typed value became an option
+       whose value is the text itself, which then posts as a site location id. */
+    const noCreateSelectIds = ['site_location'];
     const getTomOptions = function(select) {
         const baseOptions = plainTomSelectIds.includes(select.id) ? plainTomOptions : tomOptions;
         const options = {
@@ -68,6 +71,10 @@ import IMask from 'imask';
             options.plugins.remove_button = {
                 title: "Remove this item",
             };
+        }
+
+        if (noCreateSelectIds.includes(select.id)) {
+            options.create = false;
         }
 
         return options;

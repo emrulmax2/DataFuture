@@ -16714,6 +16714,67 @@ body.employee-public-form-body .dataCollectionFormWrap {
     color: #17312f;
     font-size: 14px;
 }
+
+/* Multi-select chips — Site Location is the only multiple select on this form.
+   tom-select 1.7 copies the select's own classes onto the wrapper, so these
+   pills were still being dressed by the shared `.lcc-tom-select` rules in
+   components/_tom-select.css: Midone grey on a form that is otherwise teal.
+   The container was restyled for the redesign but nothing inside it was. */
+/* tom-select binds "open the dropdown" to .ts-input, not to the wrapper, and
+   the dropdown_input plugin moves the search box into the dropdown itself — so
+   an empty multi-select has a genuinely empty control. Combined with the
+   `min-height: 0 !important` above that collapsed .ts-input to zero height,
+   leaving a 44px box with no hit area and no room to paint its chevron: the
+   field looked right and did nothing. Single selects escaped it because the
+   selected .item gives the control height. */
+.employee-create-page .ts-control.multi .ts-input {
+    align-self: stretch;
+    min-height: 34px !important;
+    /* clear of the chevron `.lcc-tom-select .ts-input` paints on the right */
+    padding-right: 26px !important;
+}
+.employee-create-page .ts-control.multi .ts-input > .item {
+    align-items: center;
+    background: #e7f2f1 !important;
+    border: 1px solid #cfe4e2;
+    border-radius: 7px;
+    color: #17312f;
+    display: inline-flex;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.2;
+    margin: 0 !important;
+    padding: 4px 4px 4px 10px !important;
+}
+.employee-create-page .ts-control.multi .ts-input > .item.active {
+    background: #d8ebe9 !important;
+    border-color: #0f7b76;
+}
+.employee-create-page .ts-control.multi.plugin-remove_button .ts-input > .item .remove {
+    align-items: center;
+    border: 0 !important;
+    border-radius: 5px;
+    color: #4d7370;
+    display: inline-flex;
+    font-size: 15px;
+    height: 18px;
+    justify-content: center;
+    line-height: 1;
+    margin-left: 6px !important;
+    padding: 0 !important;
+    text-decoration: none;
+    transition: background .14s ease, color .14s ease;
+    width: 18px;
+}
+.employee-create-page .ts-control.multi.plugin-remove_button .ts-input > .item .remove:hover {
+    background: #0f7b76;
+    color: #ffffff;
+}
+/* Keeps the search caret usable once a few venues are picked. */
+.employee-create-page .ts-control.multi .ts-input > input {
+    flex: 1 1 60px;
+    min-width: 60px;
+}
 .employee-create-page .ts-dropdown {
     background: #ffffff !important;
     border: 1px solid #d5e2e0 !important;

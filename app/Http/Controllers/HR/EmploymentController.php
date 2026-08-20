@@ -93,8 +93,11 @@ class EmploymentController extends Controller
         $changes = $employment->getDirty();
         $employment->save();
 
-        /* Sync Site Location */
-        $employee->venues()->sync($request->site_location);
+        /* Sync Site Location — the select carries an empty "Please Select"
+           option, so strip anything that is not a venue id. */
+        $employee->venues()->sync(array_values(array_filter(
+            array_map('intval', (array) $request->site_location)
+        )));
 
         if($employment->wasChanged() && !empty($changes)):
             foreach($changes as $field => $value):

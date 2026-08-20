@@ -420,9 +420,16 @@ class EmployeeController extends Controller
             'employment_period_id' => Session::get('employment_period'), 
         ]);
         
-        $siteLocations = Session::get('site_location');
-        
-        $employee->venues()->attach($siteLocations);
+        /* sync(), not attach(): this wizard is re-runnable for an existing
+           employee (`employee/new/{id?}`) and every other write on this step is
+           an updateOrCreate, so attach() was appending a second pivot row for a
+           venue the employee already had. Blank values are filtered because the
+           select carries a "Please Select" option with an empty value. */
+        $siteLocations = array_values(array_filter(
+            array_map('intval', (array) Session::get('site_location'))
+        ));
+
+        $employee->venues()->sync($siteLocations);
  
 
         return response()->json(["data success",$data = session()->all(),"user_id"=>$employee->id]);
