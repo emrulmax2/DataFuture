@@ -16674,6 +16674,16 @@ body.employee-public-form-body .dataCollectionFormWrap {
 }
 .employee-create-page .ts-control .ts-input {
     align-items: center;
+    /* tom-select binds "open the dropdown" to .ts-input, never to the wrapper,
+       and the dropdown_input plugin keeps the search box in the dropdown — so a
+       control with nothing selected is genuinely empty. The `min-height: 0`
+       below then collapsed it to zero height and the 44px box you can see (the
+       wrapper) has no handler: the field looked fine and did nothing, with no
+       room to paint its chevron either. Stretching to the wrapper restores the
+       hit area that tom-select's own `min-height: 40px` used to provide.
+       Two fields hit this: Site Location (multiple, starts empty) and Type on
+       the eligibility step (cleared by the right-to-work toggle). */
+    align-self: stretch;
     background-color: transparent !important;
     border: 0 !important;
     border-radius: 0 !important;
@@ -16720,15 +16730,8 @@ body.employee-public-form-body .dataCollectionFormWrap {
    pills were still being dressed by the shared `.lcc-tom-select` rules in
    components/_tom-select.css: Midone grey on a form that is otherwise teal.
    The container was restyled for the redesign but nothing inside it was. */
-/* tom-select binds "open the dropdown" to .ts-input, not to the wrapper, and
-   the dropdown_input plugin moves the search box into the dropdown itself — so
-   an empty multi-select has a genuinely empty control. Combined with the
-   `min-height: 0 !important` above that collapsed .ts-input to zero height,
-   leaving a 44px box with no hit area and no room to paint its chevron: the
-   field looked right and did nothing. Single selects escaped it because the
-   selected .item gives the control height. */
 .employee-create-page .ts-control.multi .ts-input {
-    align-self: stretch;
+    /* floor for the stretch above: wrapper 44px less its 5px padding */
     min-height: 34px !important;
     /* clear of the chevron `.lcc-tom-select .ts-input` paints on the right */
     padding-right: 26px !important;
