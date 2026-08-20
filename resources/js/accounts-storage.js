@@ -79,6 +79,11 @@ var storageTransList = (function () {
                                     }
                                     if(cell.getData().has_requisition > 0){
                                         html += '<a target="_blank" href="'+route('budget.management.show.req', cell.getData().has_requisition)+'" class="text-success mr-2" style="position: relative; top: -1px;"><i data-lucide="briefcase" class="w-4 h-4"></i></a>';
+                                    }else if(cell.getData().ops_requisition_url != ''){
+                                        // Settled against a requisition in the Operations system. Same
+                                        // briefcase, because to the reader it means the same thing —
+                                        // this money is spoken for — only the destination differs.
+                                        html += '<a href="'+cell.getData().ops_requisition_url+'" title="Requisition '+cell.getData().ops_requisition_ref+'" class="text-success mr-2" style="position: relative; top: -1px;"><i data-lucide="briefcase" class="w-4 h-4"></i></a>';
                                     }
                                     if(cell.getData().has_assets != ''){
                                         html += '<span class="text-success mr-2" style="position: relative; top: -1px;"><i data-lucide="package-check" class="w-4 h-4"></i></span>';

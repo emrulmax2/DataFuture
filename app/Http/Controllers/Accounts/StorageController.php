@@ -19,6 +19,38 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class StorageController extends Controller
 {
+    /**
+     * A requisition raised in the Operations system, shown inside the accounts
+     * screens.
+     *
+     * Lives under the bank's transaction list rather than the budget section
+     * because that is the only route to it: someone reconciling a statement
+     * clicks through from a transaction and needs to come back to the same
+     * bank. Read over the API — the record itself belongs to Operations.
+     */
+    public function showOperationsRequisition($bank, string $reference, \App\Services\OperationsBudgetClient $client){
+        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
+
+        $accBank = AccBank::find($bank);
+
+        return view('pages.accounts.storage.requisition', [
+            'title' => 'Requisition ' . $reference . ' - London Churchill College',
+            'breadcrumbs' => [
+                ['label' => 'Accounts', 'href' => 'javascript:void(0);'],
+                ['label' => (isset($accBank->bank_name) ? $accBank->bank_name : 'Storage'), 'href' => route('accounts.storage', $bank)],
+                ['label' => 'Requisition', 'href' => 'javascript:void(0);'],
+            ],
+            // The accounts sidebar lists every storage and badges the assets
+            // register; this page sits in the same shell, so it owes the
+            // partial the same data the transaction list gives it.
+            'banks' => AccBank::where('status', 1)->whereIn('audit_status', $audit_status)->orderBy('bank_name', 'ASC')->get(),
+            'openedAssets' => AccAssetRegister::where('active', 1)->count(),
+            'bank' => $accBank,
+            'reference' => $reference,
+            'req' => $client->requisition($reference),
+        ]);
+    }
+
     public function index($bank){
         $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         $csvfiles = AccCsvFile::where('acc_bank_id', $bank)->pluck('id')->unique()->toArray();
@@ -220,7 +252,27 @@ class StorageController extends Controller
                     'has_assets' => (isset($list->assets->id) && $list->assets->id > 0 ? 1 : 0),
                     'has_payments' => (isset($list->has_payments) && $list->has_payments > 0 ? 1 : 0),
                     'can_eidt' => $canEdit,
-                    'has_requisition' => (isset($list->requisition->budget_requisition_id) && $list->requisition->budget_requisition_id > 0 ? $list->requisition->budget_requisition_id : 0)
+                    /* `source` decides which system owns the link, not the
+                       presence of the id: a migrated link keeps its original
+                       budget_requisition_id for provenance, so nulling it is
+                       never needed and the conversion stays reversible. */
+                    'has_requisition' => (isset($list->requisition->budget_requisition_id)
+                        && $list->requisition->budget_requisition_id > 0
+                        && (! isset($list->requisition->source) || $list->requisition->source !== 'operations')
+                            ? $list->requisition->budget_requisition_id : 0),
+
+                    /* A transaction can also be spent against a requisition raised
+                       in the Operations system, which has no id in this database —
+                       it is identified by its reference, and the link points there. */
+                    'ops_requisition_ref' => (isset($list->requisition->source) && $list->requisition->source === 'operations'
+                        ? $list->requisition->ops_requisition_ref : ''),
+                    /* Shown here rather than sending the reader to the other
+                       system: the requisition is read over the API and rendered
+                       inside these screens, nested under this bank so the way
+                       back is the statement they came from. */
+                    'ops_requisition_url' => (isset($list->requisition->source) && $list->requisition->source === 'operations' && $list->requisition->ops_requisition_ref
+                        ? route('accounts.storage.ops.requisition', [$storage, $list->requisition->ops_requisition_ref])
+                        : '')
                 ];
                 $i++;
             endforeach;

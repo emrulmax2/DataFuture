@@ -1,0 +1,199 @@
+/*
+    Requisition detail, for requisitions held in the Operations system.
+
+    Everything is scoped under .bmo so this cannot leak into the rest of the
+    application, which is Tailwind-based. The palette matches the Operations
+    Budget Management module, because a reader following a transaction through
+    should recognise the document they land on.
+*/
+
+.bmo {
+    --bmo-ink: #141B2E;
+    --bmo-ink-2: #232C40;
+    --bmo-line: #E7E4DC;
+    --bmo-line-soft: #EEF0F3;
+    --bmo-pine: #1B5E4B;
+    --bmo-pine-deep: #164E3E;
+    --bmo-brass: #B08D57;
+    --bmo-muted: #6B7280;
+    --bmo-muted-2: #9AA1AC;
+
+    color: var(--bmo-ink);
+    font-size: 14px;
+}
+
+.bmo-card { background: #fff; border: 1px solid var(--bmo-line); border-radius: 14px; overflow: hidden; }
+
+.bmo-masthead { padding: 28px 32px 24px; background: linear-gradient(180deg, #FCFBF8, #fff); }
+
+.bmo-masthead-grid { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+
+.bmo-eyebrow {
+    font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+    font-weight: 600; color: var(--bmo-brass); margin-bottom: 6px;
+}
+
+.bmo-display {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 32px; font-weight: 600; line-height: 1.1; margin: 0; color: var(--bmo-ink);
+}
+
+.bmo-ref { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: var(--bmo-muted); margin-top: 4px; }
+
+.bmo-vendor { text-align: right; font-size: 13px; color: var(--bmo-muted); line-height: 1.6; max-width: 280px; }
+.bmo-vendor-name { font-family: Georgia, serif; font-size: 16px; font-weight: 600; color: var(--bmo-ink-2); }
+
+.bmo-status-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+.bmo-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 11px; border-radius: 99px;
+    font-size: 12px; font-weight: 600; white-space: nowrap;
+}
+
+.bmo-pill-submitted        { color: #475569; background: #EEF1F5; }
+.bmo-pill-first_approved   { color: #3730A3; background: #E9E8FB; }
+.bmo-pill-awaiting_payment { color: #92600A; background: #FBEFD9; }
+.bmo-pill-paid             { color: #14543E; background: #DCEBE4; }
+.bmo-pill-rejected         { color: #9B1C1C; background: #FBE7E7; }
+
+.bmo-open {
+    display: inline-flex; align-items: center; gap: 5px;
+    margin-left: auto; font-size: 12.5px; font-weight: 600; color: var(--bmo-pine);
+}
+.bmo-open:hover { color: var(--bmo-pine-deep); text-decoration: underline; }
+
+.bmo-rule { height: 1px; background: var(--bmo-brass); opacity: .5; border: 0; margin: 22px 0; }
+
+.bmo-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px 24px; }
+@media (max-width: 900px) { .bmo-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.bmo-label {
+    font-size: 10.5px; letter-spacing: .13em; text-transform: uppercase;
+    font-weight: 600; color: var(--bmo-muted-2);
+}
+
+.bmo-value { font-size: 13.5px; margin-top: 3px; }
+.bmo-strong { font-weight: 600; }
+
+/* Pipeline ------------------------------------------------------------- */
+
+.bmo-stepper-wrap { padding: 24px 32px; border-top: 1px solid var(--bmo-line-soft); background: #FCFBF8; }
+
+.bmo-stepper { display: flex; align-items: flex-start; }
+.bmo-step { flex: 1; position: relative; text-align: center; }
+
+.bmo-step-node {
+    width: 32px; height: 32px; margin: 0 auto 8px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; background: #F0EEE7; color: var(--bmo-muted-2);
+    font-size: 13px; font-weight: 700;
+    border: 2px solid transparent;
+    position: relative; z-index: 1;
+}
+
+.bmo-step-node.is-done   { background: var(--bmo-pine); color: #fff; }
+.bmo-step-node.is-active { background: #fff; color: var(--bmo-pine); border-color: var(--bmo-pine); }
+
+.bmo-step-label { font-size: 12px; font-weight: 600; color: var(--bmo-muted-2); }
+.bmo-step-label.is-on { color: var(--bmo-ink); }
+.bmo-step-who { font-size: 10.5px; color: var(--bmo-muted-2); }
+
+.bmo-step-line { position: absolute; top: 16px; left: 50%; right: -50%; height: 2px; background: var(--bmo-line); }
+.bmo-step-line.is-done { background: var(--bmo-pine); }
+
+.bmo-returned { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 12px; background: #FBE7E7; }
+.bmo-returned-mark {
+    width: 28px; height: 28px; border-radius: 50%; background: #C4302B; color: #fff;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.bmo-returned-title { font-size: 13px; font-weight: 600; color: #9B1C1C; }
+.bmo-returned-sub { font-size: 12px; color: #B4534E; }
+
+/* Sections ------------------------------------------------------------- */
+
+.bmo-section { padding: 24px 32px; border-top: 1px solid var(--bmo-line-soft); }
+
+.bmo-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; }
+@media (max-width: 800px) { .bmo-two { grid-template-columns: 1fr; } }
+
+.bmo-heading {
+    font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    font-weight: 600; color: var(--bmo-muted-2); margin-bottom: 12px;
+}
+
+.bmo-table { width: 100%; border-collapse: collapse; }
+
+.bmo-table thead th {
+    font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+    font-weight: 600; color: var(--bmo-muted-2);
+    text-align: left; padding: 0 0 10px;
+}
+
+.bmo-table :is(tbody, tfoot) td {
+    padding: 13px 0; border-top: 1px solid var(--bmo-line-soft);
+    font-size: 13.5px; vertical-align: top;
+}
+
+.bmo-table thead th.bmo-num, .bmo-table td.bmo-num { text-align: right; }
+.bmo-table td:not(:first-child), .bmo-table th:not(:first-child) { padding-left: 12px; }
+
+.bmo-table tfoot td { border-top: 2px solid var(--bmo-ink); }
+
+.bmo-total { font-family: Georgia, serif; font-size: 19px; font-weight: 600; }
+
+.bmo-person { margin-bottom: 14px; }
+
+.bmo-event { display: flex; gap: 12px; margin-bottom: 14px; }
+.bmo-event:last-child { margin-bottom: 0; }
+
+.bmo-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; background: var(--bmo-muted-2); }
+.bmo-dot-approved  { background: var(--bmo-pine); }
+.bmo-dot-paid      { background: var(--bmo-pine); }
+.bmo-dot-rejected  { background: #C4302B; }
+.bmo-dot-submitted { background: var(--bmo-muted-2); }
+
+.bmo-event-body { min-width: 0; flex: 1; }
+.bmo-event-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; }
+.bmo-event-meta { font-size: 11.5px; color: var(--bmo-muted); margin-top: 2px; }
+.bmo-event-note { font-size: 12.5px; color: var(--bmo-muted); font-style: italic; margin-top: 4px; }
+
+.bmo-tag { font-size: 11px; font-weight: 600; border-radius: 99px; padding: 2px 9px; white-space: nowrap; }
+.bmo-tag-approved  { color: #14543E; background: #DCEBE4; }
+.bmo-tag-paid      { color: #14543E; background: #DCEBE4; }
+.bmo-tag-rejected  { color: #9B1C1C; background: #FBE7E7; }
+.bmo-tag-submitted { color: #475569; background: #EEF1F5; }
+.bmo-tag-deleted, .bmo-tag-restored { color: #92600A; background: #FBEFD9; }
+
+/* Settlement ----------------------------------------------------------- */
+
+.bmo-settlement { background: #FBFAF7; }
+
+.bmo-code-link { font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; font-weight: 600; color: var(--bmo-pine); }
+.bmo-code-link:hover { text-decoration: underline; }
+
+.bmo-reconcile {
+    display: flex; gap: 24px; flex-wrap: wrap;
+    margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--bmo-line);
+    font-size: 13px; color: var(--bmo-muted);
+}
+.bmo-reconcile span:last-child { margin-left: auto; font-weight: 600; color: var(--bmo-ink); }
+.bmo-variance { color: #9B1C1C !important; }
+
+.bmo-force { margin-top: 12px; padding: 10px 14px; border-radius: 9px; background: #FBEFD9; color: #92600A; font-size: 12.5px; }
+
+/* Documents ------------------------------------------------------------ */
+
+.bmo-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.bmo-chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 6px 12px; border-radius: 8px;
+    border: 1px solid var(--bmo-line); background: #fff;
+    font-size: 12.5px; font-weight: 500;
+}
+
+.bmo-quiet { font-size: 13px; color: var(--bmo-muted); }
+
+.bmo-empty { padding: 40px 32px; text-align: center; }
+.bmo-empty-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+.bmo-empty p { font-size: 13px; color: var(--bmo-muted); max-width: 520px; margin: 0 auto; }

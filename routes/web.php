@@ -3429,6 +3429,12 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(StorageController::class)->group(function() {
         Route::get('accounts/storage/transactions/{id}', 'index')->name('accounts.storage'); 
+
+        /* A requisition held in the Operations system, reached from a
+           transaction on this bank's list and rendered here. Nested under the
+           bank so "back" returns to the statement the reader came from. */
+        Route::get('accounts/storage/transactions/{id}/requisition/{reference}', 'showOperationsRequisition')
+            ->name('accounts.storage.ops.requisition'); 
         Route::post('accounts/storage/store', 'store')->name('accounts.storage.trans.store'); 
         Route::get('accounts/storage/list', 'list')->name('accounts.storage.trans.list'); 
         Route::post('accounts/storage/edit', 'edit')->name('accounts.storage.trans.edit'); 
@@ -3902,7 +3908,8 @@ Route::middleware('auth')->group(function() {
         Route::post('budget-management/store-requisition', 'storeRequisition')->name('budget.management.store.req'); 
         Route::post('budget-management/edit-requisition', 'editRequisition')->name('budget.management.edit.req'); 
         Route::post('budget-management/update-requisition', 'updateRequisition')->name('budget.management.update.req'); 
-        Route::get('budget-management/requisition/{requisition}', 'showRequisition')->name('budget.management.show.req'); 
+        Route::get('budget-management/requisition/{requisition}', 'showRequisition')->name('budget.management.show.req');
+ 
         Route::post('budget-management/update-requisition-status', 'updateRequisitionStatus')->name('budget.management.update.req.status'); 
         Route::post('budget-management/get-filtered-transactions', 'getFilteredTransactions')->name('budget.management.get.filtered.transactions'); 
         Route::post('budget-management/get-transaction', 'getTransaction')->name('budget.management.get.transaction'); 

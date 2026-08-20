@@ -275,6 +275,7 @@ export default defineConfig({
                 'resources/js/accounts.js',
                 'resources/js/accounts-summary.js',
                 'resources/js/accounts-storage.js',
+                'resources/css/budget-operations.css',
                 'resources/js/accounts-report.js',
                 'resources/js/accounts-csv.js',
 

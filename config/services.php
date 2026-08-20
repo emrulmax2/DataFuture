@@ -70,4 +70,22 @@ return [
 
 
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | LCC Operations
+    |--------------------------------------------------------------------------
+    | Budget Management now lives in the Operations system. Transactions settled
+    | against a requisition raised there link back to it from the accounts
+    | screens, so this is the base URL those links are built from.
+    */
+    'operations' => [
+        'url' => env('OPERATIONS_BASE_URL', 'https://operations.lcc.ac.uk'),
+
+        // Shared secret presented as X-Operations-Key when reading a requisition.
+        'api_key' => env('OPERATIONS_API_KEY'),
+        'timeout' => (int) env('OPERATIONS_API_TIMEOUT', 10),
+        'verify_tls' => env('OPERATIONS_API_VERIFY_TLS', true),
+    ],
+
 ];
