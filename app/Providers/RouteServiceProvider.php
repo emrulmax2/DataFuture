@@ -48,5 +48,19 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
+
+        /*
+         * Server-to-server synchronisation.
+         *
+         * The 60/minute above is sized for a browser and is keyed by IP, so
+         * every sync command on the Operations server shares one budget — and
+         * an import that fetches a few hundred files one at a time exhausts it
+         * in seconds. These routes are already gated by OAuth client
+         * credentials and a scope, so the limit here exists to stop a runaway
+         * loop, not to police a caller that has already proved who it is.
+         */
+        RateLimiter::for('sms-sync', function (Request $request) {
+            return Limit::perMinute(1200)->by($request->ip());
+        });
     }
 }
