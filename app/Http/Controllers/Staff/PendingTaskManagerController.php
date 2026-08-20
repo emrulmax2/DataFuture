@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Staff;
 use App\Exports\ArrayCollectionExport;
 use App\Exports\StudentEmailIdTaskExport;
 use App\Http\Controllers\Controller;
+use App\Services\StudentIdCardPalette;
 use App\Http\Requests\BulkStatusUpdateReqest;
 use App\Http\Requests\InterviewerUnlockDirectRequest;
 use App\Http\Requests\PearsonRegistrationConfirmationRequest;
@@ -849,26 +850,39 @@ class PendingTaskManagerController extends Controller
             $photoURL = asset('build/assets/images/user_avatar.png');
         }
 
+        $courseId = (isset($student->activeCR->creation->course_id) ? $student->activeCR->creation->course_id : 0);
+        $ringColour = StudentIdCardPalette::borderColour($courseId);
+
+        $downloadIcon = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M4 20h16"></path></svg>';
+
+        /* Markup for the redesigned Task Manager dialog: a sticky toolbar over the
+           card itself. The card keeps its legacy class names because the artwork
+           offsets are styled against them, and #theIDCard_{reg_no} is what
+           html2canvas captures on download. */
         $PDFHTML = '';
-        $PDFHTML .= '<div class="printBtns">';
-            $PDFHTML .= '<button data-id="'.$student->registration_no.'" id="thePrintBtn_'.$student->registration_no.'" class="btn btn-success text-white thePrintBtn"><i data-lucide="download-cloud" class="w-4 h-4 mr-2"></i> Download '.$student->registration_no.'</button>';
-        $PDFHTML .= '</div>';
-        $PDFHTML .= '<div class="theIDCard" id="theIDCard_'.$student->registration_no.'" style="background-image: url('.asset('build/assets/images/id_card_bg_new.jpg').');">';
-            $PDFHTML .= '<div class="profilePicWrap">';
-                $PDFHTML .= '<span class="course_'.$student->activeCR->creation->course_id.'" style="background-image: url(\''.$photoURL.'\')">';
-                    //$PDFHTML .= '<img src="'.$student->photo_url.'" alt=""/>';
-                $PDFHTML .= '</span>';
+        $PDFHTML .= '<div class="tkm-idcard">';
+            $PDFHTML .= '<div class="tkm-idcard__bar">';
+                $PDFHTML .= '<span class="tkm-idcard__reg">'.e($student->registration_no).'</span>';
+                $PDFHTML .= '<button type="button" data-id="'.e($student->registration_no).'" id="thePrintBtn_'.e($student->registration_no).'" class="tkm-btn tkm-btn--green thePrintBtn">'.$downloadIcon.'Download card</button>';
             $PDFHTML .= '</div>';
-            $PDFHTML .= '<div class="profileInfWrap">';
-                $PDFHTML .= '<h2 class="uppercase firstName">'.$student->first_name.'</h2>';
-                $PDFHTML .= '<h2 class="uppercase firstName">'.$student->last_name.'</h2>';
-            $PDFHTML .= '</div>';
-            $PDFHTML .= '<div class="profileIdentificationWrap">';
-                $PDFHTML .= '<p class="registrationNo">'.$student->registration_no.'</p>';
-                $PDFHTML .= '<p class="expireDate">Exp Date: '.(isset($student->crel->creation->availability[0]->course_end_date) && !empty($student->crel->creation->availability[0]->course_end_date) ? date('F Y', strtotime($student->crel->creation->availability[0]->course_end_date)) : '').'</p>';
-            $PDFHTML .= '</div>';
-            $PDFHTML .= '<div class="qrcodeCol">';
-                $PDFHTML .= QrCode::format('svg')->size(106)->generate($student->registration_no);
+            $PDFHTML .= '<div class="tkm-idcard__stage">';
+                $PDFHTML .= '<div class="theIDCard" id="theIDCard_'.$student->registration_no.'" style="background-image: url('.asset('build/assets/images/id_card_bg_new.jpg').');">';
+                    $PDFHTML .= '<div class="profilePicWrap">';
+                        $PDFHTML .= '<span class="course_'.$courseId.'" style="border-color: '.$ringColour.'; background-color: '.$ringColour.'; background-image: url(\''.$photoURL.'\')">';
+                        $PDFHTML .= '</span>';
+                    $PDFHTML .= '</div>';
+                    $PDFHTML .= '<div class="profileInfWrap">';
+                        $PDFHTML .= '<h2 class="uppercase firstName">'.e($student->first_name).'</h2>';
+                        $PDFHTML .= '<h2 class="uppercase firstName">'.e($student->last_name).'</h2>';
+                    $PDFHTML .= '</div>';
+                    $PDFHTML .= '<div class="profileIdentificationWrap">';
+                        $PDFHTML .= '<p class="registrationNo">'.e($student->registration_no).'</p>';
+                        $PDFHTML .= '<p class="expireDate">Exp Date: '.(isset($student->crel->creation->availability[0]->course_end_date) && !empty($student->crel->creation->availability[0]->course_end_date) ? date('F Y', strtotime($student->crel->creation->availability[0]->course_end_date)) : '').'</p>';
+                    $PDFHTML .= '</div>';
+                    $PDFHTML .= '<div class="qrcodeCol">';
+                        $PDFHTML .= QrCode::format('svg')->size(106)->generate($student->registration_no);
+                    $PDFHTML .= '</div>';
+                $PDFHTML .= '</div>';
             $PDFHTML .= '</div>';
         $PDFHTML .= '</div>';
 

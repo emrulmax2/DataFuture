@@ -21,10 +21,14 @@
                     </div>
                 </div>
                 <div class="hr-live-stats" aria-label="Live attendance summary">
-                    <span class="hr-live-stat hr-live-stat--working"><span></span><strong id="liveCountWorking">{{ $liveMeta['working'] ?? 0 }}</strong> Working</span>
-                    <span class="hr-live-stat hr-live-stat--absent"><span></span><strong id="liveCountAbsent">{{ $liveMeta['absent'] ?? 0 }}</strong> Awaiting / Absent</span>
-                    <span class="hr-live-stat hr-live-stat--off"><span></span><strong id="liveCountOff">{{ $liveMeta['off'] ?? 0 }}</strong> Not working</span>
-                    <span class="hr-live-stat hr-live-stat--leave"><span></span><strong id="liveCountLeave">{{ $liveMeta['leave'] ?? 0 }}</strong> On leave</span>
+                    <button type="button" data-live-filter="" aria-pressed="true" title="Show all staff" class="hr-live-stat hr-live-stat--all hr-live-stat--active"><span></span><strong id="liveCountAll">{{ $liveMeta['shownCount'] ?? 0 }}</strong> All</button>
+                    <button type="button" data-live-filter="working" aria-pressed="false" title="Filter working staff" class="hr-live-stat hr-live-stat--working"><span></span><strong id="liveCountWorking">{{ $liveMeta['working'] ?? 0 }}</strong> Working</button>
+                    <button type="button" data-live-filter="absent" aria-pressed="false" title="Filter awaiting / absent staff" class="hr-live-stat hr-live-stat--absent"><span></span><strong id="liveCountAbsent">{{ $liveMeta['absent'] ?? 0 }}</strong> Awaiting / Absent</button>
+                    {{-- Hidden on HR request — "Not Working Today" staff are not listed in the table.
+                         Uncomment the button below to bring this filter chip back.
+                    <button type="button" data-live-filter="off" aria-pressed="false" title="Filter not working staff" class="hr-live-stat hr-live-stat--off"><span></span><strong id="liveCountOff">{{ $liveMeta['off'] ?? 0 }}</strong> Not working</button>
+                    --}}
+                    <button type="button" data-live-filter="leave" aria-pressed="false" title="Filter staff on leave" class="hr-live-stat hr-live-stat--leave"><span></span><strong id="liveCountLeave">{{ $liveMeta['leave'] ?? 0 }}</strong> On leave</button>
                 </div>
             </section>
 

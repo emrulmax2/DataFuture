@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Services\StudentIdCardPalette;
 use App\Models\DocumentSettings;
 use App\Models\Student;
 use App\Models\StudentDocument;
@@ -127,13 +128,16 @@ class UploadController extends Controller
             $photoURL = asset('build/assets/images/user_avatar.png');
         }
 
+        $courseId = (isset($student->activeCR->creation->course_id) ? $student->activeCR->creation->course_id : 0);
+        $ringColour = StudentIdCardPalette::borderColour($courseId);
+
         $PDFHTML = '';
         $PDFHTML .= '<div class="printBtns">';
             $PDFHTML .= '<button data-id="'.$student->registration_no.'" id="thePrintBtn_'.$student->registration_no.'" class="btn btn-success text-white thePrintBtn"><i data-lucide="download-cloud" class="w-4 h-4 mr-2"></i> Download '.$student->registration_no.'</button>';
         $PDFHTML .= '</div>';
         $PDFHTML .= '<div class="theIDCard" id="theIDCard_'.$student->registration_no.'" style="background-image: url('.asset('build/assets/images/id_card_bg_new.jpg').');">';
             $PDFHTML .= '<div class="profilePicWrap">';
-                $PDFHTML .= '<span class="course_'.$student->activeCR->creation->course_id.'" style="background-image: url(\''.$photoURL.'\')">';
+                $PDFHTML .= '<span class="course_'.$courseId.'" style="border-color: '.$ringColour.'; background-color: '.$ringColour.'; background-image: url(\''.$photoURL.'\')">';
                     //$PDFHTML .= '<img src="'.$student->photo_url.'" alt=""/>';
                 $PDFHTML .= '</span>';
             $PDFHTML .= '</div>';

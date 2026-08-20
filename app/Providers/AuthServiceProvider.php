@@ -27,6 +27,9 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         Passport::tokensCan([
+            'sms.budget.read' => 'Export budget management data for external synchronization.',
+            'sms.acc-transactions.read' => 'Search accounts transactions for budget requisition settlement.',
+            'sms.acc-transactions.write' => 'Link and release accounts transactions against external budget requisitions.',
             'sms.users.sync' => 'Read users for SMS system synchronization.',
             'sms.applicants.read' => 'Read current applicants for external synchronization.',
             'sms.courses.read' => 'Read courses for external synchronization.',
@@ -39,6 +42,8 @@ class AuthServiceProvider extends ServiceProvider
             'sms.rooms.read' => 'Read rooms for external synchronization.',
             'sms.book-locations.read' => 'Read book locations for external synchronization.',
             'sms.library-books.read' => 'Read library books for external synchronization.',
+            'sms.file-manager.read' => 'Read file manager folders and documents for external synchronization.',
+            'sms.user-mobiles.read' => 'Read staff mobile numbers for external synchronization.',
         ]);
         
         Passport::tokensExpireIn(now()->addDays(15));

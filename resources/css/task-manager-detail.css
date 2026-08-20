@@ -1072,6 +1072,111 @@ html:has(> body.tkm-body) { background: #F7F4ED; }
 .tkm-toast__ico { flex: none; color: #0F4C33; }
 .tkm-toast--bad .tkm-toast__ico { color: #8E2C22; }
 
+/* ------------------------------------------------------------------ */
+/* ID card dialog                                                      */
+/* ------------------------------------------------------------------ */
+/* The card body is served by PendingTaskManagerController@downloadIdCard.
+   Its styling used to live under `#downloadIDCard` in datafuture.css — an id
+   this dialog does not have — which is why the card rendered unstyled here.
+   Everything below is the same design, re-scoped to the dialog.
+
+   id_card_bg_new.jpg is 663x1038 and every offset in the card is measured
+   against that artwork, so the card renders 1:1 and the dialog body scrolls.
+   Scaling it with a transform would ship a blurry download: html2canvas
+   captures this element at its rendered size. */
+
+/* 663px card + room for the body's vertical scrollbar. At exactly 663px the
+   scrollbar eats into the content box and the card scrolls sideways too. */
+[data-tkm-modal="idcard"] .tkm-modal__box { width: 703px; }
+[data-tkm-modal="idcard"] .tkm-modal__body { padding: 0; background: #E9E3D5; }
+
+.tkm-idcard__bar {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    background: #F7F2E6;
+    border-bottom: 1px solid #EDE5D0;
+}
+.tkm-idcard__reg {
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    color: #6E6754;
+    font-variant-numeric: tabular-nums;
+}
+.tkm-idcard__bar .thePrintBtn { margin-left: auto; }
+.tkm-idcard__stage { display: flex; justify-content: center; }
+
+[data-tkm-modal="idcard"] .theIDCard {
+    flex: none;
+    width: 663px;
+    height: 1038px;
+    background-color: #1A2C44;
+    background-repeat: no-repeat;
+    background-position: center top;
+    font-family: "Roboto", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: normal;
+    color: #FFFFFF;
+}
+[data-tkm-modal="idcard"] .profilePicWrap {
+    padding: 251px 0 0;
+    margin: 0;
+    text-align: center;
+}
+[data-tkm-modal="idcard"] .profilePicWrap span {
+    display: inline-block;
+    width: 294px;
+    height: 294px;
+    /* Ring colour is set inline per course by StudentIdCardPalette; these two
+       only show if that inline style is missing. */
+    border: 13px solid #D21A22;
+    border-radius: 50%;
+    background-color: #D21A22;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    overflow: hidden;
+}
+[data-tkm-modal="idcard"] .profileInfWrap {
+    margin: 0;
+    padding: 12px 0 0;
+    font-size: 44px;
+    font-weight: 700;
+    line-height: 100%;
+    color: #1A1A1A;
+    text-align: center;
+    text-transform: uppercase;
+}
+[data-tkm-modal="idcard"] .profileInfWrap .firstName {
+    margin: 0 0 8px;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    color: inherit;
+}
+[data-tkm-modal="idcard"] .profileIdentificationWrap {
+    margin: 0;
+    padding: 76px 0 0;
+    font-size: 31px;
+    line-height: 100%;
+    color: #1A1A1A;
+    text-align: center;
+}
+[data-tkm-modal="idcard"] .profileIdentificationWrap .registrationNo { margin: 0 0 8px; letter-spacing: 2px; }
+[data-tkm-modal="idcard"] .profileIdentificationWrap .expireDate { margin: 0; }
+[data-tkm-modal="idcard"] .qrcodeCol {
+    margin: 0;
+    padding: 28px 120px 0 0;
+    text-align: right;
+}
+[data-tkm-modal="idcard"] .qrcodeCol svg { display: inline-block; }
+
 /* =================================================================
    Print
    ================================================================= */
