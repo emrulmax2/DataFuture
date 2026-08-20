@@ -77,7 +77,10 @@
             $headerLogo = Storage::disk('local')->url('public/'.$darkHeaderLogo);
         }
 
-        $hideGlobalHeader = request()->routeIs('hr.portal') || request()->is('hr/portal');
+        /* Screens that render their own `components/hr-dashboard-topbar` supply the
+           header and the breadcrumb strip themselves — drawing the global one as
+           well stacks two headers on top of each other. */
+        $hideGlobalHeader = request()->routeIs('hr.portal', 'employee.create') || request()->is('hr/portal');
         $searchConfig = \App\Support\GlobalSearch::forCurrentUser();
         $canSearchApplicants = $searchConfig['applicants'];
         $canSearchStudents = $searchConfig['students'];
