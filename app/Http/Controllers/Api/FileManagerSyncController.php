@@ -111,7 +111,7 @@ class FileManagerSyncController extends Controller
             ->get()
             ->groupBy('document_folder_id');
 
-        $employees = DB::table('employees')->pluck('email', 'id');
+        $employees = $this->employeeLoginEmails();
 
         return DB::table('document_folders')
             ->when(! $withTrashed, fn ($q) => $q->whereNull('deleted_at'))
@@ -256,7 +256,7 @@ class FileManagerSyncController extends Controller
             return [];
         }
 
-        $employees = DB::table('employees')->pluck('email', 'id');
+        $employees = $this->employeeLoginEmails();
 
         return $reminders->map(function ($r) use ($employees, $emails) {
             $recipients = DB::table('document_info_reminder_employees')
@@ -297,6 +297,23 @@ class FileManagerSyncController extends Controller
     }
 
     /** user id => email, for created_by / updated_by columns. */
+    /**
+     * Employee id => the email that identifies them in the other system.
+     *
+     * `employees.email` is a personal address; the account people actually sign
+     * in with lives on `users`. Operations matches staff by their login email,
+     * so sending the employee address silently drops every permission grant it
+     * cannot resolve. The employee address is kept only as a fallback for
+     * records with no user account behind them.
+     */
+    private function employeeLoginEmails()
+    {
+        return DB::table('employees as e')
+            ->leftJoin('users as u', 'u.id', '=', 'e.user_id')
+            ->get(['e.id', 'e.email as employee_email', 'u.email as user_email'])
+            ->mapWithKeys(fn ($r) => [$r->id => $r->user_email ?: $r->employee_email]);
+    }
+
     private function emailLookup(): array
     {
         return DB::table('users')->pluck('email', 'id')->all();
