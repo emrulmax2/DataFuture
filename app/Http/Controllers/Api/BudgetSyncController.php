@@ -156,15 +156,24 @@ class BudgetSyncController extends Controller
                 ];
             })->values(),
 
+            /* `approver` is a STAGE flag here (1 = first approver, 2 = final),
+               not a user id — the person who acted is `created_by`. Emitted
+               under distinct names so the far side cannot confuse the two. */
             'history' => DB::table('budget_requisition_histories')->orderBy('id')->get()->map(fn ($h) => [
                 'id'                    => (int) $h->id,
                 'budget_requisition_id' => (int) $h->budget_requisition_id,
-                'approver'              => $h->approver ? (int) $h->approver : null,
+                'stage'                 => $h->approver ? (int) $h->approver : null,
                 'status'                => (int) $h->status,
                 'note'                  => $h->note,
-                'created_by'            => $h->created_by ? (int) $h->created_by : null,
+                'actor_id'              => $h->created_by ? (int) $h->created_by : null,
                 'created_at'            => $h->created_at,
             ])->values(),
+
+            /* The payment step is never written to the history table — 
+               markAsCompleted() only flips the status — so it is reconstructed
+               here from who linked the transactions, or who forced it through.
+               Without this a paid requisition shows no record of being paid. */
+            'settlements' => $this->settlements(),
 
             // Settled requisitions carry their accounts transactions with them.
             'transactions' => DB::table('budget_requisition_transactions as brt')
@@ -188,6 +197,42 @@ class BudgetSyncController extends Controller
                     'amount'                => (float) $t->transaction_amount,
                 ])->values(),
         ]);
+    }
+
+    /**
+     * Who settled each paid requisition, and when.
+     *
+     * Preference order: the person who forced it complete, then whoever linked
+     * the first transaction to it (that action *is* the settlement), then the
+     * last person to touch the row.
+     */
+    protected function settlements(): array
+    {
+        $firstLink = DB::table('budget_requisition_transactions')
+            ->select('budget_requisition_id', DB::raw('MIN(id) AS first_id'))
+            ->groupBy('budget_requisition_id')
+            ->pluck('first_id', 'budget_requisition_id');
+
+        $links = DB::table('budget_requisition_transactions')
+            ->whereIn('id', $firstLink->values()->all())
+            ->get()
+            ->keyBy('budget_requisition_id');
+
+        return DB::table('budget_requisitions')
+            ->where('active', 4)
+            ->get()
+            ->map(function ($r) use ($links) {
+                $link = $links[$r->id] ?? null;
+
+                return [
+                    'budget_requisition_id' => (int) $r->id,
+                    'by'     => (int) ($r->force_completed_by ?: ($link->created_by ?? $r->updated_by ?: 0)) ?: null,
+                    'at'     => $r->force_completed_at ?: ($link->created_at ?? $r->updated_at),
+                    'forced' => (bool) $r->is_force_complete,
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     /** Stream one requisition document. */

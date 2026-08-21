@@ -39,9 +39,7 @@
             ['programme_dashboard', 'Manager', 'layout-dashboard', 'programme.dashboard', null],
             ['access_account', 'Accounts', 'wallet', 'accounts', null],
             ['library_management', 'Library', 'library', 'library.management.index', null],
-            ['budget_manager', 'Budget', 'pound-sterling', 'budget.management', null],
             ['news_events', 'News & Events', 'megaphone', 'news.updates', null],
-            ['file_manager', 'File Manager', 'folder-open', 'file.manager', null],
         ];
 
         foreach ($lccdGated as [$lccdKey, $lccdLabel, $lccdIcon, $lccdRoute, $lccdCount]) {
@@ -562,6 +560,23 @@
         @if($work_history_lock && $work_history_lock_no > 0 && (Session::has('work_history_lock_first_time') == null || Session::get('work_history_lock_first_time') != 1) && ((!in_array(auth()->user()->last_login_ip, $venue_ips) && isset($home_work) && $home_work) || (in_array(auth()->user()->last_login_ip, $venue_ips) && isset($desktop_login) && $desktop_login)))
         @php
             $lccdOnBreak = $work_history_lock_no != 1;
+
+            /* The clock face is drawn from the same timestamp as the digits
+               below it, so the two can never disagree. Angles run clockwise
+               from 12, and the hour hand carries the minutes with it so it
+               sits between hours instead of snapping from one to the next. */
+            $lccdClockAt = time();
+            $lccdClockMinute = (int) date('i', $lccdClockAt);
+            $lccdHourAngle = ((int) date('G', $lccdClockAt) % 12) * 30 + $lccdClockMinute * 0.5;
+            $lccdMinuteAngle = $lccdClockMinute * 6;
+
+            /* Hand tip on the 48x48 face. Lengths keep the original drawing's
+               proportions: both stay inside the tick marks at r=16. */
+            $lccdHandTip = function ($angle, $length) {
+                $radians = deg2rad($angle);
+
+                return sprintf('%.2f %.2f', 24 + $length * sin($radians), 24 - $length * cos($radians));
+            };
         @endphp
         <!-- BEGIN: Clock-in Confirm Modal -->
         <div id="attendanceHistoryLocModal" class="modal lccd-modal lccd-modal--confirm lccd-modal--{{ $lccdOnBreak ? 'gold' : 'danger' }}" tabindex="-1" aria-hidden="true">
@@ -572,13 +587,13 @@
                             <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
                                 <circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="2.4"/>
                                 <path d="M24 5 V8 M43 24 H40 M24 43 V40 M5 24 H8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity=".45"/>
-                                <path d="M24 24 L15.4 21.2" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
-                                <path d="M24 24 L16.4 34.5" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/>
+                                <path d="M24 24 L{{ $lccdHandTip($lccdHourAngle, 9) }}" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+                                <path d="M24 24 L{{ $lccdHandTip($lccdMinuteAngle, 13) }}" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/>
                                 <circle cx="24" cy="24" r="1.9" fill="currentColor"/>
                             </svg>
                         </div>
-                        <div class="lccd-modal__time">{{ date('g:i A') }}</div>
-                        <div class="lccd-modal__meta">{{ date('l, j F') }} &middot; {{ $lccdOnBreak ? 'On break' : 'Not clocked in' }}</div>
+                        <div class="lccd-modal__time">{{ date('g:i A', $lccdClockAt) }}</div>
+                        <div class="lccd-modal__meta">{{ date('l, j F', $lccdClockAt) }} &middot; {{ $lccdOnBreak ? 'On break' : 'Not clocked in' }}</div>
                         <p class="lccd-modal__body">{{ $lccdOnBreak ? 'It seems you\'re on break. Are you returning to work now?' : 'Looks like you are not clocked in. Ready to start today\'s shift?' }}</p>
 
                         <button type="button" data-value="{{$work_history_lock_no}}" class="agreeWith actionBtn lccd-modal__primary">{{ $lccdOnBreak ? 'Return to work' : 'Clock in now' }}</button>

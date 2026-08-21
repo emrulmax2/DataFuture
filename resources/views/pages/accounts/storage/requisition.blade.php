@@ -127,7 +127,12 @@
                         @else
                             <div class="bmo-stepper">
                                 @foreach ($stages as $stage => $who)
-                                    @php $i = $loop->index; $done = $i < $reached - 1; $active = $i === $reached - 1; @endphp
+                                    @php
+                                        /* Paid ends the pipeline: every step is
+                                           finished, none is still in progress. */
+                                        $finished = ($req['status'] ?? null) === 'paid' ? count($stages) : $reached - 1;
+                                        $i = $loop->index; $done = $i < $finished; $active = $i === $finished;
+                                    @endphp
                                     <div class="bmo-step">
                                         <div class="bmo-step-node {{ $done ? 'is-done' : ($active ? 'is-active' : '') }}">
                                             @if ($done)

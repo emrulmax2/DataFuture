@@ -438,30 +438,6 @@
                                                         </div>
                                                         <div class="col-span-12 sm:col-span-3">
                                                             <div class="flex items-center">
-                                                                <input id="dashboard-budget-{{ $department->id }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][dashboard_budget]" {{ isset($permissions[$department->id]['dashboard_budget']) && $permissions[$department->id]['dashboard_budget'] ? 'checked' : '' }}>
-                                                                <label for="dashboard-budget-{{ $department->id }}" class="ml-2 font-medium">Budget Management</label>
-                                                            </div>
-                                                            <div class="pl-8 mt-2">
-                                                                <div class="flex items-center mt-2">
-                                                                    <input id="budget-edit-{{ $department->id }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][dashboard_budget_edit]" {{ isset($permissions[$department->id]['dashboard_budget_edit']) && $permissions[$department->id]['dashboard_budget_edit'] ? 'checked' : '' }}>
-                                                                    <label for="budget-edit-{{ $department->id }}" class="ml-2">Edit Budget</label>
-                                                                </div>
-                                                                <div class="flex items-center mt-2">
-                                                                    <input id="budget-delete-{{ $department->id }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][dashboard_budget_delete]" {{ isset($permissions[$department->id]['dashboard_budget_delete']) && $permissions[$department->id]['dashboard_budget_delete'] ? 'checked' : '' }}>
-                                                                    <label for="budget-delete-{{ $department->id }}" class="ml-2">Delete Settings</label>
-                                                                </div>
-                                                                <div class="flex items-center mt-2">
-                                                                    <input id="budget-settings-{{ $department->id }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][dashboard_budget_settings]" {{ isset($permissions[$department->id]['dashboard_budget_settings']) && $permissions[$department->id]['dashboard_budget_settings'] ? 'checked' : '' }}>
-                                                                    <label for="budget-settings-{{ $department->id }}" class="ml-2">Budget Settings</label>
-                                                                </div>
-                                                                <div class="flex items-center mt-2">
-                                                                    <input id="budget-reports-{{ $department->id }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][dashboard_budget_reports]" {{ isset($permissions[$department->id]['dashboard_budget_reports']) && $permissions[$department->id]['dashboard_budget_reports'] ? 'checked' : '' }}>
-                                                                    <label for="budget-reports-{{ $department->id }}" class="ml-2">Budget Reports</label>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-span-12 sm:col-span-3">
-                                                            <div class="flex items-center">
                                                                 <input id="dashboard-file-manager-{{ $department->id }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][dashboard_file_manager]" {{ isset($permissions[$department->id]['dashboard_file_manager']) && $permissions[$department->id]['dashboard_file_manager'] ? 'checked' : '' }}>
                                                                 <label for="dashboard-file-manager-{{ $department->id }}" class="ml-2 font-medium">File Manager</label>
                                                             </div>
