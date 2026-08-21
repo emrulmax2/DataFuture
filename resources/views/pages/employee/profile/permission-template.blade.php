@@ -281,30 +281,6 @@
             </div>
             <div class="col-span-12 sm:col-span-3">
                 <div class="form-check form-switch">
-                    <input {{ $on('dashboard_budget') }} id="dashboard-budget-{{ $d }}" class="form-check-input parentPermissionItem" type="checkbox" value="1" name="permissions[{{ $d }}][dashboard_budget]">
-                    <label class="form-check-label ml-4" for="dashboard-budget-{{ $d }}">Budget Management</label>
-                </div>
-                <div class="childrenPermissionWrap pt-4 pl-12">
-                    <div class="form-check form-switch mb-4">
-                        <input {{ $on('dashboard_budget_edit') }} {{ $off('dashboard_budget') }} id="budget-edit-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][dashboard_budget_edit]">
-                        <label class="form-check-label ml-4" for="budget-edit-{{ $d }}">Edit Budget</label>
-                    </div>
-                    <div class="form-check form-switch mb-4">
-                        <input {{ $on('dashboard_budget_delete') }} {{ $off('dashboard_budget') }} id="budget-delete-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][dashboard_budget_delete]">
-                        <label class="form-check-label ml-4" for="budget-delete-{{ $d }}">Delete Settings</label>
-                    </div>
-                    <div class="form-check form-switch mb-4">
-                        <input {{ $on('dashboard_budget_settings') }} {{ $off('dashboard_budget') }} id="budget-settings-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][dashboard_budget_settings]">
-                        <label class="form-check-label ml-4" for="budget-settings-{{ $d }}">Budget Settings</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input {{ $on('dashboard_budget_reports') }} {{ $off('dashboard_budget') }} id="budget-reports-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][dashboard_budget_reports]">
-                        <label class="form-check-label ml-4" for="budget-reports-{{ $d }}">Budget Reports</label>
-                    </div>
-                </div>
-            </div>
-            <div class="col-span-12 sm:col-span-3">
-                <div class="form-check form-switch">
                     <input {{ $on('dashboard_news') }} id="dashboard-news-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][dashboard_news]">
                     <label class="form-check-label ml-4" for="dashboard-news-{{ $d }}">News &amp; Events</label>
                 </div>
