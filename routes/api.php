@@ -73,28 +73,28 @@ Route::middleware(['client.credentials:sms.venues.read'])->get('/venues/sync', [
 Route::middleware(['client.credentials:sms.rooms.read'])->get('/rooms/sync', [RoomSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.book-locations.read'])->get('/book-locations/sync', [BookLocationSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.library-books.read'])->get('/library/books/sync', [LibraryBookSyncController::class, 'index']);
-Route::middleware(['client.credentials:sms.user-mobiles.read'])->withoutMiddleware('throttle:api')->middleware('throttle:sms-sync')->get('/users/mobiles/sync', [UserMobileSyncController::class, 'index']);
-Route::middleware(['client.credentials:sms.file-manager.read'])->withoutMiddleware('throttle:api')->middleware('throttle:sms-sync')->get('/file-manager/sync', [FileManagerSyncController::class, 'index']);
+Route::middleware(['client.credentials:sms.user-mobiles.read', 'throttle:sms-sync'])->withoutMiddleware('throttle:api')->get('/users/mobiles/sync', [UserMobileSyncController::class, 'index']);
+Route::middleware(['client.credentials:sms.file-manager.read', 'throttle:sms-sync'])->withoutMiddleware('throttle:api')->get('/file-manager/sync', [FileManagerSyncController::class, 'index']);
 
 /* One-off (and repeatable) export of the Budget Management data set, for the
    Operations rebuild of this module. */
-Route::middleware(['client.credentials:sms.budget.read'])->withoutMiddleware('throttle:api')->middleware('throttle:sms-sync')->group(function () {
+Route::middleware(['client.credentials:sms.budget.read', 'throttle:sms-sync'])->withoutMiddleware('throttle:api')->group(function () {
     Route::get('/budget/sync', [BudgetSyncController::class, 'index']);
     Route::get('/budget/sync/document/{id}', [BudgetSyncController::class, 'download'])->whereNumber('id');
 });
 
 /* Accounts transactions for the Operations Budget Management module: search
    what is still unspent, then claim it when a requisition is settled. */
-Route::middleware(['client.credentials:sms.acc-transactions.read'])->withoutMiddleware('throttle:api')->middleware('throttle:sms-sync')->group(function () {
+Route::middleware(['client.credentials:sms.acc-transactions.read', 'throttle:sms-sync'])->withoutMiddleware('throttle:api')->group(function () {
     Route::get('/budget/transactions/search',  [BudgetTransactionController::class, 'search']);
     Route::get('/budget/transactions/{id}',    [BudgetTransactionController::class, 'show'])->whereNumber('id');
 });
 
-Route::middleware(['client.credentials:sms.acc-transactions.write'])->withoutMiddleware('throttle:api')->middleware('throttle:sms-sync')->group(function () {
+Route::middleware(['client.credentials:sms.acc-transactions.write', 'throttle:sms-sync'])->withoutMiddleware('throttle:api')->group(function () {
     Route::post('/budget/transactions/link',   [BudgetTransactionController::class, 'link']);
     Route::post('/budget/transactions/unlink', [BudgetTransactionController::class, 'unlink']);
 });
-Route::middleware(['client.credentials:sms.file-manager.read'])->withoutMiddleware('throttle:api')->middleware('throttle:sms-sync')->get('/file-manager/sync/download/{type}/{id}', [FileManagerSyncController::class, 'download'])
+Route::middleware(['client.credentials:sms.file-manager.read', 'throttle:sms-sync'])->withoutMiddleware('throttle:api')->get('/file-manager/sync/download/{type}/{id}', [FileManagerSyncController::class, 'download'])
     ->whereIn('type', ['info', 'version', 'attachment'])->whereNumber('id');
 
 // Attach a finalised interview-outcome PDF to an applicant and complete their
