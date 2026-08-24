@@ -19,13 +19,34 @@
             'U' => ['color' => '#B3392E', 'bg' => '#FBEDEB'],
             'A' => ['color' => '#B3392E', 'bg' => '#FBEDEB'],
         ];
-        $completedCount = 0; $outstandingCount = 0; $totalCount = 0;
+        $statusMeta = [
+            'core' => 'sp-status--core',
+            'specialist' => 'sp-status--specialist',
+            'optional' => 'sp-status--optional',
+        ];
+        $completedCount = 0; $outstandingCount = 0; $totalCount = 0; $totalCreditsAchieved = 0;
+        $termGroups = [];
         if(!empty($dataSet)):
             foreach($dataSet as $mName => $rSet):
                 $totalCount++;
                 $gcode = isset($rSet[0]->grade->code) ? trim($rSet[0]->grade->code) : '';
                 if(in_array($gcode, ['P','M','D'])) { $completedCount++; } else { $outstandingCount++; }
+
+                $termObj = (!empty($rSet[0]->term_declaration_id)) ? $rSet[0]->term : $rSet[0]->plan->attenTerm;
+                $tid = isset($termObj->id) ? $termObj->id : 0;
+                if(!isset($termGroups[$tid])):
+                    $termGroups[$tid] = [
+                        'name' => (isset($termObj->name) ? $termObj->name : '—'),
+                        'credits' => 0,
+                        'modules' => [],
+                    ];
+                endif;
+                $credit = (int) ($rSet[0]->plan->creations->credit_value ?? 0);
+                $termGroups[$tid]['credits'] += $credit;
+                $termGroups[$tid]['modules'][$mName] = $rSet;
+                if(in_array($gcode, ['P','M','D'])) { $totalCreditsAchieved += $credit; }
             endforeach;
+            krsort($termGroups);
         endif;
     @endphp
 
@@ -40,6 +61,7 @@
                     <span class="sp-pill sp-pill--total">Total {{ $totalCount }}</span>
                 </div>
                 <div class="sp-card-actions">
+                    <span class="sp-credit-note">Total credits achieved: <strong>{{ $totalCreditsAchieved }}</strong></span>
                     <a href="{{ route('student-results.print',$student->id) }}" id="tabulator-print-x" class="sp-btn sp-btn--ghost">
                         <i data-lucide="printer" class="w-4 h-4"></i> Print
                     </a>
@@ -49,27 +71,41 @@
                 </div>
             </div>
             <div class="sp-rtable-wrap">
-                <table id="sortable-table" class="sp-rtable">
+                <table class="sp-rtable">
                     <thead>
                         <tr>
-                            <th data-sort="module" class="sp-th sp-th--sort">Module <i data-lucide="chevrons-up-down" class="sp-th-ic"></i></th>
-                            <th data-sort="term" class="sp-th sp-th--sort">Term <i data-lucide="chevrons-up-down" class="sp-th-ic"></i></th>
-                            <th data-sort="published" class="sp-th sp-th--sort">Published <i data-lucide="chevrons-up-down" class="sp-th-ic"></i></th>
-                            <th data-sort="grade" class="sp-th sp-th--sort">Grade <i data-lucide="chevrons-up-down" class="sp-th-ic"></i></th>
-                            <th data-sort="merit" class="sp-th sp-th--sort">Merit <i data-lucide="chevrons-up-down" class="sp-th-ic"></i></th>
-                            <th data-sort="attempts" class="sp-th sp-th--sort sp-th--center">Attempts <i data-lucide="chevrons-up-down" class="sp-th-ic"></i></th>
-                            <th data-sort="updated_by" class="sp-th sp-th--sort">Updated By <i data-lucide="chevrons-up-down" class="sp-th-ic"></i></th>
+                            <th class="sp-th">Module</th>
+                            <th class="sp-th">Credit</th>
+                            <th class="sp-th">Level</th>
+                            <th class="sp-th">Status</th>
+                            <th class="sp-th">Grade</th>
+                            <th class="sp-th sp-th--center">Attempts</th>
+                            <th class="sp-th">Published</th>
+                            <th class="sp-th">Updated By</th>
                             <th class="sp-th sp-th--right">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @if($dataSet)
-                            @foreach($dataSet as $moduleDetails => $resultSet)
+                        @foreach($termGroups as $termGroup)
+                            <tr class="sp-term-row">
+                                <td colspan="9">
+                                    <div class="sp-term-head">
+                                        <div class="sp-term-left">
+                                            <span class="sp-term-name">{{ $termGroup['name'] }}</span>
+                                            <span class="sp-term-count">{{ count($termGroup['modules']) }} {{ count($termGroup['modules']) == 1 ? 'module' : 'modules' }}</span>
+                                        </div>
+                                        <span class="sp-term-credits">{{ $termGroup['credits'] }} credits</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            @foreach($termGroup['modules'] as $moduleDetails => $resultSet)
                                 @php
                                     $currentResult = $resultSet[0];
                                     $gcode = isset($currentResult->grade->code) ? trim($currentResult->grade->code) : '';
                                     $gm = $gradeMeta[$gcode] ?? ['color' => '#43585D', 'bg' => '#EEF2F3'];
                                     $attemptCount = count($resultSet);
+                                    $unitStatus = strtolower(trim($currentResult->plan->creations->status ?? ''));
+                                    $unitStatusClass = $statusMeta[$unitStatus] ?? 'sp-status--none';
                                 @endphp
                                 <tr class="sp-tr">
                                     <td class="sp-td">
@@ -82,22 +118,23 @@
                                             <span class="sp-mono">#{{ $currentResult->id }}</span>
                                         </span>
                                     </td>
-                                    <td class="sp-td sp-td--muted">
-                                        @if($currentResult->term_declaration_id == Null)
-                                            {{ $currentResult->plan->attenTerm->name }}
+                                    <td class="sp-td sp-td--credit">{{ $currentResult->plan->creations->credit_value }}</td>
+                                    <td class="sp-td sp-td--muted">{{ $currentResult->plan->creations->unit_value }}</td>
+                                    <td class="sp-td">
+                                        @if($unitStatus != '')
+                                            <span class="sp-status {{ $unitStatusClass }}">{{ ucfirst($unitStatus) }}</span>
                                         @else
-                                            {{ $currentResult->term->name }}
+                                            <span class="sp-status sp-status--none">&mdash;</span>
                                         @endif
+                                    </td>
+                                    <td class="sp-td">
+                                        <span class="sp-grade-pill" style="color:{{ $gm['color'] }};background:{{ $gm['bg'] }}">{{ $gcode }} &middot; {{ $currentResult->grade->name }}</span>
+                                    </td>
+                                    <td class="sp-td sp-td--center">
+                                        <a href="javascript:;" data-theme="light" data-tw-toggle="modal" data-tw-target="#callLockModal{{ $resultSet[0]->id }}" data-trigger="click" class="sp-attempts {{ $attemptCount > 1 ? 'is-multi' : '' }}" title="attempt count">{{ $attemptCount }}</a>
                                     </td>
                                     <td class="sp-td sp-td--muted sp-td--num">
                                         {{ date('d M, Y',strtotime($currentResult->published_at)) }} &middot; {{ date('h:i a',strtotime($currentResult->published_at)) }}
-                                    </td>
-                                    <td class="sp-td">
-                                        <span class="sp-grade" style="color:{{ $gm['color'] }};background:{{ $gm['bg'] }}">{{ $gcode }}</span>
-                                    </td>
-                                    <td class="sp-td sp-td--grade" style="color:{{ $gm['color'] }}">{{ $currentResult->grade->name }}</td>
-                                    <td class="sp-td sp-td--center">
-                                        <a href="javascript:;" data-theme="light" data-tw-toggle="modal" data-tw-target="#callLockModal{{ $resultSet[0]->id }}" data-trigger="click" class="sp-attempts {{ $attemptCount > 1 ? 'is-multi' : '' }}" title="attempt count">{{ $attemptCount }}</a>
                                     </td>
                                     <td class="sp-td sp-td--muted">
                                         {{ isset($currentResult->updatedBy->employee->full_name)  ? $currentResult->updatedBy->employee->full_name : (isset($currentResult->createdBy->employee->full_name) ? $currentResult->createdBy->employee->full_name : $currentResult->createdBy->name) }}
@@ -111,7 +148,7 @@
                                     </td>
                                 </tr>
                             @endforeach
-                        @endif
+                        @endforeach
                     </tbody>
                 </table>
             </div>
