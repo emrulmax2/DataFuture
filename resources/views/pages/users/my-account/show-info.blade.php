@@ -12,7 +12,7 @@
     $jobTitle = optional(optional($employment)->employeeJobTitle)->name;
     $department = optional(optional($employment)->department)->name;
     $jobLine = collect([$jobTitle, $department])->filter(fn ($item) => filled($item))->implode(' - ');
-    $employeeNumber = optional($employment)->punch_number;
+    $employeeNumber = optional($employment)->works_number;
     $employeeStatus = (isset($employee->status) && in_array((string) $employee->status, ['0', 'Inactive', 'inactive'], true)) ? 'Inactive' : 'Active';
     $addressCityLine = collect([
         optional($employee->address)->city,

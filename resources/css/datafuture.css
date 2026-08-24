@@ -1647,7 +1647,7 @@ body.hr-dashboard-v2-body .content::before {
 .hrd-brand__logo {
     display: block;
     width: auto;
-    height: 46px;
+    height: 50px;
     max-width: 220px;
     object-fit: contain;
 }
