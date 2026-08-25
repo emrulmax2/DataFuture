@@ -57,6 +57,11 @@ class PlanTreeController extends Controller
             'cmPageTitle' => 'Class Plan — Tree View',
             'cmBackUrl' => route('class.plan'),
             'cmBackLabel' => 'Back to Class Plans',
+            // Sits beside the back action so a plan can be started without
+            // stepping back through the list first.
+            'cmActions' => [
+                ['label' => 'Add Class Plan', 'href' => route('class.plan.add')],
+            ],
             'breadcrumbs' => [
                 ['label' => 'Course Management', 'href' => route('course.management')],
                 ['label' => 'Class Plans', 'href' => route('class.plan')],
