@@ -103,26 +103,36 @@
                 @endif
             </a>
 
-            <div class="spf-cart__pop" role="tooltip">
+            <div class="spf-cart__pop" id="spfCartPop" role="tooltip">
                 <div class="spf-cart__pop-head">Your basket</div>
                 @if($cartCount > 0)
-                    <div class="spf-cart__items">
+                    <div class="spf-cart__items" id="spfCartItems"
+                         data-spf-cart-remove-url="{{ route('students.shopping.cart.destory', '__ID__') }}"
+                         data-spf-cart-limit="4">
                         @foreach($cart->take(4) as $item)
-                            <div class="spf-cart__item">
-                                <span class="spf-cart__item-name">{{ $item->letterSet->letter_title ?? 'Item' }}</span>
+                            @php $itemName = $item->letterSet->letter_title ?? 'Item'; @endphp
+                            <div class="spf-cart__item" data-spf-cart-item="{{ $item->id }}">
+                                <span class="spf-cart__item-name">{{ $itemName }}</span>
                                 <span class="spf-cart__item-qty">&times;{{ $item->quantity }}</span>
                                 <span class="spf-cart__item-price">&pound;{{ number_format((float) $item->total_amount, 2) }}</span>
+                                <button type="button" class="spf-cart__remove"
+                                        data-spf-cart-remove="{{ route('students.shopping.cart.destory', $item->id) }}"
+                                        title="Remove from basket"
+                                        aria-label="Remove {{ $itemName }} from basket">
+                                    <i data-lucide="x" class="w-3 h-3"></i>
+                                </button>
                             </div>
                         @endforeach
                     </div>
                     @if($cartCount > 4)
-                        <div class="spf-cart__more">+ {{ $cartCount - 4 }} more</div>
+                        <div class="spf-cart__more" id="spfCartMore">+ {{ $cartCount - 4 }} more</div>
                     @endif
-                    <div class="spf-cart__total">
+                    <div class="spf-cart__total" id="spfCartTotal">
                         <span>Total</span>
                         <span>&pound;{{ number_format($cartTotal, 2) }}</span>
                     </div>
-                    <a href="{{ route('students.shopping.cart.checkout') }}" class="spf-cart__cta">Go to checkout &rarr;</a>
+                    <a href="{{ route('students.shopping.cart.checkout') }}" class="spf-cart__cta"
+                       data-spf-empty-href="{{ route('students.document-request-form.products') }}">Go to checkout &rarr;</a>
                 @else
                     <div class="spf-cart__empty">Your basket is empty.</div>
                     <a href="{{ route('students.document-request-form.products') }}" class="spf-cart__cta">Browse documents &rarr;</a>

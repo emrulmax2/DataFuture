@@ -374,6 +374,33 @@ body.student-portal-body {
     white-space: nowrap;
 }
 
+.spf-cart__remove {
+    align-items: center;
+    background: none;
+    border: 0;
+    border-radius: 50%;
+    color: var(--spf-muted);
+    cursor: pointer;
+    display: flex;
+    flex: 0 0 18px;
+    height: 18px;
+    justify-content: center;
+    padding: 0;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    width: 18px;
+}
+
+.spf-cart__remove:hover {
+    background: var(--spf-rustbg);
+    color: var(--spf-rust);
+}
+
+/* Held while the delete request is in flight. */
+.spf-cart__item.is-removing {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
 .spf-cart__more {
     color: var(--spf-muted);
     font-size: 11.5px;
@@ -2820,6 +2847,518 @@ body.student-portal-body .spf-btn:disabled:hover {
     line-height: 1.6;
     min-height: 96px;
     resize: vertical;
+}
+
+/* ── First-login wizard ────────────────────────────────────────────────────── */
+
+/*
+   The first-login wizard. student-frontend.js steps by toggling `show` on the
+   `.wizard-fieldset`s and active/activated on the step items — those class
+   names and the sibling order are its API, so everything here styles around
+   them under `.spf-*` names.
+*/
+
+.spf-notice {
+    align-items: flex-start;
+    background: var(--spf-creambg);
+    border: 1px solid var(--spf-cream);
+    border-radius: 12px;
+    display: flex;
+    gap: 12px;
+    margin-bottom: 22px;
+    padding: 14px 16px;
+    position: relative;
+}
+
+.spf-notice__icon {
+    align-items: center;
+    background: var(--spf-cream);
+    border-radius: 9px;
+    color: var(--spf-goldtxt);
+    display: flex;
+    flex: 0 0 32px;
+    height: 32px;
+    justify-content: center;
+    width: 32px;
+}
+
+.spf-notice__text {
+    color: var(--spf-body);
+    font-size: 12.5px;
+    line-height: 1.6;
+    padding-right: 24px;
+}
+
+body.student-portal-body .spf-notice__close {
+    background: none;
+    border: 0;
+    color: var(--spf-muted);
+    cursor: pointer;
+    padding: 4px;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
+
+body.student-portal-body .spf-notice__close:hover {
+    color: var(--spf-goldtxt);
+}
+
+.spf-wizard {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-line);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.spf-wizard__head {
+    padding: 28px 36px 24px;
+}
+
+body.student-portal-body .spf-wsteps {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.spf-wstep {
+    align-items: center;
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: 9px;
+    position: relative;
+    text-align: center;
+}
+
+/* Connector between one step and the next. */
+.spf-wstep + .spf-wstep::before {
+    background: var(--spf-line);
+    content: "";
+    height: 2px;
+    left: calc(-50% + 28px);
+    position: absolute;
+    right: calc(50% + 28px);
+    top: 15px;
+}
+
+.spf-wstep.activated + .spf-wstep::before {
+    background: var(--spf-bronze);
+}
+
+.spf-wstep__dot {
+    align-items: center;
+    background: var(--spf-card);
+    border: 1.5px solid var(--spf-border2);
+    border-radius: 50%;
+    color: var(--spf-muted);
+    display: flex;
+    font-size: 13px;
+    font-weight: 600;
+    height: 32px;
+    justify-content: center;
+    width: 32px;
+}
+
+.spf-wstep.active .spf-wstep__dot {
+    background: var(--spf-graphite);
+    border-color: var(--spf-graphite);
+    color: #f0efec;
+}
+
+/* A completed step swaps its number for a tick. */
+.spf-wstep__tick {
+    align-items: center;
+    background: var(--spf-bronze);
+    border: 1.5px solid var(--spf-bronze);
+    border-radius: 50%;
+    color: #fff;
+    display: none;
+    height: 32px;
+    justify-content: center;
+    width: 32px;
+}
+
+.spf-wstep.activated .spf-wstep__dot {
+    display: none;
+}
+
+.spf-wstep.activated .spf-wstep__tick {
+    display: flex;
+}
+
+.spf-wstep__label {
+    color: var(--spf-muted);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.spf-wstep.active .spf-wstep__label {
+    color: var(--spf-ink);
+    font-weight: 600;
+}
+
+.spf-wstep.activated .spf-wstep__label {
+    color: var(--spf-dim);
+}
+
+/* datafuture.css supplies the display:none / .show toggling. */
+body.student-portal-body .spf-wizard__body {
+    border: 0;
+    border-top: 1px solid var(--spf-hairline);
+    margin: 0;
+    padding: 30px 36px 34px;
+}
+
+.spf-wizard__body-title {
+    margin-bottom: 20px;
+}
+
+.spf-wgrid {
+    display: grid;
+    gap: 18px 20px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.spf-wgrid--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.spf-wfield--full {
+    margin-bottom: 16px;
+}
+
+.spf-wfield--gap {
+    margin-bottom: 22px;
+    margin-top: 22px;
+}
+
+body.student-portal-body .spf-wlabel {
+    align-items: center;
+    color: var(--spf-muted);
+    display: inline-flex;
+    font-size: 10.5px;
+    font-weight: 600;
+    gap: 5px;
+    letter-spacing: 0.1em;
+    margin-bottom: 7px;
+    text-transform: uppercase;
+}
+
+.spf-req {
+    color: var(--spf-rust);
+}
+
+body.student-portal-body .spf-whelp {
+    color: var(--spf-bronze);
+    cursor: pointer;
+    flex: 0 0 14px;
+    height: 14px;
+    width: 14px;
+}
+
+body.student-portal-body .spf-winput {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-border2);
+    border-radius: 9px;
+    box-shadow: none;
+    box-sizing: border-box;
+    color: var(--spf-ink);
+    display: block;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    padding: 10px 14px;
+    width: 100%;
+}
+
+body.student-portal-body select.spf-winput {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2393938f' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m4 6 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 14px 14px;
+    cursor: pointer;
+    padding-right: 36px;
+}
+
+body.student-portal-body .spf-winput:focus {
+    border-color: var(--spf-bronze);
+    box-shadow: 0 0 0 3px var(--spf-goldsoft);
+}
+
+body.student-portal-body .spf-winput::placeholder {
+    color: var(--spf-muted);
+}
+
+body.student-portal-body .spf-winput.border-danger {
+    border-color: var(--spf-rust);
+}
+
+body.student-portal-body .spf-wizard .acc__input-error {
+    color: var(--spf-rust);
+    font-size: 11.5px;
+}
+
+body.student-portal-body .spf-wizard .acc__input-error:empty {
+    display: none;
+}
+
+/* Tom Select 1.7.8 renders these controls: .ts-control is only a positioning
+   wrapper, .ts-input is the visible box. Restate it on the portal palette. */
+body.student-portal-body .spf-wizard .ts-control {
+    background: none;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+}
+
+body.student-portal-body .spf-wizard .ts-input {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-border2);
+    border-radius: 9px;
+    box-shadow: none;
+    color: var(--spf-ink);
+    font-size: 13px;
+    padding: 10px 14px;
+}
+
+body.student-portal-body .spf-wizard .ts-input.focus,
+body.student-portal-body .spf-wizard .ts-input.dropdown-active {
+    border-color: var(--spf-bronze);
+    box-shadow: 0 0 0 3px var(--spf-goldsoft);
+}
+
+body.student-portal-body .spf-wizard .ts-input .item {
+    color: var(--spf-ink);
+}
+
+body.student-portal-body .spf-wizard .ts-input > input {
+    font-size: 13px;
+}
+
+/* The dropdown mounts on <body>, outside .spf-wizard. */
+body.student-portal-body .ts-dropdown.lcc-tom-float {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-line);
+    border-radius: 10px;
+    box-shadow: 0 8px 28px rgba(38, 41, 46, 0.14);
+    color: var(--spf-body);
+    font-size: 13px;
+}
+
+body.student-portal-body .ts-dropdown.lcc-tom-float .option {
+    padding: 9px 14px;
+}
+
+body.student-portal-body .ts-dropdown.lcc-tom-float .option.active {
+    background: var(--spf-paper);
+    color: var(--spf-goldtxt);
+}
+
+body.student-portal-body .ts-dropdown.lcc-tom-float .dropdown-input-wrap .dropdown-input {
+    border: 0;
+    border-bottom: 1px solid var(--spf-hairline);
+    font-size: 13px;
+    padding: 10px 14px;
+}
+
+/* Address confirmation question. */
+.spf-wq {
+    margin: 0 auto;
+    max-width: 560px;
+    padding: 12px 0 4px;
+    text-align: center;
+}
+
+.spf-wq--inline {
+    margin: 0;
+    max-width: none;
+    padding: 0;
+    text-align: left;
+}
+
+.spf-wq__text {
+    color: var(--spf-body);
+    font-size: 13.5px;
+    line-height: 1.65;
+    margin: 0 0 10px;
+}
+
+.spf-wq__address {
+    color: var(--spf-ink);
+    font-family: var(--spf-serif);
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.5;
+    margin: 0 0 10px;
+}
+
+.spf-wq__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 18px;
+}
+
+.spf-wq--inline .spf-wq__actions {
+    justify-content: flex-start;
+    margin-top: 12px;
+}
+
+.spf-btn--choice {
+    padding: 10px 22px;
+}
+
+body.student-portal-body .spf-btn.border-danger {
+    border-color: var(--spf-rust);
+    color: var(--spf-rust);
+}
+
+.spf-wsection {
+    align-items: center;
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.spf-wsection__title {
+    color: var(--spf-muted);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+/* The address the student confirmed, echoed back read-only. */
+.spf-waddress {
+    background: var(--spf-paper);
+    border: 1px solid var(--spf-line);
+    border-radius: 10px;
+    color: var(--spf-ink);
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.7;
+    padding: 13px 16px;
+}
+
+.spf-wintro {
+    color: var(--spf-body);
+    font-size: 13px;
+    line-height: 1.7;
+    margin: 0 0 18px;
+    max-width: 640px;
+}
+
+.spf-wconsents {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 640px;
+}
+
+.spf-switchrow {
+    align-items: center;
+    background: var(--spf-paper);
+    border: 1px solid var(--spf-line);
+    border-radius: 11px;
+    cursor: pointer;
+    display: flex;
+    gap: 12px;
+    padding: 12px 16px;
+    transition: border-color 0.15s ease;
+}
+
+.spf-switchrow:hover {
+    border-color: var(--spf-bronze);
+}
+
+.spf-switchrow__text {
+    align-items: center;
+    color: var(--spf-body);
+    display: inline-flex;
+    flex-wrap: wrap;
+    font-size: 13px;
+    gap: 5px;
+    line-height: 1.5;
+}
+
+/* Drawn toggle — the theme resets checkboxes with appearance:none, so the
+   track is the input itself and the knob a background image sliding across. */
+body.student-portal-body input[type="checkbox"].spf-switch {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: var(--spf-chipgrey);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3ccircle cx='8' cy='8' r='7' fill='%23ffffff'/%3e%3c/svg%3e");
+    background-position: 3px 50%;
+    background-repeat: no-repeat;
+    background-size: 16px 16px;
+    border: 1px solid var(--spf-border2);
+    border-radius: 999px;
+    box-sizing: border-box;
+    cursor: pointer;
+    flex: 0 0 40px;
+    height: 22px;
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.2s ease, background-position 0.2s ease,
+        border-color 0.2s ease;
+    width: 40px;
+}
+
+body.student-portal-body input[type="checkbox"].spf-switch:checked {
+    background-color: var(--spf-bronze);
+    background-position: 19px 50%;
+    border-color: var(--spf-bronze);
+}
+
+body.student-portal-body input[type="checkbox"].spf-switch:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+body.student-portal-body input[type="checkbox"].spf-switch:focus-visible {
+    box-shadow: 0 0 0 3px var(--spf-goldsoft);
+    outline: none;
+}
+
+.spf-wizard__foot {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 28px;
+}
+
+/* Corner close for centred status dialogs. */
+body.student-portal-body .spf-modal .modal-content {
+    position: relative;
+}
+
+.spf-modal__close--corner {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+}
+
+@media (max-width: 800px) {
+    .spf-wizard__head {
+        padding: 22px 20px 18px;
+    }
+
+    body.student-portal-body .spf-wizard__body {
+        padding: 22px 20px 26px;
+    }
+
+    .spf-wgrid,
+    .spf-wgrid--3 {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .spf-wstep__label {
+        font-size: 10.5px;
+    }
 }
 
 /* ── Checkboxes ────────────────────────────────────────────────────────── */
