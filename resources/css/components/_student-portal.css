@@ -1,0 +1,2916 @@
+/*
+ |--------------------------------------------------------------------------
+ | Student Portal (frontend) — LCC design language
+ |--------------------------------------------------------------------------
+ |
+ | The student-facing portal shell: fixed left navigation, editorial main
+ | column and a right rail for news / library / timetable.
+ |
+ | Everything is scoped to `body.student-portal-body` so it can never leak
+ | into the staff-side student profile (`body.student-profile-body`, which
+ | owns the `.sp-*` namespace) or the rest of the admin theme. This file
+ | owns the `.spf-*` namespace exclusively.
+ |
+ | Palette: graphite / bronze / cream on warm paper.
+ | Type: Source Serif 4 (display) + Instrument Sans (UI).
+ */
+
+body.student-portal-body {
+    --spf-graphite: #26292e;
+    --spf-ink: #232528;
+    --spf-body: #3c3f44;
+    --spf-dim: #5e6165;
+    --spf-muted: #93938f;
+    --spf-faint: #75787d;
+
+    --spf-paper: #f7f6f4;
+    --spf-card: #ffffff;
+    --spf-line: #e8e6e1;
+    --spf-hairline: #f0eeea;
+    --spf-border2: #e0dcd2;
+
+    --spf-bronze: #b98a4e;
+    --spf-gold: #c79b60;
+    --spf-goldsoft: rgba(199, 155, 96, 0.16);
+    --spf-goldtxt: #8a6420;
+    --spf-cream: #efe7da;
+    --spf-creambg: #f9f3e7;
+    --spf-chipgrey: #ededea;
+
+    --spf-green: #3e6b34;
+    --spf-greenbg: #e9f0e6;
+    --spf-sage: #5b8a50;
+    --spf-rust: #9a5226;
+    --spf-rustbg: #f5e9dc;
+
+    --spf-sidebar-w: 236px;
+    --spf-rail-w: 336px;
+
+    --spf-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --spf-sans: "Instrument Sans", "Public Sans", system-ui, -apple-system,
+        "Segoe UI", Roboto, sans-serif;
+
+    background: var(--spf-paper);
+    color: var(--spf-ink);
+    font-family: var(--spf-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    min-height: 100vh;
+    padding: 0;
+}
+
+/* ── Shell ─────────────────────────────────────────────────────────────── */
+
+.spf {
+    display: flex;
+    flex-wrap: wrap;
+    min-height: 100vh;
+}
+
+.spf-main {
+    box-sizing: border-box;
+    flex: 1 1 560px;
+    max-width: 1220px;
+    min-width: 0;
+    padding: 34px 40px 64px;
+}
+
+.spf-rail {
+    box-sizing: border-box;
+    display: flex;
+    flex: 1 1 280px;
+    flex-direction: column;
+    gap: 18px;
+    max-width: var(--spf-rail-w);
+    padding: 34px 32px 64px;
+}
+
+/* ── Sidebar ───────────────────────────────────────────────────────────── */
+
+.spf-sidebar {
+    background: var(--spf-graphite);
+    box-sizing: border-box;
+    color: #c9cbce;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    gap: 4px;
+    height: 100vh;
+    padding: 26px 18px 20px;
+    position: sticky;
+    top: 0;
+    width: var(--spf-sidebar-w);
+    z-index: 60;
+}
+
+.spf-sidebar__brand {
+    align-items: center;
+    display: flex;
+    margin-bottom: 10px;
+    padding: 0 8px;
+    text-decoration: none;
+}
+
+.spf-sidebar__brand:hover {
+    opacity: 0.9;
+    text-decoration: none;
+}
+
+.spf-sidebar__logo {
+    display: block;
+    height: 66px;
+    max-width: 100%;
+    object-fit: contain;
+    object-position: left center;
+    width: auto;
+}
+
+.spf-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.spf-nav__link {
+    border-left: 2px solid transparent;
+    border-radius: 9px;
+    box-sizing: border-box;
+    color: #c9cbce;
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 14px;
+    text-align: left;
+    text-decoration: none;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    width: 100%;
+}
+
+.spf-nav__link:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #e6e7e9;
+    text-decoration: none;
+}
+
+.spf-nav__link.is-active {
+    background: var(--spf-goldsoft);
+    border-left-color: var(--spf-gold);
+    color: var(--spf-gold);
+    font-weight: 600;
+}
+
+.spf-nav__badge {
+    background: var(--spf-gold);
+    border-radius: 999px;
+    color: var(--spf-graphite);
+    font-size: 10px;
+    font-weight: 700;
+    margin-left: 6px;
+    padding: 1px 7px;
+}
+
+.spf-nav__divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 14px 6px 10px;
+}
+
+.spf-nav__caption {
+    color: #75787d;
+    font-size: 9.5px;
+    letter-spacing: 0.12em;
+    padding: 0 14px 6px;
+    text-transform: uppercase;
+}
+
+.spf-sidebar__scroll {
+    -ms-overflow-style: none;
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+
+.spf-sidebar__scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.spf-sidebar__spacer {
+    flex: 1 1 auto;
+    min-height: 16px;
+}
+
+.spf-sidebar__action {
+    align-items: center;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+    box-sizing: border-box;
+    color: #c9cbce;
+    cursor: pointer;
+    display: flex;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 10px;
+    padding: 8px 14px;
+    text-align: center;
+    text-decoration: none;
+    transition: border-color 0.15s ease, color 0.15s ease;
+    width: 100%;
+}
+
+.spf-sidebar__action:hover {
+    border-color: var(--spf-gold);
+    color: var(--spf-gold);
+    text-decoration: none;
+}
+
+.spf-user {
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    gap: 8px;
+    padding: 14px 6px 0;
+}
+
+.spf-user__avatar {
+    border: 2px solid var(--spf-bronze);
+    border-radius: 50%;
+    flex: 0 0 34px;
+    height: 34px;
+    object-fit: cover;
+    width: 34px;
+}
+
+.spf-user__meta {
+    flex: 1 1 auto;
+    line-height: 1.35;
+    min-width: 0;
+}
+
+/* Sign out lives as an icon action on the account row, mirroring the design. */
+.spf-user__logout {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    color: #8d9095;
+    cursor: pointer;
+    display: flex;
+    flex: 0 0 28px;
+    height: 28px;
+    justify-content: center;
+    text-decoration: none;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    width: 28px;
+}
+
+.spf-user__logout:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--spf-gold);
+    text-decoration: none;
+}
+
+/* Basket: an icon action on the account row, with a hover summary that
+   escapes the sidebar to the right. */
+/* Deliberately not positioned: the popup anchors to the sidebar itself so it
+   clears the panel edge instead of overlapping the sign-out control. */
+.spf-cartwrap {
+    flex: 0 0 auto;
+}
+
+.spf-cart {
+    position: relative;
+}
+
+.spf-cart__badge {
+    background: var(--spf-gold);
+    border: 2px solid var(--spf-graphite);
+    border-radius: 999px;
+    color: var(--spf-graphite);
+    font-size: 9.5px;
+    font-weight: 700;
+    line-height: 1;
+    min-width: 17px;
+    padding: 2px 4px;
+    position: absolute;
+    right: 0;
+    text-align: center;
+    top: 1px;
+}
+
+.spf-cart__pop {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-line);
+    border-radius: 12px;
+    bottom: 16px;
+    box-shadow: 0 12px 34px rgba(38, 41, 46, 0.28);
+    color: var(--spf-ink);
+    left: calc(100% + 12px);
+    opacity: 0;
+    padding: 14px 16px;
+    pointer-events: none;
+    position: absolute;
+    transform: translateY(4px);
+    transition: opacity 0.14s ease, transform 0.14s ease;
+    width: 258px;
+    z-index: 80;
+}
+
+.spf-cart__pop::before {
+    bottom: 0;
+    content: "";
+    left: -16px;
+    position: absolute;
+    top: 0;
+    width: 16px;
+}
+
+/* Opened by `student-portal.js` after a short hover-intent delay. */
+.spf-cartwrap.is-open .spf-cart__pop {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.spf-cart__pop-head {
+    color: var(--spf-muted);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.spf-cart__items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.spf-cart__item {
+    align-items: baseline;
+    display: flex;
+    font-size: 12.5px;
+    gap: 8px;
+}
+
+.spf-cart__item-name {
+    flex: 1 1 auto;
+    line-height: 1.35;
+    min-width: 0;
+}
+
+.spf-cart__item-qty {
+    color: var(--spf-muted);
+    font-size: 11.5px;
+}
+
+.spf-cart__item-price {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.spf-cart__more {
+    color: var(--spf-muted);
+    font-size: 11.5px;
+    margin-top: 8px;
+}
+
+.spf-cart__total {
+    border-top: 1px solid var(--spf-hairline);
+    display: flex;
+    font-size: 13px;
+    font-weight: 600;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding-top: 10px;
+}
+
+.spf-cart__empty {
+    color: var(--spf-muted);
+    font-size: 12.5px;
+}
+
+.spf-cart__cta {
+    color: var(--spf-goldtxt);
+    cursor: pointer;
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 10px;
+    text-decoration: none;
+}
+
+.spf-cart__cta:hover {
+    color: #6e4f17;
+    text-decoration: underline;
+}
+
+/* Below the desktop breakpoint the sidebar is a drawer, so the popup would
+   sit off-screen — the badge alone carries the count there. */
+@media (max-width: 1023px) {
+    .spf-cart__pop {
+        display: none;
+    }
+}
+
+.spf-user__name {
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.spf-user__role {
+    color: #8d9095;
+    font-size: 10.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Mobile top bar / drawer ───────────────────────────────────────────── */
+
+.spf-topbar {
+    align-items: center;
+    background: var(--spf-graphite);
+    display: none;
+    gap: 12px;
+    padding: 12px 18px;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 70;
+}
+
+.spf-topbar__toggle {
+    align-items: center;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 9px;
+    color: #e6e7e9;
+    cursor: pointer;
+    display: flex;
+    flex: 0 0 36px;
+    height: 36px;
+    justify-content: center;
+    width: 36px;
+}
+
+.spf-topbar__title {
+    color: #fff;
+    font-family: var(--spf-serif);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.spf-backdrop {
+    background: rgba(38, 41, 46, 0.45);
+    display: none;
+    inset: 0;
+    position: fixed;
+    z-index: 55;
+}
+
+.spf-backdrop.is-open {
+    display: block;
+}
+
+/* ── Typography & primitives ───────────────────────────────────────────── */
+
+.spf-eyebrow {
+    color: var(--spf-muted);
+    font-size: 12px;
+    margin-bottom: 6px;
+}
+
+.spf-h1 {
+    color: var(--spf-ink);
+    font-family: var(--spf-serif);
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.spf-h2 {
+    color: var(--spf-ink);
+    font-family: var(--spf-serif);
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.spf-h3 {
+    color: var(--spf-ink);
+    font-family: var(--spf-serif);
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.spf-label {
+    color: var(--spf-muted);
+    display: block;
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.spf-spacer {
+    flex: 1 1 auto;
+}
+
+.spf-page-head {
+    align-items: flex-end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+/* Title, status badges and a right-aligned summary sharing one row — the
+   badges centre on the heading rather than sitting on its baseline. */
+.spf-page-head--inline {
+    align-items: center;
+    gap: 10px;
+}
+
+/* Title with its context note set beside it, sharing a baseline. */
+.spf-page-head--baseline {
+    align-items: baseline;
+    gap: 16px;
+}
+
+.spf-page-head--baseline .spf-eyebrow {
+    font-size: 13px;
+    margin-bottom: 0;
+}
+
+.spf-section {
+    margin-bottom: 30px;
+}
+
+.spf-section:last-child {
+    margin-bottom: 0;
+}
+
+.spf-section__head {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.spf-section__note {
+    color: var(--spf-muted);
+    font-size: 12px;
+}
+
+.spf-card {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-line);
+    border-radius: 14px;
+}
+
+.spf-empty {
+    background: var(--spf-card);
+    border: 1px dashed var(--spf-border2);
+    border-radius: 12px;
+    color: var(--spf-muted);
+    font-size: 13px;
+    padding: 22px;
+    text-align: center;
+}
+
+/* Chips */
+
+.spf-chip {
+    align-items: center;
+    border-radius: 999px;
+    display: inline-flex;
+    font-size: 10px;
+    font-weight: 600;
+    gap: 6px;
+    letter-spacing: 0.06em;
+    padding: 5px 12px;
+    white-space: nowrap;
+}
+
+.spf-chip--cream {
+    background: var(--spf-cream);
+    color: var(--spf-goldtxt);
+}
+
+.spf-chip--grey {
+    background: var(--spf-chipgrey);
+    color: var(--spf-dim);
+    justify-content: center;
+    min-width: 44px;
+}
+
+.spf-chip--green {
+    background: var(--spf-greenbg);
+    color: var(--spf-green);
+}
+
+.spf-chip--rust {
+    background: var(--spf-rustbg);
+    color: var(--spf-rust);
+}
+
+.spf-chip--outline {
+    border: 1px solid var(--spf-border2);
+    color: var(--spf-faint);
+}
+
+.spf-chip--wrap {
+    line-height: 1.35;
+    text-align: left;
+    white-space: normal;
+}
+
+.spf-chip--lg {
+    font-size: 11.5px;
+    letter-spacing: 0;
+    padding: 5px 13px;
+}
+
+.spf-chip__dot {
+    border-radius: 50%;
+    flex: 0 0 6px;
+    height: 6px;
+    width: 6px;
+}
+
+.spf-chip__dot--sage {
+    background: var(--spf-sage);
+}
+
+.spf-chip__dot--bronze {
+    background: var(--spf-bronze);
+}
+
+/* Buttons */
+
+.spf-btn {
+    align-items: center;
+    background: var(--spf-card);
+    border: 1px solid var(--spf-border2);
+    border-radius: 999px;
+    color: var(--spf-dim);
+    cursor: pointer;
+    display: inline-flex;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    gap: 8px;
+    padding: 9px 18px;
+    text-decoration: none;
+    transition: border-color 0.15s ease, color 0.15s ease,
+        background-color 0.15s ease;
+    white-space: nowrap;
+}
+
+.spf-btn:hover {
+    border-color: var(--spf-bronze);
+    color: var(--spf-goldtxt);
+    text-decoration: none;
+}
+
+.spf-btn--dark {
+    background: var(--spf-graphite);
+    border-color: var(--spf-graphite);
+    color: #f0efec;
+}
+
+.spf-btn--dark:hover {
+    background: var(--spf-body);
+    border-color: var(--spf-body);
+    color: #fff;
+}
+
+.spf-btn--sm {
+    font-size: 11.5px;
+    padding: 7px 14px;
+}
+
+.spf-linkbtn {
+    background: none;
+    border: 0;
+    color: var(--spf-goldtxt);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 0;
+    text-decoration: none;
+}
+
+.spf-linkbtn:hover {
+    color: #6e4f17;
+    text-decoration: none;
+}
+
+.spf-pillbtn {
+    background: var(--spf-chipgrey);
+    border: 0;
+    border-radius: 999px;
+    color: var(--spf-faint);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 5px 12px;
+    white-space: nowrap;
+}
+
+.spf-pillbtn:hover {
+    background: #e3e3df;
+    color: var(--spf-dim);
+}
+
+/* Dropdowns */
+
+.spf-dd {
+    display: inline-block;
+    position: relative;
+}
+
+.spf-dd__menu {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-line);
+    border-radius: 12px;
+    box-shadow: 0 8px 28px rgba(38, 41, 46, 0.14);
+    display: none;
+    padding: 6px;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    width: 240px;
+    z-index: 50;
+}
+
+.spf-dd__menu.is-open {
+    display: block;
+}
+
+.spf-dd__menu--wide {
+    width: 300px;
+}
+
+.spf-dd__item {
+    align-items: center;
+    background: none;
+    border: 0;
+    border-radius: 9px;
+    color: var(--spf-body);
+    cursor: pointer;
+    display: flex;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    gap: 11px;
+    padding: 11px 14px;
+    text-align: left;
+    text-decoration: none;
+    width: 100%;
+}
+
+.spf-dd__item:hover {
+    background: var(--spf-paper);
+    color: var(--spf-ink);
+    text-decoration: none;
+}
+
+.spf-dd__item svg {
+    color: var(--spf-bronze);
+    flex: 0 0 auto;
+}
+
+.spf-dd__empty {
+    color: var(--spf-muted);
+    font-size: 12px;
+    padding: 16px 14px;
+    text-align: center;
+}
+
+/* ── Profile hero card ─────────────────────────────────────────────────── */
+
+.spf-hero {
+    align-items: start;
+    background: var(--spf-card);
+    border: 1px solid var(--spf-line);
+    border-radius: 14px;
+    display: grid;
+    gap: 36px;
+    grid-template-columns: minmax(300px, 1.4fr) 1fr;
+    margin-bottom: 26px;
+    padding: 32px 36px;
+}
+
+.spf-hero__identity {
+    align-items: center;
+    display: flex;
+    gap: 20px;
+    height: 100%;
+    min-width: 0;
+}
+
+.spf-hero__photo {
+    border: 3px solid var(--spf-bronze);
+    border-radius: 50%;
+    flex: 0 0 72px;
+    height: 72px;
+    object-fit: cover;
+    width: 72px;
+}
+
+.spf-hero__text {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    min-width: 0;
+}
+
+.spf-hero__reg {
+    font-family: var(--spf-serif);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.spf-hero__name {
+    color: var(--spf-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.spf-hero__name strong {
+    color: var(--spf-body);
+    font-weight: 600;
+}
+
+.spf-hero__course {
+    color: var(--spf-body);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.spf-hero__course span {
+    color: var(--spf-muted);
+}
+
+.spf-hero__aside {
+    border-left: 1px solid var(--spf-hairline);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-left: 32px;
+}
+
+.spf-hero__blockhead {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.spf-hero__list {
+    color: var(--spf-body);
+    font-size: 12.5px;
+    line-height: 1.9;
+    word-break: break-word;
+}
+
+.spf-hero__list .spf-warn {
+    color: var(--spf-rust);
+    font-weight: 600;
+}
+
+.spf-hero__block--divided {
+    border-top: 1px solid var(--spf-hairline);
+    padding-top: 20px;
+}
+
+/* ── Stats ─────────────────────────────────────────────────────────────── */
+
+.spf-stats {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    margin-bottom: 30px;
+}
+
+.spf-stat {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-line);
+    border-radius: 12px;
+    padding: 16px 20px;
+}
+
+.spf-stat__label {
+    color: var(--spf-muted);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
+
+.spf-stat__value {
+    font-family: var(--spf-serif);
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.spf-stat__value small {
+    color: var(--spf-muted);
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.spf-stat__value--rust {
+    color: var(--spf-rust);
+}
+
+.spf-stat__value--green {
+    color: var(--spf-green);
+}
+
+/* ── Module cards ──────────────────────────────────────────────────────── */
+
+.spf-modules {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.spf-module {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-line);
+    border-radius: 12px;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px 20px 16px;
+    text-decoration: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.spf-module:hover {
+    border-color: var(--spf-bronze);
+    box-shadow: 0 6px 18px rgba(38, 41, 46, 0.06);
+    color: inherit;
+    text-decoration: none;
+}
+
+.spf-module__top {
+    align-items: flex-start;
+    display: flex;
+    gap: 10px;
+}
+
+.spf-module__icon {
+    align-items: center;
+    background: var(--spf-cream);
+    border-radius: 10px;
+    color: var(--spf-goldtxt);
+    display: flex;
+    flex: 0 0 36px;
+    font-family: var(--spf-serif);
+    font-size: 13px;
+    font-weight: 600;
+    height: 36px;
+    justify-content: center;
+    text-transform: uppercase;
+    width: 36px;
+}
+
+.spf-module__icon--v1 {
+    background: #e8ebee;
+    color: #3c4a5c;
+}
+
+.spf-module__icon--v2 {
+    background: #e9ede6;
+    color: #4a5c44;
+}
+
+.spf-module__icon--v3 {
+    background: #ede8ee;
+    color: #5c4460;
+}
+
+.spf-module__icon--v4 {
+    background: #eeeae6;
+    color: #5c5044;
+}
+
+.spf-module__body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.spf-module__name {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.spf-module__sub {
+    color: var(--spf-muted);
+    font-size: 11.5px;
+    margin-top: 2px;
+}
+
+.spf-module__foot {
+    align-items: center;
+    border-top: 1px solid var(--spf-hairline);
+    display: flex;
+    gap: 10px;
+    padding-top: 12px;
+}
+
+.spf-avatars {
+    display: flex;
+}
+
+.spf-avatars img {
+    border: 2px solid #fff;
+    border-radius: 50%;
+    height: 27px;
+    object-fit: cover;
+    width: 27px;
+}
+
+.spf-avatars img + img {
+    margin-left: -9px;
+}
+
+/* ── Quick links ───────────────────────────────────────────────────────── */
+
+.spf-quicklinks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.spf-quicklink {
+    align-items: center;
+    background: var(--spf-card);
+    border: 1px solid var(--spf-border2);
+    border-radius: 999px;
+    color: var(--spf-body);
+    display: inline-flex;
+    font-size: 12.5px;
+    font-weight: 600;
+    gap: 8px;
+    padding: 10px 18px;
+    text-decoration: none;
+    transition: border-color 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+}
+
+.spf-quicklink:hover {
+    border-color: var(--spf-bronze);
+    color: var(--spf-goldtxt);
+    text-decoration: none;
+}
+
+.spf-quicklink svg {
+    color: var(--spf-bronze);
+}
+
+/* ── Field grids (Profile) ─────────────────────────────────────────────── */
+
+.spf-panel {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-line);
+    border-radius: 14px;
+    padding: 26px 30px;
+}
+
+.spf-panel + .spf-panel {
+    margin-top: 22px;
+}
+
+.spf-panel__head {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 22px;
+}
+
+.spf-fieldgrid {
+    display: grid;
+    gap: 22px 32px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.spf-fieldgrid--2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.spf-field__label {
+    color: var(--spf-muted);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.spf-field__value {
+    color: var(--spf-ink);
+    font-size: 13.5px;
+    line-height: 1.55;
+    word-break: break-word;
+}
+
+.spf-field__value--muted {
+    color: var(--spf-muted);
+}
+
+.spf-field--full {
+    grid-column: 1 / -1;
+}
+
+.spf-subhead {
+    border-top: 1px solid var(--spf-hairline);
+    color: var(--spf-goldtxt);
+    font-size: 11px;
+    font-weight: 600;
+    grid-column: 1 / -1;
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+    padding-top: 20px;
+    text-transform: uppercase;
+}
+
+.spf-subhead:first-child {
+    border-top: 0;
+    margin-top: 0;
+    padding-top: 0;
+}
+
+.spf-taglist {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+/* ── Results table ─────────────────────────────────────────────────────── */
+
+.spf-rtable-wrap {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-line);
+    border-radius: 14px;
+    overflow-x: auto;
+}
+
+/* Wide enough for every column plus gaps and row padding, so the wrapper
+   scrolls instead of clipping the last column. */
+.spf-rtable {
+    min-width: 720px;
+}
+
+.spf-rtable__head,
+.spf-rtable__row {
+    display: grid;
+    gap: 12px;
+    grid-template-columns:
+        minmax(200px, 1fr) 64px 56px 96px 120px 72px;
+    padding: 0 20px;
+}
+
+.spf-rtable__head {
+    border-bottom: 1px solid var(--spf-line);
+    color: var(--spf-muted);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    padding-bottom: 13px;
+    padding-top: 13px;
+    text-transform: uppercase;
+}
+
+.spf-rtable__row {
+    align-items: center;
+    border-bottom: 1px solid var(--spf-hairline);
+    font-size: 13px;
+    padding-bottom: 15px;
+    padding-top: 15px;
+}
+
+.spf-rtable__termrow {
+    align-items: center;
+    background: var(--spf-creambg);
+    border-bottom: 1px solid var(--spf-hairline);
+    display: flex;
+    gap: 10px;
+    padding: 10px 20px;
+}
+
+.spf-rtable__termname {
+    color: var(--spf-goldtxt);
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.spf-rtable__termcount {
+    color: var(--spf-bronze);
+    font-size: 11.5px;
+}
+
+.spf-rtable__termcredits {
+    color: var(--spf-goldtxt);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.spf-mod__name {
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.spf-mod__meta {
+    color: var(--spf-muted);
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    margin-top: 3px;
+}
+
+.spf-cell--credit {
+    font-weight: 600;
+}
+
+.spf-cell--muted {
+    color: var(--spf-dim);
+}
+
+.spf-cell--accent {
+    color: var(--spf-goldtxt);
+    font-weight: 600;
+}
+
+.spf-status {
+    border-radius: 999px;
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 11px;
+    white-space: nowrap;
+}
+
+.spf-status--core {
+    background: var(--spf-greenbg);
+    color: var(--spf-green);
+}
+
+.spf-status--optional {
+    background: var(--spf-cream);
+    color: var(--spf-goldtxt);
+}
+
+.spf-status--specialist {
+    background: #e8ebee;
+    color: #3c4a5c;
+}
+
+.spf-status--none {
+    background: var(--spf-chipgrey);
+    color: var(--spf-faint);
+}
+
+.spf-grade {
+    border-radius: 999px;
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 11px;
+    white-space: nowrap;
+}
+
+.spf-attempts {
+    color: var(--spf-dim);
+    text-decoration: none;
+}
+
+.spf-attempts:hover {
+    color: var(--spf-goldtxt);
+    text-decoration: none;
+}
+
+.spf-attempts.is-multi {
+    color: var(--spf-goldtxt);
+    font-weight: 600;
+}
+
+.spf-rtable__foot {
+    color: var(--spf-muted);
+    font-size: 12px;
+    padding: 13px 20px;
+}
+
+.spf-rtable__foot strong {
+    color: var(--spf-ink);
+}
+
+/* ── Performance ───────────────────────────────────────────────────────── */
+
+.spf-terms {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.spf-term {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-line);
+    border-radius: 14px;
+    padding: 24px 30px;
+}
+
+.spf-term__head {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.spf-term__score {
+    color: var(--spf-dim);
+    font-size: 12.5px;
+}
+
+.spf-term__score strong {
+    color: var(--spf-ink);
+}
+
+.spf-bar {
+    background: #eceae5;
+    border-radius: 999px;
+    height: 6px;
+    margin-bottom: 22px;
+    overflow: hidden;
+}
+
+.spf-bar__fill {
+    border-radius: 999px;
+    background: var(--spf-bronze);
+    height: 100%;
+}
+
+.spf-bar__fill--green {
+    background: var(--spf-sage);
+}
+
+.spf-bar__fill--rust {
+    background: var(--spf-rust);
+}
+
+.spf-split {
+    display: grid;
+    gap: 30px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.spf-split__label {
+    color: var(--spf-muted);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    margin-bottom: 9px;
+    text-transform: uppercase;
+}
+
+.spf-bar--thin {
+    height: 5px;
+    margin-bottom: 0;
+}
+
+.spf-modlist {
+    border-top: 1px solid var(--spf-hairline);
+    display: flex;
+    flex-direction: column;
+    margin-top: 18px;
+    padding-top: 12px;
+}
+
+.spf-modlist__row {
+    align-items: center;
+    display: flex;
+    font-size: 13px;
+    gap: 12px;
+    padding: 7px 0;
+}
+
+.spf-modlist__dot {
+    background: var(--spf-bronze);
+    border-radius: 50%;
+    flex: 0 0 6px;
+    height: 6px;
+    width: 6px;
+}
+
+.spf-modlist__dot--pending {
+    background: var(--spf-border2);
+}
+
+.spf-modlist__name {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.spf-modlist__grade {
+    color: var(--spf-muted);
+    font-size: 12px;
+}
+
+/* ── Do it online (forms page) ─────────────────────────────────────────── */
+
+.spf-formgrid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 980px;
+}
+
+.spf-formcard {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-line);
+    border-radius: 12px;
+    display: block;
+    padding: 17px 20px;
+    text-decoration: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.spf-formcard:hover {
+    border-color: var(--spf-bronze);
+    box-shadow: 0 6px 18px rgba(38, 41, 46, 0.06);
+    text-decoration: none;
+}
+
+.spf-formcard__title {
+    color: var(--spf-ink);
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.spf-formcard__desc {
+    color: var(--spf-muted);
+    font-size: 12px;
+    line-height: 1.6;
+    margin-top: 4px;
+}
+
+/* ── Right rail ────────────────────────────────────────────────────────── */
+
+.spf-rail__grid {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.spf-railcard {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-line);
+    border-radius: 14px;
+    padding: 20px 24px;
+}
+
+.spf-railcard__head {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.spf-railcard__title {
+    color: var(--spf-muted);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.spf-railnav {
+    align-items: center;
+    background: var(--spf-card);
+    border: 1px solid var(--spf-border2);
+    border-radius: 50%;
+    color: var(--spf-dim);
+    cursor: pointer;
+    display: flex;
+    flex: 0 0 24px;
+    height: 24px;
+    justify-content: center;
+    padding: 0;
+}
+
+.spf-railnav:hover {
+    border-color: var(--spf-bronze);
+    color: var(--spf-goldtxt);
+}
+
+.spf-news__age {
+    color: #b4b4b0;
+    font-size: 10.5px;
+}
+
+.spf-news__title {
+    font-family: var(--spf-serif);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.35;
+    margin-top: 4px;
+}
+
+/* Staff-authored rich text. Clamped to keep the rail scannable; the shell
+   script reveals a "Read more" toggle when there is more to see. */
+.spf-news__body {
+    color: var(--spf-dim);
+    font-size: 11.5px;
+    line-height: 1.65;
+    margin-top: 8px;
+    max-height: 132px;
+    overflow: hidden;
+    position: relative;
+}
+
+.spf-news__body.is-expanded {
+    max-height: none;
+}
+
+.spf-news__body.is-clamped:not(.is-expanded)::after {
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0),
+        var(--spf-card) 88%
+    );
+    bottom: 0;
+    content: "";
+    display: block;
+    height: 36px;
+    left: 0;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+}
+
+.spf-news__body p {
+    margin: 0 0 8px;
+}
+
+.spf-news__body p:last-child {
+    margin-bottom: 0;
+}
+
+.spf-news__body a {
+    color: var(--spf-goldtxt);
+    font-weight: 500;
+    text-decoration: none;
+    word-break: break-word;
+}
+
+.spf-news__body a:hover {
+    text-decoration: underline;
+}
+
+.spf-news__body ul,
+.spf-news__body ol {
+    margin: 0 0 8px;
+    padding-left: 18px;
+}
+
+.spf-news__body li {
+    margin-bottom: 4px;
+}
+
+.spf-news__body img {
+    border-radius: 8px;
+    height: auto;
+    max-width: 100%;
+}
+
+.spf-news__none {
+    color: var(--spf-dim);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.spf-news__none p {
+    margin: 0;
+}
+
+.spf-news__none-sub {
+    color: var(--spf-muted);
+    margin-top: 4px !important;
+}
+
+.spf-news__actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.spf-news__actions:empty {
+    display: none;
+}
+
+.spf-news__foot {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.spf-dots {
+    display: flex;
+    gap: 5px;
+}
+
+.spf-dots span {
+    background: var(--spf-border2);
+    border-radius: 50%;
+    cursor: pointer;
+    height: 6px;
+    width: 6px;
+}
+
+.spf-dots span.is-active {
+    background: var(--spf-bronze);
+}
+
+.spf-lib {
+    align-items: center;
+    border-radius: 12px;
+    display: flex;
+    gap: 14px;
+    padding: 18px 20px;
+    text-decoration: none;
+}
+
+.spf-lib:hover {
+    text-decoration: none;
+}
+
+.spf-lib--jstor {
+    background: #7a1f2b;
+}
+
+.spf-lib--jstor .spf-lib__mark {
+    color: #fff;
+    font-family: var(--spf-serif);
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.spf-lib--jstor .spf-lib__text {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.spf-lib--ebsco {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-line);
+}
+
+.spf-lib--ebsco:hover {
+    border-color: var(--spf-bronze);
+}
+
+.spf-lib--ebsco .spf-lib__mark {
+    color: #1b4b66;
+    font-family: var(--spf-serif);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+.spf-lib--ebsco .spf-lib__text {
+    color: var(--spf-muted);
+}
+
+.spf-lib--training {
+    background: #1e3a4c;
+}
+
+.spf-lib--training .spf-lib__mark {
+    align-items: center;
+    background: #d64550;
+    border-radius: 50%;
+    color: #fff;
+    display: flex;
+    flex: 0 0 34px;
+    height: 34px;
+    justify-content: center;
+    width: 34px;
+}
+
+.spf-lib--training .spf-lib__text {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.spf-lib__mark {
+    flex: 0 0 auto;
+}
+
+.spf-lib__text {
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+.spf-classlist {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.spf-class {
+    border-left: 2px solid var(--spf-cream);
+    padding-left: 12px;
+}
+
+.spf-class__module {
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.spf-class__meta {
+    color: var(--spf-dim);
+    font-size: 11.5px;
+    margin-top: 2px;
+}
+
+.spf-class__room {
+    color: var(--spf-muted);
+    font-size: 11px;
+    margin-top: 1px;
+}
+
+.spf-class__join {
+    align-items: center;
+    color: var(--spf-goldtxt);
+    display: inline-flex;
+    font-size: 11px;
+    font-weight: 600;
+    gap: 5px;
+    margin-top: 4px;
+    text-decoration: none;
+}
+
+.spf-class__join:hover {
+    text-decoration: underline;
+}
+
+.spf-railcard__empty {
+    color: var(--spf-muted);
+    font-size: 11.5px;
+    margin-bottom: 6px;
+}
+
+.spf-railcard__divider {
+    border-top: 1px solid var(--spf-hairline);
+    margin: 14px 0 12px;
+}
+
+/* ── Service pages (excuse, documents, IT, checkout, module) ───────────── */
+
+.spf-page-head__sub {
+    color: var(--spf-muted);
+    font-size: 12.5px;
+    margin-top: 6px;
+}
+
+/* Two independent columns that stack on narrow screens. */
+.spf-split2 {
+    align-items: start;
+    display: grid;
+    gap: 26px;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.spf-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Toolbar: search field, filter chips and secondary actions. */
+.spf-toolbar {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+body.student-portal-body .spf-input--pill {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-border2);
+    border-radius: 999px;
+    box-sizing: border-box;
+    color: var(--spf-ink);
+    flex: 1 1 200px;
+    font-family: inherit;
+    font-size: 12.5px;
+    max-width: 340px;
+    outline: none;
+    padding: 9px 16px;
+}
+
+body.student-portal-body .spf-input--pill:focus {
+    border-color: var(--spf-bronze);
+}
+
+/* ── Panel with a scrolling body (absent days, class dates) ────────────── */
+
+.spf-panel--flush {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-line);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.spf-panel__bar {
+    align-items: center;
+    border-bottom: 1px solid var(--spf-line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 16px 22px;
+}
+
+.spf-panel__bar-title {
+    color: var(--spf-muted);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.spf-panel__bar-note {
+    color: var(--spf-muted);
+    font-size: 11.5px;
+}
+
+.spf-scrollbody {
+    max-height: 520px;
+    overflow-y: auto;
+}
+
+.spf-grouprow {
+    align-items: center;
+    background: var(--spf-creambg);
+    border-bottom: 1px solid var(--spf-hairline);
+    display: flex;
+    gap: 10px;
+    padding: 10px 22px;
+}
+
+.spf-grouprow__name {
+    color: var(--spf-goldtxt);
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.spf-grouprow__count {
+    color: var(--spf-bronze);
+    font-size: 11.5px;
+    white-space: nowrap;
+}
+
+/* Checkable session row. */
+.spf-checkrow {
+    align-items: center;
+    border-bottom: 1px solid var(--spf-hairline);
+    box-sizing: border-box;
+    color: var(--spf-body);
+    cursor: pointer;
+    display: flex;
+    font-size: 13px;
+    gap: 12px;
+    padding: 11px 22px;
+    width: 100%;
+}
+
+.spf-checkrow:hover {
+    background: var(--spf-paper);
+}
+
+body.student-portal-body .spf-checkrow input[type="checkbox"] {
+    accent-color: var(--spf-bronze);
+    flex: 0 0 16px;
+    height: 16px;
+    margin: 0;
+    width: 16px;
+}
+
+.spf-checkrow input[type="checkbox"]:disabled ~ span {
+    opacity: 0.55;
+}
+
+.spf-checkrow__flag {
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 6px;
+}
+
+.spf-checkrow__flag--pending {
+    color: var(--spf-rust);
+}
+
+.spf-checkrow__flag--rejected {
+    color: var(--spf-goldtxt);
+}
+
+.spf-notice {
+    background: var(--spf-creambg);
+    border-radius: 10px;
+    color: var(--spf-goldtxt);
+    font-size: 12.5px;
+    padding: 13px 16px;
+}
+
+/* ── Upload + reason ──────────────────────────────────────────────────── */
+
+.spf-dropzone {
+    align-items: center;
+    border: 1.5px dashed var(--spf-border2);
+    border-radius: 11px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 18px 20px;
+}
+
+.spf-dropzone__hint {
+    color: var(--spf-muted);
+    font-size: 11.5px;
+    line-height: 1.4;
+}
+
+body.student-portal-body .spf-textarea {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-border2);
+    border-radius: 10px;
+    box-sizing: border-box;
+    color: var(--spf-ink);
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.6;
+    min-height: 110px;
+    outline: none;
+    padding: 12px 14px;
+    resize: vertical;
+    width: 100%;
+}
+
+body.student-portal-body .spf-textarea:focus {
+    border-color: var(--spf-bronze);
+}
+
+.spf-filenames {
+    color: var(--spf-dim);
+    font-size: 12px;
+    margin-top: 12px;
+}
+
+.spf-filenames > div {
+    align-items: center;
+    color: var(--spf-goldtxt);
+    display: flex;
+    font-weight: 500;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+/* ── Tabs (module details) ────────────────────────────────────────────── */
+
+.spf-tabs {
+    border-bottom: 1px solid var(--spf-line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 26px;
+    margin-bottom: 24px;
+}
+
+.spf-tabs__btn {
+    align-items: center;
+    background: none;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    color: var(--spf-muted);
+    cursor: pointer;
+    display: inline-flex;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    gap: 8px;
+    padding: 0 2px 12px;
+    text-decoration: none;
+}
+
+.spf-tabs__btn:hover {
+    color: var(--spf-body);
+    text-decoration: none;
+}
+
+.spf-tabs__btn.is-active {
+    border-bottom-color: var(--spf-bronze);
+    color: var(--spf-ink);
+    font-weight: 600;
+}
+
+.spf-tabs__btn img {
+    height: 18px;
+    width: auto;
+}
+
+/* ── Media / document cards ───────────────────────────────────────────── */
+
+.spf-cardgrid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+/* Three across, so long product names and category labels have room. */
+.spf-cardgrid--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 1180px) {
+    .spf-cardgrid--3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    .spf-cardgrid--3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+.spf-doccard {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-line);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.15s ease;
+}
+
+.spf-doccard:hover {
+    border-color: var(--spf-bronze);
+}
+
+.spf-doccard__head {
+    align-items: flex-start;
+    display: flex;
+    gap: 12px;
+    padding: 18px 20px 14px;
+}
+
+.spf-doccard__title {
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.spf-doccard__body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 7px;
+    padding: 0 20px 16px;
+}
+
+.spf-doccard__meta {
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.spf-doccard__meta span {
+    color: var(--spf-muted);
+}
+
+.spf-doccard__meta strong {
+    color: var(--spf-body);
+    font-weight: 500;
+}
+
+.spf-doccard__foot {
+    align-items: center;
+    border-top: 1px solid var(--spf-hairline);
+    color: var(--spf-goldtxt);
+    display: flex;
+    font-size: 12.5px;
+    font-weight: 600;
+    gap: 7px;
+    padding: 12px 20px;
+    text-decoration: none;
+}
+
+a.spf-doccard__foot:hover {
+    color: #6e4f17;
+    text-decoration: none;
+}
+
+.spf-doccard__foot--off {
+    color: var(--spf-muted);
+    font-weight: 500;
+}
+
+/* Product cards carry stacked purchase options. */
+.spf-doccard__options {
+    border-top: 1px solid var(--spf-hairline);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: auto;
+    padding: 12px 20px 16px;
+}
+
+.spf-optionbtn {
+    align-items: center;
+    background: var(--spf-card);
+    border: 1px solid var(--spf-border2);
+    border-radius: 999px;
+    box-sizing: border-box;
+    color: var(--spf-body);
+    cursor: pointer;
+    display: flex;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    gap: 10px;
+    justify-content: space-between;
+    padding: 9px 16px;
+    width: 100%;
+}
+
+.spf-optionbtn:hover {
+    border-color: var(--spf-bronze);
+    color: var(--spf-goldtxt);
+}
+
+.spf-optionbtn__price {
+    color: var(--spf-muted);
+    font-weight: 400;
+}
+
+.spf-optionbtn--paid {
+    background: var(--spf-graphite);
+    border-color: var(--spf-graphite);
+    color: #f0efec;
+}
+
+.spf-optionbtn--paid:hover {
+    background: var(--spf-body);
+    border-color: var(--spf-body);
+    color: #fff;
+}
+
+.spf-optionbtn--paid .spf-optionbtn__price {
+    color: var(--spf-gold);
+}
+
+/* ── Order summary (checkout) ─────────────────────────────────────────── */
+
+.spf-summary__row {
+    align-items: baseline;
+    border-bottom: 1px solid var(--spf-hairline);
+    display: flex;
+    font-size: 13px;
+    gap: 12px;
+    padding: 9px 0;
+}
+
+.spf-summary__row > span:first-child {
+    flex: 1 1 auto;
+    line-height: 1.45;
+}
+
+.spf-summary__qty {
+    color: var(--spf-muted);
+    font-size: 11.5px;
+}
+
+.spf-summary__line {
+    color: var(--spf-dim);
+    display: flex;
+    font-size: 13px;
+    justify-content: space-between;
+    padding-top: 8px;
+}
+
+.spf-summary__total {
+    align-items: baseline;
+    border-top: 1px solid var(--spf-line);
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding-top: 12px;
+}
+
+.spf-summary__total > span:first-child {
+    font-family: var(--spf-serif);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.spf-summary__total > span:last-child {
+    font-family: var(--spf-serif);
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.spf-deflist {
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+    gap: 10px;
+}
+
+.spf-deflist__row {
+    display: flex;
+    gap: 12px;
+}
+
+.spf-deflist__row > span:first-child {
+    color: var(--spf-muted);
+    flex: 0 0 120px;
+}
+
+.spf-deflist__row > span:last-child {
+    font-weight: 500;
+}
+
+.spf-radio {
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    font-size: 13px;
+    gap: 10px;
+}
+
+body.student-portal-body .spf-radio input[type="radio"] {
+    accent-color: var(--spf-bronze);
+    height: 15px;
+    margin: 0;
+    width: 15px;
+}
+
+/* ── Class-date rows (module details) ─────────────────────────────────── */
+
+.spf-datecell {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+}
+
+.spf-datechip {
+    align-items: center;
+    background: var(--spf-chipgrey);
+    border-radius: 10px;
+    color: var(--spf-faint);
+    display: flex;
+    flex: 0 0 42px;
+    flex-direction: column;
+    height: 42px;
+    justify-content: center;
+}
+
+.spf-datechip__d {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+/* Order list: seven fixed columns, cells may stack within a row. */
+.spf-otable {
+    min-width: 942px;
+}
+
+.spf-otable__head,
+.spf-otable__row {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: 40px 146px minmax(180px, 1fr) 116px 118px 78px 132px;
+    padding: 0 24px;
+}
+
+.spf-otable__head {
+    border-bottom: 1px solid var(--spf-line);
+    color: var(--spf-muted);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    padding-bottom: 13px;
+    padding-top: 13px;
+    text-transform: uppercase;
+}
+
+.spf-otable__row {
+    align-items: start;
+    border-bottom: 1px solid var(--spf-hairline);
+    font-size: 13px;
+    padding-bottom: 16px;
+    padding-top: 16px;
+}
+
+.spf-otable__row:last-of-type {
+    border-bottom: 0;
+}
+
+.spf-otable__product + .spf-otable__product {
+    margin-top: 10px;
+}
+
+.spf-otable__product-name {
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.spf-otable__qty {
+    color: var(--spf-muted);
+    font-weight: 400;
+}
+
+.spf-otable__actions {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+}
+
+.spf-otable__foot {
+    color: var(--spf-muted);
+    font-size: 12px;
+    padding: 13px 24px;
+}
+
+.spf-otable__foot strong {
+    color: var(--spf-ink);
+}
+
+/* The status filter reads as a chip but behaves as a button. */
+.spf-chipbtn {
+    border: 0;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+/* Class-dates table: fixed columns, rendered server-side. */
+.spf-dtable {
+    min-width: 640px;
+}
+
+.spf-dtable__head,
+.spf-dtable__row {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: minmax(200px, 1.2fr) 1fr 170px 110px;
+    padding: 0 24px;
+}
+
+.spf-dtable__head {
+    border-bottom: 1px solid var(--spf-line);
+    color: var(--spf-muted);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    padding-bottom: 13px;
+    padding-top: 13px;
+    text-transform: uppercase;
+}
+
+.spf-dtable__row {
+    align-items: center;
+    border-bottom: 1px solid var(--spf-hairline);
+    font-size: 13px;
+    padding-bottom: 14px;
+    padding-top: 14px;
+}
+
+.spf-dtable__row:last-child {
+    border-bottom: 0;
+}
+
+.spf-dtable__sub {
+    color: var(--spf-muted);
+    display: block;
+    font-size: 11.5px;
+    margin-top: 1px;
+}
+
+.spf-dtable__cell--right {
+    text-align: right;
+}
+
+.spf-datechip__m {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/* Tabulator tables sit inside a portal card on these screens. */
+body.student-portal-body .spf-tablecard {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-line);
+    border-radius: 14px;
+    padding: 6px 18px 14px;
+}
+
+/* ── Modals ────────────────────────────────────────────────────────────── */
+
+/*
+   The portal's request dialogs. The tw-starter `.modal / .modal-dialog /
+   .modal-content` scaffold is kept intact — its JS drives show/hide — and
+   `.spf-modal` restyles what sits inside.
+*/
+
+.spf-modal.modal-dialog {
+    margin-left: auto;
+    margin-right: auto;
+    width: 410px;
+}
+
+.spf-modal--wide.modal-dialog {
+    width: 640px;
+}
+
+body.student-portal-body .spf-modal .modal-content {
+    border: 0;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(38, 41, 46, 0.3);
+    box-sizing: border-box;
+    padding: 30px 32px;
+}
+
+.spf-modal__head {
+    align-items: center;
+    display: flex;
+    gap: 13px;
+}
+
+.spf-modal__icon {
+    align-items: center;
+    background: var(--spf-cream);
+    border-radius: 11px;
+    color: var(--spf-goldtxt);
+    display: flex;
+    flex: 0 0 40px;
+    height: 40px;
+    justify-content: center;
+    width: 40px;
+}
+
+.spf-modal__title {
+    color: var(--spf-ink);
+    font-family: var(--spf-serif);
+    font-size: 19px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.spf-modal__close {
+    align-items: center;
+    background: var(--spf-card);
+    border: 1px solid var(--spf-border2);
+    border-radius: 50%;
+    color: var(--spf-muted);
+    cursor: pointer;
+    display: flex;
+    flex: 0 0 28px;
+    height: 28px;
+    justify-content: center;
+    text-decoration: none;
+    transition: border-color 0.15s ease, color 0.15s ease;
+    width: 28px;
+}
+
+.spf-modal__close:hover {
+    border-color: var(--spf-bronze);
+    color: var(--spf-goldtxt);
+    text-decoration: none;
+}
+
+.spf-modal__desc {
+    color: var(--spf-muted);
+    font-size: 12.5px;
+    line-height: 1.6;
+    margin: 14px 0 20px;
+}
+
+.spf-modal__field {
+    margin-bottom: 16px;
+}
+
+.spf-modal__field:last-of-type {
+    margin-bottom: 24px;
+}
+
+.spf-modal__label {
+    color: var(--spf-muted);
+    display: block;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    margin-bottom: 7px;
+    text-transform: uppercase;
+}
+
+.spf-modal__current {
+    background: var(--spf-paper);
+    border-radius: 9px;
+    color: var(--spf-dim);
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 11px 14px;
+    word-break: break-word;
+}
+
+body.student-portal-body .spf-modal__input {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-border2);
+    border-radius: 9px;
+    box-sizing: border-box;
+    color: var(--spf-ink);
+    display: block;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    padding: 11px 14px;
+    width: 100%;
+}
+
+body.student-portal-body .spf-modal__input:focus {
+    border-color: var(--spf-bronze);
+    box-shadow: 0 0 0 3px var(--spf-goldsoft);
+}
+
+body.student-portal-body .spf-modal__input::placeholder {
+    color: var(--spf-muted);
+}
+
+body.student-portal-body .spf-modal__input.border-danger {
+    border-color: var(--spf-rust);
+}
+
+.spf-modal__foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.spf-modal__note {
+    color: var(--spf-rust);
+    font-size: 11.5px;
+    margin-top: 7px;
+}
+
+.spf-modal__note--ok {
+    color: var(--spf-green);
+}
+
+/* Empty error slots must not add space before the JS fills them in. */
+.spf-modal__note:empty {
+    display: none;
+}
+
+/* Centred confirmation dialogs (success / warning). */
+.spf-modal--status {
+    text-align: center;
+}
+
+.spf-modal__status-icon {
+    align-items: center;
+    border-radius: 50%;
+    display: inline-flex;
+    height: 56px;
+    justify-content: center;
+    margin-bottom: 18px;
+    width: 56px;
+}
+
+.spf-modal__status-icon--ok {
+    background: var(--spf-greenbg);
+    color: var(--spf-green);
+}
+
+.spf-modal__status-icon--warn {
+    background: var(--spf-rustbg);
+    color: var(--spf-rust);
+}
+
+.spf-modal--status .errorModalTitle,
+.spf-modal--status .successModalTitle {
+    color: var(--spf-ink);
+    font-family: var(--spf-serif);
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.spf-modal--status .errorModalDesc,
+.spf-modal--status .successModalDesc {
+    color: var(--spf-dim);
+    font-size: 12.5px;
+    line-height: 1.6;
+    margin-top: 8px;
+}
+
+.spf-modal--status .spf-modal__foot {
+    justify-content: center;
+    margin-top: 22px;
+}
+
+/* The address dialog keeps its existing field grid; these align it with the
+   rest of the portal without touching its markup. */
+body.student-portal-body .spf-modal .form-label {
+    color: var(--spf-muted);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    margin-bottom: 7px;
+    text-transform: uppercase;
+}
+
+body.student-portal-body .spf-modal .form-control {
+    border-color: var(--spf-border2);
+    border-radius: 9px;
+    font-size: 13px;
+    padding: 10px 14px;
+}
+
+.spf-modal__section {
+    margin-top: 20px;
+}
+
+.spf-modal__section-title {
+    align-items: center;
+    color: var(--spf-ink);
+    display: flex;
+    font-size: 12.5px;
+    font-weight: 600;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.spf-modal__section-title svg {
+    color: var(--spf-bronze);
+}
+
+.spf-modal__body-scroll {
+    margin-right: -8px;
+    max-height: min(58vh, 520px);
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+@media (max-width: 700px) {
+    .spf-modal.modal-dialog,
+    .spf-modal--wide.modal-dialog {
+        width: 92vw;
+    }
+
+    body.student-portal-body .spf-modal .modal-content {
+        padding: 24px 20px;
+    }
+}
+
+/* ── Preloader ─────────────────────────────────────────────────────────── */
+
+/*
+   The shared preloader is navy with a white wordmark. Scoped to the portal
+   body it is restated on warm paper — recolouring the background alone would
+   leave the wordmark and track invisible. Staff screens keep the navy version.
+*/
+
+body.student-portal-body .sitePreLoader.lcc-preloader {
+    background: var(--spf-paper);
+    font-family: var(--spf-sans);
+}
+
+/* Track ring, then the spinning arc. */
+body.student-portal-body .lcc-preloader__ring circle {
+    stroke: var(--spf-line);
+}
+
+body.student-portal-body .lcc-preloader__ring circle + circle {
+    stroke: var(--spf-bronze);
+}
+
+body.student-portal-body .lcc-preloader__tile {
+    animation-name: spfPreloaderTile;
+    background: var(--spf-graphite);
+    color: #f0efec;
+}
+
+body.student-portal-body .lcc-preloader__wordmark-top {
+    color: var(--spf-ink);
+}
+
+body.student-portal-body .lcc-preloader__wordmark-bottom {
+    color: var(--spf-muted);
+}
+
+body.student-portal-body .lcc-preloader__track {
+    background: #eceae5;
+}
+
+body.student-portal-body .lcc-preloader__bar {
+    background: linear-gradient(90deg, var(--spf-bronze), var(--spf-gold));
+}
+
+body.student-portal-body .lcc-preloader__status {
+    color: var(--spf-muted);
+}
+
+/* The stock pulse glows gold; on paper it reads better in bronze. */
+@keyframes spfPreloaderTile {
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(185, 138, 78, 0.3);
+        transform: scale(1);
+    }
+
+    50% {
+        box-shadow: 0 0 0 14px rgba(185, 138, 78, 0);
+        transform: scale(1.05);
+    }
+}
+
+/* ── Theme bridge for the shared tw-starter modals/forms ───────────────── */
+
+body.student-portal-body .modal-content {
+    border-radius: 16px;
+}
+
+body.student-portal-body .modal-header {
+    border-bottom-color: var(--spf-hairline);
+}
+
+body.student-portal-body .modal-header h2 {
+    font-family: var(--spf-serif);
+    font-size: 17px;
+    font-weight: 600;
+}
+
+body.student-portal-body .modal-footer {
+    border-top-color: var(--spf-hairline);
+}
+
+body.student-portal-body .form-control:focus,
+body.student-portal-body .form-select:focus {
+    border-color: var(--spf-bronze);
+    box-shadow: 0 0 0 3px var(--spf-goldsoft);
+}
+
+body.student-portal-body .form-label {
+    color: var(--spf-dim);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+body.student-portal-body .btn-primary {
+    background-color: var(--spf-graphite);
+    border-color: var(--spf-graphite);
+    color: #f0efec;
+}
+
+body.student-portal-body .btn-outline-secondary {
+    border-color: var(--spf-border2);
+    color: var(--spf-dim);
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+
+@media (max-width: 1440px) {
+    .spf-main {
+        padding: 30px 32px 56px;
+    }
+
+    .spf-rail {
+        padding: 30px 26px 56px;
+    }
+}
+
+@media (max-width: 1279px) {
+    .spf-rail {
+        flex: 1 1 100%;
+        max-width: none;
+        padding: 0 32px 56px;
+    }
+
+    .spf-rail__grid {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .spf-hero {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .spf-hero__aside {
+        border-left: 0;
+        border-top: 1px solid var(--spf-hairline);
+        padding-left: 0;
+        padding-top: 22px;
+    }
+}
+
+@media (max-width: 1023px) {
+    .spf-topbar {
+        display: flex;
+    }
+
+    .spf-sidebar {
+        height: 100vh;
+        left: 0;
+        position: fixed;
+        top: 0;
+        transform: translateX(-100%);
+        transition: transform 0.22s ease;
+    }
+
+    .spf-sidebar.is-open {
+        transform: translateX(0);
+    }
+
+    .spf-main,
+    .spf-rail {
+        flex: 1 1 100%;
+        max-width: none;
+    }
+
+    .spf-main {
+        padding: 26px 20px 40px;
+    }
+
+    .spf-rail {
+        padding: 0 20px 48px;
+    }
+
+    .spf-fieldgrid,
+    .spf-fieldgrid--2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .spf-formgrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 767px) {
+    .spf-panel {
+        padding: 22px 20px;
+    }
+
+    .spf-hero {
+        padding: 24px 20px;
+    }
+
+    .spf-hero__identity {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .spf-fieldgrid,
+    .spf-fieldgrid--2,
+    .spf-split {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .spf-term {
+        padding: 20px 18px;
+    }
+
+    .spf-h1 {
+        font-size: 22px;
+    }
+}
+
+/* Portal components set their own `display`, which would otherwise beat
+   Tailwind's single-class `hidden` utility that page scripts toggle. */
+body.student-portal-body .hidden {
+    display: none;
+}

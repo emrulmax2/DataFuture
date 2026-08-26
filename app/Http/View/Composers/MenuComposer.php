@@ -47,6 +47,16 @@ class MenuComposer
             return request()->query('layout');
         }
 
+        /* The student-facing portal (route names prefixed `students.`) has its
+           own shell — it must never fall back to the staff `top-menu` layout,
+           which renders the staff global header. Controllers can still opt out
+           by passing an explicit `layout`, as the login screen does. */
+        $routeName = optional(request()->route())->getName();
+
+        if (is_string($routeName) && str_starts_with($routeName, 'students.')) {
+            return 'student-portal';
+        }
+
         return 'top-menu';
     }
 
