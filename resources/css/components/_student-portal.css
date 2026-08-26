@@ -2701,6 +2701,28 @@ body.student-portal-body .spf-modal--verify .modal-content {
     overflow-y: auto;
 }
 
+/*
+   This dialog's title is long enough that a close button sitting in the header
+   flex row would wrap it onto two lines, so it is pinned to the card corner
+   instead. It only renders while staff are impersonating a student.
+*/
+body.student-portal-body .spf-modal--verify .modal-content {
+    position: relative;
+}
+
+.spf-modal--verify .spf-modal__close {
+    position: absolute;
+    right: 24px;
+    top: 24px;
+}
+
+/* The title fills a 440px card almost exactly, so the staff-only close button
+   would sit on top of it. Widen the card rather than shrink the type — the
+   student's dialog keeps the prototype's dimensions. */
+.spf-modal--verify.spf-modal--closable.modal-dialog {
+    width: 480px;
+}
+
 .spf-modal__headtext {
     min-width: 0;
 }

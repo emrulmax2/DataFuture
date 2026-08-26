@@ -73,7 +73,7 @@
 @if(isset($student->crel->abody) && $student->crel->abody->registration_document_verified==null)
 <!-- BEGIN: Pearson registration verification -->
 <div id="awardingBodyEditModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog spf-modal spf-modal--verify">
+    <div class="modal-dialog spf-modal spf-modal--verify @impersonating($guard = 'student') spf-modal--closable @endImpersonating">
         <form method="POST" action="#" id="awardingBodyDetailsVerificationEditModalForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="spf-modal__head">
@@ -84,6 +84,14 @@
                         <h3 class="spf-modal__title">Pearson registration verification</h3>
                         <div class="spf-modal__subtitle">Please check your registration details before continuing</div>
                     </div>
+                    {{-- Staff viewing the portal as a student can step past this. The
+                         student themselves has to answer: the dialog has a static
+                         backdrop, so without this there is no way out of it. --}}
+                    @impersonating($guard = 'student')
+                        <a href="javascript:;" data-tw-dismiss="modal" class="spf-modal__close" aria-label="Close">
+                            <i data-lucide="x" class="w-3 h-3"></i>
+                        </a>
+                    @endImpersonating
                 </div>
 
                 <div class="spf-vtable">
