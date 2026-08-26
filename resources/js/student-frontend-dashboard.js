@@ -125,6 +125,13 @@ if($('#awardingBodyEditModal').length > 0 ) {
     const awardingBodyEditModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#awardingBodyEditModal"));
     const confirmAwardMissModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmAwardingBodyMissingInformationModal"));
     awardingBodyEditModal.show();
+
+    /* The student has to tick the consent box before they can confirm. The
+       button is rendered disabled, so this is the only thing that enables it. */
+    $("#awardingBodyConsent").on('change', function(){
+        $('#agreeWithAwarding').prop('disabled', !this.checked);
+    });
+
     $("#awardingBodyDetailsVerificationEditModalForm").on('submit', function(e){
         e.preventDefault();
             const form = document.getElementById('awardingBodyDetailsVerificationEditModalForm');
