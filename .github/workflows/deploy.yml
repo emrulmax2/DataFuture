@@ -4,86 +4,214 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
-  
+  # Re-run a deploy by hand from the Actions tab (e.g. after fixing the server).
+  workflow_dispatch:
+
+# Never let two deploys touch the server at once.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
 env:
-  APP_NAME: "London Churchill College (SMS) App"
-  APP_ENV: production
-  TIME_ZONE: 'Europe/London'
-  APP_KEY: ${{ secrets.APP_KEY }} 
-  APP_DEBUG: false
-
-  APP_URL: ${{ secrets.APP_URL }} 
-  ASSET_URL: ${{ secrets.ASSET_URL }} 
-  VITE_BASE_URL: ${{ secrets.VITE_BASE_URL }} 
-  
-  DB_CONNECTION: ${{ secrets.DB_CONNECTION }}
-  DB_HOST: ${{ secrets.DB_HOST }}
-  DB_DATABASE: ${{ secrets.DB_DATABASE }}
-  DB_USERNAME: ${{ secrets.DB_USERNAME }}
-  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-  DB_PORT: 3306
-
-  BROADCAST_DRIVER: log
-  CACHE_DRIVER: file
-  FILESYSTEM_DISK: local
-  QUEUE_CONNECTION: sync
-  SESSION_DRIVER: file
-  SESSION_LIFETIME: 120
-  
-  MAIL_MAILER: smtp
-  MAIL_HOST: ${{ secrets.MAIL_HOST }}
-  MAIL_PORT: 587
-  MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
-  MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
-  MAIL_ENCRYPTION: tls
-  MAIL_FROM_ADDRESS: ${{ secrets.MAIL_FROM_ADDRESS }}
-  MAIL_FROM_NAME: "${APP_NAME}"
-
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }} 
-  AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-  AWS_BUCKET: ${{ secrets.AWS_BUCKET }}
-  AWS_USE_PATH_STYLE_ENDPOINT: false
-  
-  GOOGLE_REDIRECT_URL : ${{ secrets.GOOGLE_REDIRECT_URL }}
-  GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-  GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-
-  GOOGLE_STUDENT_REDIRECT_URL : ${{ secrets.GOOGLE_STUDENT_REDIRECT_URL }}
-  GOOGLE_STUDENT_CLIENT_ID: ${{ secrets.GOOGLE_STUDENT_CLIENT_ID }}
-  GOOGLE_STUDENT_CLIENT_SECRET: ${{ secrets.GOOGLE_STUDENT_CLIENT_SECRET }}
-
-  DOCUSEAL_API_KEY: ${{ secrets.DOCUSEAL_API_KEY }}
-  OFFER_ACCEPTANCE_FORM_TEMPLATE_ID: 172859
-
+  # Older cPanel/OpenSSH servers still hand out ssh-rsa keys, which OpenSSH 9
+  # on the runner rejects by default.
+  SSH_OPTS: "-o BatchMode=yes -o PubkeyAcceptedKeyTypes=+ssh-rsa -o HostKeyAlgorithms=+ssh-rsa"
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    # Repository variables, not secrets: a username and a path are not
+    # credentials, and leaving them unmasked keeps the logs readable.
+    env:
+      SSH_USER: ${{ vars.SSH_USER }}
+      DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      # ------------------------------------------------------------------
+      # 1. Preflight - fail on missing secrets/variables before anything runs
+      # ------------------------------------------------------------------
+      - name: Check configuration
+        env:
+          SSH_PRIVATE_SMS_KEY: ${{ secrets.SSH_PRIVATE_SMS_KEY }}
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+        run: |
+          set -eu
+          missing=0
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '16.15.1'
+          # Secrets - masked, so only presence can be reported.
+          for name in SSH_PRIVATE_SMS_KEY SERVER_IP; do
+            eval "value=\${$name:-}"
+            if [ -z "$value" ]; then
+              echo "::error title=Missing secret::$name is not set. Add it in Settings > Secrets and variables > Actions > Secrets."
+              missing=1
+            else
+              echo "  secret   $name: set"
+            fi
+          done
 
-    
-      
-    - name: Setup SSH
-      run: |
-        mkdir -p ~/.ssh/
-        echo "${{ secrets.SSH_PRIVATE_SMS_KEY }}" > ~/.ssh/id_rsa
-        echo "${{ secrets.SSH_PUBLIC_SMS_KEY }}" > ~/.ssh/id_rsa.pub
-        chmod 600 ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa.pub
-        ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+          # Variables - not masked, so show what will actually be used.
+          for name in SSH_USER DEPLOY_PATH; do
+            eval "value=\${$name:-}"
+            if [ -z "$value" ]; then
+              echo "::error title=Missing variable::$name is not set. Add it in Settings > Secrets and variables > Actions > Variables."
+              missing=1
+            else
+              echo "  variable $name: $value"
+            fi
+          done
 
-    - name: Deploy
-      run: |
-        ssh smslccuk@${{ secrets.SERVER_IP }} 'bash -s' < ${{ github.workspace }}/.github/workflows/deploy.sh
+          case "${DEPLOY_PATH:-}" in
+            /*|"") ;;
+            *) echo "::error title=Bad DEPLOY_PATH::DEPLOY_PATH must be an absolute path on the server, got '$DEPLOY_PATH'."
+               missing=1 ;;
+          esac
+
+          [ "$missing" -eq 0 ] || exit 1
+          echo "Deploying to $SSH_USER@<SERVER_IP>:$DEPLOY_PATH"
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ------------------------------------------------------------------
+      # 2. Build assets HERE, not on the server. A broken build then shows
+      #    up as its own red step with the full vite log, and never reaches
+      #    production.
+      # ------------------------------------------------------------------
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          # pnpm-lock.yaml is lockfileVersion 6.0, which is pnpm 8's format.
+          # pnpm 9/10 would silently rewrite it to a newer format on install.
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          # Matches local dev and the server's ea-nodejs22. Verified: vite 4.5.14
+          # builds clean on Node 22, and nothing in the tree is native or has an
+          # upper Node bound.
+          node-version: '22'
+          cache: pnpm
+
+      - name: Install front-end dependencies
+        # --no-frozen-lockfile: pnpm-lock.yaml is behind package.json
+        # (jspdf, signature_pad are missing from it). Regenerate the lockfile
+        # and this can become a strict --frozen-lockfile install.
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build assets
+        run: |
+          set -eu
+          pnpm run build
+          if [ ! -f public/build/manifest.json ] && [ ! -f public/build/.vite/manifest.json ]; then
+            echo "::error title=Build produced no manifest::vite finished but public/build/manifest.json is missing. The site would 500 on every asset."
+            exit 1
+          fi
+          echo "Built $(find public/build -type f | wc -l) files, $(du -sh public/build | cut -f1) total."
+
+      # ------------------------------------------------------------------
+      # 3. Connect
+      # ------------------------------------------------------------------
+      - name: Setup SSH
+        env:
+          SSH_PRIVATE_SMS_KEY: ${{ secrets.SSH_PRIVATE_SMS_KEY }}
+          SSH_PUBLIC_SMS_KEY: ${{ secrets.SSH_PUBLIC_SMS_KEY }}
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+        run: |
+          set -eu
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          # Preserve the multiline key and strip CRLF if pasted from Windows.
+          printf '%s\n' "$SSH_PRIVATE_SMS_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          if [ -n "${SSH_PUBLIC_SMS_KEY:-}" ]; then
+            printf '%s\n' "$SSH_PUBLIC_SMS_KEY" | tr -d '\r' > ~/.ssh/id_rsa.pub
+            chmod 644 ~/.ssh/id_rsa.pub
+          fi
+
+          if ! ssh-keygen -y -f ~/.ssh/id_rsa > /dev/null 2>&1; then
+            echo "::error title=Bad SSH key::SSH_PRIVATE_SMS_KEY is not a valid unencrypted private key. Re-paste the whole file including the BEGIN/END lines, with no passphrase."
+            exit 1
+          fi
+
+          # Normalise in case a protocol or path was pasted into the secret.
+          host="$SERVER_IP"; host="${host#ssh://}"; host="${host#http://}"
+          host="${host#https://}"; host="${host%%/*}"
+          if [ -z "$host" ]; then
+            echo "::error title=Bad SERVER_IP::SERVER_IP is empty after normalisation."
+            exit 1
+          fi
+          echo "SSH_TARGET_HOST=$host" >> "$GITHUB_ENV"
+
+          if ! ssh-keyscan -H "$host" >> ~/.ssh/known_hosts 2>/dev/null; then
+            echo "::error title=Host unreachable::ssh-keyscan failed for '$host'. Check the IP and that the firewall allows GitHub Actions runners."
+            exit 1
+          fi
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Verify server
+        run: |
+          set -eu
+          echo "::group::Server toolchain"
+          ssh $SSH_OPTS "$SSH_USER@$SSH_TARGET_HOST" '
+            fail=0
+            command -v rsync >/dev/null || { echo "::error title=rsync missing on server::Built assets cannot be uploaded."; fail=1; }
+            command -v git   >/dev/null || { echo "::error title=git missing on server::"; fail=1; }
+            [ -d "'"$DEPLOY_PATH"'" ] || { echo "::error title=Deploy path missing::'"$DEPLOY_PATH"' does not exist on the server. Fix the DEPLOY_PATH repository variable."; fail=1; }
+            echo "rsync : $(command -v rsync || echo -)"
+            echo "git   : $(command -v git || echo -)"
+            echo "php builds available:"; ls -1 /usr/local/bin/ea-php* 2>/dev/null || echo "  (none found)"
+            exit $fail
+          '
+          echo "::endgroup::"
+
+      # ------------------------------------------------------------------
+      # 4. Ship
+      # ------------------------------------------------------------------
+      - name: Upload built assets
+        run: |
+          set -eu
+          rsync -az --delete --stats \
+            -e "ssh $SSH_OPTS" \
+            public/build/ \
+            "$SSH_USER@$SSH_TARGET_HOST:$DEPLOY_PATH/public/build/"
+
+      - name: Run server deploy
+        run: |
+          set -eu
+          ssh $SSH_OPTS "$SSH_USER@$SSH_TARGET_HOST" \
+            "APP_DIR='$DEPLOY_PATH' DEPLOY_SHA='${{ github.sha }}' bash -s" \
+            < "${{ github.workspace }}/.github/workflows/deploy.sh"
+
+      # ------------------------------------------------------------------
+      # 5. Report - readable outcome on the run page, pass or fail
+      # ------------------------------------------------------------------
+      - name: Deploy summary
+        if: always()
+        env:
+          # Passed via env, never interpolated into the script body - a commit
+          # message is attacker-controlled text.
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+          COMMIT_SHA: ${{ github.sha }}
+          ACTOR: ${{ github.actor }}
+          STATUS: ${{ job.status }}
+        run: |
+          set -eu
+          {
+            echo "### Deploy: $STATUS"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Commit | \`$COMMIT_SHA\` |"
+            echo "| Message | $(printf '%s' "${COMMIT_MSG:-manual run}" | head -1 | tr '|' '/') |"
+            echo "| By | $ACTOR |"
+            echo "| Target | \`$SSH_USER@***:$DEPLOY_PATH\` |"
+            echo ""
+            if [ "$STATUS" != "success" ]; then
+              echo "The red step above is the phase that failed. Server-side phases"
+              echo "are numbered 1/6 to 6/6 inside the **Run server deploy** log."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
