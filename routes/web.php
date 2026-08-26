@@ -660,6 +660,7 @@ Route::prefix('/students')->name('students.')->group(function() {
             Route::get('/dashboard/plan/{plan}', 'showCourseContent')->name('dashboard.plan.module.show'); 
             Route::get('/dashboard/plan-dates/list', 'planDatelist')->name('dashboard.plan.dates.list');
 
+            Route::get('/dashboard/do-it-online', 'doItOnline')->name('dashboard.forms');
             Route::get('/dashboard/attendance-excuse', 'attendanceExcuse')->name('dashboard.attendance.excuse');
             Route::post('/dashboard/update-awarding-body-status', 'awardingBodyUpdateStatus')->name('awarding.body.status.update');
 

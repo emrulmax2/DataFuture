@@ -194,10 +194,33 @@ class DashboardController extends Controller
                 'newsEvents' => NewsAndEvent::where('active', 1)->where('fol_all', 1)->orWhereHas('students', function($q) use($student){
                                     $q->where('student_id', $student->id);
                                 })->orderBy('created_at', 'DESC')->get(),
-                'smsNews' => StudentSms::with('sms')->where('student_id', $student->id)->where('show_as_news', 1)->orderBy('id', 'DESC')->get()
+                'smsNews' => StudentSms::with('sms')->where('student_id', $student->id)->where('show_as_news', 1)->orderBy('id', 'DESC')->get(),
+                'termSnapshot' => \App\Support\StudentTermPerformance::latest($student)
             ]);
         endif;
 
+    }
+
+    /**
+     * The full "Do it online" catalogue — every request form the student can
+     * submit. The dashboard shows a shortlist of the same records.
+     */
+    public function doItOnline()
+    {
+        $selectedStudentId = session('selected_student_id');
+        $userData = auth('student')->user();
+
+        $student = $selectedStudentId
+            ? Student::find($selectedStudentId)
+            : Student::where('student_user_id', $userData->id)->orderBy('id', 'DESC')->first();
+
+        return view('pages.students.frontend.forms.index', [
+            'title' => 'Do it online - London Churchill College',
+            'breadcrumbs' => [],
+            'student' => $student,
+            'doItOnline' => FormsTable::all(),
+            'reportItAll' => ReportItAll::all(),
+        ]);
     }
 
     public function profileView() {
