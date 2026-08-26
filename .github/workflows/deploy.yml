@@ -152,21 +152,14 @@ jobs:
           fi
           chmod 644 ~/.ssh/known_hosts
 
+      # Runs the SAME toolchain check as the deploy, but stops before touching
+      # anything. A missing php/composer/rsync fails here with the server left
+      # exactly as it was, instead of stranding it on new assets + old code.
       - name: Verify server
         run: |
           set -eu
-          echo "::group::Server toolchain"
-          ssh $SSH_OPTS "$SSH_USER@$SSH_TARGET_HOST" '
-            fail=0
-            command -v rsync >/dev/null || { echo "::error title=rsync missing on server::Built assets cannot be uploaded."; fail=1; }
-            command -v git   >/dev/null || { echo "::error title=git missing on server::"; fail=1; }
-            [ -d "'"$DEPLOY_PATH"'" ] || { echo "::error title=Deploy path missing::'"$DEPLOY_PATH"' does not exist on the server. Fix the DEPLOY_PATH repository variable."; fail=1; }
-            echo "rsync : $(command -v rsync || echo -)"
-            echo "git   : $(command -v git || echo -)"
-            echo "php builds available:"; ls -1 /usr/local/bin/ea-php* 2>/dev/null || echo "  (none found)"
-            exit $fail
-          '
-          echo "::endgroup::"
+          REMOTE="APP_DIR='$DEPLOY_PATH' DEPLOY_MODE=preflight bash -s"
+          ssh $SSH_OPTS "$SSH_USER@$SSH_TARGET_HOST" "$REMOTE" < .github/workflows/deploy.sh
 
       # ------------------------------------------------------------------
       # 4. Ship
@@ -182,9 +175,8 @@ jobs:
       - name: Run server deploy
         run: |
           set -eu
-          ssh $SSH_OPTS "$SSH_USER@$SSH_TARGET_HOST" \
-            "APP_DIR='$DEPLOY_PATH' DEPLOY_SHA='${{ github.sha }}' bash -s" \
-            < "${{ github.workspace }}/.github/workflows/deploy.sh"
+          REMOTE="APP_DIR='$DEPLOY_PATH' DEPLOY_SHA='${{ github.sha }}' bash -s"
+          ssh $SSH_OPTS "$SSH_USER@$SSH_TARGET_HOST" "$REMOTE" < .github/workflows/deploy.sh
 
       # ------------------------------------------------------------------
       # 5. Report - readable outcome on the run page, pass or fail

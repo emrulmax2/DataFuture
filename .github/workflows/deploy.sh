@@ -16,11 +16,18 @@ set -Eeuo pipefail
 APP_DIR="${APP_DIR:-/home/smslccuk/datafuture}"
 DEPLOY_SHA="${DEPLOY_SHA:-unknown}"
 
+# preflight = run only the toolchain check and exit. The workflow calls this
+# BEFORE uploading anything, so a missing php/composer/rsync leaves the server
+# completely untouched instead of stranding it on new assets + old code.
+DEPLOY_MODE="${DEPLOY_MODE:-deploy}"
+
 # composer.lock requires PHP >= 8.2 (laravel/nightwatch, symfony 7, nette/utils).
 # Never rely on the account's default `php` - cPanel often points it at an
 # older build than the one the app needs.
 PHP_BIN="${PHP_BIN:-/usr/local/bin/ea-php82}"
-COMPOSER_BIN="${COMPOSER_BIN:-/opt/cpanel/composer/bin/composer}"
+# Optional override. Left empty, the toolchain check probes the usual cPanel
+# locations and $PATH - the path differs between servers.
+COMPOSER_BIN="${COMPOSER_BIN:-}"
 
 PHASE="startup"
 
@@ -54,23 +61,83 @@ phase "1/6 Toolchain check"
 
 cd "$APP_DIR" || fail "APP_DIR '$APP_DIR' does not exist or is not readable. Check the DEPLOY_PATH repository variable."
 
+# --- PHP --------------------------------------------------------------
+# If the configured build is absent, fall back to the newest ea-php that
+# actually satisfies composer.lock, rather than failing on a guessed path.
 if [ ! -x "$PHP_BIN" ]; then
-    echo "Available PHP builds:"; ls -1 /usr/local/bin/ea-php* 2>/dev/null || echo "  (none)"
-    fail "PHP binary not found: $PHP_BIN. Install it in WHM > EasyApache 4, or set PHP_BIN in deploy.yml."
+    echo "note: $PHP_BIN not present, searching for a PHP >= 8.2 build..."
+    for candidate in $(ls -1r /usr/local/bin/ea-php8* 2>/dev/null); do
+        if [ -x "$candidate" ] && "$candidate" -r 'exit(version_compare(PHP_VERSION,"8.2.0",">=")?0:1);' 2>/dev/null; then
+            PHP_BIN="$candidate"; break
+        fi
+    done
 fi
-[ -f "$COMPOSER_BIN" ] || fail "composer not found at $COMPOSER_BIN"
+if [ ! -x "$PHP_BIN" ]; then
+    echo "PHP builds present on this server:"
+    ls -1 /usr/local/bin/ea-php* 2>/dev/null || echo "  (none)"
+    fail "No PHP >= 8.2 found. Install one in WHM > EasyApache 4, or set PHP_BIN in deploy.yml."
+fi
 
 PHP_VERSION="$("$PHP_BIN" -r 'echo PHP_VERSION;')"
+"$PHP_BIN" -r 'exit(version_compare(PHP_VERSION, "8.2.0", ">=") ? 0 : 1);'     || fail "composer.lock needs PHP >= 8.2 but $PHP_BIN is $PHP_VERSION."
+
+# --- Transfer tools ---------------------------------------------------
+command -v rsync >/dev/null 2>&1 || fail "rsync is not installed on the server; built assets cannot be uploaded."
+command -v git   >/dev/null 2>&1 || fail "git is not installed on the server."
+
+# --- Composer ---------------------------------------------------------
+# This project keeps composer inside the app directory, so look there first,
+# then fall back to the usual cPanel locations and $PATH. Set COMPOSER_BIN in
+# deploy.yml to skip the search entirely.
+COMPOSER_RUN=""
+composer_candidates=(
+    ${COMPOSER_BIN:-}
+    "$APP_DIR/composer.phar"
+    "$APP_DIR/composer"
+    "$HOME/composer.phar"
+    "$HOME/bin/composer"
+    /opt/cpanel/composer/bin/composer
+    /usr/local/bin/composer
+    /usr/bin/composer
+    "$(command -v composer 2>/dev/null || true)"
+)
+
+for candidate in "${composer_candidates[@]}"; do
+    [ -n "$candidate" ] && [ -f "$candidate" ] || continue
+    # Prefer running the phar under our chosen PHP, so composer cannot pick up
+    # the account default (older) interpreter and fail the platform check.
+    if "$PHP_BIN" "$candidate" --version >/dev/null 2>&1; then
+        COMPOSER_RUN="$PHP_BIN $candidate"; break
+    fi
+    # Otherwise it is a shell wrapper - run it as-is.
+    if [ -x "$candidate" ] && "$candidate" --version >/dev/null 2>&1; then
+        COMPOSER_RUN="$candidate"; break
+    fi
+done
+
+if [ -z "$COMPOSER_RUN" ]; then
+    echo "Searched:"; printf '  %s
+' "${composer_candidates[@]}"
+    echo "command -v composer -> $(command -v composer 2>/dev/null || echo 'not on PATH')"
+    fail "Composer not found. Install it, or set COMPOSER_BIN in deploy.yml to its full path."
+fi
+
 echo "php      : $PHP_VERSION ($PHP_BIN)"
-echo "composer : $("$PHP_BIN" "$COMPOSER_BIN" --version 2>/dev/null | head -1)"
+echo "composer : $($COMPOSER_RUN --version 2>/dev/null | head -1)  [$COMPOSER_RUN]"
 echo "app dir  : $APP_DIR"
 echo "target   : $DEPLOY_SHA"
 
-"$PHP_BIN" -r 'exit(version_compare(PHP_VERSION, "8.2.0", ">=") ? 0 : 1);' \
-    || fail "composer.lock needs PHP >= 8.2 but $PHP_BIN is $PHP_VERSION."
+echo "rsync    : $(command -v rsync)"
 
-# The workflow rsyncs assets in before this runs; if they are absent something
-# went wrong upstream and the site would 500 on every Vite asset.
+if [ "$DEPLOY_MODE" = "preflight" ]; then
+    echo "preflight OK - server is ready, nothing has been changed."
+    echo "::endgroup::"
+    trap - ERR
+    exit 0
+fi
+
+# Assets are rsynced in before this runs; if they are absent something went
+# wrong upstream and the site would 500 on every Vite asset.
 if [ ! -f public/build/manifest.json ] && [ ! -f public/build/.vite/manifest.json ]; then
     fail "No Vite manifest in $APP_DIR/public/build - the asset upload did not land."
 fi
@@ -90,8 +157,7 @@ fi
 # ---------------------------------------------------------------------------
 phase "3/6 Composer dependencies"
 
-"$PHP_BIN" "$COMPOSER_BIN" install \
-    --no-interaction --no-dev --prefer-dist --optimize-autoloader
+$COMPOSER_RUN install --no-interaction --no-dev --prefer-dist --optimize-autoloader
 
 # ---------------------------------------------------------------------------
 phase "4/6 Database migrations"
