@@ -437,6 +437,7 @@ export default defineConfig({
                 'resources/js/news-updates-create.js',
                 'resources/js/news-updates-edits.js',
                 'resources/js/student-frontend-global.js',
+                'resources/js/student-portal.js',
                 'resources/js/student-due-reports.js',
                 'resources/js/issue_types.js',
                 'resources/js/report-it-all.js',

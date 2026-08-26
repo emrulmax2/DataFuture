@@ -5,23 +5,20 @@
 @endsection
 
 @section('subcontent')
-<div class="grid grid-cols-12 gap-6">
-    <div class="col-span-12 2xl:col-span-9">
-        <div class="grid grid-cols-12 gap-6">
-            <!-- BEGIN: Profile Info -->
-            @include('pages.students.frontend.dashboard.show-info')
-            <!-- END: Profile Info -->
-            
-            <div class="intro-y mt-5 col-span-12">
-                <form method="post" action="#" id="studentAttendanceExcuseForm" enctype="multipart/form-data">
-                    <div class="intro-y box">
-                        <div class="grid grid-cols-12 gap-0 items-center p-5">
-                            <div class="col-span-6">
-                                <div class="font-medium text-base">Workplacement Details</div>
-                            </div>
-                        </div>
-                        <div class="border-t border-slate-200/60 dark:border-darkmode-400"></div>
-                        <div class="p-5">
+    <div class="spf-page-head">
+        <div>
+            <div class="spf-eyebrow">Your placement hours and provider</div>
+            <h1 class="spf-h1">Work placement</h1>
+        </div>
+    </div>
+
+
+    <form method="post" action="#" id="studentAttendanceExcuseForm" enctype="multipart/form-data">
+        <div class="spf-panel">
+            <div class="spf-panel__head">
+                <h2 class="spf-h3">Work placement details</h2>
+            </div>
+                        <div>
                             @if(!empty($workplacement_details))
                             <div class="grid grid-cols-12 gap-4">
                                 <div class="col-span-12">
@@ -97,14 +94,8 @@
                                 </div>
                             @endif
                         </div>
-                    </div>
-                </form>
-            </div>
         </div>
-    </div><!--End 2xl:col-span-9-->  
-    @include('pages.students.frontend.dashboard.profile.sidebar')
- 
-</div><!--End GRID-->   
+    </form>
 
 <!-- BEGIN: Success Modal Content -->
 <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">

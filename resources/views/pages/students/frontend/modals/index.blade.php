@@ -189,17 +189,15 @@
 
     <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog spf-modal spf-modal--status">
             <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitle"></div>
-                        <div class="text-slate-500 mt-2 successModalDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
-                    </div>
+                <span class="spf-modal__status-icon spf-modal__status-icon--ok">
+                    <i data-lucide="check" class="w-6 h-6"></i>
+                </span>
+                <div class="successModalTitle"></div>
+                <div class="successModalDesc"></div>
+                <div class="spf-modal__foot">
+                    <button type="button" data-tw-dismiss="modal" class="spf-btn spf-btn--dark">Ok</button>
                 </div>
             </div>
         </div>
@@ -209,14 +207,15 @@
 
     <!-- BEGIN: Success Modal Content -->
     <div id="warningModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog spf-modal spf-modal--status">
             <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="alert-octagon" class="w-16 h-16 text-orange-400 mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitle"></div>
-                        <div class="text-slate-500 mt-2 successModalDesc"></div>
-                    </div>
+                <span class="spf-modal__status-icon spf-modal__status-icon--warn">
+                    <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                </span>
+                <div class="successModalTitle"></div>
+                <div class="successModalDesc"></div>
+                <div class="spf-modal__foot">
+                    <button type="button" data-tw-dismiss="modal" class="spf-btn">Close</button>
                 </div>
             </div>
         </div>
@@ -225,102 +224,132 @@
 
 <!-- BEGIN: Delete Confirm Modal Content -->
 <div id="confirmPersonalMobileUpdateModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content w-full">
-            <div class="modal-body p-0">
-                <a class="absolute right-0 top-0 mr-3 mt-3" data-tw-dismiss="modal" href="javascript::void()">
-                    <i data-tw-merge data-lucide="x" class="stroke-1.5 w-8 h-8  text-slate-400 "></i>
+    <div class="modal-dialog spf-modal">
+        <div class="modal-content">
+            <div class="spf-modal__head">
+                <span class="spf-modal__icon"><i data-lucide="smartphone" class="w-5 h-5"></i></span>
+                <h3 class="spf-modal__title confModTitle">Change Mobile</h3>
+                <div class="spf-spacer"></div>
+                <a href="javascript:;" data-tw-dismiss="modal" class="spf-modal__close" aria-label="Close">
+                    <i data-lucide="x" class="w-3 h-3"></i>
                 </a>
-                <div class="p-5 text-center">
-                    <i data-lucide="message-square" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                    <div class="text-3xl mt-5 confModTitle">UPDATE PHONE</div>
-                    
-                    <div class="text-slate-500 mt-2 mb-2 confModDesc">To update your mobile number, please enter the new number below. We will send an OTP to that number. Once you enter the OTP code, your mobile number will be updated.</div>
-                   
-                    <div  id="modal-mobileverified" class="mt-5">
-                            <form method="POST" action="#" id="confirmModalForm2" class="flex-none" enctype="multipart/form-data">
-                                <input class="id" type="hidden" name="id" value="">
-                                <input type="hidden" name="url" value="{{ route('students.verify.mobile') }}" />
-                                <input type="hidden" name="student_user_id" value="{{ $student->users->id }}" />
-                                <div class="flex py-2 items-center">
-                                    <label for="horizontal-form-2" class="form-label w-20 text-left inline-flex"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning"></i> Mobile</label>
-                                    <input id="horizontal-form-2" name="mobile" type="text" class=" form-control w-60 mr-1 flex-auto" placeholder="079XXXXXXXX">
-                                    <button id="resend-mobile" type="submit" data-id="0" data-action="none" class="save btn btn-primary  w-auto ml-auto flex-auto">
-                                        <i data-lucide="send" class="w-4 h-4 mr-2 "></i> SEND OTP
-                                        <i data-loading-icon="oval" data-color="white" class="loadingClass w-4 h-4 ml-2 hidden"></i>
-                                    </button>
-                                </div>
-                            </form>
-                            <form method="POST" action="#" id="confirmModalForm3" enctype="multipart/form-data" class="hidden">
-                                <div class="flex py-2 items-center">
-                                    <label for="horizontal-form-3" class="form-label w-20 text-left flex-none"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning inline-flex"></i> OTP </label>
-                                    <input type="hidden" name="url" value="{{ route('students.update.mobile') }}" />
-                                    <input type="hidden" name="student_user_id" value="{{ $student->users->id }}" />
-                                    <input id="horizontal-form-3" name="code" type="text" class="form-control w-60 mr-1 flex-auto" placeholder="XXXX">
-                                    
-                                    <button type="button" data-id="0" data-action="none" class="save btn btn-danger w-auto flex-auto">
-                                        <i data-lucide="send" class="w-4 h-4 mr-2 "></i> VERIFY
-                                        <i data-loading-icon="oval" data-color="white" class="loadingClass w-4 h-4 ml-2 hidden"></i>
-                                    </button>
-                                    <div class="acc__input-error error-verify_code text-danger mt-2 w-full text-right"></div>
-                                </div>
-                            </form>
+            </div>
+
+            <p class="spf-modal__desc confModDesc">Request an update to your mobile number. We will text a one-time code to the new number to confirm the change.</p>
+
+            <div class="spf-modal__field">
+                <span class="spf-modal__label">Current</span>
+                <div class="spf-modal__current">{{ !empty($student->contact->mobile) ? $student->contact->mobile : 'Not set yet' }}</div>
+            </div>
+
+            <div id="modal-mobileverified">
+                {{-- Step 1: request the code. The script swaps this form for the
+                     one below once the code has been sent. --}}
+                <form method="POST" action="#" id="confirmModalForm2" enctype="multipart/form-data">
+                    <div class="spf-modal__field">
+                        <label for="horizontal-form-2" class="spf-modal__label">New mobile number</label>
+                        <input id="horizontal-form-2" name="mobile" type="text" class="spf-modal__input mobile" placeholder="07xxx xxx xxx">
+                        <div class="acc__input-error error-mobile spf-modal__note"></div>
                     </div>
-                </div>
+
+                    <input class="id" type="hidden" name="id" value="">
+                    <input type="hidden" name="url" value="{{ route('students.verify.mobile') }}" />
+                    <input type="hidden" name="student_user_id" value="{{ $student->users->id }}" />
+
+                    <div class="spf-modal__foot">
+                        <button type="button" data-tw-dismiss="modal" class="spf-btn">Cancel</button>
+                        <button id="resend-mobile" type="submit" data-id="0" data-action="none" class="save spf-btn spf-btn--dark">
+                            Send code
+                            <i data-loading-icon="oval" data-color="white" class="loadingClass w-4 h-4 hidden"></i>
+                        </button>
+                    </div>
+                </form>
+
+                {{-- Step 2: confirm the code. --}}
+                <form method="POST" action="#" id="confirmModalForm3" enctype="multipart/form-data" class="hidden">
+                    <div class="spf-modal__field">
+                        <label for="horizontal-form-3" class="spf-modal__label">One-time code</label>
+                        <input id="horizontal-form-3" name="code" type="text" class="spf-modal__input code" placeholder="XXXX">
+                        <div class="acc__input-error error-verify_code spf-modal__note"></div>
+                    </div>
+
+                    <input type="hidden" name="url" value="{{ route('students.update.mobile') }}" />
+                    <input type="hidden" name="student_user_id" value="{{ $student->users->id }}" />
+
+                    <div class="spf-modal__foot">
+                        <button type="button" data-tw-dismiss="modal" class="spf-btn">Cancel</button>
+                        <button type="button" data-id="0" data-action="none" class="save spf-btn spf-btn--dark">
+                            Verify &amp; update
+                            <i data-loading-icon="oval" data-color="white" class="loadingClass w-4 h-4 hidden"></i>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
-        
     </div>
 </div>
 <!-- END: Delete Confirm Modal Content -->
 
 <div id="confirmPersonalEmailUpdateModal" class="modal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content w-full">
-            <div class="modal-body p-0">
-                <a class="absolute right-0 top-0 mr-3 mt-3" data-tw-dismiss="modal" href="javascript::void()">
-                    <i data-tw-merge data-lucide="x" class="stroke-1.5 w-8 h-8  text-slate-400 "></i>
-                </a>
-                <div class="p-5 text-center">
-                    <i data-lucide="message-square" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                    <div class="text-3xl mt-5 confModTitle">Update Email</div>
-                    <div class="text-slate-500 mt-2 mb-2 confModDesc">If you’d like to change your personal email, please enter the new email address below. Keep in mind that we will send you a verification link, which you need to click to complete the update.</div>
-                    <div id="modal-emailverified" class="form-inline">
-                        <form method="POST" action="#" id="confirmModalForm1" enctype="multipart/form-data">
-                        <input class="id" type="hidden" name="id" value="">
-                        <input type="hidden" name="url" value="{{ route('students.verify.email') }}" />
-                        <input type="hidden" name="student_user_id" value="{{ $student->users->id }}" />
-                        <label for="horizontal-form-1" class="form-label w-20 text-left inline-flex"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning"></i> Email </label>
-                        
-                        <input id="horizontal-form-1" name="email" type="text" class="form-control w-60 mr-2" placeholder="email@example.com">
-                        <input name="type" value="email" type="hidden">
-
-                        <button id="send-email" type="submit" data-id="0" data-action="none" class="save btn btn-primary w-auto ml-auto">
-                            <i data-lucide="send" class="w-4 h-4 mr-2 "></i> SEND
-                            <i data-loading-icon="oval" data-color="white" class="loadingClass w-4 h-4 ml-2 hidden"></i>
-                        </button>
-                        <div class="acc__input-success success-email text-success mt-2 w-full text-right"></div>
-                        <div class="acc__input-error error-email text-danger mt-2 w-full text-right"></div>
-                        </form>
+    <div class="modal-dialog spf-modal">
+        <div class="modal-content">
+            <div id="modal-emailverified">
+                <form method="POST" action="#" id="confirmModalForm1" enctype="multipart/form-data">
+                    <div class="spf-modal__head">
+                        <span class="spf-modal__icon"><i data-lucide="mail" class="w-5 h-5"></i></span>
+                        <h3 class="spf-modal__title confModTitle">Change Email</h3>
+                        <div class="spf-spacer"></div>
+                        <a href="javascript:;" data-tw-dismiss="modal" class="spf-modal__close" aria-label="Close">
+                            <i data-lucide="x" class="w-3 h-3"></i>
+                        </a>
                     </div>
-                </div>
+
+                    <p class="spf-modal__desc confModDesc">Request an update to your personal email address. The college will verify the new address before it takes effect.</p>
+
+                    <div class="spf-modal__field">
+                        <span class="spf-modal__label">Current</span>
+                        <div class="spf-modal__current">{{ !empty($student->contact->personal_email) ? $student->contact->personal_email : 'Not set yet' }}</div>
+                    </div>
+
+                    <div class="spf-modal__field">
+                        <label for="horizontal-form-1" class="spf-modal__label">New email address</label>
+                        <input id="horizontal-form-1" name="email" type="text" class="spf-modal__input email" placeholder="name@example.com">
+                        <div class="acc__input-success success-email spf-modal__note spf-modal__note--ok"></div>
+                        <div class="acc__input-error error-email spf-modal__note"></div>
+                    </div>
+
+                    <input class="id" type="hidden" name="id" value="">
+                    <input type="hidden" name="url" value="{{ route('students.verify.email') }}" />
+                    <input type="hidden" name="student_user_id" value="{{ $student->users->id }}" />
+                    <input name="type" value="email" type="hidden">
+
+                    <div class="spf-modal__foot">
+                        <button type="button" data-tw-dismiss="modal" class="spf-btn">Cancel</button>
+                        <button id="send-email" type="submit" data-id="0" data-action="none" class="save spf-btn spf-btn--dark">
+                            Submit request
+                            <i data-loading-icon="oval" data-color="white" class="loadingClass w-4 h-4 hidden"></i>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
-        
     </div>
 </div>
 
 <div id="addressUpdateModal" class="modal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog spf-modal spf-modal--wide">
         <form method="POST" action="#" id="addressUpdateForm" enctype="multipart/form-data">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="font-medium text-base mr-auto">Address Update  Request</h2>
-                    <a data-tw-dismiss="modal" href="javascript:;">
-                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                <div class="spf-modal__head">
+                    <span class="spf-modal__icon"><i data-lucide="map-pin" class="w-5 h-5"></i></span>
+                    <h3 class="spf-modal__title">Change Address</h3>
+                    <div class="spf-spacer"></div>
+                    <a href="javascript:;" data-tw-dismiss="modal" class="spf-modal__close" aria-label="Close">
+                        <i data-lucide="x" class="w-3 h-3"></i>
                     </a>
                 </div>
-                <div class="modal-body">
+                <p class="spf-modal__desc">Request an update to your correspondence address. Supporting evidence may be required.</p>
+                <div class="spf-modal__body-scroll">
                     <input type="hidden" name="validation_status" value="{{ (isset($student->addressUpdateRequest->task->status) && !empty($student->addressUpdateRequest->task->status) ? $student->addressUpdateRequest->task->status : 'NEW') }}"/>
                     @if(isset($student->addressUpdateRequest->task->status) && ($student->addressUpdateRequest->task->status == 'Pending' || $student->addressUpdateRequest->task->status == 'In Progress') )
                         <div class="mb-5">
@@ -332,8 +361,8 @@
                         </div>
                     @endif
                     <div>
-                        <div class="font-medium mb-1 flex items-center">
-                            <i data-lucide="map-pin" class="w-4 h-4 mr-2"></i>Old Address
+                        <div class="spf-modal__section-title" style="margin-top:18px">
+                            <i data-lucide="map-pin" class="w-4 h-4"></i>Old Address
                         </div>
                         <div class="pl-6 text-slate-500 uppercase">
                             @if(isset($student->contact->term_time_address_id) && $student->contact->term_time_address_id > 0)
@@ -364,8 +393,8 @@
                     </div>
 
                     @if(isset($student->addressUpdateRequest->task->status) && ($student->addressUpdateRequest->task->status == 'Pending' || $student->addressUpdateRequest->task->status == 'In Progress') )
-                        <div class="font-medium mt-5 mb-2 flex items-center">
-                            <i data-lucide="map-pin" class="w-4 h-4 mr-2"></i>Requested Address
+                        <div class="spf-modal__section-title" style="margin-top:18px">
+                            <i data-lucide="map-pin" class="w-4 h-4"></i>Requested Address
                         </div>
                         <div class="pl-6 text-slate-500 uppercase">
                             @if(isset($student->addressUpdateRequest->id) && $student->addressUpdateRequest->id > 0)
@@ -395,8 +424,8 @@
                         </div>
 
                         @if (isset($student->addressUpdateRequest->docs) && !empty($student->addressUpdateRequest->docs))
-                            <div class="font-medium mt-5 mb-2 flex items-center">
-                                <i data-lucide="download-cloud" class="w-4 h-4 mr-2"></i>Download Proofs
+                            <div class="spf-modal__section-title" style="margin-top:18px">
+                                <i data-lucide="download-cloud" class="w-4 h-4"></i>Download Proofs
                             </div>
                             @foreach($student->addressUpdateRequest->docs as $doc)
                                 @if(Storage::disk('s3')->exists('public/students/'.$student->id.'/'.$doc->current_file_name))
@@ -412,8 +441,8 @@
                         @endif
 
                         @if (isset($student->addressUpdateRequest->notes) && $student->addressUpdateRequest->notes->count() > 0)
-                            <div class="font-medium mt-5 mb-2 flex items-center">
-                                <i data-lucide="pencil" class="w-4 h-4 mr-2"></i>Notes
+                            <div class="spf-modal__section-title" style="margin-top:18px">
+                                <i data-lucide="pencil" class="w-4 h-4"></i>Notes
                             </div>
                             @foreach($student->addressUpdateRequest->notes as $not)
                                 <ul>
@@ -430,8 +459,8 @@
 
                         @if(isset($student->addressUpdateRequest->task->status) && $student->addressUpdateRequest->task->status == 'In Progress' )
                             <div class="mt-6 flex justify-start items-center relative">
-                                <label for="addrProofDocument" class="inline-flex items-center justify-center btn btn-primary  cursor-pointer">
-                                    <i data-lucide="upload-cloud" class="w-4 h-4 mr-2 text-white"></i> Upload New Document
+                                <label for="addrProofDocument" class="spf-btn" style="cursor:pointer">
+                                    <i data-lucide="upload-cloud" class="w-4 h-4"></i> Upload new document
                                 </label>
                                 <input type="file" accept=".jpeg,.jpg,.png,.gif,.txt,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx" name="document" class="absolute w-0 h-0 overflow-hidden opacity-0" id="addrProofDocument"/>
                             </div>
@@ -440,8 +469,8 @@
                         @endif
                         <input type="hidden" name="id" value="{{ isset($student->addressUpdateRequest->id) && $student->addressUpdateRequest->id > 0 ? $student->addressUpdateRequest->id : 0 }}"/>
                     @else
-                        <div class="font-medium mt-5 mb-2 flex items-center">
-                            <i data-lucide="map-pin" class="w-4 h-4 mr-2"></i>New Address
+                        <div class="spf-modal__section-title" style="margin-top:18px">
+                            <i data-lucide="map-pin" class="w-4 h-4"></i>New Address
                         </div>
                         <div class="theAddressWrap grid grid-cols-12 gap-x-4 gap-y-3" id="studentAddressWrap9898">
                             <div class="col-span-12">
@@ -476,8 +505,8 @@
                             <input type="hidden" id="longitude" class="longitude form-control w-full" name="longitude">
                         </div>
                         <div class="mt-6 flex justify-start items-center relative">
-                            <label for="addrProofDocument" class="inline-flex items-center justify-center btn btn-primary  cursor-pointer">
-                                <i data-lucide="upload-cloud" class="w-4 h-4 mr-2 text-white"></i> Upload Proof
+                            <label for="addrProofDocument" class="spf-btn" style="cursor:pointer">
+                                <i data-lucide="upload-cloud" class="w-4 h-4"></i> Upload proof
                             </label>
                             <input type="file" accept=".jpeg,.jpg,.png,.gif,.txt,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx" name="document" class="absolute w-0 h-0 overflow-hidden opacity-0" id="addrProofDocument"/>
                         </div>
@@ -486,11 +515,11 @@
                         <input type="hidden" name="id" value="0"/>
                     @endif
                 </div>
-                <div class="modal-footer">
-                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                <div class="spf-modal__foot" style="margin-top:22px">
+                    <button type="button" data-tw-dismiss="modal" class="spf-btn">Cancel</button>
                     @if(!isset($student->addressUpdateRequest->task->status) || ($student->addressUpdateRequest->task->status != 'Pending' || $student->addressUpdateRequest->task->status != 'In Progress'))
-                    <button type="submit" id="updtAddress" class="btn btn-primary w-auto">     
-                        Submit Request                    
+                    <button type="submit" id="updtAddress" class="spf-btn spf-btn--dark">
+                        Submit request
                         <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2">
                             <g fill="none" fill-rule="evenodd">
