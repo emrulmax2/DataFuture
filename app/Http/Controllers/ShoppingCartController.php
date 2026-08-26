@@ -146,6 +146,15 @@ class ShoppingCartController extends Controller
         if (!$cartItem) {
             return response()->json(['message' => 'Item not found'], 404);
         }
+
+        /* The id comes straight off the request, so confirm the row belongs to
+           the signed-in student before deleting it. Same lookup as index(). */
+        $studentUserId = auth('student')->user()->id;
+        $student = Student::where('student_user_id', $studentUserId)->first();
+        if (!$student || $cartItem->student_id != $student->id) {
+            return response()->json(['message' => 'Item not found'], 404);
+        }
+
         $studentId = $cartItem->student_id;
         $cartItem->delete();
 

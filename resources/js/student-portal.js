@@ -285,4 +285,167 @@
 
         if (slides.length) render();
     }
+
+    /* ── Basket removal ──────────────────────────────────────────────────
+       The hover card lists the first few items and each row can be removed
+       without leaving the page. The endpoint returns the remaining cart, so
+       the list is rebuilt from that — deleting just the clicked row would
+       leave a hidden overflow item stranded behind a "+N more" line. */
+    const cartPop = document.getElementById("spfCartPop");
+    const cartItems = document.getElementById("spfCartItems");
+
+    if (cartPop && cartItems) {
+        const removeUrl = cartItems.getAttribute("data-spf-cart-remove-url") || "";
+        const limit = parseInt(cartItems.getAttribute("data-spf-cart-limit"), 10) || 4;
+
+        const money = function (n) {
+            return "£" + n.toFixed(2);
+        };
+
+        const closeIcon = function () {
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("viewBox", "0 0 24 24");
+            svg.setAttribute("fill", "none");
+            svg.setAttribute("stroke", "currentColor");
+            svg.setAttribute("stroke-width", "2");
+            svg.setAttribute("stroke-linecap", "round");
+            svg.setAttribute("class", "w-3 h-3");
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", "M18 6 6 18M6 6l12 12");
+            svg.appendChild(path);
+            return svg;
+        };
+
+        const buildRow = function (item) {
+            const name = (item.letter_set && item.letter_set.letter_title) ||
+                (item.letterSet && item.letterSet.letter_title) || "Item";
+
+            const row = document.createElement("div");
+            row.className = "spf-cart__item";
+            row.setAttribute("data-spf-cart-item", item.id);
+
+            const nameEl = document.createElement("span");
+            nameEl.className = "spf-cart__item-name";
+            nameEl.textContent = name;
+
+            const qty = document.createElement("span");
+            qty.className = "spf-cart__item-qty";
+            qty.textContent = "×" + (item.quantity || 1);
+
+            const price = document.createElement("span");
+            price.className = "spf-cart__item-price";
+            price.textContent = money(parseFloat(item.total_amount || 0));
+
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "spf-cart__remove";
+            button.title = "Remove from basket";
+            button.setAttribute("aria-label", "Remove " + name + " from basket");
+            button.setAttribute("data-spf-cart-remove", removeUrl.replace("__ID__", item.id));
+            button.appendChild(closeIcon());
+
+            row.appendChild(nameEl);
+            row.appendChild(qty);
+            row.appendChild(price);
+            row.appendChild(button);
+            return row;
+        };
+
+        const showEmpty = function () {
+            cartItems.remove();
+
+            const total = document.getElementById("spfCartTotal");
+            const more = document.getElementById("spfCartMore");
+            if (total) total.remove();
+            if (more) more.remove();
+
+            const cta = cartPop.querySelector(".spf-cart__cta");
+            if (cta) {
+                const browse = cta.getAttribute("data-spf-empty-href");
+                if (browse) cta.setAttribute("href", browse);
+                cta.textContent = "Browse documents →";
+
+                const empty = document.createElement("div");
+                empty.className = "spf-cart__empty";
+                empty.textContent = "Your basket is empty.";
+                cartPop.insertBefore(empty, cta);
+            }
+
+            const wrap = cartPop.closest(".spf-cartwrap");
+            const badge = wrap ? wrap.querySelector(".spf-cart__badge") : null;
+            if (badge) badge.remove();
+
+            const basket = wrap ? wrap.querySelector(".spf-cart") : null;
+            const cta2 = cartPop.querySelector(".spf-cart__cta");
+            if (basket && cta2) {
+                // Nothing to check out, so the icon goes back to the shop.
+                basket.setAttribute("href", cta2.getAttribute("href"));
+                basket.setAttribute("aria-label", "Basket (empty)");
+            }
+        };
+
+        const render = function (items) {
+            if (!items.length) {
+                showEmpty();
+                return;
+            }
+
+            cartItems.textContent = "";
+            items.slice(0, limit).forEach(function (item) {
+                cartItems.appendChild(buildRow(item));
+            });
+
+            const badge = document.querySelector(".spf-cart__badge");
+            if (badge) badge.textContent = items.length;
+
+            const total = document.getElementById("spfCartTotal");
+            if (total) {
+                total.lastElementChild.textContent = money(
+                    items.reduce(function (sum, item) {
+                        return sum + parseFloat(item.total_amount || 0) + parseFloat(item.tax_amount || 0);
+                    }, 0)
+                );
+            }
+
+            const more = document.getElementById("spfCartMore");
+            const hidden = items.length - Math.min(items.length, limit);
+            if (more) {
+                if (hidden > 0) more.textContent = "+ " + hidden + " more";
+                else more.remove();
+            }
+        };
+
+        cartPop.addEventListener("click", function (event) {
+            const button = event.target.closest("[data-spf-cart-remove]");
+            if (!button) return;
+
+            event.preventDefault();
+
+            const row = button.closest("[data-spf-cart-item]");
+            if (!row || row.classList.contains("is-removing")) return;
+
+            row.classList.add("is-removing");
+
+            const token = document.querySelector('meta[name="csrf-token"]');
+
+            fetch(button.getAttribute("data-spf-cart-remove"), {
+                method: "DELETE",
+                headers: {
+                    "X-CSRF-TOKEN": token ? token.getAttribute("content") : "",
+                    "X-Requested-With": "XMLHttpRequest",
+                    Accept: "application/json"
+                }
+            })
+                .then(function (response) {
+                    if (!response.ok) throw new Error(response.status);
+                    return response.json();
+                })
+                .then(function (data) {
+                    render(Array.isArray(data.cart) ? data.cart : []);
+                })
+                .catch(function () {
+                    row.classList.remove("is-removing");
+                });
+        });
+    }
 })();
