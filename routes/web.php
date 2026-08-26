@@ -1100,6 +1100,7 @@ Route::middleware('auth')->group(function() {
 
     });
 
+
     Route::controller(WorkplacementDocumentController::class)->group(function() {
         Route::post('student/workplacement-documents-store', 'store')->name('student.workplacement.documents.store');
         Route::get('student/workplacement-documents-list', 'list')->name('student.workplacement.documents.list');
