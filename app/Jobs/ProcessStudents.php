@@ -19,7 +19,6 @@ use App\Models\CourseCreationAvailability;
 use App\Models\Role;
 use App\Models\StudentUser;
 use App\Models\UserRole;
-use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Support\Facades\Storage;
 
 class ProcessStudents implements ShouldQueue
@@ -110,18 +109,14 @@ class ProcessStudents implements ShouldQueue
         $sourceDir = 'public/applicants/'.$this->applicant->id;
         $destinationDir = 'public/students/'.$student->id;
 
-        //Debugbar::warning($destinationDir);
         // No need to makeDirectory for S3; S3 creates folders as needed when you upload/copy files.
 
         Storage::copy($sourceDir."/".$this->applicant->photo, $destinationDir."/".$this->applicant->photo);
         $files = Storage::disk('s3')->files($sourceDir);
-        
-        //Debugbar::warning($files);
+
         foreach ($files as $file) {
             $filename = basename($file);
-            Debugbar::warning($filename);
             Storage::disk('s3')->copy($file, $destinationDir . '/' . $filename);
-            //dd($destinationDir . '/' . $filename);
         }
         
 

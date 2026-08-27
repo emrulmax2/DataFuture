@@ -23,7 +23,6 @@ use App\Models\StudentInterview;
 use App\Models\StudentKin;
 use App\Models\StudentTask;
 use App\Models\StudentUser;
-use Barryvdh\Debugbar\Facades\Debugbar;
 
 class ProcessStudentInterview implements ShouldQueue
 {
@@ -86,8 +85,6 @@ class ProcessStudentInterview implements ShouldQueue
                 $dataSet->save();
 
                 $dataArray = array_merge($dataArray, ["student_task_id"=>$dataSet->id]);
-                //Debugbar::warning($applicantSet->applicant_document_id);
-                //Debugbar::warning($applicantTaskData->documents[0]->id);
             }
 
             
