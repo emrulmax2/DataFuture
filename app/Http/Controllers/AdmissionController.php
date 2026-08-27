@@ -293,28 +293,38 @@ class AdmissionController extends Controller
             if(!empty($refno)):
                 $i = 1;
                 $list = Student::where('application_no', $refno)->get()->first();
-                $createPermissionStatus = (isset(auth()->user()->priv()['create_an_applicant']) && auth()->user()->priv()['create_an_applicant'] == 1) ? true : false;
-                $applicantFound = ApplicantUser::where('email', $list->contact->personal_email)->first();
-                $data[] = [
-                    'id' => $list->id,
-                    'sl' => $i,
-                    'application_no' => (empty($list->application_no) ? $list->id : $list->application_no),
-                    'first_name' => ucfirst($list->first_name),
-                    'last_name' => ucfirst($list->last_name),
-                    'full_name' => ucfirst($list->first_name)." ".ucfirst($list->last_name),
-                    
-                    'date_of_birth'=> $list->date_of_birth,
-                    'course'=> (isset($list->course->creation->course->name) ? $list->course->creation->course->name : ''),
-                    'semester'=> (isset($list->course->semester->name) ? $list->course->semester->name : ''),
-                    'full_time'=> (isset($list->course->full_time) ? "Yes": "No"),
-                    'gender'=> (isset($list->sexid->name) && !empty($list->sexid->name) ? $list->sexid->name : ''),
-                    'status_id'=> (isset($list->status->name) ? $list->status->name : ''),
-                    'url' => route('admission.show', $list->id),
-                    'ccid' => implode(',', $courses).' - '.implode(',', $courseCreationId),
-                    'photo_url' => $list->photo_url,
-                    'create_account' => $createPermissionStatus,
-                    'apply_ready' => isset($applicantFound) ? $applicantFound->id : false,
-                ];
+                // The ref may match neither an applicant nor a student (typo, or an
+                // applicant the main query hides via its submission_date/status
+                // conditions) — return an empty result set instead of dereferencing null.
+                if(isset($list->id)):
+                    $createPermissionStatus = (isset(auth()->user()->priv()['create_an_applicant']) && auth()->user()->priv()['create_an_applicant'] == 1) ? true : false;
+                    // A student can exist without a StudentContact row (a conversion
+                    // halted between ProcessStudents and ProcessStudentContact); an
+                    // empty email must also skip the lookup so a blank-email
+                    // ApplicantUser never counts as "apply ready".
+                    $personalEmail = (isset($list->contact->personal_email) && !empty($list->contact->personal_email) ? $list->contact->personal_email : '');
+                    $applicantFound = (!empty($personalEmail) ? ApplicantUser::where('email', $personalEmail)->first() : null);
+                    $data[] = [
+                        'id' => $list->id,
+                        'sl' => $i,
+                        'application_no' => (empty($list->application_no) ? $list->id : $list->application_no),
+                        'first_name' => ucfirst($list->first_name),
+                        'last_name' => ucfirst($list->last_name),
+                        'full_name' => ucfirst($list->first_name)." ".ucfirst($list->last_name),
+
+                        'date_of_birth'=> $list->date_of_birth,
+                        'course'=> (isset($list->course->creation->course->name) ? $list->course->creation->course->name : ''),
+                        'semester'=> (isset($list->course->semester->name) ? $list->course->semester->name : ''),
+                        'full_time'=> (isset($list->course->full_time) ? "Yes": "No"),
+                        'gender'=> (isset($list->sexid->name) && !empty($list->sexid->name) ? $list->sexid->name : ''),
+                        'status_id'=> (isset($list->status->name) ? $list->status->name : ''),
+                        'url' => route('admission.show', $list->id),
+                        'ccid' => implode(',', $courses).' - '.implode(',', $courseCreationId),
+                        'photo_url' => $list->photo_url,
+                        'create_account' => $createPermissionStatus,
+                        'apply_ready' => isset($applicantFound) ? $applicantFound->id : false,
+                    ];
+                endif;
             endif;
         endif;
         

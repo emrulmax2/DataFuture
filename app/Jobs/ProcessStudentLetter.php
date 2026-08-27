@@ -20,7 +20,6 @@ use App\Models\StudentDocument;
 use App\Models\StudentLettersDocument;
 use App\Models\StudentUser;
 use App\Models\User;
-use Barryvdh\Debugbar\Facades\Debugbar;
 
 class ProcessStudentLetter implements ShouldQueue
 {
@@ -74,8 +73,6 @@ class ProcessStudentLetter implements ShouldQueue
                 $dataArray = array_merge($dataArray,['comon_smtp_id' => $applicantSet->comon_smtp_id]);
             }
             $applicantDocument = ApplicantDocument::where('id',$applicantSet->applicant_document_id)->withTrashed()->get()->first();
-            Debugbar::warning($applicantDocument);
-            Debugbar::warning($applicantSet->applicant_document_id);
             if($applicantSet->applicant_document_id) {
 
                 $studentDocument = new StudentDocument();
