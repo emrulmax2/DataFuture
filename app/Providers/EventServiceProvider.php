@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Listeners\StudentConversionLogSubscriber;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -22,6 +23,16 @@ class EventServiceProvider extends ServiceProvider
         SocialiteWasCalled::class => [
             'SocialiteProviders\\Microsoft\\MicrosoftExtendSocialite@handle',
         ],
+    ];
+
+    /**
+     * The subscriber classes to register.
+     *
+     * @var array
+     */
+    protected $subscribe = [
+        // Applicant-to-student conversion audit trail (student_conversion_logs).
+        StudentConversionLogSubscriber::class,
     ];
 
     /**

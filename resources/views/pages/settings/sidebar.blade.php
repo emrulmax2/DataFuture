@@ -365,6 +365,12 @@
                         <i data-lucide="home" class="w-4 h-4 mr-2"></i> Residency Status Settings
                     </a>
                 </li>
+
+                <li>
+                    <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'student.conversion.logs' ? 'active text-primary font-medium' : '' }}" href="{{ route('student.conversion.logs') }}">
+                        <i data-lucide="clipboard-list" class="w-4 h-4 mr-2"></i> Student Conversion Logs
+                    </a>
+                </li>
         </ul>
     </div>
 </div>

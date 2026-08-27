@@ -201,6 +201,10 @@ class Applicant extends Model
         return $this->hasOne(ApplicantCriminalConviction::class, 'applicant_id', 'id');
     }
 
+    public function conversionLogs() {
+        return $this->hasMany(StudentConversionLog::class, 'applicant_id', 'id');
+    }
+
     public function getPhotoUrlAttribute()
     {
         if ($this->photo !== null && Storage::disk('local')->exists('public/applicants/'.$this->id.'/'.$this->photo)) {

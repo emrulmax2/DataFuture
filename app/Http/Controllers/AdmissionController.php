@@ -111,6 +111,7 @@ use App\Models\LetterSet;
 use App\Models\Signatory;
 use App\Models\SmsTemplate;
 use App\Models\JobBatch;
+use App\Models\StudentConversionLog;
 use App\Models\MobileVerificationCode;
 use App\Models\SexIdentifier;
 use App\Models\Student;
@@ -2577,6 +2578,7 @@ class AdmissionController extends Controller
                 ])->dispatch();
 
                 session()->put("lastBatchId", $chainedBatch->id);
+                $this->seedStudentConversionLogs($applicant_id, $chainedBatch->id);
                 /* Student Process END */
             elseif($statusidID == 6):
                 $docuSealDoc = $this->sendDocusealForm($applicant_id);
@@ -2605,6 +2607,111 @@ class AdmissionController extends Controller
         else:
             return response()->json(['message' => 'Something went wrong. Please try later.'], 422);
         endif;
+    }
+
+    /**
+     * One "queued" row per conversion job, written the moment the batch is
+     * dispatched so the Conversion Log always shows the full plan — including
+     * the steps a halted chain never reached. Keyed on (batch_id, job_class):
+     * on the sync queue the jobs finish BEFORE this runs and the subscriber
+     * has already created the rows, so firstOrCreate must not reset them.
+     */
+    private function seedStudentConversionLogs($applicant_id, $batchId){
+        foreach(StudentConversionLog::JOB_SEQUENCE as $jobClass):
+            $log = StudentConversionLog::firstOrCreate([
+                'batch_id' => $batchId,
+                'job_class' => $jobClass,
+            ], [
+                'applicant_id' => $applicant_id,
+                'job_name' => StudentConversionLog::jobLabel($jobClass),
+                'status' => StudentConversionLog::STATUS_QUEUED,
+                'created_by' => auth()->user()->id,
+            ]);
+            if(empty($log->created_by)):
+                $log->update(['created_by' => auth()->user()->id]);
+            endif;
+        endforeach;
+
+        Log::channel('student_conversion')->info('['.$batchId.'] Conversion batch dispatched for applicant #'.$applicant_id.' ('.count(StudentConversionLog::JOB_SEQUENCE).' jobs) by user #'.auth()->user()->id.'.');
+    }
+
+    public function admissionConversionLog($applicantId){
+        return view('pages.students.admission.conversion-log', [
+            'title' => 'Recruitment - London Churchill College',
+            'layout' => 'admission-top-menu',
+            'admissionThemeApplicant' => Applicant::find($applicantId),
+            'breadcrumbs' => [
+                ['label' => 'Students Admission', 'href' => route('admission')],
+                ['label' => 'Student Details', 'href' => route('admission.show', $applicantId)],
+                ['label' => 'Conversion Log', 'href' => 'javascript:void(0);'],
+            ],
+            'applicant' => Applicant::find($applicantId),
+            'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'feeelegibility' => FeeEligibility::all(),
+            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
+            'esignature' => ApplicantESignature::where('applicant_id', $applicantId)->latest('id')->first()
+        ]);
+    }
+
+    public function admissionConversionLogList(Request $request){
+        $applicantId = (isset($request->applicantId) && !empty($request->applicantId) ? $request->applicantId : 0);
+        $queryStr = (isset($request->queryStr) && $request->queryStr != '' ? $request->queryStr : '');
+        $status = (isset($request->status) && !empty($request->status) ? $request->status : '');
+
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
+        $sorts = [];
+        foreach($sorters as $sort):
+            $sorts[] = $sort['field'].' '.$sort['dir'];
+        endforeach;
+
+        $query = StudentConversionLog::orderByRaw(implode(',', $sorts))->where('applicant_id', $applicantId);
+        if(!empty($queryStr)):
+            $query->where(function($qs) use($queryStr){
+                $qs->where('job_name', 'LIKE', '%'.$queryStr.'%')
+                    ->orWhere('message', 'LIKE', '%'.$queryStr.'%')
+                    ->orWhere('batch_id', 'LIKE', '%'.$queryStr.'%');
+            });
+        endif;
+        if(!empty($status)):
+            $query->where('status', $status);
+        endif;
+
+        $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+
+        $Query = $query->skip($offset)
+               ->take($limit)
+               ->get();
+
+        $data = array();
+
+        if(!empty($Query)):
+            $i = 1;
+            foreach($Query as $list):
+                $data[] = [
+                    'id' => $list->id,
+                    'sl' => $i,
+                    'batch_id' => $list->batch_id,
+                    'batch_ref' => (!empty($list->batch_id) ? substr($list->batch_id, -8) : ''),
+                    'job_name' => $list->job_name,
+                    'status' => $list->status,
+                    'message' => (!empty($list->message) ? $list->message : ''),
+                    'attempts' => (int) $list->attempts,
+                    'started_at' => (!empty($list->started_at) ? date('d-m-Y H:i:s', strtotime($list->started_at)) : ''),
+                    'finished_at' => (!empty($list->finished_at) ? date('d-m-Y H:i:s', strtotime($list->finished_at)) : ''),
+                    'exception' => (!empty($list->exception) ? $list->exception : ''),
+                    'created_by' => ($list->created_by > 0 && isset($list->user->name) ? $list->user->name : ''),
+                ];
+                $i++;
+            endforeach;
+        endif;
+        return response()->json(['last_page' => $last_page, 'total_rows' => $total_rows, 'data' => $data]);
     }
 
     public function admissionInterviewLogList(Request $request){
@@ -2665,8 +2772,15 @@ class AdmissionController extends Controller
             if(JobBatch::where('id', $batchId)->count())
             {
                 $response = JobBatch::where('id', $batchId)->first();
-                 
-                return response()->json($response);
+
+                // The conversion log rows let the progress modal name the exact
+                // step that broke instead of silently closing on a cancelled batch.
+                $data = $response->toArray();
+                $data['conversion'] = StudentConversionLog::where('batch_id', $batchId)
+                    ->orderBy('id', 'ASC')
+                    ->get(['applicant_id', 'job_name', 'status', 'message']);
+
+                return response()->json($data);
             // } else {
             //     return response()->json(["total_jobs" => 0,"pending_jobs"=>0]);
             }

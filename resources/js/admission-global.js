@@ -346,6 +346,14 @@ import Dropzone from "dropzone";
                             // (updated live by the Vue app) reaches 100% before closing/reloading.
                             let progressWatcher = setInterval(function(){
                                 let inProgress = parseInt($('#progressBarModal input#progress').val());
+                                let conversionFailed = parseInt($('#progressBarModal input#conversionFailed').val());
+                                if(conversionFailed > 0) {
+                                    // A conversion step failed: leave the modal open so the
+                                    // error panel (and its Conversion Log link) stays readable
+                                    // instead of reloading it away.
+                                    clearInterval(progressWatcher);
+                                    return;
+                                }
                                 if(inProgress >= 100) {
                                     clearInterval(progressWatcher);
                                     statusStudentProgressModal.hide();
