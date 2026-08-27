@@ -65,7 +65,7 @@
         $gradeMeta = [
             'P' => ['#0b6b66', '#e5f2f0'],
             'M' => ['#8a6d1f', '#f4ebd6'],
-            'D' => ['#0f252d', '#e2e8e9'],
+            'D' => ['#5b3ea6', '#efeafa'],
             'R' => ['#b3392e', '#fbedeb'],
             'U' => ['#b3392e', '#fbedeb'],
             'A' => ['#b3392e', '#fbedeb'],
