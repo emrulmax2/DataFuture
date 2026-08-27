@@ -67,6 +67,7 @@ export default defineConfig({
                 'resources/js/admission-process.js',
                 'resources/js/admission-uploads.js',
                 'resources/js/admission-notes.js',
+                'resources/js/admission-conversion-log.js',
 
                 'resources/js/students.js',
                 'resources/js/student-global.js',
@@ -88,6 +89,7 @@ export default defineConfig({
 
                 'resources/js/settings.js',
                 'resources/js/site-settings-redesign.js',
+                'resources/js/student-conversion-logs.js',
                 'resources/js/awardingbody.js',
                 'resources/js/academicyears.js',
                 'resources/js/sourcetuitionfee.js',

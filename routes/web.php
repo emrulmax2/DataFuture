@@ -285,6 +285,7 @@ use App\Http\Controllers\Reports\TermPerformance\TermProgressionReportController
 use App\Http\Controllers\Reports\TermPerformance\TermRetentionReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermSubmissionPerformanceReportController;
 use App\Http\Controllers\ResidencyStatusController;
+use App\Http\Controllers\StudentConversionLogController;
 use App\Http\Controllers\ResultComparisonController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
@@ -1417,6 +1418,9 @@ Route::middleware('auth')->group(function() {
         Route::post('admission/status-validation', 'admissionStudentStatusValidation')->name('admission.student.status.validation');
 
         Route::get('admission/progress/data/{id?}','progressForStudentStoreProcess')->name('admission.progress.data');
+
+        Route::get('admission/conversion-log/{applicantId}', 'admissionConversionLog')->name('admission.conversion.log');
+        Route::get('admission/conversion-log-list', 'admissionConversionLogList')->name('admission.conversion.log.list');
 
         //Route::get('admission/convertstudent','convertStudentDemo')->name('admission.convertstudent');
 
@@ -3115,6 +3119,11 @@ Route::middleware('auth')->group(function() {
     
         //Route::get('site-settings/residency-status/export', 'export')->name('residency.status.export');
         //Route::post('site-settings/residency-status/import', 'import')->name('residency.status.import');
+    });
+
+    Route::controller(StudentConversionLogController::class)->group(function() {
+        Route::get('site-settings/student-conversion-logs', 'index')->name('student.conversion.logs');
+        Route::get('site-settings/student-conversion-logs/list', 'list')->name('student.conversion.logs.list');
     });
     
 

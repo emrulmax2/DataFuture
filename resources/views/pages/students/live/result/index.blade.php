@@ -14,7 +14,9 @@
         $gradeMeta = [
             'P' => ['color' => '#0B6B66', 'bg' => '#E5F2F0'],
             'M' => ['color' => '#8A6D1F', 'bg' => '#F4EBD6'],
-            'D' => ['color' => '#0F252D', 'bg' => '#E2E8E9'],
+            /* Distinction is the top grade — purple so it is visibly the
+               best of the three passes, not just another grey pill. */
+            'D' => ['color' => '#5B3EA6', 'bg' => '#EFEAFA'],
             'R' => ['color' => '#B3392E', 'bg' => '#FBEDEB'],
             'U' => ['color' => '#B3392E', 'bg' => '#FBEDEB'],
             'A' => ['color' => '#B3392E', 'bg' => '#FBEDEB'],

@@ -344,19 +344,37 @@
             <form method="POST" action="#" id="" enctype="multipart/form-data">
                 <div  class="modal-content">
                     <div class="modal-header border-0" >
-                        <h2 v-if="progressPercentage<100" class="font-medium text-xl mr-auto">@{{ progress }}  ....</h2>
+                        <h2 v-if="failedJobs.length" class="font-medium text-xl mr-auto text-danger">Conversion stopped</h2>
+                        <h2 v-else-if="progressPercentage<100" class="font-medium text-xl mr-auto">@{{ progress }}  ....</h2>
                         <h2 v-else-if="progressPercentage==100"class="font-medium text-xl mr-auto">@{{ progress }} Done</h2>
-                        
+
                         <a data-tw-dismiss="modal" href="javascript:;">
                             <i data-lucide="x" class="w-6 h-6 text-slate-400"></i>
                         </a>
                     </div>
                     <input id="batchId" type="hidden" value="" />
                     <input id="progress" type="hidden" :value="progressPercentage" />
+                    {{-- Non-zero while conversion steps failed; admission-global.js skips
+                         its auto-close/reload so the errors below stay readable. --}}
+                    <input id="conversionFailed" type="hidden" :value="failedJobs.length" />
                     <div class="modal-body">
                         <div>
                             <div class="progress h-3 mt-1">
-                                <div id="progress-bar" :style="{width: `${progressPercentage}%`}" class="progress-bar  bg-success transition-all ease-out duration-1000 " role="progressbar" :aria-valuenow="progressPercentage" aria-valuemin="0" aria-valuemax="100"> @{{progressPercentage}}%</div>
+                                <div id="progress-bar" :style="{width: `${progressPercentage}%`}" class="progress-bar transition-all ease-out duration-1000" :class="failedJobs.length ? 'bg-danger' : 'bg-success'" role="progressbar" :aria-valuenow="progressPercentage" aria-valuemin="0" aria-valuemax="100"> @{{progressPercentage}}%</div>
+                            </div>
+                        </div>
+
+                        {{-- Failed steps from student_conversion_logs (via the
+                             admission.progress.data payload). Inline SVG rather than
+                             data-lucide: this block mounts after createIcons ran. --}}
+                        <div v-if="failedJobs.length" class="alert alert-danger-soft show flex items-start mt-4" role="alert">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6 mr-2 flex-none"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"></path><path d="M12 9v4M12 17h.01"></path></svg>
+                            <div>
+                                <div class="font-medium">The student conversion stopped because a step failed. The remaining steps were skipped.</div>
+                                <ul class="list-disc ml-4 mt-2">
+                                    <li v-for="job in failedJobs">@{{ job.job_name }}: @{{ job.message }}</li>
+                                </ul>
+                                <a v-if="conversionLogUrl" :href="conversionLogUrl" class="btn btn-danger w-auto mt-3">View Conversion Log</a>
                             </div>
                         </div>
                     </div>

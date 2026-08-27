@@ -70,6 +70,19 @@ return [
             'replace_placeholders' => true,
         ],
 
+        /*
+         | The applicant-to-student conversion (offer accepted -> ProcessStudent*
+         | job chain) on its own file, mirroring the student_conversion_logs
+         | table, so a broken conversion can be traced without DB access.
+         */
+        'student_conversion' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/student-conversion.log'),
+            'level' => 'debug',
+            'days' => 60,
+            'replace_placeholders' => true,
+        ],
+
         'single' => [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),

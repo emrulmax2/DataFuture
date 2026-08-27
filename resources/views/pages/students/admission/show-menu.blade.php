@@ -46,6 +46,22 @@
                 <span class="adm-tab__desc">{{ $applicant->pendingTasks->count() }} Pendings</span>
             </span>
         </a>
+
+        {{-- Only meaningful once a student conversion (status 7) has been
+             dispatched, so the tab stays hidden until log rows exist. --}}
+        @php
+            $admConversionLogs = $applicant->conversionLogs;
+            $admConversionProblems = $admConversionLogs->whereIn('status', ['failed', 'cancelled'])->count();
+        @endphp
+        @if($admConversionLogs->count() > 0 || Route::currentRouteName() == 'admission.conversion.log')
+            <a href="{{ route('admission.conversion.log', $applicant->id) }}" class="adm-tab {{ Route::currentRouteName() == 'admission.conversion.log' ? 'adm-tab--active' : '' }}">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1"></rect><path d="M12 11h4"></path><path d="M12 16h4"></path><path d="M8 11h.01"></path><path d="M8 16h.01"></path></svg>
+                <span>
+                    <span class="adm-tab__title">Conversion Log</span>
+                    <span class="adm-tab__desc">{{ $admConversionProblems > 0 ? $admConversionProblems.' Problems' : $admConversionLogs->count().' Steps' }}</span>
+                </span>
+            </a>
+        @endif
     </div>
 
     @if(isset(auth()->user()->priv()['e_signature_request']) && auth()->user()->priv()['e_signature_request'] == 1)

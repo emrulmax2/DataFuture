@@ -30,7 +30,7 @@
         $gradeMeta = [
             'P' => ['#0B6B66', '#E5F2F0'],
             'M' => ['#8A6D1F', '#F4EBD6'],
-            'D' => ['#0F252D', '#E2E8E9'],
+            'D' => ['#5B3EA6', '#EFEAFA'],
         ];
     @endphp
 
