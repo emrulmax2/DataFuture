@@ -946,17 +946,21 @@
     filter: brightness(1.06);
 }
 
-.adm-btn--gold {
-    background: var(--adm-acc);
+/* Impersonation is a utility action, not content, so it stays neutral rather
+ * than following --adm-acc: the course accent clashed with warm palettes and
+ * competed with the primary action for attention. The slate echoes the top
+ * bar and reads the same on every course theme. */
+.adm-btn--ink {
+    background: #2f3d4a;
     border: none;
-    box-shadow: 0 3px 10px rgba(192, 111, 44, 0.24);
+    box-shadow: 0 3px 10px rgba(47, 61, 74, 0.22);
     color: #fff;
     font-weight: 700;
 }
 
-.adm-btn--gold:hover {
+.adm-btn--ink:hover {
+    background: #3b4b5a;
     color: #fff;
-    filter: brightness(1.06);
 }
 
 /* Tinted secondary — a download sits beside the primary action without
