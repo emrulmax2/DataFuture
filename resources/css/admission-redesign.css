@@ -2069,20 +2069,23 @@
     background: #f0e6dd;
 }
 
+/* Progress meaning, not course branding: outstanding work reads amber and
+   finished work reads green in every course palette. Following --adm-pri
+   here painted a completed bar red on red-themed courses. */
 .adm-work__bar--pending .adm-work__fill {
-    background: var(--adm-acc);
+    background: #c5642a;
 }
 
 .adm-work__bar--done .adm-work__bar-count {
-    color: var(--adm-pri);
+    color: #1e6b4e;
 }
 
 .adm-work__bar--done .adm-work__track {
-    background: var(--adm-tint);
+    background: #eaf4ee;
 }
 
 .adm-work__bar--done .adm-work__fill {
-    background: var(--adm-pri);
+    background: #1e6b4e;
 }
 
 /* Status dropdown inside the hero */
