@@ -53,7 +53,8 @@ import Tabulator from "tabulator-tables";
             return '<span class="ss-status-pill is-inactive"><span></span>Failed</span>';
         }
         if (state === "inprogress") {
-            return '<span class="ss-status-pill"><span></span>In Progress</span>';
+            // No amber variant exists for ss-status-pill, so color it inline.
+            return '<span class="ss-status-pill" style="border-color:#fde68a;background:#fef3c7;color:#b45309;"><span style="background:#b45309;"></span>In Progress</span>';
         }
 
         return '<span class="ss-status-pill is-active"><span></span>Completed</span>';
