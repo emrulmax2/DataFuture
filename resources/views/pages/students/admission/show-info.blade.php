@@ -74,7 +74,7 @@
                 </a>
 
                 @if(isset(auth()->user()->priv()['login_as_applicant']) && auth()->user()->priv()['login_as_applicant'] == 1)
-                    <a target="__blank" href="{{ route('impersonate', ['id' => $applicant->applicant_user_id, 'guardName' => 'applicant']) }}" class="adm-btn adm-btn--gold">
+                    <a target="__blank" href="{{ route('impersonate', ['id' => $applicant->applicant_user_id, 'guardName' => 'applicant']) }}" class="adm-btn adm-btn--ink">
                         Login As Applicant
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"></path></svg>
                     </a>

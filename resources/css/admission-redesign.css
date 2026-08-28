@@ -946,17 +946,21 @@
     filter: brightness(1.06);
 }
 
-.adm-btn--gold {
-    background: var(--adm-acc);
+/* Impersonation is a utility action, not content, so it stays neutral rather
+ * than following --adm-acc: the course accent clashed with warm palettes and
+ * competed with the primary action for attention. The slate echoes the top
+ * bar and reads the same on every course theme. */
+.adm-btn--ink {
+    background: #2f3d4a;
     border: none;
-    box-shadow: 0 3px 10px rgba(192, 111, 44, 0.24);
+    box-shadow: 0 3px 10px rgba(47, 61, 74, 0.22);
     color: #fff;
     font-weight: 700;
 }
 
-.adm-btn--gold:hover {
+.adm-btn--ink:hover {
+    background: #3b4b5a;
     color: #fff;
-    filter: brightness(1.06);
 }
 
 /* Tinted secondary — a download sits beside the primary action without
@@ -2069,20 +2073,23 @@
     background: #f0e6dd;
 }
 
+/* Progress meaning, not course branding: outstanding work reads amber and
+   finished work reads green in every course palette. Following --adm-pri
+   here painted a completed bar red on red-themed courses. */
 .adm-work__bar--pending .adm-work__fill {
-    background: var(--adm-acc);
+    background: #c5642a;
 }
 
 .adm-work__bar--done .adm-work__bar-count {
-    color: var(--adm-pri);
+    color: #1e6b4e;
 }
 
 .adm-work__bar--done .adm-work__track {
-    background: var(--adm-tint);
+    background: #eaf4ee;
 }
 
 .adm-work__bar--done .adm-work__fill {
-    background: var(--adm-pri);
+    background: #1e6b4e;
 }
 
 /* Status dropdown inside the hero */
