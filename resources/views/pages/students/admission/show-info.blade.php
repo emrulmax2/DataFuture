@@ -30,6 +30,15 @@
         default => 'pending',
     };
 
+    // The Work Progress status chip otherwise inherits the course palette
+    // (--adm-pri), which showed "Offer Accepted" in a red-themed course's
+    // colour. Outcome statuses carry their own tone instead.
+    $admStatusTriggerClass = match($admStatusTone) {
+        'success' => 'adm-statusmenu__trigger--success',
+        'danger' => 'adm-statusmenu__trigger--danger',
+        default => '',
+    };
+
     $admPending = $applicant->pendingTasks->count();
     $admInProgress = $applicant->inProgressTasks->count();
     $admCompleted = $applicant->completedTasks->count();
@@ -120,7 +129,7 @@
 
                     @if($applicant->status_id == 4 || $applicant->status_id == 5 || $applicant->status_id == 6)
                         <div class="dropdown adm-statusmenu" data-tw-placement="bottom-end">
-                            <button class="dropdown-toggle adm-statusmenu__trigger" aria-expanded="false" data-tw-toggle="dropdown">
+                            <button class="dropdown-toggle adm-statusmenu__trigger {{ $admStatusTriggerClass }}" aria-expanded="false" data-tw-toggle="dropdown">
                                 <span class="adm-statusmenu__dot"></span>{{ $applicant->status->name }}
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"></path></svg>
                             </button>
@@ -145,7 +154,7 @@
                         </div>
                     @elseif(($applicant->status_id == 3 || $applicant->status_id == 8) && isset(auth()->user()->priv()['applicant_rejected']) && auth()->user()->priv()['applicant_rejected'] == 1)
                         <div class="dropdown adm-statusmenu" data-tw-placement="bottom-end">
-                            <button class="dropdown-toggle adm-statusmenu__trigger {{ $applicant->status_id == 8 ? 'adm-statusmenu__trigger--danger' : '' }}" aria-expanded="false" data-tw-toggle="dropdown">
+                            <button class="dropdown-toggle adm-statusmenu__trigger {{ $admStatusTriggerClass }}" aria-expanded="false" data-tw-toggle="dropdown">
                                 <span class="adm-statusmenu__dot"></span>{{ $applicant->status->name }}
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"></path></svg>
                             </button>
@@ -169,7 +178,7 @@
                             </div>
                         </div>
                     @else
-                        <span class="adm-statusmenu__trigger {{ $applicant->status_id == 8 ? 'adm-statusmenu__trigger--danger' : '' }}" style="cursor:default;">
+                        <span class="adm-statusmenu__trigger {{ $admStatusTriggerClass }}" style="cursor:default;">
                             <span class="adm-statusmenu__dot"></span>{{ $applicant->status->name ?? '--' }}
                         </span>
                     @endif
