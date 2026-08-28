@@ -12,13 +12,19 @@ function conversionRenderLucide() {
     });
 }
 
-// Same tone classes the admission task tables use for their status pills.
+// Inline-styled pills rather than btn-* classes: the admission redesign
+// re-themes button colors per course palette, which turned "Completed" red.
+// These hexes match the ss-status-pill palette on the settings pages.
+const conversionPill = (label, color, bg, border) =>
+    '<span style="display:inline-flex;align-items:center;gap:6px;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:700;line-height:1.4;border:1px solid ' + border + ';background:' + bg + ';color:' + color + ';">' +
+    '<span style="width:6px;height:6px;border-radius:999px;background:' + color + ';"></span>' + label + '</span>';
+
 const conversionStatusBadges = {
-    queued: '<span class="btn inline-flex btn-secondary w-auto px-2 py-0 rounded-0">Queued</span>',
-    processing: '<span class="btn inline-flex btn-warning w-auto px-2 py-0 rounded-0">Processing</span>',
-    completed: '<span class="btn inline-flex btn-success w-auto px-2 text-white py-0 rounded-0">Completed</span>',
-    failed: '<span class="btn inline-flex btn-danger w-auto px-2 text-white py-0 rounded-0">Failed</span>',
-    cancelled: '<span class="btn inline-flex btn-outline-danger w-auto px-2 py-0 rounded-0">Cancelled</span>',
+    queued: conversionPill('Queued', '#64748b', '#f1f5f9', '#e2e8f0'),
+    processing: conversionPill('Processing', '#b45309', '#fef3c7', '#fde68a'),
+    completed: conversionPill('Completed', '#0f8278', '#e5f7f3', '#b9e4db'),
+    failed: conversionPill('Failed', '#d64545', '#fde7e7', '#f4cbcb'),
+    cancelled: conversionPill('Cancelled', '#d64545', '#fff5f5', '#f4cbcb'),
 };
 
 var conversionLogListTable = (function () {
