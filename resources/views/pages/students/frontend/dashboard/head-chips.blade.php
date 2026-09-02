@@ -19,18 +19,18 @@
     <span class="spf-chip spf-chip--cream">{{ strtoupper($student->status->name) }}</span>
 @endif
 
-<div class="spf-dd">
-    <button type="button" class="spf-pillbtn" data-spf-dd="spfCoursesMenu">PREVIOUS COURSES &#9662;</button>
-    <div id="spfCoursesMenu" class="spf-dd__menu spf-dd__menu--wide">
-        @if($relatedEnrolments->count() > 0)
+{{-- Nothing to switch to means nothing to show: the chip only appears for a
+     student who actually has another enrolment. --}}
+@if($relatedEnrolments->count() > 0)
+    <div class="spf-dd">
+        <button type="button" class="spf-pillbtn" data-spf-dd="spfCoursesMenu">PREVIOUS COURSES &#9662;</button>
+        <div id="spfCoursesMenu" class="spf-dd__menu spf-dd__menu--wide">
             @foreach($relatedEnrolments as $enrolment)
                 <a href="{{ route('students.dashboard.student.select', $enrolment->id) }}" class="spf-dd__item">
                     <i data-lucide="user" class="w-4 h-4"></i>
                     View {{ isset($enrolment->course->semester->name) ? $enrolment->course->semester->name : 'enrolment' }}
                 </a>
             @endforeach
-        @else
-            <div class="spf-dd__empty">&mdash; No record found</div>
-        @endif
+        </div>
     </div>
-</div>
+@endif

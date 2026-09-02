@@ -19,9 +19,9 @@ body.student-portal-body {
     --spf-graphite: #26292e;
     --spf-ink: #232528;
     --spf-body: #3c3f44;
-    --spf-dim: #5e6165;
-    --spf-muted: #93938f;
-    --spf-faint: #75787d;
+    --spf-dim: #53565b;
+    --spf-muted: #6b6b66;
+    --spf-faint: #63666b;
 
     --spf-paper: #f7f6f4;
     --spf-card: #ffffff;
@@ -30,9 +30,9 @@ body.student-portal-body {
     --spf-border2: #e0dcd2;
 
     --spf-bronze: #b98a4e;
-    --spf-gold: #c79b60;
+    --spf-gold: #cda468;
     --spf-goldsoft: rgba(199, 155, 96, 0.16);
-    --spf-goldtxt: #8a6420;
+    --spf-goldtxt: #825d1c;
     --spf-cream: #efe7da;
     --spf-creambg: #f9f3e7;
     --spf-chipgrey: #ededea;
@@ -141,7 +141,7 @@ body.student-portal-body {
     box-sizing: border-box;
     color: #c9cbce;
     display: block;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     padding: 10px 14px;
     text-align: left;
@@ -167,7 +167,7 @@ body.student-portal-body {
     background: var(--spf-gold);
     border-radius: 999px;
     color: var(--spf-graphite);
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
     margin-left: 6px;
     padding: 1px 7px;
@@ -180,7 +180,7 @@ body.student-portal-body {
 
 .spf-nav__caption {
     color: #75787d;
-    font-size: 9.5px;
+    font-size: 10.5px;
     letter-spacing: 0.12em;
     padding: 0 14px 6px;
     text-transform: uppercase;
@@ -211,7 +211,7 @@ body.student-portal-body {
     cursor: pointer;
     display: flex;
     font-family: inherit;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
     gap: 8px;
     justify-content: center;
@@ -258,7 +258,7 @@ body.student-portal-body {
     background: transparent;
     border: 0;
     border-radius: 8px;
-    color: #8d9095;
+    color: #9ca0a6;
     cursor: pointer;
     display: flex;
     flex: 0 0 28px;
@@ -292,7 +292,7 @@ body.student-portal-body {
     border: 2px solid var(--spf-graphite);
     border-radius: 999px;
     color: var(--spf-graphite);
-    font-size: 9.5px;
+    font-size: 10.5px;
     font-weight: 700;
     line-height: 1;
     min-width: 17px;
@@ -339,7 +339,8 @@ body.student-portal-body {
 
 .spf-cart__pop-head {
     color: var(--spf-muted);
-    font-size: 10.5px;
+    font-size: 11.5px;
+    font-weight: 600;
     letter-spacing: 0.1em;
     margin-bottom: 10px;
     text-transform: uppercase;
@@ -354,7 +355,7 @@ body.student-portal-body {
 .spf-cart__item {
     align-items: baseline;
     display: flex;
-    font-size: 12.5px;
+    font-size: 13.5px;
     gap: 8px;
 }
 
@@ -366,7 +367,7 @@ body.student-portal-body {
 
 .spf-cart__item-qty {
     color: var(--spf-muted);
-    font-size: 11.5px;
+    font-size: 12.5px;
 }
 
 .spf-cart__item-price {
@@ -403,14 +404,14 @@ body.student-portal-body {
 
 .spf-cart__more {
     color: var(--spf-muted);
-    font-size: 11.5px;
+    font-size: 12.5px;
     margin-top: 8px;
 }
 
 .spf-cart__total {
     border-top: 1px solid var(--spf-hairline);
     display: flex;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     justify-content: space-between;
     margin-top: 10px;
@@ -419,14 +420,15 @@ body.student-portal-body {
 
 .spf-cart__empty {
     color: var(--spf-muted);
-    font-size: 12.5px;
+    font-size: 13.5px;
+    font-weight: 500;
 }
 
 .spf-cart__cta {
     color: var(--spf-goldtxt);
     cursor: pointer;
     display: block;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     margin-top: 10px;
     text-decoration: none;
@@ -447,7 +449,7 @@ body.student-portal-body {
 
 .spf-user__name {
     color: #fff;
-    font-size: 12.5px;
+    font-size: 13.5px;
     font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -455,8 +457,8 @@ body.student-portal-body {
 }
 
 .spf-user__role {
-    color: #8d9095;
-    font-size: 10.5px;
+    color: #9ca0a6;
+    font-size: 11.5px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -493,7 +495,7 @@ body.student-portal-body {
 .spf-topbar__title {
     color: #fff;
     font-family: var(--spf-serif);
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
 }
 
@@ -513,7 +515,8 @@ body.student-portal-body {
 
 .spf-eyebrow {
     color: var(--spf-muted);
-    font-size: 12px;
+    font-size: 13px;
+    font-weight: 600;
     margin-bottom: 6px;
 }
 
@@ -546,7 +549,8 @@ body.student-portal-body {
 .spf-label {
     color: var(--spf-muted);
     display: block;
-    font-size: 10.5px;
+    font-size: 11.5px;
+    font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
 }
@@ -577,7 +581,7 @@ body.student-portal-body {
 }
 
 .spf-page-head--baseline .spf-eyebrow {
-    font-size: 13px;
+    font-size: 14px;
     margin-bottom: 0;
 }
 
@@ -599,7 +603,7 @@ body.student-portal-body {
 
 .spf-section__note {
     color: var(--spf-muted);
-    font-size: 12px;
+    font-size: 13px;
 }
 
 .spf-card {
@@ -613,7 +617,8 @@ body.student-portal-body {
     border: 1px dashed var(--spf-border2);
     border-radius: 12px;
     color: var(--spf-muted);
-    font-size: 13px;
+    font-size: 14px;
+    font-weight: 500;
     padding: 22px;
     text-align: center;
 }
@@ -624,7 +629,7 @@ body.student-portal-body {
     align-items: center;
     border-radius: 999px;
     display: inline-flex;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
     gap: 6px;
     letter-spacing: 0.06em;
@@ -666,7 +671,7 @@ body.student-portal-body {
 }
 
 .spf-chip--lg {
-    font-size: 11.5px;
+    font-size: 12.5px;
     letter-spacing: 0;
     padding: 5px 13px;
 }
@@ -697,7 +702,7 @@ body.student-portal-body {
     cursor: pointer;
     display: inline-flex;
     font-family: inherit;
-    font-size: 12.5px;
+    font-size: 13.5px;
     font-weight: 600;
     gap: 8px;
     padding: 9px 18px;
@@ -726,7 +731,7 @@ body.student-portal-body {
 }
 
 .spf-btn--sm {
-    font-size: 11.5px;
+    font-size: 12.5px;
     padding: 7px 14px;
 }
 
@@ -736,7 +741,7 @@ body.student-portal-body {
     color: var(--spf-goldtxt);
     cursor: pointer;
     font-family: inherit;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     padding: 0;
     text-decoration: none;
@@ -754,7 +759,7 @@ body.student-portal-body {
     color: var(--spf-faint);
     cursor: pointer;
     font-family: inherit;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.06em;
     padding: 5px 12px;
@@ -804,7 +809,7 @@ body.student-portal-body {
     cursor: pointer;
     display: flex;
     font-family: inherit;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     gap: 11px;
     padding: 11px 14px;
@@ -826,7 +831,7 @@ body.student-portal-body {
 
 .spf-dd__empty {
     color: var(--spf-muted);
-    font-size: 12px;
+    font-size: 13px;
     padding: 16px 14px;
     text-align: center;
 }
@@ -877,20 +882,21 @@ body.student-portal-body {
 }
 
 .spf-hero__name {
-    color: var(--spf-muted);
-    font-size: 12px;
-    line-height: 1.5;
+    color: var(--spf-ink);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.45;
 }
 
 .spf-hero__name strong {
-    color: var(--spf-body);
-    font-weight: 600;
+    color: inherit;
+    font-weight: inherit;
 }
 
 .spf-hero__course {
     color: var(--spf-body);
-    font-size: 13px;
-    line-height: 1.5;
+    font-size: 13.5px;
+    line-height: 1.55;
 }
 
 .spf-hero__course span {
@@ -908,14 +914,21 @@ body.student-portal-body {
 .spf-hero__blockhead {
     align-items: center;
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 10px;
 }
 
+/* The label is a single unit - let the action pill drop to the next line
+   rather than breaking "CONTACT DETAILS" across two. */
+.spf-hero__blockhead .spf-label {
+    white-space: nowrap;
+}
+
 .spf-hero__list {
     color: var(--spf-body);
-    font-size: 12.5px;
-    line-height: 1.9;
+    font-size: 13px;
+    line-height: 1.85;
     word-break: break-word;
 }
 
@@ -947,7 +960,8 @@ body.student-portal-body {
 
 .spf-stat__label {
     color: var(--spf-muted);
-    font-size: 10.5px;
+    font-size: 11.5px;
+    font-weight: 600;
     letter-spacing: 0.1em;
     margin-bottom: 6px;
     text-transform: uppercase;
@@ -961,7 +975,7 @@ body.student-portal-body {
 
 .spf-stat__value small {
     color: var(--spf-muted);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 400;
 }
 
@@ -1015,7 +1029,7 @@ body.student-portal-body {
     display: flex;
     flex: 0 0 36px;
     font-family: var(--spf-serif);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     height: 36px;
     justify-content: center;
@@ -1049,14 +1063,14 @@ body.student-portal-body {
 }
 
 .spf-module__name {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     line-height: 1.35;
 }
 
 .spf-module__sub {
     color: var(--spf-muted);
-    font-size: 11.5px;
+    font-size: 12.5px;
     margin-top: 2px;
 }
 
@@ -1099,7 +1113,7 @@ body.student-portal-body {
     border-radius: 999px;
     color: var(--spf-body);
     display: inline-flex;
-    font-size: 12.5px;
+    font-size: 13.5px;
     font-weight: 600;
     gap: 8px;
     padding: 10px 18px;
@@ -1151,7 +1165,8 @@ body.student-portal-body {
 
 .spf-field__label {
     color: var(--spf-muted);
-    font-size: 11px;
+    font-size: 12px;
+    font-weight: 600;
     letter-spacing: 0.1em;
     margin-bottom: 5px;
     text-transform: uppercase;
@@ -1159,7 +1174,7 @@ body.student-portal-body {
 
 .spf-field__value {
     color: var(--spf-ink);
-    font-size: 13.5px;
+    font-size: 14.5px;
     line-height: 1.55;
     word-break: break-word;
 }
@@ -1175,7 +1190,7 @@ body.student-portal-body {
 .spf-subhead {
     border-top: 1px solid var(--spf-hairline);
     color: var(--spf-goldtxt);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     grid-column: 1 / -1;
     letter-spacing: 0.1em;
@@ -1224,7 +1239,8 @@ body.student-portal-body {
 .spf-rtable__head {
     border-bottom: 1px solid var(--spf-line);
     color: var(--spf-muted);
-    font-size: 10.5px;
+    font-size: 11.5px;
+    font-weight: 600;
     letter-spacing: 0.1em;
     padding-bottom: 13px;
     padding-top: 13px;
@@ -1234,7 +1250,7 @@ body.student-portal-body {
 .spf-rtable__row {
     align-items: center;
     border-bottom: 1px solid var(--spf-hairline);
-    font-size: 13px;
+    font-size: 14px;
     padding-bottom: 15px;
     padding-top: 15px;
 }
@@ -1250,18 +1266,18 @@ body.student-portal-body {
 
 .spf-rtable__termname {
     color: var(--spf-goldtxt);
-    font-size: 12.5px;
+    font-size: 13.5px;
     font-weight: 600;
 }
 
 .spf-rtable__termcount {
-    color: var(--spf-bronze);
-    font-size: 11.5px;
+    color: var(--spf-goldtxt);
+    font-size: 12.5px;
 }
 
 .spf-rtable__termcredits {
     color: var(--spf-goldtxt);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
 }
 
@@ -1272,7 +1288,7 @@ body.student-portal-body {
 
 .spf-mod__meta {
     color: var(--spf-muted);
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.02em;
     margin-top: 3px;
 }
@@ -1293,7 +1309,7 @@ body.student-portal-body {
 .spf-status {
     border-radius: 999px;
     display: inline-block;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     padding: 4px 11px;
     white-space: nowrap;
@@ -1322,7 +1338,7 @@ body.student-portal-body {
 .spf-grade {
     border-radius: 999px;
     display: inline-block;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     padding: 4px 11px;
     white-space: nowrap;
@@ -1345,7 +1361,7 @@ body.student-portal-body {
 
 .spf-rtable__foot {
     color: var(--spf-muted);
-    font-size: 12px;
+    font-size: 13px;
     padding: 13px 20px;
 }
 
@@ -1378,7 +1394,7 @@ body.student-portal-body {
 
 .spf-term__score {
     color: var(--spf-dim);
-    font-size: 12.5px;
+    font-size: 13.5px;
 }
 
 .spf-term__score strong {
@@ -1415,7 +1431,8 @@ body.student-portal-body {
 
 .spf-split__label {
     color: var(--spf-muted);
-    font-size: 11px;
+    font-size: 12px;
+    font-weight: 600;
     letter-spacing: 0.1em;
     margin-bottom: 9px;
     text-transform: uppercase;
@@ -1437,7 +1454,7 @@ body.student-portal-body {
 .spf-modlist__row {
     align-items: center;
     display: flex;
-    font-size: 13px;
+    font-size: 14px;
     gap: 12px;
     padding: 7px 0;
 }
@@ -1461,7 +1478,7 @@ body.student-portal-body {
 
 .spf-modlist__grade {
     color: var(--spf-muted);
-    font-size: 12px;
+    font-size: 13px;
 }
 
 /* ── Do it online (forms page) ─────────────────────────────────────────── */
@@ -1491,14 +1508,14 @@ body.student-portal-body {
 
 .spf-formcard__title {
     color: var(--spf-ink);
-    font-size: 13.5px;
+    font-size: 14.5px;
     font-weight: 600;
     line-height: 1.35;
 }
 
 .spf-formcard__desc {
     color: var(--spf-muted);
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.6;
     margin-top: 4px;
 }
@@ -1527,7 +1544,8 @@ body.student-portal-body {
 
 .spf-railcard__title {
     color: var(--spf-muted);
-    font-size: 11px;
+    font-size: 12px;
+    font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
 }
@@ -1552,13 +1570,14 @@ body.student-portal-body {
 }
 
 .spf-news__age {
-    color: #b4b4b0;
-    font-size: 10.5px;
+    color: var(--spf-muted);
+    font-size: 11.5px;
+    font-weight: 500;
 }
 
 .spf-news__title {
     font-family: var(--spf-serif);
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
     line-height: 1.35;
     margin-top: 4px;
@@ -1568,7 +1587,8 @@ body.student-portal-body {
    script reveals a "Read more" toggle when there is more to see. */
 .spf-news__body {
     color: var(--spf-dim);
-    font-size: 11.5px;
+    font-size: 12.5px;
+    font-weight: 500;
     line-height: 1.65;
     margin-top: 8px;
     max-height: 132px;
@@ -1633,7 +1653,8 @@ body.student-portal-body {
 
 .spf-news__none {
     color: var(--spf-dim);
-    font-size: 12px;
+    font-size: 13px;
+    font-weight: 500;
     line-height: 1.6;
 }
 
@@ -1749,7 +1770,7 @@ body.student-portal-body {
 
 .spf-lib--training .spf-lib__text {
     color: #fff;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
 }
 
@@ -1758,7 +1779,8 @@ body.student-portal-body {
 }
 
 .spf-lib__text {
-    font-size: 11px;
+    font-size: 12px;
+    font-weight: 500;
     line-height: 1.35;
 }
 
@@ -1774,20 +1796,20 @@ body.student-portal-body {
 }
 
 .spf-class__module {
-    font-size: 12.5px;
+    font-size: 13.5px;
     font-weight: 600;
     line-height: 1.35;
 }
 
 .spf-class__meta {
     color: var(--spf-dim);
-    font-size: 11.5px;
+    font-size: 12.5px;
     margin-top: 2px;
 }
 
 .spf-class__room {
     color: var(--spf-muted);
-    font-size: 11px;
+    font-size: 12px;
     margin-top: 1px;
 }
 
@@ -1795,7 +1817,7 @@ body.student-portal-body {
     align-items: center;
     color: var(--spf-goldtxt);
     display: inline-flex;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     gap: 5px;
     margin-top: 4px;
@@ -1808,7 +1830,8 @@ body.student-portal-body {
 
 .spf-railcard__empty {
     color: var(--spf-muted);
-    font-size: 11.5px;
+    font-size: 12.5px;
+    font-weight: 500;
     margin-bottom: 6px;
 }
 
@@ -1821,7 +1844,8 @@ body.student-portal-body {
 
 .spf-page-head__sub {
     color: var(--spf-muted);
-    font-size: 12.5px;
+    font-size: 13.5px;
+    font-weight: 500;
     margin-top: 6px;
 }
 
@@ -1856,7 +1880,7 @@ body.student-portal-body .spf-input--pill {
     color: var(--spf-ink);
     flex: 1 1 200px;
     font-family: inherit;
-    font-size: 12.5px;
+    font-size: 13.5px;
     max-width: 340px;
     outline: none;
     padding: 9px 16px;
@@ -1886,14 +1910,14 @@ body.student-portal-body .spf-input--pill:focus {
 
 .spf-panel__bar-title {
     color: var(--spf-muted);
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
 }
 
 .spf-panel__bar-note {
     color: var(--spf-muted);
-    font-size: 11.5px;
+    font-size: 12.5px;
 }
 
 .spf-scrollbody {
@@ -1912,13 +1936,13 @@ body.student-portal-body .spf-input--pill:focus {
 
 .spf-grouprow__name {
     color: var(--spf-goldtxt);
-    font-size: 12.5px;
+    font-size: 13.5px;
     font-weight: 600;
 }
 
 .spf-grouprow__count {
-    color: var(--spf-bronze);
-    font-size: 11.5px;
+    color: var(--spf-goldtxt);
+    font-size: 12.5px;
     white-space: nowrap;
 }
 
@@ -1930,7 +1954,7 @@ body.student-portal-body .spf-input--pill:focus {
     color: var(--spf-body);
     cursor: pointer;
     display: flex;
-    font-size: 13px;
+    font-size: 14px;
     gap: 12px;
     padding: 11px 22px;
     width: 100%;
@@ -1949,7 +1973,7 @@ body.student-portal-body .spf-checkrow input[type="checkbox"] {
 }
 
 .spf-checkrow__flag {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     margin-left: 6px;
 }
@@ -1966,7 +1990,7 @@ body.student-portal-body .spf-checkrow input[type="checkbox"] {
     background: var(--spf-creambg);
     border-radius: 10px;
     color: var(--spf-goldtxt);
-    font-size: 12.5px;
+    font-size: 13.5px;
     padding: 13px 16px;
 }
 
@@ -1984,7 +2008,7 @@ body.student-portal-body .spf-checkrow input[type="checkbox"] {
 
 .spf-dropzone__hint {
     color: var(--spf-muted);
-    font-size: 11.5px;
+    font-size: 12.5px;
     line-height: 1.4;
 }
 
@@ -1995,7 +2019,7 @@ body.student-portal-body .spf-textarea {
     box-sizing: border-box;
     color: var(--spf-ink);
     font-family: inherit;
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.6;
     min-height: 110px;
     outline: none;
@@ -2010,7 +2034,7 @@ body.student-portal-body .spf-textarea:focus {
 
 .spf-filenames {
     color: var(--spf-dim);
-    font-size: 12px;
+    font-size: 13px;
     margin-top: 12px;
 }
 
@@ -2042,7 +2066,7 @@ body.student-portal-body .spf-textarea:focus {
     cursor: pointer;
     display: inline-flex;
     font-family: inherit;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     gap: 8px;
     padding: 0 2px 12px;
@@ -2111,7 +2135,7 @@ body.student-portal-body .spf-textarea:focus {
 }
 
 .spf-doccard__title {
-    font-size: 13.5px;
+    font-size: 14.5px;
     font-weight: 600;
     line-height: 1.35;
 }
@@ -2125,7 +2149,8 @@ body.student-portal-body .spf-textarea:focus {
 }
 
 .spf-doccard__meta {
-    font-size: 12px;
+    font-size: 13px;
+    font-weight: 500;
     line-height: 1.45;
 }
 
@@ -2143,7 +2168,7 @@ body.student-portal-body .spf-textarea:focus {
     border-top: 1px solid var(--spf-hairline);
     color: var(--spf-goldtxt);
     display: flex;
-    font-size: 12.5px;
+    font-size: 13.5px;
     font-weight: 600;
     gap: 7px;
     padding: 12px 20px;
@@ -2180,7 +2205,7 @@ a.spf-doccard__foot:hover {
     cursor: pointer;
     display: flex;
     font-family: inherit;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     gap: 10px;
     justify-content: space-between;
@@ -2220,7 +2245,7 @@ a.spf-doccard__foot:hover {
     align-items: baseline;
     border-bottom: 1px solid var(--spf-hairline);
     display: flex;
-    font-size: 13px;
+    font-size: 14px;
     gap: 12px;
     padding: 9px 0;
 }
@@ -2232,13 +2257,13 @@ a.spf-doccard__foot:hover {
 
 .spf-summary__qty {
     color: var(--spf-muted);
-    font-size: 11.5px;
+    font-size: 12.5px;
 }
 
 .spf-summary__line {
     color: var(--spf-dim);
     display: flex;
-    font-size: 13px;
+    font-size: 14px;
     justify-content: space-between;
     padding-top: 8px;
 }
@@ -2267,7 +2292,7 @@ a.spf-doccard__foot:hover {
 .spf-deflist {
     display: flex;
     flex-direction: column;
-    font-size: 13px;
+    font-size: 14px;
     gap: 10px;
 }
 
@@ -2289,7 +2314,7 @@ a.spf-doccard__foot:hover {
     align-items: center;
     cursor: pointer;
     display: flex;
-    font-size: 13px;
+    font-size: 14px;
     gap: 10px;
 }
 
@@ -2321,7 +2346,7 @@ body.student-portal-body .spf-radio input[type="radio"] {
 }
 
 .spf-datechip__d {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     line-height: 1;
 }
@@ -2342,7 +2367,8 @@ body.student-portal-body .spf-radio input[type="radio"] {
 .spf-otable__head {
     border-bottom: 1px solid var(--spf-line);
     color: var(--spf-muted);
-    font-size: 10.5px;
+    font-size: 11.5px;
+    font-weight: 600;
     letter-spacing: 0.1em;
     padding-bottom: 13px;
     padding-top: 13px;
@@ -2352,7 +2378,7 @@ body.student-portal-body .spf-radio input[type="radio"] {
 .spf-otable__row {
     align-items: start;
     border-bottom: 1px solid var(--spf-hairline);
-    font-size: 13px;
+    font-size: 14px;
     padding-bottom: 16px;
     padding-top: 16px;
 }
@@ -2383,7 +2409,7 @@ body.student-portal-body .spf-radio input[type="radio"] {
 
 .spf-otable__foot {
     color: var(--spf-muted);
-    font-size: 12px;
+    font-size: 13px;
     padding: 13px 24px;
 }
 
@@ -2414,7 +2440,7 @@ body.student-portal-body .spf-radio input[type="radio"] {
 .spf-dtable__head {
     border-bottom: 1px solid var(--spf-line);
     color: var(--spf-muted);
-    font-size: 10.5px;
+    font-size: 11.5px;
     letter-spacing: 0.1em;
     padding-bottom: 13px;
     padding-top: 13px;
@@ -2424,7 +2450,7 @@ body.student-portal-body .spf-radio input[type="radio"] {
 .spf-dtable__row {
     align-items: center;
     border-bottom: 1px solid var(--spf-hairline);
-    font-size: 13px;
+    font-size: 14px;
     padding-bottom: 14px;
     padding-top: 14px;
 }
@@ -2436,7 +2462,7 @@ body.student-portal-body .spf-radio input[type="radio"] {
 .spf-dtable__sub {
     color: var(--spf-muted);
     display: block;
-    font-size: 11.5px;
+    font-size: 12.5px;
     margin-top: 1px;
 }
 
@@ -2445,7 +2471,7 @@ body.student-portal-body .spf-radio input[type="radio"] {
 }
 
 .spf-datechip__m {
-    font-size: 9px;
+    font-size: 10.5px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
@@ -2534,7 +2560,8 @@ body.student-portal-body .spf-modal .modal-content {
 
 .spf-modal__desc {
     color: var(--spf-muted);
-    font-size: 12.5px;
+    font-size: 13.5px;
+    font-weight: 500;
     line-height: 1.6;
     margin: 14px 0 20px;
 }
@@ -2550,8 +2577,8 @@ body.student-portal-body .spf-modal .modal-content {
 .spf-modal__label {
     color: var(--spf-muted);
     display: block;
-    font-size: 10.5px;
-    font-weight: 500;
+    font-size: 11.5px;
+    font-weight: 600;
     letter-spacing: 0.1em;
     margin-bottom: 7px;
     text-transform: uppercase;
@@ -2561,7 +2588,7 @@ body.student-portal-body .spf-modal .modal-content {
     background: var(--spf-paper);
     border-radius: 9px;
     color: var(--spf-dim);
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.5;
     padding: 11px 14px;
     word-break: break-word;
@@ -2575,7 +2602,7 @@ body.student-portal-body .spf-modal__input {
     color: var(--spf-ink);
     display: block;
     font-family: inherit;
-    font-size: 13px;
+    font-size: 14px;
     outline: none;
     padding: 11px 14px;
     width: 100%;
@@ -2603,7 +2630,7 @@ body.student-portal-body .spf-modal__input.border-danger {
 
 .spf-modal__note {
     color: var(--spf-rust);
-    font-size: 11.5px;
+    font-size: 12.5px;
     margin-top: 7px;
 }
 
@@ -2652,7 +2679,7 @@ body.student-portal-body .spf-modal__input.border-danger {
 .spf-modal--status .errorModalDesc,
 .spf-modal--status .successModalDesc {
     color: var(--spf-dim);
-    font-size: 12.5px;
+    font-size: 13.5px;
     line-height: 1.6;
     margin-top: 8px;
 }
@@ -2666,7 +2693,7 @@ body.student-portal-body .spf-modal__input.border-danger {
    rest of the portal without touching its markup. */
 body.student-portal-body .spf-modal .form-label {
     color: var(--spf-muted);
-    font-size: 10.5px;
+    font-size: 11.5px;
     font-weight: 500;
     letter-spacing: 0.1em;
     margin-bottom: 7px;
@@ -2676,7 +2703,7 @@ body.student-portal-body .spf-modal .form-label {
 body.student-portal-body .spf-modal .form-control {
     border-color: var(--spf-border2);
     border-radius: 9px;
-    font-size: 13px;
+    font-size: 14px;
     padding: 10px 14px;
 }
 
@@ -2688,7 +2715,7 @@ body.student-portal-body .spf-modal .form-control {
     align-items: center;
     color: var(--spf-ink);
     display: flex;
-    font-size: 12.5px;
+    font-size: 13.5px;
     font-weight: 600;
     gap: 8px;
     margin-bottom: 8px;
@@ -2756,7 +2783,8 @@ body.student-portal-body .spf-modal--verify .modal-content {
 
 .spf-modal__subtitle {
     color: var(--spf-muted);
-    font-size: 11.5px;
+    font-size: 12.5px;
+    font-weight: 500;
     line-height: 1.5;
     margin-top: 2px;
 }
@@ -2772,7 +2800,7 @@ body.student-portal-body .spf-modal--verify .modal-content {
 .spf-vtable__row {
     border-bottom: 1px solid var(--spf-hairline);
     display: grid;
-    font-size: 12.5px;
+    font-size: 13.5px;
     gap: 14px;
     grid-template-columns: 140px minmax(0, 1fr);
     padding: 11px 16px;
@@ -2784,6 +2812,7 @@ body.student-portal-body .spf-modal--verify .modal-content {
 
 .spf-vtable__label {
     color: var(--spf-muted);
+    font-weight: 600;
 }
 
 .spf-vtable__value {
@@ -2819,7 +2848,7 @@ body.student-portal-body .spf-consent input[type="checkbox"] {
 
 .spf-consent__text {
     color: var(--spf-body);
-    font-size: 12.5px;
+    font-size: 13.5px;
     line-height: 1.6;
 }
 
@@ -2884,7 +2913,7 @@ body.student-portal-body .spf-btn:disabled:hover {
 
 .spf-notice__text {
     color: var(--spf-body);
-    font-size: 12.5px;
+    font-size: 13.5px;
     line-height: 1.6;
     padding-right: 24px;
 }
@@ -2954,7 +2983,7 @@ body.student-portal-body .spf-wsteps {
     border-radius: 50%;
     color: var(--spf-muted);
     display: flex;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     height: 32px;
     justify-content: center;
@@ -2990,7 +3019,7 @@ body.student-portal-body .spf-wsteps {
 
 .spf-wstep__label {
     color: var(--spf-muted);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
 }
 
@@ -3038,7 +3067,7 @@ body.student-portal-body .spf-wlabel {
     align-items: center;
     color: var(--spf-muted);
     display: inline-flex;
-    font-size: 10.5px;
+    font-size: 11.5px;
     font-weight: 600;
     gap: 5px;
     letter-spacing: 0.1em;
@@ -3067,7 +3096,7 @@ body.student-portal-body .spf-winput {
     color: var(--spf-ink);
     display: block;
     font-family: inherit;
-    font-size: 13px;
+    font-size: 14px;
     outline: none;
     padding: 10px 14px;
     width: 100%;
@@ -3098,7 +3127,7 @@ body.student-portal-body .spf-winput.border-danger {
 
 body.student-portal-body .spf-wizard .acc__input-error {
     color: var(--spf-rust);
-    font-size: 11.5px;
+    font-size: 12.5px;
 }
 
 body.student-portal-body .spf-wizard .acc__input-error:empty {
@@ -3120,7 +3149,7 @@ body.student-portal-body .spf-wizard .ts-input {
     border-radius: 9px;
     box-shadow: none;
     color: var(--spf-ink);
-    font-size: 13px;
+    font-size: 14px;
     padding: 10px 14px;
 }
 
@@ -3135,7 +3164,7 @@ body.student-portal-body .spf-wizard .ts-input .item {
 }
 
 body.student-portal-body .spf-wizard .ts-input > input {
-    font-size: 13px;
+    font-size: 14px;
 }
 
 /* The dropdown mounts on <body>, outside .spf-wizard. */
@@ -3145,7 +3174,7 @@ body.student-portal-body .ts-dropdown.lcc-tom-float {
     border-radius: 10px;
     box-shadow: 0 8px 28px rgba(38, 41, 46, 0.14);
     color: var(--spf-body);
-    font-size: 13px;
+    font-size: 14px;
 }
 
 body.student-portal-body .ts-dropdown.lcc-tom-float .option {
@@ -3160,7 +3189,7 @@ body.student-portal-body .ts-dropdown.lcc-tom-float .option.active {
 body.student-portal-body .ts-dropdown.lcc-tom-float .dropdown-input-wrap .dropdown-input {
     border: 0;
     border-bottom: 1px solid var(--spf-hairline);
-    font-size: 13px;
+    font-size: 14px;
     padding: 10px 14px;
 }
 
@@ -3181,7 +3210,7 @@ body.student-portal-body .ts-dropdown.lcc-tom-float .dropdown-input-wrap .dropdo
 
 .spf-wq__text {
     color: var(--spf-body);
-    font-size: 13.5px;
+    font-size: 14.5px;
     line-height: 1.65;
     margin: 0 0 10px;
 }
@@ -3226,7 +3255,7 @@ body.student-portal-body .spf-btn.border-danger {
 
 .spf-wsection__title {
     color: var(--spf-muted);
-    font-size: 10.5px;
+    font-size: 11.5px;
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -3238,7 +3267,7 @@ body.student-portal-body .spf-btn.border-danger {
     border: 1px solid var(--spf-line);
     border-radius: 10px;
     color: var(--spf-ink);
-    font-size: 13.5px;
+    font-size: 14.5px;
     font-weight: 500;
     line-height: 1.7;
     padding: 13px 16px;
@@ -3246,7 +3275,8 @@ body.student-portal-body .spf-btn.border-danger {
 
 .spf-wintro {
     color: var(--spf-body);
-    font-size: 13px;
+    font-size: 14px;
+    font-weight: 500;
     line-height: 1.7;
     margin: 0 0 18px;
     max-width: 640px;
@@ -3280,7 +3310,7 @@ body.student-portal-body .spf-btn.border-danger {
     color: var(--spf-body);
     display: inline-flex;
     flex-wrap: wrap;
-    font-size: 13px;
+    font-size: 14px;
     gap: 5px;
     line-height: 1.5;
 }
@@ -3357,7 +3387,7 @@ body.student-portal-body .spf-modal .modal-content {
     }
 
     .spf-wstep__label {
-        font-size: 10.5px;
+        font-size: 11.5px;
     }
 }
 
@@ -3500,7 +3530,7 @@ body.student-portal-body .form-select:focus {
 
 body.student-portal-body .form-label {
     color: var(--spf-dim);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
 }
 
