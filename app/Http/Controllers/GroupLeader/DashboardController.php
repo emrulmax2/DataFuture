@@ -8,6 +8,7 @@ use App\Models\AssessmentPlan;
 use App\Models\Employee;
 use App\Models\Group;
 use App\Models\GroupLeader;
+use App\Models\Grade;
 use App\Models\GroupLeaderContact;
 use App\Models\Plan;
 use App\Models\PlansDateList;
@@ -15,6 +16,7 @@ use App\Models\Result;
 use App\Models\Student;
 use App\Models\TermDeclaration;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -54,6 +56,14 @@ class DashboardController extends Controller
     private const AT_RISK = 75;
     private const CRITICAL = 60;
     private const ON_TRACK_SUBMISSION = 75;
+
+    /**
+     * Grades that count a module as submitted: pass, merit, distinction and
+     * unclassified/compensated. Referred, fail, absent, plagiarised, withheld
+     * and "submitted but not yet graded" are not an outcome, so they do not
+     * count towards a student's submission figure.
+     */
+    private const COMPLETED_GRADES = ['P', 'M', 'D', 'U'];
 
     /* ------------------------------------------------------------------ *
      * Guards
@@ -484,7 +494,7 @@ class DashboardController extends Controller
                 'termType' => $node['term']->termType->name ?? '',
                 'termId' => $node['termId'],
                 'evening' => ((int) $node['group']->evening_and_weekend === 1),
-                'modules' => Plan::whereIn('id', $planIds)->where('parent_id', 0)->count(),
+                'modules' => $this->theoryModuleCount($planIds),
                 'students' => count($activeIds),
                 'below60' => $below,
                 'attendance' => $summary['total'] > 0 ? (int) round($summary['percentage']) : null,
@@ -541,7 +551,7 @@ class DashboardController extends Controller
         $rates = $this->studentRates($planIds);
         $consecutive = $this->consecutiveAbsences($planIds, $studentIds);
         $tutors = $this->personalTutors($planIds, $studentIds);
-        $submissions = $this->studentSubmissions($planIds, $studentIds);
+        $submissions = $this->studentSubmissions($this->theoryModulePlanIds($planIds), $studentIds);
         $contacts = $this->contactLogs($groupIds, $termId, $studentIds);
 
         $due = $submissions['due'];
@@ -690,11 +700,51 @@ class DashboardController extends Controller
     }
 
     /**
+     * The Theory plans out of a set.
+     *
+     * A module is delivered as a Theory plan plus its tutorial and seminar
+     * plans, but the assessed work hangs off Theory. Counting the others in
+     * would inflate what is "due" for a student who has one piece to hand in.
+     * Their rows still appear in the module table.
+     *
+     * Resolution matches `moduleRows()`: the plan's own class type, falling
+     * back to the creation record, since `plans.class_type` is often null.
+     */
+    private function theoryModulePlanIds(array $planIds): array
+    {
+        if (empty($planIds)) {
+            return [];
+        }
+
+        return Plan::with('creations')->whereIn('id', $planIds)->where('parent_id', 0)->get()
+            ->filter(fn ($plan) => $this->isTheory($this->planClassType($plan)))
+            ->pluck('id')->map(fn ($id) => (int) $id)->values()->toArray();
+    }
+
+    /** How many modules a set of plans represents. */
+    private function theoryModuleCount(array $planIds): int
+    {
+        return count($this->theoryModulePlanIds($planIds));
+    }
+
+    /** `plans.class_type` is often null, so fall back to the creation record. */
+    private function planClassType($plan): string
+    {
+        return (string) ($plan->class_type ?: ($plan->creations->class_type ?? ''));
+    }
+
+    private function isTheory(?string $type): bool
+    {
+        return strtolower(trim((string) $type)) === 'theory';
+    }
+
+    /**
      * Submissions expected and made.
      *
-     * "Expected" is a published, final staff assessment; a student has
-     * submitted when a result exists for them against it. Counting assessments
-     * rather than plans is what makes 3/4 mean the same thing on every row.
+     * Expected is the group's Theory modules; a student has submitted a module
+     * once they hold a completed grade on it (see COMPLETED_GRADES). Counting
+     * modules rather than assessments is what makes 2/2 mean the same thing on
+     * every row, and a student with no completed grade counts nothing.
      */
     private function studentSubmissions(array $planIds, array $studentIds): array
     {
@@ -704,24 +754,23 @@ class DashboardController extends Controller
             return $blank;
         }
 
-        $assessments = AssessmentPlan::whereIn('plan_id', $planIds)
-            ->where('upload_user_type', 'staff')->where('is_it_final', 1)
-            ->get(['id', 'plan_id']);
+        $gradeIds = Grade::whereIn('code', self::COMPLETED_GRADES)->pluck('id')->toArray();
 
-        if ($assessments->isEmpty()) {
-            return $blank;
-        }
-
-        $results = Result::whereIn('assessment_plan_id', $assessments->pluck('id')->toArray())
+        $results = empty($gradeIds) ? collect() : Result::whereIn('plan_id', $planIds)
             ->whereIn('student_id', $studentIds)
-            ->get(['student_id', 'assessment_plan_id', 'plan_id']);
+            ->whereIn('grade_id', $gradeIds)
+            // A grade the student cannot see yet is not a submission here
+            // either. The comparison also drops null and scheduled dates.
+            ->where('published_at', '<', Carbon::now())
+            ->get(['student_id', 'plan_id']);
 
         $byStudent = [];
         $byPlan = [];
         $seen = [];
         foreach ($results as $result) {
-            // One result per student per assessment; a re-mark must not inflate.
-            $key = $result->student_id.'|'.$result->assessment_plan_id;
+            // A module counts once however many assessments it carries, and a
+            // re-mark must not inflate the figure.
+            $key = $result->student_id.'|'.$result->plan_id;
             if (isset($seen[$key])) {
                 continue;
             }
@@ -732,10 +781,14 @@ class DashboardController extends Controller
         }
 
         return [
-            'due' => $assessments->pluck('id')->unique()->count(),
+            // Everyone is measured against the same denominator: the modules
+            // themselves, not how many assessments happen to hang off them.
+            'due' => count($planIds),
             'byStudent' => $byStudent,
             'byPlan' => array_map('count', $byPlan),
-            'plansWithAssessment' => $assessments->pluck('plan_id')->unique()->values()->toArray(),
+            'plansWithAssessment' => AssessmentPlan::whereIn('plan_id', $planIds)
+                ->where('upload_user_type', 'staff')->where('is_it_final', 1)
+                ->pluck('plan_id')->unique()->values()->toArray(),
         ];
     }
 
@@ -981,7 +1034,7 @@ class DashboardController extends Controller
                 'id' => $plan->id,
                 'code' => $plan->id.(isset($plan->tutorial->id) ? '–'.$plan->tutorial->id : ''),
                 'module' => $plan->creations->module_name ?? '',
-                'type' => $plan->class_type ?: ($plan->creations->class_type ?? ''),
+                'type' => $this->planClassType($plan),
                 'tutor' => $plan->tutor->full_name ?? '',
                 'tutorialTutor' => $plan->tutorial->personalTutor->full_name ?? ($plan->personalTutor->full_name ?? ''),
                 'delivered' => $planSessions->whereIn('status', ['Completed', 'Ongoing'])->count(),
@@ -1112,7 +1165,9 @@ class DashboardController extends Controller
         }
 
         $behind = array_values(array_filter($modules, function ($m) {
-            return $m['submissionDue'] && $m['submissionPct'] !== null && $m['submissionPct'] < self::ON_TRACK_SUBMISSION;
+            return $this->isTheory($m['type'])
+                && $m['submissionDue'] && $m['submissionPct'] !== null
+                && $m['submissionPct'] < self::ON_TRACK_SUBMISSION;
         }));
         if (!empty($behind)) {
             $alerts[] = [
@@ -1145,7 +1200,7 @@ class DashboardController extends Controller
         return [
             'students' => count($students),
             'contacted' => $thisWeek,
-            'modules' => count($modules),
+            'modules' => count(array_filter($modules, fn ($m) => $this->isTheory($m['type']))),
             'personalTutors' => count($tutors),
             'below60' => count(array_filter($students, fn ($s) => $s['attendance'] !== null && $s['attendance'] < self::CRITICAL)),
         ];
@@ -1250,7 +1305,7 @@ class DashboardController extends Controller
                 'id' => $session->id,
                 'scheduled' => $scheduled,
                 'module' => $plan->creations->module_name ?? 'Unknown module',
-                'type' => $plan->class_type ?: ($plan->creations->class_type ?? ''),
+                'type' => $this->planClassType($plan),
                 'group' => $plan->group->name ?? '',
                 'course' => $plan->course->name ?? '',
                 // On cover the proxy runs it and the named tutor is the one

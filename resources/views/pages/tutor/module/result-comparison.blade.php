@@ -355,10 +355,21 @@
                                     <select data-search="true" class="tom-select w-full" id="published_at" name="published_at" >
                                         <option value="">Please Select A Publish Type</option>
                                         @if(isset($term_publish_date) && !empty($term_publish_date))
-                                            
-                                        <option value="{{ $term_publish_date->exam_publish_date }} {{ $term_publish_date->exam_publish_time }}">{{ $term_publish_date->exam_publish_date }} {{ $term_publish_date->exam_publish_time }}</option>
-                                        <option value="{{ $term_publish_date->exam_resubmission_publish_date }} {{ $term_publish_date->exam_resubmission_publish_time }}">{{ $term_publish_date->exam_resubmission_publish_date }} {{ $term_publish_date->exam_resubmission_publish_time }}</option>
-                                            
+                                            @php
+                                                $srPublishTypes = [
+                                                    'Exam Publish' => [$term_publish_date->exam_publish_date, $term_publish_date->exam_publish_time],
+                                                    'Resubmission Publish' => [$term_publish_date->exam_resubmission_publish_date, $term_publish_date->exam_resubmission_publish_time],
+                                                ];
+                                            @endphp
+                                            @foreach($srPublishTypes as $srPublishLabel => $srPublishType)
+                                                @php
+                                                    $srPublishDate = (!empty($srPublishType[0]) ? $srPublishType[0] : '');
+                                                    $srPublishTime = (!empty($srPublishType[1]) ? $srPublishType[1] : '00:00:00');
+                                                @endphp
+                                                @if(!empty($srPublishDate))
+                                                <option value="{{ $srPublishDate }} {{ $srPublishTime }}">{{ $srPublishLabel }} &middot; {{ $srPublishDate }} {{ date('H:i', strtotime($srPublishTime)) }}</option>
+                                                @endif
+                                            @endforeach
                                         @endif
                                     </select>
 
