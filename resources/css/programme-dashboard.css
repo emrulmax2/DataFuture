@@ -1992,10 +1992,79 @@ html:has(> body.pgd-body) { background: #F2F5F5; }
 .pgd-table__row--total { background: #F7FAFA; border-bottom: 1px solid var(--pgd-line-soft); font-size: 13px; font-weight: 600; }
 .pgd-table__empty { padding: 40px 18px; text-align: center; font-size: 13px; color: var(--pgd-ink-faint); }
 
+/* ---- class-type accordions ------------------------------------------
+   The personal-tutor detail table is split by class type. Each section owns
+   its headings and its totals, and the header repeats the figures so a
+   collapsed section is still readable.
+   ------------------------------------------------------------------- */
+
+.pgd-acc + .pgd-acc { border-top: 1px solid var(--pgd-line-soft); }
+
+.pgd-acc__head {
+    /* Falls back to the neutral slate if a type ever renders without its
+       triple, so the header is never transparent on the card. */
+    --pgd-acc-rgb: 122, 135, 145;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 13px 18px;
+    border: 0;
+    border-left: 3px solid rgba(var(--pgd-acc-rgb), .55);
+    /* Tinted with the section's own dot colour. Kept at single-digit alpha:
+       it has to sit under body text and behind a white table, so it can only
+       ever be a wash, never a fill. */
+    background: rgba(var(--pgd-acc-rgb), .07);
+    color: var(--pgd-ink);
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background .15s ease;
+}
+
+.pgd-acc__head:hover { background: rgba(var(--pgd-acc-rgb), .13); }
+
+.pgd-acc__chev { flex: none; color: var(--pgd-ink-soft); transition: transform .18s ease; }
+.pgd-acc__head[aria-expanded="false"] .pgd-acc__chev { transform: rotate(-90deg); }
+
+.pgd-acc__dot { flex: none; width: 7px; height: 7px; border-radius: 50%; }
+
+.pgd-acc__title {
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+.pgd-acc__count { font-size: 11.5px; color: var(--pgd-ink-faint); }
+
+/* Pushed right so the header's figures land near the columns they summarise. */
+.pgd-acc__sum { display: flex; align-items: center; gap: 14px; margin-left: auto; }
+
+.pgd-acc__uploads {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--pgd-ink-faint);
+    font-variant-numeric: tabular-nums;
+}
+
+.pgd-acc__uploads--due { color: #B3261E; }
+
+.pgd-acc__body[hidden] { display: none; }
+
+@media (max-width: 720px) {
+    .pgd-acc__count { display: none; }
+    .pgd-acc__sum { gap: 8px; }
+}
+
 .pgd-cols-tutors { grid-template-columns: minmax(220px, 1fr) 116px 100px 74px 104px 118px 108px 112px; }
-.pgd-cols-ptutors { grid-template-columns: minmax(200px, 1fr) 104px 96px 66px 108px 116px 104px 104px 100px; }
+.pgd-cols-ptutors { grid-template-columns: minmax(180px, 1fr) 100px 90px 62px 104px 112px 100px 98px 100px 100px; }
 .pgd-cols-detail { grid-template-columns: 62px minmax(170px, 1fr) 140px 120px 104px 108px 118px 44px; }
 .pgd-cols-pdetail { grid-template-columns: 62px minmax(170px, 1fr) 140px 116px 108px 116px 96px 44px; }
+/* Tutorial and Seminar carry no submission or achievement figures, so
+   those two tracks are gone rather than empty — the width goes to the
+   module name, which is the column that actually needed it. */
+.pgd-cols-pdetail--slim { grid-template-columns: 62px minmax(170px, 1fr) 140px 116px 96px 44px; }
 
 /* Tutor + personal tutor, overlapped; the second lifts on hover so a covered
    face can still be read. */
@@ -2071,6 +2140,25 @@ html:has(> body.pgd-body) { background: #F2F5F5; }
 
 /* Rows clip nothing, but the table itself does — let tips escape it. */
 .pgd-table { overflow: visible; }
+
+/* Which costs the card its corners: with overflow visible it cannot clip a
+   child's background, so the top and bottom strips round themselves. 12px,
+   not 13 — the radius wanted here is the inside of the card's 1px border. */
+.pgd-table > .pgd-table__head:first-child,
+.pgd-acc:first-child .pgd-acc__head {
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+/* Whichever strip ends the card: the last module row, the header of a
+   collapsed final section, a table with no accordions, or the empty state. */
+.pgd-acc:last-child .pgd-acc__head[aria-expanded="false"],
+.pgd-acc:last-child .pgd-acc__body > .pgd-table__row:last-child,
+.pgd-table > .pgd-table__row:last-child,
+.pgd-table > .pgd-table__empty:last-child {
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
 
 .pgd-t-right { text-align: right; }
 .pgd-t-center { text-align: center; }

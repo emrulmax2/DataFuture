@@ -1201,6 +1201,28 @@ function initTutorScreens() {
     const courseFilter = $("#personalTutorCourseFilter");
     courseFilter?.addEventListener("change", () => { window.location.href = courseFilter.value; });
 
+    initTypeAccordions();
+}
+
+/*
+ * Class-type sections on the personal-tutor detail table.
+ *
+ * Open on load rather than closed: the sections group rows that were all
+ * visible before, so starting collapsed would hide data the page used to
+ * show. `hidden` rather than a display rule, so nothing has to know what the
+ * body's display value is.
+ */
+function initTypeAccordions() {
+    document.querySelectorAll("[data-pgd-acc]").forEach((head) => {
+        const body = head.nextElementSibling;
+        if (!body) return;
+
+        head.addEventListener("click", () => {
+            const open = head.getAttribute("aria-expanded") === "true";
+            head.setAttribute("aria-expanded", open ? "false" : "true");
+            body.hidden = open;
+        });
+    });
 }
 
 /* ------------------------------------------------------------------ *

@@ -23,6 +23,12 @@
     $pgdTone = function ($pct) {
         return $pct >= 75 ? 'good' : ($pct >= 50 ? 'mid' : 'bad');
     };
+
+    /* A tutor with no one enrolled has no submission rate, which is not the
+       same as a rate of zero — show a dash rather than a red 0.00%. */
+    $pgdPct = function ($figures) {
+        return ($figures['rate'] ?? null) === null ? null : $figures['rate'];
+    };
 @endphp
 
 <main class="pgd-page">
@@ -52,6 +58,7 @@
             <span class="pgd-t-right pgd-t-nowrap">Outstanding call</span>
             <span class="pgd-t-center pgd-t-nowrap">Uploads due</span>
             <span class="pgd-t-right pgd-t-nowrap">Submission</span>
+            <span class="pgd-t-right pgd-t-nowrap">Pass rate</span>
         </div>
 
         @forelse($tutors as $tut)
@@ -100,7 +107,26 @@
                         {{ $uploads }}
                     </button>
                 </span>
-                <span class="pgd-num pgd-num--muted pgd-t-right">0.0%</span>
+                {{-- Both scored over the tutor's theory plans for the whole term,
+                     off one denominator: how many of the cohort handed work in,
+                     and how many of the cohort got through. --}}
+                @php $sub = $pgdPct($tut->submission ?? []); $pass = $pgdPct($tut->pass ?? []); @endphp
+                <span class="pgd-t-right">
+                    @if($sub === null)
+                        <span class="pgd-num pgd-num--muted">&mdash;</span>
+                    @else
+                        <span class="pgd-rate pgd-rate--{{ $pgdTone($sub) }}"
+                              title="{{ $tut->submission['counted'] }} of {{ $tut->submission['expected'] }} expected submissions"><span></span>{{ number_format($sub, 2) }}%</span>
+                    @endif
+                </span>
+                <span class="pgd-t-right">
+                    @if($pass === null)
+                        <span class="pgd-num pgd-num--muted">&mdash;</span>
+                    @else
+                        <span class="pgd-rate pgd-rate--{{ $pgdTone($pass) }}"
+                              title="{{ $tut->pass['counted'] }} of {{ $tut->pass['expected'] }} passed"><span></span>{{ number_format($pass, 2) }}%</span>
+                    @endif
+                </span>
             </div>
         @empty
             <div class="pgd-table__empty">No personal tutors found for the selected terms.</div>
