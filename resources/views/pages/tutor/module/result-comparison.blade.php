@@ -350,9 +350,8 @@
                             <div class="sr-confirm__badge is-info"><i data-lucide="calendar-clock" class="w-8 h-8"></i></div>
                             <div class="text-3xl mt-5 title">Set A Publish Date</div>
                             <div class="text-slate-500 mt-2 description">
-                                <div class="mt-1 w-48 mx-auto">
-                                    
-                                    <select data-search="true" class="tom-select w-full" id="published_at" name="published_at" >
+                                <div class="mt-1 mx-auto sr-publish-picker">
+                                    <select data-search="true" data-placeholder="Select publish type" class="tom-select w-full" id="published_at" name="published_at" >
                                         <option value="">Please Select A Publish Type</option>
                                         @if(isset($term_publish_date) && !empty($term_publish_date))
                                             @php
