@@ -62,7 +62,7 @@ class EmployeeProfileController extends Controller
         $relation = KinsRelation::all();
         $disability = Disability::all();
         $venues = Venue::all();
-        $departments = Department::all();
+        $departments = Department::orderBy('name', 'asc')->get();
         $noticePeriods = EmployeeNoticePeriod::all();
         $employmentPeriods = EmploymentPeriod::all();
         $sspTerms = EmploymentSspTerm::all();

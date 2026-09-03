@@ -95,7 +95,17 @@
                     <span class="pgd-rate pgd-rate--{{ $pgdTone($rate) }}"><span></span>{{ number_format($rate, 2) }}%</span>
                 </span>
                 <span class="pgd-num pgd-t-right">{{ (isset($tut->expected_submission) && $tut->expected_submission > 0 ? $tut->expected_submission : 0) }}</span>
-                <span class="pgd-num pgd-num--muted pgd-t-right">0.0%</span>
+                {{-- Null, not zero, when nothing is expected: a tutor with no
+                     cohort has no submission rate, and a red 0.00% would read
+                     as a failure rather than as an empty set. --}}
+                <span class="pgd-t-right">
+                    @if(($tut->submission['rate'] ?? null) === null)
+                        <span class="pgd-num pgd-num--muted">&mdash;</span>
+                    @else
+                        <span class="pgd-rate pgd-rate--{{ $pgdTone($tut->submission['rate']) }}"
+                              title="{{ $tut->submission['counted'] }} of {{ $tut->submission['expected'] }} expected submissions"><span></span>{{ number_format($tut->submission['rate'], 2) }}%</span>
+                    @endif
+                </span>
             </a>
         @empty
             <div class="pgd-table__empty">No tutors found for the selected terms.</div>

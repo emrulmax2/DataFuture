@@ -20,7 +20,7 @@ class BirthdayReportController extends Controller
 {
     public function index(Request $request){
         $employeeWorkType = EmployeeWorkType::all();
-        $departments = Department::all();
+        $departments = Department::orderBy('name', 'asc')->get();
         return view('pages.hr.portal.reports.birthdaylist', [
             'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
