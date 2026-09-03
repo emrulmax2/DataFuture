@@ -26,6 +26,8 @@ use App\Models\StudentSms;
 use App\Models\StudentSmsContent;
 use App\Models\TermDeclaration;
 use App\Models\User;
+use App\Services\PassRate;
+use App\Services\SubmissionRate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Support\Avatar;
@@ -1081,6 +1083,23 @@ class DashboardController extends Controller
         endif;
         $tutorIds = $query->whereNotNull('tutor_id')->where('tutor_id', '>', 0)->pluck('tutor_id')->unique()->toArray();
 
+        /* Scored on `tutor_id` here, not `personal_tutor_id` — this is the
+           teaching list, so a rate has to follow whoever taught the module.
+           One pass over every plan in scope, then each tutor's share is
+           totalled out of it — no query per row. */
+        $submissionPlans = Plan::whereIn('term_declaration_id', $termIds)
+            ->whereIn('tutor_id', $tutorIds)
+            ->tap(fn ($q) => SubmissionRate::scopeSubmitting($q))
+            ->when($course_id > 0, function($q) use($course_id){ $q->where('course_id', $course_id); })
+            ->get(['id', 'tutor_id']);
+
+        $submissionByPlan = (new SubmissionRate())->perPlan(
+            $submissionPlans->pluck('id')->all(),
+            (int) $term_declaration_id
+        );
+
+        $planIdsByTutor = $submissionPlans->groupBy('tutor_id')->map->pluck('id');
+
         $res = [];
         $tutors = User::with('employee')->whereIn('id', $tutorIds)->orderBy('id', 'ASC')->get();
         foreach($tutors as $tut):
@@ -1095,9 +1114,17 @@ class DashboardController extends Controller
             $assigned = Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->toArray();
             $moduleCreations = $activePlans->pluck('module_creation_id')->unique()->toArray();
 
+            $submission = SubmissionRate::total(
+                array_intersect_key($submissionByPlan, array_flip(($planIdsByTutor[$tut->id] ?? collect())->all()))
+            );
+
             $tut['no_of_module'] = count($moduleCreations);
-            $tut['expected_submission'] = count($assigned);
+            /* Taken from the same figures as the rate beside it. Counted
+               separately, the two columns would disagree the moment a student
+               held two assign rows on one module. */
+            $tut['expected_submission'] = $submission['expected'];
             $res[$tut->id] = $tut;
+            $res[$tut->id]['submission'] = $submission;
             $res[$tut->id]['attendances'] = $this->getTermAttendanceRate($termIds, $tut->id, 1);
             $res[$tut->id]['contracted_hour'] = (isset($employee->workingPattern->contracted_hour) && !empty($employee->workingPattern->contracted_hour) ? $employee->workingPattern->contracted_hour : '00:00');
             $res[$tut->id]['class_minutes'] = $classMinutes;
@@ -1144,6 +1171,14 @@ class DashboardController extends Controller
         $tutor = User::find($tutorid);
         $classMinutes = $this->calculateTutorHours($tutorid, $term_declaration_id);
 
+        /* Both rates for every module in two queries each. Scored on this
+           page's own plans, which are already `tutor_id` = this tutor — the
+           teaching side, where the personal-tutor screens use the other
+           column. */
+        $planIds = array_keys($plans);
+        $submissionByPlan = (new SubmissionRate())->perPlan($planIds, (int) $term_declaration_id);
+        $passByPlan = (new PassRate())->perPlan($planIds, (int) $term_declaration_id);
+
         return view('pages.programme.dashboard.tutors-details', [
             'title' => 'Programme Dashboard - London Churchill College',
             'layout' => 'programme-top-menu',
@@ -1155,6 +1190,10 @@ class DashboardController extends Controller
             'pgdTermRouteExtra' => [$tutorid],
 
             'p_tutor_id' => $tutorid,
+            'submissionByPlan' => $submissionByPlan,
+            'submissionOverall' => SubmissionRate::total($submissionByPlan),
+            'passByPlan' => $passByPlan,
+            'passOverall' => PassRate::total($passByPlan),
             'termDeclaration' => TermDeclaration::find($term_declaration_id),
             'termDeclarations' => TermDeclaration::orderBy('id', 'desc')->get(),
             'tutor' => $tutor,
@@ -1180,6 +1219,27 @@ class DashboardController extends Controller
         endif;
         $tutorIds = $query->whereNotNull('personal_tutor_id')->where('personal_tutor_id', '>', 0)->pluck('personal_tutor_id')->unique()->toArray();
 
+        /* Theory plans only. Work is submitted against a theory class, so any
+           other cohort in the denominator divides real submissions by students
+           who were never expected to submit.
+
+           Note this is a different scope from the rest of the row, which counts
+           Tutorial plans. One pass over all the plans in scope, then each
+           tutor's share is totalled out of it — no query per row. */
+        $submissionPlans = Plan::whereIn('term_declaration_id', $termIds)
+            ->whereIn('personal_tutor_id', $tutorIds)
+            ->tap(fn ($q) => SubmissionRate::scopeSubmitting($q))
+            ->when($course_id > 0, function($q) use($course_id){ $q->where('course_id', $course_id); })
+            ->get(['id', 'personal_tutor_id']);
+
+        $scoredPlanIds = $submissionPlans->pluck('id')->all();
+        $submissionByPlan = (new SubmissionRate())->perPlan($scoredPlanIds, (int) $term_declaration_id);
+        /* Same plans, same denominator — the two columns have to be readable
+           against each other on one row. */
+        $passByPlan = (new PassRate())->perPlan($scoredPlanIds, (int) $term_declaration_id);
+
+        $planIdsByTutor = $submissionPlans->groupBy('personal_tutor_id')->map->pluck('id');
+
         $res = [];
         $tutors = User::with('employee')->whereIn('id', $tutorIds)->orderBy('id', 'ASC')->get();
         foreach($tutors as $tut):
@@ -1203,6 +1263,9 @@ class DashboardController extends Controller
             $res[$tut->id]['outstanding_calls'] = $this->getPersonalTutorOutstandingCall($term_declaration_id, $course_id, $tut->id);
             $res[$tut->id]['initials'] = $this->initialsOf(isset($tut->employee->full_name) ? $tut->employee->full_name : (isset($tut->name) ? $tut->name : ''));
             $res[$tut->id]['term_ids'] = $activePlans->pluck('term_declaration_id')->unique()->values()->toArray();
+            $mine = array_flip(($planIdsByTutor[$tut->id] ?? collect())->all());
+            $res[$tut->id]['submission'] = SubmissionRate::total(array_intersect_key($submissionByPlan, $mine));
+            $res[$tut->id]['pass'] = PassRate::total(array_intersect_key($passByPlan, $mine));
         endforeach;
 
         $terms = TermDeclaration::whereIn('id', $termIds)->get();
@@ -1285,6 +1348,26 @@ class DashboardController extends Controller
         $planIds = array_keys($plans);
         $assignedStudents = (!empty($planIds) ? Assign::whereIn('plan_id', $planIds)->distinct('student_id')->count('student_id') : 0);
 
+        /* Every module's submission rate in two queries, not one pair per row.
+           The view reads the per-plan figures for the table and totals them for
+           the section headers, so both come from the same numbers. */
+        $submissionByPlan = (new SubmissionRate())->perPlan($planIds, (int) $term_declaration_id);
+
+        /* Pass rate over the same denominator, so the two columns on a row are
+           directly comparable: how many of the class handed work in, and how
+           many of the class got through. */
+        $passByPlan = (new PassRate())->perPlan($planIds, (int) $term_declaration_id);
+
+        /* The headline figure counts theory plans only. Including the other
+           cohorts would inflate a denominator that only theory classes can
+           meet, and report a tutor whose students have all submitted as though
+           most of them had not. */
+        $taughtPlanIds = collect($plans)->filter(fn ($p) => SubmissionRate::isSubmitting($p->class_type))
+            ->pluck('id')->all();
+        $theoryOnly = array_flip($taughtPlanIds);
+        $submissionOverall = SubmissionRate::total(array_intersect_key($submissionByPlan, $theoryOnly));
+        $passOverall = PassRate::total(array_intersect_key($passByPlan, $theoryOnly));
+
         return view('pages.programme.dashboard.personal-tutors-details', [
             'title' => 'Programme Dashboard - London Churchill College',
             'layout' => 'programme-top-menu',
@@ -1296,6 +1379,10 @@ class DashboardController extends Controller
             'pgdTermRouteExtra' => [$tutorid],
 
             'p_tutor_id' => $tutorid,
+            'submissionByPlan' => $submissionByPlan,
+            'submissionOverall' => $submissionOverall,
+            'passByPlan' => $passByPlan,
+            'passOverall' => $passOverall,
             'termDeclaration' => TermDeclaration::find($term_declaration_id),
             'termDeclarations' => TermDeclaration::orderBy('id', 'desc')->get(),
             'tutor' => $tutor,

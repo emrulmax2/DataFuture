@@ -29,7 +29,7 @@ class EmployeeContactDetailController extends Controller
            'country' => Country::all(),
            'ethnicity' => Ethnicity::all(),
            'employeeWorkType' => EmployeeWorkType::all(),
-           'departments' => Department::all(),
+           'departments' => Department::orderBy('name', 'asc')->get(),
            'gender' => SexIdentifier::all()
         ]);
     }

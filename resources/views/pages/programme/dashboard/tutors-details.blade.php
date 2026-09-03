@@ -37,10 +37,18 @@
         $planTotal = (isset($attendances->TOTAL) && $attendances->TOTAL > 0) ? $attendances->TOTAL : 0;
         $TOTAL += $planTotal;
 
-        $expected = (isset($pln->expected_submission) && $pln->expected_submission > 0 ? $pln->expected_submission : 0);
+        /* Expected comes from the rate itself rather than being counted again,
+           so the "Exp. sub." column is literally the denominator of the two
+           percentages beside it. */
+        $submission = ($submissionByPlan[$pln->id] ?? ['counted' => 0, 'expected' => 0, 'rate' => null]);
+        $pass = ($passByPlan[$pln->id] ?? ['counted' => 0, 'expected' => 0, 'rate' => null]);
+
+        $expected = $submission['expected'];
         $expectedTotal += $expected;
 
         $moduleRows[] = [
+            'submission' => $submission,
+            'pass' => $pass,
             'id' => $pln->id,
             'module' => (isset($pln->creations->module->name) ? $pln->creations->module->name : 'Unknown'),
             'type' => (isset($pln->class_type) ? strtoupper($pln->class_type) : ''),
@@ -100,15 +108,30 @@
                 <div class="pgd-kpi__value"><strong>{{ number_format($overallRate, 1) }}%</strong><span>across modules</span></div>
                 <div class="pgd-kpi__bar"><span style="width: {{ min(100, round($overallRate)) }}%; background: {{ $pgdToneDot[$pgdTone($overallRate)] }};"></span></div>
             </div>
+            @php
+                /* Null when no cohort is enrolled at all — a grey bar and a dash
+                   rather than a red 0.0%, which would read as a failure. */
+                $kpi = function ($figures) use ($pgdTone, $pgdToneDot) {
+                    $rate = $figures['rate'];
+
+                    return [
+                        'text' => $rate === null ? '—' : number_format($rate, 1).'%',
+                        'dot' => $rate === null ? '#8A9299' : $pgdToneDot[$pgdTone($rate)],
+                        'width' => $rate === null ? 2 : max(2, min(100, round($rate))),
+                    ];
+                };
+                $subKpi = $kpi($submissionOverall);
+                $passKpi = $kpi($passOverall);
+            @endphp
             <div class="pgd-kpi">
-                <div class="pgd-kpi__label"><span style="background: #B3261E;"></span>Submission</div>
-                <div class="pgd-kpi__value"><strong>0.0%</strong><span>of {{ number_format($expectedTotal) }} expected</span></div>
-                <div class="pgd-kpi__bar"><span style="width: 2%; background: #B3261E;"></span></div>
+                <div class="pgd-kpi__label"><span style="background: {{ $subKpi['dot'] }};"></span>Submission</div>
+                <div class="pgd-kpi__value"><strong>{{ $subKpi['text'] }}</strong><span>{{ number_format($submissionOverall['counted']) }} of {{ number_format($submissionOverall['expected']) }} expected</span></div>
+                <div class="pgd-kpi__bar"><span style="width: {{ $subKpi['width'] }}%; background: {{ $subKpi['dot'] }};"></span></div>
             </div>
             <div class="pgd-kpi">
-                <div class="pgd-kpi__label"><span style="background: #B3261E;"></span>Achievement</div>
-                <div class="pgd-kpi__value"><strong>0.0%</strong><span>graded work</span></div>
-                <div class="pgd-kpi__bar"><span style="width: 2%; background: #B3261E;"></span></div>
+                <div class="pgd-kpi__label"><span style="background: {{ $passKpi['dot'] }};"></span>Pass rate</div>
+                <div class="pgd-kpi__value"><strong>{{ $passKpi['text'] }}</strong><span>{{ number_format($passOverall['counted']) }} of {{ number_format($passOverall['expected']) }} passed</span></div>
+                <div class="pgd-kpi__bar"><span style="width: {{ $passKpi['width'] }}%; background: {{ $passKpi['dot'] }};"></span></div>
             </div>
             <div class="pgd-kpi">
                 <div class="pgd-kpi__label"><span style="background: {{ $loadColor }};"></span>Load</div>
@@ -125,7 +148,7 @@
                 <span class="pgd-t-right pgd-t-nowrap">Attendance</span>
                 <span class="pgd-t-right pgd-t-nowrap">Exp. sub.</span>
                 <span class="pgd-t-right pgd-t-nowrap">Submission</span>
-                <span class="pgd-t-right pgd-t-nowrap">Achievement</span>
+                <span class="pgd-t-right pgd-t-nowrap">Pass rate</span>
                 <span></span>
             </div>
 
@@ -135,8 +158,10 @@
                 <span></span>
                 <span class="pgd-t-right" style="color: #0E5A61; font-variant-numeric: tabular-nums;">{{ number_format($overallRate, 2) }}%</span>
                 <span class="pgd-t-right" style="font-variant-numeric: tabular-nums;">{{ number_format($expectedTotal) }}</span>
-                <span class="pgd-t-right pgd-num--muted" style="font-variant-numeric: tabular-nums;">0.0%</span>
-                <span class="pgd-t-right pgd-num--muted" style="font-variant-numeric: tabular-nums;">0.0%</span>
+                <span class="pgd-t-right" style="font-variant-numeric: tabular-nums; {{ $submissionOverall['rate'] === null ? 'color: var(--pgd-ink-faint);' : 'color: #0E5A61;' }}"
+                      title="{{ $submissionOverall['counted'] }} of {{ $submissionOverall['expected'] }} expected submissions">{{ $submissionOverall['rate'] === null ? '—' : number_format($submissionOverall['rate'], 2).'%' }}</span>
+                <span class="pgd-t-right" style="font-variant-numeric: tabular-nums; {{ $passOverall['rate'] === null ? 'color: var(--pgd-ink-faint);' : 'color: #0E5A61;' }}"
+                      title="{{ $passOverall['counted'] }} of {{ $passOverall['expected'] }} passed">{{ $passOverall['rate'] === null ? '—' : number_format($passOverall['rate'], 2).'%' }}</span>
                 <span></span>
             </div>
 
@@ -173,8 +198,22 @@
                         <span class="pgd-rate pgd-rate--{{ $pgdTone($row['rate']) }}"><span></span>{{ number_format($row['rate'], 2) }}%</span>
                     </span>
                     <span class="pgd-num pgd-t-right">{{ $row['expected'] }}</span>
-                    <span class="pgd-num pgd-num--muted pgd-t-right">0.0%</span>
-                    <span class="pgd-num pgd-num--muted pgd-t-right">0.0%</span>
+                    <span class="pgd-t-right">
+                        @if($row['submission']['rate'] === null)
+                            <span class="pgd-num pgd-num--muted">&mdash;</span>
+                        @else
+                            <span class="pgd-rate pgd-rate--{{ $pgdTone($row['submission']['rate']) }}"
+                                  title="{{ $row['submission']['counted'] }} of {{ $row['submission']['expected'] }} expected submissions"><span></span>{{ number_format($row['submission']['rate'], 2) }}%</span>
+                        @endif
+                    </span>
+                    <span class="pgd-t-right">
+                        @if($row['pass']['rate'] === null)
+                            <span class="pgd-num pgd-num--muted">&mdash;</span>
+                        @else
+                            <span class="pgd-rate pgd-rate--{{ $pgdTone($row['pass']['rate']) }}"
+                                  title="{{ $row['pass']['counted'] }} of {{ $row['pass']['expected'] }} passed"><span></span>{{ number_format($row['pass']['rate'], 2) }}%</span>
+                        @endif
+                    </span>
                     <span class="pgd-t-center">
                         <a href="{{ route('tutor-dashboard.plan.module.show', $row['id']) }}" class="pgd-eye" data-pgd-tooltip="Open module details">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5Z"></path><circle cx="12" cy="12" r="1.7"></circle></svg>
