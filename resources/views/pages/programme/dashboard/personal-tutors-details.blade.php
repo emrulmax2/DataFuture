@@ -18,22 +18,32 @@
     foreach($plans as $pln):
         $attendances = $pln->attendances;
 
+        /* A Theory parent is on the page because its results are this tutor's
+           responsibility, but the class is taught by somebody else. Its
+           attendance is shown on the row and in the Theory total, and kept out
+           of the headline, which answers "how are this tutor's own groups
+           attending". */
+        $ownClass = !($pln->parent_theory ?? false);
+
         $attended = 0;
         $attended += (isset($attendances->P) && $attendances->P > 0 ? $attendances->P : 0);
-        $P += (isset($attendances->P) && $attendances->P > 0 ? $attendances->P : 0);
         $attended += (isset($attendances->O) && $attendances->O > 0 ? $attendances->O : 0);
-        $O += (isset($attendances->O) && $attendances->O > 0 ? $attendances->O : 0);
         $attended += (isset($attendances->L) && $attendances->L > 0 ? $attendances->L : 0);
-        $L += (isset($attendances->L) && $attendances->L > 0 ? $attendances->L : 0);
         $attended += (isset($attendances->E) && $attendances->E > 0 ? $attendances->L : 0);
-        $E += (isset($attendances->E) && $attendances->E > 0 ? $attendances->L : 0);
         $attended += (isset($attendances->M) && $attendances->M > 0 ? $attendances->M : 0);
-        $M += (isset($attendances->M) && $attendances->M > 0 ? $attendances->M : 0);
         $attended += (isset($attendances->H) && $attendances->H > 0 ? $attendances->H : 0);
-        $H += (isset($attendances->H) && $attendances->H > 0 ? $attendances->H : 0);
 
         $planTotal = (isset($attendances->TOTAL) && $attendances->TOTAL > 0) ? $attendances->TOTAL : 0;
-        $TOTAL += $planTotal;
+
+        if($ownClass):
+            $P += (isset($attendances->P) && $attendances->P > 0 ? $attendances->P : 0);
+            $O += (isset($attendances->O) && $attendances->O > 0 ? $attendances->O : 0);
+            $L += (isset($attendances->L) && $attendances->L > 0 ? $attendances->L : 0);
+            $E += (isset($attendances->E) && $attendances->E > 0 ? $attendances->L : 0);
+            $M += (isset($attendances->M) && $attendances->M > 0 ? $attendances->M : 0);
+            $H += (isset($attendances->H) && $attendances->H > 0 ? $attendances->H : 0);
+            $TOTAL += $planTotal;
+        endif;
 
         $uploads = (isset($pln->undecidedUploads) ? $pln->undecidedUploads : 0);
         $uploadsTotal += $uploads;
