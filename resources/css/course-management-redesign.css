@@ -2459,6 +2459,69 @@
     padding: 12px;
 }
 
+/* ------------------------------------------------------------------ *
+ * People pickers
+ *
+ * The personal tutor lists carry the person's picture to the left of their
+ * name, in the open dropdown and in the closed control alike. Where somebody
+ * has uploaded a photo that slot is an <img>; where nobody has, it is a chip
+ * of their initials on the colour their name resolves to. The two share a
+ * class so the list keeps one left edge either way.
+ * ------------------------------------------------------------------ */
+
+.cm-tsperson {
+    align-items: center;
+    display: flex;
+    gap: 9px;
+    min-width: 0;
+}
+
+.cm-tsperson__pic {
+    border-radius: 50%;
+    flex: 0 0 auto;
+    height: 24px;
+    object-fit: cover;
+    width: 24px;
+}
+
+.cm-tsperson__pic--chip {
+    align-items: center;
+    color: #fff;
+    display: inline-flex;
+    font-size: 10px;
+    font-weight: 700;
+    justify-content: center;
+    letter-spacing: 0.02em;
+    line-height: 1;
+}
+
+.cm-tsperson__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* "Please Select" has nobody behind it, so it reads as the placeholder it is. */
+.cm-tsperson--none {
+    color: #a9b0ba;
+}
+
+/* A 24px picture is taller than the line of text the other fields hold, so the
+ * vertical padding comes back down to keep this control on the same 44px as
+ * the ones beside it. */
+.cm-body .ts-control.cm-select--person .ts-input {
+    padding-bottom: 9px !important;
+    padding-top: 9px !important;
+}
+
+/* Long names truncate inside the control rather than pushing the caret out. */
+.cm-body .ts-control.cm-select--person .ts-input .item {
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+}
+
+
 /* Switch field — a real checkbox so the existing form payloads are unchanged
  * (`franchise_course=Yes`, `active=1`); the card is just its label. The input
  * stays in the DOM and focusable, and every state is driven by sibling

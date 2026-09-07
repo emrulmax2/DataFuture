@@ -67,16 +67,16 @@
                         <label for="tp_tutor_id">Tutor</label>
                         <select id="tp_tutor_id" name="tutor_id" class="cm-select tutor_id">
                             <option value="">Please Select</option>
-                            @foreach($users as $u)<option value="{{ $u->id }}">{{ $u->full_name }}</option>@endforeach
+                            @include('pages.course-management.plan.tree.staff-options', ['users' => $users])
                         </select>
                         <div class="acc__input-error error-tutor_id"></div>
                     </div>
 
                     <div class="cm-field tpPTutorWrap">
                         <label for="tp_personal_tutor_id">Personal Tutor</label>
-                        <select id="tp_personal_tutor_id" name="personal_tutor_id" class="cm-select personal_tutor_id">
+                        <select id="tp_personal_tutor_id" name="personal_tutor_id" class="cm-select cm-select--person personal_tutor_id">
                             <option value="">Please Select</option>
-                            @foreach($users as $u)<option value="{{ $u->id }}">{{ $u->full_name }}</option>@endforeach
+                            @include('pages.course-management.plan.tree.staff-options', ['users' => $users, 'avatar' => true])
                         </select>
                         <div class="acc__input-error error-personal_tutor_id"></div>
                     </div>
@@ -177,9 +177,9 @@
 
                     <div class="cm-field">
                         <label for="tu_personal_tutor_id">Personal Tutor <span>*</span></label>
-                        <select id="tu_personal_tutor_id" name="personal_tutor_id" class="cm-select">
+                        <select id="tu_personal_tutor_id" name="personal_tutor_id" class="cm-select cm-select--person">
                             <option value="">Please Select</option>
-                            @foreach($users as $u)<option value="{{ $u->id }}">{{ $u->full_name }}</option>@endforeach
+                            @include('pages.course-management.plan.tree.staff-options', ['users' => $users, 'avatar' => true])
                         </select>
                         <div class="acc__input-error error-personal_tutor_id"></div>
                     </div>
