@@ -86,9 +86,23 @@ import { createIcons, icons } from "lucide";
          * from the source node, not from here.
          */
         const centred = client === "mobile" ? "body{display:flex;justify-content:center;}" : "";
+        /*
+         * The preview is a picture of what a recipient will see, so it has to
+         * sit outside the browser's own dark-mode rewriting. A forced dark mode
+         * — Chrome and Edge auto-darkening, or an extension doing the same —
+         * inverts every background and text colour it finds and leaves <img>
+         * alone, which is what turned the card charcoal while the portrait
+         * panel stayed white beside it. Neither `bgcolor` nor an inline
+         * `background` stops it; declaring the scheme does.
+         *
+         * `only light` is the standard opt-out. The darkreader-lock meta is the
+         * same opt-out for the extension, which does not read the CSS one.
+         */
         frame.srcdoc =
             '<!DOCTYPE html><html><head><meta charset="utf-8">' +
-            "<style>html,body{margin:0;padding:34px;background:#ffffff;}" + centred + "</style>" +
+            '<meta name="color-scheme" content="only light">' +
+            '<meta name="darkreader-lock">' +
+            "<style>:root{color-scheme:only light;}html,body{margin:0;padding:34px;background:#ffffff;}" + centred + "</style>" +
             "</head><body>" +
             html +
             "</body></html>";
