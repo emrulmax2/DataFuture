@@ -57,8 +57,17 @@ class SignatureAvatar
      */
     const SEAM = 1;
 
-    /** ~64MB decoded, which the default 128M limit absorbs comfortably. */
-    const MAX_SOURCE_PIXELS = 16000000;
+    /**
+     * Ceiling on the source photo: how many pixels it may carry, and how much
+     * memory one decode of it may claim. Both are generous — 40MP covers every
+     * camera and phone staff actually upload from, and 384MB is enough to open
+     * one with the request's own footprint still sitting underneath it.
+     */
+    const MAX_SOURCE_PIXELS = 40000000;
+    const MEMORY_CEILING = 402653184;
+
+    /** Left free for whatever the request still has to do after the decode. */
+    const MEMORY_HEADROOM = 25165824;
 
     /** Arcs are drawn at 3x and scaled down — GD has no antialiasing on them. */
     const SUPERSAMPLE = 3;
@@ -96,7 +105,13 @@ class SignatureAvatar
         $scale = (int) max(1, min(3, $scale));
         // "-2x" rather than the usual "@2x": the URL is handed to mail clients
         // and image proxies, and there is nothing to gain from an "@" in a path.
-        $file = 'signature-'.$kind.($scale > 1 ? '-'.$scale.'x' : '').'.png';
+        //
+        // "v2" is a cache epoch rather than decoration. Every signature built
+        // before large photos could be decoded is cached as an initials panel
+        // stamped later than the photo it failed to open, so the freshness
+        // check below would go on serving it for good; moving the name retires
+        // that whole generation at once and costs one rebuild per employee.
+        $file = 'signature-'.$kind.'-v2'.($scale > 1 ? '-'.$scale.'x' : '').'.png';
         $relative = 'employees/'.$employee->id.'/'.$file;
         $target = storage_path('app/public/'.$relative);
         $source = self::sourcePhotoPath($employee);
@@ -148,10 +163,22 @@ class SignatureAvatar
     }
 
     /**
-     * GD holds an image uncompressed at four bytes a pixel, so a photo straight
-     * off a phone can exhaust the memory limit on its own. Reading the header
-     * costs nothing, and anything oversized falls through to the thumbnail —
-     * softer than ideal, but a great deal better than a fatal error on My HR.
+     * Whether this photo can be decoded at all.
+     *
+     * GD holds an image uncompressed at four bytes a pixel and has no
+     * shrink-on-load, so the entire frame has to fit in memory before anything
+     * can be cropped out of it: a 12MP phone photo is 6MB on disk and about
+     * 50MB decoded. What decides it is therefore not the memory limit but how
+     * much of the limit is still unspent, and My HR has already claimed most
+     * of a default 128M by the time the signature renders. Measuring the frame
+     * against the whole limit instead was why an ordinary 4MB phone photo
+     * either landed on the initials fallback or, just under the old ceiling,
+     * exhausted memory outright.
+     *
+     * Where the headroom is short the limit is lifted for the decode and put
+     * back afterwards, as the heavier reports already do. Only a photo past
+     * MAX_SOURCE_PIXELS, or one that would not fit even then, falls through to
+     * the thumbnail and finally to initials.
      */
     protected static function withinMemory($path){
         $size = @getimagesize($path);
@@ -159,7 +186,94 @@ class SignatureAvatar
             return false;
         endif;
 
-        return (($size[0] * $size[1]) <= self::MAX_SOURCE_PIXELS);
+        if(($size[0] * $size[1]) > self::MAX_SOURCE_PIXELS):
+            return false;
+        endif;
+
+        return (self::decodeFootprint($path, $size) <= self::MEMORY_CEILING);
+    }
+
+    /**
+     * Peak bytes the request would hold while the photo is decoded: what it has
+     * already claimed, the encoded file, and GD's uncompressed copy of the
+     * frame with a margin for its per-row index.
+     */
+    protected static function decodeFootprint($path, $size){
+        return (int) (memory_get_usage(true)
+            + (int) @filesize($path)
+            + ($size[0] * $size[1] * 4 * 1.1)
+            + self::MEMORY_HEADROOM);
+    }
+
+    /**
+     * Lifts memory_limit high enough for one decode of $footprint bytes.
+     * Returns the value to hand back to restoreMemory(), NULL when the limit
+     * was already sufficient, or false if the room could not be found — a host
+     * with ini_set locked down, say.
+     */
+    protected static function reserveMemory($footprint){
+        $limit = self::memoryLimit();
+        if($limit < 0 || $footprint <= $limit):
+            return null;
+        endif;
+
+        // A host that locks these away cannot be given more room, so the photo
+        // falls through to the thumbnail instead. Tested with function_exists
+        // rather than "@": disable_functions makes the name undefined outright
+        // in PHP 8, and the silence operator does not suppress an Error.
+        if($footprint > self::MEMORY_CEILING || !function_exists('ini_set') || !function_exists('ini_get')):
+            return false;
+        endif;
+
+        $previous = ini_get('memory_limit');
+        if(@ini_set('memory_limit', (string) $footprint) === false):
+            return false;
+        endif;
+
+        return $previous;
+    }
+
+    /**
+     * Hands the limit back once the decoded frame has been released.
+     *
+     * Best effort by design: PHP refuses to set memory_limit below what the
+     * request is currently holding, and the allocator does not always return
+     * the frame's chunks to the OS the moment GD frees them. Where that
+     * happens the raised limit simply stands for the rest of this one request
+     * — it is not inherited by the next — which is the same bargain the heavy
+     * reports make when they open with ini_set('memory_limit', '512M').
+     */
+    protected static function restoreMemory($previous){
+        if(is_string($previous) && $previous !== '' && function_exists('ini_set')):
+            @ini_set('memory_limit', $previous);
+        endif;
+    }
+
+    /** memory_limit in bytes, or -1 where the request is not capped. */
+    protected static function memoryLimit(){
+        // With ini_get disabled there is no way to read the limit, so assume
+        // the PHP default: guessing high is what would put a fatal error on
+        // the page instead of a signature that merely falls back to initials.
+        if(!function_exists('ini_get')):
+            return 134217728;
+        endif;
+
+        $limit = trim((string) ini_get('memory_limit'));
+        if($limit === '' || (int) $limit < 0):
+            return -1;
+        endif;
+
+        $value = (int) $limit;
+        $unit = strtolower(substr($limit, -1));
+        if($unit === 'g'):
+            return $value * 1024 * 1024 * 1024;
+        elseif($unit === 'm'):
+            return $value * 1024 * 1024;
+        elseif($unit === 'k'):
+            return $value * 1024;
+        endif;
+
+        return $value;
     }
 
     protected static function build(Employee $employee, $target, $source, $scale = 2){
@@ -293,24 +407,46 @@ class SignatureAvatar
      * will occupy — one resample, straight from the upload.
      */
     protected static function photoSquare($size, $path){
-        $raw = @file_get_contents($path);
-        $src = ($raw !== false ? @imagecreatefromstring($raw) : false);
-        if(!$src):
+        $source = @getimagesize($path);
+        if(!$source):
             return false;
         endif;
 
-        // Centre-crop to a square first so faces are not stretched.
-        $sw = imagesx($src);
-        $sh = imagesy($src);
-        $side = min($sw, $sh);
+        // The decode is the only large allocation in the build — everything
+        // after it works on a square a couple of hundred pixels across — so the
+        // limit is lifted around that alone.
+        $previous = self::reserveMemory(self::decodeFootprint($path, $source));
+        if($previous === false):
+            return false;
+        endif;
 
-        $square = imagecreatetruecolor($size, $size);
-        imagealphablending($square, false);
-        imagesavealpha($square, false);
-        imagecopyresampled($square, $src, 0, 0, (int) (($sw - $side) / 2), (int) (($sh - $side) / 2), $size, $size, $side, $side);
-        imagedestroy($src);
+        try{
+            $raw = @file_get_contents($path);
+            $src = ($raw !== false ? @imagecreatefromstring($raw) : false);
+            // The encoded copy is dead weight once GD has the frame, and on a
+            // phone photo it is several megabytes of it.
+            unset($raw);
+            if(!$src):
+                return false;
+            endif;
 
-        return $square;
+            // Centre-crop to a square first so faces are not stretched.
+            $sw = imagesx($src);
+            $sh = imagesy($src);
+            $side = min($sw, $sh);
+
+            $square = imagecreatetruecolor($size, $size);
+            imagealphablending($square, false);
+            imagesavealpha($square, false);
+            imagecopyresampled($square, $src, 0, 0, (int) (($sw - $side) / 2), (int) (($sh - $side) / 2), $size, $size, $side, $side);
+            imagedestroy($src);
+
+            return $square;
+        } finally {
+            // Attempted only once the frame is released — see restoreMemory()
+            // for why it does not always take.
+            self::restoreMemory($previous);
+        }
     }
 
     /**
