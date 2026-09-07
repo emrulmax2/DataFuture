@@ -21917,6 +21917,11 @@ body.employee-public-form-body .dataCollectionFormWrap {
 }
 .myhr-sign-stage iframe {
     border: 0;
+    /* The frame's own document declares this too. Repeating it on the element
+     * stops the embedding page's scheme propagating in before that document
+     * has loaded, which is what let a browser in forced dark mode darken the
+     * very signature it is meant to be previewing. */
+    color-scheme: only light;
     display: block;
     height: 560px;
     min-width: 660px;
