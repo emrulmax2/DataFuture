@@ -194,4 +194,8 @@ class Employee extends Model
     public function approvers(){
         return $this->hasMany(EmployeeApprover::class);
     }
+
+    public function emailSignature(){
+        return $this->hasOne(EmployeeEmailSignature::class, 'employee_id', 'id');
+    }
 }

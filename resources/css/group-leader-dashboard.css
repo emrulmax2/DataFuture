@@ -35,8 +35,8 @@ body.gl-dashboard-body .content.content--top-nav::before {
 .gl-root {
     --gl-ink: #0f172a;
     --gl-body: #334155;
-    --gl-muted: #64748b;
-    --gl-faint: #94a3b8;
+    --gl-muted: #475569;
+    --gl-faint: #5a6b80;
     --gl-line: #e2e8f0;
     --gl-line-soft: #f1f5f9;
     --gl-surface: #ffffff;
@@ -45,7 +45,7 @@ body.gl-dashboard-body .content.content--top-nav::before {
     --gl-accent: #15794e;
     --gl-accent-dark: #0f5c3b;
     --gl-accent-soft: #e7f2ec;
-    --gl-accent-faint: #a7f3d0;
+    --gl-accent-faint: #d1fae5;
     /* The term-progress fill sits on the pine header, where the accent green
        is too close to the background to read. */
     --gl-progress: #34d399;
@@ -809,6 +809,13 @@ body.gl-dashboard-body .content.content--top-nav::before {
     white-space: nowrap;
 }
 
+/* The LCC number is what a leader searches and quotes, so it stays legible
+   against the rest of the sub-line and leads it out of the truncation. */
+.gl-row__id {
+    color: var(--gl-ink);
+    font-variant-numeric: tabular-nums;
+}
+
 .gl-row__flag {
     color: var(--gl-red-ink);
 }
@@ -833,7 +840,7 @@ body.gl-dashboard-body .content.content--top-nav::before {
 }
 
 .gl-row__chev {
-    color: #cbd5e1;
+    color: var(--gl-faint);
     flex: 0 0 auto;
 }
 
@@ -1323,6 +1330,74 @@ body.gl-dashboard-body .content.content--top-nav::before {
 
 .gl-ministat.is-red .gl-ministat__value   { color: var(--gl-red-ink); }
 .gl-ministat.is-amber .gl-ministat__value { color: var(--gl-amber-ink); }
+
+/* The dates behind the counts above. The unbroken run at the top is what the
+   "Consec. abs" tile reports, so that run is the part marked out. */
+.gl-misses {
+    background: #fff;
+    border: 1px solid var(--gl-line);
+    border-radius: 12px;
+    margin-top: 12px;
+    padding: 16px;
+}
+
+.gl-misses__title {
+    align-items: baseline;
+    color: var(--gl-ink);
+    display: flex;
+    font-size: 14px;
+    font-weight: 600;
+    gap: 8px;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.gl-misses__count {
+    color: var(--gl-faint);
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.gl-miss {
+    align-items: baseline;
+    border-top: 1px solid var(--gl-line-soft);
+    display: grid;
+    gap: 2px 10px;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding: 7px 0;
+}
+
+.gl-miss__date {
+    color: var(--gl-ink);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+}
+
+.gl-miss__class {
+    color: var(--gl-faint);
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.gl-miss__status {
+    color: var(--gl-muted);
+    font-size: 12px;
+}
+
+.gl-miss.is-run .gl-miss__date,
+.gl-miss.is-run .gl-miss__status {
+    color: var(--gl-red-ink);
+}
+
+.gl-misses__more {
+    border-top: 1px solid var(--gl-line-soft);
+    color: var(--gl-faint);
+    font-size: 12px;
+    padding-top: 8px;
+}
 
 .gl-form {
     background: #fff;

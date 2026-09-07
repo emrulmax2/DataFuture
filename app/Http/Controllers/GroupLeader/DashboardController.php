@@ -5,6 +5,7 @@ namespace App\Http\Controllers\GroupLeader;
 use App\Http\Controllers\Controller;
 use App\Models\Assign;
 use App\Models\AssessmentPlan;
+use App\Models\AttendanceFeedStatus;
 use App\Models\Employee;
 use App\Models\Group;
 use App\Models\GroupLeader;
@@ -120,7 +121,7 @@ class DashboardController extends Controller
         $requested = (string) $request->query('term', '');
         $termId = $terms->pluck('id')->map(fn ($id) => (string) $id)->contains($requested)
             ? (int) $requested
-            : (int) ($terms->first()->id ?? 0);
+            : (int) (optional($this->currentTerm($terms))->id ?? 0);
         $selected = ($requested === 'all') ? 'all' : $termId;
 
         return view('pages.group-leader.dashboard.index', [
@@ -168,8 +169,14 @@ class DashboardController extends Controller
 
         // Without a term in the URL, use the one this group is actually led in.
         if ($termId <= 0) {
-            $termId = (int) GroupLeader::where('user_id', $userId)->where('group_id', $groupId)
-                ->orderBy('term_declaration_id', 'DESC')->value('term_declaration_id');
+            $ledTermIds = GroupLeader::where('user_id', $userId)->where('group_id', $groupId)
+                ->pluck('term_declaration_id')->unique()->filter()->toArray();
+
+            $ledTerms = empty($ledTermIds) ? collect() : TermDeclaration::whereIn('id', $ledTermIds)->get()
+                ->sortByDesc(fn ($term) => [$this->termTime($term->start_date), $term->id])
+                ->values();
+
+            $termId = (int) (optional($this->currentTerm($ledTerms))->id ?? 0);
         }
 
         $groupIds = $this->groupIdsForNode($userId, $termId, (int) $groupId);
@@ -263,6 +270,10 @@ class DashboardController extends Controller
             return response()->json(['message' => 'That student is not in this group.'], 403);
         }
 
+        // Only the drawer needs the dates behind the counts, so they are read
+        // here rather than for every row in the list behind it.
+        $student['absences'] = $this->absenceSessions($scope['planIds'], (int) $student['id']);
+
         return response()->json([
             'htm' => view('pages.group-leader.dashboard.partials.drawer', [
                 'student' => $student,
@@ -328,10 +339,15 @@ class DashboardController extends Controller
         $lists = $this->worklists($students);
         $tab = array_key_exists((string) $request->tab, $lists) ? $request->tab : 'risk';
 
+        $student = collect($students)->firstWhere('id', $studentId);
+        if (!empty($student)) {
+            $student['absences'] = $this->absenceSessions($scope['planIds'], $studentId);
+        }
+
         return response()->json([
             'message' => 'Saved to the student record.',
             'drawer' => view('pages.group-leader.dashboard.partials.drawer', [
-                'student' => collect($students)->firstWhere('id', $studentId),
+                'student' => $student,
                 'groupId' => $scope['groupId'],
                 'termId' => $scope['termId'],
             ])->render(),
@@ -357,13 +373,66 @@ class DashboardController extends Controller
     }
 
     /** The terms this user leads a group in, most recent first. */
+    /**
+     * The term a leader should land on: the one running today, else the most
+     * recent one that has already started, else the soonest upcoming.
+     *
+     * Ids are not chronological, so "latest term" has to be decided on dates.
+     */
+    private function currentTerm($terms)
+    {
+        if ($terms->isEmpty()) {
+            return null;
+        }
+
+        $today = strtotime(date('Y-m-d'));
+
+        $running = $terms->first(function ($term) use ($today) {
+            $start = $this->termTime($term->start_date);
+            $end = $this->termTime($term->end_date);
+
+            return $start > 0 && $end > 0 && $start <= $today && $end >= $today;
+        });
+
+        if ($running) {
+            return $running;
+        }
+
+        // Sorted newest-first, so the first already-started term is the most
+        // recent one and the last is the soonest still to come.
+        $started = $terms->first(function ($term) use ($today) {
+            $start = $this->termTime($term->start_date);
+
+            return $start > 0 && $start <= $today;
+        });
+
+        return $started ?: ($terms->last() ?: $terms->first());
+    }
+
+    /**
+     * A term date as a timestamp.
+     *
+     * TermDeclaration's accessors reformat these to `d-m-Y` on read, so they
+     * cannot be compared or sorted as strings.
+     */
+    private function termTime($value): int
+    {
+        $ts = empty($value) ? false : strtotime($value);
+
+        return $ts === false ? 0 : (int) $ts;
+    }
+
     private function leaderTerms($userId)
     {
         $termIds = GroupLeader::where('user_id', $userId)->pluck('term_declaration_id')->unique()->toArray();
 
-        return empty($termIds)
-            ? collect()
-            : TermDeclaration::with('termType')->whereIn('id', $termIds)->orderBy('id', 'DESC')->get();
+        if (empty($termIds)) {
+            return collect();
+        }
+
+        return TermDeclaration::with('termType')->whereIn('id', $termIds)->get()
+            ->sortByDesc(fn ($term) => [$this->termTime($term->start_date), $term->id])
+            ->values();
     }
 
     private function leadsTerm($userId, $termId): bool
@@ -549,12 +618,10 @@ class DashboardController extends Controller
         // `full_name` reads the title, so without this it is one query per row.
         $students = Student::with('title')->whereIn('id', $studentIds)->get()->keyBy('id');
         $rates = $this->studentRates($planIds);
-        $consecutive = $this->consecutiveAbsences($planIds, $studentIds);
+        $consecutive = $this->consecutiveAbsences($this->theoryModulePlanIds($planIds), $studentIds);
         $tutors = $this->personalTutors($planIds, $studentIds);
-        $submissions = $this->studentSubmissions($this->theoryModulePlanIds($planIds), $studentIds);
+        $submissions = $this->studentSubmissions($this->submissionPlanIds($planIds, $studentIds, $termId), $studentIds);
         $contacts = $this->contactLogs($groupIds, $termId, $studentIds);
-
-        $due = $submissions['due'];
 
         $rows = [];
         foreach ($studentIds as $studentId) {
@@ -566,6 +633,7 @@ class DashboardController extends Controller
             $rate = $rates[$studentId] ?? null;
             $log = $contacts[$studentId] ?? [];
             $submitted = $submissions['byStudent'][$studentId] ?? 0;
+            $due = $submissions['due'][$studentId] ?? 0;
 
             $rows[] = [
                 'id' => $student->id,
@@ -616,11 +684,19 @@ class DashboardController extends Controller
     }
 
     /**
-     * How many of the most recent sessions each student missed in a row.
+     * How many of the most recent teaching days each student missed in a row.
      *
      * Three in a row is the signal a leader acts on, and it cannot be read off
      * a percentage — a student at 70% who has missed the last four weeks is a
      * different problem from one who missed four scattered days.
+     *
+     * Counted in days, not registers: a group that teaches three modules on a
+     * Monday would otherwise report "3 in a row" for one missed Monday, and
+     * the count would mean something different in every group. A day counts
+     * only if every Theory class on it was missed.
+     *
+     * Theory only, so it counts the same days the drawer lists underneath it:
+     * a missed group tutorial is not the module falling behind.
      */
     private function consecutiveAbsences(array $planIds, array $studentIds): array
     {
@@ -635,25 +711,37 @@ class DashboardController extends Controller
             ->whereNull('deleted_at')
             ->whereIn('plan_id', $planIds)
             ->whereIn('student_id', $studentIds)
-            ->orderBy('student_id')
-            ->orderBy('attendance_date', 'DESC')
+            // No ordering: the fold below is by date, so the order the rows
+            // arrive in cannot change the answer.
             ->get();
 
-        $streaks = [];
-        $stopped = [];
+        // Fold the registers into days first: a day the student turned up to
+        // any part of is a day they were seen.
+        $days = [];
         foreach ($rows as $row) {
-            // Rows arrive newest first per student; the first attended mark
-            // ends that student's streak and the rest are history.
-            if (!empty($stopped[$row->student_id])) {
-                continue;
+            $date = (string) $row->attendance_date;
+            $missed = !in_array((int) $row->attendance_feed_status_id, $counted, true);
+
+            $days[$row->student_id][$date] = ($days[$row->student_id][$date] ?? true) && $missed;
+        }
+
+        $streaks = [];
+        foreach ($days as $studentId => $byDate) {
+            // Dates are stored sortable, so this is newest first.
+            krsort($byDate);
+
+            $run = 0;
+            foreach ($byDate as $allMissed) {
+                if (!$allMissed) {
+                    break;
+                }
+
+                $run++;
             }
 
-            if (in_array((int) $row->attendance_feed_status_id, $counted, true)) {
-                $stopped[$row->student_id] = true;
-                continue;
+            if ($run > 0) {
+                $streaks[$studentId] = $run;
             }
-
-            $streaks[$row->student_id] = ($streaks[$row->student_id] ?? 0) + 1;
         }
 
         return $streaks;
@@ -716,7 +804,13 @@ class DashboardController extends Controller
             return [];
         }
 
-        return Plan::with('creations')->whereIn('id', $planIds)->where('parent_id', 0)->get()
+        return $this->theoryPlanIds(Plan::whereIn('id', $planIds));
+    }
+
+    /** The Theory plans a query resolves to, by the rule above. */
+    private function theoryPlanIds($query): array
+    {
+        return $query->with('creations')->where('parent_id', 0)->get()
             ->filter(fn ($plan) => $this->isTheory($this->planClassType($plan)))
             ->pluck('id')->map(fn ($id) => (int) $id)->values()->toArray();
     }
@@ -739,19 +833,123 @@ class DashboardController extends Controller
     }
 
     /**
-     * Submissions expected and made.
+     * The modules a student's submission figure is measured against: the ones
+     * they carry this term and every one they carried before it.
      *
-     * Expected is the group's Theory modules; a student has submitted a module
-     * once they hold a completed grade on it (see COMPLETED_GRADES). Counting
-     * modules rather than assessments is what makes 2/2 mean the same thing on
-     * every row, and a student with no completed grade counts nothing.
+     * The figure reads as progress through the course rather than through the
+     * term. A student sitting on one module this term is not "1/1" while three
+     * modules behind it are still outstanding, and a leader picking up a group
+     * mid-course sees what the student is actually carrying.
+     */
+    private function submissionPlanIds(array $planIds, array $studentIds, $termId): array
+    {
+        $current = $this->theoryModulePlanIds($planIds);
+
+        $termIds = $this->termIdsUpTo((int) $termId);
+        if (empty($studentIds) || empty($termIds)) {
+            return $current;
+        }
+
+        $carried = Assign::whereIn('student_id', $studentIds)
+            ->where(function ($q) {
+                $q->whereNull('attendance')->orWhere('attendance', 1);
+            })->pluck('plan_id')->unique()->values()->toArray();
+
+        if (empty($carried)) {
+            return $current;
+        }
+
+        // Bounded to the course this group teaches. A student who transferred
+        // in carries the modules of the course they left, and those are not
+        // part of what this one is measured against.
+        $courseIds = Plan::whereIn('id', $planIds)->pluck('course_id')
+            ->filter()->unique()->values()->toArray();
+
+        $earlier = $this->theoryPlanIds(
+            Plan::whereIn('id', $carried)->whereIn('term_declaration_id', $termIds)
+                ->when(!empty($courseIds), fn ($q) => $q->whereIn('course_id', $courseIds))
+        );
+
+        return array_values(array_unique(array_merge($current, $earlier)));
+    }
+
+    /**
+     * Every term that had started by the time the selected one did, itself
+     * included — "this term and before", on dates rather than on ids.
+     *
+     * Read through the model, `start_date` comes back reformatted as `d-m-Y`,
+     * which no database can compare; the query builder sees the stored value.
+     */
+    private function termIdsUpTo(int $termId): array
+    {
+        if ($termId <= 0) {
+            return [];
+        }
+
+        $start = DB::table('term_declarations')->where('id', $termId)->value('start_date');
+        if (empty($start)) {
+            return [];
+        }
+
+        return DB::table('term_declarations')
+            ->whereNull('deleted_at')
+            ->whereNotNull('start_date')
+            ->where('start_date', '<=', $start)
+            ->pluck('id')->map(fn ($id) => (int) $id)->toArray();
+    }
+
+    /**
+     * The module each plan delivers, keyed by plan id.
+     *
+     * A retake, or a module a student sat again in a later term, is a second
+     * plan for the same course module; a submission figure spanning terms has
+     * to count that module once. A plan with no creation record keys on itself,
+     * so it still counts as one module rather than merging with another.
+     */
+    private function planModuleKeys(array $planIds): array
+    {
+        $keys = [];
+
+        $plans = Plan::with('creations')->whereIn('id', $planIds)->get(['id', 'module_creation_id']);
+        foreach ($plans as $plan) {
+            $moduleId = $plan->creations->course_module_id ?? 0;
+            $keys[$plan->id] = $moduleId > 0 ? 'module:'.$moduleId : 'plan:'.$plan->id;
+        }
+
+        return $keys;
+    }
+
+    /**
+     * Submissions expected and made, student by student.
+     *
+     * A student's denominator is their own modules — the ones out of this set
+     * of plans they are actively assigned to — and their numerator is how many
+     * of those they hold a completed grade on (see COMPLETED_GRADES). A group
+     * does not hand every student the same modules, so a group-wide denominator
+     * reads 0/5 against a student who only takes one of them.
+     *
+     * Grades on modules a student is not assigned to are ignored, which is
+     * what keeps the numerator inside the denominator.
      */
     private function studentSubmissions(array $planIds, array $studentIds): array
     {
-        $blank = ['due' => 0, 'byStudent' => [], 'byPlan' => [], 'plansWithAssessment' => []];
+        $blank = ['due' => [], 'byStudent' => [], 'byPlan' => [], 'plansWithAssessment' => []];
 
         if (empty($planIds) || empty($studentIds)) {
             return $blank;
+        }
+
+        $modules = $this->planModuleKeys($planIds);
+
+        // The modules each student actually carries.
+        $assigned = [];
+        $assigns = Assign::whereIn('plan_id', $planIds)->whereIn('student_id', $studentIds)
+            ->where(function ($q) {
+                $q->whereNull('attendance')->orWhere('attendance', 1);
+            })->get(['student_id', 'plan_id']);
+
+        foreach ($assigns as $assign) {
+            $assigned[$assign->student_id][$modules[$assign->plan_id] ?? 'plan:'.$assign->plan_id] = true;
         }
 
         $gradeIds = Grade::whereIn('code', self::COMPLETED_GRADES)->pluck('id')->toArray();
@@ -768,22 +966,31 @@ class DashboardController extends Controller
         $byPlan = [];
         $seen = [];
         foreach ($results as $result) {
-            // A module counts once however many assessments it carries, and a
-            // re-mark must not inflate the figure.
-            $key = $result->student_id.'|'.$result->plan_id;
+            // Only against a module the student is on.
+            $module = $modules[$result->plan_id] ?? 'plan:'.$result->plan_id;
+            if (!isset($assigned[$result->student_id][$module])) {
+                continue;
+            }
+
+            // The module table counts heads per plan, so this one is set
+            // whichever plan of the module the grade landed on.
+            $byPlan[$result->plan_id][$result->student_id] = true;
+
+            // The student's own figure counts the module once, however many
+            // assessments or retakes carry it: a re-mark must not inflate it.
+            $key = $result->student_id.'|'.$module;
             if (isset($seen[$key])) {
                 continue;
             }
             $seen[$key] = true;
 
             $byStudent[$result->student_id] = ($byStudent[$result->student_id] ?? 0) + 1;
-            $byPlan[$result->plan_id][$result->student_id] = true;
         }
 
         return [
-            // Everyone is measured against the same denominator: the modules
-            // themselves, not how many assessments happen to hang off them.
-            'due' => count($planIds),
+            // Modules, not the assessments hanging off them: that is what
+            // makes 2/2 mean the same thing wherever it is read.
+            'due' => array_map('count', $assigned),
             'byStudent' => $byStudent,
             'byPlan' => array_map('count', $byPlan),
             'plansWithAssessment' => AssessmentPlan::whereIn('plan_id', $planIds)
@@ -792,8 +999,112 @@ class DashboardController extends Controller
         ];
     }
 
-    /** The contact history for each student, newest first. */
-    private function contactLogs(array $groupIds, $termId, array $studentIds): array
+    /**
+     * The Theory classes a student was marked down on, newest first.
+     *
+     * Theory only, matching the "Consec. abs" tile above it and the Subs
+     * figure: the tutorial and seminar plans hanging off a module are not the
+     * module, so a missed group tutorial does not belong beside a missed one.
+     *
+     * Only the marks that count against them: an excused absence reads as
+     * attended everywhere else on this screen, so listing it here would not
+     * explain the figures the leader is looking at.
+     *
+     * `run` flags the rows making up the consecutive streak — the same walk
+     * `consecutiveAbsences()` does, stopping at the first attended mark — so
+     * the drawer can show which dates the "Consec. abs" tile is counting.
+     */
+    private function absenceSessions(array $planIds, int $studentId): array
+    {
+        $planIds = $this->theoryModulePlanIds($planIds);
+
+        if (empty($planIds) || $studentId <= 0) {
+            return [];
+        }
+
+        $rows = DB::table('attendances')
+            ->select('attendance_date', 'attendance_feed_status_id', 'plan_id')
+            ->whereNull('deleted_at')
+            ->whereIn('plan_id', $planIds)
+            ->where('student_id', $studentId)
+            // Two classes can share a date, so id breaks the tie and keeps the
+            // walk below in the order the registers were taken.
+            ->orderBy('attendance_date', 'DESC')->orderBy('id', 'DESC')
+            ->get();
+
+        if ($rows->isEmpty()) {
+            return [];
+        }
+
+        $counted = array_merge(self::PRESENT_STATUSES, self::EXCUSED_STATUSES);
+        $plans = Plan::with('creations')->whereIn('id', $rows->pluck('plan_id')->unique()->toArray())
+            ->get()->keyBy('id');
+        $statuses = AttendanceFeedStatus::pluck('name', 'id')->toArray();
+
+        // Grouped by day: a day carries two classes of the same module name,
+        // and two identical rows read as a duplicate rather than as two
+        // classes. Rows arrive newest first, so insertion order is the order
+        // the days are shown in.
+        $days = [];
+        foreach ($rows as $row) {
+            $key = (string) $row->attendance_date;
+
+            if (!isset($days[$key])) {
+                $date = strtotime($key);
+
+                $days[$key] = [
+                    // The weekday earns its place: a student who only ever
+                    // misses Tuesdays has a timetable problem, not an
+                    // attitude one.
+                    'date' => $date ? date('D d M Y', $date) : $key,
+                    'modules' => [],
+                    'statuses' => [],
+                    'count' => 0,
+                    'allMissed' => true,
+                ];
+            }
+
+            if (in_array((int) $row->attendance_feed_status_id, $counted, true)) {
+                // Seen that day, so the day is not a missed one — but it still
+                // has to be walked over below to break the streak.
+                $days[$key]['allMissed'] = false;
+                continue;
+            }
+
+            $plan = $plans->get($row->plan_id);
+            $module = $plan->creations->module_name ?? ($plan ? $this->planClassType($plan) : '');
+            if ($module !== '') {
+                $days[$key]['modules'][$module] = true;
+            }
+
+            $days[$key]['statuses'][$statuses[$row->attendance_feed_status_id] ?? 'Absence'] = true;
+            $days[$key]['count']++;
+        }
+
+        // The same walk `consecutiveAbsences()` does, so the rows marked here
+        // are exactly the days the "Consec. abs" tile counts.
+        $inRun = true;
+        $out = [];
+        foreach ($days as $day) {
+            $inRun = $inRun && $day['allMissed'];
+
+            if ($day['count'] === 0) {
+                continue;
+            }
+
+            $out[] = [
+                'date' => $day['date'],
+                'classes' => implode(', ', array_keys($day['modules'])),
+                'status' => implode(' · ', array_keys($day['statuses'])),
+                'count' => $day['count'],
+                'run' => $inRun,
+            ];
+        }
+
+        return $out;
+    }
+
+    /** The contact history for each student, newest first. */    private function contactLogs(array $groupIds, $termId, array $studentIds): array
     {
         if (empty($groupIds) || empty($studentIds)) {
             return [];

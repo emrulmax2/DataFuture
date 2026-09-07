@@ -99,7 +99,7 @@
                                 <span class="gl-live"><span class="gl-live__ping"></span><span class="gl-live__dot"></span></span>
                                 <span class="gl-state__text">
                                     <strong style="color:#1d4ed8;">LIVE</strong>
-                                    <span class="gl-mono" style="color:#64748b;">from {{ $class['start'] }}</span>
+                                    <span class="gl-mono" style="color:var(--gl-muted);">from {{ $class['start'] }}</span>
                                 </span>
                             </div>
                         @elseif($class['state'] === 'late')
@@ -107,18 +107,18 @@
                                 <span class="gl-state__badge is-red">!</span>
                                 <span class="gl-state__text">
                                     <strong style="color:#be123c;">Not started</strong>
-                                    <span class="gl-mono" style="color:#64748b;">due {{ $class['scheduled'] }}</span>
+                                    <span class="gl-mono" style="color:var(--gl-muted);">due {{ $class['scheduled'] }}</span>
                                 </span>
                             </div>
                         @elseif($class['state'] === 'cancelled')
                             <div class="gl-state">
                                 <span class="gl-state__badge is-grey">✕</span>
-                                <span class="gl-state__text" style="color:#64748b;">Cancelled</span>
+                                <span class="gl-state__text" style="color:var(--gl-muted);">Cancelled</span>
                             </div>
                         @else
                             <div class="gl-state">
                                 <span class="gl-state__badge is-grey">○</span>
-                                <span class="gl-state__text gl-mono" style="color:#64748b;">Scheduled {{ $class['scheduled'] }}</span>
+                                <span class="gl-state__text gl-mono" style="color:var(--gl-muted);">Scheduled {{ $class['scheduled'] }}</span>
                             </div>
                         @endif
 

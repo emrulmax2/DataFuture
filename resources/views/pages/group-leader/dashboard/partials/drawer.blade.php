@@ -35,6 +35,38 @@
         </div>
     </div>
 
+    @php
+        $glAbsences = $student['absences'] ?? [];
+        $glShown = array_slice($glAbsences, 0, 10);
+        $glMissed = array_sum(array_column($glAbsences, 'count'));
+    @endphp
+
+    @if(!empty($glAbsences))
+        <div class="gl-misses">
+            <div class="gl-misses__title">
+                Missed classes
+                <span class="gl-misses__count">
+                    {{ $glMissed }} {{ $glMissed === 1 ? 'class' : 'classes' }} over {{ count($glAbsences) }} {{ count($glAbsences) === 1 ? 'day' : 'days' }}
+                </span>
+            </div>
+
+            @foreach($glShown as $glMiss)
+                <div class="gl-miss {{ $glMiss['run'] ? 'is-run' : '' }}">
+                    <span class="gl-miss__date">{{ $glMiss['date'] }}</span>
+                    <span class="gl-miss__class">
+                        {{ $glMiss['classes'] ?: 'Class' }}@if($glMiss['count'] > 1) · {{ $glMiss['count'] }} classes @endif
+                    </span>
+                    <span class="gl-miss__status">{{ $glMiss['status'] }}</span>
+                </div>
+            @endforeach
+
+            @if(count($glAbsences) > count($glShown))
+                @php $glMore = count($glAbsences) - count($glShown); @endphp
+                <div class="gl-misses__more">+{{ $glMore }} earlier {{ $glMore === 1 ? 'day' : 'days' }} this term</div>
+            @endif
+        </div>
+    @endif
+
     {{-- The one write on this dashboard. Posting needs the student id and the
          group/term the leader is looking at, so all three travel with it. --}}
     <form class="gl-form" id="glContactForm" autocomplete="off">
