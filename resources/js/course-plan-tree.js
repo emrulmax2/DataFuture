@@ -582,6 +582,147 @@ const TABLE_ID = "#classPlanTreeListTable";
         });
     });
 
+    /* ------------------------------------------------------------------ *
+     * Searchable selects
+     * ------------------------------------------------------------------ */
+
+    /* The settings the builder screen already uses, so the two read alike. The
+     * dropdown is re-parented to <body> because `.cm-modal` clips its overflow,
+     * and there is deliberately no `dropdown_input` plugin: without it the
+     * control itself is the search field, which is one fewer moving part and
+     * matches the people pickers further down this file. */
+    const TOM_OPTIONS = {
+        placeholder: "Select",
+        dropdownParent: "body",
+        dropdownClass: "ts-dropdown cm-tom-dropdown",
+        allowEmptyOption: true,
+        // 157 staff; the default cap of 50 would hide most of them until the
+        // user typed, which reads as a broken list.
+        maxOptions: 500,
+    };
+
+    /**
+     * A person's row: their picture, then their name.
+     *
+     * The photo and the chip that stands in for it both arrive as data
+     * attributes on the <option> — TomSelect copies an option's whole dataset
+     * onto the record it renders from — so nothing here has to be looked up.
+     *
+     * `loading="lazy"` earns its place: staff photos are served at whatever
+     * size they were uploaded at, and without it every one in the list would be
+     * fetched the moment the dropdown opened.
+     */
+    function personRow(data, escape) {
+        const name = escape(data.text || "");
+
+        // "Please Select" has nobody behind it, so it stays plain text rather
+        // than opening the list with an empty circle.
+        if (!data.value) return `<div class="cm-tsperson cm-tsperson--none">${name}</div>`;
+
+        const face = data.photo
+            ? `<img class="cm-tsperson__pic" src="${escape(data.photo)}" alt="" loading="lazy" decoding="async">`
+            : `<span class="cm-tsperson__pic cm-tsperson__pic--chip" style="background:${escape(data.color || "#0E5A61")}">${escape(data.initials || "")}</span>`;
+
+        return `<div class="cm-tsperson">${face}<span class="cm-tsperson__name">${name}</span></div>`;
+    }
+
+    const PERSON_OPTIONS = Object.assign({}, TOM_OPTIONS, {
+        // Both, so the picture shows in the closed control and not only in the
+        // open list.
+        render: { option: personRow, item: personRow },
+    });
+
+    /* Every picker in the dialogs is searchable. The two multi-selects are
+     * absent because they are built on demand, further down, the first time
+     * their own modal opens. */
+    const PLAIN_SELECTS = [
+        "tp_module_creation_id",
+        "tp_rooms_id",
+        "tp_class_type",
+        "tp_tutor_id",
+        "tu_rooms_id",
+        "sync_plan_id",
+    ];
+    const PERSON_SELECTS = ["tp_personal_tutor_id", "tu_personal_tutor_id"];
+
+    function enhance(ids, options) {
+        ids.forEach((id) => {
+            const select = document.querySelector(`#${id}`);
+            // `select.tomselect` is set by the constructor, so this is safe to
+            // run again over one that has already been through it.
+            if (select && !select.tomselect) new TomSelect(select, options);
+        });
+    }
+
+    enhance(PLAIN_SELECTS, TOM_OPTIONS);
+    enhance(PERSON_SELECTS, PERSON_OPTIONS);
+
+    /** Sets a picker's value whether or not TomSelect is driving it. */
+    function setSelect(id, value) {
+        const select = document.querySelector(`#${id}`);
+        if (!select) return;
+
+        const next = value == null ? "" : String(value);
+
+        if (select.tomselect) {
+            // Silent: the dialog is being filled in, not chosen from, and a
+            // change event here would run the tutor-field toggle early.
+            select.tomselect.setValue(next, true);
+        }
+
+        // Also straight onto the element, because that is what FormData reads.
+        // TomSelect writes the selection back itself, but its silent path skips
+        // that when the value is not in the list — a room or module retired
+        // since the plan was made — which would otherwise leave the previous
+        // dialog's option still marked selected and submit it.
+        select.value = next;
+    }
+
+    /**
+     * Replaces a picker's options from server-rendered <option> markup.
+     *
+     * TomSelect 1.7.8 has no `sync()` — that arrived in v2 — and it rewrites
+     * the original select as the selection changes, so dropping fresh markup
+     * onto the element leaves the control still showing the previous list. The
+     * markup is parsed off-DOM and pushed through the control's own API.
+     */
+    function fillSelect(id, html) {
+        const select = document.querySelector(`#${id}`);
+        if (!select) return;
+
+        const ts = select.tomselect;
+        if (!ts) {
+            $(select).html(html || "");
+            return;
+        }
+
+        const holder = document.createElement("select");
+        holder.innerHTML = html || "";
+
+        // The element itself is refreshed too. TomSelect renders from its own
+        // store, but the original select is what FormData reads, and it only
+        // ever has options *prepended* to it — left alone it would carry every
+        // previous dialog's list as well as this one's.
+        select.innerHTML = html || "";
+
+        // clearOptions() keeps whatever is still selected, so the selection has
+        // to go first or the last plan's module survives into the next dialog.
+        ts.clear(true);
+        ts.clearOptions();
+        ts.addOption(
+            Array.from(holder.options).map((option) =>
+                Object.assign({}, option.dataset, { value: option.value, text: option.textContent })
+            )
+        );
+        ts.refreshOptions(false);
+
+        // Read the attribute rather than `option.selected`: a detached select
+        // reports its first option as selected whether the server marked it or
+        // not, which would quietly pick the wrong plan.
+        const chosen = Array.from(holder.options).find((option) => option.hasAttribute("selected"));
+        if (chosen) ts.setValue(chosen.value, true);
+    }
+
     /** The day chip rows write into the hidden input the endpoints read. */
     function setPick(name, value) {
         const group = document.querySelector(`[data-cm-optpick="${name}"]`);
@@ -635,11 +776,11 @@ const TABLE_ID = "#classPlanTreeListTable";
             $("#editPlanModal .courseName").text(p.course || "—");
             $("#editPlanModal .groupName").text(p.group || "—");
 
-            $("#tp_module_creation_id").html(p.modules || "");
-            $("#tp_rooms_id").val(p.rooms_id || "");
-            $("#tp_class_type").val(p.class_type || "");
-            $("#tp_tutor_id").val(p.tutor_id || "");
-            $("#tp_personal_tutor_id").val(p.personal_tutor_id || "");
+            fillSelect("tp_module_creation_id", p.modules || "");
+            setSelect("tp_rooms_id", p.rooms_id);
+            setSelect("tp_class_type", p.class_type);
+            setSelect("tp_tutor_id", p.tutor_id);
+            setSelect("tp_personal_tutor_id", p.personal_tutor_id);
             $("#tp_start_time").val(p.start_time || "");
             $("#tp_end_time").val(p.end_time || "");
             $("#tp_submission_date").val(toPickerDate(p.submission_date));
@@ -710,7 +851,7 @@ const TABLE_ID = "#classPlanTreeListTable";
             $("#tutorialDetailsModal .tuModuleName").text(p.module || "—");
             $("#tutorialDetailsModal .tuVenueName").text(p.venue || "—");
 
-            $("#tu_rooms_id").val(p.rooms_id || "");
+            setSelect("tu_rooms_id", p.rooms_id);
             $("#tu_start_time").val(p.start_time || "");
             $("#tu_end_time").val(p.end_time || "");
             $("#tu_virtual_room").val(p.virtual_room || "");
@@ -719,7 +860,7 @@ const TABLE_ID = "#classPlanTreeListTable";
 
             // `personal_tutor_id` is the tutorial's own; `pt_id` is the parent
             // theory's, which seeds a tutorial that does not have one yet.
-            $("#tu_personal_tutor_id").val(p.personal_tutor_id || p.pt_id || "");
+            setSelect("tu_personal_tutor_id", p.personal_tutor_id || p.pt_id);
 
             // `tutorial_id` decides insert vs update, so it is the button's own
             // attribute and nothing else. It used to fall back to `pt_id`, which
@@ -769,7 +910,7 @@ const TABLE_ID = "#classPlanTreeListTable";
             data: { plan_id: id },
             headers: csrfHeaders(),
         }).then((response) => {
-            $("#sync_plan_id").html(response.data.htm || "");
+            fillSelect("sync_plan_id", response.data.htm || "");
             $('#syncTutorialForm input[name="id"]').val(id);
             modal("syncTutorialModal").show();
         });
