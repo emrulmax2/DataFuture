@@ -1093,10 +1093,12 @@ class DashboardController extends Controller
             ->when($course_id > 0, function($q) use($course_id){ $q->where('course_id', $course_id); })
             ->get(['id', 'tutor_id']);
 
-        $submissionByPlan = (new SubmissionRate())->perPlan(
-            $submissionPlans->pluck('id')->all(),
-            (int) $term_declaration_id
-        );
+        $scoredPlanIds = $submissionPlans->pluck('id')->all();
+        $submissionByPlan = (new SubmissionRate())->perPlan($scoredPlanIds, (int) $term_declaration_id);
+        /* Same plans, same denominator — the two columns have to be readable
+           against each other on one row: how many of the cohort handed work
+           in, and how many of it got through. */
+        $passByPlan = (new PassRate())->perPlan($scoredPlanIds, (int) $term_declaration_id);
 
         $planIdsByTutor = $submissionPlans->groupBy('tutor_id')->map->pluck('id');
 
@@ -1114,9 +1116,8 @@ class DashboardController extends Controller
             $assigned = Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->toArray();
             $moduleCreations = $activePlans->pluck('module_creation_id')->unique()->toArray();
 
-            $submission = SubmissionRate::total(
-                array_intersect_key($submissionByPlan, array_flip(($planIdsByTutor[$tut->id] ?? collect())->all()))
-            );
+            $mine = array_flip(($planIdsByTutor[$tut->id] ?? collect())->all());
+            $submission = SubmissionRate::total(array_intersect_key($submissionByPlan, $mine));
 
             $tut['no_of_module'] = count($moduleCreations);
             /* Taken from the same figures as the rate beside it. Counted
@@ -1125,6 +1126,7 @@ class DashboardController extends Controller
             $tut['expected_submission'] = $submission['expected'];
             $res[$tut->id] = $tut;
             $res[$tut->id]['submission'] = $submission;
+            $res[$tut->id]['pass'] = PassRate::total(array_intersect_key($passByPlan, $mine));
             $res[$tut->id]['attendances'] = $this->getTermAttendanceRate($termIds, $tut->id, 1);
             $res[$tut->id]['contracted_hour'] = (isset($employee->workingPattern->contracted_hour) && !empty($employee->workingPattern->contracted_hour) ? $employee->workingPattern->contracted_hour : '00:00');
             $res[$tut->id]['class_minutes'] = $classMinutes;
@@ -1153,10 +1155,18 @@ class DashboardController extends Controller
     }
 
     public function tutorsDetails($term_declaration_id, $tutorid){
+        /* Theory only, and taken straight off `tutor_id` — on the teaching
+           side the tutor is named on the Theory plan itself, so there is no
+           parent to resolve the way the personal-tutor screens do.
+
+           Stated as the module's own allow list rather than as "not Tutorial,
+           not Seminar", so the day a Practical is added it is a decision
+           rather than a silent inclusion. Seminars do carry `tutor_id`, but
+           they are not what this page counts. */
         $plans = [];
         $tutorPlans = Plan::with(['tutor.employee', 'personalTutor.employee', 'tutorial.personalTutor.employee'])
             ->where('term_declaration_id', $term_declaration_id)->where('tutor_id', $tutorid)
-            ->whereNotIn('class_type', ['Tutorial', 'Seminar'])->get();
+            ->tap(fn ($q) => SubmissionRate::scopeSubmitting($q))->get();
         if($tutorPlans->count() > 0):
             foreach($tutorPlans as $tp):
                 $plans[$tp->id] = $tp;
@@ -1174,7 +1184,9 @@ class DashboardController extends Controller
         /* Both rates for every module in two queries each. Scored on this
            page's own plans, which are already `tutor_id` = this tutor — the
            teaching side, where the personal-tutor screens use the other
-           column. */
+           column, and with no parent hop: the tutor is named on the Theory
+           plan itself. Every plan on the page is already a Theory plan, so
+           the headline is simply their total. */
         $planIds = array_keys($plans);
         $submissionByPlan = (new SubmissionRate())->perPlan($planIds, (int) $term_declaration_id);
         $passByPlan = (new PassRate())->perPlan($planIds, (int) $term_declaration_id);
@@ -1219,26 +1231,49 @@ class DashboardController extends Controller
         endif;
         $tutorIds = $query->whereNotNull('personal_tutor_id')->where('personal_tutor_id', '>', 0)->pluck('personal_tutor_id')->unique()->toArray();
 
-        /* Theory plans only. Work is submitted against a theory class, so any
-           other cohort in the denominator divides real submissions by students
-           who were never expected to submit.
+        /* A personal tutor never owns the Theory class — they hold the
+           Tutorial, and the assessed work sits on the Theory plan that
+           tutorial hangs off (`plans.parent_id`). So the scored plans are the
+           tutor's tutorials resolved through to their parents.
+
+           Reading `personal_tutor_id` off the theory row instead, as this
+           used to, scores a different slice of the term every time: the column
+           is set on 24 of term 54's 117 theory plans, on 1 of term 52's 134,
+           and on all 176 of term 48's — so the same code reported a near-empty
+           term and a complete one.
+
+           The link is 1:1 across the whole table — 756 tutorials, 756 distinct
+           theory parents, none shared — so totalling a tutor's parents cannot
+           count one cohort twice.
 
            Note this is a different scope from the rest of the row, which counts
-           Tutorial plans. One pass over all the plans in scope, then each
-           tutor's share is totalled out of it — no query per row. */
-        $submissionPlans = Plan::whereIn('term_declaration_id', $termIds)
+           the Tutorial plans themselves. One pass over all the plans in scope,
+           then each tutor's share is totalled out of it — no query per row. */
+        $tutorialPlans = Plan::whereIn('term_declaration_id', $termIds)
             ->whereIn('personal_tutor_id', $tutorIds)
-            ->tap(fn ($q) => SubmissionRate::scopeSubmitting($q))
+            ->where('class_type', 'Tutorial')
+            ->where('parent_id', '>', 0)
             ->when($course_id > 0, function($q) use($course_id){ $q->where('course_id', $course_id); })
-            ->get(['id', 'personal_tutor_id']);
+            ->get(['id', 'parent_id', 'personal_tutor_id']);
 
-        $scoredPlanIds = $submissionPlans->pluck('id')->all();
+        /* The parent is confirmed Theory and still live rather than trusted:
+           four parents in the table are soft-deleted, and a tutorial whose
+           parent has gone scores nothing rather than falling back to scoring
+           the tutorial — a tutorial carries no results to score. */
+        $scoredPlanIds = Plan::whereIn('id', $tutorialPlans->pluck('parent_id')->unique()->values()->all())
+            ->tap(fn ($q) => SubmissionRate::scopeSubmitting($q))
+            ->pluck('id')->all();
+
         $submissionByPlan = (new SubmissionRate())->perPlan($scoredPlanIds, (int) $term_declaration_id);
         /* Same plans, same denominator — the two columns have to be readable
            against each other on one row. */
         $passByPlan = (new PassRate())->perPlan($scoredPlanIds, (int) $term_declaration_id);
 
-        $planIdsByTutor = $submissionPlans->groupBy('personal_tutor_id')->map->pluck('id');
+        $liveParents = array_flip($scoredPlanIds);
+        $planIdsByTutor = $tutorialPlans->groupBy('personal_tutor_id')->map(
+            fn ($rows) => $rows->pluck('parent_id')->unique()
+                ->filter(fn ($id) => isset($liveParents[$id]))->values()
+        );
 
         $res = [];
         $tutors = User::with('employee')->whereIn('id', $tutorIds)->orderBy('id', 'ASC')->get();
@@ -1328,8 +1363,27 @@ class DashboardController extends Controller
         $plans = [];//->where('class_type', 'Tutorial')
         $tutorPlans = Plan::with(['tutor.employee', 'personalTutor.employee', 'tutorial.personalTutor.employee'])
             ->where('term_declaration_id', $term_declaration_id)->where('personal_tutor_id', $tutorid)->get();
+
+        /* The Theory rows on this page are the parents of the tutor's
+           tutorials, and nothing else. A personal tutor holds the tutorial;
+           the theory class it hangs off is where the work is assessed, so that
+           is the row worth listing. A stray theory plan that happens to carry
+           this tutor in `personal_tutor_id` is dropped rather than listed
+           beside them — it is not a class they hold, and leaving it in made
+           the Theory section total disagree with the headline. */
+        $parentTheoryIds = Plan::whereIn('id', $tutorPlans->where('class_type', 'Tutorial')->pluck('parent_id')->filter()->unique()->values()->all())
+            ->tap(fn ($q) => SubmissionRate::scopeSubmitting($q))->pluck('id')->all();
+
         if($tutorPlans->count() > 0):
             foreach($tutorPlans as $tp):
+                /* Theory is added below, from the parents, so that every
+                   theory row on the page is built the same way — including the
+                   few parents that do carry this tutor in `personal_tutor_id`
+                   and would otherwise arrive here with different figures. */
+                if(SubmissionRate::isSubmitting($tp->class_type)):
+                    continue;
+                endif;
+
                 $planDates = PlansDateList::where('plan_id', $tp->id)->where('class_file_upload_found', "Undecided")->where('status','Completed')
                     ->whereHas('plan', function($q) use($term_declaration_id, $tutorid){  
                             $q->where('personal_tutor_id', $tutorid);
@@ -1344,9 +1398,38 @@ class DashboardController extends Controller
             endforeach;
         endif;
 
+        /* The tutor's own rows above are their tutorials and seminars. The
+           assessed work is on none of them — it is on the Theory plan each
+           tutorial hangs off — so those parents are listed as rows in their
+           own right, which is what fills the Theory accordion and its
+           submission and pass columns. */
+        $ownPlanIds = array_keys($plans);
+        $parentPlans = Plan::with(['tutor.employee', 'personalTutor.employee', 'tutorial.personalTutor.employee'])
+            ->whereIn('id', $parentTheoryIds)->get();
+
+        if($parentPlans->count() > 0):
+            foreach($parentPlans as $pp):
+                $plans[$pp->id] = $pp;
+                $plans[$pp->id]['attendances'] = $this->getPlanAttendanceRate($pp->id);
+                /* Scoped to the plan alone: the tutor's own rows are found by
+                   `personal_tutor_id`, which a theory parent does not carry. */
+                $plans[$pp->id]['undecidedUploads'] = PlansDateList::where('plan_id', $pp->id)
+                    ->where('class_file_upload_found', 'Undecided')->where('status', 'Completed')->count();
+                $plans[$pp->id]['people'] = $this->planPeople($pp);
+                /* Marks the row as somebody else's class, so the page can show
+                   its attendance without folding it into this tutor's own
+                   attendance headline. */
+                $plans[$pp->id]['parent_theory'] = true;
+            endforeach;
+        endif;
+
         $tutor = User::find($tutorid);
         $planIds = array_keys($plans);
-        $assignedStudents = (!empty($planIds) ? Assign::whereIn('plan_id', $planIds)->distinct('student_id')->count('student_id') : 0);
+        /* Counted over the tutor's own tutorials and seminars. A theory parent
+           shares its tutorial's cohort, so including it would not add
+           students, but the figure should mean "students this tutor holds"
+           whether or not that stays true. */
+        $assignedStudents = (!empty($ownPlanIds) ? Assign::whereIn('plan_id', $ownPlanIds)->distinct('student_id')->count('student_id') : 0);
 
         /* Every module's submission rate in two queries, not one pair per row.
            The view reads the per-plan figures for the table and totals them for
@@ -1358,13 +1441,17 @@ class DashboardController extends Controller
            many of the class got through. */
         $passByPlan = (new PassRate())->perPlan($planIds, (int) $term_declaration_id);
 
-        /* The headline figure counts theory plans only. Including the other
-           cohorts would inflate a denominator that only theory classes can
-           meet, and report a tutor whose students have all submitted as though
-           most of them had not. */
-        $taughtPlanIds = collect($plans)->filter(fn ($p) => SubmissionRate::isSubmitting($p->class_type))
-            ->pluck('id')->all();
-        $theoryOnly = array_flip($taughtPlanIds);
+        /* The headline is exactly the set the all-tutors list scores for this
+           tutor — the Theory parents of their tutorials — so the figure does
+           not change when a tutor clicks through to their own page.
+
+           Deliberately not "every theory row on the page": a stray theory plan
+           carrying this tutor in `personal_tutor_id` is still listed, because
+           the page has always listed the plans they are named on, but a
+           personal tutor holds tutorials, so it is the parents that decide the
+           figure. And theory only, because including a tutorial or seminar
+           cohort would inflate a denominator only a theory class can meet. */
+        $theoryOnly = array_flip($parentTheoryIds);
         $submissionOverall = SubmissionRate::total(array_intersect_key($submissionByPlan, $theoryOnly));
         $passOverall = PassRate::total(array_intersect_key($passByPlan, $theoryOnly));
 
@@ -1727,14 +1814,36 @@ class DashboardController extends Controller
         $plan_id = (isset($request->plan_id) && $request->plan_id > 0 ? $request->plan_id : 0);
         
         $html = '';
-        $query = PlansDateList::with('plan', 'attendanceInformation', 'attendances')->where('class_file_upload_found', 'Undecided')->where('status','Completed')
-                    ->whereHas('plan', function($q) use($term_id, $tutor_id){
-                        $q->where('personal_tutor_id', $tutor_id);
-                        $q->where('class_type', "Theory");
-                        $q->where('term_declaration_id', $term_id);
-                    });
+        $query = PlansDateList::with('plan', 'attendanceInformation', 'attendances')
+                    ->where('class_file_upload_found', 'Undecided')->where('status','Completed');
+
         if($plan_id > 0):
-            $query->where('plan_id', $plan_id);
+            /* One row on the page. A personal tutor reaches a Theory class
+               through the Tutorial that hangs off it, so the plan counts as
+               theirs when they hold it outright or hold its child — testing
+               `personal_tutor_id` alone, as this used to, left the modal empty
+               on rows whose pill showed a count: 133 of term 52's 134 theory
+               rows, 1,420 uploads with no way to open them. */
+            $query->where('plan_id', $plan_id)
+                ->whereHas('plan', function($q) use($term_id, $tutor_id){
+                    $q->where('term_declaration_id', $term_id)
+                        ->where(function($w) use($tutor_id){
+                            $w->where('personal_tutor_id', $tutor_id)
+                                ->orWhereIn('id', function($sub) use($tutor_id){
+                                    $sub->select('parent_id')->from('plans')
+                                        ->where('personal_tutor_id', $tutor_id)
+                                        ->where('class_type', 'Tutorial')
+                                        ->whereNull('deleted_at');
+                                });
+                        });
+                });
+        else:
+            /* No plan named — the tutor's whole outstanding list. */
+            $query->whereHas('plan', function($q) use($term_id, $tutor_id){
+                $q->where('personal_tutor_id', $tutor_id);
+                $q->where('class_type', "Theory");
+                $q->where('term_declaration_id', $term_id);
+            });
         endif;
         $planDates = $query->get()->sortBy(function($planDates, $key) {
             return date("Y-m-d H:i", strtotime($planDates->date." ".$planDates->plan->start_time));

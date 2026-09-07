@@ -55,6 +55,7 @@
             <span class="pgd-t-right pgd-t-nowrap">Attendance rate</span>
             <span class="pgd-t-right pgd-t-nowrap">Exp. submission</span>
             <span class="pgd-t-right pgd-t-nowrap">Submission rate</span>
+            <span class="pgd-t-right pgd-t-nowrap">Pass rate</span>
         </div>
 
         @forelse($tutors as $tut)
@@ -104,6 +105,16 @@
                     @else
                         <span class="pgd-rate pgd-rate--{{ $pgdTone($tut->submission['rate']) }}"
                               title="{{ $tut->submission['counted'] }} of {{ $tut->submission['expected'] }} expected submissions"><span></span>{{ number_format($tut->submission['rate'], 2) }}%</span>
+                    @endif
+                </span>
+                {{-- The same cohort as the column beside it, so the two read
+                     as a pair rather than against different denominators. --}}
+                <span class="pgd-t-right">
+                    @if(($tut->pass['rate'] ?? null) === null)
+                        <span class="pgd-num pgd-num--muted">&mdash;</span>
+                    @else
+                        <span class="pgd-rate pgd-rate--{{ $pgdTone($tut->pass['rate']) }}"
+                              title="{{ $tut->pass['counted'] }} of {{ $tut->pass['expected'] }} passed"><span></span>{{ number_format($tut->pass['rate'], 2) }}%</span>
                     @endif
                 </span>
             </a>

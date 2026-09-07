@@ -2050,6 +2050,15 @@ html:has(> body.pgd-body) { background: #F2F5F5; }
 
 .pgd-acc__uploads--due { color: #B3261E; }
 
+/* The same slot used for a neutral figure, so a collapsed section still
+   reports the number its columns are divided by. */
+.pgd-acc__note {
+    font-size: 11.5px;
+    color: var(--pgd-ink-faint);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
 .pgd-acc__body[hidden] { display: none; }
 
 @media (max-width: 720px) {
@@ -2057,7 +2066,7 @@ html:has(> body.pgd-body) { background: #F2F5F5; }
     .pgd-acc__sum { gap: 8px; }
 }
 
-.pgd-cols-tutors { grid-template-columns: minmax(220px, 1fr) 116px 100px 74px 104px 118px 108px 112px; }
+.pgd-cols-tutors { grid-template-columns: minmax(200px, 1fr) 108px 92px 68px 96px 112px 104px 106px 100px; }
 .pgd-cols-ptutors { grid-template-columns: minmax(180px, 1fr) 100px 90px 62px 104px 112px 100px 98px 100px 100px; }
 .pgd-cols-detail { grid-template-columns: 62px minmax(170px, 1fr) 140px 120px 104px 108px 118px 44px; }
 .pgd-cols-pdetail { grid-template-columns: 62px minmax(170px, 1fr) 140px 116px 108px 116px 96px 44px; }
@@ -2065,6 +2074,11 @@ html:has(> body.pgd-body) { background: #F2F5F5; }
    those two tracks are gone rather than empty — the width goes to the
    module name, which is the column that actually needed it. */
 .pgd-cols-pdetail--slim { grid-template-columns: 62px minmax(170px, 1fr) 140px 116px 96px 44px; }
+
+/* The teaching-side detail table, same idea: a Seminar carries no assessed
+   work, so its section drops the three assessment tracks instead of ruling
+   three empty columns down the page. */
+.pgd-cols-detail--slim { grid-template-columns: 62px minmax(170px, 1fr) 140px 120px 44px; }
 
 /* Tutor + personal tutor, overlapped; the second lifts on hover so a covered
    face can still be read. */

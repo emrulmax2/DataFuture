@@ -56,11 +56,80 @@
             'people' => (isset($pln->people) ? $pln->people : []),
             'rate' => ($attended > 0 && $planTotal > 0 ? $attended / $planTotal * 100 : 0),
             'expected' => $expected,
+            /* Kept beside the rate so a section total can be summed from the
+               marks themselves. Averaging the per-module percentages would let
+               a two-student class weigh the same as a forty-student one. */
+            'attended' => $attended,
+            'total' => $planTotal,
         ];
     endforeach;
 
     $overallAttended = $P + $O + $L + $E + $M + $H;
     $overallRate = ($overallAttended > 0 && $TOTAL > 0 ? $overallAttended / $TOTAL * 100 : 0);
+
+    /* One accordion per class type, exactly as the personal-tutor page does.
+       A Theory rate and a Seminar rate answer different questions and should
+       never be read off the same running total.
+
+       Order is fixed rather than first-seen: the section a reader is looking
+       for should not move because a plan was created in a different order. */
+    $pgdTypeOrder = ['SEMINAR', 'THEORY', 'TUTORIAL', 'PRACTICAL', 'WORKSHOP', 'LAB'];
+    $pgdTypeDots = [
+        'TUTORIAL' => '#0E5A61', 'SEMINAR' => '#C9922B', 'THEORY' => '#4B4FA6',
+        'PRACTICAL' => '#1B7F5A', 'WORKSHOP' => '#8A5CB8', 'LAB' => '#2AA9C4',
+    ];
+
+    /* The header tint is the dot colour at low alpha, so the two can never
+       drift apart. Emitted as an "r, g, b" triple rather than a finished rgba
+       so the stylesheet owns the alpha for the resting and hover states. */
+    $pgdRgb = function ($hex) {
+        $hex = ltrim($hex, '#');
+
+        return implode(', ', [hexdec(substr($hex, 0, 2)), hexdec(substr($hex, 2, 2)), hexdec(substr($hex, 4, 2))]);
+    };
+
+    $typeGroups = [];
+    foreach($moduleRows as $row):
+        $key = $row['type'] !== '' ? $row['type'] : 'UNSPECIFIED';
+
+        if(!isset($typeGroups[$key])):
+            $dot = ($pgdTypeDots[$key] ?? '#7A8791');
+            $typeGroups[$key] = [
+                'label' => $key,
+                'dot' => $dot,
+                'rgb' => $pgdRgb($dot),
+                'rows' => [], 'attended' => 0, 'total' => 0,
+                'submitted' => 0, 'passed' => 0, 'expected' => 0,
+            ];
+        endif;
+
+        $typeGroups[$key]['rows'][] = $row;
+        $typeGroups[$key]['attended'] += $row['attended'];
+        $typeGroups[$key]['total'] += $row['total'];
+        /* Totalled from the marks, not averaged from the module percentages.
+           One denominator for both, because they are the same cohort. */
+        $typeGroups[$key]['submitted'] += $row['submission']['counted'];
+        $typeGroups[$key]['passed'] += $row['pass']['counted'];
+        $typeGroups[$key]['expected'] += $row['submission']['expected'];
+    endforeach;
+
+    uksort($typeGroups, function($a, $b) use($pgdTypeOrder) {
+        $ai = array_search($a, $pgdTypeOrder, true);
+        $bi = array_search($b, $pgdTypeOrder, true);
+        /* Anything not in the list sorts alphabetically after everything that
+           is, so a new class type appears rather than disappearing. */
+        $ai = ($ai === false ? count($pgdTypeOrder) : $ai);
+        $bi = ($bi === false ? count($pgdTypeOrder) : $bi);
+
+        return $ai === $bi ? strcmp($a, $b) : $ai - $bi;
+    });
+
+    foreach($typeGroups as $key => $g):
+        $typeGroups[$key]['rate'] = ($g['attended'] > 0 && $g['total'] > 0 ? $g['attended'] / $g['total'] * 100 : 0);
+        /* Null, not zero, when nothing is expected: no cohort means no rate. */
+        $typeGroups[$key]['subRate'] = ($g['expected'] > 0 ? $g['submitted'] / $g['expected'] * 100 : null);
+        $typeGroups[$key]['passRate'] = ($g['expected'] > 0 ? $g['passed'] / $g['expected'] * 100 : null);
+    endforeach;
 
     $chours = explode(':', $contractedHour);
     $contractedMinutes = (isset($chours[0]) ? (int) $chours[0] * 60 : 0) + (isset($chours[1]) ? (int) $chours[1] : 0);
@@ -141,84 +210,131 @@
         </div>
 
         <section class="pgd-table">
-            <div class="pgd-table__head pgd-cols-detail">
-                <span></span>
-                <span>Module name</span>
-                <span>Group</span>
-                <span class="pgd-t-right pgd-t-nowrap">Attendance</span>
-                <span class="pgd-t-right pgd-t-nowrap">Exp. sub.</span>
-                <span class="pgd-t-right pgd-t-nowrap">Submission</span>
-                <span class="pgd-t-right pgd-t-nowrap">Pass rate</span>
-                <span></span>
-            </div>
+            @forelse($typeGroups as $key => $g)
+                @php
+                    /* Submission and achievement are only ever recorded against
+                       taught Theory classes. On a Seminar they were three
+                       columns of nothing wide enough to push the real figures
+                       off to the right, so those sections drop them and get the
+                       width back. */
+                    $isTheory = \App\Services\SubmissionRate::isSubmitting($key);
+                    $cols = $isTheory ? 'pgd-cols-detail' : 'pgd-cols-detail--slim';
+                @endphp
 
-            <div class="pgd-table__row pgd-table__row--total pgd-cols-detail">
-                <span></span>
-                <span>Overall</span>
-                <span></span>
-                <span class="pgd-t-right" style="color: #0E5A61; font-variant-numeric: tabular-nums;">{{ number_format($overallRate, 2) }}%</span>
-                <span class="pgd-t-right" style="font-variant-numeric: tabular-nums;">{{ number_format($expectedTotal) }}</span>
-                <span class="pgd-t-right" style="font-variant-numeric: tabular-nums; {{ $submissionOverall['rate'] === null ? 'color: var(--pgd-ink-faint);' : 'color: #0E5A61;' }}"
-                      title="{{ $submissionOverall['counted'] }} of {{ $submissionOverall['expected'] }} expected submissions">{{ $submissionOverall['rate'] === null ? '—' : number_format($submissionOverall['rate'], 2).'%' }}</span>
-                <span class="pgd-t-right" style="font-variant-numeric: tabular-nums; {{ $passOverall['rate'] === null ? 'color: var(--pgd-ink-faint);' : 'color: #0E5A61;' }}"
-                      title="{{ $passOverall['counted'] }} of {{ $passOverall['expected'] }} passed">{{ $passOverall['rate'] === null ? '—' : number_format($passOverall['rate'], 2).'%' }}</span>
-                <span></span>
-            </div>
+                {{-- One section per class type, each carrying its own column
+                     headings and its own totals: a Seminar rate and a Theory
+                     rate answer different questions and should never be read
+                     off the same running total. --}}
+                <div class="pgd-acc">
+                    <button type="button" class="pgd-acc__head" data-pgd-acc aria-expanded="true"
+                            style="--pgd-acc-rgb: {{ $g['rgb'] }};">
+                        <svg class="pgd-acc__chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
+                        <span class="pgd-acc__dot" style="background: {{ $g['dot'] }};"></span>
+                        <span class="pgd-acc__title">{{ $g['label'] }}</span>
+                        <span class="pgd-acc__count">{{ count($g['rows']) }} {{ count($g['rows']) == 1 ? 'module' : 'modules' }}</span>
 
-            @forelse($moduleRows as $row)
-                <div class="pgd-table__row pgd-cols-detail">
-                    {{-- Both faces when the tutor and the personal tutor differ,
-                         each captioned on hover. --}}
-                    <span class="pgd-people">
-                        @forelse($row['people'] as $person)
-                            <span class="pgd-people__face" data-pgd-tooltip="{{ $person['role'] }} · {{ $person['name'] }}">
-                                <span class="pgd-avatar" style="background: {{ $person['color'] }};">
-                                    @if(!empty($person['photo']))
-                                        <img src="{{ $person['photo'] }}" alt="{{ $person['name'] }}">
-                                    @else
-                                        {{ $person['initials'] }}
-                                    @endif
-                                </span>
-                            </span>
-                        @empty
-                            <span class="pgd-people__face" data-pgd-tooltip="Tutor · {{ $tutorName }}">
-                                <span class="pgd-avatar" style="background: {{ \App\Support\Avatar::soft($tutorName) }};">{{ $tutorInitials }}</span>
-                            </span>
-                        @endforelse
-                    </span>
-                    <span style="min-width: 0;">
-                        <span class="pgd-mod__name">{{ $row['module'] }}</span>
-                        <span class="pgd-mod__meta">
-                            <span class="pgd-mod__type">{{ $row['type'] }}</span>
-                            <span class="pgd-mod__term"><span style="background: {{ $termMeta['dot'] }};"></span>{{ $termMeta['name'] }}</span>
+                        {{-- Repeated on the header so a collapsed section still
+                             reports itself. --}}
+                        <span class="pgd-acc__sum">
+                            <span class="pgd-rate pgd-rate--{{ $pgdTone($g['rate']) }}"><span></span>{{ number_format($g['rate'], 2) }}%</span>
+                            @if($isTheory)
+                                <span class="pgd-acc__note">{{ number_format($g['expected']) }} expected</span>
+                            @endif
                         </span>
-                    </span>
-                    <span>@if(!empty($row['group']))<span class="pgd-group">{{ $row['group'] }}</span>@endif</span>
-                    <span class="pgd-t-right">
-                        <span class="pgd-rate pgd-rate--{{ $pgdTone($row['rate']) }}"><span></span>{{ number_format($row['rate'], 2) }}%</span>
-                    </span>
-                    <span class="pgd-num pgd-t-right">{{ $row['expected'] }}</span>
-                    <span class="pgd-t-right">
-                        @if($row['submission']['rate'] === null)
-                            <span class="pgd-num pgd-num--muted">&mdash;</span>
-                        @else
-                            <span class="pgd-rate pgd-rate--{{ $pgdTone($row['submission']['rate']) }}"
-                                  title="{{ $row['submission']['counted'] }} of {{ $row['submission']['expected'] }} expected submissions"><span></span>{{ number_format($row['submission']['rate'], 2) }}%</span>
-                        @endif
-                    </span>
-                    <span class="pgd-t-right">
-                        @if($row['pass']['rate'] === null)
-                            <span class="pgd-num pgd-num--muted">&mdash;</span>
-                        @else
-                            <span class="pgd-rate pgd-rate--{{ $pgdTone($row['pass']['rate']) }}"
-                                  title="{{ $row['pass']['counted'] }} of {{ $row['pass']['expected'] }} passed"><span></span>{{ number_format($row['pass']['rate'], 2) }}%</span>
-                        @endif
-                    </span>
-                    <span class="pgd-t-center">
-                        <a href="{{ route('tutor-dashboard.plan.module.show', $row['id']) }}" class="pgd-eye" data-pgd-tooltip="Open module details">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5Z"></path><circle cx="12" cy="12" r="1.7"></circle></svg>
-                        </a>
-                    </span>
+                    </button>
+
+                    <div class="pgd-acc__body">
+                        <div class="pgd-table__head {{ $cols }}">
+                            <span></span>
+                            <span>Module name</span>
+                            <span>Group</span>
+                            <span class="pgd-t-right pgd-t-nowrap">Attendance</span>
+                            @if($isTheory)
+                                <span class="pgd-t-right pgd-t-nowrap">Exp. sub.</span>
+                                <span class="pgd-t-right pgd-t-nowrap">Submission</span>
+                                <span class="pgd-t-right pgd-t-nowrap">Pass rate</span>
+                            @endif
+                            <span></span>
+                        </div>
+
+                        <div class="pgd-table__row pgd-table__row--total {{ $cols }}">
+                            <span></span>
+                            <span>Overall</span>
+                            <span></span>
+                            <span class="pgd-t-right" style="color: #0E5A61; font-variant-numeric: tabular-nums;">{{ number_format($g['rate'], 2) }}%</span>
+                            @if($isTheory)
+                                <span class="pgd-t-right" style="font-variant-numeric: tabular-nums;">{{ number_format($g['expected']) }}</span>
+                                <span class="pgd-t-right" style="font-variant-numeric: tabular-nums; {{ $g['subRate'] === null ? 'color: var(--pgd-ink-faint);' : 'color: #0E5A61;' }}"
+                                      title="{{ $g['submitted'] }} of {{ $g['expected'] }} expected submissions">
+                                    {{ $g['subRate'] === null ? '—' : number_format($g['subRate'], 2).'%' }}
+                                </span>
+                                <span class="pgd-t-right" style="font-variant-numeric: tabular-nums; {{ $g['passRate'] === null ? 'color: var(--pgd-ink-faint);' : 'color: #0E5A61;' }}"
+                                      title="{{ $g['passed'] }} of {{ $g['expected'] }} passed">
+                                    {{ $g['passRate'] === null ? '—' : number_format($g['passRate'], 2).'%' }}
+                                </span>
+                            @endif
+                            <span></span>
+                        </div>
+
+                        @foreach($g['rows'] as $row)
+                            <div class="pgd-table__row {{ $cols }}">
+                                {{-- Both faces when the tutor and the personal tutor differ,
+                                     each captioned on hover. --}}
+                                <span class="pgd-people">
+                                    @forelse($row['people'] as $person)
+                                        <span class="pgd-people__face" data-pgd-tooltip="{{ $person['role'] }} &middot; {{ $person['name'] }}">
+                                            <span class="pgd-avatar" style="background: {{ $person['color'] }};">
+                                                @if(!empty($person['photo']))
+                                                    <img src="{{ $person['photo'] }}" alt="{{ $person['name'] }}">
+                                                @else
+                                                    {{ $person['initials'] }}
+                                                @endif
+                                            </span>
+                                        </span>
+                                    @empty
+                                        <span class="pgd-people__face" data-pgd-tooltip="Tutor &middot; {{ $tutorName }}">
+                                            <span class="pgd-avatar" style="background: {{ \App\Support\Avatar::soft($tutorName) }};">{{ $tutorInitials }}</span>
+                                        </span>
+                                    @endforelse
+                                </span>
+                                <span style="min-width: 0;">
+                                    <span class="pgd-mod__name">{{ $row['module'] }}</span>
+                                    <span class="pgd-mod__meta">
+                                        <span class="pgd-mod__type">{{ $row['type'] }}</span>
+                                        <span class="pgd-mod__term"><span style="background: {{ $termMeta['dot'] }};"></span>{{ $termMeta['name'] }}</span>
+                                    </span>
+                                </span>
+                                <span>@if(!empty($row['group']))<span class="pgd-group">{{ $row['group'] }}</span>@endif</span>
+                                <span class="pgd-t-right">
+                                    <span class="pgd-rate pgd-rate--{{ $pgdTone($row['rate']) }}"><span></span>{{ number_format($row['rate'], 2) }}%</span>
+                                </span>
+                                @if($isTheory)
+                                    <span class="pgd-num pgd-t-right">{{ $row['expected'] }}</span>
+                                    <span class="pgd-t-right">
+                                        @if($row['submission']['rate'] === null)
+                                            <span class="pgd-num pgd-num--muted">&mdash;</span>
+                                        @else
+                                            <span class="pgd-rate pgd-rate--{{ $pgdTone($row['submission']['rate']) }}"
+                                                  title="{{ $row['submission']['counted'] }} of {{ $row['submission']['expected'] }} expected submissions"><span></span>{{ number_format($row['submission']['rate'], 2) }}%</span>
+                                        @endif
+                                    </span>
+                                    <span class="pgd-t-right">
+                                        @if($row['pass']['rate'] === null)
+                                            <span class="pgd-num pgd-num--muted">&mdash;</span>
+                                        @else
+                                            <span class="pgd-rate pgd-rate--{{ $pgdTone($row['pass']['rate']) }}"
+                                                  title="{{ $row['pass']['counted'] }} of {{ $row['pass']['expected'] }} passed"><span></span>{{ number_format($row['pass']['rate'], 2) }}%</span>
+                                        @endif
+                                    </span>
+                                @endif
+                                <span class="pgd-t-center">
+                                    <a href="{{ route('tutor-dashboard.plan.module.show', $row['id']) }}" class="pgd-eye" data-pgd-tooltip="Open module details">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5Z"></path><circle cx="12" cy="12" r="1.7"></circle></svg>
+                                    </a>
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             @empty
                 <div class="pgd-table__empty">No modules for this tutor in the selected term.</div>
