@@ -13,10 +13,12 @@ use Illuminate\Http\Request;
 class UserEmailSignatureController extends Controller
 {
     /**
-     * The two artefacts the tab can produce. Gmail keeps the rounded, modern
-     * card; Outlook gets the Word-safe layout (see the blade files for why).
+     * The four artefacts the tab can produce. Gmail keeps the rounded, modern
+     * card; Outlook gets the Word-safe layout; Apple Mail gets a WebKit build
+     * with the data detectors neutralised; mobile stacks the same content into
+     * a phone-width column (see the blade files for why).
      */
-    const VARIANTS = ['gmail', 'outlook'];
+    const VARIANTS = ['gmail', 'outlook', 'apple', 'mobile'];
 
     public function index(){
         $employee = $this->currentEmployee();

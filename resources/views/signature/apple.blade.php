@@ -1,22 +1,37 @@
 {{--
-    Gmail / modern-client variant of the staff email signature.
+    Apple Mail variant of the staff email signature.
 
-    Three panels split by hairline rules: the ringed portrait, the contact
-    details, and the crest with the social badges. The reference design builds
-    this with absolute positioning and flexbox; neither survives an email
-    client, so it is rebuilt here as nested tables with inline styles only —
-    Gmail throws away <style> blocks and classes when a signature is pasted in.
+    Apple Mail draws with WebKit, so the Gmail card survives it almost intact
+    and this file starts from that layout rather than the Word-safe one. Three
+    things do differ, and they are the reason this is its own variant:
+
+    1. Data detectors. macOS and iOS Mail scan the body for phone numbers and
+       postal addresses and wrap whatever they find in their own link, painted
+       system blue with an underline — which lands squarely on the address
+       block and on the extension sitting just outside the tel: link. Text
+       already inside an <a> is left alone, so everything detectable is given
+       a real link of its own here.
+    2. Text inflation. iOS Mail scales small type up unless told otherwise.
+    3. Retina. This audience is entirely on Retina screens — which the panel
+       already covers, being drawn at 2x and sized down for every variant.
 --}}
 @php
     $icon = fn ($name) => ($sig['icons'][$name] ?? '');
-    $telHref = 'tel:'.preg_replace('/[^0-9+]/', '', (string) ($sig['telephone'] ?? ''));
-    $mobileHref = 'tel:'.preg_replace('/[^0-9+]/', '', (string) ($sig['mobile'] ?? ''));
+    $panel = (string) ($sig['photo_url'] ?? '');
+    $showPhoto = filled($panel);
     $showMobile = filled($sig['mobile'] ?? null);
-    $showPhoto = filled($sig['photo_url'] ?? null);
     $roleLine = trim((string) ($sig['job_title'] ?? ''));
     $addressLines = collect([$sig['address_line_1'] ?? null, $sig['address_line_2'] ?? null])
         ->filter(fn ($item) => filled($item))->values();
     $sans = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+
+    /* Switchboard number and extension go inside one link, so the detector
+       cannot claim the digits sitting either side of it. The comma is a DTMF
+       pause, so tapping it on an iPhone dials on through to the desk. */
+    $telHref = 'tel:'.preg_replace('/[^0-9+]/', '', (string) ($sig['telephone'] ?? ''))
+        .(filled($sig['extension'] ?? null) ? ','.preg_replace('/\D/', '', (string) $sig['extension']) : '');
+    $mobileHref = 'tel:'.preg_replace('/[^0-9+]/', '', (string) ($sig['mobile'] ?? ''));
+    $mapHref = 'https://maps.apple.com/?q='.rawurlencode(trim(rtrim($addressLines->implode(' '), ' ,')));
 
     /* The five contact rows, assembled once so they cannot drift apart. */
     $rows = [];
@@ -24,7 +39,7 @@
         $ext = filled($sig['extension'] ?? null)
             ? '<span style="color:#9AA3AE"> &nbsp;&middot;&nbsp; </span><span style="color:#5A6069">ext. '.e($sig['extension']).'</span>'
             : '';
-        $rows[] = ['phone', 'Telephone', '<a href="'.$telHref.'" style="color:#12294A; text-decoration:none">'.e($sig['telephone']).'</a>'.$ext];
+        $rows[] = ['phone', 'Telephone', '<a href="'.$telHref.'" style="color:#12294A; text-decoration:none">'.e($sig['telephone']).$ext.'</a>'];
     }
     if ($showMobile) {
         $rows[] = ['mobile', 'Mobile', '<a href="'.$mobileHref.'" style="color:#12294A; text-decoration:none">'.e($sig['mobile']).'</a>'];
@@ -36,22 +51,24 @@
         $rows[] = ['website', 'Website', '<a href="'.e($sig['website_url']).'" style="color:#12294A; text-decoration:none">'.e($sig['website']).'</a>'];
     }
     if ($addressLines->isNotEmpty()) {
-        $rows[] = ['address', 'Address', '<span style="color:#5A6069">'.$addressLines->map(fn ($line) => e($line))->implode('<br>').'</span>'];
+        $rows[] = ['address', 'Address', '<a href="'.e($mapHref).'" style="color:#5A6069; text-decoration:none">'
+            .$addressLines->map(fn ($line) => e($line))->implode('<br>').'</a>'];
     }
 @endphp
-<table cellpadding="0" cellspacing="0" border="0" width="830" bgcolor="#FFFFFF" style="border-collapse:collapse; width:830px; background:#FFFFFF; box-shadow:0 16px 44px rgba(18,41,74,.34), 0 3px 10px rgba(18,41,74,.14)">
+<table cellpadding="0" cellspacing="0" border="0" width="830" bgcolor="#FFFFFF" style="border-collapse:collapse; width:830px; background:#FFFFFF; color-scheme:only light; -webkit-text-size-adjust:100%; box-shadow:0 16px 44px rgba(18,41,74,.34), 0 3px 10px rgba(18,41,74,.14)">
   <tr>
     {{-- The crimson rule that anchors the whole card --}}
     <td width="5" bgcolor="#C8102E" style="width:5px; background:#C8102E; font-size:1px; line-height:1px">&nbsp;</td>
 
     @if($showPhoto)
-      <td width="218" style="width:218px; padding:0; vertical-align:top">
-        <img src="{{ $sig['photo_url'] }}" width="218" height="320" alt="{{ $sig['display_name'] }}" style="display:block; border:0; width:218px; height:320px">
+      {{-- Twice the pixels, declared at half the size: crisp on a Retina Mac --}}
+      <td width="218" bgcolor="#FFFFFF" style="width:218px; padding:0; vertical-align:top; background:#FFFFFF">
+        <img src="{{ $panel }}" width="218" height="320" alt="{{ $sig['display_name'] }}" style="display:block; border:0; width:218px; height:320px">
       </td>
       <td width="1" bgcolor="#D8E0EA" style="width:1px; background:#D8E0EA; font-size:1px; line-height:1px">&nbsp;</td>
     @endif
 
-    <td width="340" style="width:340px; padding:32px 24px 32px 30px; vertical-align:middle">
+    <td width="340" bgcolor="#FFFFFF" style="width:340px; padding:32px 24px 32px 30px; vertical-align:middle; background:#FFFFFF">
       <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
         <tr>
           <td style="font:700 32px/1.05 {{ $sans }}; letter-spacing:-.026em; color:#12294A">{{ $sig['display_name'] }}</td>
@@ -63,7 +80,7 @@
         @endif
         @if(filled($roleLine))
           <tr>
-            {{-- Uppercased in PHP: Word ignores text-transform outright --}}
+            {{-- Uppercased in PHP so all three variants read identically --}}
             <td style="font:600 11px/1.3 {{ $sans }}; letter-spacing:.17em; color:#8A93A0; padding-top:10px">{{ mb_strtoupper($roleLine) }}</td>
           </tr>
         @endif
@@ -92,7 +109,7 @@
     </td>
 
     <td width="1" bgcolor="#D8E0EA" style="width:1px; background:#D8E0EA; font-size:1px; line-height:1px">&nbsp;</td>
-    <td width="156" align="right" background="{{ $icon('corner') }}" style="width:156px; padding:32px 30px 32px 25px; vertical-align:middle; background-image:url({{ $icon('corner') }}); background-repeat:no-repeat; background-position:right bottom">
+    <td width="156" align="right" bgcolor="#FFFFFF" background="{{ $icon('corner') }}" style="width:156px; padding:32px 30px 32px 25px; vertical-align:middle; background-color:#FFFFFF; background-image:url({{ $icon('corner') }}); background-repeat:no-repeat; background-position:right bottom">
       <table cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse">
         <tr>
           <td align="right" style="text-align:right">
@@ -118,7 +135,7 @@
   </tr>
 </table>
 @if(filled($sig['disclaimer'] ?? null))
-  <table cellpadding="0" cellspacing="0" border="0" width="830" style="border-collapse:collapse; width:830px">
+  <table cellpadding="0" cellspacing="0" border="0" width="830" style="border-collapse:collapse; width:830px; -webkit-text-size-adjust:100%">
     <tr>
       <td style="font:400 10.5px/1.6 {{ $sans }}; color:#6B727C; padding:16px 0 0 0">{{ $sig['disclaimer'] }}</td>
     </tr>

@@ -27,7 +27,7 @@
             </span>
             <div class="myhr-sign__header-text">
                 <h2>Email Signature</h2>
-                <p>Built from your HR record. Edit anything below, then copy it into Gmail or Outlook / Hotmail.</p>
+                <p>Built from your HR record. Edit anything below, then copy it into Gmail, Outlook / Hotmail, Apple Mail or your phone.</p>
             </div>
             <div class="myhr-sign__header-actions">
                 <button type="button" id="signatureReset" class="myhr-sign-btn myhr-sign-btn--muted">
@@ -49,7 +49,7 @@
                 <i data-lucide="image-off"></i>
                 <div>
                     <strong>Images will not appear when you paste this yet.</strong>
-                    The crest, icons and your photo are linked from <code>{{ $fields['image_host'] }}</code>, which Gmail and Outlook cannot reach &mdash; they fetch images from their own servers rather than carrying them with the message. Everything else pastes correctly, and the images appear on their own once this site is running on its public address.
+                    The crest, icons and your photo are linked from <code>{{ $fields['image_host'] }}</code>, which mail clients cannot reach &mdash; they fetch images from their own servers rather than carrying them with the message. Everything else pastes correctly, and the images appear on their own once this site is running on its public address.
                 </div>
             </div>
         @endunless
@@ -119,6 +119,14 @@
                         <i data-lucide="mail-check"></i>
                         Outlook &amp; Hotmail
                     </button>
+                    <button type="button" class="myhr-sign-clients__item" data-client="apple" role="tab" aria-selected="false">
+                        <i data-lucide="at-sign"></i>
+                        Apple Mail
+                    </button>
+                    <button type="button" class="myhr-sign-clients__item" data-client="mobile" role="tab" aria-selected="false">
+                        <i data-lucide="smartphone"></i>
+                        Mobile
+                    </button>
                     <span class="myhr-sign-saved" id="signatureSavedAt">
                         @if($fields['has_saved_row'] && $fields['updated_at'])
                             Last saved {{ $fields['updated_at'] }}
@@ -158,8 +166,39 @@
                         <li>Choose the signature under <strong>New messages</strong> and <strong>Replies/forwards</strong>.</li>
                     </ol>
                     <p class="myhr-sign-help__aside">
-                        <i data-lucide="triangle-alert"></i>
+                        <i data-lucide="alert-triangle"></i>
                         Outlook for Windows draws email with Word, so it ignores rounded corners. This version is laid out to survive that &mdash; use it rather than the Gmail one in any Outlook or Hotmail account.
+                    </p>
+                </div>
+
+                <div class="myhr-sign-help" data-help="apple" hidden>
+                    <h3><i data-lucide="list-ordered"></i> Add this to Apple Mail</h3>
+                    <ol>
+                        <li>Press <strong>Copy signature</strong> above.</li>
+                        <li>In Mail on your Mac, open <strong>Mail</strong> &rarr; <strong>Settings</strong> (<strong>Preferences</strong> on older macOS) &rarr; <strong>Signatures</strong>.</li>
+                        <li>Pick your college account in the left column, click <strong>+</strong> to add a signature and give it a name.</li>
+                        <li>Untick <strong>Always match my default message font</strong>. This is the step people miss &mdash; leave it ticked and Mail strips the whole layout back to plain text.</li>
+                        <li>Select everything already in the right-hand pane, then paste over it with <strong>Cmd&nbsp;+&nbsp;V</strong>.</li>
+                        <li>Pick it under <strong>Choose Signature</strong> so it goes out on every new message.</li>
+                    </ol>
+                    <p class="myhr-sign-help__aside">
+                        <i data-lucide="alert-triangle"></i>
+                        <span>On iPhone and iPad, <strong>Settings &rarr; Mail &rarr; Signature</strong> only holds plain text, so set this up on a Mac. The usual way round it on iOS is to email the signature to yourself, copy the block out of the message, paste it into the Signature field and then shake to undo once, which puts the formatting back. The <strong>Mobile</strong> tab has a version laid out for a phone screen.</span>
+                    </p>
+                </div>
+
+                <div class="myhr-sign-help" data-help="mobile" hidden>
+                    <h3><i data-lucide="list-ordered"></i> Add this to your phone</h3>
+                    <p class="myhr-sign-help__lead">One column, 340&nbsp;pixels wide, so it stays readable on a phone instead of being shrunk to fit. Works on iPhone and Android.</p>
+                    <ol>
+                        <li>Press <strong>Copy signature</strong> above &mdash; easiest on a computer, then send it to yourself.</li>
+                        <li><strong>iPhone / iPad:</strong> open <strong>Settings &rarr; Mail &rarr; Signature</strong>, paste, then shake the phone once and tap <strong>Undo</strong>. That puts the formatting back, which the field otherwise strips.</li>
+                        <li><strong>Android (Gmail):</strong> leave the app's own <strong>Mobile Signature</strong> empty, and paste this into Gmail's signature box on the web instead. Gmail then uses it from the app as well.</li>
+                        <li>Send yourself a test message and check it before relying on it.</li>
+                    </ol>
+                    <p class="myhr-sign-help__aside">
+                        <i data-lucide="alert-triangle"></i>
+                        <span>Gmail keeps one signature per account, so putting this in Gmail's web settings replaces the wide one on your computer too. Pick whichever you send from more. Outlook's mobile app is plain text only &mdash; use the <strong>Outlook &amp; Hotmail</strong> tab in Outlook on the web, and it will follow onto the phone.</span>
                     </p>
                 </div>
             </div>
@@ -174,6 +213,8 @@
     <div id="signatureSource" aria-hidden="true" class="myhr-sign-source">
         <div data-variant="gmail">{!! $markup['gmail'] !!}</div>
         <div data-variant="outlook">{!! $markup['outlook'] !!}</div>
+        <div data-variant="apple">{!! $markup['apple'] !!}</div>
+        <div data-variant="mobile">{!! $markup['mobile'] !!}</div>
     </div>
 
     <!-- BEGIN: Success Modal Content -->

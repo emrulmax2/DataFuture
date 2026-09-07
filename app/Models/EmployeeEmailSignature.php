@@ -118,7 +118,12 @@ class EmployeeEmailSignature extends Model
         $fields['icons'] = self::icons();
         // The rings around the photo are drawn into the image itself; see
         // SignatureAvatar for why they cannot be CSS here.
-        $fields['photo_url'] = self::absoluteUrl(SignatureAvatar::urlFor($employee));
+        // Both are drawn at a higher density than they are displayed at and
+        // sized down in the markup. A signature is read on Retina laptops and
+        // phones, where an image built 1:1 with its CSS size looks soft against
+        // the text beside it.
+        $fields['photo_url'] = self::absoluteUrl(SignatureAvatar::urlFor($employee, 2));
+        $fields['badge_url'] = self::absoluteUrl(SignatureAvatar::badgeUrlFor($employee, 3));
         $fields['image_host'] = parse_url($fields['icons']['lcc-logo'], PHP_URL_HOST);
         $fields['images_public'] = self::hostIsPublic($fields['icons']['lcc-logo']);
         // The college's own details are fixed for everyone, so they come

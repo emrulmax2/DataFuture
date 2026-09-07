@@ -21941,6 +21941,12 @@ body.employee-public-form-body .dataCollectionFormWrap {
     height: 16px;
     width: 16px;
 }
+.myhr-sign-help__lead {
+    color: #5c7977;
+    font-size: 12.5px;
+    line-height: 1.6;
+    margin: -2px 0 10px;
+}
 .myhr-sign-help ol {
     color: #3f5c59;
     font-size: 13px;

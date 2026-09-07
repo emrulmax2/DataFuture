@@ -27,6 +27,15 @@ import { createIcons, icons } from "lucide";
     const clientBtns = Array.from(document.querySelectorAll(".myhr-sign-clients__item"));
     const helpBlocks = Array.from(document.querySelectorAll(".myhr-sign-help"));
 
+    /* Named for the status line after a copy, and the only place the
+     * variant keys are spelled out in the browser. */
+    const CLIENT_NAMES = {
+        gmail: "Gmail",
+        outlook: "Outlook / Hotmail",
+        apple: "Apple Mail",
+        mobile: "your phone",
+    };
+
     let client = "gmail";
     let statusTimer = null;
     let previewTimer = null;
@@ -69,9 +78,17 @@ import { createIcons, icons } from "lucide";
     const paintFrame = () => {
         const node = variantNode(client);
         const html = node ? node.innerHTML : "";
+        /*
+         * The phone card is 340px in a stage several times that wide, and left
+         * against the edge it reads as a broken full-width layout rather than a
+         * deliberate one. It is a single root table, so centring the preview
+         * body is safe — and it never touches what gets copied, which comes
+         * from the source node, not from here.
+         */
+        const centred = client === "mobile" ? "body{display:flex;justify-content:center;}" : "";
         frame.srcdoc =
             '<!DOCTYPE html><html><head><meta charset="utf-8">' +
-            "<style>html,body{margin:0;padding:34px;background:#ffffff;}</style>" +
+            "<style>html,body{margin:0;padding:34px;background:#ffffff;}" + centred + "</style>" +
             "</head><body>" +
             html +
             "</body></html>";
@@ -178,7 +195,7 @@ import { createIcons, icons } from "lucide";
             return;
         }
         const html = node.innerHTML;
-        const label = client === "gmail" ? "Gmail" : "Outlook / Hotmail";
+        const label = CLIENT_NAMES[client] || "your email client";
 
         const done = () => setStatus("Copied. Now paste it into " + label + ".", "ok");
 
