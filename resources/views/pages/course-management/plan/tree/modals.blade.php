@@ -65,9 +65,9 @@
                          the hidden one is never cleared. --}}
                     <div class="cm-field tpTutorWrap">
                         <label for="tp_tutor_id">Tutor</label>
-                        <select id="tp_tutor_id" name="tutor_id" class="cm-select tutor_id">
+                        <select id="tp_tutor_id" name="tutor_id" class="cm-select cm-select--person tutor_id">
                             <option value="">Please Select</option>
-                            @include('pages.course-management.plan.tree.staff-options', ['users' => $users])
+                            @include('pages.course-management.plan.tree.staff-options', ['users' => $users, 'avatar' => true])
                         </select>
                         <div class="acc__input-error error-tutor_id"></div>
                     </div>

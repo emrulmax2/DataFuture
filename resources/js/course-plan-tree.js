@@ -608,6 +608,12 @@ const TABLE_ID = "#classPlanTreeListTable";
      * attributes on the <option> — TomSelect copies an option's whole dataset
      * onto the record it renders from — so nothing here has to be looked up.
      *
+     * The element handed back *becomes* the option (or the item): TomSelect
+     * stamps its own class onto whatever a renderer returns. `.option` is
+     * display:block in this module's skin, so the picture and the name are laid
+     * out by a child of the root rather than by the root — putting the flex on
+     * the root is what left the two stacked.
+     *
      * `loading="lazy"` earns its place: staff photos are served at whatever
      * size they were uploaded at, and without it every one in the list would be
      * fetched the moment the dropdown opened.
@@ -623,7 +629,7 @@ const TABLE_ID = "#classPlanTreeListTable";
             ? `<img class="cm-tsperson__pic" src="${escape(data.photo)}" alt="" loading="lazy" decoding="async">`
             : `<span class="cm-tsperson__pic cm-tsperson__pic--chip" style="background:${escape(data.color || "#0E5A61")}">${escape(data.initials || "")}</span>`;
 
-        return `<div class="cm-tsperson">${face}<span class="cm-tsperson__name">${name}</span></div>`;
+        return `<div class="cm-tsperson"><span class="cm-tsperson__row">${face}<span class="cm-tsperson__name">${name}</span></span></div>`;
     }
 
     const PERSON_OPTIONS = Object.assign({}, TOM_OPTIONS, {
@@ -635,15 +641,10 @@ const TABLE_ID = "#classPlanTreeListTable";
     /* Every picker in the dialogs is searchable. The two multi-selects are
      * absent because they are built on demand, further down, the first time
      * their own modal opens. */
-    const PLAIN_SELECTS = [
-        "tp_module_creation_id",
-        "tp_rooms_id",
-        "tp_class_type",
-        "tp_tutor_id",
-        "tu_rooms_id",
-        "sync_plan_id",
-    ];
-    const PERSON_SELECTS = ["tp_personal_tutor_id", "tu_personal_tutor_id"];
+    const PLAIN_SELECTS = ["tp_module_creation_id", "tp_rooms_id", "tp_class_type", "tu_rooms_id", "sync_plan_id"];
+
+    // Both tutor fields draw the person, not just their name.
+    const PERSON_SELECTS = ["tp_tutor_id", "tp_personal_tutor_id", "tu_personal_tutor_id"];
 
     function enhance(ids, options) {
         ids.forEach((id) => {
