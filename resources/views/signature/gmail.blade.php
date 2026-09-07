@@ -39,19 +39,19 @@
         $rows[] = ['address', 'Address', '<span style="color:#5A6069">'.$addressLines->map(fn ($line) => e($line))->implode('<br>').'</span>'];
     }
 @endphp
-<table cellpadding="0" cellspacing="0" border="0" width="830" bgcolor="#FFFFFF" style="border-collapse:collapse; width:830px; background:#FFFFFF; box-shadow:0 16px 44px rgba(18,41,74,.34), 0 3px 10px rgba(18,41,74,.14)">
+<table cellpadding="0" cellspacing="0" border="0" width="830" bgcolor="#FFFFFF" style="border-collapse:collapse; width:830px; background:#FFFFFF; color-scheme:only light; box-shadow:0 16px 44px rgba(18,41,74,.34), 0 3px 10px rgba(18,41,74,.14)">
   <tr>
     {{-- The crimson rule that anchors the whole card --}}
     <td width="5" bgcolor="#C8102E" style="width:5px; background:#C8102E; font-size:1px; line-height:1px">&nbsp;</td>
 
     @if($showPhoto)
-      <td width="218" style="width:218px; padding:0; vertical-align:top">
+      <td width="218" bgcolor="#FFFFFF" style="width:218px; padding:0; vertical-align:top; background:#FFFFFF">
         <img src="{{ $sig['photo_url'] }}" width="218" height="320" alt="{{ $sig['display_name'] }}" style="display:block; border:0; width:218px; height:320px">
       </td>
       <td width="1" bgcolor="#D8E0EA" style="width:1px; background:#D8E0EA; font-size:1px; line-height:1px">&nbsp;</td>
     @endif
 
-    <td width="340" style="width:340px; padding:32px 24px 32px 30px; vertical-align:middle">
+    <td width="340" bgcolor="#FFFFFF" style="width:340px; padding:32px 24px 32px 30px; vertical-align:middle; background:#FFFFFF">
       <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
         <tr>
           <td style="font:700 32px/1.05 {{ $sans }}; letter-spacing:-.026em; color:#12294A">{{ $sig['display_name'] }}</td>
@@ -92,7 +92,7 @@
     </td>
 
     <td width="1" bgcolor="#D8E0EA" style="width:1px; background:#D8E0EA; font-size:1px; line-height:1px">&nbsp;</td>
-    <td width="156" align="right" background="{{ $icon('corner') }}" style="width:156px; padding:32px 30px 32px 25px; vertical-align:middle; background-image:url({{ $icon('corner') }}); background-repeat:no-repeat; background-position:right bottom">
+    <td width="156" align="right" bgcolor="#FFFFFF" background="{{ $icon('corner') }}" style="width:156px; padding:32px 30px 32px 25px; vertical-align:middle; background-color:#FFFFFF; background-image:url({{ $icon('corner') }}); background-repeat:no-repeat; background-position:right bottom">
       <table cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse">
         <tr>
           <td align="right" style="text-align:right">
