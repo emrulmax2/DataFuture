@@ -1899,7 +1899,9 @@ body.staff-result-submission-body #PublishDateConfirmUploadTask .sr-publish-pick
     width: 100%;
 }
 
-body.staff-result-submission-body #PublishDateConfirmUploadTask .ts-wrapper {
+/* In TomSelect 1.7 the outer wrapper is `.ts-control` and the control box
+   itself is `.ts-input`; the option list is its absolutely positioned child. */
+body.staff-result-submission-body #PublishDateConfirmUploadTask .ts-control {
     width: 100%;
 }
 
@@ -1915,6 +1917,7 @@ body.staff-result-submission-body #PublishDateConfirmUploadTask .ts-input {
     box-shadow: none !important;
     color: #3a4a47 !important;
     display: flex;
+    flex-wrap: nowrap;
     font-size: 13px !important;
     font-weight: 600;
     line-height: 1;
@@ -1925,8 +1928,7 @@ body.staff-result-submission-body #PublishDateConfirmUploadTask .ts-input {
 }
 
 body.staff-result-submission-body #PublishDateConfirmUploadTask .ts-input.dropdown-active,
-body.staff-result-submission-body #PublishDateConfirmUploadTask .ts-input.focus,
-body.staff-result-submission-body #PublishDateConfirmUploadTask .ts-wrapper.focus .ts-input {
+body.staff-result-submission-body #PublishDateConfirmUploadTask .ts-input.focus {
     border-color: #b9a970 !important;
     box-shadow: 0 0 0 3px rgba(198, 164, 78, .14) !important;
 }
@@ -1953,9 +1955,24 @@ body.staff-result-submission-body #PublishDateConfirmUploadTask .ts-input > inpu
     padding: 0 !important;
 }
 
-body.staff-result-submission-body #PublishDateConfirmUploadTask .ts-input > input::placeholder {
-    color: #8a9a97 !important;
+/* Empty-state label. The `dropdown_input` plugin parks the control's own input
+   off-screen (`.input-hidden`) and moves the search box into the dropdown, so
+   its placeholder attribute never renders and the closed control read blank.
+   TomSelect also drops the empty first <option>, so there is no item to show
+   either — hence the label lives here. */
+body.staff-result-submission-body #PublishDateConfirmUploadTask .ts-input:not(.has-items)::after {
+    content: "Select publish type";
+    color: #8a9a97;
+    font-size: 13px;
     font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* Base TomSelect paints a 1px strip along the open control's bottom edge to
+   butt it against the dropdown; the list floats detached here, so drop it. */
+body.staff-result-submission-body #PublishDateConfirmUploadTask .ts-input.dropdown-active::before {
+    display: none;
 }
 
 /* Floating option list */

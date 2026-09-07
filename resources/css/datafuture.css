@@ -21580,3 +21580,431 @@ body.employee-public-form-body .dataCollectionFormWrap {
 .dark .att-page .att-btn--outline,
 .dark .att-page .att-input,
 .dark .att-page .att-editor__close{ background:#233145; border-color:#3f4b5f; color:#cbd5e1; }
+
+/* ============================================================================
+   My HR -> Email Signature (myhr-sign-*)
+   Two-column workspace: the edit form on the left, a live preview of the
+   rendered signature on the right. Palette follows the my-account shell.
+   ========================================================================= */
+.myhr-sign {
+    background: #ffffff;
+    border: 1px solid #e1eae9;
+    border-left: 4px solid #0f7b76;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(11, 43, 40, 0.05);
+    margin-bottom: 22px;
+    overflow: hidden;
+}
+.myhr-sign__header {
+    align-items: center;
+    border-bottom: 1px solid #edf3f2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 13px;
+    padding: 18px 26px;
+}
+.myhr-sign__header-icon {
+    align-items: center;
+    background: #e3f0ef;
+    border-radius: 10px;
+    color: #0f7b76;
+    display: flex;
+    flex: none;
+    height: 38px;
+    justify-content: center;
+    width: 38px;
+}
+.myhr-sign__header-icon svg {
+    height: 18px;
+    width: 18px;
+}
+.myhr-sign__header-text {
+    flex: 1;
+    min-width: 220px;
+}
+.myhr-sign__header-text h2 {
+    color: #12302d;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0;
+}
+.myhr-sign__header-text p {
+    color: #5c7977;
+    font-size: 12.5px;
+    line-height: 1.5;
+    margin: 3px 0 0;
+}
+.myhr-sign__header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.myhr-sign-btn {
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #d4e3e1;
+    border-radius: 9px;
+    color: #17312f;
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 13px;
+    font-weight: 600;
+    gap: 7px;
+    line-height: 1;
+    padding: 9px 14px;
+    text-decoration: none;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+    white-space: nowrap;
+}
+.myhr-sign-btn svg {
+    height: 15px;
+    width: 15px;
+}
+.myhr-sign-btn:hover {
+    background: #f2f8f7;
+    border-color: #b9d4d1;
+    color: #0f4f4a !important;
+}
+.myhr-sign-btn--primary {
+    background: #0f7b76;
+    border-color: #0f7b76;
+    color: #ffffff !important;
+}
+.myhr-sign-btn--primary:hover {
+    background: #0c6660;
+    border-color: #0c6660;
+    color: #ffffff !important;
+}
+.myhr-sign-btn--muted {
+    background: #f3f7f6;
+    border-color: #dfeae8;
+    color: #4a6b68;
+}
+.myhr-sign-btn[disabled] {
+    cursor: not-allowed;
+    opacity: .6;
+}
+.myhr-sign-alert {
+    align-items: flex-start;
+    background: #fef7e7;
+    border-bottom: 1px solid #f3e3bd;
+    color: #7a5a11;
+    display: flex;
+    font-size: 12.5px;
+    gap: 10px;
+    line-height: 1.6;
+    padding: 13px 26px;
+}
+.myhr-sign-alert svg {
+    flex: none;
+    height: 16px;
+    margin-top: 2px;
+    width: 16px;
+}
+.myhr-sign-alert strong {
+    color: #6b4d08;
+    font-weight: 700;
+}
+.myhr-sign-alert code {
+    background: #f7ebcd;
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11.5px;
+    padding: 1px 5px;
+}
+.myhr-sign__layout {
+    display: grid;
+    gap: 0;
+    grid-template-columns: minmax(320px, 400px) minmax(0, 1fr);
+}
+.myhr-sign__form {
+    border-right: 1px solid #edf3f2;
+    padding: 22px 24px 26px;
+}
+.myhr-sign-group {
+    border: 0;
+    margin: 0 0 22px;
+    padding: 0;
+}
+.myhr-sign-group:last-of-type {
+    margin-bottom: 14px;
+}
+.myhr-sign-group > legend {
+    color: #0f7b76;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    margin-bottom: 12px;
+    padding: 0;
+    text-transform: uppercase;
+}
+.myhr-sign-field {
+    display: block;
+    margin-bottom: 13px;
+}
+.myhr-sign-field > span {
+    color: #17312f;
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+.myhr-sign-field input {
+    background: #ffffff;
+    border: 1px solid #d9e6e4;
+    border-radius: 9px;
+    color: #17312f;
+    display: block;
+    font-size: 13.5px;
+    padding: 9px 12px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+    width: 100%;
+}
+.myhr-sign-field input:focus {
+    border-color: #0f7b76;
+    box-shadow: 0 0 0 3px rgba(15, 123, 118, 0.12);
+    outline: none;
+}
+.myhr-sign-field input::placeholder {
+    color: #a9bfbc;
+}
+.myhr-sign-field small {
+    color: #7d9997;
+    display: block;
+    font-size: 11.5px;
+    margin-top: 5px;
+    overflow-wrap: anywhere;
+}
+.myhr-sign-field-row {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: minmax(0, 1fr) 108px;
+}
+.myhr-sign-toggle {
+    align-items: center;
+    color: #17312f;
+    cursor: pointer;
+    display: flex;
+    font-size: 13px;
+    font-weight: 500;
+    gap: 10px;
+    margin-bottom: 11px;
+}
+.myhr-sign-toggle input {
+    height: 0;
+    opacity: 0;
+    position: absolute;
+    width: 0;
+}
+.myhr-sign-toggle > span {
+    background: #dbe7e5;
+    border-radius: 999px;
+    flex: none;
+    height: 20px;
+    position: relative;
+    transition: background .15s ease;
+    width: 36px;
+}
+.myhr-sign-toggle > span::after {
+    background: #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 1px 2px rgba(11, 43, 40, 0.25);
+    content: "";
+    height: 16px;
+    left: 2px;
+    position: absolute;
+    top: 2px;
+    transition: transform .15s ease;
+    width: 16px;
+}
+.myhr-sign-toggle input:checked + span {
+    background: #0f7b76;
+}
+.myhr-sign-toggle input:checked + span::after {
+    transform: translateX(16px);
+}
+.myhr-sign-toggle input:focus-visible + span {
+    box-shadow: 0 0 0 3px rgba(15, 123, 118, 0.2);
+}
+.myhr-sign-note {
+    align-items: flex-start;
+    background: #f3f8f7;
+    border-radius: 10px;
+    color: #4a6b68;
+    display: flex;
+    font-size: 12px;
+    gap: 8px;
+    line-height: 1.5;
+    margin: 0;
+    padding: 11px 13px;
+}
+.myhr-sign-note svg {
+    flex: none;
+    height: 15px;
+    margin-top: 1px;
+    width: 15px;
+}
+.myhr-sign__preview {
+    background: #f7fafa;
+    min-width: 0;
+    padding: 18px 24px 24px;
+}
+.myhr-sign-clients {
+    align-items: center;
+    border-bottom: 1px solid #e3edec;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 14px;
+}
+.myhr-sign-clients__item {
+    align-items: center;
+    background: none;
+    border: 0;
+    border-bottom: 2.5px solid transparent;
+    color: #5c7977;
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 13.5px;
+    font-weight: 500;
+    gap: 7px;
+    padding: 10px 12px 8px;
+}
+.myhr-sign-clients__item svg {
+    height: 15px;
+    width: 15px;
+}
+.myhr-sign-clients__item:hover {
+    color: #17312f;
+}
+.myhr-sign-clients__item.active {
+    border-bottom-color: #0f7b76;
+    color: #0f4f4a;
+    font-weight: 600;
+}
+.myhr-sign-saved {
+    color: #8aa5a3;
+    font-size: 11.5px;
+    margin-left: auto;
+    padding-bottom: 8px;
+}
+.myhr-sign-toolbar {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+.myhr-sign-toolbar__status {
+    color: #5c7977;
+    font-size: 12.5px;
+    font-weight: 500;
+}
+.myhr-sign-toolbar__status.is-ok {
+    color: #0f8278;
+}
+.myhr-sign-toolbar__status.is-error {
+    color: #d64545;
+}
+.myhr-sign-stage {
+    background: #ffffff;
+    border: 1px solid #e3edec;
+    border-radius: 12px;
+    margin-bottom: 18px;
+    overflow: auto;
+    padding: 4px;
+}
+.myhr-sign-stage iframe {
+    border: 0;
+    display: block;
+    height: 560px;
+    min-width: 660px;
+    width: 100%;
+}
+.myhr-sign-help {
+    background: #ffffff;
+    border: 1px solid #e3edec;
+    border-radius: 12px;
+    padding: 16px 20px 18px;
+}
+.myhr-sign-help h3 {
+    align-items: center;
+    color: #12302d;
+    display: flex;
+    font-size: 13.5px;
+    font-weight: 700;
+    gap: 8px;
+    margin: 0 0 10px;
+}
+.myhr-sign-help h3 svg {
+    height: 16px;
+    width: 16px;
+}
+.myhr-sign-help ol {
+    color: #3f5c59;
+    font-size: 13px;
+    line-height: 1.65;
+    margin: 0;
+    padding-left: 20px;
+}
+.myhr-sign-help ol li {
+    list-style: decimal;
+    margin-bottom: 4px;
+}
+.myhr-sign-help strong {
+    color: #17312f;
+    font-weight: 600;
+}
+.myhr-sign-help__aside {
+    align-items: flex-start;
+    background: #fef7e7;
+    border-radius: 9px;
+    color: #7a5a11;
+    display: flex;
+    font-size: 12px;
+    gap: 8px;
+    line-height: 1.55;
+    margin: 12px 0 0;
+    padding: 10px 12px;
+}
+.myhr-sign-help__aside svg {
+    flex: none;
+    height: 15px;
+    margin-top: 1px;
+    width: 15px;
+}
+/* Holds the real signature nodes for the clipboard - never shown, but must
+   stay rendered so a Range can select live formatting rather than markup. */
+.myhr-sign-source {
+    height: 1px;
+    left: -10000px;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    width: 700px;
+}
+@media (max-width: 1100px) {
+    .myhr-sign__layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .myhr-sign__form {
+        border-bottom: 1px solid #edf3f2;
+        border-right: 0;
+    }
+}
+@media (max-width: 640px) {
+    .myhr-sign__header,
+    .myhr-sign__form,
+    .myhr-sign__preview {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+    .myhr-sign__header-actions {
+        width: 100%;
+    }
+    .myhr-sign__header-actions .myhr-sign-btn {
+        flex: 1;
+        justify-content: center;
+    }
+}

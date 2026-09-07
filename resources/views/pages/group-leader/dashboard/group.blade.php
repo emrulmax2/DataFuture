@@ -193,7 +193,7 @@
                                 <tr>
                                     <th>Module</th>
                                     <th>Tutor</th>
-                                    <th>Tutorial tutor</th>
+                                    <th>Personal tutor</th>
                                     <th>Sessions</th>
                                     <th>Attendance</th>
                                     <th>Submission</th>
@@ -214,9 +214,9 @@
                                             <div class="gl-table__code gl-mono">{{ $module['code'] }}</div>
                                         </td>
                                         <td>{{ $module['tutor'] ?: '—' }}</td>
-                                        <td style="color:#64748b;">{{ $module['tutorialTutor'] ?: '—' }}</td>
+                                        <td style="color:var(--gl-muted);">{{ $module['tutorialTutor'] ?: '—' }}</td>
                                         <td>
-                                            <span style="font-weight:500;color:#334155;">{{ $module['delivered'] }}</span><span style="color:#94a3b8;">/{{ $module['planned'] }}</span>
+                                            <span style="font-weight:500;color:var(--gl-body);">{{ $module['delivered'] }}</span><span style="color:var(--gl-faint);">/{{ $module['planned'] }}</span>
                                         </td>
                                         <td>
                                             <div style="display:flex;align-items:center;gap:8px;">
@@ -230,7 +230,7 @@
                                                     {{ $module['submissionPct'] }}%
                                                 </span>
                                             @else
-                                                <span style="color:#94a3b8;">Not due</span>
+                                                <span style="color:var(--gl-faint);">Not due</span>
                                             @endif
                                         </td>
                                         <td>

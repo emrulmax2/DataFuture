@@ -348,6 +348,7 @@ use App\Http\Controllers\StudentApplicationPrintController;
 use App\Http\Controllers\StudentDocumentRequestFormController;
 use App\Http\Controllers\StudentOrderController;
 use App\Http\Controllers\StudentVisitController;
+use App\Http\Controllers\User\UserEmailSignatureController;
 use App\Http\Controllers\User\UserHolidayController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Tutor\DashboardController as TutorDashboard;
@@ -1480,6 +1481,13 @@ Route::middleware('auth')->group(function() {
         Route::get('my-account', 'index')->name('user.account'); 
         Route::get('my-account/payslip', 'payrollSyncShow')->name('user.account.payslip'); 
         Route::get('my-account/extra-benefit', 'extraBenefit')->name('user.account.extrabenefit'); 
+    });
+
+    Route::controller(UserEmailSignatureController::class)->group(function() {
+        Route::get('my-account/email-signature', 'index')->name('user.account.signature');
+        Route::post('my-account/email-signature/update', 'update')->name('user.account.signature.update');
+        Route::post('my-account/email-signature/preview', 'preview')->name('user.account.signature.preview');
+        Route::post('my-account/email-signature/reset', 'reset')->name('user.account.signature.reset');
     });
 
     Route::controller(UserHolidayController::class)->group(function(){

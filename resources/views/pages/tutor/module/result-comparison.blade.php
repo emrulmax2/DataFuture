@@ -351,7 +351,7 @@
                             <div class="text-3xl mt-5 title">Set A Publish Date</div>
                             <div class="text-slate-500 mt-2 description">
                                 <div class="mt-1 mx-auto sr-publish-picker">
-                                    <select data-search="true" data-placeholder="Select publish type" class="tom-select w-full" id="published_at" name="published_at" >
+                                    <select data-search="true" data-placeholder="Search publish type..." class="tom-select w-full" id="published_at" name="published_at" >
                                         <option value="">Please Select A Publish Type</option>
                                         @if(isset($term_publish_date) && !empty($term_publish_date))
                                             @php

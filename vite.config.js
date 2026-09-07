@@ -286,6 +286,7 @@ export default defineConfig({
                 'resources/js/communication-template.js',
                 'resources/js/user-team-holiday.js',
                 'resources/js/user-groups.js',
+                'resources/js/user-email-signature.js',
                 'resources/js/holiday-hour-report.js',
 
                 'resources/js/application-analysis.js',

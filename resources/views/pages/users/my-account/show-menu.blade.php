@@ -30,4 +30,7 @@
             Vacancies
         </a>
     @endif
+    <a href="{{ route('user.account.signature') }}" class="my-account-tabs__item {{ Route::currentRouteName() == 'user.account.signature' ? 'active' : '' }}">
+        Email Signature
+    </a>
 </nav>

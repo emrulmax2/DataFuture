@@ -13,6 +13,7 @@
                 @endif
             </span>
             <span class="gl-row__sub">
+                <span class="gl-row__id">{{ $row['registration_no'] }}</span> ·
                 {{ $row['personalTutor'] ? 'PT: '.$row['personalTutor'] : 'No personal tutor' }} ·
                 @if($row['lastContact'])
                     Last contact {{ $row['lastContact'] }}
