@@ -2469,7 +2469,11 @@
  * class so the list keeps one left edge either way.
  * ------------------------------------------------------------------ */
 
-.cm-tsperson {
+/* The root is whatever personRow() returns, and TomSelect stamps `option` or
+ * `item` onto it — `.option` is display:block a few rules up, which beats a
+ * `display: flex` put here and stacks the picture above the name. So the root
+ * stays a plain block and the row is a child of it. */
+.cm-tsperson__row {
     align-items: center;
     display: flex;
     gap: 9px;
@@ -2496,6 +2500,9 @@
 }
 
 .cm-tsperson__name {
+    /* A flex item will not shrink below its content without this, so a long
+     * name would push the row wide instead of ellipsing. */
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
