@@ -91,7 +91,7 @@
 
   {{-- Contact rows: same glyphs as the desktop card, spaced for a thumb --}}
   <tr>
-    <td style="padding:18px 16px 4px 16px">
+    <td bgcolor="#FFFFFF" style="padding:18px 16px 4px 16px; background:#FFFFFF">
       <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
         @foreach($rows as $item)
           <tr>
@@ -107,7 +107,7 @@
 
   {{-- Crest left, socials right, on one line at this width --}}
   <tr>
-    <td style="padding:20px 16px 20px 16px">
+    <td bgcolor="#FFFFFF" style="padding:20px 16px 20px 16px; background:#FFFFFF">
       <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse; width:100%">
         <tr>
           <td align="left" style="text-align:left; vertical-align:middle">
