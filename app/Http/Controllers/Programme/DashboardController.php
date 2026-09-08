@@ -1127,7 +1127,7 @@ class DashboardController extends Controller
             $res[$tut->id] = $tut;
             $res[$tut->id]['submission'] = $submission;
             $res[$tut->id]['pass'] = PassRate::total(array_intersect_key($passByPlan, $mine));
-            $res[$tut->id]['attendances'] = $this->getTermAttendanceRate($termIds, $tut->id, 1);
+            $res[$tut->id]['attendances'] = $this->getTermAttendanceRate($termIds, $tut->id, 1, $course_id);
             $res[$tut->id]['contracted_hour'] = (isset($employee->workingPattern->contracted_hour) && !empty($employee->workingPattern->contracted_hour) ? $employee->workingPattern->contracted_hour : '00:00');
             $res[$tut->id]['class_minutes'] = $classMinutes;
             $res[$tut->id]['class_hours'] = $this->calculateHourMinute($classMinutes);
@@ -1292,10 +1292,10 @@ class DashboardController extends Controller
             $tut['no_of_assigned'] = count($assigns);
             $tut['no_of_group'] = count($groups);
             $res[$tut->id] = $tut;
-            $res[$tut->id]['attendances'] = $this->getTermAttendanceRate($termIds, $tut->id, 2);
+            $res[$tut->id]['attendances'] = $this->getTermAttendanceRate($termIds, $tut->id, 2, $course_id);
             $res[$tut->id]['undecidedUploads'] = 0;
             $res[$tut->id]['contracted_hour'] = (isset($employee->workingPattern->contracted_hour) && !empty($employee->workingPattern->contracted_hour) ? $employee->workingPattern->contracted_hour : '00:00');
-            $res[$tut->id]['outstanding_calls'] = $this->getPersonalTutorOutstandingCall($term_declaration_id, $course_id, $tut->id);
+            $res[$tut->id]['outstanding_calls'] = $this->getPersonalTutorOutstandingCall($term_declaration_id, $tut->id, $course_id);
             $res[$tut->id]['initials'] = $this->initialsOf(isset($tut->employee->full_name) ? $tut->employee->full_name : (isset($tut->name) ? $tut->name : ''));
             $res[$tut->id]['term_ids'] = $activePlans->pluck('term_declaration_id')->unique()->values()->toArray();
             $mine = array_flip(($planIdsByTutor[$tut->id] ?? collect())->all());
@@ -1322,40 +1322,69 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function getPersonalTutorOutstandingCall($term_declaration_id, $course_id = 0, $user_id){
+    /**
+     * Absences still waiting on a follow-up call, for one personal tutor.
+     *
+     * Counted as distinct student-and-date pairs: a student marked absent in
+     * three classes on one day is one call to make, not three.
+     */
+    public function getPersonalTutorOutstandingCall($term_declaration_id, $user_id, $course_id = 0){
+        /* The tutor's tutorials for this term, plus the Theory class each one
+           hangs off — the same pair the attendance column totals, and for the
+           same reason: the theory plan carries no `personal_tutor_id`, so
+           `parent_id` is the only route back to the tutor. Term 55 keeps 900
+           of its outstanding absences on theory plans against 8 on the
+           tutorials themselves.
 
-        $tutor_plans = PlansDateList::whereHas('plan', function($q) use($term_declaration_id, $course_id,$user_id){
+           The term and the class type are constraints on one query rather
+           than an `orWhere` beside them. Written the old way they were not
+           binding at all — `(term AND type AND tutor_id) OR personal_tutor_id`
+           let the second branch match that tutor's plans in every term the
+           college has ever run, which is what made this column count absences
+           from closed terms. */
+        $tutorialPlans = Plan::where('term_declaration_id', $term_declaration_id)
+            ->where('personal_tutor_id', $user_id)
+            ->where('class_type', 'Tutorial')
+            ->when($course_id > 0, function($q) use($course_id){ $q->where('course_id', $course_id); })
+            ->get(['id', 'parent_id']);
 
-                        $q->where('term_declaration_id', $term_declaration_id)
-                            ->where('class_type', 'Tutorial')
-                            ->where('tutor_id', $user_id)
-                            ->orWhere('personal_tutor_id', $user_id);
-                        if($course_id > 0):
-                            $q->where('course_id', $course_id);
-                        endif;
+        $parentIds = Plan::whereIn('id', $tutorialPlans->pluck('parent_id')->filter()->unique()->values()->all())
+            ->where('term_declaration_id', $term_declaration_id)
+            ->tap(fn ($q) => SubmissionRate::scopeSubmitting($q))
+            ->pluck('id')->all();
 
-                    })->get();
-        $date_list_ids = $tutor_plans->pluck('id')->unique()->toArray();
-        $plan_ids = $tutor_plans->pluck('plan_id')->unique()->toArray();
+        $plan_ids = array_values(array_unique(array_merge($tutorialPlans->pluck('id')->all(), $parentIds)));
+        if(empty($plan_ids)):
+            return 0;
+        endif;
+
+        $date_list_ids = PlansDateList::whereIn('plan_id', $plan_ids)->pluck('id')->unique()->toArray();
 
         $assignStudents = Assign::whereIn('plan_id', $plan_ids)->where(function($q){
                     $q->whereNull('attendance')->orWhere('attendance', 1)->orWhere('attendance', '');
                 })->pluck('student_id')->unique()->toArray();
 
-        $outStandingCount = 0;
-        if(!empty($assignStudents)):
-            $outStandingCount += DB::table('attendances as atn')
-                        ->select('atn.student_id', 'atn.attendance_date', DB::raw('count(atn.id) as no_of_rows'), DB::raw('GROUP_CONCAT(atn.id) as atn_ids'))
-                        ->leftJoin('plans as pln', 'pln.id', 'atn.plan_id')
-                        ->whereIn('atn.student_id', $assignStudents)
-                        ->where('atn.attendance_feed_status_id', 4)
-                        ->where('atn.tracking_status', 0)
-                        ->whereIn('pln.id', $plan_ids)
-                        ->whereIn('atn.plans_date_list_id', $date_list_ids)
-                        ->groupBy('atn.student_id', 'atn.attendance_date')->orderBy('atn.attendance_date', 'DESC')->get()->count();
+        if(empty($assignStudents) || empty($date_list_ids)):
+            return 0;
         endif;
 
-        return $outStandingCount;
+        return DB::table('attendances as atn')
+                    ->select('atn.student_id', 'atn.attendance_date')
+                    /* Soft-deleted marks are not a call to make. Every other
+                       attendance figure in this module already skips them. */
+                    ->whereNull('atn.deleted_at')
+                    ->whereIn('atn.student_id', $assignStudents)
+                    ->where('atn.attendance_feed_status_id', 4)
+                    ->where('atn.tracking_status', 0)
+                    ->whereIn('atn.plan_id', $plan_ids)
+                    ->whereIn('atn.plans_date_list_id', $date_list_ids)
+                    /* Up to yesterday. An absence marked this morning is not
+                       yet a missed call — the tutor still has today to make
+                       it, and counting it would put the column permanently in
+                       the red by breakfast. */
+                    ->whereDate('atn.attendance_date', '<', date('Y-m-d'))
+                    ->groupBy('atn.student_id', 'atn.attendance_date')
+                    ->get()->count();
     }
 
 
@@ -1477,12 +1506,12 @@ class DashboardController extends Controller
             'assignedStudents' => $assignedStudents,
             'tutorInitials' => $this->initialsOf(isset($tutor->employee->full_name) ? $tutor->employee->full_name : (isset($tutor->name) ? $tutor->name : '')),
             'contractedHour' => (isset($tutor->employee->workingPattern->contracted_hour) && !empty($tutor->employee->workingPattern->contracted_hour) ? $tutor->employee->workingPattern->contracted_hour : '00:00'),
-            'outstandingCalls' => $this->getPersonalTutorOutstandingCall($term_declaration_id, 0, $tutorid),
+            'outstandingCalls' => $this->getPersonalTutorOutstandingCall($term_declaration_id, $tutorid),
             'termColours' => $this->getTermColourMap([$term_declaration_id]),
         ]);
     }
 
-    public function getTermAttendanceRate($term_declaration_id, $tutor_id, $type = 1){
+    public function getTermAttendanceRate($term_declaration_id, $tutor_id, $type = 1, $course_id = 0){
         $tutor_field = ($type == 2 ? 'personal_tutor_id' : 'tutor_id');
         $termIds = (is_array($term_declaration_id) || $term_declaration_id instanceof \Illuminate\Support\Collection)
             ? $term_declaration_id
@@ -1498,14 +1527,42 @@ class DashboardController extends Controller
         $plan_ids = $planDateLists->pluck('plan_id')->unique()->toArray();
         $date_ids = $planDateLists->pluck('id')->unique()->toArray();*/
 
-        $plan_ids = Plan::whereIn('term_declaration_id', $termIds)->where($tutor_field, $tutor_id)->where(function($q) use($type){
-            if($type == 2):
-                $q->whereIn('class_type', ['Tutorial', 'Seminar']);
-            else:
-                $q->whereNotIn('class_type', ['Tutorial', 'Seminar']);
-            endif;
-        })->pluck('id')->unique()->toArray();
-        
+        /* The course filter belongs on the tutor's own plans. The Theory
+           parents picked up below inherit it, because no parent sits in a
+           different course from its tutorial — the same reason the submission
+           and pass columns filter the tutorial rather than the parent. */
+        $tutorPlans = Plan::whereIn('term_declaration_id', $termIds)->where($tutor_field, $tutor_id)
+            ->when($course_id > 0, function($q) use($course_id){ $q->where('course_id', $course_id); })
+            ->where(function($q) use($type){
+                if($type == 2):
+                    $q->whereIn('class_type', ['Tutorial', 'Seminar']);
+                else:
+                    $q->whereNotIn('class_type', ['Tutorial', 'Seminar']);
+                endif;
+            })->get(['id', 'parent_id', 'class_type']);
+
+        $plan_ids = $tutorPlans->pluck('id')->unique()->values()->toArray();
+
+        if($type == 2):
+            /* A personal tutor's group is marked on the Theory class as well as
+               on the Tutorial that hangs off it, so both sides of the pair
+               count towards their attendance.
+
+               Without the parent the column reads the wrong register almost
+               entirely: term 55 keeps 1,318 attendance rows across 36 Theory
+               plans against 26 rows on 4 Tutorials, so a group that attends
+               reliably was being reported off a handful of marks.
+
+               The parent is confirmed Theory and in the same term rather than
+               trusted — the same test the submission and pass columns use. */
+            $parentIds = Plan::whereIn('id', $tutorPlans->where('class_type', 'Tutorial')->pluck('parent_id')->filter()->unique()->values()->all())
+                ->whereIn('term_declaration_id', $termIds)
+                ->tap(fn ($q) => SubmissionRate::scopeSubmitting($q))
+                ->pluck('id')->all();
+
+            $plan_ids = array_values(array_unique(array_merge($plan_ids, $parentIds)));
+        endif;
+
         $student_ids = (!empty($plan_ids) ? Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray() : []);
         $query = DB::table('attendances as atn')
                     ->select(
@@ -1521,6 +1578,11 @@ class DashboardController extends Controller
                     )
                     
                     ->whereNull('atn.deleted_at')
+                    /* Up to yesterday, the same cutoff the outstanding-call
+                       column uses. A register taken this morning is still
+                       being filled in — counting it would drop the rate every
+                       day at breakfast and recover it by the afternoon. */
+                    ->whereDate('atn.attendance_date', '<', date('Y-m-d'))
                     ->whereIn('atn.plan_id', $plan_ids);
         if(!empty($student_ids)):
             $query->whereIn('atn.student_id', $student_ids);
@@ -1547,6 +1609,10 @@ class DashboardController extends Controller
                     )
                     
                     ->whereNull('atn.deleted_at')
+                    /* Up to yesterday — see getTermAttendanceRate(). The two
+                       have to share the cutoff, or a tutor's row on the list
+                       stops matching their own page. */
+                    ->whereDate('atn.attendance_date', '<', date('Y-m-d'))
                     ->whereIn('atn.plans_date_list_id', $planDateLists);
         if(!empty($student_ids)):
             $query->whereIn('atn.student_id', $student_ids);
@@ -2018,7 +2084,7 @@ class DashboardController extends Controller
                 $cHour = $this->convertStringToMinute($contracted_hour);
                 $load = ($cHour > 0 && $classMinutes > 0 ? $classMinutes / $cHour : 0);
 
-                $attendances = $this->getTermAttendanceRate($term_declaration_id, $tut->id, 1);
+                $attendances = $this->getTermAttendanceRate($term_declaration_id, $tut->id, 1, $course_id);
                 $attendance = 0;
                 $attendance += (isset($attendances->P) && $attendances->P > 0 ? $attendances->P : 0);
                 $attendance += (isset($attendances->O) && $attendances->O > 0 ? $attendances->O : 0);

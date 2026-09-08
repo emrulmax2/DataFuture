@@ -27,8 +27,8 @@
         $O += (isset($attendances->O) && $attendances->O > 0 ? $attendances->O : 0);
         $attended += (isset($attendances->L) && $attendances->L > 0 ? $attendances->L : 0);
         $L += (isset($attendances->L) && $attendances->L > 0 ? $attendances->L : 0);
-        $attended += (isset($attendances->E) && $attendances->E > 0 ? $attendances->L : 0);
-        $E += (isset($attendances->E) && $attendances->E > 0 ? $attendances->L : 0);
+        $attended += (isset($attendances->E) && $attendances->E > 0 ? $attendances->E : 0);
+        $E += (isset($attendances->E) && $attendances->E > 0 ? $attendances->E : 0);
         $attended += (isset($attendances->M) && $attendances->M > 0 ? $attendances->M : 0);
         $M += (isset($attendances->M) && $attendances->M > 0 ? $attendances->M : 0);
         $attended += (isset($attendances->H) && $attendances->H > 0 ? $attendances->H : 0);
@@ -236,7 +236,13 @@
                         {{-- Repeated on the header so a collapsed section still
                              reports itself. --}}
                         <span class="pgd-acc__sum">
-                            <span class="pgd-rate pgd-rate--{{ $pgdTone($g['rate']) }}"><span></span>{{ number_format($g['rate'], 2) }}%</span>
+                            {{-- Nothing recorded reads as a dash, not as a red
+                                 0.00% — the same rule the rows below follow. --}}
+                            @if($g['rate'] <= 0)
+                                <span class="pgd-num pgd-num--muted">&mdash;</span>
+                            @else
+                                <span class="pgd-rate pgd-rate--{{ $pgdTone($g['rate']) }}"><span></span>{{ number_format($g['rate'], 2) }}%</span>
+                            @endif
                             @if($isTheory)
                                 <span class="pgd-acc__note">{{ number_format($g['expected']) }} expected</span>
                             @endif
@@ -261,16 +267,16 @@
                             <span></span>
                             <span>Overall</span>
                             <span></span>
-                            <span class="pgd-t-right" style="color: #0E5A61; font-variant-numeric: tabular-nums;">{{ number_format($g['rate'], 2) }}%</span>
+                            <span class="pgd-t-right" style="font-variant-numeric: tabular-nums; {{ $g['rate'] <= 0 ? 'color: var(--pgd-ink-faint);' : 'color: #0E5A61;' }}">{{ $g['rate'] <= 0 ? '—' : number_format($g['rate'], 2).'%' }}</span>
                             @if($isTheory)
                                 <span class="pgd-t-right" style="font-variant-numeric: tabular-nums;">{{ number_format($g['expected']) }}</span>
-                                <span class="pgd-t-right" style="font-variant-numeric: tabular-nums; {{ $g['subRate'] === null ? 'color: var(--pgd-ink-faint);' : 'color: #0E5A61;' }}"
+                                <span class="pgd-t-right" style="font-variant-numeric: tabular-nums; {{ ($g['subRate'] ?? 0) <= 0 ? 'color: var(--pgd-ink-faint);' : 'color: #0E5A61;' }}"
                                       title="{{ $g['submitted'] }} of {{ $g['expected'] }} expected submissions">
-                                    {{ $g['subRate'] === null ? '—' : number_format($g['subRate'], 2).'%' }}
+                                    {{ ($g['subRate'] ?? 0) <= 0 ? '—' : number_format($g['subRate'], 2).'%' }}
                                 </span>
-                                <span class="pgd-t-right" style="font-variant-numeric: tabular-nums; {{ $g['passRate'] === null ? 'color: var(--pgd-ink-faint);' : 'color: #0E5A61;' }}"
+                                <span class="pgd-t-right" style="font-variant-numeric: tabular-nums; {{ ($g['passRate'] ?? 0) <= 0 ? 'color: var(--pgd-ink-faint);' : 'color: #0E5A61;' }}"
                                       title="{{ $g['passed'] }} of {{ $g['expected'] }} passed">
-                                    {{ $g['passRate'] === null ? '—' : number_format($g['passRate'], 2).'%' }}
+                                    {{ ($g['passRate'] ?? 0) <= 0 ? '—' : number_format($g['passRate'], 2).'%' }}
                                 </span>
                             @endif
                             <span></span>
@@ -306,12 +312,16 @@
                                 </span>
                                 <span>@if(!empty($row['group']))<span class="pgd-group">{{ $row['group'] }}</span>@endif</span>
                                 <span class="pgd-t-right">
-                                    <span class="pgd-rate pgd-rate--{{ $pgdTone($row['rate']) }}"><span></span>{{ number_format($row['rate'], 2) }}%</span>
+                                    @if($row['rate'] <= 0)
+                                        <span class="pgd-num pgd-num--muted">&mdash;</span>
+                                    @else
+                                        <span class="pgd-rate pgd-rate--{{ $pgdTone($row['rate']) }}"><span></span>{{ number_format($row['rate'], 2) }}%</span>
+                                    @endif
                                 </span>
                                 @if($isTheory)
                                     <span class="pgd-num pgd-t-right">{{ $row['expected'] }}</span>
                                     <span class="pgd-t-right">
-                                        @if($row['submission']['rate'] === null)
+                                        @if(($row['submission']['rate'] ?? 0) <= 0)
                                             <span class="pgd-num pgd-num--muted">&mdash;</span>
                                         @else
                                             <span class="pgd-rate pgd-rate--{{ $pgdTone($row['submission']['rate']) }}"
@@ -319,7 +329,7 @@
                                         @endif
                                     </span>
                                     <span class="pgd-t-right">
-                                        @if($row['pass']['rate'] === null)
+                                        @if(($row['pass']['rate'] ?? 0) <= 0)
                                             <span class="pgd-num pgd-num--muted">&mdash;</span>
                                         @else
                                             <span class="pgd-rate pgd-rate--{{ $pgdTone($row['pass']['rate']) }}"
