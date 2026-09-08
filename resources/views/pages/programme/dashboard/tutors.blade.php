@@ -11,7 +11,7 @@
         $attended += (isset($attendances->P) && $attendances->P > 0 ? $attendances->P : 0);
         $attended += (isset($attendances->O) && $attendances->O > 0 ? $attendances->O : 0);
         $attended += (isset($attendances->L) && $attendances->L > 0 ? $attendances->L : 0);
-        $attended += (isset($attendances->E) && $attendances->E > 0 ? $attendances->L : 0);
+        $attended += (isset($attendances->E) && $attendances->E > 0 ? $attendances->E : 0);
         $attended += (isset($attendances->M) && $attendances->M > 0 ? $attendances->M : 0);
         $attended += (isset($attendances->H) && $attendances->H > 0 ? $attendances->H : 0);
 
@@ -92,15 +92,21 @@
                 <span class="pgd-num pgd-t-right">{{ $classHour }}</span>
                 <span class="pgd-num pgd-num--muted pgd-t-right">{{ number_format($load, 2) }}</span>
                 <span class="pgd-t-center"><span class="pgd-count">{{ (isset($tut->no_of_module) && $tut->no_of_module > 0 ? $tut->no_of_module : 0) }}</span></span>
+                {{-- Nothing recorded reads as a dash, not as a red 0.00% —
+                     the same treatment the two rate columns below get. --}}
                 <span class="pgd-t-right">
-                    <span class="pgd-rate pgd-rate--{{ $pgdTone($rate) }}"><span></span>{{ number_format($rate, 2) }}%</span>
+                    @if($rate <= 0)
+                        <span class="pgd-num pgd-num--muted">&mdash;</span>
+                    @else
+                        <span class="pgd-rate pgd-rate--{{ $pgdTone($rate) }}"><span></span>{{ number_format($rate, 2) }}%</span>
+                    @endif
                 </span>
                 <span class="pgd-num pgd-t-right">{{ (isset($tut->expected_submission) && $tut->expected_submission > 0 ? $tut->expected_submission : 0) }}</span>
                 {{-- Null, not zero, when nothing is expected: a tutor with no
                      cohort has no submission rate, and a red 0.00% would read
                      as a failure rather than as an empty set. --}}
                 <span class="pgd-t-right">
-                    @if(($tut->submission['rate'] ?? null) === null)
+                    @if(($tut->submission['rate'] ?? 0) <= 0)
                         <span class="pgd-num pgd-num--muted">&mdash;</span>
                     @else
                         <span class="pgd-rate pgd-rate--{{ $pgdTone($tut->submission['rate']) }}"
@@ -110,7 +116,7 @@
                 {{-- The same cohort as the column beside it, so the two read
                      as a pair rather than against different denominators. --}}
                 <span class="pgd-t-right">
-                    @if(($tut->pass['rate'] ?? null) === null)
+                    @if(($tut->pass['rate'] ?? 0) <= 0)
                         <span class="pgd-num pgd-num--muted">&mdash;</span>
                     @else
                         <span class="pgd-rate pgd-rate--{{ $pgdTone($tut->pass['rate']) }}"
