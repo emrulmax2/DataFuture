@@ -2,6 +2,7 @@
 
 @section('subhead')
     <title>{{ $title }}</title>
+    @vite('resources/css/student-service-desk.css')
 @endsection
 
 @section('subcontent')
@@ -466,6 +467,37 @@
     </div>
     <!-- END: Warning Modal Content -->
 
+    <!-- BEGIN: Service Desk tickets -->
+    @include('pages.students.live.service-desk-tickets')
+    <!-- END: Service Desk tickets -->
+
+    <!-- BEGIN: Service Desk ticket panel -->
+    <div id="serviceDeskTicketModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Service Desk ticket</h2>
+
+                    {{-- Lucide's "x", inlined rather than left as <i data-lucide>.
+                         The header is drawn once and never re-scanned, so an
+                         icon that depends on a later createIcons() pass is one
+                         that can quietly fail to appear. --}}
+                    <a href="javascript:;" data-tw-dismiss="modal" class="sd-panel-close" aria-label="Close">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                             stroke-linejoin="round" aria-hidden="true">
+                            <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                        </svg>
+                    </a>
+                </div>
+                <div class="modal-body p-0" id="serviceDeskTicketBody">
+                    <div class="p-5 text-center text-slate-500">Loading…</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Service Desk ticket panel -->
+
     <!-- BEGIN: Delete Confirm Modal Content -->
     <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
@@ -490,4 +522,5 @@
 @section('script')
     @vite('resources/js/student-global.js')
     @vite('resources/js/student-note.js')
+    @vite('resources/js/student-service-desk.js')
 @endsection

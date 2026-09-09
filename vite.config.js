@@ -21,6 +21,7 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/css/site-settings-redesign.css',
+                'resources/css/student-service-desk.css',
                 'resources/css/admission-redesign.css',
                 'resources/css/course-management-redesign.css',
                 'resources/css/agent-management-redesign.css',
@@ -81,6 +82,7 @@ export default defineConfig({
                 'resources/js/student-sms.js',
                 'resources/js/student-quick-communication.js',
                 'resources/js/student-note.js',
+                'resources/js/student-service-desk.js',
                 'resources/js/student-upload.js',
                 'resources/js/student-process.js',
                 'resources/js/student-course.js',

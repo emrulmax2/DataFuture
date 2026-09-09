@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Auth\GoogleSocialiteStudentController as APIAuthGoogleSocialiteStudentController;
 use App\Http\Controllers\Api\ApplicantInterviewDocumentSyncController;
+//use App\Http\Controllers\Api\LibraryCoverController;
 use App\Http\Controllers\Api\BudgetSyncController;
 use App\Http\Controllers\Api\BudgetTransactionController;
 use App\Http\Controllers\Api\FileManagerSyncController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\Api\CourseModuleSyncController;
 use App\Http\Controllers\Api\HrDepartmentSyncController;
 use App\Http\Controllers\Api\RoomSyncController;
 use App\Http\Controllers\Api\VenueSyncController;
+use App\Http\Controllers\Api\StudentSearchController;
 use App\Http\Controllers\Api\UserSyncController;
 use App\Http\Controllers\Api\Student\DashboardController as ApiDashboardController;
 use App\Http\Controllers\Api\Student\ClassRoutineController;
@@ -75,6 +77,21 @@ Route::middleware(['client.credentials:sms.book-locations.read'])->get('/book-lo
 Route::middleware(['client.credentials:sms.library-books.read'])->get('/library/books/sync', [LibraryBookSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.user-mobiles.read', 'throttle:sms-sync'])->withoutMiddleware('throttle:api')->get('/users/mobiles/sync', [UserMobileSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.file-manager.read', 'throttle:sms-sync'])->withoutMiddleware('throttle:api')->get('/file-manager/sync', [FileManagerSyncController::class, 'index']);
+
+/* Book covers for the Operations library sync. Taken by query parameter
+   because many filenames contain a literal "%", which no amount of encoding
+   gets past the web server in a path. */
+// Route::middleware(['client.credentials:sms.library-books.read', 'throttle:sms-sync'])
+//     ->withoutMiddleware('throttle:api')
+//     ->get('/library/books/cover', [LibraryCoverController::class, 'show']);
+
+/* Student lookup for the Operations Service Desk, which tags a student on a
+   ticket to record who it concerns. Searched live rather than synced: it is
+   asked as a name is typed, and a copy of every enrolment held over there
+   would only be a second thing to keep current. */
+Route::middleware(['client.credentials:sms.students.read', 'throttle:sms-sync'])
+    ->withoutMiddleware('throttle:api')
+    ->get('/students/search', [StudentSearchController::class, 'search']);
 
 /* One-off (and repeatable) export of the Budget Management data set, for the
    Operations rebuild of this module. */
