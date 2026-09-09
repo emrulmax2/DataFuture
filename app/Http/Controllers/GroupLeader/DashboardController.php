@@ -60,11 +60,11 @@ class DashboardController extends Controller
 
     /**
      * Grades that count a module as submitted: pass, merit, distinction and
-     * unclassified/compensated. Referred, fail, absent, plagiarised, withheld
-     * and "submitted but not yet graded" are not an outcome, so they do not
-     * count towards a student's submission figure.
+     * withhold. Referred, fail, absent, plagiarised and "submitted but not yet
+     * graded" are not an outcome, so they do not count towards a student's
+     * submission figure.
      */
-    private const COMPLETED_GRADES = ['P', 'M', 'D', 'U'];
+    private const COMPLETED_GRADES = ['P', 'M', 'D', 'W'];
 
     /* ------------------------------------------------------------------ *
      * Guards
@@ -1010,6 +1010,9 @@ class DashboardController extends Controller
      * attended everywhere else on this screen, so listing it here would not
      * explain the figures the leader is looking at.
      *
+     * Returns the missed days plus the totals behind them: how many Theory
+     * classes were missed, and how many were taken in all.
+     *
      * `run` flags the rows making up the consecutive streak — the same walk
      * `consecutiveAbsences()` does, stopping at the first attended mark — so
      * the drawer can show which dates the "Consec. abs" tile is counting.
@@ -1018,8 +1021,12 @@ class DashboardController extends Controller
     {
         $planIds = $this->theoryModulePlanIds($planIds);
 
+        // A student on no Theory module at all still gets the shape back, so
+        // the caller never has to tell "no classes" from "no answer".
+        $blank = ['days' => [], 'missed' => 0, 'run' => 0, 'total' => 0];
+
         if (empty($planIds) || $studentId <= 0) {
-            return [];
+            return $blank;
         }
 
         $rows = DB::table('attendances')
@@ -1033,7 +1040,7 @@ class DashboardController extends Controller
             ->get();
 
         if ($rows->isEmpty()) {
-            return [];
+            return $blank;
         }
 
         $counted = array_merge(self::PRESENT_STATUSES, self::EXCUSED_STATUSES);
@@ -1101,7 +1108,20 @@ class DashboardController extends Controller
             ];
         }
 
-        return $out;
+        return [
+            'days' => $out,
+            'missed' => array_sum(array_column($out, 'count')),
+            // The "Consec. abs" tile counts days and this panel counts classes,
+            // so the panel states the streak in the tile's own unit — without
+            // it the two numbers sit side by side with no way to read one
+            // against the other.
+            'run' => count(array_filter($out, fn ($day) => $day['run'])),
+            // Every Theory register taken for this student, missed or not. The
+            // Attendance tile beside this panel is the college figure — all
+            // class types, excused absence counted as attended — so without a
+            // denominator of its own the panel reads as a contradiction of it.
+            'total' => $rows->count(),
+        ];
     }
 
     /** The contact history for each student, newest first. */    private function contactLogs(array $groupIds, $termId, array $studentIds): array
@@ -1144,7 +1164,7 @@ class DashboardController extends Controller
     private function kpis(array $students, array $planIds): array
     {
         $summary = $this->attendanceSummary($planIds);
-        $withSubs = array_values(array_filter($students, fn ($s) => $s['submissionPct'] !== null));
+        $subs = $this->termSubmissionRate($planIds, array_column($students, 'id'));
 
         $onTrack = array_filter($students, function ($s) {
             return $s['attendance'] !== null && $s['attendance'] >= 80
@@ -1155,12 +1175,61 @@ class DashboardController extends Controller
             'attendance' => $summary['total'] > 0 ? (int) round($summary['percentage']) : null,
             'attendanceTrend' => $this->attendanceTrend($planIds),
             'belowRisk' => count(array_filter($students, fn ($s) => $s['attendance'] !== null && $s['attendance'] < self::AT_RISK)),
-            'submission' => count($withSubs) > 0
-                ? (int) round(array_sum(array_column($withSubs, 'submissionPct')) / count($withSubs))
-                : null,
-            'submissionOutstanding' => count(array_filter($withSubs, fn ($s) => $s['submissionPct'] < self::ON_TRACK_SUBMISSION)),
+            'submission' => $subs['rate'],
+            'submissionOutstanding' => $subs['outstanding'],
             'completion' => count($students) > 0 ? (int) round(count($onTrack) * 100 / count($students)) : null,
         ];
+    }
+
+    /**
+     * The submission rate card: this term's modules, across the whole group.
+     *
+     * The term's Theory modules only — a module completed last term is not
+     * this term's submission, and counting it reads the group as further ahead
+     * than it is. The Subs figure on the rows deliberately spans terms, so the
+     * two answer different questions.
+     *
+     * The rate is the group's own ratio — every module owed by every student
+     * over every one that carries a completed grade — not the average of the
+     * students' percentages, which would let a student on one module weigh as
+     * heavily as one on five.
+     *
+     * A module counts once whatever it took to get there: `studentSubmissions()`
+     * folds retakes and re-marks into the module, so two modules both carrying
+     * a grade are 2/2 however many attempts sit behind them.
+     */
+    private function termSubmissionRate(array $planIds, array $studentIds): array
+    {
+        $blank = ['rate' => null, 'outstanding' => 0];
+
+        if (empty($planIds) || empty($studentIds)) {
+            return $blank;
+        }
+
+        $subs = $this->studentSubmissions($this->theoryModulePlanIds($planIds), $studentIds);
+
+        $due = 0;
+        $done = 0;
+        $outstanding = 0;
+
+        foreach ($subs['due'] as $studentId => $studentDue) {
+            if ($studentDue <= 0) {
+                continue;
+            }
+
+            $studentDone = $subs['byStudent'][$studentId] ?? 0;
+
+            $due += $studentDue;
+            $done += $studentDone;
+
+            if ($studentDone * 100 / $studentDue < self::ON_TRACK_SUBMISSION) {
+                $outstanding++;
+            }
+        }
+
+        return $due > 0
+            ? ['rate' => (int) round($done * 100 / $due), 'outstanding' => $outstanding]
+            : $blank;
     }
 
     /**

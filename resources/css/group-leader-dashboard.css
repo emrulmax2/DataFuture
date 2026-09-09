@@ -1356,6 +1356,22 @@ body.gl-dashboard-body .content.content--top-nav::before {
     color: var(--gl-faint);
     font-size: 12px;
     font-weight: 400;
+    text-align: right;
+}
+
+/* The half of the header that reconciles with the "Consec. abs" tile. */
+.gl-misses__run {
+    color: var(--gl-red-ink);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.gl-misses__break {
+    border-top: 1px solid var(--gl-line);
+    color: var(--gl-faint);
+    font-size: 11px;
+    margin-top: 4px;
+    padding-top: 8px;
 }
 
 .gl-miss {
