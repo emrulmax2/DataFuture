@@ -11,7 +11,7 @@
         $attended += (isset($attendances->P) && $attendances->P > 0 ? $attendances->P : 0);
         $attended += (isset($attendances->O) && $attendances->O > 0 ? $attendances->O : 0);
         $attended += (isset($attendances->L) && $attendances->L > 0 ? $attendances->L : 0);
-        $attended += (isset($attendances->E) && $attendances->E > 0 ? $attendances->L : 0);
+        $attended += (isset($attendances->E) && $attendances->E > 0 ? $attendances->E : 0);
         $attended += (isset($attendances->M) && $attendances->M > 0 ? $attendances->M : 0);
         $attended += (isset($attendances->H) && $attendances->H > 0 ? $attendances->H : 0);
 
@@ -24,10 +24,14 @@
         return $pct >= 75 ? 'good' : ($pct >= 50 ? 'mid' : 'bad');
     };
 
-    /* A tutor with no one enrolled has no submission rate, which is not the
-       same as a rate of zero — show a dash rather than a red 0.00%. */
+    /* Nothing to report reads as a dash, not as a red 0.00%: a tutor with no
+       cohort enrolled has no rate at all, and one whose cohort has nothing
+       recorded yet has nothing to show either. Both would otherwise render as
+       a failing figure against tutors who are simply waiting on data. */
     $pgdPct = function ($figures) {
-        return ($figures['rate'] ?? null) === null ? null : $figures['rate'];
+        $rate = ($figures['rate'] ?? null);
+
+        return ($rate === null || $rate <= 0) ? null : $rate;
     };
 @endphp
 
@@ -96,9 +100,17 @@
                     <span class="pgd-count pgd-count--alt" title="Groups">{{ (isset($tut->no_of_group) && $tut->no_of_group > 0 ? $tut->no_of_group : 0) }}</span>
                 </span>
                 <span class="pgd-t-right">
-                    <span class="pgd-rate pgd-rate--{{ $pgdTone($rate) }}"><span></span>{{ number_format($rate, 2) }}%</span>
+                    @if($rate <= 0)
+                        <span class="pgd-num pgd-num--muted">&mdash;</span>
+                    @else
+                        <span class="pgd-rate pgd-rate--{{ $pgdTone($rate) }}"><span></span>{{ number_format($rate, 2) }}%</span>
+                    @endif
                 </span>
-                <span class="pgd-num pgd-t-right">{{ number_format($tut->outstanding_calls) }}</span>
+                @if($tut->outstanding_calls > 0)
+                    <span class="pgd-num pgd-t-right">{{ number_format($tut->outstanding_calls) }}</span>
+                @else
+                    <span class="pgd-num pgd-num--muted pgd-t-right">&mdash;</span>
+                @endif
                 <span class="pgd-t-center">
                     <button type="button"
                             data-plan="0" data-tutor="{{ $tut->id }}" data-term="{{ $termDeclaration->id }}"
