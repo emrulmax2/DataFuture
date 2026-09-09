@@ -37,20 +37,36 @@
 
     @php
         $glAbsences = $student['absences'] ?? [];
-        $glShown = array_slice($glAbsences, 0, 10);
-        $glMissed = array_sum(array_column($glAbsences, 'count'));
+        $glDays = $glAbsences['days'] ?? [];
+        $glShown = array_slice($glDays, 0, 10);
+        $glMissed = $glAbsences['missed'] ?? 0;
+        $glTotal = $glAbsences['total'] ?? 0;
+        $glRun = $glAbsences['run'] ?? 0;
+        $glBreak = false;
     @endphp
 
-    @if(!empty($glAbsences))
+    @if(!empty($glDays))
         <div class="gl-misses">
             <div class="gl-misses__title">
                 Missed classes
+                {{-- Spelt out, because Attendance above is the college figure
+                     across every class type and this panel is Theory only. --}}
                 <span class="gl-misses__count">
-                    {{ $glMissed }} {{ $glMissed === 1 ? 'class' : 'classes' }} over {{ count($glAbsences) }} {{ count($glAbsences) === 1 ? 'day' : 'days' }}
+                    {{ $glMissed }} of {{ $glTotal }} theory {{ $glTotal === 1 ? 'class' : 'classes' }}
+                    over {{ count($glDays) }} {{ count($glDays) === 1 ? 'day' : 'days' }}@if($glRun > 0),
+                        <span class="gl-misses__run">{{ $glRun }} in a row</span>
+                    @endif
                 </span>
             </div>
 
             @foreach($glShown as $glMiss)
+                {{-- Where the streak ends. Colour alone carries it too quietly:
+                     a leader counting rows reads six and the tile says five. --}}
+                @if($glRun > 0 && !$glMiss['run'] && !$glBreak)
+                    @php $glBreak = true; @endphp
+                    <div class="gl-misses__break">Attended a class since — earlier absences</div>
+                @endif
+
                 <div class="gl-miss {{ $glMiss['run'] ? 'is-run' : '' }}">
                     <span class="gl-miss__date">{{ $glMiss['date'] }}</span>
                     <span class="gl-miss__class">
@@ -60,8 +76,8 @@
                 </div>
             @endforeach
 
-            @if(count($glAbsences) > count($glShown))
-                @php $glMore = count($glAbsences) - count($glShown); @endphp
+            @if(count($glDays) > count($glShown))
+                @php $glMore = count($glDays) - count($glShown); @endphp
                 <div class="gl-misses__more">+{{ $glMore }} earlier {{ $glMore === 1 ? 'day' : 'days' }} this term</div>
             @endif
         </div>
