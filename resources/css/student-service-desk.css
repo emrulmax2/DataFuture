@@ -1,0 +1,215 @@
+/*
+ * Service Desk tickets on the student record.
+ *
+ * The tickets live in Operations; this is a window on them. The thread is drawn
+ * to match how it reads there — the person who raised it on the right, everyone
+ * answering on the left — so somebody who has seen the ticket in Operations
+ * recognises it here rather than having to re-read it in a new shape.
+ */
+
+/* --------------------------------------------------------------- the list */
+
+/*
+ * Bordered, and built from the same tokens as the Tabulator tables elsewhere on
+ * this page — #F6F8F5 header, #E7E9E6 hairlines, #3C463F body, #7A847D labels.
+ * Taken from datafuture.css rather than eyeballed, so the two tables on the
+ * student record are the same table and stay that way.
+ */
+.sd-tickets-wrap {
+    border: 1px solid #E7E9E6;
+    border-radius: 8px;
+    overflow: hidden;
+    overflow-x: auto;
+}
+
+.sd-tickets-table { width: 100%; border-collapse: collapse; }
+
+.sd-tickets-table thead { background: #F6F8F5; }
+
+.sd-tickets-table th {
+    padding: 0.65rem 0.85rem;
+    border-bottom: 1px solid #E7E9E6;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-align: left;
+    white-space: nowrap;
+    color: #7A847D;
+}
+
+.sd-tickets-table td {
+    padding: 0.85rem;
+    border-bottom: 1px solid #E7E9E6;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: #3C463F;
+    vertical-align: middle;
+}
+.sd-tickets-table tbody tr:last-child td { border-bottom: 0; }
+
+.sd-ticket-row { cursor: pointer; transition: background 120ms ease; }
+.sd-ticket-row:hover { background: #F6F8F5; }
+
+.sd-tickets-table .is-ref { font-weight: 700; white-space: nowrap; }
+.sd-tickets-table .is-nowrap { white-space: nowrap; }
+.sd-tickets-table .is-right { text-align: right; }
+.sd-tickets-table .is-muted { color: #7A847D; }
+
+/* Status and overdue, sized to sit on one line beside each other. */
+.sd-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* ------------------------------------------------------------- the panel */
+
+.sd-panel-head { padding: 20px 22px; border-bottom: 1px solid rgb(226 232 240); }
+
+.sd-panel-subject { margin: 12px 0 0; font-size: 17px; font-weight: 700; line-height: 1.32; color: rgb(15 23 42); }
+
+.sd-panel-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 12px 24px;
+    margin-top: 16px;
+    font-size: 13px;
+}
+
+.sd-panel-label {
+    margin-bottom: 2px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: rgb(148 163 184);
+}
+
+/* ------------------------------------------------------------ the thread */
+
+.sd-panel-thread {
+    max-height: 55vh;
+    overflow-y: auto;
+    padding: 18px 22px;
+    background-color: rgb(248 250 252);
+}
+
+/*
+ * A message is its author's avatar beside what they said. The requester's own
+ * messages sit on the right with the avatar flipped to that side, so the two
+ * ends of the conversation read apart at a glance — the same arrangement the
+ * ticket has in Operations.
+ */
+.sd-msg {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    max-width: 82%;
+    margin-bottom: 16px;
+}
+.sd-msg:last-child { margin-bottom: 0; }
+
+.sd-msg.is-requester { margin-left: auto; flex-direction: row-reverse; }
+.sd-msg.is-requester .sd-msg-main { text-align: right; }
+
+/* Holds the bubble's own width; without this the flex item refuses to shrink
+   and a long unbroken word pushes the message past its container. */
+.sd-msg-main { min-width: 0; }
+
+.sd-msg-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    background-color: #134e35;
+    color: #ffffff;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    /* Lines the avatar up with the first line of text, not the meta line. */
+    margin-top: 18px;
+}
+
+.sd-msg-meta { margin-bottom: 5px; font-size: 11.5px; color: rgb(148 163 184); }
+
+.sd-msg-body {
+    display: inline-block;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background-color: #ffffff;
+    border: 1px solid rgb(226 232 240);
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: rgb(30 41 59);
+    text-align: left;
+}
+
+.sd-msg.is-requester .sd-msg-body {
+    background-color: #134e35;
+    border-color: #134e35;
+    color: #ffffff;
+}
+
+.sd-msg-files { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
+.sd-msg.is-requester .sd-msg-files { justify-content: flex-end; }
+
+/*
+ * One line, always. The name is the only part allowed to give ground: it
+ * truncates, while the icon and the size hold their width — a file chip that
+ * wraps onto two lines pushes every chip beside it out of alignment and reads
+ * as two separate files.
+ */
+.sd-msg-file {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 6px;
+    max-width: 260px;
+    padding: 5px 9px;
+    border: 1px solid rgb(226 232 240);
+    border-radius: 8px;
+    background-color: #ffffff;
+    font-size: 11.5px;
+    line-height: 1.2;
+    color: rgb(71 85 105);
+    text-decoration: none;
+    white-space: nowrap;
+}
+.sd-msg-file:hover { border-color: #134e35; color: #134e35; }
+
+.sd-msg-file svg { flex-shrink: 0; }
+
+/* The one flexible part, so `min-width: 0` is what lets it actually shrink. */
+.sd-msg-file-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sd-msg-file-size { flex-shrink: 0; color: rgb(148 163 184); }
+
+@media (max-width: 640px) {
+    .sd-msg { max-width: 100%; }
+}
+
+/* The panel's close control: a target, not a link that happens to hold an icon. */
+.sd-panel-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    color: #7A847D;
+    flex-shrink: 0;
+}
+.sd-panel-close:hover { background: #F6F8F5; color: #3C463F; }

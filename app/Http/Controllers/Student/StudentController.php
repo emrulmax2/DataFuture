@@ -430,7 +430,14 @@ class  StudentController extends Controller
 
     public function notes($studentId){
         $userData = \Auth::guard('web')->user();
+
+        /* Tickets Operations staff have tagged this student on. Null when that
+           system cannot be reached, which the view says out loud rather than
+           showing an empty list that reads as "no tickets". */
+        $serviceDeskTickets = app(\App\Services\OperationsServiceDeskClient::class)->ticketsForStudent($studentId);
+
         return view('pages.students.live.notes', [
+            'serviceDeskTickets' => $serviceDeskTickets,
             'title' => 'Live Students - London Churchill College',
             'layout' => 'student-top-menu',
             'breadcrumbs' => [
@@ -447,6 +454,56 @@ class  StudentController extends Controller
             'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
             'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
             'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
+        ]);
+    }
+
+    /**
+     * One Service Desk ticket, for the panel that opens from the notes page.
+     *
+     * Fetched on demand rather than with the list: a ticket carries its whole
+     * conversation, and loading twenty of those to show one is a lot of traffic
+     * for a page most people open to read notes.
+     *
+     * Internal notes are stripped at the Operations end. This only renders what
+     * it is given.
+     */
+    public function serviceDeskTicket($ticketId)
+    {
+        $ticket = app(\App\Services\OperationsServiceDeskClient::class)->ticket((int) $ticketId);
+
+        if (! $ticket):
+            return response()->json([
+                'status' => false,
+                'message' => 'That ticket could not be loaded from Operations.',
+            ], 502);
+        endif;
+
+        return response()->json([
+            'status' => true,
+            'html'   => view('pages.students.live.service-desk-ticket', ['ticket' => $ticket])->render(),
+        ]);
+    }
+
+    /**
+     * Hand a ticket attachment to a member of staff.
+     *
+     * Served through this app rather than linked straight to Operations: that
+     * endpoint answers to a shared key no browser can present, and the person
+     * asking is already signed in here. Operations still decides whether the
+     * file may be released — it refuses anything on an internal note — so this
+     * adds a session, not a second opinion.
+     */
+    public function serviceDeskAttachment($attachmentId)
+    {
+        $file = app(\App\Services\OperationsServiceDeskClient::class)->attachment((int) $attachmentId);
+
+        if (! $file):
+            abort(404, 'That file could not be fetched from Operations.');
+        endif;
+
+        return response($file['body'], 200, [
+            'Content-Type'        => $file['type'],
+            'Content-Disposition' => 'attachment; filename="'.addslashes($file['name']).'"',
         ]);
     }
 
