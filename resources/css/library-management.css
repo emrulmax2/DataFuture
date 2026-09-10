@@ -1,0 +1,1855 @@
+/* =================================================================
+   Library Management — the issue desk
+   =================================================================
+   Everything this module needs, loaded only on /library-management.
+   Nothing here leaks into other screens, and the module can be
+   restyled without touching datafuture.css.
+   ================================================================= */
+
+/* Declared on the page root and on the dialogs. The theme re-parents modals to
+   <body> when shown, so a dialog scoped only to the page wrapper inherits
+   nothing and renders with invisible borders and a white-on-white primary
+   button — which is what went wrong the first four times these were built. */
+.lib-desk,
+.lib-modal {
+    --lib-line: #e3e7ec;
+    --lib-soft: #f7f9fb;
+    --lib-ink: #1b2330;
+    --lib-muted: #5f6875;
+    --lib-faint: #98a1ae;
+    --lib-accent: #0e7c86;
+    --lib-gold: #c9a24a;
+    --lib-gold-dark: #b0883a;
+    --lib-gold-ink: #8a6d1f;
+    --lib-gold-tint: #fbf3e0;
+    --lib-gold-line: #e3c877;
+    --lib-red: #8e1f1f;
+    --lib-red-dark: #741818;
+    --lib-radius: 14px;
+    --lib-navy: #16264f;
+    --lib-danger: #b3261e;
+    --lib-grid: #e2dfd7;
+    --lib-line-2: #eeece6;
+    --lib-label: #8a919c;
+    --lib-field: #e4e1d8;
+    --lib-field-bg: #fbfaf7;
+    --lib-dim: #a29e94;
+    --lib-line-4: #f3f1ec;
+    --lib-canvas: #f4f3f0;
+}
+
+/* ---- page furniture ------------------------------------------------ */
+
+/* The module's canvas. Set on the page root rather than <body> so it cannot
+   repaint any other screen that happens to share the layout. */
+.lib-desk {
+    background: var(--lib-canvas);
+    margin: -1.25rem -1.5rem 0;
+    padding: 26px 1.5rem 48px;
+    min-height: calc(100vh - 120px);
+}
+
+@media (max-width: 640px) {
+    .lib-desk { margin: -1rem -1rem 0; padding: 20px 1rem 40px; }
+}
+
+/* The module's own card, so the page does not depend on another module's
+   stylesheet being loaded. */
+.lib-card {
+    border: 1px solid var(--lib-line);
+    border-radius: var(--lib-radius);
+    background: #fff;
+    overflow: hidden;
+}
+
+/* `overflow: hidden` is what keeps the grid's corners rounded, but it also
+   clips anything that escapes the card — which is every combobox panel in the
+   day-reading form. That card opts out and rounds its own corners instead. */
+.lib-card--open {
+    overflow: visible;
+}
+
+.lib-card--open > :first-child { border-radius: var(--lib-radius) var(--lib-radius) 0 0; }
+.lib-card--open > :last-child { border-radius: 0 0 var(--lib-radius) var(--lib-radius); }
+
+
+
+
+.lib-panel { margin-top: 20px; }
+
+.lib-tiles {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 4px;
+}
+
+@media (max-width: 1100px) { .lib-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .lib-tiles { grid-template-columns: 1fr; } }
+
+.lib-flash {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 18px;
+    padding: 12px 16px;
+    border: 1px solid;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.lib-flash svg { flex: none; width: 17px; height: 17px; }
+.lib-flash--ok { border-color: #bfe0cd; background: #eaf6ef; color: #145c37; }
+.lib-flash--bad { border-color: #f0cfcb; background: #fdeceb; color: #9b1c1c; }
+
+/* ---- summary stats ------------------------------------------------ */
+
+/* One bordered grid with hairline gaps rather than four floating cards: the
+   1px `gap` over a grey background is what draws the dividers, so the panel
+   reads as a single instrument cluster. */
+.lib-stats {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1px;
+    overflow: hidden;
+    border: 1px solid var(--lib-grid);
+    border-radius: var(--lib-radius);
+    background: var(--lib-grid);
+    margin-bottom: 20px;
+}
+
+@media (max-width: 1500px) { .lib-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 1000px) { .lib-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .lib-stats { grid-template-columns: 1fr; } }
+
+/* One tone per tile, driven by a custom property: label, number, icon, the
+   rule above the link and the hover fill all read from `--tone`, so a new
+   tile is one line of CSS rather than five rules. */
+.lib-stat {
+    --tone: var(--lib-navy);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 22px 24px 18px;
+    background: #fff;
+    color: var(--tone);
+    text-align: left;
+    transition: background .16s ease, color .16s ease;
+}
+
+.lib-stat:hover { background: var(--tone); color: #fff; }
+
+/* The same five tones as the status pills, so a tile and the rows it leads to
+   agree on what colour that state is. */
+.lib-stat--amber  { --tone: #8a5c0c; }
+.lib-stat--indigo { --tone: #45409a; }
+.lib-stat--red    { --tone: #a11d1d; }
+.lib-stat--teal   { --tone: #0e6e78; }
+.lib-stat--green  { --tone: #17714a; }
+
+/* Two figures instead of one, so the type comes down to fit them on a line
+   the tile can actually hold at its narrowest. */
+.lib-stat__value--money { font-size: 30px; }
+
+/* Owed in red, held in green — each figure keeps its own meaning, which is
+   the whole reason for putting them side by side. */
+.lib-stat__fig { font-weight: inherit; }
+.lib-stat__fig--red { color: var(--lib-danger); }
+.lib-stat__fig--green { color: #17714a; }
+
+.lib-stat__slash {
+    margin: 0 6px;
+    color: var(--lib-faint);
+    font-weight: 400;
+}
+
+/* On hover the tile fills with its tone, so both figures and the slash have
+   to give up their own colour or they disappear into it. */
+.lib-stat:hover .lib-stat__fig,
+.lib-stat:hover .lib-stat__slash { color: inherit; }
+
+.lib-stat__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.lib-stat__label {
+    color: inherit;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: .14em;
+    opacity: .78;
+    text-transform: uppercase;
+}
+
+.lib-stat__icon { display: flex; flex-shrink: 0; color: inherit; opacity: .5; }
+.lib-stat__icon svg { width: 17px; height: 17px; }
+
+.lib-stat__value {
+    display: block;
+    color: inherit;
+    font-family: "Spectral", Georgia, "Times New Roman", serif;
+    font-size: 40px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    letter-spacing: -.03em;
+    line-height: .95;
+}
+
+.lib-stat__foot {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 13px;
+    border-top: 1px solid currentColor;
+    color: inherit;
+    font-size: 11.5px;
+    font-weight: 700;
+    opacity: .68;
+}
+
+/* ---- card heads ---------------------------------------------------- */
+
+.lib-cardhead {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 20px 24px 16px;
+}
+
+.lib-cardhead--divided { border-bottom: 1px solid var(--lib-line-2); }
+
+.lib-cardhead__titles { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px; min-width: 0; }
+
+.lib-cardhead__title {
+    margin: 0;
+    color: var(--lib-navy);
+    font-family: "Spectral", Georgia, "Times New Roman", serif;
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+}
+
+.lib-cardhead__count {
+    color: var(--lib-faint);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .04em;
+}
+
+.lib-cardhead__sub {
+    width: 100%;
+    margin: -6px 0 0;
+    color: var(--lib-muted);
+    font-size: 12.5px;
+}
+
+.lib-cardhead__spacer { margin-left: auto; }
+
+/* ---- form fields --------------------------------------------------- */
+
+.lib-field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+
+.lib-field > label {
+    color: var(--lib-label);
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.lib-field > label span { color: var(--lib-danger); }
+
+.lib-field__hint { margin: 0; color: var(--lib-muted); font-size: 12px; line-height: 1.5; }
+
+.lib-text {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid var(--lib-field);
+    border-radius: 10px;
+    background: var(--lib-field-bg);
+    color: var(--lib-ink);
+    font-size: 14px;
+    font-weight: 500;
+    outline: none;
+}
+
+.lib-text:focus { background: #fff; border-color: var(--lib-navy); }
+
+/* ---- day reading panel -------------------------------------------- */
+
+/* The lookup columns anchor their absolutely positioned result lists. */
+#dayReadingBody .grid > div { position: relative; }
+
+.lib-results {
+    position: absolute;
+    z-index: 30;
+    width: 100%;
+    max-height: 280px;
+    margin-top: 2px;
+    overflow-y: auto;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 10px 26px rgba(15, 23, 42, .16);
+}
+
+/* Floats over the row below rather than pushing the form about as
+   matches come and go. */
+.lib-results:empty { display: none; }
+
+.lib-results__row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 12px;
+    border: 0;
+    border-bottom: 1px solid #eef1f4;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+}
+
+.lib-results__row:last-child { border-bottom: 0; }
+.lib-results__row:hover { background: #f1f5f9; }
+.lib-results__row strong { display: block; font-size: 13px; font-weight: 600; color: var(--lib-ink); }
+.lib-results__row small { display: block; margin-top: 2px; font-size: 11.5px; color: var(--lib-muted); }
+.lib-results__empty { padding: 10px 12px; font-size: 12.5px; color: var(--lib-muted); }
+
+.lib-chosen {
+    margin-top: 8px;
+    padding: 9px 10px;
+    border: 1px solid #cfe4e2;
+    border-radius: 8px;
+    background: #eef6f5;
+    color: #14504b;
+}
+
+/* `.lib-chosen` and Tailwind's `.hidden` are both single-class selectors and
+   this file loads after the framework, so `display` would tie on specificity
+   and lose to source order — showing an empty box before anything is picked.
+   `:empty` covers the box being cleared without the class being reapplied. */
+.lib-chosen.hidden,
+.lib-chosen:empty { display: none !important; }
+
+.lib-picked { display: flex; align-items: flex-start; gap: 10px; }
+.lib-picked__body { flex: 1 1 auto; min-width: 0; }
+.lib-picked__name { font-size: 13px; font-weight: 700; line-height: 1.3; color: #12403c; }
+.lib-picked__line { margin-top: 2px; font-size: 11.5px; color: #4a706c; }
+
+/* Label/value pairs so a long publisher or ISBN cannot push the card about. */
+.lib-picked__facts {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2px 10px;
+    margin: 7px 0 0;
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.lib-picked__facts dt { color: #7ba09c; font-weight: 600; white-space: nowrap; }
+.lib-picked__facts dd { margin: 0; color: #24534e; overflow: hidden; text-overflow: ellipsis; }
+
+.lib-chosen__x {
+    flex: none;
+    padding: 0 2px;
+    border: 0;
+    background: none;
+    color: #14504b;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+/* ---- grid ---------------------------------------------------------- */
+
+.lib-grid .tabulator-row .tabulator-cell {
+    padding: 12px 10px;
+    white-space: normal;
+}
+
+.lib-grid .tabulator-col-title {
+    color: var(--lib-muted);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: .03em;
+}
+
+.lib-col-ref { font-weight: 700; font-size: 12.5px; }
+
+.lib-grid .tabulator-cell .btn {
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+/* ---- collapsible panel -------------------------------------------- */
+
+
+.lib-panel__head.is-open .lib-panel__chevron { transform: rotate(180deg); }
+
+/* The theme sets `display: block` on forms, which beats the `hidden`
+   attribute's default and would leave the panel permanently open. */
+form#dayReadingBody[hidden] { display: none !important; }
+
+/* Subtitle under a dialog title — the reference on cancel, the loan type on
+   history. */
+.lib-modal__sub {
+    margin-top: 2px;
+    color: var(--lib-muted);
+    font-size: 11.5px;
+}
+
+.lib-modal__error {
+    margin-top: 12px;
+    padding: 9px 12px;
+    border: 1px solid #f0cfcb;
+    border-radius: 8px;
+    background: #fdeceb;
+    color: #9b1c1c;
+    font-size: 12px;
+}
+
+.lib-modal__error[hidden] { display: none !important; }
+
+/* ---- cancel dialog --------------------------------------------------- */
+
+.lib-modal__box--sm { max-width: 460px; }
+
+.lib-modal__icon--danger { background: #fdeceb; color: #b91c1c; }
+
+.lib-cancel__lead {
+    margin: 0 0 16px;
+    color: var(--lib-muted);
+    font-size: 12.5px;
+    line-height: 1.55;
+}
+
+.lib-cancel__lead strong { color: var(--lib-ink); }
+
+.lib-field__label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--lib-faint);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.lib-field__req { color: #b91c1c; }
+
+/* One click for the reasons a desk actually gives, free text underneath for
+   anything else — mid-queue, nobody wants to type a sentence. */
+.lib-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.lib-chip {
+    padding: 5px 11px;
+    border: 1px solid var(--lib-line);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--lib-muted);
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .14s ease, border-color .14s ease, color .14s ease;
+}
+
+.lib-chip:hover { border-color: #cbd5e1; color: var(--lib-ink); }
+
+.lib-chip.is-on {
+    border-color: #b91c1c;
+    background: #b91c1c;
+    color: #fff;
+}
+
+.lib-input {
+    width: 100%;
+    height: 40px;
+    padding: 0 13px;
+    border: 1px solid var(--lib-line);
+    border-radius: 9px;
+    background: #fff;
+    color: var(--lib-ink);
+    font-size: 13px;
+}
+
+.lib-input:focus {
+    border-color: #b91c1c;
+    box-shadow: 0 0 0 3px rgba(185, 28, 28, .1);
+    outline: none;
+}
+
+/* Base for the dialog buttons. The colour modifiers below were being used
+   without this, so the buttons had no display, padding or radius — they
+   rendered as inline text and overlapped each other in the footer. */
+.lib-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 15px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--lib-ink);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background .14s ease, border-color .14s ease, color .14s ease;
+}
+
+.lib-btn svg { width: 15px; height: 15px; flex: none; }
+
+.lib-btn--ghost { border-color: var(--lib-line); color: var(--lib-muted); }
+.lib-btn--ghost:hover { border-color: #cbd5e1; color: var(--lib-ink); }
+
+/* The confirm here really is destructive, so unlike the read-only dialog's
+   close button it is filled rather than outlined. */
+.lib-btn--danger-solid {
+    border-color: #b91c1c;
+    background: #b91c1c;
+    color: #fff;
+}
+
+.lib-btn--danger-solid:hover:not(:disabled) { background: #991b1b; border-color: #991b1b; }
+.lib-btn--danger-solid:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ---- day reading: progressive steps ---------------------------------- */
+
+.lib-steps {
+    position: relative;
+    display: grid;
+    /* The last column carries the note and the action together, so it needs a
+       little more room than the two lookups. */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr) minmax(0, 1.1fr);
+    gap: 16px;
+    align-items: start;
+}
+
+/* A step that is not yet reachable is removed, not dimmed — the row then
+   re-flows so the active step is where the eye already is. */
+.lib-step[hidden] { display: none !important; }
+
+.lib-step { position: relative; }
+
+.lib-step__head {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 6px;
+}
+
+.lib-step__num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--lib-soft);
+    border: 1px solid var(--lib-line);
+    color: var(--lib-muted);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.lib-step__label {
+    margin: 0;
+    color: var(--lib-ink);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+@media (max-width: 1100px) {
+    .lib-steps { grid-template-columns: 1fr; gap: 16px; }
+}
+
+/* ---- combobox -------------------------------------------------------- */
+
+.lib-combo { position: relative; }
+
+/* Raises the whole control while its panel is open, so the panel is not
+   painted under the next step in the grid. */
+.lib-combo:has(.lib-combo__panel:not([hidden])) { z-index: 55; }
+
+.lib-combo__trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    /* Fixed, not min-height: the two triggers sit side by side in the step grid
+       and a portrait cover is taller than a round avatar, so letting them size
+       to their content leaves the pair visibly mismatched. */
+    height: 48px;
+    padding: 5px 32px 5px 10px;
+    border: 1px solid var(--lib-line);
+    border-radius: 9px;
+    background: #fff;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .14s ease, box-shadow .14s ease;
+}
+
+/* Both media types share one box inside the trigger so neither one drives the
+   height. The cover keeps its portrait ratio by cropping rather than growing. */
+.lib-combo__value .lib-media__cover { width: 26px; height: 36px; border-radius: 3px; }
+.lib-combo__value .lib-media__avatar { width: 30px; height: 30px; }
+.lib-combo__value { gap: 9px; }
+
+/* One line each, ellipsised — a long title must not wrap the trigger open.
+   Line height is pulled in tight so two lines still clear 48px. */
+.lib-combo__value .lib-media__copy strong,
+.lib-combo__value .lib-media__copy small {
+    display: block;
+    overflow: hidden;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.lib-combo__value .lib-media__copy strong { font-size: 12.5px; font-weight: 700; color: var(--lib-ink); }
+.lib-combo__value .lib-media__copy small { margin-top: 0; font-size: 11px; color: var(--lib-muted); }
+
+.lib-combo__trigger:hover { border-color: #cbd5e1; }
+
+.lib-combo__trigger[aria-expanded="true"] {
+    border-color: var(--lib-accent, #0e7c86);
+    box-shadow: 0 0 0 3px rgba(14, 124, 134, .12);
+}
+
+.lib-combo__value {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1 1 auto;
+    min-width: 0;
+    color: var(--lib-ink);
+    font-size: 13px;
+}
+
+.lib-combo__value--empty { color: #94a3b8; font-size: 13px; }
+.lib-combo__value--empty svg { width: 16px; height: 16px; flex: none; }
+
+.lib-combo__caret {
+    position: absolute;
+    top: 50%;
+    right: 11px;
+    width: 16px;
+    height: 16px;
+    color: #94a3b8;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+/* Sits over the caret once something is chosen, so clearing is one click from
+   where the value is rather than a trip to a separate card. */
+.lib-combo__clear {
+    position: absolute;
+    top: 50%;
+    right: 30px;
+    z-index: 2;
+    width: 20px;
+    height: 20px;
+    border: 0;
+    border-radius: 50%;
+    background: #eef2f6;
+    color: #64748b;
+    font-size: 15px;
+    line-height: 1;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.lib-combo__clear:hover { background: #e2e8f0; color: var(--lib-ink); }
+
+/* Floats over what follows so opening the list never pushes the next step down
+   the page. */
+.lib-combo__panel {
+    position: absolute;
+    /* Above the following steps, the card border and the sticky grid header;
+       below the dialogs, which sit at 60. */
+    z-index: 55;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    overflow: hidden;
+    border: 1px solid var(--lib-line);
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 14px 34px rgba(15, 23, 42, .16);
+}
+
+.lib-combo__panel[hidden] { display: none !important; }
+
+.lib-combo__search {
+    position: relative;
+    padding: 10px;
+    border-bottom: 1px solid var(--lib-line);
+}
+
+.lib-combo__search svg {
+    position: absolute;
+    top: 50%;
+    left: 21px;
+    width: 15px;
+    height: 15px;
+    color: #94a3b8;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.lib-combo__input {
+    width: 100%;
+    height: 36px;
+    padding: 0 11px 0 33px;
+    border: 1px solid var(--lib-line);
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.lib-combo__input:focus {
+    border-color: var(--lib-accent, #0e7c86);
+    outline: none;
+}
+
+.lib-combo__list { max-height: 274px; overflow-y: auto; }
+
+.lib-combo__row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 12px;
+    border: 0;
+    border-bottom: 1px solid #f1f5f9;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+}
+
+.lib-combo__row:last-child { border-bottom: 0; }
+.lib-combo__row:hover { background: #f8fafc; }
+
+.lib-combo__hint {
+    padding: 16px 12px;
+    color: var(--lib-muted);
+    font-size: 12.5px;
+    text-align: center;
+}
+
+.lib-combo__hint--bad { color: #b91c1c; }
+
+/* ---- return dialog --------------------------------------------------- */
+
+.lib-return__book {
+    padding-bottom: 14px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--lib-line);
+}
+
+/* Amber, not red: a charge to collect is a step in the process, not an error. */
+.lib-return__charge {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    margin-bottom: 16px;
+    padding: 11px 13px;
+    border: 1px solid #f0dcbc;
+    border-radius: 9px;
+    background: #fdf6e8;
+    color: #8a6218;
+    font-size: 12.5px;
+    line-height: 1.5;
+}
+
+.lib-return__charge[hidden] { display: none !important; }
+.lib-return__charge svg { flex: none; width: 15px; height: 15px; margin-top: 2px; }
+.lib-return__charge strong { font-weight: 700; }
+
+.lib-btn--go {
+    border-color: var(--lib-accent, #0e7c86);
+    background: var(--lib-accent, #0e7c86);
+    color: #fff;
+}
+
+.lib-btn--go:hover:not(:disabled) { background: #0b6670; border-color: #0b6670; }
+.lib-btn--go:disabled { opacity: .5; cursor: not-allowed; }
+
+
+/* =================================================================
+   Grid skin and pagination
+   =================================================================
+   Adapted from the Course Management table so the two modules read as
+   one system. Scoped through `.lib-desk .lib-tabulator`, so it can
+   only ever repaint tables inside this module.
+   ================================================================= */
+
+ * Overrides the theme's `table-report--tabulator` skin. Scoped through
+ * `.lib-desk .lib-tabulator` so it can only ever repaint tables inside this
+ * module — every rule here needs to out-specify datafuture.css.
+ * ------------------------------------------------------------------ */
+
+.lib-tabulator-wrap {
+    overflow-x: auto;
+}
+
+.lib-desk .lib-tabulator.tabulator {
+    background: transparent;
+    border: 0;
+    font-family: inherit;
+    margin: 0;
+}
+
+.lib-desk .lib-tabulator .tabulator-header {
+    background: #fff;
+    border: 0;
+    /* Ruled top and bottom so the header reads as a band rather than as the
+       first row bleeding into the card above it. */
+    border-top: 1px solid var(--lib-line);
+    border-bottom: 1px solid var(--lib-line);
+    color: #655f52;
+}
+
+.lib-desk .lib-tabulator .tabulator-header .tabulator-col {
+    background: transparent;
+    border-right: 0;
+}
+
+.lib-desk .lib-tabulator .tabulator-header .tabulator-col .tabulator-col-content {
+    align-items: center;
+    display: flex;
+    min-height: 42px;
+    padding: 0 12px;
+}
+
+.lib-desk .lib-tabulator .tabulator-header .tabulator-col:first-child .tabulator-col-content {
+    padding-left: 26px;
+}
+
+.lib-desk .lib-tabulator .tabulator-header .tabulator-col:last-child .tabulator-col-content {
+    padding-right: 26px;
+}
+
+.lib-desk .lib-tabulator .tabulator-header .tabulator-col-title {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    line-height: 1.3;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.lib-desk .lib-tabulator .tabulator-header .tabulator-col.tabulator-sortable:hover {
+    background: var(--lib-field-bg);
+}
+
+/* Tabulator reserves room for its sort arrow with `padding-right: 25px` on the
+ * column title, but the theme skin resets that to `pr-0` — so the arrow lands
+ * on top of the last letter. Hide the native arrow and draw the caret as an
+ * inline `::after` instead: staying in the title's text flow means the
+ * right-aligned Actions header keeps its alignment. */
+.lib-desk .lib-tabulator .tabulator-header .tabulator-col .tabulator-col-sorter,
+.lib-desk .lib-tabulator .tabulator-header .tabulator-col .tabulator-arrow {
+    display: none;
+}
+
+.lib-desk .lib-tabulator .tabulator-header .tabulator-col.tabulator-sortable .tabulator-col-title::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23c2bdb2' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m8 9 4-4 4 4'/%3E%3Cpath d='m16 15-4 4-4-4'/%3E%3C/svg%3E");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 10px 10px;
+    content: "";
+    display: inline-block;
+    height: 10px;
+    margin-left: 6px;
+    vertical-align: -1px;
+    width: 10px;
+}
+
+.lib-desk .lib-tabulator .tabulator-header .tabulator-col.tabulator-sortable[aria-sort="asc"] .tabulator-col-title::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2316264f' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 15 6-6 6 6'/%3E%3C/svg%3E");
+}
+
+.lib-desk .lib-tabulator .tabulator-header .tabulator-col.tabulator-sortable[aria-sort="desc"] .tabulator-col-title::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2316264f' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+.lib-desk .lib-tabulator .tabulator-tableholder,
+.lib-desk .lib-tabulator .tabulator-tableHolder {
+    background: transparent;
+}
+
+/* `nowrap` on the row, `normal` on the cell: cells are inline-block siblings,
+ * so when their widths exceed the row the last one drops onto a second line —
+ * which is what put the action buttons under the row on wide tables. The row
+ * now overflows instead and `.lib-tabulator-wrap` scrolls it. Cells reset the
+ * value for their own text. */
+.lib-desk .lib-tabulator .tabulator-row,
+.lib-desk .lib-tabulator .tabulator-row.tabulator-row-even {
+    background: #fff;
+    border-bottom: 1px solid var(--lib-line-4);
+    min-height: 58px;
+    white-space: nowrap;
+    transition: background 0.12s ease;
+}
+
+.lib-desk .lib-tabulator .tabulator-row:hover,
+.lib-desk .lib-tabulator .tabulator-row.tabulator-row-even:hover {
+    background: var(--lib-field-bg);
+}
+
+/* `inline-flex`, never `flex`: Tabulator lays cells out as `inline-block`
+ * siblings and sets their widths itself. A block-level `flex` box takes the
+ * full row width, which stacks every cell onto its own line. */
+.lib-desk .lib-tabulator .tabulator-row .tabulator-cell {
+    align-items: center;
+    border-right: 0;
+    color: var(--lib-muted);
+    display: inline-flex;
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1.4;
+    min-height: 58px;
+    padding: 12px;
+    vertical-align: middle;
+    white-space: normal;
+}
+
+.lib-desk .lib-tabulator .tabulator-row .tabulator-cell:first-child {
+    padding-left: 26px;
+}
+
+.lib-desk .lib-tabulator .tabulator-row .tabulator-cell:last-child {
+    padding-right: 26px;
+}
+
+.lib-desk .lib-tabulator .tabulator-cell[tabulator-field="id"] {
+    color: #5a626e;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+}
+
+.lib-desk .lib-tabulator .tabulator-cell.lib-cell--primary {
+    color: var(--lib-navy);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* The opposite of `--clamp`: names long enough to dominate the table wrap onto
+ * a second line instead, so the column can be narrow and the rest of the row
+ * gets the space back. Pair it with `variableHeight` on the column or the
+ * wrapped line is cut off by the row's fixed height. */
+.lib-desk .lib-tabulator .tabulator-cell.lib-cell--wrap {
+    align-items: center;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* Long descriptive columns (tuition source, degree offered) stay on one line
+ * and ellipsize rather than pushing every row taller. */
+.lib-desk .lib-tabulator .tabulator-cell.lib-cell--clamp {
+    display: inline-block;
+    line-height: 58px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.lib-desk .lib-tabulator .tabulator-placeholder {
+    color: var(--lib-dim);
+}
+
+.lib-desk .lib-tabulator .tabulator-placeholder span {
+    color: var(--lib-dim);
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 56px 20px;
+}
+
+/* Row actions */
+.lib-rowactions {
+    align-items: center;
+    display: flex;
+    gap: 4px;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+/* Row buttons run tighter than toolbar ones — two labelled actions have to
+ * clear the Actions column without forcing the table into a scroll. */
+.lib-rowactions .lib-pillbtn {
+    font-size: 11.5px;
+    gap: 5px;
+    padding: 6px 10px;
+}
+
+.lib-rowactions .lib-pillbtn svg {
+    height: 13px;
+    width: 13px;
+}
+
+.lib-rowbtn {
+    align-items: center;
+    background: #eeede9;
+    border: none;
+    border-radius: 8px;
+    color: #6d747e;
+    cursor: pointer;
+    display: inline-flex;
+    height: 29px;
+    justify-content: center;
+    padding: 0;
+    transition: background 0.14s ease, color 0.14s ease;
+    width: 29px;
+}
+
+.lib-rowbtn svg {
+    height: 14px;
+    width: 14px;
+}
+
+/* Footer / pagination */
+/* `margin: 0` matters — the theme skin adds `mt-2` to every footer. */
+.lib-desk .lib-tabulator .tabulator-footer {
+    background: #fff;
+    border-top: 1px solid var(--lib-line-2);
+    color: var(--lib-faint);
+    margin: 0;
+    padding: 16px 26px 20px;
+}
+
+/* No flex `gap` here: spacing is set per element instead, so the pager reads
+ * as one evenly spaced run. A container gap would stack on top of the page
+ * buttons' own margins and open a visible hole either side of the numbers. */
+.lib-desk .lib-tabulator .tabulator-footer .tabulator-paginator {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    justify-content: flex-start;
+    row-gap: 8px;
+    text-align: left;
+}
+
+.lib-desk .lib-tabulator .tabulator-footer .tabulator-paginator > label {
+    color: var(--lib-faint);
+    font-size: 12.5px;
+    font-weight: 700;
+    margin: 0 10px 0 0;
+}
+
+.lib-desk .lib-tabulator .tabulator-footer .tabulator-page-size {
+    background: #fff;
+    border: 1px solid var(--lib-field);
+    border-radius: 8px;
+    color: var(--lib-ink);
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 700;
+    margin: 0 12px 0 0;
+    outline: none;
+    padding: 6px 10px;
+}
+
+.lib-desk .lib-tabulator .tabulator-footer .tabulator-pages {
+    align-items: center;
+    display: inline-flex;
+    margin: 0;
+}
+
+/* The range readout is injected after the size select — see course-semester.js.
+ * It must not carry the auto margin that pushes the pager right: it is optional
+ * markup, so alignment would collapse on any table that skips it. */
+.lib-page-range {
+    color: var(--lib-faint);
+    font-size: 12.5px;
+    font-weight: 600;
+    margin-right: 12px;
+}
+
+.lib-desk .lib-tabulator .tabulator-footer .tabulator-page {
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--lib-field);
+    border-radius: 9px;
+    color: #5a626e;
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 12.5px;
+    font-weight: 700;
+    height: 30px;
+    justify-content: center;
+    margin: 0 3px;
+    min-width: 30px;
+    padding: 0 8px;
+}
+
+.lib-desk .lib-tabulator .tabulator-footer .tabulator-page[data-page="first"],
+.lib-desk .lib-tabulator .tabulator-footer .tabulator-page[data-page="last"] {
+    display: none;
+}
+
+/* Tabulator appends first / prev / pages / next / last in that order, and the
+ * two ends are hidden above — so `prev` is the leading visible control and the
+ * one that carries the margin pushing the whole pager to the right edge. */
+.lib-desk .lib-tabulator .tabulator-footer .tabulator-page[data-page="prev"] {
+    margin-left: auto;
+}
+
+.lib-desk .lib-tabulator .tabulator-footer .tabulator-page:not(:disabled):hover {
+    background: #ecebe7;
+    color: var(--lib-navy);
+}
+
+.lib-desk .lib-tabulator .tabulator-footer .tabulator-page.active,
+.lib-desk .lib-tabulator .tabulator-footer .tabulator-page.active:hover {
+    background: var(--lib-navy);
+    border-color: var(--lib-navy);
+    color: #fff;
+    font-weight: 800;
+}
+
+.lib-desk .lib-tabulator .tabulator-footer .tabulator-page:disabled {
+    opacity: 0.45;
+}
+
+/* =================================================================
+   Grid cell components
+   =================================================================
+   The Tabulator formatters build these. Sizes are fixed rather than
+   intrinsic: a cover is whatever the catalogue uploaded — some are
+   1400px tall — and an unconstrained <img> in a cell drags the whole
+   row to that height.
+   ================================================================= */
+
+.lib-media { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.lib-media__copy { min-width: 0; flex: 1 1 auto; }
+
+.lib-media__title {
+    color: var(--lib-navy);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.lib-media__sub {
+    color: var(--lib-muted);
+    font-size: 11.5px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+/* The placeholder is the box; the image sits on top. A missing or unreadable
+   file just reveals what is underneath, and the footprint never changes. */
+.lib-media__cover,
+.lib-media__avatar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    overflow: hidden;
+    background: #eceae4;
+    color: #9a958a;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.lib-media__cover img,
+.lib-media__avatar img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.lib-media__cover { width: 32px; height: 44px; border-radius: 4px; }
+.lib-media__cover svg { width: 15px; height: 15px; opacity: .55; }
+.lib-media__cover--lg { width: 56px; height: 76px; border-radius: 6px; }
+.lib-media__cover--lg svg { width: 22px; height: 22px; }
+
+.lib-media__avatar { width: 32px; height: 32px; border-radius: 50%; font-size: 11.5px; }
+.lib-media__avatar--lg { width: 46px; height: 46px; font-size: 14px; }
+
+/* ---- dates cell ---------------------------------------------------- */
+
+.lib-dates { color: var(--lib-ink); font-size: 12.5px; white-space: nowrap; }
+.lib-dates__sub { margin-top: 2px; color: var(--lib-muted); font-size: 11.5px; white-space: nowrap; }
+.lib-dates__late { margin-top: 2px; color: var(--lib-danger); font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+
+/* ---- status pills -------------------------------------------------- */
+
+/* Dot plus label in a soft tint: the dot is a colour cue you can scan a
+   column by without reading, and the label is there for everyone the colour
+   alone does not reach. */
+.lib-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 12px 5px 10px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 700;
+    line-height: 1.35;
+    white-space: nowrap;
+}
+
+/* currentColor, so a new tone only ever needs the two lines below. */
+.lib-status > i {
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.lib-status--wait { background: #fdf1dc; color: #8a5c0c; }
+.lib-status--out  { background: #eceaf8; color: #45409a; }
+.lib-status--done { background: #e6f4ec; color: #17714a; }
+.lib-status--late { background: #fbe6e5; color: #a11d1d; }
+.lib-status--void { background: #eeece6; color: #6b6f78; }
+
+.lib-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: #e8ecf7;
+    color: #2c4c8f;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
+/* Inside the pill, so it inherits the tone rather than fighting it — only
+   the tabular figures are worth setting here. */
+.lib-fine { font-weight: 800; font-variant-numeric: tabular-nums; }
+
+/* ---- filter buttons ------------------------------------------------ */
+
+.lib-filter-btn { display: inline-flex; align-items: center; }
+
+.lib-tab-count {
+    display: inline-block;
+    min-width: 18px;
+    margin-left: 5px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, .07);
+    font-size: 10.5px;
+    font-weight: 800;
+    line-height: 18px;
+    text-align: center;
+}
+
+.btn-primary .lib-tab-count { background: rgba(255, 255, 255, .24); }
+
+/* =================================================================
+   Dialog chrome
+   =================================================================
+   Shared by the return, cancel and history dialogs.
+   ================================================================= */
+
+.lib-modal__head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--lib-line-2);
+    border-radius: var(--lib-radius) var(--lib-radius) 0 0;
+    background: var(--lib-line-4);
+}
+
+.lib-modal__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #e2eee9;
+    color: #14624f;
+}
+
+.lib-modal__icon svg { width: 18px; height: 18px; }
+.lib-modal__heading { flex: 1 1 auto; min-width: 0; }
+
+.lib-modal__title {
+    color: var(--lib-navy);
+    font-family: "Spectral", Georgia, "Times New Roman", serif;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.lib-modal__ref {
+    margin-top: 2px;
+    color: var(--lib-faint);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: .04em;
+}
+
+.lib-modal__x {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 30px;
+    height: 30px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: none;
+    color: #b23b34;
+    cursor: pointer;
+    transition: background .14s ease, border-color .14s ease;
+}
+
+.lib-modal__x svg { width: 16px; height: 16px; }
+.lib-modal__x:hover { border-color: #f3cdc9; background: #fdeceb; }
+
+.lib-modal__body { padding: 20px 22px; }
+
+.lib-modal__foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 22px;
+    border-top: 1px solid var(--lib-line-2);
+    border-radius: 0 0 var(--lib-radius) var(--lib-radius);
+    background: var(--lib-line-4);
+}
+
+.lib-btn-close {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #edc4c0;
+    background: #fff;
+    color: #b91c1c;
+    font-weight: 700;
+}
+
+.lib-btn-close:hover { border-color: #b91c1c; background: #b91c1c; color: #fff; }
+
+/* ---- history dialog ------------------------------------------------ */
+
+.lib-section-title {
+    margin: 0 0 10px;
+    color: var(--lib-label);
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.lib-parties {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    padding-bottom: 18px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid var(--lib-line-2);
+}
+
+@media (max-width: 560px) { .lib-parties { grid-template-columns: 1fr; } }
+
+.lib-party { min-width: 0; }
+.lib-party__label { margin-bottom: 8px; color: var(--lib-label); font-size: 10.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+
+.lib-party__facts {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 3px 10px;
+    margin: 9px 0 0;
+    font-size: 11.5px;
+    line-height: 1.45;
+}
+
+.lib-party__facts dt { color: var(--lib-faint); font-weight: 600; white-space: nowrap; }
+.lib-party__facts dd { margin: 0; color: var(--lib-ink); overflow: hidden; text-overflow: ellipsis; }
+
+/* A rail with a dot per event: the trail is read top to bottom, and the line
+   is what makes it one sequence rather than four loose rows. */
+.lib-timeline { margin: 0; padding: 0 0 0 18px; list-style: none; border-left: 2px solid var(--lib-line); }
+
+.lib-timeline li { position: relative; padding: 0 0 16px; }
+.lib-timeline li:last-child { padding-bottom: 0; }
+
+.lib-timeline li::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: -25px;
+    width: 9px;
+    height: 9px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    background: var(--lib-gold);
+}
+
+.lib-timeline__what { color: var(--lib-navy); font-size: 13px; font-weight: 700; }
+.lib-timeline__when { color: var(--lib-faint); font-variant-numeric: tabular-nums; }
+.lib-timeline__meta { margin-top: 2px; color: var(--lib-muted); font-size: 11.5px; }
+.lib-timeline__note { margin-top: 3px; color: var(--lib-faint); font-size: 11.5px; font-style: italic; }
+
+/* ---- search in the card head ---------------------------------------- */
+
+/* `margin: 0` here would silently beat .lib-cardhead__spacer's margin-left:auto
+   — same specificity, later in the file — so the auto is written in. */
+.lib-headsearch { display: flex; align-items: center; gap: 10px; margin: 0 0 0 auto; }
+
+.lib-headsearch__box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 14px;
+    border: 1px solid var(--lib-field);
+    border-radius: 999px;
+    background: var(--lib-field-bg);
+    transition: border-color .14s ease, background .14s ease;
+}
+
+.lib-headsearch__box:focus-within { border-color: var(--lib-navy); background: #fff; }
+.lib-headsearch__box > svg { flex: none; width: 15px; height: 15px; color: #b2b7bf; }
+
+.lib-headsearch__box input {
+    width: 230px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--lib-ink);
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+}
+
+.lib-headsearch__box input::placeholder { color: #a4a49e; }
+.lib-headsearch__box input::-webkit-search-cancel-button { appearance: none; }
+
+.lib-headsearch__clear {
+    color: var(--lib-muted);
+    font-size: 12.5px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.lib-headsearch__clear:hover { color: var(--lib-navy); }
+
+@media (max-width: 700px) {
+    .lib-headsearch { width: 100%; margin-left: 0; }
+    .lib-headsearch__box { flex: 1 1 auto; }
+    .lib-headsearch__box input { width: 100%; }
+}
+
+/* ---- collapsible head ------------------------------------------------ */
+
+/* Full width so the whole strip is the hit area — a toggle you have to aim at
+   is worse than no toggle. */
+/* Same warm field tone as the search box, so a collapsed panel reads as a
+   control to open rather than a card with nothing in it. */
+.lib-panel__head {
+    width: 100%;
+    border: 0;
+    border-radius: var(--lib-radius) var(--lib-radius) 0 0;
+    background: var(--lib-field-bg);
+    text-align: left;
+    cursor: pointer;
+}
+
+/* Closed, the head is the whole card — so it keeps all four corners. */
+.lib-panel__head[aria-expanded="false"] { border-radius: var(--lib-radius); }
+
+.lib-panel__head .lib-cardhead__count { font-weight: 600; }
+.lib-panel__chevron { flex: none; width: 18px; height: 18px; color: var(--lib-faint); transition: transform .18s ease; }
+.lib-panel__head[aria-expanded="true"] .lib-panel__chevron { transform: rotate(180deg); }
+
+
+/* ---- step 3: note + action on one line ------------------------------ */
+
+.lib-step__row { display: flex; align-items: stretch; gap: 10px; }
+.lib-step__row .lib-text { flex: 1 1 auto; min-width: 0; height: 48px; padding: 0 12px; font-size: 13px; }
+
+/* Matched to the combobox triggers so all four controls sit on one baseline. */
+.lib-issue-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    flex: none;
+    height: 58px;
+    padding: 0 20px;
+    border: 1px solid #0d6a4c;
+    border-radius: 9px;
+    background: #0f7a58;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background .14s ease, border-color .14s ease;
+}
+
+.lib-issue-btn svg { width: 16px; height: 16px; }
+.lib-issue-btn:hover:not(:disabled) { background: #0b5f45; border-color: #0b5f45; }
+
+.lib-issue-btn:disabled {
+    border-color: var(--lib-line);
+    background: #eef0f2;
+    color: #a4acb6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 700px) {
+    .lib-step__row { flex-direction: column; }
+    .lib-issue-btn { width: 100%; }
+}
+
+/* ---- segmented filters ----------------------------------------------
+   Each axis is one track with the choices inside it. A recessed track with a
+   single raised pill states "pick one of these" on sight, which a row of
+   equal-weight chips never does — and it drops the divider that was standing
+   in for the group boundary.
+   ------------------------------------------------------------------- */
+
+.lib-segs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px 0;
+}
+
+.lib-seg {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px;
+    border: 1px solid var(--lib-line-2);
+    border-radius: 999px;
+    background: #f2f1ec;
+}
+
+.lib-seg__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 32px;
+    padding: 0 14px;
+    border-radius: 999px;
+    color: var(--lib-muted);
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    transition: background .14s ease, color .14s ease;
+}
+
+.lib-seg__item svg { flex: none; width: 15px; height: 15px; opacity: .75; }
+
+.lib-seg__item:hover { color: var(--lib-ink); }
+
+/* Raised, not coloured: the track already carries the group, so the selected
+   pill only has to lift out of it. */
+.lib-seg__item--on,
+.lib-seg__item--on:hover {
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(22, 38, 79, .10), 0 0 0 1px rgba(22, 38, 79, .05);
+    color: var(--lib-navy);
+    font-weight: 700;
+}
+
+.lib-seg__item--on svg { opacity: 1; }
+
+/* Counts sit inside the pill, so they take their weight from it rather than
+   competing as a second badge. */
+.lib-seg__count {
+    min-width: 18px;
+    padding: 2px 5px;
+    border-radius: 999px;
+    background: rgba(22, 38, 79, .07);
+    color: var(--lib-muted);
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.lib-seg__item--on .lib-seg__count {
+    background: var(--lib-gold-tint);
+    color: var(--lib-gold-ink);
+}
+
+@media (max-width: 700px) {
+    .lib-seg { flex-wrap: wrap; border-radius: 18px; }
+    .lib-seg__item { flex: 1 1 auto; justify-content: center; }
+}
+
+/* ---- row actions ----------------------------------------------------
+   Quiet by default: a grid of six rows with six solid buttons in it reads as
+   a wall of colour, and nothing in the column is the obvious next click. The
+   colour arrives on hover instead, and it names the consequence — green to
+   hand a book over or take it back, blue to look at history, red to cancel.
+   ------------------------------------------------------------------- */
+
+.lib-acts {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.lib-act-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 11px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: #f1f0ed;
+    color: var(--lib-muted);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background .14s ease, color .14s ease, border-color .14s ease;
+}
+
+.lib-act-btn svg { flex: none; width: 15px; height: 15px; }
+
+/* Icon-only (the history count is a number, not a word) still wants to be
+   square rather than a stubby pill. */
+.lib-act-btn--tight { padding: 0 9px; }
+
+.lib-act-btn:focus-visible { outline: 2px solid var(--lib-navy); outline-offset: 2px; }
+.lib-act-btn:disabled { opacity: .5; cursor: default; }
+
+.lib-act-btn--ok:hover:not(:disabled) {
+    border-color: #bfe3cd;
+    background: #e8f6ee;
+    color: #1a7a4b;
+}
+
+.lib-act-btn--info:hover:not(:disabled) {
+    border-color: #c6d6f0;
+    background: #eaf1fb;
+    color: #2b57a6;
+}
+
+.lib-act-btn--danger:hover:not(:disabled) {
+    border-color: #f0c4c1;
+    background: #fdeceb;
+    color: #c1352c;
+}
+
+/* An overdue return carries a charge, so it says so at rest instead of
+   waiting for a hover nobody is guaranteed to give it. */
+.lib-act-btn--alert {
+    background: #fdeceb;
+    color: var(--lib-red);
+}
+
+.lib-act-btn--alert:hover:not(:disabled) {
+    border-color: #e8b3ae;
+    background: #fbdedb;
+    color: var(--lib-red-dark);
+}
+
+/* =================================================================
+   Buttons
+   =================================================================
+   Gold carries the action, cream-and-gold the secondary, deep red the
+   destructive — the same three weights the clock-in controls use, so a
+   button means the same thing here as everywhere else in the app.
+   ================================================================= */
+
+.lib-b {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 34px;
+    padding: 0 15px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: none;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background .14s ease, border-color .14s ease, color .14s ease;
+}
+
+.lib-b svg { flex: none; width: 15px; height: 15px; }
+.lib-b--lg { height: 48px; padding: 0 18px; font-size: 12.5px; border-radius: 9px; }
+
+.lib-b--gold { border-color: var(--lib-gold); background: var(--lib-gold); color: #fff; }
+.lib-b--gold:hover:not(:disabled) { border-color: var(--lib-gold-dark); background: var(--lib-gold-dark); }
+
+.lib-b--cream {
+    border-color: var(--lib-gold-line);
+    background: var(--lib-gold-tint);
+    color: var(--lib-gold-ink);
+}
+
+.lib-b--cream:hover:not(:disabled) { border-color: var(--lib-gold); background: #f6ead0; }
+
+.lib-b--red { border-color: var(--lib-red); background: var(--lib-red); color: #fff; }
+.lib-b--red:hover:not(:disabled) { border-color: var(--lib-red-dark); background: var(--lib-red-dark); }
+
+.lib-b--redline { border-color: #e0bdbd; background: #fff; color: var(--lib-red); }
+.lib-b--redline:hover:not(:disabled) { border-color: var(--lib-red); background: var(--lib-red); color: #fff; }
+
+.lib-b--quiet { border-color: var(--lib-line); background: #fff; color: var(--lib-muted); }
+.lib-b--quiet:hover:not(:disabled) { border-color: var(--lib-gold); color: var(--lib-gold-ink); }
+
+.lib-b:disabled {
+    border-color: var(--lib-line);
+    background: #eef0f2;
+    color: #a4acb6;
+    cursor: not-allowed;
+}
+
+/* Filter chips: gold when the filter is on. */
+.lib-filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 13px;
+    border: 1px solid var(--lib-line);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--lib-muted);
+    font-size: 12.5px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background .14s ease, border-color .14s ease, color .14s ease;
+}
+
+.lib-filter-btn svg { flex: none; width: 14px; height: 14px; }
+.lib-filter-btn:hover { border-color: var(--lib-gold-line); color: var(--lib-gold-ink); }
+
+.lib-filter-btn--on {
+    border-color: var(--lib-gold);
+    background: var(--lib-gold);
+    color: #fff;
+}
+
+.lib-filter-btn--on .lib-tab-count { background: rgba(255, 255, 255, .26); }
+.lib-filter-btn--alert { border-color: var(--lib-red); background: var(--lib-red); color: #fff; }
+
+/* =================================================================
+   Deposits & fines ledger
+   ================================================================= */
+
+.lib-money {
+    border-collapse: collapse;
+    min-width: 860px;
+    width: 100%;
+}
+
+.lib-money th {
+    border-bottom: 1px solid var(--lib-line, #e5e7eb);
+    color: var(--lib-muted, #6b7280);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 13px 16px;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.lib-money td {
+    border-bottom: 1px solid var(--lib-hairline, #f1f2f4);
+    font-size: 14px;
+    padding: 14px 16px;
+    vertical-align: middle;
+}
+
+.lib-money tr:last-child td {
+    border-bottom: 0;
+}
+
+.lib-money th:first-child,
+.lib-money td:first-child {
+    padding-left: 22px;
+}
+
+.lib-money th:last-child,
+.lib-money td:last-child {
+    padding-right: 22px;
+}
+
+.lib-money__right {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* The reason a row exists, in the desk's own words — allowed to wrap so a
+   long note is readable rather than trailing off. */
+.lib-money__detail {
+    line-height: 1.45;
+    max-width: 320px;
+}
+
+/* The fifth cell on the ledger: navigation, not a figure.
+
+   `--tone` is set rather than `color`, because the shared
+   `.lib-stat:hover { background: var(--tone); color: #fff }` is what paints
+   every tile on hover. Left unset it fell back to `--lib-navy`, and a colour
+   override here — later in the file and therefore winning — put dark text on
+   that dark fill. Slate keeps it quieter than the four money tones beside it
+   while still going white-on-tone like its neighbours. */
+.lib-stat--back {
+    --tone: #4c5563;
+}
+
+.lib-stat__value--back {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+/* Status select in the ledger header, sitting beside the search box. */
+.lib-money__statuslabel {
+    color: var(--lib-muted);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    margin-left: 4px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.lib-money__status {
+    cursor: pointer;
+    min-width: 150px;
+    padding-right: 30px;
+}

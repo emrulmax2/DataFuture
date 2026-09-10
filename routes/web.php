@@ -86,9 +86,9 @@ use App\Http\Controllers\Auth\GoogleSocialiteStudentController;
 use App\Http\Controllers\Auth\MicrosoftSocialiteStudentController;
 use App\Http\Controllers\Student\Frontend\Auth\LoginController as StudentLoginController;
 use App\Http\Controllers\Student\Frontend\DashboardController as StudentDashboardController;
-// use App\Http\Controllers\Student\Frontend\LibraryController as StudentLibraryController;
-// use App\Http\Controllers\PayPalWebhookController;
-// use App\Http\Controllers\Library\IssueDeskController;
+use App\Http\Controllers\Student\Frontend\LibraryController as StudentLibraryController;
+use App\Http\Controllers\PayPalWebhookController;
+use App\Http\Controllers\Library\IssueDeskController;
 use App\Http\Controllers\Student\Frontend\PersonalDetailController as StudentPersonalDetailController;
 use App\Http\Controllers\Student\Frontend\OtherPersonalInformationController as StudentOtherPersonalInformationController;
 use App\Http\Controllers\Student\Frontend\ContactDetailController as StudentContactDetailController;
@@ -289,7 +289,7 @@ use App\Http\Controllers\Reports\TermPerformance\TermRetentionReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermSubmissionPerformanceReportController;
 use App\Http\Controllers\ResidencyStatusController;
 use App\Http\Controllers\StudentConversionLogController;
-// use App\Http\Controllers\Settings\LibrarySettingController;
+use App\Http\Controllers\Settings\LibrarySettingController;
 use App\Http\Controllers\ResultComparisonController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
@@ -678,18 +678,18 @@ Route::prefix('/students')->name('students.')->group(function() {
 
         /* Student library: catalogue search proxied to Operations, the Stripe
            deposit, and the student's own loans. */
-        // Route::controller(StudentLibraryController::class)->group(function() {
-        //     Route::get('/dashboard/library', 'index')->name('library.index');
-        //     Route::get('/dashboard/library/search', 'search')->name('library.search');
-        //     Route::get('/dashboard/library/title/{titleId}', 'title')->name('library.title');
-        //     Route::post('/dashboard/library/deposit', 'depositCheckout')->name('library.deposit.checkout');
-        //     Route::get('/dashboard/library/deposit/complete', 'depositComplete')->name('library.deposit.complete');
-        //     Route::get('/dashboard/library/deposit/cancel', 'depositCancel')->name('library.deposit.cancel');
-        //     Route::post('/dashboard/library/deposit/refund', 'depositRefund')->name('library.deposit.refund');
-        //     Route::post('/dashboard/library/borrow', 'borrow')->name('library.borrow');
-        //     Route::post('/dashboard/library/loans/{loanId}/renew', 'renew')->name('library.renew');
-        //     Route::post('/dashboard/library/loans/{loanId}/cancel', 'cancel')->name('library.cancel');
-        // });
+        Route::controller(StudentLibraryController::class)->group(function() {
+            Route::get('/dashboard/library', 'index')->name('library.index');
+            Route::get('/dashboard/library/search', 'search')->name('library.search');
+            Route::get('/dashboard/library/title/{titleId}', 'title')->name('library.title');
+            Route::post('/dashboard/library/deposit', 'depositCheckout')->name('library.deposit.checkout');
+            Route::get('/dashboard/library/deposit/complete', 'depositComplete')->name('library.deposit.complete');
+            Route::get('/dashboard/library/deposit/cancel', 'depositCancel')->name('library.deposit.cancel');
+            Route::post('/dashboard/library/deposit/refund', 'depositRefund')->name('library.deposit.refund');
+            Route::post('/dashboard/library/borrow', 'borrow')->name('library.borrow');
+            Route::post('/dashboard/library/loans/{loanId}/renew', 'renew')->name('library.renew');
+            Route::post('/dashboard/library/loans/{loanId}/cancel', 'cancel')->name('library.cancel');
+        });
 
         Route::controller(StudentDocumentRequestFormController::class)->group(function() {
 
@@ -3139,12 +3139,12 @@ Route::middleware('auth')->group(function() {
     });
 
 
-    // Route::controller(LibrarySettingController::class)->group(function() {
-    //     Route::get('site-settings/library/deposit-rule', 'depositRule')->name('library.settings.deposit.rule');
-    //     Route::get('site-settings/library/loan-rule', 'loanRule')->name('library.settings.loan.rule');
-    //     Route::get('site-settings/library/fine-charges', 'fineCharges')->name('library.settings.fine.charges');
-    //     Route::post('site-settings/library/{group}/save', 'save')->name('library.settings.save');
-    // });
+    Route::controller(LibrarySettingController::class)->group(function() {
+        Route::get('site-settings/library/deposit-rule', 'depositRule')->name('library.settings.deposit.rule');
+        Route::get('site-settings/library/loan-rule', 'loanRule')->name('library.settings.loan.rule');
+        Route::get('site-settings/library/fine-charges', 'fineCharges')->name('library.settings.fine.charges');
+        Route::post('site-settings/library/{group}/save', 'save')->name('library.settings.save');
+    });
 
     Route::controller(ResidencyStatusController::class)->group(function() {
         Route::get('site-settings/residency-status', 'index')->name('residency.status'); 
@@ -3834,16 +3834,17 @@ Route::middleware('auth')->group(function() {
     ]);
     /* Library Management (new). The old dashboard stays on library/management;
        this is the issue desk working the library_book_issues table. */
-    // Route::controller(IssueDeskController::class)->group(function(){
-    //     Route::get('library-management', 'index')->name('library.management');
-    //     Route::get('library-management/list', 'list')->name('library.management.list');
-    //     Route::get('library-management/catalogue', 'searchCatalogue')->name('library.management.catalogue');
-    //     Route::get('library-management/students', 'searchStudents')->name('library.management.students');
-    //     Route::post('library-management/day-reading', 'issueDayReading')->name('library.management.day.reading');
-    //     Route::post('library-management/{id}/issue', 'issue')->name('library.management.issue');
-    //     Route::post('library-management/{id}/return', 'returnBook')->name('library.management.return');
-    //     Route::post('library-management/{id}/cancel', 'cancel')->name('library.management.cancel');
-    // });
+    Route::controller(IssueDeskController::class)->group(function(){
+        Route::get('library-management', 'index')->name('library.management');
+        Route::get('library-management/money', 'money')->name('library.management.money');
+        Route::get('library-management/list', 'list')->name('library.management.list');
+        Route::get('library-management/catalogue', 'searchCatalogue')->name('library.management.catalogue');
+        Route::get('library-management/students', 'searchStudents')->name('library.management.students');
+        Route::post('library-management/day-reading', 'issueDayReading')->name('library.management.day.reading');
+        Route::post('library-management/{id}/issue', 'issue')->name('library.management.issue');
+        Route::post('library-management/{id}/return', 'returnBook')->name('library.management.return');
+        Route::post('library-management/{id}/cancel', 'cancel')->name('library.management.cancel');
+    });
 
     Route::controller(LibraryLocationController::class)->group(function(){
         Route::get('library-locations', 'index')->name('library-locations'); 
@@ -4363,6 +4364,6 @@ Route::controller(ApplicanESignatureController::class)->group(function() {
 /* PayPal server-to-server notifications. Deliberately outside every auth group:
    the caller is PayPal, not a signed-in person, and the payload is trusted only
    after its transmission signature verifies. */
-// Route::post('paypal/webhook', [PayPalWebhookController::class, 'handle'])
-//     ->middleware('throttle:120,1')
-//     ->name('paypal.webhook');
+Route::post('paypal/webhook', [PayPalWebhookController::class, 'handle'])
+    ->middleware('throttle:120,1')
+    ->name('paypal.webhook');

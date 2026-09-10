@@ -62,6 +62,21 @@
                 <a href="{{ route('students.performance.frontend.index', $student->id) }}" class="spf-nav__link{{ $isActive('students.performance.frontend.index') }}">Performance</a>
             @endif
 
+            {{-- Staff only, while the library is being tested on live. An
+                 impersonated session is a member of staff looking at the portal
+                 through a student's account, so they get the link and real
+                 students do not see it yet.
+
+                 This hides the menu entry, not the feature: the routes stay
+                 open, so anyone with the URL can still reach it. Drop the
+                 wrapper to release it to everyone. --}}
+            @impersonating($guard = 'student')
+                {{-- Every library screen keeps the tab lit, not just the index:
+                     a student reading a title or coming back from the deposit
+                     checkout is still inside the library. --}}
+                <a href="{{ route('students.library.index') }}" class="spf-nav__link{{ $isActive(['students.library.index', 'students.library.search', 'students.library.title', 'students.library.deposit.complete', 'students.library.deposit.cancel']) }}">Library</a>
+            @endImpersonating
+
             <a href="{{ route('students.dashboard.forms') }}" class="spf-nav__link{{ $isActive('students.dashboard.forms') }}">Do it online</a>
 
             @if($hasWorkplacement)
