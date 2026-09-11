@@ -21,6 +21,8 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/css/site-settings-redesign.css',
+                'resources/css/library-management.css',
+                'resources/css/student-library.css',
                 'resources/css/student-service-desk.css',
                 'resources/css/admission-redesign.css',
                 'resources/css/course-management-redesign.css',
@@ -137,6 +139,8 @@ export default defineConfig({
                 'resources/js/plan-tree.js',
                 'resources/js/employee-new.js',
                 'resources/js/student-frontend.js',
+                'resources/js/student-library.js',
+                'resources/js/library-management.js',
 
                 'resources/js/student-frontend-dashboard.js',
                 'resources/js/student-frontend-profile.js',

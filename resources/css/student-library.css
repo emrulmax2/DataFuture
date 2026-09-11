@@ -1,0 +1,909 @@
+/* =================================================================
+   Student library — catalogue search and My books
+   =================================================================
+   Loaded only on /students/dashboard/library.
+
+   The page sits inside the student portal shell, so it borrows that
+   shell's palette and type rather than defining its own: every colour
+   below resolves to a `--spf-*` token declared on
+   `body.student-portal-body`, and the fallbacks after each one only
+   matter if this stylesheet is ever loaded outside the portal.
+
+   Icon rules name both `i` and `svg`: the markup ships a
+   `<i data-lucide>` placeholder that lucide's createIcons() replaces
+   with an `<svg>`, so a selector on one of them alone leaves the icon
+   unsized on one side of that swap.
+
+   Class names stay `slib-` and unscoped. They are the contract with
+   `student-library.js`, which builds the result cards and the confirm
+   dialog as HTML strings — renaming one here silently unstyles a
+   component that no Blade file mentions.
+   ================================================================= */
+
+.slib,
+.slib-modal {
+    --slib-line: var(--spf-line, #e8e6e1);
+    --slib-hairline: var(--spf-hairline, #f0eeea);
+    --slib-border2: var(--spf-border2, #e0dcd2);
+    --slib-card: var(--spf-card, #fff);
+    --slib-paper: var(--spf-paper, #f7f6f4);
+    --slib-ink: var(--spf-ink, #232528);
+    --slib-body: var(--spf-body, #3c3f44);
+    --slib-muted: var(--spf-muted, #6b6b66);
+    --slib-dim: var(--spf-dim, #53565b);
+    --slib-gold: var(--spf-gold, #cda468);
+    --slib-goldtxt: var(--spf-goldtxt, #825d1c);
+    --slib-cream: var(--spf-cream, #efe7da);
+    --slib-creambg: var(--spf-creambg, #f9f3e7);
+    --slib-green: var(--spf-green, #3e6b34);
+    --slib-greenbg: var(--spf-greenbg, #e9f0e6);
+    --slib-rust: var(--spf-rust, #9a5226);
+    --slib-rustbg: var(--spf-rustbg, #f5e9dc);
+    --slib-graphite: var(--spf-graphite, #26292e);
+    --slib-serif: var(--spf-serif, "Source Serif 4", Georgia, serif);
+}
+
+/* ---------- Search ------------------------------------------------ */
+
+.slib-search__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.slib-search__field {
+    align-items: center;
+    background: var(--slib-card);
+    border: 1px solid var(--slib-border2);
+    border-radius: 999px;
+    display: flex;
+    flex: 1 1 220px;
+    gap: 9px;
+    min-width: 0;
+    padding: 0 16px;
+    transition: border-color 0.15s ease;
+}
+
+.slib-search__field:focus-within {
+    border-color: var(--slib-gold);
+}
+
+.slib-search__field > i,
+.slib-search__field > svg {
+    color: var(--slib-muted);
+    flex: 0 0 15px;
+    height: 15px;
+    width: 15px;
+}
+
+.slib-input,
+.slib-select {
+    background: none;
+    border: 0;
+    color: var(--slib-ink);
+    flex: 1;
+    font-family: inherit;
+    font-size: 13.5px;
+    min-width: 0;
+    outline: none;
+    padding: 11px 0;
+}
+
+/* The arrow is drawn rather than native so the control keeps the pill
+   shape on every platform. */
+.slib-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b66' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right center;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    padding-right: 18px;
+}
+
+.slib-search__filters {
+    align-items: end;
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    margin-top: 14px;
+}
+
+.slib-search__label {
+    color: var(--slib-muted);
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
+
+.slib-search__action {
+    display: flex;
+}
+
+.slib-reset {
+    align-items: center;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    color: var(--slib-muted);
+    cursor: pointer;
+    display: inline-flex;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 11px 16px;
+    white-space: nowrap;
+}
+
+.slib-reset:hover {
+    border-color: var(--slib-border2);
+    color: var(--slib-goldtxt);
+}
+
+/* ---------- Results ---------------------------------------------- */
+
+.slib-results {
+    border-top: 1px solid var(--slib-line);
+    margin-top: 22px;
+    padding-top: 18px;
+}
+
+.slib-results__head {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    min-height: 18px;
+}
+
+.slib-count {
+    color: var(--slib-muted);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.slib-grid {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+}
+
+.slib-card {
+    background: var(--slib-card);
+    border: 1px solid var(--slib-line);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.slib-card:hover {
+    border-color: var(--slib-border2);
+    box-shadow: 0 6px 20px rgba(38, 41, 46, 0.06);
+}
+
+/* The gap above the divider lives here rather than on the footer: the
+   footer's `margin-top: auto` is what pins it to the bottom, and an auto
+   margin cannot also guarantee a minimum. On the tallest card in a row —
+   where auto resolves to nothing — this is the only thing keeping the
+   rule off the availability pill. */
+.slib-card__top {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.slib-card__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.slib-card__title {
+    color: var(--slib-ink);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    font-family: var(--slib-serif);
+    font-size: 15.5px;
+    font-weight: 600;
+    line-height: 1.32;
+    overflow: hidden;
+}
+
+.slib-card__author {
+    color: var(--slib-body);
+    font-size: 12.5px;
+}
+
+.slib-card__meta {
+    color: var(--slib-muted);
+    font-size: 11.5px;
+    line-height: 1.5;
+}
+
+/* `margin-top: auto` rather than a fixed gap: grid items already stretch
+   to the tallest card in the row, so pushing the footer down pins every
+   Borrow button to the same baseline however many lines the title above
+   it ran to. */
+.slib-card__foot {
+    align-items: center;
+    border-top: 1px solid var(--slib-hairline);
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 14px;
+}
+
+/* The venue list wraps over two lines instead of being cut off at one,
+   and reserves both of them whether or not it needs the second — it is
+   the only thing down here whose height varies, so holding the space
+   keeps the footers of neighbouring cards level. The full list stays
+   available through the title attribute the card markup sets. */
+.slib-card__where {
+    color: var(--slib-muted);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    font-size: 11.5px;
+    line-height: 1.45;
+    min-height: 2.9em;
+    min-width: 0;
+    overflow: hidden;
+}
+
+/* ---------- Covers ------------------------------------------------ */
+
+/* The icon sits underneath and the image on top, so a cover that fails
+   to load (or is a PDF the markup strips) leaves the placeholder
+   showing rather than a broken-image glyph. */
+.slib-cover {
+    align-items: center;
+    background: var(--slib-creambg);
+    border: 1px solid var(--slib-cream);
+    border-radius: 8px;
+    color: var(--slib-gold);
+    display: flex;
+    flex: 0 0 54px;
+    height: 78px;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    width: 54px;
+}
+
+.slib-cover i,
+.slib-cover svg {
+    height: 20px;
+    width: 20px;
+}
+
+.slib-cover img {
+    height: 100%;
+    left: 0;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    width: 100%;
+}
+
+.slib-cover--lg {
+    flex: 0 0 84px;
+    height: 122px;
+    width: 84px;
+}
+
+.slib-cover--lg i,
+.slib-cover--lg svg {
+    height: 26px;
+    width: 26px;
+}
+
+/* ---------- Pills, badges, statuses ------------------------------- */
+
+.slib-pill {
+    align-items: center;
+    align-self: flex-start;
+    border-radius: 999px;
+    display: inline-flex;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    margin-top: 5px;
+    padding: 4px 11px;
+    white-space: nowrap;
+}
+
+.slib-pill--in {
+    background: var(--slib-greenbg);
+    color: var(--slib-green);
+}
+
+.slib-pill--out {
+    background: var(--spf-chipgrey, #ededea);
+    color: var(--slib-dim);
+}
+
+.slib-badge {
+    background: var(--slib-cream);
+    border-radius: 999px;
+    color: var(--slib-goldtxt);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    margin-left: 8px;
+    padding: 3px 9px;
+    text-transform: uppercase;
+    vertical-align: 2px;
+}
+
+.slib-status {
+    border-radius: 999px;
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 11px;
+    white-space: nowrap;
+}
+
+.slib-status--out {
+    background: var(--slib-greenbg);
+    color: var(--slib-green);
+}
+
+.slib-status--wait {
+    background: var(--slib-cream);
+    color: var(--slib-goldtxt);
+}
+
+.slib-status--late {
+    background: var(--slib-rustbg);
+    color: var(--slib-rust);
+}
+
+.slib-status--done {
+    background: var(--spf-chipgrey, #ededea);
+    color: var(--slib-dim);
+}
+
+/* ---------- Buttons ----------------------------------------------- */
+
+.slib-btn,
+.slib-borrow {
+    align-items: center;
+    border-radius: 999px;
+    cursor: pointer;
+    display: inline-flex;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 500;
+    gap: 6px;
+    padding: 7px 14px;
+    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+}
+
+.slib-btn i,
+.slib-btn svg,
+.slib-borrow i,
+.slib-borrow svg {
+    height: 14px;
+    width: 14px;
+}
+
+.slib-btn {
+    background: var(--slib-card);
+    border: 1px solid var(--slib-border2);
+    color: var(--slib-dim);
+}
+
+.slib-btn--ghost:hover {
+    border-color: var(--spf-bronze, #b98a4e);
+    color: var(--slib-goldtxt);
+}
+
+.slib-btn--danger {
+    color: var(--slib-rust);
+}
+
+.slib-btn--danger:hover {
+    border-color: var(--slib-rust);
+}
+
+.slib-borrow {
+    background: var(--slib-graphite);
+    border: 1px solid var(--slib-graphite);
+    color: #f0efec;
+}
+
+.slib-borrow:hover:not(:disabled) {
+    background: var(--slib-body);
+    border-color: var(--slib-body);
+    color: #fff;
+}
+
+.slib-borrow:disabled {
+    background: var(--spf-chipgrey, #ededea);
+    border-color: var(--spf-chipgrey, #ededea);
+    color: var(--slib-muted);
+    cursor: not-allowed;
+}
+
+/* ---------- My books table ---------------------------------------- */
+
+.slib-panel {
+    overflow-x: auto;
+}
+
+.slib-table {
+    border-collapse: collapse;
+    min-width: 720px;
+    width: 100%;
+}
+
+.slib-table th {
+    border-bottom: 1px solid var(--slib-line);
+    color: var(--slib-muted);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    padding: 14px 14px;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.slib-table td {
+    border-bottom: 1px solid var(--slib-hairline);
+    font-size: 14px;
+    padding: 15px 14px;
+    vertical-align: middle;
+}
+
+.slib-table tr:last-child td {
+    border-bottom: 0;
+}
+
+.slib-table th:first-child,
+.slib-table td:first-child {
+    padding-left: 22px;
+}
+
+.slib-table th:last-child,
+.slib-table td:last-child {
+    padding-right: 22px;
+}
+
+.slib-table__book {
+    width: 42%;
+}
+
+.slib-table__right {
+    text-align: right;
+}
+
+.slib-table__sub {
+    color: var(--slib-muted);
+    font-size: 12.5px;
+}
+
+.slib-media {
+    align-items: center;
+    display: flex;
+    gap: 13px;
+}
+
+.slib-media__cover {
+    align-items: center;
+    background: var(--slib-creambg);
+    border: 1px solid var(--slib-cream);
+    border-radius: 6px;
+    color: var(--slib-gold);
+    display: flex;
+    flex: 0 0 38px;
+    height: 54px;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    width: 38px;
+}
+
+.slib-media__cover i,
+.slib-media__cover svg {
+    height: 15px;
+    width: 15px;
+}
+
+.slib-media__cover img {
+    height: 100%;
+    left: 0;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    width: 100%;
+}
+
+.slib-media__copy {
+    min-width: 0;
+}
+
+.slib-media__title {
+    color: var(--slib-ink);
+    font-family: var(--slib-serif);
+    font-size: 14.5px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.slib-dates {
+    color: var(--slib-ink);
+    font-size: 13.5px;
+}
+
+.slib-dates__sub {
+    color: var(--slib-muted);
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.slib-dates__late {
+    color: var(--slib-rust);
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+.slib-charge {
+    color: var(--slib-body);
+    font-size: 13.5px;
+    font-variant-numeric: tabular-nums;
+}
+
+.slib-charge--due {
+    color: var(--slib-rust);
+    font-weight: 600;
+}
+
+.slib-reason {
+    align-items: flex-start;
+    color: var(--slib-muted);
+    display: flex;
+    font-size: 12px;
+    gap: 6px;
+    line-height: 1.5;
+    margin-top: 4px;
+}
+
+.slib-reason i,
+.slib-reason svg {
+    flex: 0 0 13px;
+    height: 13px;
+    margin-top: 2px;
+    width: 13px;
+}
+
+/* Shared by the empty table row and the JS "no results" panel.
+
+   Centred with `text-align`, not with flex: this rule also lands on a
+   `<td colspan="6">`, and `display: flex` takes the element out of the
+   table layout — the colspan stops applying and the message centres
+   itself inside the first column instead of the whole table. */
+.slib-note {
+    color: var(--slib-muted);
+    font-size: 13.5px;
+    padding: 34px 20px;
+    text-align: center;
+}
+
+/* Both selectors on purpose: lucide swaps the `<i>` for an `<svg>` once
+   createIcons() runs, so styling only one of them leaves the icon
+   unstyled either before or after that swap. */
+.slib-note i,
+.slib-note svg {
+    color: var(--slib-border2);
+    display: block;
+    height: 26px;
+    margin: 0 auto 9px;
+    width: 26px;
+}
+
+.slib-note--bad {
+    color: var(--slib-rust);
+}
+
+.slib-note--bad i,
+.slib-note--bad svg {
+    color: var(--slib-rust);
+}
+
+/* ---------- Confirm dialog ---------------------------------------- */
+
+.slib-modal {
+    align-items: center;
+    background: rgba(29, 31, 34, 0.5);
+    display: flex;
+    inset: 0;
+    justify-content: center;
+    padding: 20px;
+    position: fixed;
+    z-index: 10000;
+}
+
+.slib-modal[hidden] {
+    display: none;
+}
+
+.slib-modal__box {
+    background: var(--slib-card);
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(24, 26, 29, 0.28);
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 40px);
+    max-width: 540px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.slib-modal__head {
+    align-items: center;
+    border-bottom: 1px solid var(--slib-line);
+    display: flex;
+    gap: 13px;
+    padding: 20px 24px;
+}
+
+.slib-modal__icon {
+    align-items: center;
+    background: var(--slib-creambg);
+    border-radius: 10px;
+    color: var(--slib-goldtxt);
+    display: flex;
+    flex: 0 0 38px;
+    height: 38px;
+    justify-content: center;
+    width: 38px;
+}
+
+.slib-modal__icon i,
+.slib-modal__icon svg {
+    height: 18px;
+    width: 18px;
+}
+
+.slib-modal__heading {
+    flex: 1;
+    min-width: 0;
+}
+
+.slib-modal__title {
+    color: var(--slib-ink);
+    font-family: var(--slib-serif);
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.slib-modal__sub {
+    color: var(--slib-muted);
+    font-size: 12.5px;
+    margin-top: 2px;
+}
+
+.slib-modal__x {
+    background: none;
+    border: 0;
+    color: var(--slib-muted);
+    cursor: pointer;
+    flex: 0 0 auto;
+    line-height: 0;
+    padding: 6px;
+}
+
+.slib-modal__x:hover {
+    color: var(--slib-ink);
+}
+
+.slib-modal__body {
+    overflow-y: auto;
+    padding: 22px 24px;
+}
+
+.slib-book {
+    display: flex;
+    gap: 16px;
+}
+
+.slib-book__copy {
+    min-width: 0;
+}
+
+.slib-book__title {
+    color: var(--slib-ink);
+    font-family: var(--slib-serif);
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.slib-book__author {
+    color: var(--slib-body);
+    font-size: 13px;
+    margin-top: 2px;
+}
+
+.slib-book__facts {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    margin: 12px 0 0;
+    row-gap: 4px;
+}
+
+.slib-book__facts dt {
+    color: var(--slib-muted);
+    font-size: 12px;
+    padding-right: 14px;
+}
+
+.slib-book__facts dd {
+    color: var(--slib-body);
+    font-size: 12.5px;
+    margin: 0;
+}
+
+.slib-rules {
+    border-top: 1px solid var(--slib-hairline);
+    display: grid;
+    gap: 11px;
+    list-style: none;
+    margin: 20px 0 0;
+    padding: 18px 0 0;
+}
+
+.slib-rules li {
+    align-items: center;
+    color: var(--slib-body);
+    display: flex;
+    font-size: 13px;
+    gap: 10px;
+    line-height: 1.5;
+}
+
+.slib-rules i,
+.slib-rules svg {
+    color: var(--slib-gold);
+    flex: 0 0 15px;
+    height: 15px;
+    width: 15px;
+}
+
+.slib-rules strong {
+    color: var(--slib-ink);
+    font-weight: 600;
+}
+
+.slib-modal__error {
+    background: var(--slib-rustbg);
+    border-radius: 10px;
+    color: var(--slib-rust);
+    font-size: 13px;
+    margin-top: 16px;
+    padding: 11px 14px;
+}
+
+.slib-modal__error[hidden] {
+    display: none;
+}
+
+.slib-modal__foot {
+    border-top: 1px solid var(--slib-line);
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding: 16px 24px;
+}
+
+/* ---------- Narrow screens ---------------------------------------- */
+
+@media (max-width: 640px) {
+    .slib-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .slib-search__filters {
+        grid-template-columns: 1fr;
+    }
+
+    .slib-modal__foot .slib-btn,
+    .slib-modal__foot .slib-borrow {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+/* The collection picker inside the reserve dialog: label and select on one
+   line, matching the rules listed above it. The select takes whatever width is
+   left and the label never shrinks, so a long "campus — shelf" option is what
+   gives way rather than the words naming what the control is for. */
+.slib-rules__pick {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+.slib-rules__pick label {
+    color: var(--slib-body);
+    flex: none;
+    font-size: 13px;
+}
+
+/* Underline only, and no wider than the option it is showing. The pill shape
+   the search fields use belongs to a control you go and fill in; this one sits
+   mid-sentence after "Collect from", so it is dressed as part of the line
+   rather than as a box parked on it. */
+.slib-search__field--pick {
+    background: none;
+    border: 0;
+    border-bottom: 1px solid var(--slib-border2);
+    border-radius: 0;
+    flex: 0 1 auto;
+    min-width: 0;
+    padding: 0;
+}
+
+.slib-search__field--pick:focus-within {
+    border-bottom-color: var(--slib-gold);
+}
+
+.slib-search__field--pick .slib-select {
+    /* Room for the chevron the select draws at its right edge — without it the
+       last characters of a long shelf code sit underneath the arrow. */
+    padding: 0 20px 0 0;
+    text-overflow: ellipsis;
+}
+
+/* The theme rings focused form controls with a blue box. Inside a dialog that
+   already shows focus on the underline, it draws a second, louder outline
+   around the same control. */
+.slib-search__field--pick .slib-select:focus,
+.slib-search__field--pick .slib-select:focus-visible {
+    box-shadow: none;
+    outline: none;
+}
+
+/* ---------- Cancel dialog ----------------------------------------- */
+
+/* Narrower than the reserve dialog: it asks one question and shows two
+   lines, so the wider box would be mostly empty. */
+.slib-modal__box--sm {
+    max-width: 420px;
+}
+
+/* Rust rather than gold — the reserve dialog's icon says "this is what you
+   are about to get", this one says "this is what you are about to lose". */
+.slib-modal__icon--danger {
+    background: var(--slib-rustbg);
+    color: var(--slib-rust);
+}
+
+.slib-borrow--danger {
+    background: var(--slib-rust);
+    border-color: var(--slib-rust);
+}
+
+.slib-borrow--danger:hover:not(:disabled) {
+    background: #85451f;
+    border-color: #85451f;
+}
+
+/* The book being cancelled, sitting alone in the body. */
+#libCancelWhere:empty {
+    display: none;
+}
