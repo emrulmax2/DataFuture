@@ -620,7 +620,7 @@ class DashboardController extends Controller
         $rates = $this->studentRates($planIds);
         $consecutive = $this->consecutiveAbsences($this->theoryModulePlanIds($planIds), $studentIds);
         $tutors = $this->personalTutors($planIds, $studentIds);
-        $submissions = $this->studentSubmissions($this->submissionPlanIds($planIds, $studentIds, $termId), $studentIds);
+        $submissions = $this->studentSubmissions($this->theoryModulePlanIds($planIds), $studentIds);
         $contacts = $this->contactLogs($groupIds, $termId, $studentIds);
 
         $rows = [];
@@ -832,71 +832,6 @@ class DashboardController extends Controller
         return strtolower(trim((string) $type)) === 'theory';
     }
 
-    /**
-     * The modules a student's submission figure is measured against: the ones
-     * they carry this term and every one they carried before it.
-     *
-     * The figure reads as progress through the course rather than through the
-     * term. A student sitting on one module this term is not "1/1" while three
-     * modules behind it are still outstanding, and a leader picking up a group
-     * mid-course sees what the student is actually carrying.
-     */
-    private function submissionPlanIds(array $planIds, array $studentIds, $termId): array
-    {
-        $current = $this->theoryModulePlanIds($planIds);
-
-        $termIds = $this->termIdsUpTo((int) $termId);
-        if (empty($studentIds) || empty($termIds)) {
-            return $current;
-        }
-
-        $carried = Assign::whereIn('student_id', $studentIds)
-            ->where(function ($q) {
-                $q->whereNull('attendance')->orWhere('attendance', 1);
-            })->pluck('plan_id')->unique()->values()->toArray();
-
-        if (empty($carried)) {
-            return $current;
-        }
-
-        // Bounded to the course this group teaches. A student who transferred
-        // in carries the modules of the course they left, and those are not
-        // part of what this one is measured against.
-        $courseIds = Plan::whereIn('id', $planIds)->pluck('course_id')
-            ->filter()->unique()->values()->toArray();
-
-        $earlier = $this->theoryPlanIds(
-            Plan::whereIn('id', $carried)->whereIn('term_declaration_id', $termIds)
-                ->when(!empty($courseIds), fn ($q) => $q->whereIn('course_id', $courseIds))
-        );
-
-        return array_values(array_unique(array_merge($current, $earlier)));
-    }
-
-    /**
-     * Every term that had started by the time the selected one did, itself
-     * included — "this term and before", on dates rather than on ids.
-     *
-     * Read through the model, `start_date` comes back reformatted as `d-m-Y`,
-     * which no database can compare; the query builder sees the stored value.
-     */
-    private function termIdsUpTo(int $termId): array
-    {
-        if ($termId <= 0) {
-            return [];
-        }
-
-        $start = DB::table('term_declarations')->where('id', $termId)->value('start_date');
-        if (empty($start)) {
-            return [];
-        }
-
-        return DB::table('term_declarations')
-            ->whereNull('deleted_at')
-            ->whereNotNull('start_date')
-            ->where('start_date', '<=', $start)
-            ->pluck('id')->map(fn ($id) => (int) $id)->toArray();
-    }
 
     /**
      * The module each plan delivers, keyed by plan id.
@@ -922,11 +857,14 @@ class DashboardController extends Controller
     /**
      * Submissions expected and made, student by student.
      *
-     * A student's denominator is their own modules — the ones out of this set
-     * of plans they are actively assigned to — and their numerator is how many
-     * of those they hold a completed grade on (see COMPLETED_GRADES). A group
-     * does not hand every student the same modules, so a group-wide denominator
-     * reads 0/5 against a student who only takes one of them.
+     * A student's denominator is the modules they have had a result submitted
+     * on at least once, out of the ones in this set they are actively assigned
+     * to; their numerator is how many of those carry a completed grade (see
+     * COMPLETED_GRADES). A module nobody has marked yet is not one the student
+     * has fallen behind on, so it stays out of the figure until a result lands.
+     *
+     * Any grade opens the module — a referral or an absence is still a result
+     * submitted — and however many attempts follow, the module counts once.
      *
      * Grades on modules a student is not assigned to are ignored, which is
      * what keeps the numerator inside the denominator.
@@ -952,16 +890,20 @@ class DashboardController extends Controller
             $assigned[$assign->student_id][$modules[$assign->plan_id] ?? 'plan:'.$assign->plan_id] = true;
         }
 
-        $gradeIds = Grade::whereIn('code', self::COMPLETED_GRADES)->pluck('id')->toArray();
+        $completed = array_flip(array_map('intval',
+            Grade::whereIn('code', self::COMPLETED_GRADES)->pluck('id')->toArray()
+        ));
 
-        $results = empty($gradeIds) ? collect() : Result::whereIn('plan_id', $planIds)
+        // Every grade, not only the completed ones: the fail and absent results
+        // are what put a module into the denominator.
+        $results = Result::whereIn('plan_id', $planIds)
             ->whereIn('student_id', $studentIds)
-            ->whereIn('grade_id', $gradeIds)
             // A grade the student cannot see yet is not a submission here
             // either. The comparison also drops null and scheduled dates.
             ->where('published_at', '<', Carbon::now())
-            ->get(['student_id', 'plan_id']);
+            ->get(['student_id', 'plan_id', 'grade_id']);
 
+        $resulted = [];
         $byStudent = [];
         $byPlan = [];
         $seen = [];
@@ -969,6 +911,12 @@ class DashboardController extends Controller
             // Only against a module the student is on.
             $module = $modules[$result->plan_id] ?? 'plan:'.$result->plan_id;
             if (!isset($assigned[$result->student_id][$module])) {
+                continue;
+            }
+
+            $resulted[$result->student_id][$module] = true;
+
+            if (!isset($completed[(int) $result->grade_id])) {
                 continue;
             }
 
@@ -988,9 +936,9 @@ class DashboardController extends Controller
         }
 
         return [
-            // Modules, not the assessments hanging off them: that is what
-            // makes 2/2 mean the same thing wherever it is read.
-            'due' => array_map('count', $assigned),
+            // Modules with a result, not the assessments hanging off them:
+            // that is what makes 2/2 mean the same thing wherever it is read.
+            'due' => array_map('count', $resulted),
             'byStudent' => $byStudent,
             'byPlan' => array_map('count', $byPlan),
             'plansWithAssessment' => AssessmentPlan::whereIn('plan_id', $planIds)
@@ -1186,11 +1134,11 @@ class DashboardController extends Controller
      *
      * The term's Theory modules only — a module completed last term is not
      * this term's submission, and counting it reads the group as further ahead
-     * than it is. The Subs figure on the rows deliberately spans terms, so the
-     * two answer different questions.
+     * than it is. It reads the same per-student figures as the Subs column, so
+     * the card is those rows added up.
      *
-     * The rate is the group's own ratio — every module owed by every student
-     * over every one that carries a completed grade — not the average of the
+     * The rate is the group's own ratio — every module a result has been
+     * submitted on, over every one carrying a completed grade — not the average of the
      * students' percentages, which would let a student on one module weigh as
      * heavily as one on five.
      *
