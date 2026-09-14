@@ -30,6 +30,7 @@ composer.lock
 app/.DS_Store
 .DS_Store
 .claude/skills/
+.agents/skills/
 
 # macOS finder metadata
 .DS_Store

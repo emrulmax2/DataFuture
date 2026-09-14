@@ -1034,8 +1034,38 @@ class DatafutureReportController extends Controller
         }
 
         $courseCreationId = $studentCrel->course_creation_id;
+
+        /* The ceiling that stops an earlier session reporting a later one's
+           modules. It has to be the student's next enrolment ON THIS COURSE:
+           a relation on a different course says nothing about where this
+           course's study ends, and letting one act as the boundary truncates
+           the report at whatever creation id happens to come next.
+
+           Student 18174 is the case that surfaced it: an inactive Hospitality
+           relation (creation 248, course 5) capped the live Business one
+           (creation 247, course 27) purely because 248 > 247, so creations
+           250, 252 and 256 — the same course, the same relation — were all
+           excluded and 8 of that student's 11 modules never reached the XML.
+
+           Scoped by course rather than by `active`: checked across every
+           relation that gets exported, all 25 mis-clamped cases have a ceiling
+           on a different course, but only 18 of them are inactive — the other
+           7 are active relations on another course, which an `active` test
+           would still let through. No case exists of a same-course ceiling
+           that is inactive, so this never starts over-clamping either.
+
+           Old, unscoped version:
+
+           $nextCourseCreationId = StudentCourseRelation::where('student_id', $student_id)
+               ->where('course_creation_id', '>', $courseCreationId)
+               ->orderBy('course_creation_id', 'ASC')
+               ->value('course_creation_id');
+        */
         $nextCourseCreationId = StudentCourseRelation::where('student_id', $student_id)
             ->where('course_creation_id', '>', $courseCreationId)
+            ->whereHas('creation', function ($q) use ($course_id) {
+                $q->where('course_id', $course_id);
+            })
             ->orderBy('course_creation_id', 'ASC')
             ->value('course_creation_id');
         $plan_ids = [];

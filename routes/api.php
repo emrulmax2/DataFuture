@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\Api\Auth\GoogleSocialiteStudentController as APIAuthGoogleSocialiteStudentController;
 use App\Http\Controllers\Api\ApplicantInterviewDocumentSyncController;
-//use App\Http\Controllers\Api\LibraryCoverController;
+use App\Http\Controllers\Api\LibraryCoverController;
 use App\Http\Controllers\Api\BudgetSyncController;
 use App\Http\Controllers\Api\BudgetTransactionController;
 use App\Http\Controllers\Api\FileManagerSyncController;
@@ -81,9 +81,9 @@ Route::middleware(['client.credentials:sms.file-manager.read', 'throttle:sms-syn
 /* Book covers for the Operations library sync. Taken by query parameter
    because many filenames contain a literal "%", which no amount of encoding
    gets past the web server in a path. */
-// Route::middleware(['client.credentials:sms.library-books.read', 'throttle:sms-sync'])
-//     ->withoutMiddleware('throttle:api')
-//     ->get('/library/books/cover', [LibraryCoverController::class, 'show']);
+Route::middleware(['client.credentials:sms.library-books.read', 'throttle:sms-sync'])
+    ->withoutMiddleware('throttle:api')
+    ->get('/library/books/cover', [LibraryCoverController::class, 'show']);
 
 /* Student lookup for the Operations Service Desk, which tags a student on a
    ticket to record who it concerns. Searched live rather than synced: it is

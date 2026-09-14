@@ -352,6 +352,44 @@
                     </ul>
                 </li>
             @endif
+            @if(isset(auth()->user()->priv()['library_management']) && auth()->user()->priv()['library_management'] == 1)
+                <li class="hasChild">
+                    <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'library.settings.deposit.rule' || Route::currentRouteName() == 'library.settings.loan.rule' || Route::currentRouteName() == 'library.settings.fine.charges' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
+                        <i data-lucide="library" class="w-4 h-4 mr-2"></i> Library Management <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>
+                    </a>
+                    <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'library.settings.deposit.rule' || Route::currentRouteName() == 'library.settings.loan.rule' || Route::currentRouteName() == 'library.settings.fine.charges' ? 'block' : 'none' }};">
+                        {{-- Issue Desk, hidden for now. It is an operational
+                             screen rather than a setting, and leaves this area
+                             for the staff library-management layout when
+                             clicked. The route (library.management ->
+                             /library-management) is untouched and still works
+                             if you go straight to it; put this back when the
+                             menu it belongs in is settled.
+
+                        <li>
+                            <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'library.management' ? 'active text-primary font-medium' : '' }}" href="{{ route('library.management') }}">
+                                <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Issue Desk
+                            </a>
+                        </li>
+                        --}}
+                        <li>
+                            <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'library.settings.deposit.rule' ? 'active text-primary font-medium' : '' }}" href="{{ route('library.settings.deposit.rule') }}">
+                                <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Deposit Rule
+                            </a>
+                        </li>
+                        <li>
+                            <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'library.settings.loan.rule' ? 'active text-primary font-medium' : '' }}" href="{{ route('library.settings.loan.rule') }}">
+                                <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Loan Rule
+                            </a>
+                        </li>
+                        <li>
+                            <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'library.settings.fine.charges' ? 'active text-primary font-medium' : '' }}" href="{{ route('library.settings.fine.charges') }}">
+                                <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Fine &amp; Charges
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            @endif
 
                 <li>
                     <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'issue.types' ? 'active text-primary font-medium' : '' }}" href="{{ route('issue.types') }}">

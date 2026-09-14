@@ -12,6 +12,9 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        //
+        /* Server-to-server callback from PayPal: no session, no CSRF token.
+           Authenticated by verifying the transmission signature instead
+           (PayPalClient::verifyWebhook). */
+        'paypal/webhook',
     ];
 }

@@ -691,4 +691,54 @@ var storageTransList = (function () {
         }
     })
 
+    /* Upload CSV: checked here before the post so a bad pick is answered in the
+       modal, next to the field, instead of costing a round trip that redirects
+       back to the page with the modal closed and nothing explaining why.
+
+       This is a courtesy, not a control — AccCsvUploadRequest still validates
+       the same things server-side. */
+    $("#uploadCSVForm").on("submit", function (e) {
+        const input = document.getElementById("csv_doc");
+        const $err = $(".error-csv_doc");
+        const fail = (msg) => {
+            e.preventDefault();
+            $err.text(msg);
+            $(input).addClass("border-danger");
+        };
+
+        $err.text("");
+        $(input).removeClass("border-danger");
+
+        const file = input && input.files ? input.files[0] : null;
+
+        if (!file) {
+            return fail("Choose a CSV file to upload.");
+        }
+
+        // Extension, not the browser's MIME guess: Windows reports a .csv as
+        // application/vnd.ms-excel whenever Excel owns the file association.
+        if (!/\.csv$/i.test(file.name)) {
+            return fail("That is not a .csv file — export the statement as CSV and try again.");
+        }
+
+        if (file.size === 0) {
+            return fail("That file is empty.");
+        }
+
+        // Matches the server's upload_max_filesize; a larger file arrives as no
+        // file at all, which reads as "required" rather than "too big".
+        if (file.size > 20 * 1024 * 1024) {
+            return fail("That file is larger than 20MB.");
+        }
+
+        const receipts = document.getElementById("cto_receipts");
+
+        if (document.getElementById("has_cto_receipts").checked && receipts && !receipts.files.length) {
+            e.preventDefault();
+            $(".error-cto_receipts").text("Add the receipt files, or turn COT Receipts Upload off.");
+
+            return;
+        }
+    });
+
 })()

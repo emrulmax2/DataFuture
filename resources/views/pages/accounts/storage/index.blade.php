@@ -274,7 +274,7 @@
                                     <div class="acc-modal__hint">Accepts .csv exported from your bank</div>
                                 </div>
                             </div>
-                            <div class="acc__input-error error-csv_doc text-danger mt-2"></div>
+                            <div class="acc__input-error error-csv_doc text-danger mt-2">@error('csv_doc'){{ $message }}@enderror</div>
                         </div>
                         <div class="acc-modal__switch">
                             <div class="form-check form-switch">
@@ -291,7 +291,7 @@
                                     <input type="file" id="cto_receipts" name="cto_receipts[]" multiple value="" accept=".pdf">
                                 </div>
                             </div>
-                            <div class="acc__input-error error-cto_receipts text-danger mt-2"></div>
+                            <div class="acc__input-error error-cto_receipts text-danger mt-2">@error('cto_receipts.*'){{ $message }}@enderror</div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -363,4 +363,20 @@
 @section('script')
     @vite('resources/js/accounts.js')
     @vite('resources/js/accounts-storage.js')
+
+    @if($errors->has('csv_doc') || $errors->has('cto_receipts.*'))
+        {{-- The upload posts as a normal form, so a rejected file returns a
+             fresh page with the modal closed and the reason hidden inside it.
+             Reopened here so the message lands in front of the person who has
+             to act on it. --}}
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const el = document.querySelector('#uploadCSVModal');
+
+                if (el && window.tailwind && tailwind.Modal) {
+                    tailwind.Modal.getOrCreateInstance(el).show();
+                }
+            });
+        </script>
+    @endif
 @endsection

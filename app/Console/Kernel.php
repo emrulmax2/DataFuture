@@ -25,6 +25,21 @@ class Kernel extends ConsoleKernel
         $schedule->command('employeestatusupdater:cron')->dailyAt('23:30');
         $schedule->command('dailyclassreminder:cron')->everyThirtyMinutes();
 
+        /* Catches library deposits PayPal took but the student never came back
+           to confirm. Redundant once PAYPAL_WEBHOOK_ID is configured, but
+           harmless — it only calls out for rows still pending. */
+        $schedule->command('library:reconcile-deposits')->everyTenMinutes()->withoutOverlapping();
+
+        /* A reservation holds a copy off the shelf. Uncollected ones are
+           released so the next borrower is not told a book on the hold shelf is
+           unavailable. */
+        $schedule->command('library:expire-holds')->hourly()->withoutOverlapping();
+
+        /* Backstop for a copy held in Operations whose borrow record never got
+           written — invisible to the student, the desk and the expiry job, so
+           nothing else would ever put it back. */
+        $schedule->command('library:release-orphans')->dailyAt('03:15')->withoutOverlapping();
+
         $schedule->command('coursecontentmissingteamnotification:cron')->weeklyOn(7, '23:45');
         $schedule->command('coursecontentmissingtutornotification:cron')->weeklyOn(7, '23:50');
 
