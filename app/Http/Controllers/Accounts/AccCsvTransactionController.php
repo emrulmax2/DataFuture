@@ -55,6 +55,7 @@ class AccCsvTransactionController extends Controller
             $csvTmpPath = $csv_doc->getPathname();
 
             $existFiles = AccCsvFile::where('name', $csvFileName)->get()->count();
+            
             if($existFiles > 0):
                 Session::flash('csv_error', '<strong>'.$csvFileName.'</strong> file aready exist in the system.'); 
                 return redirect('/accounts/storage/transactions/'.$acc_bank_id);
