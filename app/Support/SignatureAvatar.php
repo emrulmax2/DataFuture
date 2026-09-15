@@ -128,7 +128,19 @@ class SignatureAvatar
             endif;
         endif;
 
-        return Storage::disk('local')->url('public/'.$relative);
+        // The address has to change when the artwork does. A new photo rebuilds
+        // the file under the same name, and without a version on the URL the
+        // browser — and Gmail's image proxy, for everyone the mail goes to —
+        // keeps showing the copy it already fetched. That is why a new profile
+        // picture reached the My HR header, whose filename changes with every
+        // upload, and never reached the signature.
+        //
+        // A query string rather than a new filename, so a signature pasted
+        // before the change still points at a file that exists. The stat cache
+        // is cleared first because the mtime above was read before the rebuild.
+        clearstatcache(true, $target);
+
+        return Storage::disk('local')->url('public/'.$relative).'?v='.filemtime($target);
     }
 
     /**
