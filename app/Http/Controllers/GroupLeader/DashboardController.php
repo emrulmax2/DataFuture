@@ -17,6 +17,7 @@ use App\Models\Result;
 use App\Models\Student;
 use App\Models\TermDeclaration;
 use App\Models\User;
+use App\Services\StudentResultSummary;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -628,7 +629,9 @@ class DashboardController extends Controller
         $rates = $this->studentRates($planIds);
         $consecutive = $this->consecutiveAbsences($this->theoryModulePlanIds($planIds), $studentIds);
         $tutors = $this->personalTutors($planIds, $studentIds);
-        $submissions = $this->studentSubmissions($this->submissionPlanIds($planIds, $studentIds, $termId), $studentIds);
+        // Subs is the student's Results tab, counted the same way: completed
+        // modules over every module they hold a result on.
+        $results = StudentResultSummary::forStudents($studentIds);
         $contacts = $this->contactLogs($groupIds, $termId, $studentIds);
 
         $rows = [];
@@ -640,8 +643,8 @@ class DashboardController extends Controller
 
             $rate = $rates[$studentId] ?? null;
             $log = $contacts[$studentId] ?? [];
-            $submitted = $submissions['byStudent'][$studentId] ?? 0;
-            $due = $submissions['due'][$studentId] ?? 0;
+            $submitted = $results[$studentId]['completed'] ?? 0;
+            $due = $results[$studentId]['total'] ?? 0;
 
             $rows[] = [
                 'id' => $student->id,
@@ -838,72 +841,6 @@ class DashboardController extends Controller
     private function isTheory(?string $type): bool
     {
         return strtolower(trim((string) $type)) === 'theory';
-    }
-
-    /**
-     * The modules a student's submission figure is measured against: the ones
-     * they carry this term and every one they carried before it.
-     *
-     * The figure reads as progress through the course rather than through the
-     * term. A student sitting on one module this term is not "1/1" while three
-     * modules behind it are still outstanding, and a leader picking up a group
-     * mid-course sees what the student is actually carrying.
-     */
-    private function submissionPlanIds(array $planIds, array $studentIds, $termId): array
-    {
-        $current = $this->theoryModulePlanIds($planIds);
-
-        $termIds = $this->termIdsUpTo((int) $termId);
-        if (empty($studentIds) || empty($termIds)) {
-            return $current;
-        }
-
-        $carried = Assign::whereIn('student_id', $studentIds)
-            ->where(function ($q) {
-                $q->whereNull('attendance')->orWhere('attendance', 1);
-            })->pluck('plan_id')->unique()->values()->toArray();
-
-        if (empty($carried)) {
-            return $current;
-        }
-
-        // Bounded to the course this group teaches. A student who transferred
-        // in carries the modules of the course they left, and those are not
-        // part of what this one is measured against.
-        $courseIds = Plan::whereIn('id', $planIds)->pluck('course_id')
-            ->filter()->unique()->values()->toArray();
-
-        $earlier = $this->theoryPlanIds(
-            Plan::whereIn('id', $carried)->whereIn('term_declaration_id', $termIds)
-                ->when(!empty($courseIds), fn ($q) => $q->whereIn('course_id', $courseIds))
-        );
-
-        return array_values(array_unique(array_merge($current, $earlier)));
-    }
-
-    /**
-     * Every term that had started by the time the selected one did, itself
-     * included — "this term and before", on dates rather than on ids.
-     *
-     * Read through the model, `start_date` comes back reformatted as `d-m-Y`,
-     * which no database can compare; the query builder sees the stored value.
-     */
-    private function termIdsUpTo(int $termId): array
-    {
-        if ($termId <= 0) {
-            return [];
-        }
-
-        $start = DB::table('term_declarations')->where('id', $termId)->value('start_date');
-        if (empty($start)) {
-            return [];
-        }
-
-        return DB::table('term_declarations')
-            ->whereNull('deleted_at')
-            ->whereNotNull('start_date')
-            ->where('start_date', '<=', $start)
-            ->pluck('id')->map(fn ($id) => (int) $id)->toArray();
     }
 
     /**
@@ -1175,9 +1112,13 @@ class DashboardController extends Controller
         $summary = $this->attendanceSummary($planIds);
         $subs = $this->termSubmissionRate($planIds, array_column($students, 'id'));
 
+        // Every module on the Results tab completed, compared on the counts
+        // rather than the rounded percentage: 199/200 rounds to 100% but still
+        // has a module outstanding. A student with no results yet has nothing
+        // outstanding, so they are not held back by it.
         $onTrack = array_filter($students, function ($s) {
-            return $s['attendance'] !== null && $s['attendance'] >= 80
-                && ($s['submissionPct'] === null || $s['submissionPct'] >= self::ON_TRACK_SUBMISSION);
+            return $s['attendance'] !== null && $s['attendance'] > 80
+                && ($s['due'] === 0 || $s['submitted'] >= $s['due']);
         });
 
         return [
@@ -1195,8 +1136,8 @@ class DashboardController extends Controller
      *
      * The term's Theory modules only — a module completed last term is not
      * this term's submission, and counting it reads the group as further ahead
-     * than it is. The Subs figure on the rows deliberately spans terms, so the
-     * two answer different questions.
+     * than it is. The Subs figure on the rows is the student's whole Results
+     * tab, so the two answer different questions.
      *
      * A module is submitted once it carries any grade but Absent (see
      * NOT_SUBMITTED_GRADES). This card asks whether the work came in, not

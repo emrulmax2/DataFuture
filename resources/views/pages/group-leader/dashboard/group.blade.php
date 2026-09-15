@@ -125,7 +125,7 @@
                     <div class="gl-kpi__track"><span class="gl-bar is-{{ $glCompTone }}" style="width: {{ min(100, max(0, (int) $kpis['completion'])) }}%;"></span></div>
                     <div class="gl-kpi__foot">
                         <span>Target 90%</span>
-                        <span>att ≥80% &amp; subs ≥75%</span>
+                        <span>att &gt;80% &amp; subs 100%</span>
                     </div>
                 </div>
             </div>

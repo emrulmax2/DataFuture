@@ -32,7 +32,7 @@
             foreach($dataSet as $mName => $rSet):
                 $totalCount++;
                 $gcode = isset($rSet[0]->grade->code) ? trim($rSet[0]->grade->code) : '';
-                if(in_array($gcode, ['P','M','D'])) { $completedCount++; } else { $outstandingCount++; }
+                if(in_array($gcode, \App\Services\StudentResultSummary::COMPLETED_GRADES)) { $completedCount++; } else { $outstandingCount++; }
 
                 $termObj = (!empty($rSet[0]->term_declaration_id)) ? $rSet[0]->term : $rSet[0]->plan->attenTerm;
                 $tid = isset($termObj->id) ? $termObj->id : 0;
@@ -46,7 +46,7 @@
                 $credit = (int) ($rSet[0]->plan->creations->credit_value ?? 0);
                 $termGroups[$tid]['credits'] += $credit;
                 $termGroups[$tid]['modules'][$mName] = $rSet;
-                if(in_array($gcode, ['P','M','D'])) { $totalCreditsAchieved += $credit; }
+                if(in_array($gcode, \App\Services\StudentResultSummary::COMPLETED_GRADES)) { $totalCreditsAchieved += $credit; }
             endforeach;
             krsort($termGroups);
         endif;
