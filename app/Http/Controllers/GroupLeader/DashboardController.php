@@ -37,6 +37,7 @@ use Illuminate\Support\Facades\DB;
  * own assignments: a group id in a request that they do not lead is a 403, not
  * a filtered-out row.
  */
+
 class DashboardController extends Controller
 {
     /**

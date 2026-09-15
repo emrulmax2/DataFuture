@@ -1,5 +1,6 @@
 @php use App\Support\GroupLeaderPresenter as GL; @endphp
 
+
 @forelse($rows as $row)
     @php $tone = GL::tone($row['attendance']); @endphp
     <button type="button" class="gl-row" data-gl-student="{{ $row['id'] }}">
