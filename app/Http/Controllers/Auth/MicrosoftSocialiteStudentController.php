@@ -14,8 +14,7 @@ class MicrosoftSocialiteStudentController extends Controller
 {
     public function redirectToMicrosoft()
     {
-        config(['services.microsoft.redirect' => env('MICROSOFT_STUDENT_REDIRECT_URL')]);
-        config(['services.microsoft.tenant' => env('MICROSOFT_TENANT', 'organizations')]);
+        config(['services.microsoft.redirect' => config('services.microsoft.student_redirect')]);
         return Socialite::driver('microsoft')->redirect();
     }
 
@@ -27,8 +26,7 @@ class MicrosoftSocialiteStudentController extends Controller
     public function handleCallback()
     {
         try {
-            config(['services.microsoft.redirect' => env('MICROSOFT_STUDENT_REDIRECT_URL')]);
-            config(['services.microsoft.tenant' => env('MICROSOFT_TENANT', 'organizations')]);
+            config(['services.microsoft.redirect' => config('services.microsoft.student_redirect')]);
             $user = Socialite::driver('microsoft')->user();
 
             $finduser = StudentUser::where('social_id', $user->id)->first();
