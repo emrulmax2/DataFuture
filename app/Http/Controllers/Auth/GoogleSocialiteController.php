@@ -14,7 +14,6 @@ class GoogleSocialiteController extends Controller
 {
     public function redirectToGoogle()
     {
-        config(['services.google.redirect' => env('GOOGLE_REDIRECT_URL')]);
         return Socialite::driver('google')->redirect();
     }
         /**
@@ -25,7 +24,6 @@ class GoogleSocialiteController extends Controller
     public function handleCallback()
     {
         try {
-            config(['services.google.redirect' => env('GOOGLE_REDIRECT_URL')]);
             $user = Socialite::driver('google')->user();
 
             $finduser = User::where('social_id', $user->id)->first();
