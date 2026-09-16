@@ -25,8 +25,6 @@ use App\Models\ResultsegmentInCoursemodules;
 use App\Models\Student;
 use App\Models\StudentArchive;
 use App\Models\User;
-use Barryvdh\Debugbar\Facades\Debugbar as FacadesDebugbar;
-use DebugBar\DebugBar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -469,7 +467,6 @@ class ResultController extends Controller
 
                     if(!empty($changes)) {
 
-                        FacadesDebugbar::info($changes);
                         $result->updated_by = auth()->user()->id;
                         
                         $result->save();
