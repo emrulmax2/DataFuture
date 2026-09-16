@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Models\Department;
 use App\Models\PermissionCategory;
 use Illuminate\Http\Request;
 use App\Http\Requests\PermissionCategoryRequest;
@@ -24,12 +25,14 @@ class PermissionCategoryController extends Controller
                 ['label' => 'Site Settings', 'href' => route('site.setting')],
                 ['label' => 'Permission Category', 'href' => 'javascript:void(0);']
             ],
+            'departments' => Department::orderBy('name')->get(['id', 'name']),
         ]);
     }
 
     public function list(Request $request){
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
+        $department = (isset($request->department) && $request->department > 0 ? (int) $request->department : 0);
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
@@ -37,9 +40,19 @@ class PermissionCategoryController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = PermissionCategory::orderByRaw(implode(',', $sorts));
+        $query = PermissionCategory::with('department')->orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
-            $query->where('name','LIKE','%'.$queryStr.'%');
+            /* Searching "Finance" should find the department's categories as
+               well as a category that happens to be called that. */
+            $query->where(function($q) use($queryStr){
+                $q->where('name','LIKE','%'.$queryStr.'%')
+                    ->orWhereHas('department', function($d) use($queryStr){
+                        $d->where('name','LIKE','%'.$queryStr.'%');
+                    });
+            });
+        endif;
+        if($department > 0):
+            $query->where('department_id', $department);
         endif;
         if($status == 2):
             $query->onlyTrashed();
@@ -66,6 +79,7 @@ class PermissionCategoryController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'department' => $list->department->name ?? '',
                     'name' => $list->name,
                     'deleted_at' => $list->deleted_at
                 ];
@@ -84,6 +98,7 @@ class PermissionCategoryController extends Controller
     public function store(PermissionCategoryRequest $request)
     {
         $data = PermissionCategory::create([
+            'department_id' => $request->department_id,
             'name'=> $request->name,
             'created_by' => auth()->user()->id
         ]);
@@ -126,6 +141,7 @@ class PermissionCategoryController extends Controller
      */
     public function update(PermissionCategoryUpdateRequest $request, PermissionCategory $dataId){      
         $data = PermissionCategory::where('id', $request->id)->update([
+            'department_id' => $request->department_id,
             'name'=> $request->name,
             'updated_by' => auth()->user()->id
         ]);

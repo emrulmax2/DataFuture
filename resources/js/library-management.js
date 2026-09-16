@@ -475,160 +475,171 @@ import { createIcons, icons } from "lucide";
     /* Day reading                                                         */
     /* ------------------------------------------------------------------ */
 
+    /**
+     * Shared by the day reading and take-home panels. Options beyond the
+     * original set are opt-in, so day reading behaves exactly as before:
+     *   blocked(item)  -> truthy keeps that row from being chosen
+     *   onChange(item) -> receives the chosen item (null when cleared)
+     */
+    /**
+     * A combobox: closed it shows the current choice, open it is a search
+     * box over a list of results.
+     *
+     * Replaces the field + results + chosen-card stack, which pushed the
+     * next step further down the page with every interaction. Book and
+     * student behave identically, so they share this.
+     */
+    function combo(opts) {
+        const root = document.querySelector(opts.root);
+        if (!root) return;
+
+        const $root = $(root);
+        const $trigger = $root.find(".lib-combo__trigger");
+        const $panel = $root.find(".lib-combo__panel");
+        const $input = $root.find(".lib-combo__input");
+        const $list = $root.find(".lib-combo__list");
+        const $id = $(opts.id);
+
+        let found = {};
+        let timer = null;
+        let request = null;
+
+        const open = () => {
+            $panel.prop("hidden", false);
+            $trigger.attr("aria-expanded", "true");
+            $input.val("").trigger("focus");
+            $list.html(`<div class="lib-combo__hint">${esc(opts.hint)}</div>`);
+        };
+
+        const close = () => {
+            $panel.prop("hidden", true);
+            $trigger.attr("aria-expanded", "false");
+            if (request) request.abort();
+        };
+
+        function paint(item) {
+            if (!item) {
+                $trigger
+                    .find(".lib-combo__value")
+                    .addClass("lib-combo__value--empty")
+                    .html(`<i data-lucide="${opts.icon}"></i>${esc(opts.placeholder)}`);
+                $root.find(".lib-combo__clear").remove();
+            } else {
+                $trigger.find(".lib-combo__value").removeClass("lib-combo__value--empty").html(opts.valueHtml(item));
+
+                if (!$root.find(".lib-combo__clear").length) {
+                    $trigger.before(
+                        '<button type="button" class="lib-combo__clear" aria-label="Change">&times;</button>'
+                    );
+                }
+            }
+            refreshIcons();
+        }
+
+        function choose(id) {
+            const item = found[id];
+            if (!item) return;
+
+            // A row the caller has marked unavailable (e.g. a student with no
+            // deposit) is shown for context but can never become the choice.
+            if (opts.blocked && opts.blocked(item)) return;
+
+            $id.val(id);
+            paint(item);
+            close();
+            opts.onChange(item);
+            $id.trigger("lib:chosen");
+        }
+
+        function clear() {
+            $id.val("");
+            paint(null);
+            opts.onChange();
+        }
+
+        $trigger.on("click", () => ($panel.prop("hidden") ? open() : close()));
+        $root.on("click", ".lib-combo__clear", (e) => {
+            e.stopPropagation();
+            clear();
+        });
+
+        $input.on("input", function () {
+            const term = $.trim($input.val());
+            clearTimeout(timer);
+
+            if (term.length < 2) {
+                $list.html(`<div class="lib-combo__hint">${esc(opts.hint)}</div>`);
+                return;
+            }
+
+            $list.html('<div class="lib-combo__hint">Searching…</div>');
+
+            timer = setTimeout(function () {
+                // One lookup in flight, so a slow earlier response cannot
+                // overwrite the list for what was typed most recently.
+                if (request) request.abort();
+
+                request = $.ajax({
+                    url: opts.url,
+                    data: { q: term },
+                    success: (res) => {
+                        const rows = opts.map(res);
+                        found = {};
+                        rows.forEach((r) => (found[r.id] = r));
+
+                        $list.html(
+                            rows.length
+                                ? rows.map(opts.rowHtml).join("")
+                                : '<div class="lib-combo__hint">Nothing found.</div>'
+                        );
+                        refreshIcons();
+                    },
+                    error: (xhr) => {
+                        if (xhr.statusText === "abort") return;
+                        $list.html(
+                            `<div class="lib-combo__hint lib-combo__hint--bad">${esc(
+                                (xhr.responseJSON && xhr.responseJSON.message) || "Lookup failed."
+                            )}</div>`
+                        );
+                    },
+                });
+            }, 300);
+        });
+
+        $list.on("click", ".lib-combo__row", function () {
+            if ($(this).attr("aria-disabled") === "true") return;
+            choose($(this).data("id"));
+        });
+
+        // Clicking away or pressing Escape closes without choosing.
+        $(document).on("mousedown", (e) => {
+            if (!$panel.prop("hidden") && !root.contains(e.target)) close();
+        });
+        $root.on("keydown", (e) => {
+            if (e.key === "Escape") {
+                close();
+                $trigger.trigger("focus");
+            }
+        });
+
+        if (opts.nextInput) {
+            $id.on("lib:chosen", () => $(opts.nextInput).trigger("focus"));
+        }
+
+        /* Cleared by an earlier step rather than by its own × — the trigger
+           has to fall back to its placeholder or it keeps showing a choice
+           that is no longer submitted. */
+        $id.on("lib:reset", () => {
+            close();
+            paint(null);
+        });
+
+        paint(null);
+    }
+
     const dayPanel = document.getElementById("dayReadingPanel");
 
     if (dayPanel) {
-        /**
-         * A combobox: closed it shows the current choice, open it is a search
-         * box over a list of results.
-         *
-         * Replaces the field + results + chosen-card stack, which pushed the
-         * next step further down the page with every interaction. Book and
-         * student behave identically, so they share this.
-         */
-        function combo(opts) {
-            const root = document.querySelector(opts.root);
-            if (!root) return;
-
-            const $root = $(root);
-            const $trigger = $root.find(".lib-combo__trigger");
-            const $panel = $root.find(".lib-combo__panel");
-            const $input = $root.find(".lib-combo__input");
-            const $list = $root.find(".lib-combo__list");
-            const $id = $(opts.id);
-
-            let found = {};
-            let timer = null;
-            let request = null;
-
-            const open = () => {
-                $panel.prop("hidden", false);
-                $trigger.attr("aria-expanded", "true");
-                $input.val("").trigger("focus");
-                $list.html(`<div class="lib-combo__hint">${esc(opts.hint)}</div>`);
-            };
-
-            const close = () => {
-                $panel.prop("hidden", true);
-                $trigger.attr("aria-expanded", "false");
-                if (request) request.abort();
-            };
-
-            function paint(item) {
-                if (!item) {
-                    $trigger
-                        .find(".lib-combo__value")
-                        .addClass("lib-combo__value--empty")
-                        .html(`<i data-lucide="${opts.icon}"></i>${esc(opts.placeholder)}`);
-                    $root.find(".lib-combo__clear").remove();
-                } else {
-                    $trigger.find(".lib-combo__value").removeClass("lib-combo__value--empty").html(opts.valueHtml(item));
-
-                    if (!$root.find(".lib-combo__clear").length) {
-                        $trigger.before(
-                            '<button type="button" class="lib-combo__clear" aria-label="Change">&times;</button>'
-                        );
-                    }
-                }
-                refreshIcons();
-            }
-
-            function choose(id) {
-                const item = found[id];
-                if (!item) return;
-
-                $id.val(id);
-                paint(item);
-                close();
-                opts.onChange();
-                $id.trigger("lib:chosen");
-            }
-
-            function clear() {
-                $id.val("");
-                paint(null);
-                opts.onChange();
-            }
-
-            $trigger.on("click", () => ($panel.prop("hidden") ? open() : close()));
-            $root.on("click", ".lib-combo__clear", (e) => {
-                e.stopPropagation();
-                clear();
-            });
-
-            $input.on("input", function () {
-                const term = $.trim($input.val());
-                clearTimeout(timer);
-
-                if (term.length < 2) {
-                    $list.html(`<div class="lib-combo__hint">${esc(opts.hint)}</div>`);
-                    return;
-                }
-
-                $list.html('<div class="lib-combo__hint">Searching…</div>');
-
-                timer = setTimeout(function () {
-                    // One lookup in flight, so a slow earlier response cannot
-                    // overwrite the list for what was typed most recently.
-                    if (request) request.abort();
-
-                    request = $.ajax({
-                        url: opts.url,
-                        data: { q: term },
-                        success: (res) => {
-                            const rows = opts.map(res);
-                            found = {};
-                            rows.forEach((r) => (found[r.id] = r));
-
-                            $list.html(
-                                rows.length
-                                    ? rows.map(opts.rowHtml).join("")
-                                    : '<div class="lib-combo__hint">Nothing found.</div>'
-                            );
-                            refreshIcons();
-                        },
-                        error: (xhr) => {
-                            if (xhr.statusText === "abort") return;
-                            $list.html(
-                                `<div class="lib-combo__hint lib-combo__hint--bad">${esc(
-                                    (xhr.responseJSON && xhr.responseJSON.message) || "Lookup failed."
-                                )}</div>`
-                            );
-                        },
-                    });
-                }, 300);
-            });
-
-            $list.on("click", ".lib-combo__row", function () {
-                choose($(this).data("id"));
-            });
-
-            // Clicking away or pressing Escape closes without choosing.
-            $(document).on("mousedown", (e) => {
-                if (!$panel.prop("hidden") && !root.contains(e.target)) close();
-            });
-            $root.on("keydown", (e) => {
-                if (e.key === "Escape") {
-                    close();
-                    $trigger.trigger("focus");
-                }
-            });
-
-            if (opts.nextInput) {
-                $id.on("lib:chosen", () => $(opts.nextInput).trigger("focus"));
-            }
-
-            /* Cleared by an earlier step rather than by its own × — the trigger
-               has to fall back to its placeholder or it keeps showing a choice
-               that is no longer submitted. */
-            $id.on("lib:reset", () => {
-                close();
-                paint(null);
-            });
-
-            paint(null);
-        }
-
         const $submit = $("#drSubmit");
 
         /* Each step appears only once the one before it is answered. Undoing a
@@ -718,6 +729,231 @@ import { createIcons, icons } from "lucide";
         $("#dayReadingToggle").on("click", function () {
             const open = $panelBody.prop("hidden");
             $panelBody.prop("hidden", !open);
+            $(this).attr("aria-expanded", open ? "true" : "false").toggleClass("is-open", open);
+        });
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Take-home issue at the desk                                         */
+    /* ------------------------------------------------------------------ */
+
+    const homePanel = document.getElementById("takeHomePanel");
+
+    if (homePanel) {
+        const $submit = $("#thSubmit");
+        const $location = $("#thLocation");
+        let chosenBook = null;
+        let copiesRequest = null;
+
+        const money = (v) => "£" + Number(v || 0).toFixed(2);
+        const facts = (pairs) =>
+            pairs
+                .filter(([, v]) => v !== null && v !== undefined && v !== "")
+                .map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`)
+                .join("");
+
+        const resetLocation = (message) => {
+            if (copiesRequest) copiesRequest.abort();
+            $location.html(`<option value="">${esc(message)}</option>`).prop("disabled", true);
+            $("#thShelf").val("");
+        };
+
+        /* Each step appears once the one before it is answered, and undoing a
+           step clears everything after it — a book or shelf chosen for the
+           previous student must not carry into the next issue. */
+        function refresh() {
+            const hasStudent = !!$("#thStudentId").val();
+
+            if (!hasStudent && $("#thTitleId").val()) {
+                $("#thTitleId").val("").trigger("lib:reset");
+                chosenBook = null;
+            }
+
+            const hasBook = !!$("#thTitleId").val();
+            if (!hasBook) {
+                chosenBook = null;
+                resetLocation("Choose a book first");
+            }
+
+            const hasLocation = hasBook && !!$location.val();
+
+            $("#thStepBook").prop("hidden", !hasStudent);
+            $("#thStepLocation").prop("hidden", !hasBook);
+            $("#thStepIssue").prop("hidden", !hasLocation);
+
+            if (!hasLocation) $("#thNote").val("");
+            $submit.prop("disabled", !(hasStudent && hasBook && hasLocation));
+        }
+
+        /* Shelves holding a free copy of the chosen title. The search result
+           only carries campus names, so the copies come from the title lookup;
+           one option per shelf, since nine copies on one shelf is one place. */
+        function loadLocations(book) {
+            resetLocation("Loading locations…");
+
+            copiesRequest = $.getJSON(homePanel.dataset.titleUrl.replace("__ID__", book.id))
+                .done((res) => {
+                    const byShelf = {};
+
+                    ((res && res.data && res.data.copies) || [])
+                        .filter((c) => String(c.status).toLowerCase() === "available")
+                        .forEach((c) => {
+                            const key = (c.campus || "") + "|" + (c.location || "");
+                            byShelf[key] = byShelf[key] || { campus: c.campus || "", location: c.location || "", n: 0 };
+                            byShelf[key].n += 1;
+                        });
+
+                    const points = Object.values(byShelf).sort((a, b) => b.n - a.n);
+
+                    if (!points.length) {
+                        resetLocation("No free copy on any shelf");
+                        refresh();
+                        return;
+                    }
+
+                    $location
+                        .html(
+                            `<option value="">Choose a location</option>` +
+                                points
+                                    .map(
+                                        (p) =>
+                                            `<option value="${esc(p.campus)}" data-location="${esc(p.location)}">${esc(p.campus)}${
+                                                p.location ? " — " + esc(p.location) : ""
+                                            } (${p.n} on the shelf)</option>`
+                                    )
+                                    .join("")
+                        )
+                        .prop("disabled", false);
+
+                    // One shelf is not a choice — take it and move straight on.
+                    if (points.length === 1) {
+                        $location.prop("selectedIndex", 1).trigger("change");
+                    }
+                    refresh();
+                })
+                .fail((xhr) => {
+                    if (xhr.statusText === "abort") return;
+                    resetLocation("Locations could not be loaded");
+                    refresh();
+                });
+        }
+
+        function paintSummary() {
+            const b = chosenBook;
+            if (!b) return;
+
+            const $opt = $location.find(":selected");
+            const shelf = $opt.data("location");
+
+            $("#thShelf").val(shelf || "");
+            $("#thWhere").text($location.val() + (shelf ? " — " + shelf : ""));
+
+            $("#thCover").html(
+                `<i data-lucide="book"></i>` +
+                    (b.image_url ? `<img src="${esc(b.image_url)}" alt="" loading="lazy" onerror="this.remove()">` : "")
+            );
+            $("#thBookTitle").text(b.title || "");
+            $("#thBookAuthor").text(b.author || "Unknown author");
+            $("#thBookFacts").html(
+                facts([
+                    ["Publisher", b.publisher],
+                    ["ISBN", b.isbn13 || b.isbn10],
+                    ["Edition", b.edition],
+                    ["Published", b.publication_date],
+                    ["Pages", b.pages],
+                    ["Price", b.price ? money(b.price) : null],
+                    ["Copies", b.available_copies + " of " + b.total_copies + " available"],
+                ])
+            );
+            refreshIcons();
+        }
+
+        combo({
+            root: "#thStudentCombo",
+            id: "#thStudentId",
+            url: homePanel.dataset.studentsUrl,
+            icon: "user",
+            placeholder: "Name or registration number...",
+            hint: "Type at least two characters.",
+            onChange: refresh,
+            nextInput: "#thBookCombo .lib-combo__trigger",
+            map: (res) => res.data || [],
+            // No deposit, at the allowance, or holding something overdue:
+            // shown so the desk can see why, never selectable.
+            blocked: (s) => !!s.take_home_block,
+            rowHtml: (s) => {
+                const block = s.take_home_block;
+
+                return `
+                <button type="button" class="lib-combo__row${block ? " lib-combo__row--blocked" : ""}"
+                        data-id="${esc(s.id)}" role="option" ${block ? 'aria-disabled="true"' : ""}>
+                    ${thumb(s.photo_url, s.label, "lib-media__avatar")}
+                    <span class="lib-media__copy">
+                        <strong>${esc(s.label)}</strong>
+                        <small>${esc(s.registration_no || "")}</small>
+                        ${block ? `<small class="lib-combo__row-reason"><i data-lucide="circle-alert"></i>${esc(block)}</small>` : ""}
+                    </span>
+                </button>`;
+            },
+            valueHtml: (s) => `
+                ${thumb(s.photo_url, s.label, "lib-media__avatar")}
+                <span class="lib-media__copy">
+                    <strong>${esc(s.label)}</strong>
+                    <small>${esc(s.registration_no || "")}</small>
+                </span>`,
+        });
+
+        combo({
+            root: "#thBookCombo",
+            id: "#thTitleId",
+            url: homePanel.dataset.catalogueUrl,
+            icon: "book",
+            placeholder: "Title, author, ISBN or barcode...",
+            hint: "Type at least two characters.",
+            onChange: (book) => {
+                chosenBook = book || null;
+                refresh();
+                if (chosenBook) loadLocations(chosenBook);
+            },
+            nextInput: "#thLocation",
+            // Only titles with a free copy can be handed over.
+            map: (res) => (res.data || []).filter((b) => Number(b.available_copies) > 0),
+            rowHtml: (b) => `
+                <button type="button" class="lib-combo__row" data-id="${esc(b.id)}" role="option">
+                    ${thumb(b.image_url, b.title, "lib-media__cover")}
+                    <span class="lib-media__copy">
+                        <strong>${esc(b.title)}</strong>
+                        <small>${esc([b.author, b.publisher].filter(Boolean).join(" · ") || "Unknown author")}</small>
+                        <small>${esc(
+                            b.available_copies + " of " + b.total_copies + " free · " + (b.campuses || []).join(", ")
+                        )}</small>
+                    </span>
+                </button>`,
+            valueHtml: (b) => `
+                ${thumb(b.image_url, b.title, "lib-media__cover")}
+                <span class="lib-media__copy">
+                    <strong>${esc(b.title)}</strong>
+                    <small>${esc([b.author, b.isbn13, b.available_copies + " free"].filter(Boolean).join(" · "))}</small>
+                </span>`,
+        });
+
+        $location.on("change", function () {
+            refresh();
+            if ($location.val()) {
+                paintSummary();
+                $("#thNote").trigger("focus");
+            }
+        });
+
+        refresh();
+
+        // Guards a double submit: the second would hold a second copy.
+        $("#takeHomeBody").on("submit", () => $submit.prop("disabled", true).text("Issuing…"));
+
+        const $homeBody = $("#takeHomeBody");
+        $("#takeHomeToggle").on("click", function () {
+            const open = $homeBody.prop("hidden");
+            $homeBody.prop("hidden", !open);
             $(this).attr("aria-expanded", open ? "true" : "false").toggleClass("is-open", open);
         });
     }

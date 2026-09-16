@@ -140,10 +140,19 @@ class LibraryRules
      * Returns the reason rather than a boolean because every caller — the
      * banner, the disabled button, the guard on the write — wants to say why.
      */
-    public function blockedReason($studentId, bool $depositHeld): ?string
+    /**
+     * Why a student may not take a book home, as a code: `deposit`,
+     * `max_books`, `overdue`, or null when nothing stands in the way.
+     *
+     * The decision lives here once. The student portal and the issue desk word
+     * it differently — one speaks to the student, the other about them — so
+     * each maps the code to its own message rather than keeping its own copy
+     * of the rules, which would drift apart.
+     */
+    public function blockedCode($studentId, bool $depositHeld): ?string
     {
         if ($this->requiresDeposit() && !$depositHeld):
-            return 'Pay your refundable deposit to start borrowing.';
+            return 'deposit';
         endif;
 
         /* Day reading never leaves the building and is handed back the same
@@ -151,7 +160,7 @@ class LibraryRules
         $open = LibraryBookIssue::where('student_id', $studentId)->takeHome()->open()->count();
 
         if ($open >= $this->maxBooks()):
-            return 'You are holding the maximum of '.$this->maxBooks().' books. Return one to borrow another.';
+            return 'max_books';
         endif;
 
         $overdue = LibraryBookIssue::where('student_id', $studentId)
@@ -161,9 +170,20 @@ class LibraryRules
             ->exists();
 
         if ($overdue):
-            return 'You have an overdue book. Return it before borrowing again.';
+            return 'overdue';
         endif;
 
         return null;
+    }
+
+    /** The same decision, worded for the student. */
+    public function blockedReason($studentId, bool $depositHeld): ?string
+    {
+        return match ($this->blockedCode($studentId, $depositHeld)) {
+            'deposit' => 'Pay your refundable deposit to start borrowing.',
+            'max_books' => 'You are holding the maximum of '.$this->maxBooks().' books. Return one to borrow another.',
+            'overdue' => 'You have an overdue book. Return it before borrowing again.',
+            default => null,
+        };
     }
 }

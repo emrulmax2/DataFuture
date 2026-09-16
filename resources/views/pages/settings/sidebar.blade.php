@@ -236,14 +236,19 @@
                         <i data-lucide="user-cog-2" class="w-4 h-4 mr-2"></i> User Privilege <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>
                     </a>
                     <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'roles.show' || Route::currentRouteName() == 'permissioncategory' || Route::currentRouteName() == 'roles' || Route::currentRouteName() == 'permissions' ? 'block' : 'none' }};">
+                        {{-- Role, hidden for now. The route (roles -> site-settings/roles)
+                             is untouched and still reachable directly; uncomment to
+                             bring the menu entry back.
+
                         <li>
                             <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'roles.show' || Route::currentRouteName() == 'roles' ? 'active text-primary font-medium' : '' }}" href="{{ route('roles') }}">
                                 <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Role
                             </a>
                         </li>
+                        --}}
                         <li>
                             <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'permissioncategory' ? 'active text-primary font-medium' : '' }}" href="{{ route('permissioncategory') }}">
-                                <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Permission Category
+                                <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Permission Sub Department
                             </a>
                         </li>
                         <li>

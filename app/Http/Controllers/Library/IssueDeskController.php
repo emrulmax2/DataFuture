@@ -419,6 +419,8 @@ class IssueDeskController extends Controller
             ->limit(15)
             ->get();
 
+        $rules = new LibraryRules();
+
         return response()->json([
             'ok' => true,
             'data' => $students->map(fn ($s) => [
@@ -428,6 +430,10 @@ class IssueDeskController extends Controller
                 /* Accessor falls back to a placeholder when the student has no
                    photo, so the desk always has something to show. */
                 'photo_url' => $s->photo_url,
+                /* Whether this student can take a book home, and if not why.
+                   Day reading ignores it — a book read in the building needs no
+                   deposit — so it is only acted on by the direct-issue panel. */
+                'take_home_block' => $this->takeHomeBlock($s->id, $rules),
             ])->all(),
         ]);
     }
@@ -520,6 +526,147 @@ class IssueDeskController extends Controller
         return back()->with(
             'library_success',
             $issue->reference.' issued to '.$student->first_name.' '.$student->last_name.' for day reading — due back today.'
+        );
+    }
+
+    /**
+     * A title with its copies, for the direct-issue location picker. Each copy
+     * reports its own campus, shelf and status.
+     */
+    public function title(Request $request, $titleId)
+    {
+        $this->guard();
+
+        $title = $this->catalogue->title($titleId);
+
+        if ($title === null):
+            return response()->json(['ok' => false, 'message' => 'That book could not be loaded.'], 503);
+        endif;
+
+        return response()->json(['ok' => true, 'data' => $title]);
+    }
+
+    /**
+     * Staff-facing reason a student cannot take a book home, or null.
+     *
+     * Same decision as the student portal (LibraryRules::blockedCode) — only
+     * the wording differs, since here it is read by staff about the student.
+     */
+    private function takeHomeBlock(int $studentId, LibraryRules $rules): ?string
+    {
+        return match ($rules->blockedCode($studentId, (bool) LibraryDeposit::heldFor($studentId))) {
+            'deposit' => 'No library deposit paid. The student needs to pay it from their portal before borrowing.',
+            'max_books' => 'Already holding the maximum of '.$rules->maxBooks().' take-home books.',
+            'overdue' => 'Has an overdue book that must be returned first.',
+            default => null,
+        };
+    }
+
+    /**
+     * Issue a take-home book straight to a student at the desk.
+     *
+     * The reservation and the collection happen in one step, so the copy is
+     * held and handed over together and the loan clock starts now. Everything
+     * the student portal enforces is re-checked here — the desk skipping the
+     * reservation must not mean skipping the deposit or the allowance.
+     */
+    public function issueTakeHome(Request $request)
+    {
+        $this->guard();
+
+        $request->validate([
+            'student_id' => ['required', 'integer', 'exists:students,id'],
+            'title_id' => ['required', 'integer'],
+            'campus' => ['nullable', 'string', 'max:191'],
+            'location' => ['nullable', 'string', 'max:191'],
+            'staff_note' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $student = Student::findOrFail($request->student_id);
+        $rules = new LibraryRules();
+        $name = trim($student->first_name.' '.$student->last_name);
+
+        /* The panel greys these students out, but the button is a courtesy and
+           this is the control: a stale page or a crafted post lands here. */
+        if ($block = $this->takeHomeBlock($student->id, $rules)):
+            return back()->with('library_error', $name.': '.$block);
+        endif;
+
+        $already = LibraryBookIssue::where('student_id', $student->id)
+            ->where('ops_title_id', $request->title_id)
+            ->open()
+            ->exists();
+
+        if ($already):
+            return back()->with('library_error', $name.' already has this book out or reserved.');
+        endif;
+
+        $hold = $this->catalogue->holdCopy($request->title_id, [
+            'student_id' => (string) $student->id,
+            'registration_no' => (string) $student->registration_no,
+            'student_name' => $name,
+            'campus' => $request->campus,
+            'location' => $request->location,
+        ]);
+
+        if (!$hold || empty($hold['copy'])):
+            return back()->with('library_error', 'No copy of that title is free at that location. It may have just been taken.');
+        endif;
+
+        $copy = $hold['copy'];
+        $book = $hold['title'] ?? [];
+
+        /* The copy is already off the shelf in Operations: a failed write must
+           give it back rather than strand it against a loan nobody can see. */
+        try {
+            $issue = LibraryBookIssue::create([
+                'reference' => LibraryBookIssue::nextReference(),
+                'student_id' => $student->id,
+                'loan_type' => LibraryBookIssue::TYPE_TAKE_HOME,
+                'ops_title_id' => (int) $request->title_id,
+                'ops_copy_id' => $copy['id'] ?? null,
+                'barcode' => $copy['barcode'] ?? null,
+                'title' => $book['title'] ?? 'Library book',
+                'author' => $book['author'] ?? null,
+                'isbn13' => $book['isbn13'] ?? null,
+                'cover_url' => $book['image_url'] ?? null,
+                /* The copy actually held, which Operations may have taken from
+                   a different shelf than the one picked. */
+                'campus' => $copy['campus'] ?? null,
+                'location' => $copy['location'] ?? null,
+                'book_price' => $book['price'] ?? null,
+                'status' => LibraryBookIssue::STATUS_ISSUED,
+                'requested_at' => Carbon::now(),
+                'issued_at' => Carbon::now(),
+                'issued_by' => auth()->id(),
+                'due_at' => $rules->dueDateFrom(),
+                'staff_note' => $request->input('staff_note'),
+                'created_by' => auth()->id(),
+            ]);
+        } catch (\Throwable $e) {
+            $this->catalogue->releaseCopy($copy['id'] ?? null, ['reason' => 'issue_failed']);
+
+            Log::error('[Library] Direct issue failed after the copy was held; copy released.', [
+                'copy' => $copy['id'] ?? null,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with('library_error', 'That could not be issued. Nothing has been held — please try again.');
+        }
+
+        $issue->log('issued', null, 'Issued directly at the desk');
+
+        /* Straight to on_loan: it never sat on the hold shelf. */
+        if (!$this->catalogue->issueCopy($issue->ops_copy_id)):
+            Log::warning('[Library] Directly issued copy could not be updated in Operations.', [
+                'reference' => $issue->reference,
+                'copy' => $issue->ops_copy_id,
+            ]);
+        endif;
+
+        return back()->with(
+            'library_success',
+            $issue->reference.' issued to '.$name.' — due back '.$issue->due_at->format('j M Y').'.'
         );
     }
 

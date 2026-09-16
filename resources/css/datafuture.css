@@ -22019,3 +22019,34 @@ body.employee-public-form-body .dataCollectionFormWrap {
         justify-content: center;
     }
 }
+
+/* Permission template bar on one line.
+   With a department AND a sub department picker (260px each) plus Load, the
+   controls no longer fitted beside the description, so the base toolbar's
+   flex-wrap dropped them onto a second row. From tablet width up the bar stays
+   a single row: the title/description column takes the remaining space and
+   wraps its own text, and the controls keep their size. Phones keep the
+   stacked layout from the max-width: 767px rules above. */
+@media (min-width: 768px) {
+    body.employee-profile-body .ep-privilege-toolbar--template {
+        flex-wrap: nowrap;
+    }
+
+    body.employee-profile-body .ep-privilege-toolbar--template .ep-privilege-toolbar__summary {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+
+    body.employee-profile-body .ep-privilege-toolbar--template .ep-privilege-toolbar__actions {
+        flex: none;
+        flex-wrap: nowrap;
+    }
+
+    body.employee-profile-body .ep-privilege-toolbar--template .ep-privilege-toolbar__select .ts-control {
+        width: 220px;
+    }
+
+    body.employee-profile-body .ep-privilege-toolbar--template .ep-privilege-btn {
+        white-space: nowrap;
+    }
+}

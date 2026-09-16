@@ -1,23 +1,44 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
- 
+
 ("use strict");
+
+const escapeHtml = (value) => {
+    if (value === null || value === undefined || value === "") {
+        return "&mdash;";
+    }
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+};
+
 var table = (function () {
     var _tableGen = function () {
-        // Setup Tabulator
         let querystr = $("#query").val() != "" ? $("#query").val() : "";
         let status = $("#status").val() != "" ? $("#status").val() : "";
+        let department = $("#department").val() != "" ? $("#department").val() : "";
+
+        // Rebuilt on every filter; the old instance and its listeners have to
+        // go first or each search stacks another table and resize handler.
+        if (window.permissionCategoryTableInstance) {
+            window.permissionCategoryTableInstance.destroy();
+        }
+
         let tableContent = new Tabulator("#permissioncategoryTableId", {
             ajaxURL: route("permissioncategory.list"),
-            ajaxParams: { querystr: querystr, status: status },
+            ajaxParams: { querystr: querystr, status: status, department: department },
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSizeSelector: [10, 25, 50, 100],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -25,39 +46,51 @@ var table = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
+                    width: 72,
+                    minWidth: 64,
                 },
                 {
-                    title: "Name",
+                    title: "Department",
+                    field: "department",
+                    headerHozAlign: "left",
+                    headerSort: false,
+                    minWidth: 150,
+                    widthGrow: 1.2,
+                    // Categories saved before departments existed have none yet,
+                    // which escapeHtml renders as a dash.
+                    formatter(cell) {
+                        return escapeHtml(cell.getValue());
+                    },
+                },
+                {
+                    title: "Sub Department",
                     field: "name",
                     headerHozAlign: "left",
+                    minWidth: 150,
+                    widthGrow: 1.6,
+                    formatter(cell) {
+                        return escapeHtml(cell.getValue());
+                    },
                 },
                 {
                     title: "Actions",
-                    field: "id",
+                    field: "actions",
                     headerSort: false,
                     hozAlign: "center",
                     headerHozAlign: "center",
-                    width: "180",
+                    width: 104,
+                    minWidth: 104,
                     download: false,
-                    formatter(cell, formatterParams) {                        
+                    formatter(cell) {
                         var btns = "";
+
                         if (cell.getData().deleted_at == null) {
-                            btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '" data-tw-toggle="modal" data-tw-target="#editPermissionModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }  else if (cell.getData().deleted_at != null) {
-                            btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="edit_btn ss-row-action ss-row-action--edit" aria-label="Edit permission category"><i data-lucide="pencil"></i></button>';
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="delete_btn ss-row-action ss-row-action--delete" aria-label="Delete permission category"><i data-lucide="trash-2"></i></button>';
+                        } else if (cell.getData().deleted_at != null) {
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="restore_btn ss-row-action ss-row-action--restore" aria-label="Restore permission category"><i data-lucide="rotate-cw"></i></button>';
                         }
-                        
+
                         return btns;
                     },
                 },
@@ -65,55 +98,45 @@ var table = (function () {
             renderComplete() {
                 createIcons({
                     icons,
-                    "stroke-width": 1.5,
+                    "stroke-width": 1.7,
                     nameAttr: "data-lucide",
                 });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }   
             },
         });
 
-        // Redraw table onresize
-        window.addEventListener("resize", () => {
+        window.permissionCategoryTableInstance = tableContent;
+
+        if (window.permissionCategoryTableResizeHandler) {
+            window.removeEventListener("resize", window.permissionCategoryTableResizeHandler);
+        }
+
+        window.permissionCategoryTableResizeHandler = () => {
             tableContent.redraw();
             createIcons({
                 icons,
-                "stroke-width": 1.5,
+                "stroke-width": 1.7,
                 nameAttr: "data-lucide",
             });
+        };
+
+        window.addEventListener("resize", window.permissionCategoryTableResizeHandler);
+
+        $("#tabulator-export-csv").off("click.permcat").on("click.permcat", function () {
+            tableContent.download("csv", "permission-categories.csv");
         });
 
-        // Export
-        $("#tabulator-export-csv").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
-        });
-
-        $("#tabulator-export-json").on("click", function (event) {
-            tableContent.download("json", "data.json");
-        });
-
-        $("#tabulator-export-xlsx").on("click", function (event) {
+        $("#tabulator-export-xlsx").off("click.permcat").on("click.permcat", function () {
             window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Permission Category Details",
+            tableContent.download("xlsx", "permission-categories.xlsx", {
+                sheetName: "Permission Categories",
             });
         });
 
-        $("#tabulator-export-html").on("click", function (event) {
-            tableContent.download("html", "data.html", {
-                style: true,
-            });
-        });
-
-        // Print
-        $("#tabulator-print").on("click", function (event) {
+        $("#tabulator-print").off("click.permcat").on("click.permcat", function () {
             tableContent.print();
         });
     };
+
     return {
         init: function () {
             _tableGen();
@@ -122,17 +145,13 @@ var table = (function () {
 })();
 
 (function () {
-    // Tabulator
     if ($("#permissioncategoryTableId").length) {
-        // Init Table
         table.init();
 
-        // Filter function
         function filterHTMLForm() {
             table.init();
         }
 
-        // On submit filter form
         $("#tabulatorFilterForm")[0].addEventListener(
             "keypress",
             function (event) {
@@ -144,250 +163,245 @@ var table = (function () {
             }
         );
 
-        // On click go button
-        $("#tabulator-html-filter-go").on("click", function (event) {
+        $("#tabulator-html-filter-go").on("click", function () {
             filterHTMLForm();
         });
 
-        // On reset filter form
-        $("#tabulator-html-filter-reset").on("click", function (event) {
+        $("#tabulator-html-filter-reset").on("click", function () {
             $("#query").val("");
-            $("#status").val("");
+            $("#department").val("");
+            $("#status").val("1");
+            filterHTMLForm();
+        });
+
+        // A dropdown is a finished choice, unlike a half-typed query, so the
+        // list follows it straight away rather than waiting for Go.
+        $("#department").on("change", function () {
             filterHTMLForm();
         });
 
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-        const addModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#addPermissionModal"));
+        const addModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addPermissionModal"));
         const editModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editPermissionModal"));
         const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-        let confModalDelTitle = 'Are you sure?';
+        const confModalDelTitle = "Are you sure?";
 
-        const addModalEl = document.getElementById('addPermissionModal')
-        addModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#addPermissionModal .acc__input-error').html('');
-            $('#addPermissionModal input').val('');
-        });
-        
-        const editModalEl = document.getElementById('editPermissionModal')
-        editModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#editPermissionModal .acc__input-error').html('');
-            $('#editPermissionModal input').val('');
-            $('#editPermissionModal input[name="id"]').val('0');
+        const setBusy = ($button, isBusy) => {
+            $button.prop("disabled", isBusy);
+            $button.find(".ss-spinner").css("display", isBusy ? "inline-block" : "none");
+        };
+
+        const showSuccess = (title, message) => {
+            $("#successModal .successModalTitle").html(title);
+            $("#successModal .successModalDesc").html(message);
+            succModal.show();
+        };
+
+        // form.reset() clears the department select as well as the input, which
+        // the old per-input reset did not.
+        const resetFormState = ($form) => {
+            if ($form[0]) {
+                $form[0].reset();
+            }
+
+            $form.find(".acc__input-error").html("");
+            $form.find(".border-danger").removeClass("border-danger");
+            $form.find('input[name="id"]').val("0");
+        };
+
+        const showErrors = ($form, errors) => {
+            for (const [key, val] of Object.entries(errors)) {
+                $form.find(`.${key}`).addClass("border-danger");
+                $form.find(`.error-${key}`).html(Array.isArray(val) ? val[0] : val);
+            }
+        };
+
+        const showConfirm = (id, action, title, message) => {
+            $("#confirmModal .confModTitle").html(title);
+            $("#confirmModal .confModDesc").html(message);
+            $("#confirmModal .agreeWith").attr("data-id", id);
+            $("#confirmModal .agreeWith").attr("data-action", action);
+            confModal.show();
+        };
+
+        resetFormState($("#addForm"));
+        resetFormState($("#editForm"));
+
+        document.getElementById("addPermissionModal").addEventListener("show.tw.modal", function () {
+            resetFormState($("#addForm"));
         });
 
-        const confirmModalEl = document.getElementById('confirmModal')
-        confirmModalEl.addEventListener('hidden.tw.modal', function(event){
-            $('#confirmModal .agreeWith').attr('data-id', '0');
-            $('#confirmModal .agreeWith').attr('data-action', 'none');
+        document.getElementById("addPermissionModal").addEventListener("hide.tw.modal", function () {
+            resetFormState($("#addForm"));
+            setBusy($("#save"), false);
         });
 
-        $('#addPermissionForm').on('submit', function(e){
+        document.getElementById("editPermissionModal").addEventListener("hide.tw.modal", function () {
+            resetFormState($("#editForm"));
+            setBusy($("#update"), false);
+        });
+
+        document.getElementById("confirmModal").addEventListener("hidden.tw.modal", function () {
+            $("#confirmModal .agreeWith").attr("data-id", "0");
+            $("#confirmModal .agreeWith").attr("data-action", "none");
+            $("#confirmModal button").removeAttr("disabled");
+        });
+
+        $("#addForm").on("submit", function (e) {
             e.preventDefault();
-            const form = document.getElementById('addPermissionForm');
-        
-            document.querySelector('#save').setAttribute('disabled', 'disabled');
-            document.querySelector("#save svg").style.cssText ="display: inline-block;";
+            const form = document.getElementById("addForm");
 
-            let form_data = new FormData(form);
+            setBusy($("#save"), true);
+
             axios({
                 method: "post",
-                url: route('permissioncategory.store'),
-                data: form_data,
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                document.querySelector('#save').removeAttribute('disabled');
-                document.querySelector("#save svg").style.cssText = "display: none;";
-                
-                if (response.status == 200) {
-                    document.querySelector('#save').removeAttribute('disabled');
-                    document.querySelector("#save svg").style.cssText = "display: none;";
-                    addModal.hide();
+                url: route("permissioncategory.store"),
+                data: new FormData(form),
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+            }).then((response) => {
+                setBusy($("#save"), false);
 
-                    succModal.show();
-                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                        $("#successModal .successModalTitle").html("Success!");
-                        $("#successModal .successModalDesc").html('Data Inserted');
-                    });         
+                if (response.status == 200) {
+                    addModal.hide();
+                    showSuccess("Success!", "Permission category successfully inserted.");
                 }
+
                 table.init();
-            }).catch(error => {
-                document.querySelector('#save').removeAttribute('disabled');
-                document.querySelector("#save svg").style.cssText = "display: none;";
-                
-                if (error.response) {
-                    if (error.response.status == 422) {
-                        for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#addPermissionForm .${key}`).addClass('border-danger')
-                            $(`#addPermissionForm  .error-${key}`).html(val)
-                        }
-                    } else {
-                        console.log('error');
-                    }
+            }).catch((error) => {
+                setBusy($("#save"), false);
+                if (error.response && error.response.status == 422) {
+                    showErrors($("#addForm"), error.response.data.errors || {});
+                } else {
+                    console.log(error);
                 }
             });
         });
 
-        $("#permissioncategoryTableId").on("click", ".edit_btn", function () {      
-            let $editBtn = $(this);
-            let editId = $editBtn.attr("data-id");
+        $("#permissioncategoryTableId").on("click", ".edit_btn", function () {
+            let editId = $(this).attr("data-id");
+
+            resetFormState($("#editForm"));
 
             axios({
                 method: "get",
                 url: route("permissioncategory.edit", editId),
-                headers: {
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-                },
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
             }).then((response) => {
                 if (response.status == 200) {
                     let dataset = response.data;
-                    $('#editPermissionModal input[name="name"]').val(dataset.name ? dataset.name : '');
-
-                    $('#editPermissionModal input[name="id"]').val(editId);
+                    $('#editForm select[name="department_id"]').val(dataset.department_id ? dataset.department_id : "");
+                    $('#editForm input[name="name"]').val(dataset.name ? dataset.name : "");
+                    $('#editForm input[name="id"]').val(editId);
+                    editModal.show();
                 }
-            })
-            .catch((error) => {
+            }).catch((error) => {
                 console.log(error);
             });
         });
 
-        // Update Course Data
-        $("#editPermissionForm").on("submit", function (e) {
+        $("#editForm").on("submit", function (e) {
             e.preventDefault();
-            let editId = $('#editPermissionModal input[name="id"]').val();
+            const form = document.getElementById("editForm");
 
-            const form = document.getElementById("editPermissionForm");
-
-            document.querySelector('#update').setAttribute('disabled', 'disabled');
-            document.querySelector('#update svg').style.cssText = 'display: inline-block;';
-
-            let form_data = new FormData(form);
+            setBusy($("#update"), true);
 
             axios({
                 method: "post",
-                url: route("permissioncategory.update", editId),
-                data: form_data,
-                headers: {
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-                },
+                url: route("permissioncategory.update"),
+                data: new FormData(form),
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
             }).then((response) => {
-                if (response.status == 200) {
-                    document.querySelector("#update").removeAttribute("disabled");
-                    document.querySelector("#update svg").style.cssText = "display: none;";
-                    editModal.hide();
+                setBusy($("#update"), false);
 
-                    succModal.show();
-                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                        $("#successModal .successModalTitle").html("Success!");
-                        $("#successModal .successModalDesc").html('Data Updated');
-                    });
+                if (response.status == 200) {
+                    editModal.hide();
+                    showSuccess("Success!", "Permission category successfully updated.");
                 }
+
                 table.init();
             }).catch((error) => {
-                document.querySelector("#update").removeAttribute("disabled");
-                document.querySelector("#update svg").style.cssText = "display: none;";
-                if (error.response) {
-                    if (error.response.status == 422) {
-                        for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#editPermissionForm .${key}`).addClass('border-danger')
-                            $(`#editPermissionForm  .error-${key}`).html(val)
-                        }
-                    }else if (error.response.status == 304) {
-                        editModal.hide();
+                setBusy($("#update"), false);
 
-                        let message = error.response.statusText;
-                        succModal.show();
-                        document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                            $("#successModal .successModalTitle").html("Oops!");
-                            $("#successModal .successModalDesc").html(message);
-                        });
-                    } else {
-                        console.log("error");
-                    }
+                if (!error.response) {
+                    console.log(error);
+                    return;
+                }
+
+                // The controller answers 422 for two different things: a field
+                // that failed validation (carries `errors`) and an update that
+                // changed nothing (carries only a message). Treating both as
+                // field errors throws on the second.
+                if (error.response.status == 422 && error.response.data.errors) {
+                    showErrors($("#editForm"), error.response.data.errors);
+                } else if (error.response.status == 422 || error.response.status == 304) {
+                    editModal.hide();
+                    showSuccess("No Data Change!", error.response.data.message || "Nothing was modified.");
+                } else {
+                    console.log(error);
                 }
             });
         });
 
-        // Confirm Modal Action
-        $('#confirmModal .agreeWith').on('click', function(){
+        $("#confirmModal .agreeWith").on("click", function () {
             let $agreeBTN = $(this);
-            let recordID = $agreeBTN.attr('data-id');
-            let action = $agreeBTN.attr('data-action');
+            let recordID = $agreeBTN.attr("data-id");
+            let action = $agreeBTN.attr("data-action");
 
-            $('#confirmModal button').attr('disabled', 'disabled');
-            if(action == 'DELETE'){
+            $("#confirmModal button").attr("disabled", "disabled");
+
+            if (action == "DELETE") {
                 axios({
-                    method: 'delete',
-                    url: route('permissioncategory.destory', recordID),
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
+                    method: "delete",
+                    url: route("permissioncategory.destory", recordID),
+                    headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+                }).then((response) => {
                     if (response.status == 200) {
-                        $('#confirmModal button').removeAttr('disabled');
+                        $("#confirmModal button").removeAttr("disabled");
                         confModal.hide();
-
-                        succModal.show();
-                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                            $('#successModal .successModalTitle').html('Done!');
-                            $('#successModal .successModalDesc').html('Academic year successfully deleted!');
-                        });
+                        showSuccess("Done!", "Permission category successfully deleted.");
                     }
+
                     table.init();
-                }).catch(error =>{
-                    console.log(error)
+                }).catch((error) => {
+                    $("#confirmModal button").removeAttr("disabled");
+                    console.log(error);
                 });
-            } else if(action == 'RESTORE'){
+            } else if (action == "RESTORE") {
                 axios({
-                    method: 'post',
-                    url: route('permissioncategory.restore', recordID),
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
+                    method: "post",
+                    url: route("permissioncategory.restore", recordID),
+                    headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+                }).then((response) => {
                     if (response.status == 200) {
-                        $('#confirmModal button').removeAttr('disabled');
+                        $("#confirmModal button").removeAttr("disabled");
                         confModal.hide();
-
-                        succModal.show();
-                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                            $('#successModal .successModalTitle').html('Success!');
-                            $('#successModal .successModalDesc').html('Academic Year Data Successfully Restored!');
-                        });
+                        showSuccess("Success!", "Permission category successfully restored.");
                     }
+
                     table.init();
-                }).catch(error =>{
-                    console.log(error)
+                }).catch((error) => {
+                    $("#confirmModal button").removeAttr("disabled");
+                    console.log(error);
                 });
             }
-        })
-
-        // Delete Course
-        $('#permissioncategoryTableId').on('click', '.delete_btn', function(){
-            let $statusBTN = $(this);
-            let rowID = $statusBTN.attr('data-id');
-
-            confModal.show();
-            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-                $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Do you really want to delete these record? If yes, the please click on agree btn.');
-                $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
-            });
         });
 
-        // Restore Course
-        $('#permissioncategoryTableId').on('click', '.restore_btn', function(){
-            const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-            document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-                $('#confirmModal .agreeWith').attr('data-id', '0');
-                $('#confirmModal .agreeWith').attr('data-action', 'none');
-            });
-            let $statusBTN = $(this);
-            let courseID = $statusBTN.attr('data-id');
+        $("#permissioncategoryTableId").on("click", ".delete_btn", function () {
+            showConfirm(
+                $(this).attr("data-id"),
+                "DELETE",
+                confModalDelTitle,
+                "Want to delete this permission category? Please click on agree to continue."
+            );
+        });
 
-            confModal.show();
-            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-                $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Do you really want to restore these record?');
-                $('#confirmModal .agreeWith').attr('data-id', courseID);
-                $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
-            });
+        $("#permissioncategoryTableId").on("click", ".restore_btn", function () {
+            showConfirm(
+                $(this).attr("data-id"),
+                "RESTORE",
+                confModalDelTitle,
+                "Want to restore this permission category from the trash? Please click on agree to continue."
+            );
         });
     }
 })();

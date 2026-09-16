@@ -11,6 +11,7 @@ class PermissionCategory extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'department_id',
         'name',
         'created_by',
         'updated_by',
@@ -20,5 +21,10 @@ class PermissionCategory extends Model
 
     public function template(){
         return $this->hasMany(PermissionTemplate::class);
+    }
+
+    /** The department this category sits under; its `name` is the sub-department. */
+    public function department(){
+        return $this->belongsTo(Department::class);
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Settings\PermissionSettingController;
 use App\Models\Department;
 use App\Models\DepartmentTemplate;
+use App\Models\PermissionCategory;
 use Illuminate\Http\Request;
 use App\Models\Employee;
 use App\Models\EmployeePermission;
@@ -46,6 +47,7 @@ class EmployeePrivilegeNewController extends Controller
         // department_id records which template these permissions came from. Null
         // means they were set directly, so no template gets preselected (step 3).
         $department_id = (int) ($existingPermission->department_id ?? 0);
+        $permission_category_id = (int) ($existingPermission->permission_category_id ?? 0);
 
         // The full grouped list is always rendered so HR can grant permissions
         // without loading a template first (step 1). Whatever the employee already
@@ -62,7 +64,10 @@ class EmployeePrivilegeNewController extends Controller
             'internalLinks' => PermissionSettingController::internalLinks(),
         ])->render();
 
-        $departmentTemplates = DepartmentTemplate::pluck('department_id')->unique()->toArray();
+        // Only departments with at least one sub department template are worth
+        // offering: a department on its own no longer has a template to load.
+        $departmentTemplates = DepartmentTemplate::whereNotNull('permission_category_id')
+            ->pluck('department_id')->unique()->toArray();
         $departmentList = Department::whereIn('id', $departmentTemplates)->orderBy('name')->get();
 
         return view('pages.employee.profile.privilege-new',[
@@ -73,6 +78,10 @@ class EmployeePrivilegeNewController extends Controller
             'employment' => Employment::where('employee_id', $id)->first(),
             'departments' => $departmentList,
             'department_id' => $department_id,
+            // Preselected so reopening an employee shows the sub department
+            // their permissions were loaded from, not just its department.
+            'categories' => $department_id > 0 ? self::categoriesWithTemplates($department_id) : collect(),
+            'permission_category_id' => $permission_category_id,
             'permissionHtml' => $permissionHtml,
         ]);
     }
@@ -89,6 +98,12 @@ class EmployeePrivilegeNewController extends Controller
         $user_id = $employee->user_id;
         $permissions = $request->permissions ?? [];
 
+        /* The sub department whose template was loaded. Trusted only when it
+           really belongs to the department the permissions are keyed under — a
+           stale or tampered value is dropped rather than recorded against the
+           wrong department. */
+        $postedCategoryId = (int) $request->permission_category_id;
+
         DB::beginTransaction();
 
         try {
@@ -104,6 +119,11 @@ class EmployeePrivilegeNewController extends Controller
                 // Key 0 is the blank list rendered when no template is loaded.
                 $department_id = $department_id > 0 ? $department_id : null;
 
+                $permission_category_id = ($department_id && $postedCategoryId > 0
+                    && PermissionCategory::where('id', $postedCategoryId)->where('department_id', $department_id)->exists())
+                    ? $postedCategoryId
+                    : null;
+
                 foreach ($deptPermissions as $key => $value) {
                     if (empty($value)) {
                         continue;
@@ -112,6 +132,7 @@ class EmployeePrivilegeNewController extends Controller
                     $insertData[] = [
                         'user_id' => $user_id,
                         'department_id' => $department_id,
+                        'permission_category_id' => $permission_category_id,
                         'key' => $key,
                         'value' => $value,
                         'created_at' => $now,
@@ -201,9 +222,16 @@ class EmployeePrivilegeNewController extends Controller
         // Cast so a cleared selection renders the blank list under key 0 rather
         // than an empty key, which would post as permissions[][...].
         $department_id = (int) $request->department_id;
+        $permission_category_id = (int) $request->permission_category_id;
 
-        $templates = $department_id > 0
-            ? DepartmentTemplate::where('department_id', $department_id)->pluck('value', 'key')->toArray()
+        /* Templates are held per sub department, so both are required. Loading
+           by department alone would merge every sub department's rows — any key
+           granted in any of them would come through, silently over-granting. */
+        $templates = ($department_id > 0 && $permission_category_id > 0)
+            ? DepartmentTemplate::where('department_id', $department_id)
+                ->where('permission_category_id', $permission_category_id)
+                ->pluck('value', 'key')
+                ->toArray()
             : [];
 
         $permissions = [
@@ -216,7 +244,44 @@ class EmployeePrivilegeNewController extends Controller
             'internalLinks' => PermissionSettingController::internalLinks(),
         ])->render();
 
-        return response()->json(['html' => $html, 'department_id' => $department_id, 'permissions' => $permissions], 200);
+        return response()->json([
+            'html' => $html,
+            'department_id' => $department_id,
+            'permission_category_id' => $permission_category_id,
+            'permissions' => $permissions,
+        ], 200);
+    }
+
+    /** Sub departments of a department that have a template to load. */
+    public function getDepartmentPermissionCategories(Request $request)
+    {
+        $this->guardPrivilegeAccess();
+
+        $department_id = (int) $request->department_id;
+
+        return response()->json([
+            'categories' => $department_id > 0
+                ? self::categoriesWithTemplates($department_id)->map(fn ($c) => ['id' => $c->id, 'name' => $c->name])->values()
+                : [],
+        ], 200);
+    }
+
+    /**
+     * A sub department with no template rows has nothing to load — every box in
+     * it was left unticked on the Permissions page — so it is not offered.
+     */
+    private static function categoriesWithTemplates(int $department_id)
+    {
+        $withTemplates = DepartmentTemplate::where('department_id', $department_id)
+            ->whereNotNull('permission_category_id')
+            ->pluck('permission_category_id')
+            ->unique()
+            ->toArray();
+
+        return PermissionCategory::where('department_id', $department_id)
+            ->whereIn('id', $withTemplates)
+            ->orderBy('name')
+            ->get(['id', 'name']);
     }
 
 }
