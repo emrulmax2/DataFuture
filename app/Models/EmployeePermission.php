@@ -9,7 +9,7 @@ class EmployeePermission extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'department_id', 'key', 'value'];
+    protected $fillable = ['user_id', 'department_id', 'permission_category_id', 'key', 'value'];
 
 
     public function user()

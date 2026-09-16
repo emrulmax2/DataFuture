@@ -418,6 +418,54 @@ form#dayReadingBody[hidden] { display: none !important; }
 
 /* ---- cancel dialog --------------------------------------------------- */
 
+/* The dialog shell: return, cancel and history.
+
+   These three rules had gone missing while every part inside the dialog kept
+   its styles. Without them a dialog "opened" by dropping its [hidden] attribute
+   but rendered as a plain block at the foot of the page, below the table and
+   off screen — so Return, Cancel and the history button appeared to do nothing
+   when in fact the dialog had opened where nobody could see it. */
+.lib-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(17, 24, 39, 0.52);
+}
+
+/* An author display rule would otherwise beat the attribute and leave every
+   dialog on screen from page load. */
+.lib-modal[hidden] {
+    display: none;
+}
+
+.lib-modal__box {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 620px;
+    max-height: calc(100vh - 40px);
+    overflow: hidden;
+    border-radius: var(--lib-radius);
+    background: #fff;
+    box-shadow: 0 24px 60px rgba(17, 24, 39, 0.28);
+}
+
+/* Head and foot stay put; a long history scrolls inside the body. */
+.lib-modal__box > form {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.lib-modal__body {
+    min-height: 0;
+    overflow-y: auto;
+}
+
 .lib-modal__box--sm { max-width: 460px; }
 
 .lib-modal__icon--danger { background: #fdeceb; color: #b91c1c; }
@@ -1852,4 +1900,209 @@ form#dayReadingBody[hidden] { display: none !important; }
     cursor: pointer;
     min-width: 150px;
     padding-right: 30px;
+}
+
+/* =================================================================
+   Take-home issue panel
+   ================================================================= */
+
+/* Student, book and location across the top; the confirm summary takes the
+   full width underneath, since it carries the book, the loan terms and the
+   action together. */
+.lib-steps--takehome {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.lib-steps--takehome .lib-step--wide {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 900px) {
+    .lib-steps--takehome { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Location picker, sized and bordered to sit on the same baseline as the two
+   search triggers beside it. */
+.lib-select {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 48px;
+    border: 1px solid var(--lib-line);
+    border-radius: 9px;
+    background: #fff;
+    transition: border-color .14s ease, box-shadow .14s ease;
+}
+
+.lib-select:focus-within {
+    border-color: var(--lib-gold);
+    box-shadow: 0 0 0 3px rgba(201, 162, 74, 0.16);
+}
+
+.lib-select > svg:first-child {
+    position: absolute;
+    left: 12px;
+    width: 16px;
+    height: 16px;
+    color: var(--lib-faint);
+    pointer-events: none;
+}
+
+.lib-select select {
+    width: 100%;
+    height: 100%;
+    padding: 0 34px 0 36px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--lib-ink);
+    font-size: 13px;
+    appearance: none;
+    cursor: pointer;
+    outline: none;
+    text-overflow: ellipsis;
+}
+
+.lib-select select:disabled {
+    color: var(--lib-faint);
+    cursor: not-allowed;
+}
+
+.lib-select__caret {
+    position: absolute;
+    right: 11px;
+    width: 15px;
+    height: 15px;
+    color: var(--lib-faint);
+    pointer-events: none;
+}
+
+/* A student who cannot take a book home: still listed so the desk can see why,
+   but tinted and not selectable. */
+.lib-combo__row--blocked,
+.lib-combo__row--blocked:hover {
+    background: #fdf1f1;
+    cursor: not-allowed;
+}
+
+.lib-combo__row--blocked .lib-media__copy strong {
+    color: var(--lib-red);
+}
+
+.lib-combo__row--blocked .lib-media__avatar {
+    opacity: 0.6;
+}
+
+.lib-combo__row-reason {
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+    margin-top: 3px;
+    color: var(--lib-danger);
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1.35;
+    white-space: normal;
+}
+
+.lib-combo__row-reason svg {
+    flex: none;
+    width: 13px;
+    height: 13px;
+    margin-top: 1px;
+}
+
+/* Confirm summary: the book on the left, the loan terms beside it, the note and
+   the Issue button along the bottom. */
+.lib-th-summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 14px 22px;
+    padding: 16px;
+    border: 1px solid var(--lib-gold-line);
+    border-radius: 12px;
+    background: var(--lib-gold-tint);
+}
+
+@media (max-width: 900px) {
+    .lib-th-summary { grid-template-columns: minmax(0, 1fr); }
+}
+
+.lib-th-summary__book {
+    display: flex;
+    gap: 14px;
+    min-width: 0;
+}
+
+.lib-th-summary__cover {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 64px;
+    height: 92px;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #eceae4;
+    color: var(--lib-faint);
+}
+
+.lib-th-summary__cover svg { width: 22px; height: 22px; }
+
+.lib-th-summary__cover img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.lib-th-summary__copy { min-width: 0; }
+
+.lib-th-summary__title {
+    color: var(--lib-ink);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.lib-th-summary__author {
+    margin-top: 2px;
+    color: var(--lib-muted);
+    font-size: 12.5px;
+}
+
+.lib-th-summary__rules {
+    display: grid;
+    gap: 8px;
+    align-content: start;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.lib-th-summary__rules li {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    color: var(--lib-ink);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.lib-th-summary__rules svg {
+    flex: none;
+    width: 15px;
+    height: 15px;
+    margin-top: 2px;
+    color: var(--lib-gold-dark);
+}
+
+.lib-th-summary__rules strong { font-weight: 700; }
+
+.lib-th-summary__action {
+    grid-column: 1 / -1;
+    padding-top: 12px;
+    border-top: 1px solid rgba(176, 136, 58, 0.25);
 }

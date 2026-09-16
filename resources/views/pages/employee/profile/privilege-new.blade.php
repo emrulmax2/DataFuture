@@ -115,9 +115,9 @@
                 <div class="ep-privilege-toolbar__title">Permission Template</div>
                 <div class="ep-privilege-toolbar__meta">
                     @if($departments->isEmpty())
-                        No department templates exist yet. Create one under Site Settings &rsaquo; Permissions.
+                        No sub department templates exist yet. Create one under Site Settings &rsaquo; Permissions.
                     @else
-                        Loading a template replaces the permissions currently ticked below.
+                        Choose a department, then a sub department. Loading a template replaces the permissions currently ticked below.
                     @endif
                 </div>
             </div>
@@ -129,6 +129,17 @@
                     <option value="" selected>Please Select</option>
                     @foreach($departments as $department)
                         <option {{ ($department_id == $department->id ? 'selected' : '') }} value="{{ $department->id }}">{{ $department->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            {{-- Filled from the department above: templates are held per sub
+                 department, so one has to be chosen before anything can load. --}}
+            <div class="ep-privilege-toolbar__select">
+                <i data-lucide="git-branch" class="w-4 h-4"></i>
+                <select id="permission_category_id_select" class="lccTom lcc-tom-select" name="permission_category_select">
+                    <option value="" selected>Sub Department</option>
+                    @foreach($categories as $category)
+                        <option {{ ($permission_category_id == $category->id ? 'selected' : '') }} value="{{ $category->id }}">{{ $category->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -207,6 +218,10 @@
 
     <form method="post" action="#" id="employeePrivilegeForm" class="ep-privilege-form">
         <input type="hidden" name="employee_id" value="{{ $employee->id }}"/>
+        {{-- The sub department of the template actually loaded, not merely the
+             one picked: it only changes when a load succeeds, so saving records
+             where the ticked permissions really came from. --}}
+        <input type="hidden" name="permission_category_id" id="loadedPermissionCategoryId" value="{{ $permission_category_id ?: '' }}"/>
         <div class="ep-privilege-layout">
             <nav class="ep-privilege-rail" id="employeePrivilegeRail" aria-label="Privilege groups">
                 <div class="ep-privilege-rail__label">Privilege Groups</div>

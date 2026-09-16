@@ -178,12 +178,19 @@ export function initPermissionBulkToggles(root = document) {
 
     let injected = false;
 
-    // Department panels first, then each permission group inside them. The
-    // controls go in each header; the checkboxes they govern live in the body.
-    form.querySelectorAll(".ss-perm-list > .accordion > .accordion-item").forEach((dept) => {
-        const header = dept.querySelector(":scope > .accordion-header");
-        const body = dept.querySelector(":scope > .accordion-collapse > .accordion-body");
-        injected = registerBulkBar(header, body, false) || injected;
+    // Department rows get no checkbox tally: with sub departments beneath them
+    // it summed every box in every sub department ("0 of 290 selected"), which
+    // says nothing useful. They show a server-rendered count of sub departments
+    // with a saved permission set instead ([data-dept-count]).
+
+    // Sub departments (permission categories) sit between the two: each holds
+    // its own complete template, so it gets the buttons as well as the count —
+    // "grant everything to this sub department" is one of the most common
+    // set-ups. Only the Permissions settings page renders this level.
+    form.querySelectorAll(".ss-perm-category > .accordion-item").forEach((category) => {
+        const header = category.querySelector(":scope > .accordion-header");
+        const body = category.querySelector(":scope > .accordion-collapse > .accordion-body");
+        injected = registerBulkBar(header, body, true) || injected;
     });
 
     form.querySelectorAll(".accordion-item.bg-gray-100").forEach((group) => {

@@ -25,37 +25,87 @@ import { initPrivilegeUi } from "./privilege-ui";
         };
 
     var department_id_select = new TomSelect('#department_id_select', tomOptions);
+    // Its own options object: TomSelect keeps a reference, and the placeholder
+    // differs from the department picker's.
+    var category_select = new TomSelect('#permission_category_id_select', Object.assign({}, tomOptions, {
+        placeholder: 'Sub Department',
+    }));
 
     // The privileges toolbar below is sticky and sits in a higher stacking
     // context, so the open menu would render behind it. Backs up the :has() rule.
     const templateBar = document.querySelector('.ep-privilege-toolbar--template');
-    department_id_select.on('dropdown_open', () => templateBar?.classList.add('is-menu-open'));
-    department_id_select.on('dropdown_close', () => templateBar?.classList.remove('is-menu-open'));
+    [department_id_select, category_select].forEach((select) => {
+        select.on('dropdown_open', () => templateBar?.classList.add('is-menu-open'));
+        select.on('dropdown_close', () => templateBar?.classList.remove('is-menu-open'));
+    });
 
-    if($('#department_id_select').val() > 0){
-        $('#loadPermissionTemplateBtn').removeClass('hidden');
-    }else{
-        $('#loadPermissionTemplateBtn').addClass('hidden');
+    // Load only makes sense once both halves of the pair are chosen.
+    function syncLoadButton(){
+        const ready = $('#department_id_select').val() > 0 && $('#permission_category_id_select').val() > 0;
+        $('#loadPermissionTemplateBtn').toggleClass('hidden', !ready);
     }
 
-    department_id_select.on('change', function(value){
-        if(value > 0){
-            $('#loadPermissionTemplateBtn').removeClass('hidden');
-        }else{
-            // Clearing the template resets to the blank grouped list, so the field
-            // names go back to permissions[0] and nothing stays tied to a template.
-            $('#loadPermissionTemplateBtn').addClass('hidden');
-            loadPermissionTemplate(0);
-        }
-    })
+    // Replaces the sub department options with the chosen department's. Nothing
+    // is selected afterwards: a sub department from the previous department
+    // must never survive into the new one.
+    function loadCategories(department_id){
+        category_select.clear(true);
+        category_select.clearOptions();
+        syncLoadButton();
 
-    function loadPermissionTemplate(department_id){
+        if(!(department_id > 0)){
+            category_select.disable();
+            return Promise.resolve();
+        }
+
+        category_select.disable();
         return axios({
             method: 'post',
-            url: route('employee.privilege.new.template'),
+            url: route('employee.privilege.new.categories'),
             data: { department_id: department_id },
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
+            (response.data.categories || []).forEach((category) => {
+                category_select.addOption({ value: String(category.id), text: category.name });
+            });
+            category_select.refreshOptions(false);
+            category_select.enable();
+        }).catch(error => {
+            category_select.enable();
+            console.log(error);
+        });
+    }
+
+    if(!($('#department_id_select').val() > 0)){
+        category_select.disable();
+    }
+    syncLoadButton();
+
+    department_id_select.on('change', function(value){
+        if(value > 0){
+            loadCategories(value);
+        }else{
+            // Clearing the template resets to the blank grouped list, so the field
+            // names go back to permissions[0] and nothing stays tied to a template.
+            loadCategories(0);
+            loadPermissionTemplate(0, 0);
+        }
+    })
+
+    category_select.on('change', function(){
+        syncLoadButton();
+    })
+
+    function loadPermissionTemplate(department_id, permission_category_id){
+        return axios({
+            method: 'post',
+            url: route('employee.privilege.new.template'),
+            data: { department_id: department_id, permission_category_id: permission_category_id },
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            // Recorded only once the template is actually on screen, so a save
+            // always reports the sub department the ticks really came from.
+            $('#loadedPermissionCategoryId').val(response.data.permission_category_id > 0 ? response.data.permission_category_id : '');
             $('#permission-template-wrapper').html(response.data.html);
             initPermissionPickers(document.getElementById('permission-template-wrapper'));
             // Rebuilds the rail, counters and print report over the new cards.
@@ -167,7 +217,8 @@ import { initPrivilegeUi } from "./privilege-ui";
         $('#loadPermissionTemplateBtn svg.theLoader').removeClass('hidden');
 
         let department_id = $('#department_id_select').val();
-        if(!department_id){
+        let permission_category_id = $('#permission_category_id_select').val();
+        if(!department_id || !permission_category_id){
             warningModal.show();
             document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
                 $("#warningModal .warningModalTitle").html("Error Found!" );
@@ -180,7 +231,7 @@ import { initPrivilegeUi } from "./privilege-ui";
 
             return;
         }
-        loadPermissionTemplate(department_id).then(() => {
+        loadPermissionTemplate(department_id, permission_category_id).then(() => {
             $('#loadPermissionTemplateBtn').prop('disabled', false);
             $('#loadPermissionTemplateBtn svg.theLoader').addClass('hidden');
         }).catch(error => {

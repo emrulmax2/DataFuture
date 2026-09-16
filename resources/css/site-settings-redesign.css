@@ -10629,3 +10629,156 @@
         max-width: 88px;
     }
 }
+
+/* --- Sub department (permission category) level ---------------------------
+   Sits between the department panel and the permission groups: a white card
+   on the department's tinted panel, holding the cream group cards, so the
+   three levels stay distinguishable at a glance. */
+.site-settings-redesign-body .ss-permissions-page .ss-perm-category {
+    margin: 0 0 10px;
+}
+
+.site-settings-redesign-body .ss-permissions-page .ss-perm-category:last-child {
+    margin-bottom: 0;
+}
+
+.site-settings-redesign-body .ss-permissions-page .ss-perm-category > .accordion-item.ss-perm-category__item {
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #e6dfcc;
+    border-left: 3px solid #16264f;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.site-settings-redesign-body .ss-permissions-page .ss-perm-category > .accordion-item > .accordion-collapse.show {
+    border-top: 1px solid #efe7d4;
+}
+
+.site-settings-redesign-body .ss-permissions-page .ss-perm-category__label {
+    margin-right: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(22, 38, 79, 0.08);
+    color: #16264f;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+/* The empty state inside a department panel: the same notice as the
+   page-level one, compacted so it does not dominate an open department. */
+.site-settings-redesign-body .ss-permissions-page .ss-perm-empty--inline {
+    gap: 6px;
+    padding: 26px 20px;
+    border: 1px dashed #e2d6b8;
+    border-radius: 12px;
+    background: #fffdf7;
+}
+
+.site-settings-redesign-body .ss-permissions-page .ss-perm-empty--inline .ss-btn {
+    margin-top: 6px;
+}
+
+/* Sub department header: tint the whole header rather than just the toggle
+   button. The header is a flex row with a 10px gap before the Check all
+   segment; on the cream group cards that gap is invisible, but a sub
+   department card is white, so hovering or opening it left a white strip
+   between the button and the actions. The header now carries the colour, and
+   the button and actions sit transparent on top of it. */
+.site-settings-redesign-body .ss-permissions-page .ss-perm-category > .accordion-item > .accordion-header.ss-perm-bulk-host {
+    gap: 0;
+    transition: background 0.16s ease;
+}
+
+.site-settings-redesign-body .ss-permissions-page .ss-perm-category > .accordion-item > .accordion-header.ss-perm-bulk-host:hover {
+    background: #faf9f4;
+}
+
+.site-settings-redesign-body .ss-permissions-page .ss-perm-category > .accordion-item > .accordion-header.ss-perm-bulk-host:has(> button.accordion-button[aria-expanded="true"]) {
+    background: #f5ecd8;
+}
+
+.site-settings-redesign-body .ss-permissions-page .ss-perm-category > .accordion-item > .accordion-header.ss-perm-bulk-host button.accordion-button,
+.site-settings-redesign-body .ss-permissions-page .ss-perm-category > .accordion-item > .accordion-header.ss-perm-bulk-host button.accordion-button:hover,
+.site-settings-redesign-body .ss-permissions-page .ss-perm-category > .accordion-item > .accordion-header.ss-perm-bulk-host button.accordion-button[aria-expanded="true"] {
+    background: transparent;
+}
+
+.site-settings-redesign-body .ss-permissions-page .ss-perm-category > .accordion-item > .accordion-header.ss-perm-bulk-host .ss-perm-bulk__actions {
+    background: transparent;
+    border-left-color: #eadfc6;
+}
+
+/* "Add sub department" under a department that already has some. */
+.site-settings-redesign-body .ss-permissions-page .ss-perm-add-row {
+    margin-top: 10px;
+}
+
+.site-settings-redesign-body .ss-permissions-page .ss-perm-add-row__btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 16px;
+    border: 1px dashed #d8c89c;
+    border-radius: 12px;
+    background: transparent;
+    color: #8a6a12;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+.site-settings-redesign-body .ss-permissions-page .ss-perm-add-row__btn:hover {
+    border-color: #16264f;
+    background: #fffdf7;
+    color: #16264f;
+}
+
+.site-settings-redesign-body .ss-perm-add-row__btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Add dialog: the department is fixed by where it was opened, so it reads as
+   a value rather than a field. */
+.site-settings-redesign-body .ss-perm-add-department {
+    padding: 10px 13px;
+    border: 1px solid #ece7da;
+    border-radius: 10px;
+    background: #faf8f2;
+    color: #16264f;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.site-settings-redesign-body .ss-perm-add-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding: 11px 13px;
+    border: 1px solid #f1d9a6;
+    border-radius: 10px;
+    background: #fff7e6;
+    color: #8a5a00;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+.site-settings-redesign-body .ss-perm-add-warning[hidden] {
+    display: none;
+}
+
+.site-settings-redesign-body .ss-perm-add-warning svg {
+    flex: none;
+    width: 17px;
+    height: 17px;
+    margin-top: 1px;
+}

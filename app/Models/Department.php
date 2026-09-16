@@ -22,4 +22,9 @@ class Department extends Model
     public function employment(){
         return $this->hasMany(Employment::class, 'department_id', 'id');
     }
+
+    /** Sub departments, each holding its own permission template. */
+    public function permissionCategories(){
+        return $this->hasMany(PermissionCategory::class)->orderBy('name');
+    }
 }

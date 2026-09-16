@@ -1686,6 +1686,7 @@ Route::middleware('auth')->group(function() {
     Route::controller(EmployeePrivilegeNewController::class)->group(function(){
         Route::get('employee-profile/privilege-new/{id}', 'index')->name('employee.privilege.new');
         Route::post('employee-profile/privilege-new/template', 'getDepartmentPermissionTemplate')->name('employee.privilege.new.template');
+        Route::post('employee-profile/privilege-new/categories', 'getDepartmentPermissionCategories')->name('employee.privilege.new.categories');
         Route::post('employee-profile/store-privilege-new', 'store')->name('employee.privilege.new.store');
         Route::post('employee-profile/privilege-new/reset', 'reset')->name('employee.privilege.new.reset');
     });
@@ -3841,6 +3842,8 @@ Route::middleware('auth')->group(function() {
         Route::get('library-management/catalogue', 'searchCatalogue')->name('library.management.catalogue');
         Route::get('library-management/students', 'searchStudents')->name('library.management.students');
         Route::post('library-management/day-reading', 'issueDayReading')->name('library.management.day.reading');
+        Route::get('library-management/title/{titleId}', 'title')->name('library.management.title');
+        Route::post('library-management/take-home', 'issueTakeHome')->name('library.management.take.home');
         Route::post('library-management/{id}/issue', 'issue')->name('library.management.issue');
         Route::post('library-management/{id}/return', 'returnBook')->name('library.management.return');
         Route::post('library-management/{id}/cancel', 'cancel')->name('library.management.cancel');

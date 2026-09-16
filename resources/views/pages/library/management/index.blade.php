@@ -191,6 +191,131 @@
             </form>
         </div>
 
+        {{-- Take-home issue at the desk: the reservation and the collection in
+             one step, for a student standing in front of staff. Same rules as
+             reserving from the portal — deposit, allowance, nothing overdue. --}}
+        <div class="lib-card lib-card--open lib-panel" id="takeHomePanel"
+             data-catalogue-url="{{ route('library.management.catalogue') }}"
+             data-students-url="{{ route('library.management.students') }}"
+             data-title-url="{{ route('library.management.title', ['titleId' => '__ID__']) }}"
+             data-loan-days="{{ $rules->loanPeriodDays() }}"
+             data-due-date="{{ $rules->dueDateFrom()->format('j M Y') }}"
+             data-penalty="{{ number_format($rules->penaltyPerDay(), 2) }}"
+             data-grace="{{ $rules->graceDays() }}"
+             data-max-renewals="{{ $rules->maxRenewals() }}">
+            <button type="button" class="lib-cardhead lib-panel__head" id="takeHomeToggle"
+                    aria-expanded="false" aria-controls="takeHomeBody">
+                <span class="lib-cardhead__titles">
+                    <span class="lib-cardhead__title">Issue a book to take home</span>
+                </span>
+                <span class="lib-cardhead__spacer lib-cardhead__count">Direct issue &middot; {{ $rules->loanPeriodDays() }}-day loan &middot; deposit required</span>
+                <i data-lucide="chevron-down" class="lib-panel__chevron"></i>
+            </button>
+            <form method="post" action="{{ route('library.management.take.home') }}" class="p-5 border-t border-slate-200/60" id="takeHomeBody" hidden>
+                @csrf
+                {{-- Four steps in the order the desk works: who, which book, from
+                     which shelf, then confirm what they are taking. Each appears
+                     once the one before it is answered. --}}
+                <div class="lib-steps lib-steps--takehome">
+                    <div class="lib-step" data-step="1">
+                        <div class="lib-step__head">
+                            <span class="lib-step__num">1</span>
+                            <label class="lib-step__label">Student <span>*</span></label>
+                        </div>
+                        <div class="lib-combo" id="thStudentCombo" data-kind="student">
+                            <button type="button" class="lib-combo__trigger" aria-haspopup="listbox" aria-expanded="false">
+                                <span class="lib-combo__value lib-combo__value--empty">
+                                    <i data-lucide="user"></i>Name or registration number...
+                                </span>
+                                <i data-lucide="chevron-down" class="lib-combo__caret"></i>
+                            </button>
+                            <div class="lib-combo__panel" hidden>
+                                <div class="lib-combo__search">
+                                    <i data-lucide="search"></i>
+                                    <input type="text" class="lib-combo__input" autocomplete="off"
+                                           placeholder="Type a name or registration number...">
+                                </div>
+                                <div class="lib-combo__list" role="listbox"></div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="student_id" id="thStudentId">
+                    </div>
+
+                    <div class="lib-step" data-step="2" id="thStepBook" hidden>
+                        <div class="lib-step__head">
+                            <span class="lib-step__num">2</span>
+                            <label class="lib-step__label">Book <span>*</span></label>
+                        </div>
+                        <div class="lib-combo" id="thBookCombo" data-kind="book">
+                            <button type="button" class="lib-combo__trigger" aria-haspopup="listbox" aria-expanded="false">
+                                <span class="lib-combo__value lib-combo__value--empty">
+                                    <i data-lucide="book"></i>Title, author, ISBN or barcode...
+                                </span>
+                                <i data-lucide="chevron-down" class="lib-combo__caret"></i>
+                            </button>
+                            <div class="lib-combo__panel" hidden>
+                                <div class="lib-combo__search">
+                                    <i data-lucide="search"></i>
+                                    <input type="text" class="lib-combo__input" autocomplete="off"
+                                           placeholder="Title, author, ISBN or barcode...">
+                                </div>
+                                <div class="lib-combo__list" role="listbox"></div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="title_id" id="thTitleId">
+                    </div>
+
+                    <div class="lib-step" data-step="3" id="thStepLocation" hidden>
+                        <div class="lib-step__head">
+                            <span class="lib-step__num">3</span>
+                            <label class="lib-step__label" for="thLocation">Location <span>*</span></label>
+                        </div>
+                        {{-- One option per shelf holding a free copy, filled from the
+                             title's copies once a book is chosen. --}}
+                        <div class="lib-select">
+                            <i data-lucide="map-pin"></i>
+                            <select id="thLocation" name="campus" disabled>
+                                <option value="">Choose a book first</option>
+                            </select>
+                            <i data-lucide="chevron-down" class="lib-select__caret"></i>
+                        </div>
+                        <input type="hidden" name="location" id="thShelf">
+                    </div>
+
+                    {{-- The summary of what is about to be handed over, like the
+                         student portal's reserve dialog, with the action beside it. --}}
+                    <div class="lib-step lib-step--wide" data-step="4" id="thStepIssue" hidden>
+                        <div class="lib-step__head">
+                            <span class="lib-step__num">4</span>
+                            <label class="lib-step__label">Confirm &amp; issue</label>
+                        </div>
+                        <div class="lib-th-summary">
+                            <div class="lib-th-summary__book">
+                                <span class="lib-th-summary__cover" id="thCover"></span>
+                                <div class="lib-th-summary__copy">
+                                    <div class="lib-th-summary__title" id="thBookTitle"></div>
+                                    <div class="lib-th-summary__author" id="thBookAuthor"></div>
+                                    <dl class="lib-picked__facts" id="thBookFacts"></dl>
+                                </div>
+                            </div>
+                            <ul class="lib-th-summary__rules">
+                                <li><i data-lucide="map-pin"></i><span>Collect from <strong id="thWhere"></strong></span></li>
+                                <li><i data-lucide="calendar-days"></i><span><strong>{{ $rules->loanPeriodDays() }}-day</strong> loan, due back <strong>{{ $rules->dueDateFrom()->format('j M Y') }}</strong></span></li>
+                                <li><i data-lucide="refresh-cw"></i><span>Can be renewed <strong>{{ $rules->maxRenewals() }}</strong> {{ $rules->maxRenewals() == 1 ? 'time' : 'times' }}</span></li>
+                                <li><i data-lucide="receipt"></i><span>Late returns charged <strong>£{{ number_format($rules->penaltyPerDay(), 2) }} per day</strong>{{ $rules->graceDays() > 0 ? ' after '.$rules->graceDays().' days grace' : '' }}</span></li>
+                            </ul>
+                            <div class="lib-step__row lib-th-summary__action">
+                                <input type="text" id="thNote" name="staff_note" class="lib-text" maxlength="255" placeholder="Desk note (optional)">
+                                <button type="submit" id="thSubmit" class="lib-b lib-b--gold lib-b--lg" disabled>
+                                    <i data-lucide="book-up"></i> Issue book
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
         <div class="lib-card lib-panel">
             {{-- Search lives in the head rather than a toolbar row of its own:
                  it acts on this table and nothing else on the page. --}}
