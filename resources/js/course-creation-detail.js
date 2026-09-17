@@ -665,6 +665,44 @@ function escapeHtml(value) {
         keepFields: ["course_creation_instance_id"],
     });
 
+    // Picking a term name pre-fills the dates and teaching weeks from its term
+    // declaration. TomSelect only fires `change` for user picks — the silent
+    // resets above do not trigger a fetch.
+    const TERM_DECLARATION_FIELDS = [
+        "start_date",
+        "end_date",
+        "total_teaching_weeks",
+        "teaching_start_date",
+        "teaching_end_date",
+        "revision_start_date",
+        "revision_end_date",
+    ];
+
+    const termAddSelect = document.querySelector('#instancetermAddForm select[name="term_declaration_id"]');
+    if (termAddSelect) {
+        termAddSelect.addEventListener("change", () => {
+            const form = document.getElementById("instancetermAddForm");
+            const declarationId = termAddSelect.value;
+            const fill = (row) =>
+                TERM_DECLARATION_FIELDS.forEach((name) => setFieldValue(form.querySelector(`[name="${name}"]`), row[name]));
+
+            if (declarationId === "") {
+                fill({});
+                return;
+            }
+
+            axios({ method: "get", url: route("term-declaration.edit", declarationId), headers: csrfHeaders() })
+                .then((response) => {
+                    // A slower reply for an earlier pick must not overwrite a newer one.
+                    if (response.status != 200 || termAddSelect.value !== declarationId) return;
+                    fill(response.data);
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        });
+    }
+
     wireForm({
         modalId: "instancetermEditModal",
         formId: "instancetermEditForm",
