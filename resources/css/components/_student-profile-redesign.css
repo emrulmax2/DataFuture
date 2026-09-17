@@ -3702,7 +3702,21 @@ body.student-profile-body #followUpCommentModal #postCommentBtn:focus {
     border: 0;
     border-radius: 0;
     box-shadow: none;
+    cursor: default;
     padding: 0;
+}
+
+/* Outcome / Excuse Status labels open their detail modals */
+.student-profile-redesign .student-profile-process-body .accordion-body .processTaskInfoLink {
+    color: var(--student-profile-accent);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.student-profile-redesign .student-profile-process-body .accordion-body .processTaskInfoLink:hover,
+.student-profile-redesign .student-profile-process-body .accordion-body .processTaskInfoLink:focus {
+    color: var(--student-profile-accent-hover);
 }
 
 .student-profile-redesign .student-profile-process-body .accordion-body .box.zoom-in .font-medium {

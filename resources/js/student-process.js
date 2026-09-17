@@ -315,8 +315,8 @@ var studentInterviewLogTable = (function () {
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
     const processDropdown = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#processDropdown"));
-    const uploadTaskDocumentModal = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#uploadTaskDocumentModal"));
-    const updateTaskOutcomeModal = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#updateTaskOutcomeModal"));
+    const uploadTaskDocumentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadTaskDocumentModal"));
+    const updateTaskOutcomeModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#updateTaskOutcomeModal"));
     const processListAccordion = tailwind.Accordion.getOrCreateInstance(document.querySelector("#processListAccordion"));
     const viewAttendanceExcuseModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#viewAttendanceExcuseModal"));
     const viewAddressUpdateReqModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#viewAddressUpdateReqModal"));
@@ -359,6 +359,7 @@ var studentInterviewLogTable = (function () {
         $("#viewAttendanceExcuseModal .modal-body").html(loaderHtml);
         $('#viewAttendanceExcuseModal input[name="student_task_id"]').val('0');
         $('#viewAttendanceExcuseModal input[name="attendance_excuse_id"]').val('0');
+        $('#viewAttendanceExcuseModal #updateAttnExcuseBtn').show();
     });
 
     const viewAddressUpdateReqModalEl = document.getElementById('viewAddressUpdateReqModal')
@@ -375,9 +376,9 @@ var studentInterviewLogTable = (function () {
                                 </g>\
                             </svg>\
                         </div>';
-        $("#viewAttendanceExcuseModal .modal-body").html(loaderHtml);
-        $('#viewAttendanceExcuseModal input[name="student_task_id"]').val('0');
-        $('#viewAttendanceExcuseModal input[name="student_address_update_request_id"]').val('0');
+        $("#viewAddressUpdateReqModal .modal-body").html(loaderHtml);
+        $('#viewAddressUpdateReqModal input[name="student_task_id"]').val('0');
+        $('#viewAddressUpdateReqModal input[name="student_address_update_request_id"]').val('0');
     });
 
     
@@ -963,28 +964,42 @@ var studentInterviewLogTable = (function () {
         e.preventDefault();
         let $theLink = $(this);
         var student_task_id = $theLink.attr('data-recordid');
+        var readonly = ($theLink.attr('data-readonly') == 1 ? 1 : 0);
+
+        if(readonly == 1){
+            $('#viewAttendanceExcuseModal #updateAttnExcuseBtn').hide();
+        }else{
+            $('#viewAttendanceExcuseModal #updateAttnExcuseBtn').show();
+        }
 
         axios({
             method: "post",
-            url: route('student.process.task.view.excuse'), 
-            data: {student_task_id : student_task_id},
+            url: route('student.process.task.view.excuse'),
+            data: {student_task_id : student_task_id, readonly : readonly},
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
             if (response.status == 200){
                 $('#viewAttendanceExcuseModal .modal-body').html(response.data.htm);
                 $('#viewAttendanceExcuseModal [name="student_task_id"]').val(student_task_id);
                 $('#viewAttendanceExcuseModal [name="attendance_excuse_id"]').val(response.data.excuse);
+                if(!(response.data.excuse > 0)){
+                    $('#viewAttendanceExcuseModal #updateAttnExcuseBtn').hide();
+                }
 
                 createIcons({
                     icons,
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
-            } 
-        }).catch(error => {
-            if(error.response){
-                console.log('error');
             }
+        }).catch(error => {
+            $('#viewAttendanceExcuseModal #updateAttnExcuseBtn').hide();
+            $('#viewAttendanceExcuseModal .modal-body').html('<div class="alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Excuse details could not be loaded. Please try again later.</div>');
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
         });
     });
 

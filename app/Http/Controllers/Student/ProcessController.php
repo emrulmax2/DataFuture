@@ -452,16 +452,19 @@ class ProcessController extends Controller
 
     public function processTaskViewExcuse(Request $request){
         $student_task_id = $request->student_task_id;
+        $readonly = (isset($request->readonly) && $request->readonly == 1);
         $excuse = AttendanceExcuse::with('student', 'days', 'documents')->where('student_task_id', $student_task_id)->get()->first();
-        $student_id = $excuse->student_id;
+        $student_id = (isset($excuse->student_id) ? $excuse->student_id : 0);
+
+        $attendanceTypes = ['E' => 'E (Authorised Absent)', 'M' => 'M (Absent For Medical Reason)', 'H' => 'H (Exceptional Event)'];
 
         $HTML = '';
         if(isset($excuse->id) && $excuse->id > 0):
             $HTML .= '<div class="grid grid-cols-12 gap-4">';
                 $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Student ID</div>';
-                $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">'.$excuse->student->registration_no.'</div>';
+                $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">'.e($excuse->student->registration_no).'</div>';
                 $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Name</div>';
-                $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">'.$excuse->student->full_name.'</div>';
+                $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">'.e($excuse->student->full_name).'</div>';
                 $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Dates</div>';
                 $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">';
                     if(isset($excuse->days) && $excuse->days->count() > 0):
@@ -470,21 +473,29 @@ class ProcessController extends Controller
                             $plan = Plan::find($plan_id);
                             $excuseDays = AttendanceExcuseDay::where('plan_id', $plan_id)->where('attendance_excuse_id', $excuse->id)->orderBy('id', 'ASC')->get();
                             $HTML .= '<div class="futureCheckedList excuseCheckedList mb-4">';
-                                $HTML .= '<label class="font-medium underline inline-flex items-start moduleLabel"><i data-lucide="check-circle" class="w-4 h-4 mr-2 text-success"></i>'.$plan->creations->module_name.'</label>';
+                                $HTML .= '<label class="font-medium underline inline-flex items-start moduleLabel"><i data-lucide="check-circle" class="w-4 h-4 mr-2 text-success"></i>'.e(isset($plan->creations->module_name) ? $plan->creations->module_name : 'Unknown Module').'</label>';
                                 foreach($excuseDays as $day):
-                                    $HTML .= '<div class="form-check items-start mt-2 pl-5">';
-                                        $HTML .= '<input '.($day->active == 1 ? 'Checked' : 0).' name="days[]" value="'.$day->id.'" id="excuse_days_'.$plan_id.'_'.$day->id.'" class="form-check-input" type="checkbox">';
-                                        $HTML .= '<label class="form-check-label" for="excuse_days_'.$plan_id.'_'.$day->id.'">';
-                                            $HTML .= (isset($day->plandate->date) && !empty($day->plandate->date) ? date('jS F, Y', strtotime($day->plandate->date)) : 'Undefined Date');
-                                        $HTML .= '</label>';
-                                    $HTML .= '</div>';
+                                    $dayLabel = (isset($day->plandate->date) && !empty($day->plandate->date) ? date('jS F, Y', strtotime($day->plandate->date)) : 'Undefined Date');
+                                    if($readonly):
+                                        $HTML .= '<div class="flex items-center mt-2 pl-5">';
+                                            $HTML .= ($day->active == 1 ? '<i data-lucide="check-square" class="w-4 h-4 mr-2 text-success"></i>' : '<i data-lucide="x-square" class="w-4 h-4 mr-2 text-slate-400"></i>');
+                                            $HTML .= '<span>'.$dayLabel.'</span>';
+                                        $HTML .= '</div>';
+                                    else:
+                                        $HTML .= '<div class="form-check items-start mt-2 pl-5">';
+                                            $HTML .= '<input '.($day->active == 1 ? 'Checked' : 0).' name="days[]" value="'.$day->id.'" id="excuse_days_'.$plan_id.'_'.$day->id.'" class="form-check-input" type="checkbox">';
+                                            $HTML .= '<label class="form-check-label" for="excuse_days_'.$plan_id.'_'.$day->id.'">';
+                                                $HTML .= $dayLabel;
+                                            $HTML .= '</label>';
+                                        $HTML .= '</div>';
+                                    endif;
                                 endforeach;
                             $HTML .= '</div>';
                         endforeach;
                     endif;
                 $HTML .= '</div>';
                 $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Reason</div>';
-                $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">'.$excuse->reason.'</div>';
+                $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">'.nl2br(e($excuse->reason)).'</div>';
                 if(isset($excuse->documents) && $excuse->documents->count() > 0):
                     $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Documents</div>';
                     $HTML .= '<div class="col-span-12 sm:col-span-8">';
@@ -492,7 +503,7 @@ class ProcessController extends Controller
                         foreach($excuse->documents as $docx):
                             if ($docx->current_file_name != null && Storage::disk('s3')->exists('public/students/'.$student_id.'/'.$docx->current_file_name)):
                                 $HTML .= '<li class="mb-1 text-primary flex items-center"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>';
-                                    $HTML .= '<a target="_blank" href="'.Storage::disk('s3')->temporaryUrl('public/students/'.$student_id.'/'.$docx->current_file_name, now()->addMinutes(60)).'">'.$docx->display_file_name.'</a>';
+                                    $HTML .= '<a target="_blank" href="'.Storage::disk('s3')->temporaryUrl('public/students/'.$student_id.'/'.$docx->current_file_name, now()->addMinutes(60)).'">'.e($docx->display_file_name).'</a>';
                                 $HTML .= '</li>';
                             endif;
                         endforeach;
@@ -501,36 +512,58 @@ class ProcessController extends Controller
                 endif;
                 $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Requested At</div>';
                 $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">'.date('jS F, Y h:i A', strtotime($excuse->created_at)).'</div>';
-                $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Attendance Type <span class="text-danger">*</span></div>';
-                $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">';
-                    $HTML .= '<select class="form-control w-full" name="attendance_types">';
-                        $HTML .= '<option value="">Please Select</option>';
-                        $HTML .= '<option '.($excuse->attendance_types == 'E' ? 'Selected' : '').' value="E">E (Authorised Absent)</option>';
-                        $HTML .= '<option '.($excuse->attendance_types == 'M' ? 'Selected' : '').' value="M">M (Absent For Medical Reason)</option>';
-                        $HTML .= '<option '.($excuse->attendance_types == 'H' ? 'Selected' : '').' value="H">H (Exceptional Event)</option>';
-                    $HTML .= '</select>';
-                    $HTML .= '<div class="acc__input-error error-attendance_types text-danger mt-2"></div>';
-                $HTML .= '</div>';
-                $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Action <span class="text-danger">*</span></div>';
-                $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">';
-                    $HTML .= '<select class="form-control w-full" name="status">';
-                        $HTML .= '<option value="">Please Select</option>';
-                        $HTML .= '<option '.($excuse->status == 0 ? 'Selected' : '').' value="0">Pending</option>';
-                        $HTML .= '<option '.($excuse->status == 1 ? 'Selected' : '').' value="1">Reviewed & Rejected</option>';
-                        $HTML .= '<option '.($excuse->status == 2 ? 'Selected' : '').' value="2">Reviewed & Approved</option>';
-                    $HTML .= '</select>';
-                    $HTML .= '<div class="acc__input-error error-status text-danger mt-2"></div>';
-                $HTML .= '</div>';
-                $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Remarks</div>';
-                $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">';
-                    $HTML .= '<textarea class="form-control w-full" name="remarks" rows="3">'.(isset($excuse->remarks) ? $excuse->remarks : '').'</textarea>';
-                $HTML .= '</div>';
+                if($readonly):
+                    $statusColors = ($excuse->status == 2 ? ['#0f8278', '#e5f7f3'] : ($excuse->status == 1 ? ['#d64545', '#fde7e7'] : ['#b45309', '#fef3c7']));
+                    $reviewer = ($excuse->actioned_by > 0 ? User::with('employee')->find($excuse->actioned_by) : null);
+                    $reviewerName = (isset($reviewer->employee->full_name) && !empty($reviewer->employee->full_name) ? $reviewer->employee->full_name : (isset($reviewer->name) ? $reviewer->name : ''));
+
+                    $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Attendance Type</div>';
+                    $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">'.(isset($attendanceTypes[$excuse->attendance_types]) ? $attendanceTypes[$excuse->attendance_types] : 'Not Set').'</div>';
+                    $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Status</div>';
+                    $HTML .= '<div class="col-span-12 sm:col-span-8 font-medium">';
+                        $HTML .= '<span style="display:inline-flex; padding:2px 10px; border-radius:999px; font-size:12px; font-weight:700; color:'.$statusColors[0].'; background:'.$statusColors[1].';">'.$excuse->status_label.'</span>';
+                    $HTML .= '</div>';
+                    $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Remarks</div>';
+                    $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">'.(isset($excuse->remarks) && !empty($excuse->remarks) ? nl2br(e($excuse->remarks)) : 'N/A').'</div>';
+                    if($reviewerName != '' || !empty($excuse->actioned_at)):
+                        $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Reviewed By</div>';
+                        $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">';
+                            $HTML .= ($reviewerName != '' ? e($reviewerName) : 'Unknown Employee');
+                            $HTML .= (!empty($excuse->actioned_at) ? '<span class="block text-xs mt-1">'.date('jS F, Y h:i A', strtotime($excuse->actioned_at)).'</span>' : '');
+                        $HTML .= '</div>';
+                    endif;
+                else:
+                    $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Attendance Type <span class="text-danger">*</span></div>';
+                    $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">';
+                        $HTML .= '<select class="form-control w-full" name="attendance_types">';
+                            $HTML .= '<option value="">Please Select</option>';
+                            foreach($attendanceTypes as $typeCode => $typeLabel):
+                                $HTML .= '<option '.($excuse->attendance_types == $typeCode ? 'Selected' : '').' value="'.$typeCode.'">'.$typeLabel.'</option>';
+                            endforeach;
+                        $HTML .= '</select>';
+                        $HTML .= '<div class="acc__input-error error-attendance_types text-danger mt-2"></div>';
+                    $HTML .= '</div>';
+                    $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Action <span class="text-danger">*</span></div>';
+                    $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">';
+                        $HTML .= '<select class="form-control w-full" name="status">';
+                            $HTML .= '<option value="">Please Select</option>';
+                            $HTML .= '<option '.($excuse->status == 0 ? 'Selected' : '').' value="0">Pending</option>';
+                            $HTML .= '<option '.($excuse->status == 1 ? 'Selected' : '').' value="1">Reviewed & Rejected</option>';
+                            $HTML .= '<option '.($excuse->status == 2 ? 'Selected' : '').' value="2">Reviewed & Approved</option>';
+                        $HTML .= '</select>';
+                        $HTML .= '<div class="acc__input-error error-status text-danger mt-2"></div>';
+                    $HTML .= '</div>';
+                    $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Remarks</div>';
+                    $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">';
+                        $HTML .= '<textarea class="form-control w-full" name="remarks" rows="3">'.(isset($excuse->remarks) ? e($excuse->remarks) : '').'</textarea>';
+                    $HTML .= '</div>';
+                endif;
             $HTML .= '</div>';
         else:
             $HTML .= '<div class="alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Excuse not found.</div>';
         endif;
 
-        return response()->json(['htm' => $HTML, 'excuse' => $excuse->id], 200);
+        return response()->json(['htm' => $HTML, 'excuse' => (isset($excuse->id) ? $excuse->id : 0)], 200);
     }
 
     public function updateProcessTaskAndExcuse(ProcessAndExcuseUpdateRequest $request){
