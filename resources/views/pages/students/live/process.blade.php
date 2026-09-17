@@ -142,6 +142,15 @@
                                     <div id="process-tab-{{ $loop->index }}-1" class="tab-pane leading-relaxed active" role="tabpanel" aria-labelledby="process-{{ $loop->index }}-1-tab">
                                         @if($proGroup['pendingTask']->count() > 0)
                                             @foreach($proGroup['pendingTask'] as $task)
+                                                @php
+                                                    $user_ids = [];
+                                                    if(isset($task->task->users) && !empty($task->task->users)):
+                                                        foreach($task->task->users as $usr):
+                                                            $user_ids[] = $usr->user_id;
+                                                        endforeach;
+                                                    endif;
+                                                    $canManageTask = (!empty($user_ids) && in_array(auth()->user()->id, $user_ids));
+                                                @endphp
                                                 <div class="grid grid-cols-12 items-center gap-4">
                                                     <div class="col-span-9 md:col-span-6">
                                                         <div class="relative ">
@@ -155,11 +164,11 @@
                                                                     <div class="flex items-center">
                                                                         <div class="font-medium">
                                                                             {{ $task->task->name }}
-                                                                            @if($task->task_status_id > 0 && isset($task->applicatnTaskStatus->name) && !empty($task->applicatnTaskStatus->name))
-                                                                                (<u>Outcome: {{ $task->applicatnTaskStatus->name }}</u>)
+                                                                            @if($task->task_status_id > 0 && isset($task->studentTaskStatus->name) && !empty($task->studentTaskStatus->name))
+                                                                                (<a href="javascript:void(0);" data-interview="{{ $task->task->interview == 'Yes' ? 1 : 0 }}" data-studentid="{{ $student->id }}" data-studenttaskid="{{ $task->id }}" data-tw-toggle="modal" data-tw-target="#viewTaskLogModal" class="viewTaskLogBtn processTaskInfoLink" title="View task log">Outcome: {{ $task->studentTaskStatus->name }}</a>)
                                                                             @endif
                                                                             @if($task->task->attendance_excuses == 'Yes' && isset($task->excuse))
-                                                                                (<u>Excuse Status: {{ ($task->excuse->status == 1 ? 'Review & Rejected' : ($task->excuse->status == 2 ? 'Review & Approved' : 'Pending')) }}</u>)
+                                                                                (<a href="javascript:void(0);" data-recordid="{{ $task->id }}" data-readonly="{{ $canManageTask ? 0 : 1 }}" data-tw-toggle="modal" data-tw-target="#viewAttendanceExcuseModal" class="viewExcuse processTaskInfoLink" title="View excuse details">Excuse Status: {{ ($task->excuse->status == 1 ? 'Review & Rejected' : ($task->excuse->status == 2 ? 'Review & Approved' : 'Pending')) }}</a>)
                                                                             @endif
                                                                         </div>
                                                                         {{--<div class="text-xs text-slate-500 ml-auto">{{ date('h:i a', strtotime($task->created_at)) }}</div>--}}
@@ -213,15 +222,7 @@
                                                             @endif
                                                         </div>
                                                     </div>
-                                                    @php 
-                                                        $user_ids = [];
-                                                        if(isset($task->task->users) && !empty($task->task->users)):
-                                                            foreach($task->task->users as $usr):
-                                                                $user_ids[] = $usr->user_id;
-                                                            endforeach;
-                                                        endif;
-                                                    @endphp
-                                                    @if(!empty($user_ids) && in_array(auth()->user()->id, $user_ids))
+                                                    @if($canManageTask)
                                                     <div class="col-span-3 sm:col-span-3 text-right">
                                                         <div class="flex justify-end">
                                                             <div class="dropdown">
@@ -264,7 +265,7 @@
                                                                         @if($task->task->attendance_excuses == 'Yes')
                                                                         <li>
                                                                             <a data-recordid="{{ $task->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#viewAttendanceExcuseModal" class="viewExcuse dropdown-item">
-                                                                                <i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> Vew Excuse
+                                                                                <i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> View Excuse
                                                                             </a>
                                                                         </li>
                                                                         @endif
@@ -290,6 +291,15 @@
                                     <div id="process-tab-{{ $loop->index }}-4" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="process-{{ $loop->index }}-4-tab">
                                         @if($proGroup['inProgressTask']->count() > 0)
                                             @foreach($proGroup['inProgressTask'] as $task)
+                                                @php
+                                                    $user_ids = [];
+                                                    if(isset($task->task->users) && !empty($task->task->users)):
+                                                        foreach($task->task->users as $usr):
+                                                            $user_ids[] = $usr->user_id;
+                                                        endforeach;
+                                                    endif;
+                                                    $canManageTask = (!empty($user_ids) && in_array(auth()->user()->id, $user_ids));
+                                                @endphp
                                                 <div class="grid grid-cols-12 gap-4">
                                                     <div class="col-span-12 md:col-span-6">
                                                         <div class="relative ">
@@ -303,8 +313,8 @@
                                                                     <div class="flex items-center">
                                                                         <div class="font-medium">
                                                                             {{ $task->task->name }}
-                                                                            @if($task->task_status_id > 0 && isset($task->applicatnTaskStatus->name) && !empty($task->applicatnTaskStatus->name))
-                                                                                (<u>Outcome: {{ $task->applicatnTaskStatus->name }}</u>)
+                                                                            @if($task->task_status_id > 0 && isset($task->studentTaskStatus->name) && !empty($task->studentTaskStatus->name))
+                                                                                (<a href="javascript:void(0);" data-interview="{{ $task->task->interview == 'Yes' ? 1 : 0 }}" data-studentid="{{ $student->id }}" data-studenttaskid="{{ $task->id }}" data-tw-toggle="modal" data-tw-target="#viewTaskLogModal" class="viewTaskLogBtn processTaskInfoLink" title="View task log">Outcome: {{ $task->studentTaskStatus->name }}</a>)
                                                                             @endif
                                                                         </div>
                                                                         {{--<div class="text-xs text-slate-500 ml-auto">{{ date('h:i a', strtotime($task->created_at)) }}</div>--}}
@@ -358,15 +368,7 @@
                                                             @endif
                                                         </div>
                                                     </div>
-                                                    @php 
-                                                        $user_ids = [];
-                                                        if(isset($task->task->users) && !empty($task->task->users)):
-                                                            foreach($task->task->users as $usr):
-                                                                $user_ids[] = $usr->user_id;
-                                                            endforeach;
-                                                        endif;
-                                                    @endphp
-                                                    @if(!empty($user_ids) && in_array(auth()->user()->id, $user_ids))
+                                                    @if($canManageTask)
                                                     <div class="col-span-3 sm:col-span-3 text-right">
                                                         <div class="flex justify-end">
                                                             <div class="dropdown">
@@ -421,8 +423,15 @@
                                     <div id="process-tab-{{ $loop->index }}-2" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="process-{{ $loop->index }}-2-tab">
                                         @if($proGroup['completedTask']->count() > 0)
                                             @foreach($proGroup['completedTask'] as $task)
-                                            @php 
+                                            @php
                                                 $uploadedBy = [];
+                                                $user_ids = [];
+                                                if(isset($task->task->users) && !empty($task->task->users)):
+                                                    foreach($task->task->users as $usr):
+                                                        $user_ids[] = $usr->user_id;
+                                                    endforeach;
+                                                endif;
+                                                $canManageTask = (!empty($user_ids) && in_array(auth()->user()->id, $user_ids));
                                             @endphp
                                             <div class="grid grid-cols-12 gap-4">
                                                     <div class="col-span-12 md:col-span-6">
@@ -437,11 +446,11 @@
                                                                     <div class="flex items-center">
                                                                         <div class="font-medium">
                                                                             {{ $task->task->name }}
-                                                                            @if($task->task_status_id > 0 && isset($task->applicatnTaskStatus->name) && !empty($task->applicatnTaskStatus->name))
-                                                                                (<u>Outcome: {{ $task->applicatnTaskStatus->name }}</u>)
+                                                                            @if($task->task_status_id > 0 && isset($task->studentTaskStatus->name) && !empty($task->studentTaskStatus->name))
+                                                                                (<a href="javascript:void(0);" data-interview="{{ $task->task->interview == 'Yes' ? 1 : 0 }}" data-studentid="{{ $student->id }}" data-studenttaskid="{{ $task->id }}" data-tw-toggle="modal" data-tw-target="#viewTaskLogModal" class="viewTaskLogBtn processTaskInfoLink" title="View task log">Outcome: {{ $task->studentTaskStatus->name }}</a>)
                                                                             @endif
                                                                             @if($task->task->attendance_excuses == 'Yes' && isset($task->excuse))
-                                                                                (<u>Excuse Status: {{ ($task->excuse->status == 1 ? 'Review & Rejected' : ($task->excuse->status == 2 ? 'Review & Approved' : 'Pending')) }}</u>)
+                                                                                (<a href="javascript:void(0);" data-recordid="{{ $task->id }}" data-readonly="{{ $canManageTask ? 0 : 1 }}" data-tw-toggle="modal" data-tw-target="#viewAttendanceExcuseModal" class="viewExcuse processTaskInfoLink" title="View excuse details">Excuse Status: {{ ($task->excuse->status == 1 ? 'Review & Rejected' : ($task->excuse->status == 2 ? 'Review & Approved' : 'Pending')) }}</a>)
                                                                             @endif
                                                                         </div>
                                                                         {{--<div class="text-xs text-slate-500 ml-auto">{{ date('h:i a', strtotime($task->created_at)) }}</div>--}}
@@ -526,15 +535,7 @@
                                                             </div>
                                                         @endif
                                                     </div>
-                                                    @php 
-                                                        $user_ids = [];
-                                                        if(isset($task->task->users) && !empty($task->task->users)):
-                                                            foreach($task->task->users as $usr):
-                                                                $user_ids[] = $usr->user_id;
-                                                            endforeach;
-                                                        endif;
-                                                    @endphp
-                                                    @if(!empty($user_ids) && in_array(auth()->user()->id, $user_ids))
+                                                    @if($canManageTask)
                                                     <div class="col-span-3 sm:col-span-3 text-right">
                                                         <div class="flex justify-end">
                                                             <div class="dropdown">
@@ -556,7 +557,7 @@
                                                                         @if($task->task->attendance_excuses == 'Yes')
                                                                             <li>
                                                                                 <a data-recordid="{{ $task->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#viewAttendanceExcuseModal" class="viewExcuse dropdown-item">
-                                                                                    <i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> Vew Excuse
+                                                                                    <i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> View Excuse
                                                                                 </a>
                                                                             </li>
                                                                         @endif

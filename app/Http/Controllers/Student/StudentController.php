@@ -518,9 +518,9 @@ class  StudentController extends Controller
                     $taskIds[] = $tsk->id;
                 endforeach;
                 if(!empty($taskIds)):
-                    $pendingTask = StudentTask::where('student_id', $studentId)->whereIn('task_list_id', $taskIds)->where('status', 'Pending')->get();
-                    $inProgressTask = StudentTask::where('student_id', $studentId)->whereIn('task_list_id', $taskIds)->where('status', 'In Progress')->get();
-                    $completedTask = StudentTask::where('student_id', $studentId)->whereIn('task_list_id', $taskIds)->where('status', 'Completed')->get();
+                    $pendingTask = StudentTask::where('student_id', $studentId)->whereIn('task_list_id', $taskIds)->where('status', 'Pending')->orderBy('id', 'DESC')->get();
+                    $inProgressTask = StudentTask::where('student_id', $studentId)->whereIn('task_list_id', $taskIds)->where('status', 'In Progress')->orderBy('id', 'DESC')->get();
+                    $completedTask = StudentTask::where('student_id', $studentId)->whereIn('task_list_id', $taskIds)->where('status', 'Completed')->orderBy('updated_at', 'DESC')->orderBy('id', 'DESC')->get();
 
 
                     $processGroup[$i]['name'] = $prl->name;
