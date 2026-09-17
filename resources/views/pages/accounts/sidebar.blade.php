@@ -55,7 +55,7 @@
             </a>
         </li>
         <li class="mb-2 pt-1">
-            <a href="{{ route('budget.management') }}" class="text-lg font-medium truncate flex justify-start items-center">
+            <a href="https://operations.lcc.ac.uk/d/finance/budget" class="text-lg font-medium truncate flex justify-start items-center">
                 <span class="accountsMenu__swatch mr-4"></span> Budget Management
             </a>
         </li>
