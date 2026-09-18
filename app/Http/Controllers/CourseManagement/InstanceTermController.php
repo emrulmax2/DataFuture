@@ -167,6 +167,6 @@ class InstanceTermController extends Controller
     public function restore($id) {
         $data = InstanceTerm::where('id', $id)->withTrashed()->restore();
 
-        response()->json($data);
+        return response()->json($data);
     }
 }

@@ -340,12 +340,13 @@
 
                             <div class="cm-field">
                                 <label for="{{ $itPrefix }}_session_term">Session Term <span>*</span></label>
+                                {{-- `session_term` is a tinyint column: values must stay numeric. --}}
                                 <select id="{{ $itPrefix }}_session_term" name="session_term" class="cm-select session_term">
                                     <option value="">Please Select</option>
-                                    <option value="Term 1">Term 1</option>
-                                    <option value="Term 2">Term 2</option>
-                                    <option value="Term 3">Term 3</option>
-                                    <option value="Term 4">Term 4</option>
+                                    <option value="1">Term 1</option>
+                                    <option value="2">Term 2</option>
+                                    <option value="3">Term 3</option>
+                                    <option value="4">Term 4</option>
                                 </select>
                                 <div class="acc__input-error error-session_term"></div>
                             </div>
