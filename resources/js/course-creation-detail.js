@@ -517,9 +517,11 @@ function escapeHtml(value) {
                     setBusy(`#${buttonId}`, false);
 
                     if (error.response) {
-                        if (error.response.status == 422) {
+                        // These update endpoints answer an unchanged record with a
+                        // bare 422 `{message}`; only validation failures carry `errors`.
+                        if (error.response.status == 422 && error.response.data.errors) {
                             paintErrors(`#${formId}`, error.response.data.errors);
-                        } else if (error.response.status == 304) {
+                        } else if (error.response.status == 422 || error.response.status == 304) {
                             modal.hide();
                             showSuccess("No change", "Nothing was modified on this record.");
                         }
@@ -644,6 +646,9 @@ function escapeHtml(value) {
         "teaching_end_date",
         "revision_start_date",
         "revision_end_date",
+        // The update endpoint saves whatever it is sent, so the parent id must
+        // come back with the record — left at 0 it detaches the term.
+        "course_creation_instance_id",
     ];
 
     // "Add Term" belongs to a row, so the parent id is stamped onto the form
