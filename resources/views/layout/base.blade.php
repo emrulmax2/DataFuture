@@ -22,7 +22,7 @@
     @vite('resources/css/app.css')
     @yield('styles')
     <!-- END: CSS Assets-->
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API', 'YOUR_API_KEY') }}&libraries=places" async></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&libraries=places" async></script>
     <script src="https://cdn.getaddress.io/scripts/getaddress-autocomplete-3.1.6.js" async></script>
     @routes
 </head>
