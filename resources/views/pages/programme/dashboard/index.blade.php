@@ -40,7 +40,8 @@
             <button type="button" class="pgd-tile pgd-tile--red" data-pgd-quick="nofeed" {{ $stats['no_attendance'] === 0 ? 'disabled' : '' }}>
                 <span class="pgd-tile__label"><span></span>Attendance missing</span>
                 <span class="pgd-tile__value" data-pgd-stat="no_attendance">{{ $stats['no_attendance'] }}</span>
-                <span class="pgd-tile__note">finished, not fed</span>
+                {{-- Counts ongoing classes too, not just finished ones. --}}
+                <span class="pgd-tile__note">started or finished, not fed</span>
             </button>
             <button type="button" class="pgd-tile" data-pgd-open="followup">
                 <span class="pgd-tile__label"><span style="background: #2AA9C4;"></span>Tutors below 50%</span>
