@@ -75,6 +75,20 @@ return [
         'webhook_id' => env('PAYPAL_WEBHOOK_ID'),
     ],
 
+    /*
+     * Google Maps / Places, used by the address lookup on the student and
+     * applicant forms.
+     *
+     * Read through config, never with env() in a view: once `php artisan
+     * config:cache` has run — which every deploy does — Laravel stops loading
+     * .env and env() returns its default. The key then rendered as the literal
+     * "YOUR_API_KEY" and Google answered InvalidKeyMapError, which is why the
+     * lookup worked locally (no cache) and failed on the server.
+     */
+    'google_maps' => [
+        'key' => env('GOOGLE_MAP_API'),
+    ],
+
     'library' => [
         /*
          * Where every library notification goes. The desk is a room, not a user
