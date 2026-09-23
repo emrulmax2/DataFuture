@@ -10,6 +10,7 @@ use App\Models\Student;
 use App\Services\LibraryRules;
 use App\Services\OperationsLibraryClient;
 use App\Services\LibraryDepositReconciler;
+use App\Services\LibraryFinePayment;
 use App\Services\PayPalClient;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -31,6 +32,7 @@ class LibraryController extends Controller
         private OperationsLibraryClient $catalogue,
         private PayPalClient $paypal,
         private LibraryDepositReconciler $reconciler,
+        private LibraryFinePayment $fines,
     ) {
     }
 
@@ -88,7 +90,44 @@ class LibraryController extends Controller
                 ->toArray(),
             'openLoans' => $loans->filter->isOpen(),
             'pastLoans' => $loans->reject->isOpen(),
+            'payable' => $this->payable($loans),
         ]);
+    }
+
+    /**
+     * Charges this student can settle right now, by loan.
+     *
+     * Only a loan the desk has already taken back appears here. While a book
+     * is still out its charge grows by the day, so there is no final figure to
+     * pay — paying an interim one would bill the same days twice when it is
+     * finally returned. The button turns up once the desk presses Confirm
+     * return, which is the moment the charge is frozen and the link exists.
+     *
+     * @return array<int,array{url:string,amount:float,until:string}>
+     */
+    private function payable($loans): array
+    {
+        $held = $loans->filter->hasPendingReturn();
+
+        if ($held->isEmpty()):
+            return [];
+        endif;
+
+        return LibraryDeposit::fines()
+            ->whereIn('library_book_issue_id', $held->pluck('id'))
+            ->where('status', 'pending')
+            ->get()
+            ->reject->hasExpired()
+            ->keyBy('library_book_issue_id')
+            ->map(fn (LibraryDeposit $row) => [
+                'url' => $this->fines->link($row),
+                /* The frozen figure, not today's. It is what the link charges,
+                   and a page quoting a penny more than the checkout is the
+                   quickest way to lose a student's trust in both. */
+                'amount' => (float) $row->amount,
+                'until' => optional($row->expires_at)->format('g:ia'),
+            ])
+            ->all();
     }
 
     /** Catalogue search, called by the page as the student types. */

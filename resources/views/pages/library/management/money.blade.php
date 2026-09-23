@@ -51,6 +51,17 @@
     @endphp
 
     <div class="lib-desk">
+        @if(session('library_success'))
+            <div class="lib-flash lib-flash--ok" role="status">
+                <i data-lucide="check-circle"></i> {{ session('library_success') }}
+            </div>
+        @endif
+        @if(session('library_error'))
+            <div class="lib-flash lib-flash--bad" role="alert">
+                <i data-lucide="alert-octagon"></i> {{ session('library_error') }}
+            </div>
+        @endif
+
         <div class="lib-stats">
             @foreach($tiles as $tile)
                 <span class="lib-stat lib-stat--{{ $tile['tone'] }}">
@@ -134,6 +145,7 @@
                             <th>Date</th>
                             <th>Status</th>
                             <th class="lib-money__right">Amount</th>
+                            <th class="lib-money__right">&nbsp;</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -164,10 +176,23 @@
                                 <td class="lib-money__right {{ $row['outstanding'] ? 'lib-fine' : '' }}">
                                     £{{ number_format($row['amount'], 2) }}
                                 </td>
+                                <td class="lib-money__right">
+                                    {{-- Only an unpaid charge can be settled. Recording it
+                                         is what lifts the student's borrowing block. --}}
+                                    @if($row['outstanding'] && !empty($row['issue_id']))
+                                        <form method="post" action="{{ route('library.management.charge.settle', $row['issue_id']) }}"
+                                              onsubmit="return confirm('Record £{{ number_format($row['amount'], 2) }} as paid for {{ $row['reference'] }}?');">
+                                            @csrf
+                                            <button type="submit" class="lib-b lib-b--gold">
+                                                <i data-lucide="banknote"></i> Mark paid
+                                            </button>
+                                        </form>
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="lib-results__empty">
+                                <td colspan="8" class="lib-results__empty">
                                     <i data-lucide="wallet"></i>
                                     No deposits or fines to show.
                                 </td>

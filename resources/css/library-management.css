@@ -2106,3 +2106,174 @@ form#dayReadingBody[hidden] { display: none !important; }
     padding-top: 12px;
     border-top: 1px solid rgba(176, 136, 58, 0.25);
 }
+
+/* The student cell is a link to their profile. It keeps the row's type
+   colours — an underlined blue name would fight the rest of the grid — and
+   shows it is clickable on hover instead. */
+.lib-media--link {
+    color: inherit;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background .14s ease;
+}
+
+.lib-media--link:hover {
+    background: var(--lib-soft);
+    text-decoration: none;
+}
+
+.lib-media--link:hover .lib-media__title {
+    color: var(--lib-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* =================================================================
+   Payment link dialog — a late return, held against its charge
+   =================================================================
+   Opened by the server the moment a late return is submitted. Three
+   things share it: the link, the QR beside it, and the choice of how
+   the student gets it. None of them is optional, so none of them is
+   tucked away behind a disclosure.
+   ================================================================= */
+
+.lib-modal__icon--gold { background: var(--lib-gold-tint); color: var(--lib-gold-ink); }
+
+.lib-pay {
+    display: flex;
+    gap: 16px;
+    margin: 16px 0 18px;
+    padding: 14px;
+    border: 1px solid var(--lib-line);
+    border-radius: 11px;
+    background: var(--lib-soft);
+}
+
+/* Fixed, because a QR that reflows with the dialog is a QR that will not
+   scan at the size it lands on. */
+.lib-pay__qr {
+    flex: none;
+    width: 132px;
+    height: 132px;
+    padding: 7px;
+    border: 1px solid var(--lib-line);
+    border-radius: 9px;
+    background: #fff;
+}
+
+.lib-pay__qr svg { display: block; width: 100%; height: 100%; }
+
+.lib-pay__side { flex: 1 1 auto; min-width: 0; }
+
+/* Monospace, and small: this is read out or checked character by character
+   more often than it is admired. */
+.lib-pay__url {
+    margin: 5px 0 8px;
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11.5px;
+    color: var(--lib-muted);
+}
+
+.lib-pay__copy { width: 100%; justify-content: center; }
+.lib-pay__copy svg { width: 14px; height: 14px; }
+
+.lib-pay__hint {
+    margin: 9px 0 0;
+    color: var(--lib-faint);
+    font-size: 11.5px;
+    line-height: 1.5;
+}
+
+.lib-pay__hint--bad { color: #b3261e; }
+
+@media (max-width: 560px) {
+    .lib-pay { flex-direction: column; align-items: center; text-align: center; }
+    .lib-pay__side { width: 100%; }
+}
+
+/* ---- channel choice ------------------------------------------------- */
+
+.lib-send { margin: 0; padding: 0; border: 0; }
+
+.lib-send__opt {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 8px;
+    padding: 11px 13px;
+    border: 1px solid var(--lib-field);
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color .14s ease, background .14s ease;
+}
+
+.lib-send__opt:hover { border-color: var(--lib-gold-line); }
+
+.lib-send__opt:has(input:checked) {
+    border-color: var(--lib-gold-line);
+    background: var(--lib-gold-tint);
+}
+
+/* Shown rather than hidden: "why is there no SMS option" is a worse
+   question than an option that says what is missing. */
+.lib-send__opt--off {
+    background: var(--lib-soft);
+    cursor: not-allowed;
+    opacity: .65;
+}
+
+.lib-send__opt--off:hover { border-color: var(--lib-field); }
+
+.lib-send__opt input {
+    flex: none;
+    width: 15px;
+    height: 15px;
+    margin-top: 2px;
+    accent-color: var(--lib-gold-dark);
+}
+
+.lib-send__body { display: block; min-width: 0; }
+
+.lib-send__name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--lib-ink);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.lib-send__name svg { width: 14px; height: 14px; color: var(--lib-muted); }
+
+.lib-send__note {
+    display: block;
+    margin-top: 2px;
+    color: var(--lib-faint);
+    font-size: 11.5px;
+}
+
+/* ---- a return waiting on its payment, in the grid -------------------- */
+
+.lib-status--held {
+    border-color: var(--lib-gold-line);
+    background: var(--lib-gold-tint);
+    color: var(--lib-gold-ink);
+}
+
+/* Sits where the Return button was, and tinted at rest rather than on hover:
+   it is a state the desk is waiting on, not another action to take. It is
+   still pressable, because the link behind it is the one thing on this screen
+   that must not become unreachable. */
+.lib-desk .lib-act-btn--held {
+    border-color: var(--lib-gold-line);
+    background: var(--lib-gold-tint);
+    color: var(--lib-gold-ink);
+    text-decoration: none;
+}
+
+.lib-desk .lib-act-btn--held:hover {
+    border-color: var(--lib-gold-dark);
+    background: var(--lib-gold);
+    color: #fff;
+}

@@ -413,12 +413,17 @@
                         <div class="lib-picked__line" id="libReturnStudent"></div>
                     </div>
 
-                    {{-- Only shown when something is owed. The desk has to collect
-                         it before the book goes back on the shelf, so it is stated
-                         here rather than discovered afterwards. --}}
+                    {{-- Only shown when something is owed. Confirming a late
+                         return does not close the loan — it holds it against
+                         the charge — so the desk is told that here, before
+                         they press the button, rather than discovering it in
+                         the dialog that follows. --}}
                     <div class="lib-return__charge" id="libReturnCharge" hidden>
                         <i data-lucide="receipt"></i>
-                        <span>Outstanding charge <strong id="libReturnFine"></strong> — collect before returning.</span>
+                        <span>
+                            <strong id="libReturnFine"></strong> is owed. The return is held until
+                            this is paid — you will get a payment link to send on.
+                        </span>
                     </div>
 
                     <label class="lib-field__label" for="libReturnNote">
@@ -437,6 +442,145 @@
             </form>
         </div>
     </div>
+
+    @php
+        $returned = session('library_returned');
+
+        if ($returned):
+            /* Reopened after a send: the desk is most likely here to send it
+               again the same way, so those boxes come back ticked. First time
+               through, email leads — it is the channel that survives a wrong
+               mobile number and can be forwarded. */
+            $alreadySent = array_filter(explode(',', (string) ($returned['sent_via'] ?? '')));
+            $ticked = $alreadySent ?: array_filter(['email'], fn ($c) => $returned['reachable'][$c]);
+        endif;
+    @endphp
+    @if($returned)
+        {{-- What a late return leaves behind.
+             ---------------------------------------------------------------
+             The loan is not closed: the book is back on the counter but it
+             still reads as out on loan, and it keeps accruing, until the
+             charge is paid. So this dialog is not a receipt — it is the rest
+             of the job, and it does not let the desk walk away without
+             choosing how the student gets the link.
+
+             The QR is there because the student is usually still standing
+             there: scanning it is faster than waiting for a text, and it is
+             the only route left when there is no address or mobile on file. --}}
+        <div class="lib-modal" id="libLinkModal" role="dialog" aria-modal="true"
+             aria-labelledby="libLinkTitle"
+             data-reachable-email="{{ $returned['reachable']['email'] ? 1 : 0 }}"
+             data-reachable-sms="{{ $returned['reachable']['sms'] ? 1 : 0 }}">
+            <div class="lib-modal__box lib-modal__box--sm">
+                <form method="post" action="{{ $returned['send_url'] }}" id="libLinkForm">
+                    @csrf
+                    <div class="lib-modal__head">
+                        <span class="lib-modal__icon lib-modal__icon--gold"><i data-lucide="receipt"></i></span>
+                        <div class="lib-modal__heading">
+                            <div class="lib-modal__title" id="libLinkTitle">
+                                {{ $alreadySent ? 'Awaiting payment' : 'Return held' }} — &pound;{{ $returned['amount'] }} to pay
+                            </div>
+                            <div class="lib-modal__sub">{{ $returned['reference'] }}</div>
+                        </div>
+                        <button type="button" class="lib-modal__x" data-lib-close aria-label="Close">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+
+                    <div class="lib-modal__body">
+                        <div class="lib-return__book">
+                            <div class="lib-picked__name">{{ $returned['title'] }}</div>
+                            <div class="lib-picked__line">{{ $returned['student'] }}</div>
+                        </div>
+
+                        <div class="lib-return__charge">
+                            <i data-lucide="alert-triangle"></i>
+                            <span>
+                                This book still counts as <strong>out on loan</strong> until the charge
+                                is paid. The link stops working at <strong>{{ $returned['deadline'] }} today</strong> —
+                                after that the return is withdrawn and another day is added to the charge.
+                            </span>
+                        </div>
+
+                        <div class="lib-pay">
+                            <div class="lib-pay__qr" aria-hidden="true">
+                                {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')->size(132)->margin(0)->errorCorrection('M')->generate($returned['link']) !!}
+                            </div>
+                            <div class="lib-pay__side">
+                                <div class="lib-field__label">Payment link</div>
+                                <input type="text" class="lib-input lib-pay__url" id="libPayUrl"
+                                       value="{{ $returned['link'] }}" readonly
+                                       onfocus="this.select();" aria-label="Payment link">
+                                <button type="button" class="lib-b lib-b--quiet lib-pay__copy" id="libPayCopy">
+                                    <i data-lucide="copy"></i><span>Copy link</span>
+                                </button>
+                                <p class="lib-pay__hint">Or let the student scan the code to pay on their phone.</p>
+                            </div>
+                        </div>
+
+                        {{-- One is required, because a link nobody sends is a
+                             return that quietly expires at midnight. A channel
+                             with nothing on file to send to is shown disabled
+                             and says so, rather than being hidden — "why is
+                             there no SMS option" is a worse question. --}}
+                        <fieldset class="lib-send">
+                            <legend class="lib-field__label">
+                                Send the link by <span class="lib-field__req">*</span>
+                            </legend>
+
+                            <label class="lib-send__opt {{ $returned['reachable']['email'] ? '' : 'lib-send__opt--off' }}">
+                                <input type="checkbox" name="channels[]" value="email"
+                                       @checked(in_array('email', $ticked, true))
+                                       @disabled(!$returned['reachable']['email'])>
+                                <span class="lib-send__body">
+                                    <span class="lib-send__name"><i data-lucide="mail"></i>Email</span>
+                                    <span class="lib-send__note">
+                                        {{ $returned['reachable']['email'] ? 'To the address on their record' : 'No email address on file' }}
+                                    </span>
+                                </span>
+                            </label>
+
+                            <label class="lib-send__opt {{ $returned['reachable']['sms'] ? '' : 'lib-send__opt--off' }}">
+                                <input type="checkbox" name="channels[]" value="sms"
+                                       @checked(in_array('sms', $ticked, true))
+                                       @disabled(!$returned['reachable']['sms'])>
+                                <span class="lib-send__body">
+                                    <span class="lib-send__name"><i data-lucide="message-square"></i>SMS</span>
+                                    <span class="lib-send__note">
+                                        {{ $returned['reachable']['sms'] ? 'To their mobile number' : 'No mobile number on file' }}
+                                    </span>
+                                </span>
+                            </label>
+
+                            <p class="lib-modal__error" id="libSendError" hidden>Choose Email, SMS, or both.</p>
+
+                            @if($alreadySent)
+                                <p class="lib-pay__hint">
+                                    Already sent by {{ implode(' and ', array_map(fn ($c) => $c === 'sms' ? 'SMS' : 'email', $alreadySent)) }}.
+                                    Sending again is harmless — it is the same link.
+                                </p>
+                            @endif
+
+                            @if(!$returned['reachable']['email'] && !$returned['reachable']['sms'])
+                                <p class="lib-pay__hint lib-pay__hint--bad">
+                                    There is no email address or mobile number on their record, so the link
+                                    cannot be sent. Have them scan the code before they leave.
+                                </p>
+                            @endif
+                        </fieldset>
+                    </div>
+
+                    <div class="lib-modal__foot">
+                        <button type="button" class="lib-b lib-b--quiet" data-lib-close>Close</button>
+                        <button type="submit" class="lib-b lib-b--gold" id="libSendGo"
+                                @disabled(!$returned['reachable']['email'] && !$returned['reachable']['sms'])>
+                            <i data-lucide="send"></i>Send link
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
 
     {{-- Cancelling frees the copy and the student is told why, so the reason is
          required rather than optional: "Cancelled at the desk" tells them

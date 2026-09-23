@@ -4,6 +4,7 @@ import { viteStaticCopy } from 'vite-plugin-static-copy';
 import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
+    server: {
     plugins: [
         viteStaticCopy({
             targets: [
@@ -22,6 +23,7 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/css/site-settings-redesign.css',
                 'resources/css/library-management.css',
+                'resources/css/library-pay.css',
                 'resources/css/student-library.css',
                 'resources/css/student-service-desk.css',
                 'resources/css/admission-redesign.css',

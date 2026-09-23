@@ -21,8 +21,10 @@ use Illuminate\Support\Facades\Log;
  */
 class LibraryDepositReconciler
 {
-    public function __construct(private PayPalClient $paypal)
-    {
+    public function __construct(
+        private PayPalClient $paypal,
+        private LibraryFinePayment $fines,
+    ) {
     }
 
     /**
@@ -113,6 +115,36 @@ class LibraryDepositReconciler
         return $counts;
     }
 
+    /**
+     * The same sweep for overdue charges paid from a link.
+     *
+     * Needed more than the deposit sweep, not less: a fine settling is what
+     * completes a return, so a payment this app never hears about leaves a
+     * book reading as out on loan and a student blocked from borrowing on
+     * money they have already paid.
+     *
+     * Only today's are worth asking about. Past midnight the submission behind
+     * the charge is gone, and a capture arriving then is handled — and
+     * flagged — by the service rather than quietly closing a stale return.
+     */
+    public function reconcileFines(int $olderThanMinutes = 5, int $limit = 200): array
+    {
+        $counts = ['paid' => 0, 'failed' => 0, 'pending' => 0, 'skipped' => 0];
+
+        LibraryDeposit::fines()
+            ->where('status', 'pending')
+            ->whereNotNull('provider_order_id')
+            ->where('created_at', '<=', Carbon::now()->subMinutes($olderThanMinutes))
+            ->orderBy('id')
+            ->limit($limit)
+            ->get()
+            ->each(function (LibraryDeposit $deposit) use (&$counts) {
+                $counts[$this->reconcile($deposit)]++;
+            });
+
+        return $counts;
+    }
+
     private function settle(LibraryDeposit $deposit, array $order): bool
     {
         $capture = data_get($order, 'purchase_units.0.payments.captures.0');
@@ -135,6 +167,17 @@ class LibraryDepositReconciler
      */
     private function settleFromCapture(LibraryDeposit $deposit, array $capture): void
     {
+        /* A fine goes through the service, because settling the ledger row is
+           only half of it: the return waiting on that charge has to complete
+           in the same step. */
+        if ($deposit->isFine()):
+            if ($this->fines->settle($deposit, $capture)):
+                Log::info('[Library] Fine reconciled against PayPal.', ['deposit' => $deposit->id]);
+            endif;
+
+            return;
+        endif;
+
         $updated = LibraryDeposit::where('id', $deposit->id)
             ->where('status', '!=', 'paid')
             ->update([

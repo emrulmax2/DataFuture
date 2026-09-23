@@ -7695,3 +7695,68 @@ body.student-profile-body .modal #successModal .text-success {
         padding-right: 16px;
     }
 }
+
+/* ---------------------------------------------------------------------------
+   Alerts inside a dialog
+
+   The page's soft alert colours are scoped to `.student-profile-redesign`,
+   which sits on <main>. The theme re-parents a modal to <body> when it opens,
+   so inside an open dialog those rules stop matching and the base theme takes
+   over: `.alert-danger-soft` then renders solid red with its text the same red
+   as the background — the blank red bar seen on Add Registration — and the
+   "agreement already exists" question renders solid amber.
+
+   Scoped to the body class and the modal so it keeps applying wherever the
+   dialog ends up in the DOM.
+   --------------------------------------------------------------------------- */
+
+body.student-profile-body .modal .alert {
+    align-items: flex-start;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.45;
+    padding: 12px 16px;
+}
+
+body.student-profile-body .modal .alert svg {
+    flex: none;
+    height: 18px;
+    width: 18px;
+}
+
+body.student-profile-body .modal .alert-danger-soft {
+    background: #fbedeb;
+    border-color: #f1c7c1;
+    color: #8e2e25;
+}
+
+body.student-profile-body .modal .alert-danger-soft svg {
+    color: #b3392e;
+}
+
+body.student-profile-body .modal .alert-warning-soft {
+    background: #fdf5e6;
+    border-color: #efdcae;
+    color: #7a5a12;
+}
+
+body.student-profile-body .modal .alert-warning-soft svg {
+    color: #b4820c;
+}
+
+/* The wrapper around the linked-agreement question. */
+body.student-profile-body .modal .bg-warning-soft {
+    background: #fffaf0 !important;
+    border: 1px solid #efdcae;
+}
+
+/* Injected by the SLC scripts as the first child of .modal-content, so it sits
+   above the header: squared off against the dialog's rounded top rather than
+   floating as a detached block. */
+body.student-profile-body .modal .modal-content > .alert:first-child {
+    border-radius: 14px 14px 0 0;
+    border-width: 0 0 1px;
+    margin: 0;
+}
