@@ -58,7 +58,7 @@ class SlcRegistrationController extends Controller
         $linked_agreement = (isset($request->linked_agreement) && $request->linked_agreement > 0 ? $request->linked_agreement : 0);
 
         $existRegistration = SlcRegistration::where('student_id', $studen_id)->where('student_course_relation_id', $student_course_relation_id)
-                             ->where('registration_year', $request->registration_year)->get()->first();
+                             ->where('registration_year', $request->registration_year)->where('academic_year_id', $request->academic_year_id)->get()->first();
         if(isset($existRegistration->id) && $existRegistration->id > 0):
             return response()->json(['msg' => 'Registration exist under selected registration year.'], 304);
         endif;
