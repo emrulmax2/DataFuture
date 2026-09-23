@@ -22,6 +22,7 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/css/site-settings-redesign.css',
                 'resources/css/library-management.css',
+                'resources/css/library-pay.css',
                 'resources/css/student-library.css',
                 'resources/css/student-service-desk.css',
                 'resources/css/admission-redesign.css',

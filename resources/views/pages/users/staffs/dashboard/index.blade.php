@@ -38,7 +38,9 @@
             ['hr_porta', 'Human Resources', 'users', 'hr.portal', null],
             ['programme_dashboard', 'Manager', 'layout-dashboard', 'programme.dashboard', null],
             ['access_account', 'Accounts', 'wallet', 'accounts', null],
-            ['library_management', 'Library', 'library', 'library.management.index', null],
+            // The issue desk (/library-management), not the older dashboard
+            // that `library.management.index` points at.
+            ['library_management', 'Library', 'library', 'library.management', null],
             ['news_events', 'News & Events', 'megaphone', 'news.updates', null],
         ];
 

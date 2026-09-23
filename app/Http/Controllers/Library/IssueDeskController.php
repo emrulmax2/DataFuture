@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\LibraryBookIssue;
 use App\Models\LibraryDeposit;
 use App\Models\Student;
+use App\Services\LibraryFinePayment;
 use App\Services\LibraryRules;
 use App\Services\OperationsLibraryClient;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -24,8 +26,10 @@ use Illuminate\Support\Facades\Log;
  */
 class IssueDeskController extends Controller
 {
-    public function __construct(private OperationsLibraryClient $catalogue)
-    {
+    public function __construct(
+        private OperationsLibraryClient $catalogue,
+        private LibraryFinePayment $fines,
+    ) {
     }
 
     /**
@@ -154,6 +158,7 @@ class IssueDeskController extends Controller
                 'method' => $row->provider,
                 'date' => $row->paid_at ?: $row->created_at,
                 'outstanding' => false,
+                'issue_id' => $row->library_book_issue_id,
             ]);
         endforeach;
 
@@ -193,6 +198,7 @@ class IssueDeskController extends Controller
                     'method' => null,
                     'date' => $loan->due_at,
                     'outstanding' => true,
+                    'issue_id' => $loan->id,
                 ]);
             endforeach;
         endif;
@@ -284,11 +290,30 @@ class IssueDeskController extends Controller
                     'overdue' => $fine > 0,
                     'fine' => (float) ($fine ?: $issue->fine_amount),
 
+                    /* A late return the desk has already submitted. The loan
+                       is still `issued` and still accruing — the grid says so
+                       rather than showing it as an ordinary overdue, because
+                       the book is physically back and the only thing missing
+                       is the money. */
+                    'return_pending' => $issue->hasPendingReturn(),
+                    'return_pending_fine' => (float) $issue->pending_return_fine,
+                    'return_pending_until' => $issue->hasPendingReturn()
+                        ? $issue->pending_return_expires_at->format('g:ia')
+                        : null,
+                    'return_pending_url' => $issue->hasPendingReturn()
+                        ? route('library.management.charge.link', ['id' => $issue->id])
+                        : null,
+
                     'title' => $issue->title,
                     'author' => $issue->author,
                     'barcode' => $issue->barcode,
                     'cover_url' => self::imageUrl($issue->cover_url),
 
+                    'student_id' => optional($student)->id,
+                    /* Built here rather than in JavaScript: the desk grid has no
+                       Ziggy route for the student profile, and a hand-written
+                       path would drift if the route ever moves. */
+                    'student_url' => $student ? route('student.show', $student->id) : null,
                     'student_name' => optional($student)->full_name,
                     'registration_no' => optional($student)->registration_no,
                     'student_photo' => optional($student)->photo_url,
@@ -530,6 +555,77 @@ class IssueDeskController extends Controller
     }
 
     /**
+     * Record that a student has paid an outstanding charge.
+     *
+     * Two things happen together: the loan is stamped paid, which is what
+     * lifts the borrowing block, and the money is written to the ledger as a
+     * fine row so the till and the block can never disagree.
+     */
+    public function settleCharge(Request $request, $id)
+    {
+        $this->guard();
+
+        $request->validate(['note' => ['nullable', 'string', 'max:191']]);
+
+        $issue = LibraryBookIssue::with('student')->findOrFail($id);
+        $rules = new LibraryRules();
+
+        if ($issue->fine_paid_at):
+            return back()->with('library_error', $issue->reference.' is already settled.');
+        endif;
+
+        /* A held return was quoted a figure when it was submitted, and that is
+           what the student is standing there to pay. Otherwise: a book still
+           out keeps accruing, so the amount is read at the moment it is paid
+           rather than from a figure frozen earlier. */
+        $amount = $issue->hasPendingReturn()
+            ? (float) $issue->pending_return_fine
+            : ($issue->isOpen() ? $rules->fineFor($issue) : (float) $issue->fine_amount);
+
+        if ($amount <= 0):
+            return back()->with('library_error', 'There is nothing outstanding on '.$issue->reference.'.');
+        endif;
+
+        DB::transaction(function () use ($issue, $amount, $request) {
+            $issue->update([
+                'fine_amount' => $amount,
+                'fine_paid_at' => Carbon::now(),
+                'updated_by' => auth()->id(),
+            ]);
+
+            LibraryDeposit::create([
+                'student_id' => $issue->student_id,
+                'type' => LibraryDeposit::TYPE_FINE,
+                'library_book_issue_id' => $issue->id,
+                'amount' => $amount,
+                'currency' => 'GBP',
+                'status' => 'paid',
+                'description' => $request->input('note') ?: 'Overdue charge — '.$issue->title,
+                'provider' => 'desk',
+                'collected_by' => auth()->id(),
+                'paid_at' => Carbon::now(),
+            ]);
+
+            $issue->log('fine_paid', null, '£'.number_format($amount, 2).' collected at the desk');
+        });
+
+        /* Any payment link handed out for this charge is now for money that is
+           no longer owed, so it is stood down rather than left live. */
+        $this->fines->voidPending($issue, 'Settled at the desk.');
+
+        /* Cash finishes a held return exactly as the link would: the charge is
+           what the return was waiting on, and it has just been paid. */
+        $this->fines->applySubmission($issue->refresh(), $amount, 'collected at the desk');
+
+        $name = trim(optional($issue->student)->first_name.' '.optional($issue->student)->last_name);
+
+        return back()->with(
+            'library_success',
+            '£'.number_format($amount, 2).' recorded against '.$issue->reference.($name ? ' for '.$name : '').'.'
+        );
+    }
+
+    /**
      * A title with its copies, for the direct-issue location picker. Each copy
      * reports its own campus, shelf and status.
      */
@@ -558,6 +654,7 @@ class IssueDeskController extends Controller
             'deposit' => 'No library deposit paid. The student needs to pay it from their portal before borrowing.',
             'max_books' => 'Already holding the maximum of '.$rules->maxBooks().' take-home books.',
             'overdue' => 'Has an overdue book that must be returned first.',
+            'charges' => 'Owes £'.number_format($rules->outstandingCharges($studentId), 2).' in unpaid library charges.',
             default => null,
         };
     }
@@ -713,12 +810,21 @@ class IssueDeskController extends Controller
         return back()->with('library_success', $issue->reference.' issued — due '.$issue->due_at->format('j M Y').'.');
     }
 
-    /** Take a book back, settle anything owed, and put the copy on the shelf. */
+    /**
+     * Take a book back.
+     *
+     * On time, that is the whole story: the loan closes and the copy goes back
+     * on the shelf. Late, it is only half of one — the return is held until
+     * the charge is paid, because a loan closed with the money still owed is a
+     * debt on a finished row, and nobody chases those.
+     */
     public function returnBook(Request $request, $id)
     {
         $this->guard();
 
-        $issue = LibraryBookIssue::findOrFail($id);
+        $request->validate(['staff_note' => ['nullable', 'string', 'max:255']]);
+
+        $issue = LibraryBookIssue::with('student')->findOrFail($id);
         $rules = new LibraryRules();
 
         if ($issue->status !== LibraryBookIssue::STATUS_ISSUED):
@@ -729,23 +835,159 @@ class IssueDeskController extends Controller
            to be recalculated later would let a change to the daily rate rewrite
            a settled charge. */
         $fine = $rules->fineFor($issue);
+        $note = $request->input('staff_note');
+
+        if ($fine > 0):
+            return $this->holdReturn($issue, $fine, $note);
+        endif;
 
         $issue->update([
             'status' => LibraryBookIssue::STATUS_RETURNED,
             'returned_at' => Carbon::now(),
             'returned_by' => auth()->id(),
-            'fine_amount' => $fine,
-            'staff_note' => $request->input('staff_note') ?: $issue->staff_note,
+            'fine_amount' => 0,
+            'staff_note' => $note ?: $issue->staff_note,
             'updated_by' => auth()->id(),
         ]);
 
-        $issue->log('returned', LibraryBookIssue::STATUS_ISSUED, $fine > 0 ? 'Charge £'.number_format($fine, 2) : $request->input('staff_note'));
+        $issue->log('returned', LibraryBookIssue::STATUS_ISSUED, $note);
 
         $this->catalogue->releaseCopy($issue->ops_copy_id, ['reason' => 'returned']);
 
+        return back()->with('library_success', $issue->reference.' returned.');
+    }
+
+    /**
+     * Hold a late return open until the charge is paid.
+     *
+     * Nothing about the loan changes: it stays out, it stays overdue, and it
+     * keeps accruing. What is saved is the desk's submission, which the
+     * payment turns into a return — see `LibraryFinePayment`.
+     *
+     * The flash carries the link because the desk is standing in front of the
+     * student: they pick Email or SMS in the dialog that opens on it, and the
+     * QR beside it means the student can pay before they walk away.
+     */
+    private function holdReturn(LibraryBookIssue $issue, float $fine, ?string $note)
+    {
+        if ($issue->fine_paid_at):
+            return back()->with('library_error', $issue->reference.' already has a settled charge — please check the ledger.');
+        endif;
+
+        if (!$this->fines->isAvailable()):
+            Log::error('[Library] PayPal is not configured; a late return cannot be held.', [
+                'reference' => $issue->reference,
+            ]);
+
+            return back()->with(
+                'library_error',
+                'Card payments are not available, so '.$issue->reference.' cannot be returned against a charge. '
+                .'Take the £'.number_format($fine, 2).' at the desk from the ledger instead.'
+            );
+        endif;
+
+        $deposit = $this->fines->submitReturn($issue, $fine, $note);
+
+        return back()->with('library_returned', $this->linkPayload($issue, $deposit));
+    }
+
+    /** Everything the payment dialog renders, for both the routes that open it. */
+    private function linkPayload(LibraryBookIssue $issue, LibraryDeposit $deposit): array
+    {
+        $student = $issue->student;
+
+        return [
+            'deposit_id' => $deposit->id,
+            'reference' => $issue->reference,
+            'title' => $issue->title,
+            'student' => trim(optional($student)->first_name.' '.optional($student)->last_name),
+            'amount' => number_format($deposit->amount, 2),
+            'link' => $this->fines->link($deposit),
+            'deadline' => optional($deposit->expires_at)->format('g:ia'),
+            'sent_via' => $deposit->sent_via,
+            'send_url' => route('library.management.charge.send', ['deposit' => $deposit->id]),
+            'reachable' => $this->fines->reachable($student),
+        ];
+    }
+
+    /**
+     * Reopen the payment dialog for a return already waiting.
+     *
+     * The dialog is shown once, when the return is submitted, and closing it
+     * would otherwise lose the link until midnight — with the student gone and
+     * the desk unable to submit the return again. This rebuilds the same flash
+     * the submission left behind, so the link, the QR and the send options all
+     * come back exactly as they were.
+     */
+    public function chargeLink(Request $request, $id)
+    {
+        $this->guard();
+
+        $issue = LibraryBookIssue::with('student')->findOrFail($id);
+
+        if (!$issue->hasPendingReturn()):
+            return back()->with('library_error', 'There is no return waiting on payment for '.$issue->reference.'.');
+        endif;
+
+        $deposit = LibraryDeposit::fines()
+            ->where('library_book_issue_id', $issue->id)
+            ->where('status', 'pending')
+            ->latest('id')
+            ->first();
+
+        if (!$deposit):
+            return back()->with('library_error', 'That payment link could not be found. Please contact support.');
+        endif;
+
+        return back()->with('library_returned', $this->linkPayload($issue, $deposit));
+    }
+
+    /**
+     * Send a payment link on, by the channels the desk picked.
+     *
+     * At least one is required by the dialog and again here — a link generated
+     * and never sent is a return that silently expires at midnight.
+     */
+    public function sendChargeLink(Request $request, $deposit)
+    {
+        $this->guard();
+
+        $request->validate([
+            'channels' => ['required', 'array', 'min:1'],
+            'channels.*' => ['required', 'string', 'in:email,sms'],
+        ], [
+            'channels.required' => 'Choose Email, SMS, or both.',
+        ]);
+
+        $deposit = LibraryDeposit::fines()->with('student', 'issue')->findOrFail($deposit);
+
+        if ($deposit->status !== 'pending'):
+            return back()->with('library_error', 'That charge is no longer waiting for payment.');
+        endif;
+
+        if ($deposit->hasExpired()):
+            return back()->with('library_error', 'That payment link has expired. Submit the return again to make a new one.');
+        endif;
+
+        $result = $this->fines->sendLink($deposit, $request->input('channels', []));
+
+        $names = ['email' => 'email', 'sms' => 'SMS'];
+        $sent = array_map(fn ($c) => $names[$c], $result['sent']);
+        $failed = array_map(fn ($c) => $names[$c], $result['failed']);
+
+        if (!$sent):
+            return back()->with(
+                'library_error',
+                'The link could not be sent by '.implode(' or ', $failed).' — there is no '
+                .(in_array('email', $result['failed'], true) ? 'address' : 'mobile number')
+                .' on file. Show the QR code at the desk instead.'
+            );
+        endif;
+
         return back()->with(
             'library_success',
-            $issue->reference.' returned.'.($fine > 0 ? ' £'.number_format($fine, 2).' is outstanding.' : '')
+            'Payment link sent by '.implode(' and ', $sent).' for '.$deposit->issue->reference.'.'
+            .($failed ? ' Nothing on file to send by '.implode(' or ', $failed).'.' : '')
         );
     }
 

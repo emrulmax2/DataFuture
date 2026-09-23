@@ -83,6 +83,23 @@ class AppServiceProvider extends ServiceProvider
         
         Schema::defaultStringLength(191);
 
+        /* Local and development run against a copy of the live database, so
+           every address in it belongs to a real student, tutor or agent. One
+           test of a reminder, a reservation or a payment link would write to
+           them from a developer's laptop.
+
+           So outside production every message goes to MAIL_REDIRECT_TO
+           instead, whoever it was addressed to. cc and bcc are dropped with
+           it. This mirrors SendSmsTrait, which already refuses to text anyone
+           from these environments.
+
+           Guarded on the environment as well as the value: this variable
+           finding its way into a production .env must not quietly divert real
+           mail to one inbox. */
+        if (config('mail.redirect_to') && !app()->environment('production')):
+            Mail::alwaysTo(config('mail.redirect_to'));
+        endif;
+
         // Supplies SMTP + template data for the global quick Send-Email / Send-SMS
         // popups so every student profile controller need not pass it explicitly.
         View::composer('pages.students.live.partials.quick-communication-modals', function ($view) {

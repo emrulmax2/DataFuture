@@ -12,7 +12,9 @@
     @php
         $depositHeld = (bool) $deposit;
         $openCount = $openLoans->count();
-        $owed = $openLoans->sum(fn ($loan) => $rules->fineFor($loan));
+        /* Everything still owed, including a charge frozen on a book already
+           returned — that is what now stands between them and borrowing. */
+        $owed = $rules->outstandingCharges($student->id);
 
         /* Some catalogue "covers" are PDFs, which an <img> cannot draw — the
            markup falls back to the placeholder icon underneath. */
@@ -122,7 +124,7 @@
         </div>
 
         @if($blockedReason && $depositHeld)
-            <div class="spf-notice">
+            <div class="spf-notice spf-notice--block">
                 <span class="spf-notice__icon"><i data-lucide="alert-triangle" class="w-4 h-4"></i></span>
                 <div class="spf-notice__text">{{ $blockedReason }}</div>
             </div>
@@ -242,8 +244,17 @@
                         <tbody>
                             @forelse($openLoans as $loan)
                                 @php
-                                    $fine = $rules->fineFor($loan);
                                     $left = $rules->daysRemaining($loan);
+
+                                    /* The desk has taken this book back and is
+                                       waiting on the charge. The loan still
+                                       reads as open — it is not returned until
+                                       the money lands — but the figure owed is
+                                       frozen, so the live accruing one must not
+                                       be shown beside a button that charges the
+                                       frozen one. */
+                                    $held = $payable[$loan->id] ?? null;
+                                    $fine = $held ? $held['amount'] : $rules->fineFor($loan);
                                 @endphp
                                 <tr>
                                     <td>
@@ -276,13 +287,19 @@
                                         @else
                                             <div class="slib-dates">{{ optional($loan->due_at)->format('j M Y') }}</div>
                                             <div class="{{ $fine > 0 ? 'slib-dates__late' : 'slib-dates__sub' }}">
-                                                {{ $fine > 0 ? abs($left).' days overdue' : $left.' days left' }}
+                                                @if($held)
+                                                    Handed back — pay by {{ $held['until'] }}
+                                                @else
+                                                    {{ $fine > 0 ? abs($left).' days overdue' : $left.' days left' }}
+                                                @endif
                                             </div>
                                         @endif
                                     </td>
                                     <td>
                                         @if($loan->status == 'requested')
                                             <span class="slib-status slib-status--wait">Awaiting collection</span>
+                                        @elseif($held)
+                                            <span class="slib-status slib-status--held">Awaiting payment</span>
                                         @elseif($fine > 0)
                                             <span class="slib-status slib-status--late">Overdue</span>
                                         @else
@@ -293,13 +310,25 @@
                                         £{{ number_format($fine, 2) }}
                                     </td>
                                     <td class="slib-table__right">
-                                        @if($loan->status == 'requested')
+                                        @if($held)
+                                            {{-- Leaves the portal for the same signed page the desk's
+                                                 link and QR code point at, so however the student got
+                                                 here they are paying through one route. --}}
+                                            <a href="{{ $held['url'] }}" class="slib-btn slib-btn--pay">
+                                                <i data-lucide="credit-card"></i>Pay £{{ number_format($held['amount'], 2) }}
+                                            </a>
+                                        @elseif($loan->status == 'requested')
                                             <button class="slib-btn slib-btn--danger libCancel" data-id="{{ $loan->id }}"
                                                     data-title="{{ $loan->title }}"
                                                     data-where="{{ trim(($loan->campus ?: '').(($loan->campus && $loan->location) ? ' · ' : '').($loan->location ?: '')) }}">
                                                 <i data-lucide="x-circle"></i>Cancel
                                             </button>
-                                        @elseif(!$loan->isDayReading() && $fine <= 0 && $loan->renewals < $rules->maxRenewals())
+                                        @elseif($fine > 0)
+                                            {{-- Still out, so the charge is still growing and there is
+                                                 no final figure to pay. Saying where it gets settled
+                                                 beats a dash that reads as "nothing you can do". --}}
+                                            <span class="slib-table__sub">Bring it to the library desk</span>
+                                        @elseif(!$loan->isDayReading() && $loan->renewals < $rules->maxRenewals())
                                             <button class="slib-btn slib-btn--ghost libRenew" data-id="{{ $loan->id }}">
                                                 <i data-lucide="refresh-cw"></i>Renew ({{ $rules->maxRenewals() - $loan->renewals }} left)
                                             </button>

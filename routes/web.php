@@ -88,6 +88,7 @@ use App\Http\Controllers\Student\Frontend\Auth\LoginController as StudentLoginCo
 use App\Http\Controllers\Student\Frontend\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Student\Frontend\LibraryController as StudentLibraryController;
 use App\Http\Controllers\PayPalWebhookController;
+use App\Http\Controllers\Library\FinePaymentController;
 use App\Http\Controllers\Library\IssueDeskController;
 use App\Http\Controllers\Student\Frontend\PersonalDetailController as StudentPersonalDetailController;
 use App\Http\Controllers\Student\Frontend\OtherPersonalInformationController as StudentOtherPersonalInformationController;
@@ -3844,6 +3845,9 @@ Route::middleware('auth')->group(function() {
         Route::post('library-management/day-reading', 'issueDayReading')->name('library.management.day.reading');
         Route::get('library-management/title/{titleId}', 'title')->name('library.management.title');
         Route::post('library-management/take-home', 'issueTakeHome')->name('library.management.take.home');
+        Route::post('library-management/charges/{id}/settle', 'settleCharge')->name('library.management.charge.settle');
+        Route::post('library-management/charges/{deposit}/send', 'sendChargeLink')->name('library.management.charge.send');
+        Route::get('library-management/charges/{id}/link', 'chargeLink')->name('library.management.charge.link');
         Route::post('library-management/{id}/issue', 'issue')->name('library.management.issue');
         Route::post('library-management/{id}/return', 'returnBook')->name('library.management.return');
         Route::post('library-management/{id}/cancel', 'cancel')->name('library.management.cancel');
@@ -4370,3 +4374,35 @@ Route::controller(ApplicanESignatureController::class)->group(function() {
 Route::post('paypal/webhook', [PayPalWebhookController::class, 'handle'])
     ->middleware('throttle:120,1')
     ->name('paypal.webhook');
+
+/* Paying a library charge from the link the desk hands out.
+   -------------------------------------------------------------------------
+   Outside every auth group on purpose. The link goes to a phone or an inbox,
+   and a charge is as often paid by a parent or a sponsor as by the student —
+   behind the student guard it would only work for the one person least likely
+   to be holding the phone.
+
+   What makes that safe is the signature: the URL names one charge and carries
+   no instruction, every figure is read from our own row, and money is only
+   ever recognised from a capture we make server-side. It expires with the
+   return submission behind it, at midnight. */
+Route::controller(FinePaymentController::class)->group(function () {
+    Route::get('library/pay/{deposit}', 'show')
+        ->middleware(['signed', 'throttle:60,1'])
+        ->name('library.fine.pay');
+
+    Route::post('library/pay/{deposit}', 'start')
+        ->middleware(['signed', 'throttle:30,1'])
+        ->name('library.fine.start');
+
+    /* Unsigned, because PayPal appends its own query string on the way back
+       and no signature survives that. It costs nothing: the token only says
+       which order to look at, never that anything was paid. */
+    Route::get('library/pay-complete', 'complete')
+        ->middleware('throttle:60,1')
+        ->name('library.fine.complete');
+
+    Route::get('library/pay-cancel', 'cancel')
+        ->middleware('throttle:60,1')
+        ->name('library.fine.cancel');
+});

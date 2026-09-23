@@ -141,8 +141,28 @@ class LibraryRules
      * banner, the disabled button, the guard on the write — wants to say why.
      */
     /**
+     * Everything this student still owes the library.
+     *
+     * A loan that is still out is charged at today's rate; one that has been
+     * returned carries the charge frozen on the row. Both count until
+     * `fine_paid_at` is set, which is what settling at the desk does.
+     */
+    public function outstandingCharges($studentId): float
+    {
+        return round(
+            LibraryBookIssue::where('student_id', $studentId)
+                ->whereNull('fine_paid_at')
+                ->get()
+                ->sum(fn (LibraryBookIssue $loan) => $loan->isOpen()
+                    ? $this->fineFor($loan)
+                    : (float) $loan->fine_amount),
+            2
+        );
+    }
+
+    /**
      * Why a student may not take a book home, as a code: `deposit`,
-     * `max_books`, `overdue`, or null when nothing stands in the way.
+     * `max_books`, `overdue`, `charges`, or null when nothing stands in the way.
      *
      * The decision lives here once. The student portal and the issue desk word
      * it differently — one speaks to the student, the other about them — so
@@ -173,6 +193,15 @@ class LibraryRules
             return 'overdue';
         endif;
 
+        /* Returning a late book freezes what was owed on the row but does not
+           pay it, so without this a student could hand the book back and
+           borrow again the same minute with the charge still outstanding.
+           Checked last: a book still out is answered by 'overdue', which tells
+           them the more useful thing to do first. */
+        if ($this->outstandingCharges($studentId) > 0):
+            return 'charges';
+        endif;
+
         return null;
     }
 
@@ -183,6 +212,8 @@ class LibraryRules
             'deposit' => 'Pay your refundable deposit to start borrowing.',
             'max_books' => 'You are holding the maximum of '.$this->maxBooks().' books. Return one to borrow another.',
             'overdue' => 'You have an overdue book. Return it before borrowing again.',
+            'charges' => 'You owe £'.number_format($this->outstandingCharges($studentId), 2)
+                .' in library charges. Settle it at the library desk to borrow again.',
             default => null,
         };
     }

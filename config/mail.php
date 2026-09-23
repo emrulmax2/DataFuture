@@ -127,4 +127,20 @@ return [
 
     'rate_limit_per_second' => env('MAIL_RATE_LIMIT_PER_SECOND', 1),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Redirect Every Recipient
+    |--------------------------------------------------------------------------
+    |
+    | Local and development run against a copy of the live database, so the
+    | addresses in it are real students, real staff and real agents. Set this
+    | and every message goes to it instead, whoever it was addressed to.
+    |
+    | Honoured only outside production — see AppServiceProvider. A value that
+    | leaked into a production .env must not silently divert real mail.
+    |
+    */
+
+    'redirect_to' => env('MAIL_REDIRECT_TO'),
+
 ];

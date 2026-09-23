@@ -76,14 +76,18 @@ import { createIcons, icons } from "lucide";
 
         const studentCell = (cell) => {
             const r = cell.getRow().getData();
-            return `
-                <div class="lib-media">
-                    ${thumb(r.student_photo, r.student_initials, "lib-media__avatar")}
-                    <div class="lib-media__copy">
-                        <div class="lib-media__title">${esc(r.student_name || "—")}</div>
-                        <div class="lib-media__sub">${esc(r.registration_no || "")}</div>
-                    </div>
+            const inner = `
+                ${thumb(r.student_photo, r.student_initials, "lib-media__avatar")}
+                <div class="lib-media__copy">
+                    <div class="lib-media__title">${esc(r.student_name || "—")}</div>
+                    <div class="lib-media__sub">${esc(r.registration_no || "")}</div>
                 </div>`;
+
+            // A deleted student leaves the loan behind with nothing to open, so
+            // the name stays plain text rather than a link to nowhere.
+            return r.student_url
+                ? `<a class="lib-media lib-media--link" href="${esc(r.student_url)}" title="Open student profile">${inner}</a>`
+                : `<div class="lib-media">${inner}</div>`;
         };
 
         const whereCell = (cell) => {
@@ -129,6 +133,12 @@ import { createIcons, icons } from "lucide";
             let [label, cls] = STATUS[r.status] || [r.status, "lib-status--void"];
             if (r.status === "issued" && r.overdue) [label, cls] = ["Overdue", "lib-status--late"];
 
+            /* Physically back on the counter, but still out on loan until the
+               charge is paid. Shown as its own state rather than as an ordinary
+               overdue: the desk has already done its half, and what is left is
+               chasing the money, not the book. */
+            if (r.return_pending) [label, cls] = [`Held to ${r.return_pending_until}`, "lib-status--held"];
+
             /* The charge belongs inside the pill: as a separate figure alongside
                it, it read as its own column and left "Overdue" looking like the
                whole story. */
@@ -156,13 +166,30 @@ import { createIcons, icons } from "lucide";
                         <i data-lucide="x-circle"></i>Cancel</button>`
                 );
             } else if (r.status === "issued") {
-                buttons.push(
-                    `<button class="lib-act-btn lib-act ${
-                        r.overdue ? "lib-act-btn--alert" : "lib-act-btn--ok"
-                    }" data-act="return" data-id="${r.id}" data-ref="${esc(r.reference)}" data-fine="${r.fine}"
-                        data-title="${esc(r.title)}" data-student="${esc(r.student_name || "")}">
-                        <i data-lucide="corner-down-left"></i>Return</button>`
-                );
+                /* A return already submitted is not offered again: pressing it
+                   would re-open the same charge against the same loan, and the
+                   desk would be left wondering which of two links is live.
+                   Settling the charge on the ledger is what moves it on. */
+                if (r.return_pending) {
+                    /* Reopens the dialog the submission put up, so a desk that
+                       closed it can still reach the link, the QR and the send
+                       options — the student is often still at the counter. */
+                    buttons.push(
+                        `<a href="${r.return_pending_url}" class="lib-act-btn lib-act-btn--held"
+                            title="Waiting on £${r.return_pending_fine.toFixed(2)} — expires ${esc(
+                            r.return_pending_until || ""
+                        )}">
+                            <i data-lucide="hourglass"></i>Payment link</a>`
+                    );
+                } else {
+                    buttons.push(
+                        `<button class="lib-act-btn lib-act ${
+                            r.overdue ? "lib-act-btn--alert" : "lib-act-btn--ok"
+                        }" data-act="return" data-id="${r.id}" data-ref="${esc(r.reference)}" data-fine="${r.fine}"
+                            data-title="${esc(r.title)}" data-student="${esc(r.student_name || "")}">
+                            <i data-lucide="corner-down-left"></i>Return</button>`
+                    );
+                }
             }
 
             if (r.logs && r.logs.length) {
@@ -280,6 +307,69 @@ import { createIcons, icons } from "lucide";
         $(returnModal).on("click", function (e) {
             if (e.target === returnModal) closeReturn();
         });
+
+        /* ---- payment link dialog ----
+           Rendered by the server only when a late return has just been held,
+           so its presence is the signal to open it: there is nothing to decide
+           here in JavaScript about whether a charge exists. */
+
+        const linkModal = document.getElementById("libLinkModal");
+
+        if (linkModal) {
+            const $sendGo = $("#libSendGo");
+            const $sendError = $("#libSendError");
+            const $channels = $(linkModal).find("input[name='channels[]']");
+
+            const closeLink = () => { linkModal.hidden = true; };
+
+            $(linkModal).on("click", "[data-lib-close]", closeLink);
+            $(linkModal).on("click", function (e) {
+                if (e.target === linkModal) closeLink();
+            });
+
+            /* The server rejects an empty set too — this is only so the desk
+               is told before the page reloads under them. */
+            $channels.on("change", () => $sendError.prop("hidden", true));
+
+            $("#libLinkForm").on("submit", function (e) {
+                if (!$channels.filter(":checked").length) {
+                    e.preventDefault();
+                    $sendError.prop("hidden", false);
+                    return;
+                }
+
+                $sendGo.prop("disabled", true);
+            });
+
+            /* Clipboard, with the oldest trick as the fallback: the desk may
+               well be on http, where navigator.clipboard does not exist. */
+            $("#libPayCopy").on("click", function () {
+                const field = document.getElementById("libPayUrl");
+                const $btn = $(this);
+                const $label = $btn.find("span");
+
+                const said = (text) => {
+                    $label.text(text);
+                    setTimeout(() => $label.text("Copy link"), 1800);
+                };
+
+                field.select();
+                field.setSelectionRange(0, 99999);
+
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(field.value)
+                        .then(() => said("Copied"))
+                        .catch(() => said("Press Ctrl+C"));
+                    return;
+                }
+
+                said(document.execCommand("copy") ? "Copied" : "Press Ctrl+C");
+            });
+
+            /* Server-rendered open, so it survives a JavaScript failure —
+               the link is the one thing on this page that must not be lost. */
+            refreshIcons();
+        }
 
         /* ---- cancel dialog ---- */
 

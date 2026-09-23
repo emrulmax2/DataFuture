@@ -37,6 +37,8 @@ class LibraryBookIssue extends Model
         'status', 'requested_at', 'issued_at', 'due_at', 'returned_at',
         'renewals', 'fine_amount', 'fine_paid_at', 'created_by', 'updated_by',
         'expires_at', 'issued_by', 'returned_by', 'cancelled_by', 'cancel_reason', 'staff_note',
+        'pending_return_at', 'pending_return_by', 'pending_return_note',
+        'pending_return_fine', 'pending_return_expires_at',
     ];
 
     protected $casts = [
@@ -48,7 +50,36 @@ class LibraryBookIssue extends Model
         'fine_paid_at' => 'datetime',
         'book_price' => 'decimal:2',
         'fine_amount' => 'decimal:2',
+        'pending_return_at' => 'datetime',
+        'pending_return_expires_at' => 'datetime',
+        'pending_return_fine' => 'decimal:2',
     ];
+
+    /**
+     * The desk has handed this back but the charge is unpaid.
+     *
+     * Only true for today's submission. An expired one is not a pending
+     * return any more, it is a loan still running late — and it reads that way
+     * here so a sweep that has not run yet cannot make the screen lie.
+     */
+    public function hasPendingReturn(): bool
+    {
+        return $this->pending_return_at !== null
+            && $this->pending_return_expires_at !== null
+            && $this->pending_return_expires_at->isFuture();
+    }
+
+    /** Clear a submission that was never paid for. The loan carries on. */
+    public function clearPendingReturn(): void
+    {
+        $this->update([
+            'pending_return_at' => null,
+            'pending_return_by' => null,
+            'pending_return_note' => null,
+            'pending_return_fine' => null,
+            'pending_return_expires_at' => null,
+        ]);
+    }
 
     /** Issues that still count against the borrowing limit. */
     public function scopeOpen($query)

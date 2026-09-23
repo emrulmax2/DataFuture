@@ -373,6 +373,14 @@
     color: var(--slib-dim);
 }
 
+/* Handed back, waiting on the charge. Gold rather than rust: the book is off
+   the student's hands and one payment away from done — reading it as an error
+   would overstate where they stand. */
+.slib-status--held {
+    background: var(--slib-creambg);
+    color: var(--slib-goldtxt);
+}
+
 /* ---------- Buttons ----------------------------------------------- */
 
 .slib-btn,
@@ -415,6 +423,23 @@
 
 .slib-btn--danger:hover {
     border-color: var(--slib-rust);
+}
+
+/* The only filled button in this table. Everything else here is optional —
+   this is the one thing standing between the student and borrowing again, so
+   it does not sit at the same weight as Renew. */
+.slib-btn--pay {
+    background: var(--slib-gold);
+    border-color: var(--slib-gold);
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.slib-btn--pay:hover {
+    background: var(--slib-goldtxt);
+    border-color: var(--slib-goldtxt);
+    color: #fff;
 }
 
 .slib-borrow {
@@ -906,4 +931,29 @@
 /* The book being cancelled, sitting alone in the body. */
 #libCancelWhere:empty {
     display: none;
+}
+
+/* The reason borrowing is closed to this student. The shared portal notice is
+   a quiet cream strip, which reads as an aside — but this one is the answer to
+   "why can't I borrow?", so it carries the rust used elsewhere for money owed
+   and overdue books, and a left edge to lift it off the page. Scoped to this
+   page: the same class carries ordinary messages on other portal screens. */
+.spf-notice.spf-notice--block {
+    align-items: center;
+    border-color: #e8c9b4;
+    border-left: 3px solid var(--slib-rust);
+    background: var(--slib-rustbg);
+}
+
+.spf-notice.spf-notice--block .spf-notice__icon {
+    background: rgba(154, 82, 38, 0.14);
+    color: var(--slib-rust);
+}
+
+.spf-notice.spf-notice--block .spf-notice__text {
+    /* The shared rule reserves room on the right for a dismiss control this
+       notice does not have, which left the text sitting off-centre. */
+    padding-right: 0;
+    color: #7a3f1c;
+    font-weight: 600;
 }

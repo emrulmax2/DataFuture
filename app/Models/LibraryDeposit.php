@@ -32,13 +32,22 @@ class LibraryDeposit extends Model
         'status', 'description', 'provider', 'provider_order_id',
         'provider_capture_id', 'provider_refund_id', 'payer_email',
         'collected_by', 'paid_at', 'refunded_at', 'failure_reason',
+        'expires_at', 'sent_via', 'sent_at',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'paid_at' => 'datetime',
         'refunded_at' => 'datetime',
+        'expires_at' => 'datetime',
+        'sent_at' => 'datetime',
     ];
+
+    /** A fine link is only good for the day it was made. */
+    public function hasExpired(): bool
+    {
+        return $this->expires_at !== null && $this->expires_at->isPast();
+    }
 
     public function student()
     {

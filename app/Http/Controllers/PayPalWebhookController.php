@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LibraryDeposit;
+use App\Services\LibraryFinePayment;
 use App\Services\PayPalClient;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -21,8 +22,10 @@ use Illuminate\Support\Facades\Log;
  */
 class PayPalWebhookController extends Controller
 {
-    public function __construct(private PayPalClient $paypal)
-    {
+    public function __construct(
+        private PayPalClient $paypal,
+        private LibraryFinePayment $fines,
+    ) {
     }
 
     public function handle(Request $request)
@@ -61,7 +64,7 @@ class PayPalWebhookController extends Controller
         return response()->json(['ok' => true]);
     }
 
-    /** The deposit this capture belongs to, found by our own reference. */
+    /** The ledger row this capture belongs to, found by our own reference. */
     private function deposit(array $resource): ?LibraryDeposit
     {
         $custom = (string) ($resource['custom_id'] ?? '');
@@ -72,6 +75,12 @@ class PayPalWebhookController extends Controller
             if ($deposit):
                 return $deposit;
             endif;
+        endif;
+
+        /* An overdue charge paid from a link. Same table, different reference,
+           because settling one also has to stamp the loan it belongs to. */
+        if ($fine = LibraryFinePayment::fromReference($custom)):
+            return $fine;
         endif;
 
         /* Falls back to the capture id, which is set once we have settled the
@@ -89,6 +98,20 @@ class PayPalWebhookController extends Controller
 
         if (!$deposit):
             Log::warning('[PayPal] Capture completed for an unknown deposit.', ['custom_id' => $resource['custom_id'] ?? null]);
+
+            return;
+        endif;
+
+        /* A fine settles through the service, because the ledger row is only
+           half of it: the loan it belongs to has to be stamped in the same
+           breath or the student stays blocked from borrowing after paying. */
+        if ($deposit->isFine()):
+            if ($this->fines->settle($deposit, [
+                'capture_id' => $resource['id'] ?? $deposit->provider_capture_id,
+                'payer_email' => data_get($resource, 'payer.email_address'),
+            ])):
+                Log::info('[PayPal] Library fine settled by webhook.', ['deposit' => $deposit->id]);
+            endif;
 
             return;
         endif;

@@ -22,10 +22,17 @@ class ReconcileLibraryDeposits extends Command
 
     public function handle(LibraryDepositReconciler $reconciler): int
     {
-        $counts = $reconciler->reconcileAll(
-            (int) $this->option('minutes'),
-            (int) $this->option('limit')
-        );
+        $minutes = (int) $this->option('minutes');
+        $limit = (int) $this->option('limit');
+
+        $counts = $reconciler->reconcileAll($minutes, $limit);
+
+        /* Overdue charges too. A fine settling is what completes a return, so
+           one this app never hears about leaves a book reading as out on loan
+           and a student blocked on money they have already paid. */
+        foreach ($reconciler->reconcileFines($minutes, $limit) as $key => $value):
+            $counts[$key] += $value;
+        endforeach;
 
         $this->info(sprintf(
             'Reconciled: %d paid, %d failed, %d still pending, %d skipped.',

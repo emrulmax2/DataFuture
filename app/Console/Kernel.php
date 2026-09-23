@@ -40,6 +40,11 @@ class Kernel extends ConsoleKernel
            nothing else would ever put it back. */
         $schedule->command('library:release-orphans')->dailyAt('03:15')->withoutOverlapping();
 
+        /* A late return is held only until midnight. Run just after, so the
+           charge starts the new day at its true figure and the desk is not
+           looking at a submission it can no longer complete. */
+        $schedule->command('library:expire-return-holds')->dailyAt('00:05')->withoutOverlapping();
+
         $schedule->command('coursecontentmissingteamnotification:cron')->weeklyOn(7, '23:45');
         $schedule->command('coursecontentmissingtutornotification:cron')->weeklyOn(7, '23:50');
 
