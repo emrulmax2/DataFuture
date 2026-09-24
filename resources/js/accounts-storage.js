@@ -61,7 +61,12 @@ var storageTransList = (function () {
                 {
                     title: "Date",
                     field: "transaction_date_2",
-                    width: '160',
+                    /* Wide enough for the longest date this formats to —
+                       "28th September, 2026" in Public Sans 700 at 13.5px —
+                       plus the 24px first-column indent and 10px right padding.
+                       At 160 the content box was 126px against ~144px of text,
+                       so every September and December date lost its year. */
+                    width: 190,
                     formatter(cell, formatterParams) { 
                         var html = '<div class="block relative">';
                                 html += '<div class="font-medium whitespace-nowrap '+(cell.getData().audit_status != 1 ? 'text-danger' : 'text-success')+'">';
@@ -104,6 +109,14 @@ var storageTransList = (function () {
                     title: "Details",
                     field: "detail",
                     headerHozAlign: "left",
+                    /* Details and Category were the only two columns without a
+                       width, so fitColumns split the leftover space equally
+                       between them — giving a 25-character category label the
+                       same room as a 150-character narrative. The slack is
+                       shared 3:1 instead, and each keeps a floor so neither
+                       collapses on a narrow screen. */
+                    minWidth: 260,
+                    widthGrow: 3,
                     formatter(cell, formatterParams) { 
                         var html = '<div class="relative">';
                                 var txts = '';
@@ -140,6 +153,13 @@ var storageTransList = (function () {
                     title: "Category",
                     field: "acc_category_id",
                     headerHozAlign: "left",
+                    /* Fits the common labels on one line and wraps the few long
+                       ones — "Staff Salary (Omniscient - Sub-contractor)" is the
+                       longest of the 112 — rather than holding open a column
+                       wide enough for an outlier nobody reads most days. */
+                    minWidth: 180,
+                    maxWidth: 300,
+                    widthGrow: 1,
                     formatter(cell, formatterParams) { 
                         var html = '';
                         if(cell.getData().transfer_bank_id > 0 && cell.getData().transaction_type == 2){

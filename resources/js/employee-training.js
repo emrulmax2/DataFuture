@@ -67,19 +67,38 @@ var employeeTrainingListTable = (function () {
                     title: "Start - End",
                     field: "start_date",
                     headerHozAlign: "left",
+                    /* Wide enough for the whole range on one line:
+                       "28th Sep, 2025 - 28th Sep, 2025" is the widest this can
+                       render, ~212px plus the cell's 36px of padding. It shared
+                       the flexible columns' 160px before, which is why every
+                       range broke in two. The room comes from Cost and Expire
+                       Date below, not from the three text columns. */
+                    width: 250,
                     formatter(cell, formatterParams){
-                        return cell.getData().start_date+' - '+cell.getData().end_date;
+                        /* Each date is wrapped so it cannot be split. On a
+                           narrower screen the line still breaks — it has to —
+                           but only between the two dates, never orphaning
+                           "5th" onto the next line away from "Feb, 2026". */
+                        return '<span class="ep-doc-daterange">'
+                            + '<span>'+cell.getData().start_date+' -</span> '
+                            + '<span>'+cell.getData().end_date+'</span>'
+                            + '</span>';
                     }
                 },
                 {
                     title: "Cost",
                     field: "cost",
                     headerHozAlign: "left",
+                    /* "£162.00" is the largest figure on file across 1,047
+                       rows, so this never needed a sixth of the table. */
+                    width: 92,
                 },
                 {
                     title: "Expire Date",
                     field: "expire_date",
                     headerHozAlign: "left",
+                    /* One date, ~92px, plus the cell's 36px of padding. */
+                    width: 140,
                 },
                 {
                     title: "Actions",
