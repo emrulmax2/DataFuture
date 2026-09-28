@@ -702,11 +702,15 @@ class DashboardController extends Controller
         $trackingStatus = (isset($request->trackingStatus) && $request->trackingStatus > 0 ? $request->trackingStatus : 0);
         $res = [];
         
-        $tutor_plans = PlansDateList::where('date', $theDate)->whereHas('plan', function($q) use($user_id){
-            $q->where('tutor_id', $user_id)->orWhere('personal_tutor_id', $user_id)->orWhereHas('tutorial', function($sq) use($user_id){
-                $sq->where('personal_tutor_id', $user_id);
-            });
-        })->get();
+        // Resolve the tutor's plans up front: a correlated whereHas (with a nested
+        // orWhereHas on tutorials) here pinned MySQL CPU on every dashboard load.
+        $tutorialParentIds = Plan::where('class_type', 'Tutorial')->where('personal_tutor_id', $user_id)
+                                ->where('parent_id', '>', 0)->pluck('parent_id')->unique()->toArray();
+        $myPlanIds = Plan::where(function($q) use($user_id, $tutorialParentIds){
+            $q->where('tutor_id', $user_id)->orWhere('personal_tutor_id', $user_id)->orWhereIn('id', $tutorialParentIds);
+        })->pluck('id')->toArray();
+
+        $tutor_plans = (!empty($myPlanIds) ? PlansDateList::where('date', $theDate)->whereIn('plan_id', $myPlanIds)->get() : collect());
         $date_list_ids = $tutor_plans->pluck('id')->unique()->toArray();
         $plan_ids = $tutor_plans->pluck('plan_id')->unique()->toArray();
 
@@ -730,7 +734,7 @@ class DashboardController extends Controller
                         'name' => $student->full_name,
                         'course' => (isset($student->activeCR->creation->course->name) && !empty($student->activeCR->creation->course->name) ? $student->activeCR->creation->course->name : ''),
                         'attendance' => $this->getStudentAttendanceRate($student->id, $plan_ids),
-                        'modules' => $this->getStudentModules($student->id, $plan_ids, $theDate, $trackingStatus),
+                        'modules' => $student_modules,
                         'attendance_ids' => !empty($attendance_ids) ? implode(',', $attendance_ids) : ''
                     ];
                 endif;
