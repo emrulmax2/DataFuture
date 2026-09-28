@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\LibraryBookSyncController;
 use App\Http\Controllers\Api\TermSyncController;
 use App\Http\Controllers\Api\CourseModuleSyncController;
 use App\Http\Controllers\Api\HrDepartmentSyncController;
+use App\Http\Controllers\Api\HrPayClaimSyncController;
 use App\Http\Controllers\Api\RoomSyncController;
 use App\Http\Controllers\Api\VenueSyncController;
 use App\Http\Controllers\Api\StudentSearchController;
@@ -113,6 +114,14 @@ Route::middleware(['client.credentials:sms.acc-transactions.write', 'throttle:sm
 });
 Route::middleware(['client.credentials:sms.file-manager.read', 'throttle:sms-sync'])->withoutMiddleware('throttle:api')->get('/file-manager/sync/download/{type}/{id}', [FileManagerSyncController::class, 'download'])
     ->whereIn('type', ['info', 'version', 'attachment'])->whereNumber('id');
+
+/* Paid payment claims from the Operations HR pay portal. Accounts settles a
+   batch over there and pushes it here, so the HR attendance report can show
+   what someone claimed in a month beside what they worked. Idempotent on the
+   claim reference — a retried push must not double a figure on that report. */
+Route::middleware(['client.credentials:sms.hr-pay-claims.write', 'throttle:sms-sync'])
+    ->withoutMiddleware('throttle:api')
+    ->post('/hr/pay-claims/push', [HrPayClaimSyncController::class, 'store']);
 
 // Attach a finalised interview-outcome PDF to an applicant and complete their
 // interview task (task_list_id = 7). Called by the LCC Operations app.

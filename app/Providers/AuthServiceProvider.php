@@ -45,6 +45,7 @@ class AuthServiceProvider extends ServiceProvider
             'sms.file-manager.read' => 'Read file manager folders and documents for external synchronization.',
             'sms.user-mobiles.read' => 'Read staff mobile numbers for external synchronization.',
             'sms.students.read' => 'Search students, so external systems can record which student a record concerns.',
+            'sms.hr-pay-claims.write' => 'Receive paid HR payment claims from the Operations pay portal.',
         ]);
         
         Passport::tokensExpireIn(now()->addDays(15));
