@@ -10,6 +10,7 @@ use App\Models\EmployeeAttendance;
 use App\Models\EmployeeLeave;
 use App\Models\EmployeeLeaveDay;
 use App\Models\EmployeeWorkType;
+use App\Models\HrPayClaim;
 use App\Models\EmployeeWorkingPattern;
 use App\Models\EmployeeWorkingPatternDetail;
 use App\Models\EmployeeWorkingPatternPay;
@@ -73,9 +74,18 @@ class AttendanceReportController extends Controller
                 $query->whereIn('id', $attendEmployees); 
             endif;
             $employees = $query->orderBy('first_name', 'ASC')->get();
+
+            /* What each person claimed in this month's pay cycle, pushed over
+               from the Operations pay portal when Accounts settled it. Read
+               once for the whole report rather than per row — this list runs to
+               every clocking employee, and a query per person would turn one
+               into sixty. */
+            $claimTotals = HrPayClaim::monthlyTotalsByEmployee($the_month);
+
             if($employees->count() > 0):
                 $html = '';
                 $TBHTML = '';
+                $totalClaim = 0;
                 $totalRows = 0;
                 $totalWorkingHours = 0;
                 $totalHolidayHours = 0;
@@ -94,6 +104,9 @@ class AttendanceReportController extends Controller
                                 $html .= '<span class="text-right">Working Pay</span>';
                                 $html .= '<span class="text-right">Holiday Pay</span>';
                                 $html .= '<span class="text-right">Bnk / SSP</span>';
+                                /* Before Gross Pay, because Gross is the sum of
+                                   everything to its left — claims included. */
+                                $html .= '<span class="text-right">Claim</span>';
                                 $html .= '<span class="text-right hr-att-gross-head">Gross Pay</span>';
                             $html .= '</div>';
 
@@ -120,7 +133,12 @@ class AttendanceReportController extends Controller
                                 $holiday_hours += (isset($bankHolidayDetails['bank_holiday_hours']) ? $bankHolidayDetails['bank_holiday_hours'] : 0);
                                 $holiday_pays = $this->calculateHoursPayment($holiday_hours, $payRate);
 
-                                $grossPay = $working_pays + $holiday_pays;
+                                /* Claims settled through the Operations pay
+                                   portal for this month's pay cycle. Part of
+                                   Gross Pay: it is money this person is paid
+                                   for the month, however it was claimed. */
+                                $claimPay = (float) ($claimTotals[$emp->id] ?? 0);
+                                $grossPay = $working_pays + $holiday_pays + $claimPay;
                                 $employeeName = $emp->first_name.' '.$emp->last_name;
                                 $jobTitle = (isset($emp->employment->employeeJobTitle->name) && !empty($emp->employment->employeeJobTitle->name) ? $emp->employment->employeeJobTitle->name : 'Staff');
                                 $worksNumber = (isset($emp->employment->works_number) && !empty($emp->employment->works_number) ? $emp->employment->works_number : (isset($emp->ni_number) && !empty($emp->ni_number) ? $emp->ni_number : $emp->id));
@@ -144,6 +162,7 @@ class AttendanceReportController extends Controller
                                     $TBHTML .= '<span class="hr-att-money">£'.number_format($working_pays, 2).'</span>';
                                     $TBHTML .= '<span class="'.($holiday_pays > 0 ? 'hr-att-warn' : 'hr-att-muted').'">'.$holidayPayText.'</span>';
                                     $TBHTML .= '<span>'.(!empty($sickLabel) ? '<span class="hr-att-chip">'.e($sickLabel).'</span>' : '<span class="hr-att-muted">£0.00</span>').'</span>';
+                                    $TBHTML .= '<span class="'.($claimPay > 0 ? 'hr-att-claim' : 'hr-att-muted').'">£'.number_format($claimPay, 2).'</span>';
                                     $TBHTML .= '<span class="hr-att-gross">£'.number_format($grossPay, 2).'</span>';
                                 $TBHTML .= '</a>';
 
@@ -153,6 +172,7 @@ class AttendanceReportController extends Controller
                                 $totalWorkingPay += $working_pays;
                                 $totalHolidayPay += $holiday_pays;
                                 $totalGrossPay += $grossPay;
+                                $totalClaim += $claimPay;
                             endif;
                         endforeach;
                         if(!empty($TBHTML)):
@@ -165,6 +185,7 @@ class AttendanceReportController extends Controller
                                 $html .= '<span class="hr-att-strong">£'.number_format($totalWorkingPay, 2).'</span>';
                                 $html .= '<span class="hr-att-strong">£'.number_format($totalHolidayPay, 2).'</span>';
                                 $html .= '<span></span>';
+                                $html .= '<span class="hr-att-claim">£'.number_format($totalClaim, 2).'</span>';
                                 $html .= '<span class="hr-att-gross">£'.number_format($totalGrossPay, 2).'</span>';
                             $html .= '</div>';
                         else:
@@ -611,10 +632,39 @@ class AttendanceReportController extends Controller
             endif;
         endfor;
 
+        /* Payment claims settled for this month's pay cycle, pushed over from
+           the Operations pay portal. Shown as one row under the days rather
+           than per claim: this table is a day-by-day record and a claim is not
+           a day — it is money for the month, so it reads as a single line
+           before the total it belongs to.
+
+           Counted into the month total for the same reason the summary column
+           on the report counts it: it is pay for the month, however it was
+           claimed. */
+        $claims = HrPayClaim::where('employee_id', $employee_id)->forMonth($monthStart)->orderBy('reference')->get();
+        $claimTotal = (float) $claims->sum('subtotal');
+
+        if ($claimTotal > 0):
+            $references = $claims->pluck('reference')->filter()->implode(', ');
+            $monthTotalPay += $claimTotal;
+
+            $html .= '<div class="ar-detail-grid ar-detail-row ar-detail-row--claim">';
+                $html .= '<span class="ar-detail-date">Payment Claims</span>';
+                $html .= '<span></span>';
+                $html .= '<span><span class="ar-detail-status">'.$claims->count().' '.($claims->count() === 1 ? 'claim' : 'claims').'</span></span>';
+                $html .= '<span></span>';
+                $html .= '<span></span>';
+                $html .= '<span></span>';
+                $html .= '<span class="text-right"><span class="ar-detail-pill ar-detail-pill--claim">£'.number_format($claimTotal, 2).'</span></span>';
+                $html .= '<span class="ar-detail-note">'.e($references).'</span>';
+            $html .= '</div>';
+        endif;
+
         $res = [];
         $res['workingHourTotal'] = ($workingHoursTotal > 0 ? $this->calculateHourMinute($workingHoursTotal) : '00:00');
         $res['holidayHourTotal'] = ($holidayHoursTotal > 0 ? $this->calculateHourMinute($holidayHoursTotal) : '00:00');
         $res['monthTotalPay'] = ($monthTotalPay > 0 ? '£'.number_format($monthTotalPay, 2) : '£0.00');
+        $res['claimTotal'] = $claimTotal;
         $res['html'] = $html;
         $res['dayCount'] = [
             'nwday' => $nwDay,
@@ -654,6 +704,9 @@ class AttendanceReportController extends Controller
         $theCollection[1][] = 'Holiday Pay (£)';
         $theCollection[1][] = 'Sick/SSP';
         $theCollection[1][] = 'Other Pay (£)';
+        /* Kept in the same order as the on-screen report so the spreadsheet
+           and the screen cannot disagree, with Gross Pay summing it. */
+        $theCollection[1][] = 'Claim (£)';
         $theCollection[1][] = 'Gross Pay (£)';
         $theCollection[1][] = 'Note';
 
@@ -679,6 +732,7 @@ class AttendanceReportController extends Controller
             endif;
 
             $employees = $query->orderBy('first_name', 'ASC')->get();
+            $claimTotals = HrPayClaim::monthlyTotalsByEmployee($the_month);
 
             $row = 2;
             if($employees->count() > 0):
@@ -705,7 +759,8 @@ class AttendanceReportController extends Controller
                         $holiday_hours += (isset($bankHolidayDetails['bank_holiday_hours']) ? $bankHolidayDetails['bank_holiday_hours'] : 0);
                         $holiday_pays = $this->calculateHoursPayment($holiday_hours, $payRate);
 
-                        $grossPay = $working_pays + $holiday_pays;
+                        $claimPay = (float) ($claimTotals[$emp->id] ?? 0);
+                        $grossPay = $working_pays + $holiday_pays + $claimPay;
 
                         $theCollection[$row][] = (isset($emp->employment->works_number) && !empty($emp->employment->works_number) ? $emp->employment->works_number : '');
                         $theCollection[$row][] = (isset($emp->ni_number) && !empty($emp->ni_number) ? $emp->ni_number : '');
@@ -719,6 +774,7 @@ class AttendanceReportController extends Controller
                         $theCollection[$row][] = number_format($holiday_pays, 2, '.', '');
                         $theCollection[$row][] = ($sickDays > 0 ? ($sickDays == 1 ? $sickDays.' Day' : $sickDays.' Days') : '');
                         $theCollection[$row][] = '';
+                        $theCollection[$row][] = number_format($claimPay, 2, '.', '');
                         $theCollection[$row][] = number_format($grossPay, 2, '.', '');
                         $theCollection[$row][] = '';
                         

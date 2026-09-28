@@ -313,6 +313,30 @@
             color: #6f4798;
         }
 
+        /* Claims, in the gold the report list uses for the same money. */
+        #attendanceDetailPage .ar-detail-pill--claim {
+            color: #8a6218;
+        }
+
+        /* Sits between the last day and the month total, and is tinted so it
+           reads as a line of its own rather than another day that happens to
+           have no hours against it. */
+        #attendanceDetailPage .ar-detail-row--claim {
+            background: #fdf9f0;
+            border-top: 1px solid #efe3c8;
+        }
+
+        #attendanceDetailPage .ar-detail-row--claim .ar-detail-date {
+            color: #8a6218;
+            font-weight: 700;
+        }
+
+        #attendanceDetailPage .ar-detail-row--claim .ar-detail-status {
+            background: #f7eed9;
+            border-color: #e9dcbc;
+            color: #8a6218;
+        }
+
         #attendanceDetailPage .ar-detail-row.nwRow {
             background: #fafafa;
         }

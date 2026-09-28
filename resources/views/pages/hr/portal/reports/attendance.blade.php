@@ -508,14 +508,19 @@
         }
 
         #attendanceReportPage .hr-att-report-table {
-            min-width: 1180px;
+            /* Widened with the Claim column; the wrapper scrolls horizontally
+               below this, so the row never compresses out of shape. */
+            min-width: 1320px;
         }
 
         #attendanceReportPage .hr-att-report-row {
             align-items: center;
             display: grid;
             gap: 12px;
-            grid-template-columns: 2fr 1fr 1.1fr 1.1fr 1.15fr 1.1fr .9fr 1.15fr;
+            /* Nine columns since Claim was added. It sits outside Gross Pay
+               rather than inside it — claims are settled through the pay
+               portal, not from hours worked. */
+            grid-template-columns: 2fr 1fr 1.1fr 1.1fr 1.15fr 1.1fr .9fr 1.15fr 1.15fr;
             min-height: 62px;
             padding: 12px 24px;
         }
@@ -601,6 +606,7 @@
         #attendanceReportPage .hr-att-strong,
         #attendanceReportPage .hr-att-warn,
         #attendanceReportPage .hr-att-muted,
+        #attendanceReportPage .hr-att-claim,
         #attendanceReportPage .hr-att-gross {
             font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
             font-size: 12.5px;
@@ -629,6 +635,13 @@
         #attendanceReportPage .hr-att-gross {
             color: var(--ar-green);
             font-size: 13px;
+            font-weight: 700;
+        }
+
+        /* Distinct from Gross Pay's green, because it is not part of it — this
+           money came through the pay portal, not from hours on the clock. */
+        #attendanceReportPage .hr-att-claim {
+            color: var(--ar-gold-dark);
             font-weight: 700;
         }
 
