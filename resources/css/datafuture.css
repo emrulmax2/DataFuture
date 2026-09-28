@@ -12912,6 +12912,38 @@ body.employee-profile-body .ep-tk-empty {
     font-size: 13px;
     line-height: 1.45;
     padding: 14px 18px;
+    /* Tabulator's own stylesheet sets `white-space: nowrap; overflow: hidden;
+       text-overflow: ellipsis` on every cell, so anything wider than its column
+       was silently truncated rather than wrapped. These tables are sized by
+       fitColumns, so a column is only ever as wide as the viewport allows —
+       which on the ten-column appraisal grid is not wide enough for a date,
+       let alone a full name.
+
+       `anywhere` rather than `break-all`: a name still breaks at its spaces
+       first, and only a single unbroken token too long for the column is split
+       mid-word. `break-all` would hyphenate "Chowdhury" across lines even when
+       there was a space available to break at. */
+    white-space: normal;
+    /* Fallback first: `overflow-wrap: anywhere` needs Safari 15.4, and the
+       older iPads around the college fall back to this, which wraps the same
+       way for everything except an over-long unbroken token. */
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+/* Ten columns in ~1208px. At 18px each side, padding alone claimed 360px of
+   that — more than a quarter of the table — squeezing every flexible column
+   to 77px of usable width against a date needing ~92px. Narrowed here only,
+   because the other tables on these pages carry far fewer columns and do not
+   need to buy the space back. */
+.ep-doc-page #employeeAppraisalListTable .tabulator-row .tabulator-cell {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.ep-doc-page #employeeAppraisalListTable .tabulator-header .tabulator-col .tabulator-col-content {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
 }
 
 .ep-doc-page .table-report--tabulator .tabulator-row .tabulator-cell:nth-child(2) {
@@ -13064,6 +13096,17 @@ body.employee-profile-body .ep-tk-empty {
 
 .ep-doc-page .ep-doc-card--accent-gold {
     border-left: 4px solid #e4b33c;
+}
+
+/* A date range on one line, breaking only between its two dates.
+
+   The cell wraps freely (see the tabulator-cell rule above), which is right for
+   prose but turned "5th Feb, 2026 - 5th Feb, 2026" into "5th Feb, 2026 - 5th"
+   over "Feb, 2026" — a break wherever one happened to fit. Holding each date
+   together leaves the space between them as the only place the line can give,
+   so on a narrow screen it falls to two tidy lines instead of a split date. */
+.ep-doc-page .ep-doc-daterange > span {
+    white-space: nowrap;
 }
 
 .ep-doc-page .ep-doc-tag {

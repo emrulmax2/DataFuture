@@ -93,7 +93,12 @@ var employeeAppraisalListTable = (function () {
                     title: "Status",
                     field: "status",
                     headerHozAlign: "left",
-                    width: 128,
+                    /* Sized to the widest pill it can hold — "Completed" at
+                       11.5px/700 is ~60px of text inside the tag's 22px of
+                       padding, so 82px, plus the cell's own 20px. The 128 it
+                       had was holding open space the six flexible columns
+                       needed more. */
+                    width: 104,
                     formatter(cell, formatterParams){
                         if(cell.getData().status == 3){
                             return '<span class="ep-doc-tag ep-doc-tag--teal">Completed</span>';

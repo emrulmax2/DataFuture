@@ -669,6 +669,14 @@
     color: #9aa5a2 !important;
     font-size: 12px;
     margin-top: 3px;
+    /* The line carries the code plus up to six badges — download, requisition,
+       assets, connection, payments. A row holding most of them runs past the
+       column and the formatter's `whitespace-nowrap` would clip it, so the
+       badges wrap onto a second line instead of disappearing. Set here rather
+       than as a utility class in the formatter, so it cannot depend on
+       Tailwind generating a class that appears only inside a JS string. */
+    flex-wrap: wrap;
+    row-gap: 3px;
 }
 
 /* Amounts */
