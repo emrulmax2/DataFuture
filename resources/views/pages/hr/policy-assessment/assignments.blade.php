@@ -218,7 +218,7 @@
                         </div>
                         <div class="modal-body ss-settings-modal__body">
                             <div class="ss-modal-field">
-                                <label for="edit_due_date">Due date</label>
+                                <label for="edit_due_date">Due date <span>*</span></label>
                                 <input id="edit_due_date" type="text" name="due_date" class="ss-modal-input datepicker due_date" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true" autocomplete="off">
                                 <div class="acc__input-error error-due_date"></div>
                             </div>

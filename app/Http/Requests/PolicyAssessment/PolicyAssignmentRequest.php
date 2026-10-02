@@ -68,7 +68,8 @@ class PolicyAssignmentRequest extends FormRequest
             'category_ids' => 'nullable|array',
             'category_ids.*' => ['required', $id, Rule::exists('policy_categories', 'id')->whereNull('deleted_at')],
             'level' => ['required', 'string', Rule::in(PolicyLevel::all())],
-            'due_date' => 'nullable|date|after_or_equal:today',
+            /* Every assignment is given a date to be done by. */
+            'due_date' => 'required|date|after_or_equal:today',
             'send_email' => 'nullable|boolean',
             'note' => 'nullable|string|max:1000',
         ];
@@ -94,6 +95,7 @@ class PolicyAssignmentRequest extends FormRequest
             'role_ids.*.exists' => 'One of the chosen roles is no longer available. Please pick the role again.',
             'category_ids.*.regex' => 'One of the chosen categories could not be found.',
             'category_ids.*.exists' => 'One of the chosen categories could not be found.',
+            'due_date.required' => 'Please choose a due date.',
             'due_date.date' => 'Please enter a valid due date.',
             'due_date.after_or_equal' => 'The due date cannot be in the past.',
             'note.max' => 'The note may not be longer than 1,000 characters.',

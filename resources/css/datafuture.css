@@ -8640,6 +8640,27 @@ fieldset.modInstSet legend{
     font-weight: 700;
 }
 .ep-tabs__link i, .ep-tabs__link svg { width: 14px; height: 14px; flex: none; }
+/* A tab that opens a menu of pages (Appraisal & Training). The theme moves the
+   open menu to <body>, so the scrolling tab bar never clips it and the menu
+   is styled by its own class rather than through .ep-tabs. */
+.ep-tabs__dropdown { flex: none; }
+button.ep-tabs__link {
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font-family: inherit;
+    line-height: inherit;
+}
+.ep-tabs__link .ep-tabs__caret { width: 12px; height: 12px; opacity: .65; margin-left: -1px; transition: transform .15s ease; }
+.ep-tabs__dropdown .dropdown-toggle[aria-expanded="true"] .ep-tabs__caret { transform: rotate(180deg); }
+.ep-tabs__menu { width: 232px; font-family: 'Public Sans', system-ui, sans-serif; }
+.ep-tabs__menu .dropdown-item { gap: 9px; font-size: 13px; font-weight: 500; }
+.ep-tabs__menu .dropdown-item i, .ep-tabs__menu .dropdown-item svg { width: 14px; height: 14px; flex: none; }
+.ep-tabs__menu .dropdown-item.is-active {
+    color: rgb(var(--color-success));
+    background: rgb(var(--color-success) / 0.10);
+    font-weight: 700;
+}
 
 /* ---------- Body shell ---------- */
 .ep-grid { max-width: 1320px; margin: 0 auto; padding: 24px 20px 70px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; align-items: start; }

@@ -203,7 +203,7 @@
                                     </p>
                                 </div>
                                 <div>
-                                    <label for="pa_ep_due" class="form-label">Due date</label>
+                                    <label for="pa_ep_due" class="form-label">Due date <span class="text-danger">*</span></label>
                                     <input id="pa_ep_due" type="text" name="due_date" class="form-control w-full datepicker due_date" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true" autocomplete="off">
                                     <div class="acc__input-error error-due_date text-danger mt-2"></div>
                                 </div>

@@ -55,7 +55,7 @@
 
                     <div class="ss-modal-grid">
                         <div class="ss-modal-field">
-                            <label for="pa_assign_due">Due date</label>
+                            <label for="pa_assign_due">Due date <span>*</span></label>
                             <input id="pa_assign_due" type="text" name="due_date" class="ss-modal-input datepicker due_date" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true" autocomplete="off">
                             <div class="acc__input-error error-due_date"></div>
                         </div>

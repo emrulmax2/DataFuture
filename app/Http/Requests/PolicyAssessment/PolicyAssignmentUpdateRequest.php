@@ -39,7 +39,9 @@ class PolicyAssignmentUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'due_date' => 'nullable|date',
+            /* A due date cannot be removed, and an older assignment that
+               never had one is given one when it is next edited. */
+            'due_date' => 'required|date',
             'note' => 'nullable|string|max:1000',
         ];
     }
@@ -47,6 +49,7 @@ class PolicyAssignmentUpdateRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'due_date.required' => 'Please choose a due date.',
             'due_date.date' => 'Please enter a valid due date.',
             'note.max' => 'The note may not be longer than 1,000 characters.',
         ];
