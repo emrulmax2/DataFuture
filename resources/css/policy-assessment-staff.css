@@ -1,0 +1,2744 @@
+/* Level pills and badge medallions, shared with the HR pages. @import must come first. */
+@import "./policy-assessment/levels.css";
+
+/* =========================================================================
+   My HR -> Policy Assessments (myhr-policy-*)
+   The list of assigned policies (numbered category sections with a card
+   grid, echoing the college website). Palette follows the my-account
+   shell (teal #0f7b76, ink #17312f, hairlines #e1eae9). The test itself
+   is the exam wizard at the end of this file (pexam-*).
+   Loaded only by pages/users/my-account/policy-assessments/*.
+   ========================================================================= */
+
+.myhr-policy {
+    background: #ffffff;
+    border: 1px solid #e1eae9;
+    border-left: 4px solid #0f7b76;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(11, 43, 40, 0.05);
+    color: #17312f;
+    margin-bottom: 22px;
+}
+
+.myhr-policy [hidden] {
+    display: none !important;
+}
+
+.myhr-policy-sr {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+}
+
+/* ---------------------------------------------------------------- header */
+.myhr-policy__header {
+    align-items: center;
+    border-bottom: 1px solid #edf3f2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 13px;
+    padding: 18px 26px;
+}
+.myhr-policy__header-icon {
+    align-items: center;
+    background: #e3f0ef;
+    border-radius: 10px;
+    color: #0f7b76;
+    display: flex;
+    flex: none;
+    height: 38px;
+    justify-content: center;
+    width: 38px;
+}
+.myhr-policy__header-icon svg {
+    height: 18px;
+    width: 18px;
+}
+.myhr-policy__header-text {
+    flex: 1;
+    min-width: 220px;
+}
+.myhr-policy__header-text h2 {
+    color: #12302d;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 0;
+}
+.myhr-policy__header-text p {
+    color: #5c7977;
+    font-size: 12.5px;
+    line-height: 1.5;
+    margin: 3px 0 0;
+}
+.myhr-policy__header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* --------------------------------------------------------------- buttons */
+.myhr-policy .myhr-policy-btn {
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #d4e3e1;
+    border-radius: 9px;
+    color: #17312f;
+    cursor: pointer;
+    display: inline-flex;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    gap: 7px;
+    justify-content: center;
+    line-height: 1;
+    min-height: 36px;
+    padding: 9px 14px;
+    text-decoration: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    white-space: nowrap;
+}
+.myhr-policy .myhr-policy-btn svg {
+    flex: none;
+    height: 15px;
+    width: 15px;
+}
+.myhr-policy .myhr-policy-btn:hover {
+    background: #f2f8f7;
+    border-color: #b9d4d1;
+    color: #0f4f4a;
+}
+.myhr-policy .myhr-policy-btn:focus-visible {
+    box-shadow: 0 0 0 3px rgba(15, 123, 118, 0.28);
+    outline: none;
+}
+.myhr-policy .myhr-policy-btn--primary {
+    background: #0f7b76;
+    border-color: #0f7b76;
+    color: #ffffff;
+}
+.myhr-policy .myhr-policy-btn--primary:hover {
+    background: #0c6660;
+    border-color: #0c6660;
+    color: #ffffff;
+}
+.myhr-policy .myhr-policy-btn--ghost {
+    background: transparent;
+    border-color: transparent;
+    color: #0f7b76;
+}
+.myhr-policy .myhr-policy-btn--ghost:hover {
+    background: #eef7f5;
+    border-color: #d6eae7;
+    color: #0c6660;
+}
+.myhr-policy .myhr-policy-btn.is-disabled,
+.myhr-policy .myhr-policy-btn[disabled] {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+.myhr-policy .myhr-policy-btn.is-disabled:hover,
+.myhr-policy .myhr-policy-btn[disabled]:hover {
+    background: #ffffff;
+    border-color: #d4e3e1;
+    color: #17312f;
+}
+.myhr-policy .myhr-policy-btn--primary.is-disabled,
+.myhr-policy .myhr-policy-btn--primary.is-disabled:hover,
+.myhr-policy .myhr-policy-btn--primary[disabled],
+.myhr-policy .myhr-policy-btn--primary[disabled]:hover {
+    background: #8fb9b6;
+    border-color: #8fb9b6;
+    color: #ffffff;
+}
+.myhr-policy .myhr-policy-btn.is-busy {
+    cursor: progress;
+}
+
+/* ---------------------------------------------------------------- notice */
+.myhr-policy-notice {
+    align-items: flex-start;
+    background: #eef7f5;
+    border-bottom: 1px solid #d6eae7;
+    color: #0f4f4a;
+    display: flex;
+    font-size: 13px;
+    gap: 10px;
+    line-height: 1.55;
+    padding: 13px 26px;
+}
+.myhr-policy-notice svg {
+    flex: none;
+    height: 16px;
+    margin-top: 2px;
+    width: 16px;
+}
+
+/* ----------------------------------------------------------- empty state */
+.myhr-policy-empty {
+    padding: 56px 26px 60px;
+    text-align: center;
+}
+.myhr-policy-empty__icon {
+    align-items: center;
+    background: #e3f0ef;
+    border-radius: 16px;
+    color: #0f7b76;
+    display: inline-flex;
+    height: 56px;
+    justify-content: center;
+    margin-bottom: 14px;
+    width: 56px;
+}
+.myhr-policy-empty__icon svg {
+    height: 26px;
+    width: 26px;
+}
+.myhr-policy-empty h3 {
+    color: #12302d;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 6px;
+}
+.myhr-policy-empty p {
+    color: #5c7977;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 0 auto;
+    max-width: 420px;
+}
+
+/* -------------------------------------------------------------- overview */
+.myhr-policy-overview {
+    border-bottom: 1px solid #edf3f2;
+    display: grid;
+    gap: 0;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+}
+.myhr-policy-summary,
+.myhr-policy-howto {
+    padding: 22px 26px;
+}
+.myhr-policy-howto {
+    background: #fafbfb;
+    border-left: 1px solid #edf3f2;
+}
+.myhr-policy-summary__label {
+    color: #0f7b76;
+    display: block;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+.myhr-policy-summary__figure {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 12px;
+}
+.myhr-policy-summary__figure strong {
+    color: #12302d;
+    font-family: "Newsreader", Georgia, "Times New Roman", serif;
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1;
+}
+.myhr-policy-summary__figure span {
+    color: #43605d;
+    font-size: 14px;
+    font-weight: 600;
+}
+.myhr-policy-progress {
+    background: #e6eeed;
+    border-radius: 999px;
+    height: 8px;
+    overflow: hidden;
+    width: 100%;
+}
+.myhr-policy-progress > span {
+    background: linear-gradient(90deg, #0f7b76, #19a394);
+    border-radius: 999px;
+    display: block;
+    height: 100%;
+    transition: width 0.25s ease;
+}
+.myhr-policy-progress--slim {
+    height: 6px;
+}
+.myhr-policy-summary__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    list-style: none;
+    margin: 16px 0 0;
+    padding: 0;
+}
+.myhr-policy-summary__stats li {
+    align-items: baseline;
+    background: #f5f8f8;
+    border: 1px solid #e6eeed;
+    border-radius: 10px;
+    display: inline-flex;
+    gap: 7px;
+    padding: 7px 12px;
+}
+.myhr-policy-summary__stats strong {
+    color: #12302d;
+    font-size: 16px;
+    font-weight: 700;
+}
+.myhr-policy-summary__stats span {
+    color: #5c7977;
+    font-size: 12.5px;
+    font-weight: 600;
+}
+.myhr-policy-summary__stats li.is-info {
+    background: #eef4fb;
+    border-color: #d8e5f4;
+}
+.myhr-policy-summary__stats li.is-info strong {
+    color: #1e5a96;
+}
+.myhr-policy-summary__stats li.is-alert {
+    background: #fdf0ee;
+    border-color: #f6d4cf;
+}
+.myhr-policy-summary__stats li.is-alert strong,
+.myhr-policy-summary__stats li.is-alert span {
+    color: #b42318;
+}
+.myhr-policy-steps {
+    display: grid;
+    gap: 9px;
+    list-style: none;
+    margin: 0 0 14px;
+    padding: 0;
+}
+.myhr-policy-steps li {
+    align-items: center;
+    color: #17312f;
+    display: flex;
+    font-size: 13.5px;
+    font-weight: 600;
+    gap: 10px;
+}
+.myhr-policy-steps li > span {
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #cfe6e2;
+    border-radius: 50%;
+    color: #0f7b76;
+    display: inline-flex;
+    flex: none;
+    font-family: "Newsreader", Georgia, "Times New Roman", serif;
+    font-size: 14px;
+    font-weight: 600;
+    height: 26px;
+    justify-content: center;
+    width: 26px;
+}
+.myhr-policy-howto__note {
+    align-items: flex-start;
+    color: #5c7977;
+    display: flex;
+    font-size: 12.5px;
+    gap: 8px;
+    line-height: 1.55;
+    margin: 0;
+}
+.myhr-policy-howto__note svg {
+    flex: none;
+    height: 15px;
+    margin-top: 2px;
+    width: 15px;
+}
+
+/* -------------------------------------------------------------- sections */
+.myhr-policy-sections {
+    padding: 6px 26px 12px;
+}
+.myhr-policy-section + .myhr-policy-section {
+    border-top: 1px solid #edf3f2;
+}
+.myhr-policy-section__head {
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    gap: 14px;
+    list-style: none;
+    padding: 18px 2px;
+    user-select: none;
+}
+.myhr-policy-section__head::-webkit-details-marker {
+    display: none;
+}
+.myhr-policy-section__head::marker {
+    content: "";
+}
+.myhr-policy-section__head:focus-visible {
+    border-radius: 10px;
+    box-shadow: 0 0 0 3px rgba(15, 123, 118, 0.28);
+    outline: none;
+}
+.myhr-policy-section__num {
+    color: #0f7b76;
+    flex: none;
+    font-family: "Newsreader", Georgia, "Times New Roman", serif;
+    font-size: 30px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    min-width: 40px;
+}
+.myhr-policy-section__title {
+    color: #12302d;
+    flex: 1;
+    font-family: "Newsreader", Georgia, "Times New Roman", serif;
+    font-size: 21px;
+    font-weight: 600;
+    line-height: 1.2;
+    min-width: 0;
+}
+.myhr-policy-section__count {
+    align-items: center;
+    background: #f3f7f6;
+    border: 1px solid #e1eae9;
+    border-radius: 999px;
+    color: #43605d;
+    display: inline-flex;
+    flex: none;
+    font-size: 12px;
+    font-weight: 700;
+    gap: 5px;
+    padding: 5px 11px;
+    white-space: nowrap;
+}
+.myhr-policy-section__count svg {
+    height: 13px;
+    width: 13px;
+}
+.myhr-policy-section__count.is-done {
+    background: #e3f5f0;
+    border-color: #c5e8de;
+    color: #0f766e;
+}
+.myhr-policy-section__chevron {
+    color: #5c7977;
+    flex: none;
+    height: 18px;
+    transition: transform 0.2s ease;
+    width: 18px;
+}
+.myhr-policy-section[open] .myhr-policy-section__chevron {
+    transform: rotate(180deg);
+}
+
+/* ------------------------------------------------------------ card grid */
+.myhr-policy-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+    padding: 0 0 24px;
+}
+.myhr-policy-card {
+    background: #ffffff;
+    border: 1px solid #e1eae9;
+    border-radius: 14px;
+    display: flex;
+    gap: 16px;
+    min-width: 0;
+    padding: 14px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.myhr-policy-card:hover {
+    border-color: #cfdedb;
+    box-shadow: 0 6px 18px rgba(11, 43, 40, 0.07);
+}
+.myhr-policy-card--passed {
+    background: linear-gradient(180deg, #fbfefd 0%, #ffffff 60%);
+}
+
+/* The cover: the policy's own thumbnail when HR has one, otherwise a plain
+   document cover in the category's colour with the title's initials. */
+.myhr-policy-cover {
+    align-items: center;
+    align-self: flex-start; /* keep the 7:9 page shape; stretching would crop thumbnails */
+    aspect-ratio: 7 / 9;
+    background-image: linear-gradient(160deg, #137b72 0%, #0f5a54 100%);
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(11, 43, 40, 0.18), inset 0 0 0 4px rgba(255, 255, 255, 0.07);
+    color: #ffffff;
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    padding-top: 12px; /* clear of the crest line */
+    position: relative;
+    width: 98px;
+}
+.myhr-policy-cover--tone-2 {
+    background-image: linear-gradient(160deg, #2e5680 0%, #1f3b5c 100%);
+}
+.myhr-policy-cover--tone-3 {
+    background-image: linear-gradient(160deg, #6f4d73 0%, #4f3552 100%);
+}
+.myhr-policy-cover--tone-4 {
+    background-image: linear-gradient(160deg, #8a7440 0%, #65552d 100%);
+}
+.myhr-policy-cover__crest {
+    font-size: 8.5px;
+    font-weight: 700;
+    left: 0;
+    letter-spacing: 0.24em;
+    opacity: 0.75;
+    position: absolute;
+    right: 0;
+    text-align: center;
+    top: 10px;
+}
+.myhr-policy-cover__initials {
+    font-family: "Newsreader", Georgia, "Times New Roman", serif;
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1;
+}
+.myhr-policy-cover__rule {
+    background: rgba(255, 255, 255, 0.5);
+    height: 2px;
+    margin: 8px 0 6px;
+    width: 24px;
+}
+.myhr-policy-cover__label {
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    opacity: 0.8;
+    text-transform: uppercase;
+}
+.myhr-policy-cover img {
+    background: #ffffff;
+    height: 100%;
+    inset: 0;
+    object-fit: cover;
+    position: absolute;
+    width: 100%;
+}
+
+.myhr-policy-card__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+.myhr-policy-card__title {
+    color: #12302d;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.35;
+    margin: 2px 0 0;
+    overflow-wrap: anywhere;
+}
+.myhr-policy-card__version {
+    color: #7a9391;
+    font-size: 12px;
+    margin-top: -3px;
+}
+.myhr-policy-card__meta {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(3, minmax(0, auto));
+    justify-content: start;
+    column-gap: 18px;
+    margin: 4px 0 0;
+}
+.myhr-policy-card__meta dt {
+    color: #7a9391;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+.myhr-policy-card__meta dd {
+    color: #17312f;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 2px 0 0;
+    white-space: nowrap;
+}
+.myhr-policy-card__meta dd.is-overdue {
+    color: #b42318;
+    font-weight: 700;
+}
+.myhr-policy-card__passed {
+    align-items: center;
+    color: #0f766e;
+    display: flex;
+    font-size: 13px;
+    font-weight: 700;
+    gap: 6px;
+    margin: 4px 0 0;
+}
+.myhr-policy-card__passed svg {
+    flex: none;
+    height: 16px;
+    width: 16px;
+}
+.myhr-policy-card__opened {
+    align-items: center;
+    color: #7a9391;
+    display: flex;
+    font-size: 12px;
+    gap: 6px;
+    margin: 0;
+}
+.myhr-policy-card__opened svg {
+    flex: none;
+    height: 13px;
+    width: 13px;
+}
+.myhr-policy-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 8px;
+}
+.myhr-policy-card__reason {
+    align-items: flex-start;
+    color: #8a5a12;
+    display: flex;
+    font-size: 12px;
+    font-weight: 600;
+    gap: 6px;
+    line-height: 1.45;
+    margin: 2px 0 0;
+}
+.myhr-policy-card__reason svg {
+    flex: none;
+    height: 13px;
+    margin-top: 1px;
+    width: 13px;
+}
+
+/* ---------------------------------------------------------- status pills */
+.myhr-policy-pill {
+    align-items: center;
+    align-self: flex-start;
+    background: #edf1f4;
+    border-radius: 999px;
+    color: #4a5d6b;
+    display: inline-flex;
+    font-size: 11.5px;
+    font-weight: 700;
+    gap: 5px;
+    line-height: 1.3;
+    padding: 3px 10px;
+}
+.myhr-policy-pill::before {
+    background: currentColor;
+    border-radius: 50%;
+    content: "";
+    height: 6px;
+    opacity: 0.85;
+    width: 6px;
+}
+.myhr-policy-pill--passed {
+    background: #e3f5f0;
+    color: #0f766e;
+}
+.myhr-policy-pill--in_progress {
+    background: #e7f0fa;
+    color: #1e5a96;
+}
+.myhr-policy-pill--overdue {
+    background: #fdecea;
+    color: #b42318;
+}
+.myhr-policy-pill--failed {
+    background: #fdf1dc;
+    color: #95560a;
+}
+.myhr-policy-pill--locked {
+    background: #f5e9e9;
+    color: #8a3434;
+}
+
+/* ------------------------------------------------------------ responsive */
+@media (max-width: 900px) {
+    .myhr-policy-overview {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .myhr-policy-howto {
+        border-left: 0;
+        border-top: 1px solid #edf3f2;
+    }
+}
+
+@media (max-width: 640px) {
+    .myhr-policy__header,
+    .myhr-policy-notice,
+    .myhr-policy-summary,
+    .myhr-policy-howto {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+    .myhr-policy-sections {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+    .myhr-policy-section__head {
+        flex-wrap: wrap;
+        gap: 8px 12px;
+    }
+    .myhr-policy-section__num {
+        font-size: 26px;
+        min-width: 34px;
+    }
+    .myhr-policy-section__title {
+        font-size: 18px;
+        /* fill the first row so the count drops under the heading */
+        min-width: calc(100% - 100px);
+    }
+    .myhr-policy-section__chevron {
+        order: 3;
+    }
+    .myhr-policy-section__count {
+        margin-left: 46px;
+        order: 4;
+    }
+    .myhr-policy__header-actions {
+        width: 100%;
+    }
+}
+
+@media (max-width: 420px) {
+    .myhr-policy-card {
+        gap: 12px;
+        padding: 12px;
+    }
+    .myhr-policy-cover {
+        width: 72px;
+    }
+    .myhr-policy-cover__initials {
+        font-size: 24px;
+    }
+    .myhr-policy-cover__crest,
+    .myhr-policy-cover__label {
+        font-size: 7.5px;
+    }
+    .myhr-policy-card__meta {
+        grid-template-columns: repeat(2, minmax(0, auto));
+    }
+    .myhr-policy-card__actions .myhr-policy-btn {
+        flex: 1 1 auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .myhr-policy *,
+    .myhr-policy *::before {
+        transition: none !important;
+    }
+}
+
+/* =========================================================================
+   Levels and badges. The medals and pills themselves come from
+   ./policy-assessment/levels.css; these rules place them on the staff
+   pages. Each level block sets --myhr-lvl-main / -soft / -ink (bronze,
+   silver, gold: the same values as App\Support\PolicyLevel::COLOURS).
+   ========================================================================= */
+.myhr-policy-award,
+.pexam-level,
+.myhr-policy-shelf__tally-item {
+    --myhr-lvl-main: #b0703a;
+    --myhr-lvl-soft: #f6e6d8;
+    --myhr-lvl-ink: #7a4a22;
+    --myhr-lvl-line: rgba(176, 112, 58, 0.32);
+}
+.myhr-policy-award--intermediate,
+.pexam-level--intermediate,
+.myhr-policy-shelf__tally-item--intermediate {
+    --myhr-lvl-main: #7b8794;
+    --myhr-lvl-soft: #eceff3;
+    --myhr-lvl-ink: #4a5563;
+    --myhr-lvl-line: rgba(123, 135, 148, 0.36);
+}
+.myhr-policy-award--expert,
+.pexam-level--expert,
+.myhr-policy-shelf__tally-item--expert {
+    --myhr-lvl-main: #c49a12;
+    --myhr-lvl-soft: #fbf2d3;
+    --myhr-lvl-ink: #7a5d00;
+    --myhr-lvl-line: rgba(196, 154, 18, 0.38);
+}
+
+/* ------------------------------------------------------------ badge shelf */
+.myhr-policy-shelf {
+    background: linear-gradient(180deg, #fafcfb 0%, #ffffff 100%);
+    border-bottom: 1px solid #edf3f2;
+    padding: 22px 26px 24px;
+}
+.myhr-policy-shelf__head {
+    align-items: flex-end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+.myhr-policy-shelf.is-empty .myhr-policy-shelf__head {
+    margin-bottom: 12px;
+}
+.myhr-policy-shelf__label {
+    color: #0f7b76;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    line-height: 1.3;
+    margin: 0;
+    text-transform: uppercase;
+}
+.myhr-policy-shelf__figure {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 8px 0 0;
+}
+.myhr-policy-shelf__figure strong {
+    color: #12302d;
+    font-family: "Newsreader", Georgia, "Times New Roman", serif;
+    font-size: 34px;
+    font-weight: 600;
+    line-height: 1;
+}
+.myhr-policy-shelf__figure span {
+    color: #43605d;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* tally: gold / silver / bronze counts */
+.myhr-policy-shelf__tally {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.myhr-policy-shelf__tally-item {
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid var(--myhr-lvl-line);
+    border-radius: 999px;
+    display: inline-flex;
+    gap: 7px;
+    padding: 4px 13px 4px 6px;
+}
+.myhr-policy-shelf__tally-medal .pa-badge-medal {
+    width: 20px;
+}
+.myhr-policy-shelf__tally-item strong {
+    color: var(--myhr-lvl-ink);
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1;
+}
+.myhr-policy-shelf__tally-item > span:last-child {
+    color: #5c7977;
+    font-size: 12.5px;
+    font-weight: 600;
+}
+.myhr-policy-shelf__tally-item.is-zero {
+    border-color: #e6eeed;
+}
+.myhr-policy-shelf__tally-item.is-zero .pa-badge-medal {
+    filter: grayscale(1);
+    opacity: 0.45;
+}
+.myhr-policy-shelf__tally-item.is-zero strong {
+    color: #7a9391;
+}
+
+/* the shelf: one award per badge */
+.myhr-policy-shelf__grid {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 178px), 1fr));
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.myhr-policy-award {
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #e3eae8;
+    border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(11, 43, 40, 0.04);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    padding: 20px 14px 16px;
+    position: relative;
+    text-align: center;
+}
+/* a thin band of the medal's metal along the top, and a soft glow behind it */
+.myhr-policy-award::before {
+    background: var(--myhr-lvl-main);
+    content: "";
+    height: 3px;
+    left: 0;
+    opacity: 0.85;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+.myhr-policy-award::after {
+    background: radial-gradient(closest-side, var(--myhr-lvl-soft) 0%, rgba(255, 255, 255, 0) 100%);
+    content: "";
+    height: 150px;
+    left: 50%;
+    pointer-events: none;
+    position: absolute;
+    top: -22px;
+    transform: translateX(-50%);
+    width: 190px;
+}
+.myhr-policy-award__stage {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+}
+/* the plinth shadow the medal stands on */
+.myhr-policy-award__stage::after {
+    background: radial-gradient(closest-side, rgba(15, 23, 42, 0.16) 0%, rgba(15, 23, 42, 0) 100%);
+    content: "";
+    height: 9px;
+    margin-top: 3px;
+    width: 62px;
+}
+.myhr-policy-award .pa-badge-medal--lg {
+    width: 74px;
+}
+.myhr-policy-award__body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    position: relative;
+    width: 100%;
+    z-index: 1;
+}
+.myhr-policy-award__level {
+    color: var(--myhr-lvl-ink);
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1.3;
+    text-transform: uppercase;
+}
+.myhr-policy-award__title {
+    color: #12302d;
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: 1.35;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+.myhr-policy-award__meta {
+    color: #5c7977;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 12px;
+    gap: 2px 10px;
+    justify-content: center;
+    line-height: 1.45;
+    margin: 2px 0 0;
+}
+.myhr-policy-award__meta span {
+    white-space: nowrap;
+}
+.myhr-policy-shelf__more {
+    display: flex;
+    justify-content: center;
+    margin-top: 14px;
+}
+.myhr-policy-shelf__more .myhr-policy-btn svg {
+    transition: transform 0.2s ease;
+}
+.myhr-policy-shelf__more .myhr-policy-btn.is-expanded svg {
+    transform: rotate(180deg);
+}
+
+/* no badges yet: what each level earns */
+.myhr-policy-shelf__empty {
+    align-items: center;
+    background: #ffffff;
+    border: 1px dashed #d4e3e1;
+    border-radius: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 24px;
+    padding: 14px 20px;
+}
+.myhr-policy-shelf__legend {
+    display: flex;
+    gap: 16px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.myhr-policy-shelf__legend-item {
+    align-items: center;
+    color: #5c7977;
+    display: flex;
+    flex-direction: column;
+    font-size: 11px;
+    font-weight: 700;
+    gap: 5px;
+}
+.myhr-policy-shelf__legend-item .pa-badge-medal {
+    opacity: 0.6;
+}
+.myhr-policy-shelf__empty-text {
+    flex: 1;
+    min-width: 220px;
+}
+.myhr-policy-shelf__empty-title {
+    color: #12302d;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.45;
+    margin: 0;
+}
+.myhr-policy-shelf__empty-note {
+    color: #5c7977;
+    font-size: 12.5px;
+    line-height: 1.5;
+    margin: 3px 0 0;
+}
+
+/* ------------------------------------------------------- cards: level */
+.myhr-policy-card__tags {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.myhr-policy-card__tags .pa-level-pill {
+    font-size: 11.5px;
+    gap: 5px;
+    line-height: 1.3;
+    min-height: 0;
+    padding: 2px 9px;
+}
+.myhr-policy-card__tags .pa-level-pill__dot {
+    height: 6px;
+    width: 6px;
+}
+.myhr-policy-card__award {
+    align-items: center;
+    color: #43605d;
+    display: flex;
+    font-size: 12.5px;
+    font-weight: 700;
+    gap: 7px;
+    margin: 0;
+}
+.myhr-policy-card__award .pa-badge-medal {
+    width: 22px;
+}
+.myhr-policy-card--level-beginner .myhr-policy-card__award {
+    color: #7a4a22;
+}
+.myhr-policy-card--level-intermediate .myhr-policy-card__award {
+    color: #4a5563;
+}
+.myhr-policy-card--level-expert .myhr-policy-card__award {
+    color: #7a5d00;
+}
+
+/* ---------------------------------------------- levels: responsive */
+@media (max-width: 640px) {
+    .myhr-policy-shelf {
+        padding: 18px 18px 20px;
+    }
+    .myhr-policy-shelf__head {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+/* Phones: each badge becomes a row (medal beside its caption), so a long
+   shelf stays short. */
+@media (max-width: 520px) {
+    .myhr-policy-shelf__grid {
+        gap: 10px;
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .myhr-policy-award {
+        flex-direction: row;
+        gap: 14px;
+        padding: 12px 14px 12px 12px;
+        text-align: left;
+    }
+    .myhr-policy-award::before {
+        bottom: 0;
+        height: auto;
+        right: auto;
+        width: 3px;
+    }
+    .myhr-policy-award::after {
+        height: 120px;
+        left: 38px;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 120px;
+    }
+    .myhr-policy-award__stage {
+        flex: none;
+        margin-bottom: 0;
+    }
+    .myhr-policy-award__stage::after {
+        height: 7px;
+        width: 44px;
+    }
+    .myhr-policy-award .pa-badge-medal--lg {
+        width: 52px;
+    }
+    .myhr-policy-award__meta {
+        justify-content: flex-start;
+    }
+    .myhr-policy-shelf__empty {
+        padding: 14px 16px;
+    }
+    .myhr-policy-shelf__empty-text {
+        min-width: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .myhr-policy-shelf__more .myhr-policy-btn svg {
+        transition: none;
+    }
+}
+
+/* =========================================================================
+   Exam mix and time limit on the list: the rules a card states
+   (questions, pass mark, time limit, the mix of question levels), the
+   clock of a test in progress and the link to the last result.
+   ========================================================================= */
+
+/* a second "how it works" note (timed tests) sits clear of the first */
+.myhr-policy-howto__note + .myhr-policy-howto__note {
+    margin-top: 8px;
+}
+
+/* ------------------------------------------------------ cards: the rules */
+.myhr-policy-card__rules {
+    border-top: 1px dashed #e1eae9;
+    display: grid;
+    gap: 4px;
+    margin-top: 4px;
+    padding-top: 9px;
+}
+.myhr-policy-card__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.myhr-policy-card__facts li {
+    align-items: center;
+    color: #43605d;
+    display: inline-flex;
+    font-size: 12px;
+    font-weight: 600;
+    gap: 5px;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+.myhr-policy-card__facts svg {
+    color: #7a9391;
+    flex: none;
+    height: 13px;
+    width: 13px;
+}
+.myhr-policy-card__facts li.is-timed {
+    color: #12302d;
+    font-weight: 700;
+}
+.myhr-policy-card__facts li.is-timed svg {
+    color: #0f7b76;
+}
+.myhr-policy-card__mix {
+    color: #7a9391;
+    font-size: 12px;
+    line-height: 1.45;
+    margin: 0;
+}
+.myhr-policy-card__clock {
+    align-items: center;
+    color: #1e5a96;
+    display: flex;
+    font-size: 12px;
+    font-weight: 700;
+    gap: 6px;
+    line-height: 1.45;
+    margin: 0;
+}
+.myhr-policy-card__clock svg {
+    flex: none;
+    height: 13px;
+    width: 13px;
+}
+.myhr-policy-card__clock.is-past {
+    color: #95560a;
+}
+
+
+/* the link from a card to the Result page of its last marked attempt */
+.myhr-policy .myhr-policy-card__result {
+    align-items: center;
+    align-self: flex-start;
+    color: #0f7b76;
+    display: inline-flex;
+    font-size: 12px;
+    font-weight: 700;
+    gap: 6px;
+    line-height: 1.45;
+    text-decoration: none;
+}
+.myhr-policy .myhr-policy-card__result:hover {
+    color: #0c6660;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.myhr-policy .myhr-policy-card__result:focus-visible {
+    border-radius: 4px;
+    box-shadow: 0 0 0 3px rgba(15, 123, 118, 0.28);
+    outline: none;
+}
+.myhr-policy-card__result svg {
+    flex: none;
+    height: 13px;
+    width: 13px;
+}
+
+/* =========================================================================
+   The exam wizard (pexam-*): a test sat in its own shell, in four steps -
+   Briefing, Questions, Review, Result.
+   layout/policy-exam.blade.php draws the shell: a sticky header (brand
+   mark, the four steps, the countdown of a timed test) over a thin
+   progress bar, then the page. start / take / result.blade.php are the
+   steps. Structure follows the wizard prototype; the colours are the
+   app's own - the dark teal and gold of the My HR top bar, teal #0f7b76
+   for what you press, ink #17312f, hairlines #e1eae9, on the #eff1f2
+   page. Amber marks flags and warnings, red marks tab exits and danger,
+   in the shades the list above already uses. Light theme only.
+   ========================================================================= */
+.pexam-body {
+    --pexam-surface: #ffffff;
+    --pexam-tint: #edf3f2;
+    --pexam-line: #e1eae9;
+    --pexam-line-soft: #edf3f2;
+    --pexam-line-strong: #b9d4d1;
+    --pexam-control: #8fb3af;
+    --pexam-ink: #17312f;
+    --pexam-head: #12302d;
+    --pexam-muted: #43605d;
+    --pexam-faint: #5c7977;
+    --pexam-teal: #0f7b76;
+    --pexam-teal-dark: #0c6660;
+    --pexam-teal-soft: #e3f0ef;
+    --pexam-teal-wash: #eef7f5;
+    --pexam-deep: #0a2724;
+    --pexam-gold: #e4b33c;
+    --pexam-ok: #0f766e;
+    --pexam-ok-soft: #e3f5f0;
+    --pexam-warn: #95560a;
+    --pexam-warn-ink: #7c4a06;
+    --pexam-warn-main: #c77d14;
+    --pexam-warn-soft: #fdf1dc;
+    --pexam-warn-line: #f1dfbd;
+    --pexam-bad: #b42318;
+    --pexam-bad-soft: #fdecea;
+    --pexam-bad-line: #f6d4cf;
+    --pexam-shadow: 0 1px 3px rgba(11, 43, 40, 0.05), 0 14px 30px -18px rgba(11, 43, 40, 0.28);
+    --pexam-display: "Newsreader", Georgia, "Times New Roman", serif;
+}
+
+.pexam-body [hidden] {
+    display: none !important;
+}
+.pexam-body *,
+.pexam-body *::before,
+.pexam-body *::after {
+    box-sizing: border-box;
+}
+.pexam-sr {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+}
+.pexam-body :focus-visible {
+    outline: 2px solid var(--pexam-teal);
+    outline-offset: 2px;
+}
+.pexam-body [tabindex="-1"]:focus {
+    outline: none;
+}
+.pexam-body .pexam-skip {
+    background: var(--pexam-surface);
+    border-radius: 0 0 10px 10px;
+    color: var(--pexam-teal-dark);
+    font-size: 14px;
+    font-weight: 700;
+    left: 16px;
+    padding: 10px 14px;
+    position: fixed;
+    top: 0;
+    transform: translateY(-110%);
+    z-index: 60;
+}
+.pexam-body .pexam-skip:focus {
+    transform: none;
+}
+
+/* ---------------------------------------------------------------- header */
+.pexam-top {
+    background: var(--pexam-deep);
+    color: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+}
+.pexam-top__in {
+    align-items: center;
+    display: flex;
+    gap: 16px;
+    margin: 0 auto;
+    max-width: 1120px;
+    min-height: 60px;
+    padding-inline: clamp(16px, 4vw, 32px);
+}
+.pexam-brand {
+    align-items: center;
+    display: flex;
+    flex: none;
+    gap: 10px;
+}
+.pexam-brand__mark {
+    align-items: center;
+    background: var(--pexam-gold);
+    border-radius: 9px;
+    color: var(--pexam-deep);
+    display: flex;
+    font-family: var(--pexam-display);
+    font-size: 12.5px;
+    font-weight: 700;
+    height: 32px;
+    justify-content: center;
+    width: 32px;
+}
+.pexam-brand__text {
+    color: #ffffff;
+    font-family: var(--pexam-display);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+}
+
+/* the four steps: done (tick), current, to do */
+.pexam-steps {
+    align-items: center;
+    display: flex;
+    flex: 1;
+    gap: 6px;
+    justify-content: center;
+    list-style: none;
+    margin: 0;
+    min-width: 0;
+    padding: 0;
+}
+.pexam-step {
+    align-items: center;
+    color: rgba(255, 255, 255, 0.64);
+    display: flex;
+    font-size: 13px;
+    font-weight: 500;
+    gap: 8px;
+    white-space: nowrap;
+}
+.pexam-step + .pexam-step::before {
+    background: rgba(255, 255, 255, 0.28);
+    content: "";
+    height: 1px;
+    width: clamp(10px, 3vw, 36px);
+}
+.pexam-step__dot {
+    align-items: center;
+    border: 1.5px solid rgba(255, 255, 255, 0.42);
+    border-radius: 50%;
+    display: flex;
+    flex: none;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    height: 24px;
+    justify-content: center;
+    line-height: 1;
+    width: 24px;
+}
+.pexam-step.is-done .pexam-step__dot {
+    background: var(--pexam-teal);
+    border-color: var(--pexam-teal);
+    color: #ffffff;
+}
+.pexam-step.is-now {
+    color: #ffffff;
+    font-weight: 700;
+}
+.pexam-step.is-now .pexam-step__dot {
+    background: #ffffff;
+    border-color: #ffffff;
+    color: var(--pexam-deep);
+}
+
+/* the countdown: calm, then amber, then red - with the words to match */
+.pexam-timer {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: #ffffff;
+    display: flex;
+    flex: none;
+    gap: 9px;
+    padding: 6px 13px 6px 11px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    white-space: nowrap;
+}
+.pexam-timer svg {
+    flex: none;
+    height: 17px;
+    width: 17px;
+}
+.pexam-timer__text {
+    display: grid;
+    gap: 2px;
+    justify-items: end;
+}
+.pexam-timer__state {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    line-height: 1.15;
+    text-transform: uppercase;
+}
+.pexam-timer__clock {
+    font-feature-settings: "tnum" 1;
+    font-size: 18px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1;
+}
+.pexam-timer[data-state="warn"] {
+    background: #fbe3bb;
+    color: var(--pexam-warn-ink);
+}
+.pexam-timer[data-state="danger"],
+.pexam-timer[data-state="done"] {
+    background: #fbd5d0;
+    color: #a01c12;
+}
+.pexam-timer[data-state="warn"] .pexam-timer__state,
+.pexam-timer[data-state="danger"] .pexam-timer__state,
+.pexam-timer[data-state="done"] .pexam-timer__state {
+    color: inherit;
+}
+.pexam-timer[data-state="danger"] {
+    animation: pexamPulse 1s ease-in-out infinite;
+}
+@keyframes pexamPulse {
+    50% {
+        opacity: 0.6;
+    }
+}
+
+/* progress through the questions: the gold strip of the My HR top bar */
+.pexam-bar {
+    background: #1f4a45;
+    height: 3px;
+}
+.pexam-bar i {
+    background: var(--pexam-gold);
+    display: block;
+    height: 100%;
+    transition: width 0.25s ease;
+    width: 0;
+}
+
+/* --------------------------------------------- "leaving was logged" notice */
+.pexam-notice {
+    margin: 14px auto 0;
+    max-width: 1120px;
+    padding-inline: clamp(16px, 4vw, 32px);
+    position: sticky;
+    top: 71px;
+    z-index: 30;
+}
+.pexam-notice__in {
+    align-items: center;
+    background: var(--pexam-bad-soft);
+    border: 1.5px solid var(--pexam-bad);
+    border-radius: 14px;
+    box-shadow: 0 10px 24px -14px rgba(120, 20, 10, 0.45);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    justify-content: space-between;
+    padding: 12px 16px;
+}
+.pexam-notice__in p {
+    color: var(--pexam-ink);
+    flex: 1 1 260px;
+    font-size: 15px;
+    line-height: 1.5;
+    margin: 0;
+    min-width: 0;
+}
+.pexam-notice__in strong {
+    color: var(--pexam-bad);
+}
+
+/* ------------------------------------------------------------------ shell */
+.pexam-wrap {
+    color: var(--pexam-ink);
+    font-size: 16px;
+    line-height: 1.5;
+    margin: 0 auto;
+    max-width: 1120px;
+    padding-block: clamp(24px, 5vw, 48px) 56px;
+    padding-inline: clamp(16px, 4vw, 32px);
+}
+/* a reset with no weight of its own (:where), so any class below can still set its padding */
+:where(.pexam-wrap) :where(h1, h2, p, ul, ol, dl, dd, fieldset) {
+    margin: 0;
+    padding: 0;
+}
+:where(.pexam-wrap) :where(ul, ol) {
+    list-style: none;
+}
+:where(.pexam-wrap) fieldset {
+    border: 0;
+    min-width: 0;
+}
+.pexam-eyebrow {
+    align-items: center;
+    color: var(--pexam-teal);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 12px;
+    font-weight: 700;
+    gap: 8px 10px;
+    letter-spacing: 0.08em;
+    line-height: 1.3;
+    text-transform: uppercase;
+}
+.pexam-eyebrow .pa-level-pill,
+.pexam-eyebrow .pexam-pill {
+    letter-spacing: 0;
+    text-transform: none;
+}
+.pexam-sub {
+    color: var(--pexam-muted);
+    font-size: 15px;
+    max-width: 60ch;
+}
+.pexam-fine {
+    color: var(--pexam-faint);
+    font-size: 13px;
+    line-height: 1.5;
+    text-align: center;
+}
+.pexam-fine--left {
+    text-align: left;
+}
+
+.pexam-pill {
+    align-items: center;
+    background: #edf1f4;
+    border-radius: 999px;
+    color: #4a5d6b;
+    display: inline-flex;
+    font-size: 12px;
+    font-weight: 700;
+    gap: 6px;
+    line-height: 1.35;
+    padding: 3px 10px;
+    white-space: nowrap;
+}
+.pexam-pill--ok {
+    background: var(--pexam-ok-soft);
+    color: var(--pexam-ok);
+}
+.pexam-pill--warn {
+    background: var(--pexam-warn-soft);
+    color: var(--pexam-warn);
+}
+.pexam-pill--bad {
+    background: var(--pexam-bad-soft);
+    color: var(--pexam-bad);
+}
+
+.pexam-body .pexam-btn {
+    align-items: center;
+    background: var(--pexam-surface);
+    border: 1.5px solid var(--pexam-line-strong);
+    border-radius: 11px;
+    color: var(--pexam-ink);
+    cursor: pointer;
+    display: inline-flex;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    gap: 8px;
+    justify-content: center;
+    line-height: 1.2;
+    min-height: 44px;
+    padding: 0 18px;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.pexam-body .pexam-btn:hover {
+    border-color: var(--pexam-teal);
+    color: var(--pexam-teal-dark);
+}
+.pexam-body .pexam-btn svg {
+    flex: none;
+    height: 16px;
+    width: 16px;
+}
+.pexam-body .pexam-btn--primary {
+    background: var(--pexam-teal);
+    border-color: var(--pexam-teal);
+    color: #ffffff;
+}
+.pexam-body .pexam-btn--primary:hover {
+    background: var(--pexam-teal-dark);
+    border-color: var(--pexam-teal-dark);
+    color: #ffffff;
+}
+.pexam-body .pexam-btn--lg {
+    font-size: 16px;
+    min-height: 52px;
+    padding: 0 24px;
+}
+.pexam-body .pexam-btn--sm {
+    font-size: 14px;
+    min-height: 38px;
+    padding: 0 14px;
+}
+.pexam-body .pexam-btn--block {
+    width: 100%;
+}
+.pexam-body .pexam-btn--ghost {
+    background: transparent;
+    border-color: transparent;
+    color: var(--pexam-muted);
+}
+.pexam-body .pexam-btn--ghost:hover {
+    background: var(--pexam-teal-soft);
+    border-color: transparent;
+    color: var(--pexam-teal-dark);
+}
+.pexam-body .pexam-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+.pexam-body .pexam-btn:disabled:hover {
+    border-color: var(--pexam-line-strong);
+    color: var(--pexam-ink);
+}
+.pexam-body .pexam-btn--primary:disabled,
+.pexam-body .pexam-btn--primary:disabled:hover {
+    background: #8fb9b6;
+    border-color: #8fb9b6;
+    color: #ffffff;
+    opacity: 1;
+}
+.pexam-body .pexam-btn.is-busy {
+    cursor: progress;
+}
+
+.pexam-alert {
+    align-items: flex-start;
+    background: var(--pexam-bad-soft);
+    border: 1px solid var(--pexam-bad-line);
+    border-radius: 12px;
+    color: var(--pexam-bad);
+    display: flex;
+    font-size: 14px;
+    font-weight: 600;
+    gap: 9px;
+    line-height: 1.5;
+    padding: 11px 14px;
+}
+.pexam-alert svg {
+    flex: none;
+    height: 16px;
+    margin-top: 2px;
+    width: 16px;
+}
+
+/* --------------------------------------------------------------- briefing */
+.pexam-brief {
+    align-items: start;
+    display: grid;
+    gap: clamp(24px, 5vw, 56px);
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+}
+.pexam-brief__main {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-width: 0;
+}
+.pexam-body .pexam-back {
+    align-items: center;
+    align-self: flex-start;
+    color: var(--pexam-teal);
+    display: inline-flex;
+    font-size: 13.5px;
+    font-weight: 600;
+    gap: 6px;
+    min-height: 32px;
+    text-decoration: none;
+}
+.pexam-body .pexam-back:hover {
+    color: var(--pexam-teal-dark);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.pexam-back svg {
+    height: 15px;
+    width: 15px;
+}
+.pexam-brief__title {
+    color: var(--pexam-head);
+    font-family: var(--pexam-display);
+    font-size: clamp(30px, 4.6vw, 44px);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.08;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+}
+.pexam-lede {
+    color: var(--pexam-muted);
+    font-size: 17px;
+    line-height: 1.55;
+    max-width: 52ch;
+}
+.pexam-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.pexam-chips li {
+    background: var(--pexam-surface);
+    border: 1px solid var(--pexam-line-strong);
+    border-radius: 999px;
+    color: var(--pexam-ink);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 5px 12px;
+}
+.pexam-chips li.is-overdue {
+    background: var(--pexam-bad-soft);
+    border-color: var(--pexam-bad-line);
+    color: var(--pexam-bad);
+}
+.pexam-rules {
+    border-top: 1px solid #d5e0de;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 2px;
+    padding-top: 20px;
+}
+.pexam-rules h2 {
+    color: var(--pexam-head);
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.25;
+}
+.pexam-rules ul {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+/* a block with a hanging bullet, not a grid: a rule may hold <strong> in the middle of its text */
+.pexam-rules li {
+    color: var(--pexam-muted);
+    font-size: 15px;
+    line-height: 1.55;
+    padding-left: 28px;
+    position: relative;
+}
+.pexam-rules li::before {
+    background: var(--pexam-teal);
+    border-radius: 2px;
+    content: "";
+    height: 7px;
+    left: 0;
+    position: absolute;
+    top: 9px;
+    width: 7px;
+}
+.pexam-rules strong {
+    color: var(--pexam-ink);
+    font-weight: 700;
+}
+
+/* the sheet: level, facts, read gate, Start */
+.pexam-sheet {
+    background: var(--pexam-surface);
+    border: 1px solid var(--pexam-line);
+    border-radius: 20px;
+    box-shadow: var(--pexam-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: clamp(18px, 3vw, 26px);
+}
+/* .pexam-level / .pexam-level--<level> only set the level's colours (see "Levels and badges") */
+.pexam-sheet__level {
+    align-items: center;
+    display: flex;
+    gap: 14px;
+}
+.pexam-sheet__medal {
+    flex: none;
+}
+.pexam-sheet__medal .pa-badge-medal {
+    width: 42px;
+}
+.pexam-sheet__level-text {
+    min-width: 0;
+}
+.pexam-sheet__level-text strong {
+    color: var(--myhr-lvl-ink);
+    display: block;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.3;
+}
+.pexam-sheet__level-text span {
+    color: var(--pexam-muted);
+    display: block;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-top: 1px;
+}
+.pexam-facts {
+    background: var(--pexam-line);
+    border: 1px solid var(--pexam-line);
+    border-radius: 14px;
+    display: grid;
+    gap: 1px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: hidden;
+}
+/* the figure first, its label under it */
+.pexam-facts > div {
+    background: var(--pexam-surface);
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 2px;
+    justify-content: flex-end;
+    min-width: 0;
+    padding: 13px 16px 14px;
+}
+.pexam-facts dd {
+    color: var(--pexam-head);
+    font-family: var(--pexam-display);
+    font-size: 28px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    line-height: 1.1;
+}
+.pexam-facts dd.is-words {
+    font-size: 20px;
+    line-height: 1.54;
+}
+.pexam-facts dt {
+    color: var(--pexam-faint);
+    font-size: 13px;
+    line-height: 1.4;
+}
+.pexam-gate {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.pexam-check {
+    align-items: start;
+    background: #f6faf9;
+    border: 1.5px dashed var(--pexam-line-strong);
+    border-radius: 14px;
+    color: var(--pexam-head);
+    cursor: pointer;
+    display: grid;
+    font-size: 15px;
+    font-weight: 600;
+    gap: 12px;
+    grid-template-columns: 22px minmax(0, 1fr);
+    line-height: 1.45;
+    padding: 14px;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.pexam-check:hover {
+    border-color: var(--pexam-teal);
+}
+.pexam-check:has(input:checked) {
+    background: var(--pexam-teal-wash);
+    border-color: var(--pexam-teal);
+    border-style: solid;
+}
+.pexam-check input[type="checkbox"] {
+    --tw-ring-color: rgba(15, 123, 118, 0.35);
+    accent-color: var(--pexam-teal);
+    border: 1.5px solid var(--pexam-control);
+    border-radius: 5px;
+    color: var(--pexam-teal);
+    cursor: pointer;
+    height: 20px;
+    margin: 1px 0 0;
+    width: 20px;
+}
+.pexam-check input[type="checkbox"]:checked {
+    background-color: var(--pexam-teal);
+    border-color: var(--pexam-teal);
+}
+
+/* -------------------------------------------------------------- questions */
+.pexam-test {
+    align-items: start;
+    display: grid;
+    gap: clamp(24px, 4vw, 48px);
+    grid-template-columns: minmax(0, 1fr) 296px;
+}
+.pexam-qcol {
+    min-width: 0;
+}
+.pexam-q {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    min-width: 0;
+}
+.pexam-qmeta {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.pexam-count {
+    color: var(--pexam-teal);
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1;
+}
+.pexam-count i {
+    color: var(--pexam-muted);
+    font-style: normal;
+    font-weight: 600;
+}
+.pexam-flag {
+    align-items: center;
+    background: var(--pexam-surface);
+    border: 1.5px solid var(--pexam-line-strong);
+    border-radius: 999px;
+    color: var(--pexam-ink);
+    cursor: pointer;
+    display: inline-flex;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    gap: 7px;
+    margin-left: auto;
+    min-height: 38px;
+    padding: 0 13px;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.pexam-flag:hover {
+    border-color: var(--pexam-warn-main);
+}
+.pexam-flag svg {
+    height: 14px;
+    width: 14px;
+}
+.pexam-flag[aria-pressed="true"] {
+    background: var(--pexam-warn-soft);
+    border-color: var(--pexam-warn-main);
+    color: var(--pexam-warn);
+}
+.pexam-flag[aria-pressed="true"] svg {
+    fill: currentColor;
+}
+.pexam-qtext {
+    color: var(--pexam-head);
+    font-size: clamp(21px, 3vw, 27px);
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    line-height: 1.3;
+    max-width: 34em;
+    overflow-wrap: anywhere;
+    scroll-margin-top: 96px;
+    text-wrap: balance;
+}
+.pexam-opts {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.pexam-opt {
+    align-items: center;
+    background: var(--pexam-surface);
+    border: 1.5px solid var(--pexam-line);
+    border-radius: 14px;
+    color: var(--pexam-ink);
+    cursor: pointer;
+    display: grid;
+    font-size: 15.5px;
+    gap: 14px;
+    grid-template-columns: 32px minmax(0, 1fr) 20px;
+    line-height: 1.45;
+    padding: 13px 16px;
+    position: relative;
+    transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+.pexam-opt:hover {
+    border-color: var(--pexam-line-strong);
+}
+/* still a radio: only drawn differently */
+.pexam-opt input {
+    height: 1px;
+    left: 16px;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 50%;
+    width: 1px;
+}
+.pexam-key {
+    align-items: center;
+    background: var(--pexam-tint);
+    border-radius: 9px;
+    color: var(--pexam-muted);
+    display: flex;
+    font-size: 13px;
+    font-weight: 700;
+    height: 32px;
+    justify-content: center;
+    line-height: 1;
+    transition: background-color 0.12s ease, color 0.12s ease;
+    width: 32px;
+}
+.pexam-opt__text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.pexam-tick {
+    border: 1.5px solid var(--pexam-control);
+    border-radius: 50%;
+    height: 20px;
+    width: 20px;
+}
+.pexam-opt.is-on,
+.pexam-opt:has(input:checked) {
+    background: var(--pexam-teal-wash);
+    border-color: var(--pexam-teal);
+}
+.pexam-opt.is-on .pexam-key,
+.pexam-opt:has(input:checked) .pexam-key {
+    background: var(--pexam-teal);
+    color: #ffffff;
+}
+.pexam-opt.is-on .pexam-tick,
+.pexam-opt:has(input:checked) .pexam-tick {
+    background: var(--pexam-teal);
+    border-color: var(--pexam-teal);
+    box-shadow: inset 0 0 0 4px var(--pexam-teal-wash);
+}
+.pexam-opt:has(input:focus-visible) {
+    outline: 2px solid var(--pexam-teal);
+    outline-offset: 2px;
+}
+.pexam-opt:has(input:disabled) {
+    cursor: default;
+    opacity: 0.72;
+}
+.pexam-qnav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+}
+.pexam-hint {
+    color: var(--pexam-muted);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 13px;
+    gap: 6px 18px;
+}
+.pexam-hint kbd {
+    background: var(--pexam-surface);
+    border: 1px solid var(--pexam-line-strong);
+    border-radius: 5px;
+    box-shadow: 0 1px 0 var(--pexam-line-strong);
+    color: var(--pexam-ink);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 3px 6px;
+}
+
+/* the rail: question navigator */
+.pexam-rail {
+    background: var(--pexam-surface);
+    border: 1px solid var(--pexam-line);
+    border-radius: 18px;
+    box-shadow: 0 1px 3px rgba(11, 43, 40, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 18px;
+    position: sticky;
+    top: 84px;
+}
+.pexam-rail__head {
+    align-items: baseline;
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+}
+.pexam-rail__head h2 {
+    color: var(--pexam-head);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+.pexam-rail__head span {
+    color: var(--pexam-faint);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    line-height: 1;
+}
+.pexam-grid {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.pexam-nb {
+    aspect-ratio: 1;
+    background: var(--pexam-surface);
+    border: 1.5px solid #cfdedb;
+    border-radius: 10px;
+    color: var(--pexam-muted);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    line-height: 1;
+    min-width: 0;
+    padding: 0;
+    position: relative;
+    width: 100%;
+}
+.pexam-nb:hover {
+    border-color: var(--pexam-teal);
+}
+.pexam-nb.is-ans {
+    background: var(--pexam-teal-soft);
+    border-color: transparent;
+    color: var(--pexam-teal-dark);
+}
+.pexam-nb.is-flg {
+    background: var(--pexam-warn-soft);
+    border-color: var(--pexam-warn-main);
+    color: var(--pexam-warn);
+}
+/* a flag is a mark as well as a colour */
+.pexam-nb.is-flg::after {
+    background: var(--pexam-warn-main);
+    border-radius: 50%;
+    content: "";
+    height: 6px;
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    width: 6px;
+}
+.pexam-nb.is-cur {
+    border-color: var(--pexam-teal);
+    box-shadow: 0 0 0 2px var(--pexam-teal);
+}
+.pexam-legend {
+    color: var(--pexam-faint);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 12px;
+    gap: 6px 14px;
+}
+.pexam-legend li {
+    align-items: center;
+    display: flex;
+    gap: 6px;
+}
+.pexam-legend i {
+    background: var(--pexam-surface);
+    border: 1.5px solid #cfdedb;
+    border-radius: 4px;
+    height: 12px;
+    width: 12px;
+}
+.pexam-legend .is-ans {
+    background: var(--pexam-teal-soft);
+    border-color: var(--pexam-teal);
+}
+.pexam-legend .is-flg {
+    background: var(--pexam-warn-soft);
+    border-color: var(--pexam-warn-main);
+}
+.pexam-exits {
+    align-self: flex-start;
+}
+
+/* ------------------------------------------------- review and result pages */
+.pexam-page {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin: 0 auto;
+    max-width: 860px;
+}
+.pexam-page__head {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.pexam-page h1 {
+    color: var(--pexam-head);
+    font-family: var(--pexam-display);
+    font-size: clamp(27px, 4.4vw, 38px);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.12;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+}
+.pexam-page h2 {
+    align-items: center;
+    color: var(--pexam-head);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 17px;
+    font-weight: 700;
+    gap: 8px 10px;
+    line-height: 1.25;
+}
+.pexam-tally {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.pexam-tally .pexam-pill {
+    font-size: 13px;
+    padding: 6px 12px;
+}
+.pexam-rows {
+    background: var(--pexam-surface);
+    border: 1px solid var(--pexam-line);
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.pexam-row {
+    align-items: center;
+    display: grid;
+    gap: 14px;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    padding: 14px 16px;
+}
+.pexam-row + .pexam-row {
+    border-top: 1px solid var(--pexam-line-soft);
+}
+.pexam-num {
+    align-items: center;
+    background: var(--pexam-tint);
+    border-radius: 10px;
+    color: var(--pexam-muted);
+    display: flex;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    height: 34px;
+    justify-content: center;
+    line-height: 1;
+    width: 34px;
+}
+.pexam-num.is-ans {
+    background: var(--pexam-teal-soft);
+    color: var(--pexam-teal-dark);
+}
+.pexam-num.is-flg {
+    background: var(--pexam-warn-soft);
+    color: var(--pexam-warn);
+}
+.pexam-row__body {
+    min-width: 0;
+}
+.pexam-row__q {
+    color: var(--pexam-head);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+.pexam-row__a {
+    align-items: center;
+    color: var(--pexam-muted);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 14px;
+    gap: 6px 8px;
+    margin-top: 3px;
+    overflow-wrap: anywhere;
+}
+.pexam-act {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+}
+.pexam-act--result {
+    justify-content: flex-start;
+}
+.pexam-confirm {
+    background: var(--pexam-teal-wash);
+    border: 1.5px solid var(--pexam-teal);
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 18px;
+}
+.pexam-confirm p {
+    color: var(--pexam-ink);
+    font-size: 15px;
+}
+.pexam-confirm .pexam-confirm__title {
+    color: var(--pexam-head);
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+.pexam-confirm__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+/* the clock reached zero */
+.pexam-timeup {
+    align-items: center;
+    background: var(--pexam-surface);
+    border: 1px solid var(--pexam-bad-line);
+    border-radius: 22px;
+    box-shadow: var(--pexam-shadow);
+    gap: 12px;
+    max-width: 560px;
+    padding: clamp(24px, 5vw, 40px);
+    text-align: center;
+}
+.pexam-timeup__icon {
+    align-items: center;
+    background: #fbd5d0;
+    border-radius: 16px;
+    color: #d92d20;
+    display: flex;
+    height: 56px;
+    justify-content: center;
+    width: 56px;
+}
+.pexam-timeup__icon svg {
+    height: 26px;
+    width: 26px;
+}
+.pexam-timeup p {
+    color: var(--pexam-muted);
+    font-size: 16px;
+    max-width: 44ch;
+}
+.pexam-timeup.is-failed p {
+    color: #a01c12;
+    font-weight: 600;
+}
+.pexam-timeup__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 6px;
+}
+
+/* ----------------------------------------------------------------- result */
+.pexam-verdict {
+    align-items: center;
+    background: var(--pexam-surface);
+    border: 1px solid var(--pexam-line);
+    border-radius: 22px;
+    box-shadow: var(--pexam-shadow);
+    display: grid;
+    gap: clamp(18px, 4vw, 32px);
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: clamp(20px, 4vw, 32px);
+}
+.pexam-verdict--pass {
+    background: linear-gradient(135deg, #f1faf7 0%, #ffffff 70%);
+    border-color: #c5e8de;
+}
+.pexam-verdict--fail {
+    background: linear-gradient(135deg, #fff9ef 0%, #ffffff 70%);
+    border-color: var(--pexam-warn-line);
+}
+.pexam-ring {
+    aspect-ratio: 1;
+    max-width: 100%;
+    position: relative;
+    width: clamp(112px, 26vw, 148px);
+}
+.pexam-ring svg {
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+.pexam-ring__track {
+    fill: none;
+    stroke: #e6eeed;
+    stroke-width: 10;
+}
+.pexam-ring__value {
+    fill: none;
+    stroke: var(--pexam-teal);
+    stroke-linecap: round;
+    stroke-width: 10;
+}
+.pexam-ring--fail .pexam-ring__value {
+    stroke: var(--pexam-warn-main);
+}
+.pexam-ring__n {
+    align-items: center;
+    color: var(--pexam-head);
+    display: flex;
+    font-family: var(--pexam-display);
+    font-size: clamp(26px, 6.4vw, 36px);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    inset: 0;
+    justify-content: center;
+    line-height: 1;
+    position: absolute;
+}
+.pexam-ring__n small {
+    color: var(--pexam-faint);
+    font-size: 0.48em;
+    font-weight: 600;
+    margin-left: 1px;
+}
+.pexam-verdict__text {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+}
+.pexam-verdict__policy {
+    align-items: center;
+    color: var(--pexam-ink);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 15px;
+    font-weight: 600;
+    gap: 6px 10px;
+}
+.pexam-line {
+    color: var(--pexam-muted);
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+}
+.pexam-note {
+    align-items: flex-start;
+    align-self: flex-start;
+    background: var(--pexam-warn-soft);
+    border: 1px solid var(--pexam-warn-line);
+    border-radius: 10px;
+    color: var(--pexam-warn-ink);
+    display: flex;
+    font-size: 13.5px;
+    font-weight: 600;
+    gap: 8px;
+    line-height: 1.5;
+    padding: 8px 12px;
+}
+.pexam-note svg {
+    flex: none;
+    height: 15px;
+    margin-top: 2px;
+    width: 15px;
+}
+.pexam-duo {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+}
+.pexam-panel {
+    background: var(--pexam-surface);
+    border: 1px solid var(--pexam-line);
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+    padding: 20px;
+}
+.pexam-panel--alert {
+    background: var(--pexam-bad-soft);
+    border-color: var(--pexam-bad-line);
+}
+.pexam-panel--alert h2 {
+    color: var(--pexam-bad);
+}
+.pexam-panel--alert p {
+    color: var(--pexam-ink);
+    font-size: 15px;
+}
+.pexam-panel--badge {
+    background: linear-gradient(115deg, var(--myhr-lvl-soft) 0%, #ffffff 78%);
+    border-color: var(--myhr-lvl-line);
+}
+.pexam-badge {
+    align-items: center;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: auto minmax(0, 1fr);
+}
+.pexam-badge__medal .pa-badge-medal {
+    width: 72px;
+}
+.pexam-badge__text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+.pexam-badge__text strong {
+    color: var(--pexam-head);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+.pexam-badge__text span {
+    color: var(--pexam-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+.pexam-body .pexam-badge__text a {
+    align-self: flex-start;
+    color: var(--pexam-teal);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.pexam-body .pexam-badge__text a:hover {
+    color: var(--pexam-teal-dark);
+}
+.pexam-leaves li {
+    align-items: baseline;
+    color: var(--pexam-ink);
+    display: grid;
+    font-size: 14px;
+    gap: 14px;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding: 9px 0;
+}
+.pexam-leaves li + li {
+    border-top: 1px solid var(--pexam-line-soft);
+}
+.pexam-leaves time,
+.pexam-leaves b {
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+.pexam-leaves time {
+    color: var(--pexam-faint);
+}
+.pexam-leaves b {
+    color: var(--pexam-bad);
+}
+
+/* ------------------------------------------------------ wizard: responsive */
+@media (max-width: 860px) {
+    .pexam-brief,
+    .pexam-test {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .pexam-rail {
+        position: static;
+    }
+    .pexam-grid {
+        grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+    }
+    /* no keyboard to hint at */
+    .pexam-hint {
+        display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .pexam-brand__text {
+        display: none;
+    }
+    /* dots, plus the name of the step you are on */
+    .pexam-step:not(.is-now) .pexam-step__label {
+        border: 0;
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        white-space: nowrap;
+        width: 1px;
+    }
+    .pexam-steps {
+        justify-content: flex-start;
+    }
+    .pexam-flag {
+        min-height: 44px;
+    }
+    .pexam-qnav .pexam-btn {
+        flex: 1;
+    }
+    .pexam-row {
+        grid-template-columns: 34px minmax(0, 1fr);
+    }
+    .pexam-body .pexam-row .pexam-btn {
+        grid-column: 2;
+        justify-self: start;
+        min-height: 44px;
+    }
+    .pexam-body .pexam-notice .pexam-btn {
+        min-height: 44px;
+    }
+    .pexam-act .pexam-btn,
+    .pexam-confirm__actions .pexam-btn,
+    .pexam-timeup__actions .pexam-btn {
+        flex: 1 1 auto;
+    }
+    .pexam-verdict {
+        grid-template-columns: minmax(0, 1fr);
+        justify-items: start;
+    }
+    .pexam-leaves li {
+        gap: 2px 12px;
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+    .pexam-leaves li span {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+}
+
+@media (max-width: 480px) {
+    .pexam-top__in {
+        gap: 12px;
+    }
+    .pexam-steps {
+        gap: 5px;
+        overflow: hidden;
+    }
+    .pexam-step {
+        gap: 6px;
+    }
+    .pexam-step + .pexam-step::before {
+        display: none;
+    }
+    .pexam-step__dot {
+        height: 22px;
+        width: 22px;
+    }
+    .pexam-timer {
+        padding: 6px 10px 6px 9px;
+    }
+    .pexam-facts dd {
+        font-size: 25px;
+    }
+    .pexam-facts dd.is-words {
+        font-size: 17px;
+        line-height: 1.62;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pexam-body *,
+    .pexam-body *::before,
+    .pexam-body *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}

@@ -18,6 +18,7 @@
         ['show' => $hrPortal,                'route' => 'employee.documents',           'match' => ['employee.documents'],                             'icon' => 'file-text',   'label' => 'Documents'],
         ['show' => $hrPortal,                'route' => 'employee.notes',               'match' => ['employee.notes'],                                 'icon' => 'sticky-note', 'label' => 'Notes'],
         ['show' => true,                     'route' => 'employee.appraisal',           'match' => ['employee.appraisal', 'employee.appraisal.documents'], 'icon' => 'award',   'label' => 'Appraisal & Training'],
+        ['show' => $hrPortal && \App\Services\PolicyAssessmentService::canManage(), 'route' => 'employee.policy.assessment', 'match' => ['employee.policy.assessment'], 'icon' => 'clipboard-check', 'label' => 'Policy Assessments'],
         ['show' => $hrPortal && $canPriv && $legacyPrivilegeLive, 'route' => 'employee.privilege', 'match' => ['employee.privilege'],              'icon' => 'lock',        'label' => 'Privilege (Old)'],
         ['show' => $hrPortal && $canPriv,    'route' => 'employee.privilege.new',       'match' => ['employee.privilege.new'],                         'icon' => 'shield-check','label' => $legacyPrivilegeLive ? 'Privilege (New)' : 'Privilege'],
         ['show' => $hrPortal,                'route' => 'employee.time.keeper',         'match' => ['employee.time.keeper'],                           'icon' => 'clock',       'label' => 'Time Recorded'],

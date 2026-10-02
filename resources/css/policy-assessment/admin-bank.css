@@ -1,0 +1,2018 @@
+/* Policy Assessments: categories, question bank, questions pages, shared section nav (.pa-*). */
+
+/* ==========================================================================
+   Section nav (shared by every Policy Assessments admin page)
+   ========================================================================== */
+
+.site-settings-redesign-body .pa-section-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 16px;
+    padding: 6px;
+    border: 1px solid #eae7de;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(20, 34, 74, 0.03);
+}
+
+.site-settings-redesign-body .pa-section-nav a.pa-section-nav__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 8px 16px;
+    border-radius: 10px;
+    color: #5a6675;
+    font-size: 13.5px;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+    transition: background 0.16s ease, color 0.16s ease;
+}
+
+.site-settings-redesign-body .pa-section-nav a.pa-section-nav__link svg {
+    width: 16px;
+    height: 16px;
+    color: #9aa3b0;
+}
+
+.site-settings-redesign-body .pa-section-nav a.pa-section-nav__link:hover {
+    background: #f6f4ec;
+    color: #16264f;
+}
+
+.site-settings-redesign-body .pa-section-nav a.pa-section-nav__link.is-active {
+    background: #16264f;
+    color: #fff;
+}
+
+.site-settings-redesign-body .pa-section-nav a.pa-section-nav__link.is-active svg {
+    color: #e8c877;
+}
+
+.site-settings-redesign-body .pa-section-nav a.pa-section-nav__link:focus-visible {
+    outline: 3px solid rgba(22, 38, 79, 0.25);
+    outline-offset: 1px;
+}
+
+/* ==========================================================================
+   Shared bits for the bank pages
+   ========================================================================== */
+
+.site-settings-redesign-body .pa-breadcrumb-current {
+    max-width: 38ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.site-settings-redesign-body .pa-bank-card .ss-table-card__header > div {
+    min-width: 0;
+}
+
+.site-settings-redesign-body .pa-bank-card .ss-table-card__header p {
+    margin: 5px 0 0;
+    color: #8a93a1;
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+/* Cells stay on one line; when the columns need more room than the card the
+   table scrolls sideways instead of wrapping cells onto a second line. */
+.site-settings-redesign-body .pa-bank-card .ss-tabulator .tabulator-row {
+    white-space: nowrap;
+}
+
+.site-settings-redesign-body .pa-bank-card .ss-tabulator .tabulator-header .tabulator-col .tabulator-col-content,
+.site-settings-redesign-body .pa-bank-card .ss-tabulator .tabulator-row .tabulator-cell {
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+.site-settings-redesign-body .pa-categories-card .ss-tabulator .tabulator-row .tabulator-cell,
+.site-settings-redesign-body .pa-policies-card .ss-tabulator .tabulator-row .tabulator-cell {
+    min-height: 68px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.site-settings-redesign-body .pa-bank-card .ss-tabulator .tabulator-cell[tabulator-field="actions"] {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 7px;
+    text-align: right;
+}
+
+.site-settings-redesign-body .pa-bank-card .ss-tabulator .tabulator-cell[tabulator-field="actions"] .ss-row-action {
+    margin-left: 0;
+}
+
+.site-settings-redesign-body .pa-name-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.site-settings-redesign-body .pa-name-cell__icon {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    flex: 0 0 34px;
+    place-items: center;
+    border-radius: 10px;
+    background: #f4ecd9;
+    color: #b48729;
+}
+
+.site-settings-redesign-body .pa-name-cell__icon svg {
+    width: 17px;
+    height: 17px;
+}
+
+.site-settings-redesign-body .pa-name-cell__body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.site-settings-redesign-body .pa-name-cell__body strong,
+.site-settings-redesign-body .ss-page a.pa-name-cell__link {
+    overflow: hidden;
+    color: #16264f;
+    font-size: 13.5px;
+    font-weight: 850;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: normal;
+}
+
+.site-settings-redesign-body .ss-page a.pa-name-cell__link:hover {
+    color: #1f7a5c;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.site-settings-redesign-body .pa-name-cell__body small {
+    display: block;
+    overflow: hidden;
+    color: #7a8494;
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.site-settings-redesign-body .pa-meta {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 6px;
+    white-space: normal !important;
+}
+
+.site-settings-redesign-body .pa-meta__dot {
+    color: #c2cad4;
+}
+
+.site-settings-redesign-body .ss-page a.pa-inline-link,
+.site-settings-redesign-body a.pa-inline-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #1c5097;
+    font-weight: 800;
+}
+
+.site-settings-redesign-body a.pa-inline-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.site-settings-redesign-body .pa-inline-link svg,
+.site-settings-redesign-body .pa-muted-warn svg {
+    width: 13px;
+    height: 13px;
+}
+
+.site-settings-redesign-body .pa-muted-warn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #a86a07;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.site-settings-redesign-body .pa-stack {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+    white-space: normal;
+}
+
+.site-settings-redesign-body .pa-stack strong {
+    color: #16264f;
+    font-size: 13.5px;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.site-settings-redesign-body .pa-stack small {
+    color: #7a8494;
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.2;
+}
+
+.site-settings-redesign-body .pa-count {
+    color: #5a6675;
+    font-size: 13px;
+    font-weight: 650;
+    line-height: 1.2;
+}
+
+.site-settings-redesign-body .pa-count strong {
+    font-size: 14px;
+}
+
+.site-settings-redesign-body .pa-count__sep {
+    margin: 0 2px;
+    color: #c2cad4;
+}
+
+.site-settings-redesign-body .pa-bank-num {
+    color: #16264f;
+    font-size: 14px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.site-settings-redesign-body .pa-bank-num--muted {
+    color: #8a93a1;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.site-settings-redesign-body .pa-pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.site-settings-redesign-body .pa-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 22px;
+    padding: 3px 9px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.site-settings-redesign-body .pa-pill svg {
+    width: 12px;
+    height: 12px;
+    stroke-width: 2.2;
+}
+
+.site-settings-redesign-body .pa-pill--danger {
+    border-color: #f4cbcb;
+    background: #fde7e7;
+    color: #c23b3b;
+}
+
+.site-settings-redesign-body .pa-pill--amber,
+.site-settings-redesign-body .ss-page a.pa-pill--amber {
+    border-color: #f0d9a4;
+    background: #fdf3dc;
+    color: #8f5f00;
+}
+
+.site-settings-redesign-body a.pa-pill--amber:hover {
+    border-color: #e5c275;
+    background: #fbe9bf;
+}
+
+.site-settings-redesign-body .pa-pill--muted {
+    border-color: #dde2e9;
+    background: #f1f3f6;
+    color: #5a6675;
+}
+
+.site-settings-redesign-body .pa-pill--success {
+    border-color: #b9e4db;
+    background: #eefaf7;
+    color: #0f6f66;
+}
+
+/* Text for screen readers only. */
+.site-settings-redesign-body .pa-visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    border: 0 !important;
+    white-space: nowrap !important;
+}
+
+/* Question Bank list: per-level active / total ("B 18/20"), one mini level pill each. */
+.site-settings-redesign-body .pa-qcount {
+    gap: 6px;
+}
+
+.site-settings-redesign-body .pa-lvl-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+}
+
+.site-settings-redesign-body .pa-lvl-mini,
+.site-settings-redesign-body .ss-page a.pa-lvl-mini {
+    position: relative;
+    display: inline-flex;
+    border-radius: 999px;
+    text-decoration: none;
+}
+
+/* Compact: three fit side by side in the column, so no dot (the letter and tint name the level). */
+.site-settings-redesign-body .pa-lvl-mini .pa-level-pill {
+    min-height: 20px;
+    padding: 2px 6px;
+    font-size: 10.5px;
+    font-variant-numeric: tabular-nums;
+}
+
+.site-settings-redesign-body .pa-lvl-mini .pa-level-pill__dot {
+    display: none;
+}
+
+/* Nothing active at this level: red and dashed, so it is not colour alone. */
+.site-settings-redesign-body .pa-lvl-mini.is-gap .pa-level-pill {
+    border-color: #e9a9a9;
+    border-style: dashed;
+    background: #fdecec;
+    color: #b43636;
+}
+
+.site-settings-redesign-body a.pa-lvl-mini:hover .pa-level-pill {
+    box-shadow: 0 0 0 2px rgba(22, 38, 79, 0.12);
+}
+
+.site-settings-redesign-body a.pa-lvl-mini:focus-visible {
+    outline: 3px solid rgba(22, 38, 79, 0.3);
+    outline-offset: 1px;
+}
+
+/* Question Bank list: the test rules cell ("10 questions · 80% to pass", then time limit, then attempts). */
+.site-settings-redesign-body .pa-rules {
+    gap: 4px;
+}
+
+.site-settings-redesign-body .pa-rules strong .pa-meta__dot {
+    color: #9aa3b0;
+    font-weight: 600;
+}
+
+.site-settings-redesign-body .pa-rules .pa-rules__line {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.site-settings-redesign-body .pa-rules__line svg {
+    width: 13px;
+    height: 13px;
+    flex: 0 0 13px;
+    color: #9aa3b0;
+}
+
+/* A timed test stands out from the untimed default. */
+.site-settings-redesign-body .pa-rules .pa-rules__line.is-timed {
+    color: #16264f;
+    font-weight: 800;
+}
+
+.site-settings-redesign-body .pa-rules__line.is-timed svg {
+    color: #b48729;
+}
+
+.site-settings-redesign-body .ss-status-pill.pa-pill--archived {
+    border-color: #dde2e9;
+    background: #f1f3f6;
+    color: #6b7686;
+}
+
+.site-settings-redesign-body .ss-status-pill.pa-pill--archived > span {
+    background: #9aa3b0;
+}
+
+/* Switch (policy + question active state). */
+.site-settings-redesign-body .pa-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 2px;
+    border: 0;
+    background: transparent;
+    color: #6b7686;
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.site-settings-redesign-body .pa-switch__track {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    flex: 0 0 36px;
+    border-radius: 999px;
+    background: #d5dae2;
+    transition: background 0.16s ease;
+}
+
+.site-settings-redesign-body .pa-switch__thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(20, 34, 74, 0.25);
+    transition: transform 0.16s ease;
+}
+
+.site-settings-redesign-body .pa-switch.is-on {
+    color: #0f8278;
+}
+
+.site-settings-redesign-body .pa-switch.is-on .pa-switch__track {
+    background: #0f8278;
+}
+
+.site-settings-redesign-body .pa-switch.is-on .pa-switch__thumb {
+    transform: translateX(16px);
+}
+
+.site-settings-redesign-body .pa-switch:hover .pa-switch__track {
+    box-shadow: 0 0 0 3px rgba(22, 38, 79, 0.08);
+}
+
+.site-settings-redesign-body .pa-switch:focus-visible {
+    outline: none;
+}
+
+.site-settings-redesign-body .pa-switch:focus-visible .pa-switch__track {
+    box-shadow: 0 0 0 3px rgba(15, 130, 120, 0.3);
+}
+
+.site-settings-redesign-body .pa-switch:disabled,
+.site-settings-redesign-body .pa-switch.is-busy {
+    cursor: progress;
+    opacity: 0.6;
+}
+
+/* ==========================================================================
+   Modals (Tailwind may move an open modal to <body>, so no page scoping)
+   ========================================================================== */
+
+.site-settings-redesign-body .pa-modal-dialog {
+    width: min(540px, calc(100vw - 48px)) !important;
+    max-width: calc(100vw - 48px) !important;
+}
+
+.site-settings-redesign-body .pa-modal-dialog--wide {
+    width: min(760px, calc(100vw - 48px)) !important;
+    max-width: calc(100vw - 48px) !important;
+}
+
+.site-settings-redesign-body .pa-modal-dialog--question {
+    width: min(820px, calc(100vw - 48px)) !important;
+    max-width: calc(100vw - 48px) !important;
+}
+
+.site-settings-redesign-body .pa-modal-toggle-field {
+    justify-content: flex-end;
+}
+
+.site-settings-redesign-body .pa-field-hint {
+    color: #8a93a1;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.site-settings-redesign-body .pa-rules-hint {
+    margin: 2px 0 -4px;
+    padding-top: 10px;
+    border-top: 1px dashed #e6e2d6;
+}
+
+/* The share of each level every exam draws (from PolicyLevel::MIX). */
+.site-settings-redesign-body .pa-rules-hint__mix {
+    display: block;
+    margin-top: 4px;
+}
+
+.site-settings-redesign-body .pa-rules-hint__exam {
+    white-space: nowrap;
+}
+
+.site-settings-redesign-body .pa-rules-hint__exam strong {
+    color: #4a5666;
+    font-weight: 800;
+}
+
+.site-settings-redesign-body .pa-rules-hint__mix .pa-meta__dot {
+    margin: 0 6px;
+}
+
+.site-settings-redesign-body .ss-modal-field label .pa-label-note {
+    margin-left: 6px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #f1f3f6;
+    color: #6b7686;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    vertical-align: 1px;
+}
+
+.site-settings-redesign-body .pa-options-field__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 12px;
+}
+
+.site-settings-redesign-body .pa-options-field__head small {
+    color: #8a93a1;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.site-settings-redesign-body .pa-option-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid #eae7de;
+    border-radius: 12px;
+    background: #faf9f4;
+}
+
+.site-settings-redesign-body .pa-option-list.has-error {
+    border-color: #d64545;
+}
+
+.site-settings-redesign-body .pa-option-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.site-settings-redesign-body .pa-option-row__input {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.site-settings-redesign-body .pa-option-row .pa-option-text {
+    min-height: 42px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.site-settings-redesign-body .pa-option-row.is-correct .pa-option-text {
+    border-color: #8fd3c5;
+    background: #f3fbf9;
+}
+
+.site-settings-redesign-body .pa-option-correct {
+    position: relative;
+    display: inline-grid;
+    flex: 0 0 auto;
+    place-items: center;
+    margin: 0;
+    cursor: pointer;
+}
+
+.site-settings-redesign-body .pa-option-correct input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.site-settings-redesign-body .pa-option-letter {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border: 1px solid #d9dee6;
+    border-radius: 10px;
+    background: #fff;
+    color: #5a6675;
+    font-size: 14px;
+    font-weight: 850;
+    transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+.site-settings-redesign-body .pa-option-correct:hover .pa-option-letter {
+    border-color: #0f8278;
+    color: #0f8278;
+}
+
+.site-settings-redesign-body .pa-option-correct input:focus-visible + .pa-option-letter {
+    box-shadow: 0 0 0 3px rgba(15, 130, 120, 0.3);
+}
+
+.site-settings-redesign-body .pa-option-correct__tick {
+    position: absolute;
+    right: -5px;
+    bottom: -5px;
+    width: 18px;
+    height: 18px;
+    display: none;
+    place-items: center;
+    border: 2px solid #fff;
+    border-radius: 999px;
+    background: #0f8278;
+    color: #fff;
+    pointer-events: none;
+}
+
+.site-settings-redesign-body .pa-option-correct__tick svg {
+    width: 10px;
+    height: 10px;
+    stroke-width: 3;
+}
+
+.site-settings-redesign-body .pa-option-correct input:checked + .pa-option-letter {
+    border-color: #0f8278;
+    background: #0f8278;
+    color: #fff;
+}
+
+.site-settings-redesign-body .pa-option-correct input:checked ~ .pa-option-correct__tick {
+    display: grid;
+}
+
+.site-settings-redesign-body .pa-option-remove {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    flex: 0 0 42px;
+    place-items: center;
+    border: 0;
+    border-radius: 10px;
+    background: rgba(214, 69, 69, 0.1);
+    color: #d64545;
+    cursor: pointer;
+    transition: background 0.16s ease;
+}
+
+.site-settings-redesign-body .pa-option-remove:hover {
+    background: rgba(214, 69, 69, 0.2);
+}
+
+.site-settings-redesign-body .pa-option-remove:disabled {
+    background: #f1f3f6;
+    color: #b8c0cb;
+    cursor: not-allowed;
+}
+
+.site-settings-redesign-body .pa-add-option {
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    gap: 7px;
+    min-height: 36px;
+    padding: 8px 14px;
+    border: 1px dashed #b9c2cf;
+    border-radius: 10px;
+    background: #fff;
+    color: #16264f;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.site-settings-redesign-body .pa-add-option:hover {
+    border-color: #16264f;
+    background: #f6f4ec;
+}
+
+.site-settings-redesign-body .pa-add-option:disabled {
+    border-style: solid;
+    color: #9aa3b0;
+    cursor: not-allowed;
+}
+
+.site-settings-redesign-body .pa-add-option svg {
+    width: 15px;
+    height: 15px;
+}
+
+.site-settings-redesign-body .pa-option-error:empty {
+    display: none;
+}
+
+/* Question modal: level, as three radio cards (medal + name + one line). */
+.site-settings-redesign-body .pa-level-choice {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.site-settings-redesign-body .pa-level-choice__item {
+    position: relative;
+    display: block;
+    margin: 0;
+    cursor: pointer;
+}
+
+.site-settings-redesign-body .pa-level-choice__input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.site-settings-redesign-body .pa-level-choice__card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 100%;
+    min-height: 62px;
+    padding: 10px 30px 10px 12px;
+    border: 1px solid #d9dee6;
+    border-radius: 12px;
+    background: #fff;
+    transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+}
+
+.site-settings-redesign-body .pa-level-choice__item:hover .pa-level-choice__card {
+    border-color: #b9c2cf;
+}
+
+.site-settings-redesign-body .pa-level-choice__medal {
+    display: inline-flex;
+    flex: 0 0 auto;
+    line-height: 0;
+}
+
+.site-settings-redesign-body .pa-level-choice__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.site-settings-redesign-body .pa-level-choice__text strong {
+    color: #16264f;
+    font-size: 13.5px;
+    font-weight: 850;
+    line-height: 1.2;
+}
+
+.site-settings-redesign-body .pa-level-choice__text small {
+    color: #6b7686;
+    font-size: 11.5px;
+    font-weight: 650;
+    line-height: 1.3;
+}
+
+.site-settings-redesign-body .pa-level-choice__tick {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 18px;
+    height: 18px;
+    display: none;
+    place-items: center;
+    border-radius: 999px;
+    color: #fff;
+}
+
+.site-settings-redesign-body .pa-level-choice__tick svg {
+    width: 11px;
+    height: 11px;
+    stroke-width: 3;
+}
+
+.site-settings-redesign-body .pa-level-choice__input:checked + .pa-level-choice__card {
+    box-shadow: 0 0 0 1px currentColor;
+}
+
+.site-settings-redesign-body .pa-level-choice__input:checked + .pa-level-choice__card .pa-level-choice__tick {
+    display: grid;
+}
+
+.site-settings-redesign-body .pa-level-choice__item--beginner .pa-level-choice__input:checked + .pa-level-choice__card {
+    border-color: #b0703a;
+    background: #fbf3ec;
+    color: #b0703a;
+}
+
+.site-settings-redesign-body .pa-level-choice__item--intermediate .pa-level-choice__input:checked + .pa-level-choice__card {
+    border-color: #7b8794;
+    background: #f4f6f8;
+    color: #7b8794;
+}
+
+.site-settings-redesign-body .pa-level-choice__item--expert .pa-level-choice__input:checked + .pa-level-choice__card {
+    border-color: #c49a12;
+    background: #fdf8e6;
+    color: #c49a12;
+}
+
+.site-settings-redesign-body .pa-level-choice__item--beginner .pa-level-choice__tick {
+    background: #b0703a;
+}
+
+.site-settings-redesign-body .pa-level-choice__item--intermediate .pa-level-choice__tick {
+    background: #7b8794;
+}
+
+.site-settings-redesign-body .pa-level-choice__item--expert .pa-level-choice__tick {
+    background: #c49a12;
+}
+
+.site-settings-redesign-body .pa-level-choice__input:focus-visible + .pa-level-choice__card {
+    outline: 3px solid rgba(22, 38, 79, 0.28);
+    outline-offset: 1px;
+}
+
+.site-settings-redesign-body .pa-level-choice.has-error .pa-level-choice__card {
+    border-color: #d64545;
+}
+
+/* ==========================================================================
+   Questions page: policy header card
+   ========================================================================== */
+
+.site-settings-redesign-body .pa-policy-head {
+    margin: 0 0 16px;
+    border: 1px solid #eae7de;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(20, 34, 74, 0.03);
+}
+
+.site-settings-redesign-body .pa-policy-head__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px 24px 16px;
+}
+
+.site-settings-redesign-body .pa-policy-head__main {
+    min-width: 0;
+}
+
+.site-settings-redesign-body .pa-policy-head__eyebrow {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    color: #b48729;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.site-settings-redesign-body .pa-policy-head__eyebrow svg {
+    width: 14px;
+    height: 14px;
+}
+
+.site-settings-redesign-body .pa-policy-head h2 {
+    margin: 6px 0 10px;
+    color: #16264f;
+    font-family: "Spectral", "Newsreader", Georgia, serif;
+    font-size: 25px;
+    font-weight: 700;
+    line-height: 1.15;
+}
+
+.site-settings-redesign-body .pa-policy-head__facts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    color: #4a5666;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.site-settings-redesign-body .pa-policy-head__facts > span:not(.pa-pill),
+.site-settings-redesign-body .pa-policy-head__facts > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.site-settings-redesign-body .pa-policy-head__facts > span:not(.pa-pill) > svg {
+    width: 15px;
+    height: 15px;
+    color: #9aa3b0;
+}
+
+.site-settings-redesign-body .pa-policy-head__stats {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 8px;
+}
+
+.site-settings-redesign-body .pa-stat {
+    min-width: 96px;
+    padding: 10px 14px;
+    border: 1px solid #eae7de;
+    border-radius: 12px;
+    background: #faf9f4;
+    text-align: center;
+}
+
+.site-settings-redesign-body .pa-stat strong {
+    display: block;
+    color: #16264f;
+    font-size: 24px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.05;
+}
+
+.site-settings-redesign-body .pa-stat span {
+    display: block;
+    margin-top: 4px;
+    color: #6b7686;
+    font-size: 11.5px;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.site-settings-redesign-body .pa-stat--active {
+    border-color: #b9e4db;
+    background: #eefaf7;
+}
+
+.site-settings-redesign-body .pa-stat--active strong {
+    color: #0f8278;
+}
+
+.site-settings-redesign-body .pa-stat--draft {
+    border-color: #f0d9a4;
+    background: #fdf8ea;
+}
+
+.site-settings-redesign-body .pa-stat--draft strong {
+    color: #8f5f00;
+}
+
+.site-settings-redesign-body .pa-stat--muted strong {
+    color: #8a93a1;
+}
+
+.site-settings-redesign-body .pa-policy-head__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 16px;
+    padding: 14px 24px;
+    border-top: 1px solid #f0eee7;
+}
+
+.site-settings-redesign-body .pa-policy-head__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/*
+ * Disabled buttons. The shared kit only styles .ss-btn--primary:disabled, so a
+ * disabled success / danger / light button kept its full colour and pointer.
+ * While a request runs (confirm modal buttons) they dim the way primary does;
+ * the hover colour is pinned so a disabled button does not react.
+ */
+.site-settings-redesign-body .ss-btn--success:disabled,
+.site-settings-redesign-body .ss-btn--danger:disabled,
+.site-settings-redesign-body .ss-btn--danger-soft:disabled,
+.site-settings-redesign-body .ss-btn--light:disabled {
+    cursor: progress;
+    opacity: 0.74;
+}
+
+.site-settings-redesign-body .ss-btn--primary:disabled {
+    background: #1b2f63;
+}
+
+.site-settings-redesign-body .ss-btn--success:disabled {
+    background: #1f7a5c;
+}
+
+.site-settings-redesign-body .ss-btn--danger:disabled {
+    background: #d64545;
+}
+
+.site-settings-redesign-body .ss-btn--danger-soft:disabled {
+    background: #fbe9e9;
+}
+
+.site-settings-redesign-body .ss-btn--light:disabled {
+    background: #fff;
+}
+
+/* Nothing to do yet (no drafts to activate, no category to add a policy to): unavailable, not busy. */
+.site-settings-redesign-body .pa-policy-head__actions .ss-btn:disabled,
+.site-settings-redesign-body .pa-bank-card .ss-table-card__header .ss-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+    box-shadow: none;
+}
+
+.site-settings-redesign-body .pa-readiness {
+    display: inline-flex;
+    flex: 1 1 320px;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0;
+    padding: 9px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.site-settings-redesign-body .pa-readiness svg {
+    width: 17px;
+    height: 17px;
+    flex: 0 0 17px;
+    margin-top: 1px;
+}
+
+.site-settings-redesign-body .pa-readiness--ready {
+    background: #eefaf7;
+    color: #0f6f66;
+}
+
+.site-settings-redesign-body .pa-readiness--short {
+    background: #fdf3dc;
+    color: #8f5f00;
+}
+
+.site-settings-redesign-body .pa-readiness--blocked {
+    background: #fde7e7;
+    color: #b43636;
+}
+
+/* Exam readiness: one card per exam, what it needs from each level against what is active. */
+.site-settings-redesign-body .pa-exams {
+    padding: 0 24px 18px;
+}
+
+.site-settings-redesign-body .pa-levels__head .pa-exams__tally {
+    margin-left: auto;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #fde7e7;
+    color: #b43636;
+    font-size: 11.5px;
+    font-weight: 800;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.site-settings-redesign-body .pa-levels__head .pa-exams__tally.is-ready {
+    background: #eefaf7;
+    color: #0f6f66;
+}
+
+.site-settings-redesign-body .pa-exams__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(264px, 1fr));
+    gap: 10px;
+}
+
+.site-settings-redesign-body .pa-exam {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 1px solid #e6e2d6;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.site-settings-redesign-body .pa-exam.is-ready {
+    border-color: #b9e4db;
+    background: #f8fdfc;
+}
+
+.site-settings-redesign-body .pa-exam.is-blocked {
+    border-color: #f1cfcf;
+    background: #fffbfb;
+}
+
+.site-settings-redesign-body .pa-exam__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.site-settings-redesign-body .pa-exam__name {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.site-settings-redesign-body .pa-exam__name strong {
+    color: #16264f;
+    font-size: 14px;
+    font-weight: 850;
+    line-height: 1.2;
+}
+
+.site-settings-redesign-body .pa-exam__medal {
+    display: inline-flex;
+    flex: 0 0 auto;
+}
+
+.site-settings-redesign-body .pa-exam__rows {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Level · needs n · has n · tick or cross (so a short level is not red alone). */
+.site-settings-redesign-body .pa-exam__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto 16px;
+    align-items: center;
+    gap: 4px 10px;
+    padding: 5px 0;
+    color: #6b7686;
+    font-size: 12.5px;
+    font-weight: 650;
+    line-height: 1.2;
+}
+
+.site-settings-redesign-body .pa-exam__row + .pa-exam__row {
+    border-top: 1px dashed #ece9df;
+}
+
+.site-settings-redesign-body .pa-exam__row .pa-level-pill {
+    justify-self: start;
+}
+
+.site-settings-redesign-body .pa-exam__need,
+.site-settings-redesign-body .pa-exam__have {
+    min-width: 50px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.site-settings-redesign-body .pa-exam__need strong,
+.site-settings-redesign-body .pa-exam__have strong {
+    margin-left: 2px;
+    color: #16264f;
+    font-size: 14px;
+    font-weight: 850;
+    font-variant-numeric: tabular-nums;
+}
+
+.site-settings-redesign-body .pa-exam__mark {
+    display: inline-flex;
+    color: #0f8278;
+}
+
+.site-settings-redesign-body .pa-exam__mark svg {
+    width: 15px;
+    height: 15px;
+    stroke-width: 2.6;
+}
+
+.site-settings-redesign-body .pa-exam__row.is-short .pa-exam__have,
+.site-settings-redesign-body .pa-exam__row.is-short .pa-exam__have strong,
+.site-settings-redesign-body .pa-exam__row.is-short .pa-exam__mark {
+    color: #b43636;
+}
+
+.site-settings-redesign-body .pa-exam__note {
+    margin: 0;
+    color: #6b7686;
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.4;
+}
+
+.site-settings-redesign-body .pa-exam.is-blocked .pa-exam__note {
+    color: #b43636;
+    font-weight: 750;
+}
+
+/* Questions by level: one card per level; a card also filters the list to its level. */
+.site-settings-redesign-body .pa-levels {
+    padding: 0 24px 18px;
+}
+
+.site-settings-redesign-body .pa-levels__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 12px;
+    margin-bottom: 10px;
+}
+
+.site-settings-redesign-body .pa-levels__head h3 {
+    margin: 0;
+    color: #16264f;
+    font-size: 13px;
+    font-weight: 850;
+    letter-spacing: 0.02em;
+}
+
+.site-settings-redesign-body .pa-levels__head span {
+    color: #8a93a1;
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.site-settings-redesign-body .pa-levels__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.site-settings-redesign-body .pa-level-ready {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 7px;
+    min-width: 0;
+    padding: 12px 14px 12px 17px;
+    border: 1px solid #e6e2d6;
+    border-radius: 12px;
+    background: #fff;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+/* Level colour down the left edge (bronze / silver / gold). */
+.site-settings-redesign-body .pa-level-ready::before {
+    position: absolute;
+    top: 10px;
+    bottom: 10px;
+    left: 0;
+    width: 4px;
+    border-radius: 0 4px 4px 0;
+    background: #b0703a;
+    content: "";
+}
+
+.site-settings-redesign-body .pa-level-ready--intermediate::before {
+    background: #7b8794;
+}
+
+.site-settings-redesign-body .pa-level-ready--expert::before {
+    background: #c49a12;
+}
+
+.site-settings-redesign-body .pa-level-ready:hover {
+    border-color: #c9cfd8;
+    box-shadow: 0 2px 6px rgba(20, 34, 74, 0.06);
+}
+
+.site-settings-redesign-body .pa-level-ready:focus-visible {
+    outline: 3px solid rgba(22, 38, 79, 0.28);
+    outline-offset: 1px;
+}
+
+.site-settings-redesign-body .pa-level-ready.is-selected {
+    border-color: #16264f;
+    background: #fbfaf6;
+    box-shadow: 0 0 0 1px #16264f;
+}
+
+.site-settings-redesign-body .pa-level-ready__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.site-settings-redesign-body .pa-level-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 800;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+.site-settings-redesign-body .pa-level-state svg {
+    width: 13px;
+    height: 13px;
+    flex: 0 0 13px;
+    stroke-width: 2.2;
+}
+
+.site-settings-redesign-body .pa-level-ready__count {
+    color: #5a6675;
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.site-settings-redesign-body .pa-level-ready__count strong {
+    margin-right: 2px;
+    color: #16264f;
+    font-size: 20px;
+    font-weight: 850;
+    font-variant-numeric: tabular-nums;
+}
+
+.site-settings-redesign-body .pa-level-ready__bar {
+    display: block;
+    height: 6px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #eceae3;
+}
+
+.site-settings-redesign-body .pa-level-ready__bar > span {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: #b0703a;
+}
+
+.site-settings-redesign-body .pa-level-ready--intermediate .pa-level-ready__bar > span {
+    background: #7b8794;
+}
+
+.site-settings-redesign-body .pa-level-ready--expert .pa-level-ready__bar > span {
+    background: #c49a12;
+}
+
+.site-settings-redesign-body .pa-level-ready__note {
+    color: #6b7686;
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.4;
+}
+
+.site-settings-redesign-body .pa-level-ready.is-blocked .pa-level-ready__note {
+    color: #b43636;
+}
+
+/* Exam pattern: the share of each level every exam draws, and the counts that gives here. */
+.site-settings-redesign-body .pa-pattern {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 20px;
+    margin: 0 24px 18px;
+    padding: 12px 16px;
+    border: 1px solid #e1e7f0;
+    border-radius: 12px;
+    background: #f6f8fc;
+}
+
+/* Side by side while the table fits beside the text; otherwise the table drops underneath. */
+.site-settings-redesign-body .pa-pattern__head {
+    flex: 1 1 220px;
+    min-width: 0;
+}
+
+.site-settings-redesign-body .pa-pattern__head h3 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 4px;
+    color: #16264f;
+    font-size: 13px;
+    font-weight: 850;
+    letter-spacing: 0.02em;
+}
+
+.site-settings-redesign-body .pa-pattern__head h3 svg {
+    width: 15px;
+    height: 15px;
+    color: #5b76a8;
+}
+
+.site-settings-redesign-body .pa-pattern__head p {
+    margin: 0;
+    color: #5a6675;
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.45;
+}
+
+.site-settings-redesign-body .pa-pattern__head p strong {
+    color: #16264f;
+    font-weight: 800;
+}
+
+.site-settings-redesign-body .pa-pattern__scroll {
+    flex: 4 1 640px;
+    min-width: 0;
+    overflow-x: auto;
+}
+
+.site-settings-redesign-body .pa-pattern__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+}
+
+.site-settings-redesign-body .pa-pattern__table th,
+.site-settings-redesign-body .pa-pattern__table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #e1e7f0;
+    text-align: left;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.site-settings-redesign-body .pa-pattern__table tbody tr:last-child th,
+.site-settings-redesign-body .pa-pattern__table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.site-settings-redesign-body .pa-pattern__table thead th {
+    padding-top: 2px;
+    color: #6b7686;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.site-settings-redesign-body .pa-pattern__table thead th:first-child {
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.site-settings-redesign-body .pa-pattern__table tbody th {
+    color: #16264f;
+    font-weight: 800;
+}
+
+.site-settings-redesign-body .pa-pattern__table td {
+    color: #6b7686;
+    font-weight: 650;
+}
+
+.site-settings-redesign-body .pa-pattern__table td strong {
+    color: #16264f;
+    font-size: 14px;
+    font-weight: 850;
+    font-variant-numeric: tabular-nums;
+}
+
+.site-settings-redesign-body .pa-pattern__table td.is-none strong {
+    color: #9aa3b0;
+}
+
+/* Bank size against the target (e.g. 50 questions per policy). */
+.site-settings-redesign-body .pa-bank-size {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 7px;
+    margin: 0;
+    color: #4a5666;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.site-settings-redesign-body .pa-bank-size svg {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    margin-top: 1px;
+    color: #9aa3b0;
+}
+
+.site-settings-redesign-body .pa-bank-size.is-below {
+    padding: 7px 12px;
+    border-radius: 10px;
+    background: #fdf3dc;
+    color: #8f5f00;
+}
+
+.site-settings-redesign-body .pa-bank-size.is-below svg {
+    color: #a86a07;
+}
+
+/* ==========================================================================
+   Questions page: review cards (one Tabulator row each)
+   ========================================================================== */
+
+.site-settings-redesign-body .pa-question-table.tabulator .tabulator-tableHolder,
+.site-settings-redesign-body .pa-question-table.tabulator .tabulator-tableholder {
+    background: #f7f6f1;
+}
+
+.site-settings-redesign-body .pa-question-table .tabulator-row,
+.site-settings-redesign-body .pa-question-table .tabulator-row.tabulator-row-even,
+.site-settings-redesign-body .pa-question-table .tabulator-row:hover,
+.site-settings-redesign-body .pa-question-table .tabulator-row.tabulator-row-even:hover {
+    min-height: 0;
+    border-bottom: 0;
+    background: transparent;
+}
+
+.site-settings-redesign-body .pa-question-table .tabulator-row .tabulator-cell {
+    display: block;
+    height: auto !important;
+    min-height: 0;
+    padding: 8px 14px;
+    overflow: visible;
+    white-space: normal;
+}
+
+.site-settings-redesign-body .pa-question-table .tabulator-row:first-child .tabulator-cell {
+    padding-top: 14px;
+}
+
+.site-settings-redesign-body .pa-question-table .tabulator-row:last-child .tabulator-cell {
+    padding-bottom: 14px;
+}
+
+.site-settings-redesign-body .pa-qcard {
+    position: relative;
+    padding: 16px 18px 14px 22px;
+    border: 1px solid #e6e2d6;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(20, 34, 74, 0.04);
+    white-space: normal;
+}
+
+.site-settings-redesign-body .pa-qcard::before {
+    position: absolute;
+    top: 12px;
+    bottom: 12px;
+    left: 0;
+    width: 4px;
+    border-radius: 0 4px 4px 0;
+    background: #d9dee6;
+    content: "";
+}
+
+.site-settings-redesign-body .pa-qcard.is-active::before {
+    background: #0f8278;
+}
+
+.site-settings-redesign-body .pa-qcard.is-draft::before {
+    background: #e0b04a;
+}
+
+.site-settings-redesign-body .pa-qcard.is-archived {
+    background: #fafafa;
+    opacity: 0.85;
+}
+
+.site-settings-redesign-body .pa-qcard__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+}
+
+.site-settings-redesign-body .pa-qcard__num {
+    display: inline-grid;
+    min-width: 36px;
+    height: 26px;
+    place-items: center;
+    padding: 0 8px;
+    border-radius: 8px;
+    background: #16264f;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 850;
+    font-variant-numeric: tabular-nums;
+}
+
+.site-settings-redesign-body .pa-qcard__badges {
+    display: flex;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+}
+
+.site-settings-redesign-body .pa-qcard__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.site-settings-redesign-body .pa-qcard__actions .ss-row-action {
+    width: 30px;
+    height: 30px;
+    display: inline-grid;
+    flex: 0 0 30px;
+    place-items: center;
+    margin: 0;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.site-settings-redesign-body .pa-qcard__actions .ss-row-action svg {
+    width: 15px;
+    height: 15px;
+}
+
+.site-settings-redesign-body .pa-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 22px;
+    padding: 3px 9px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.site-settings-redesign-body .pa-badge svg {
+    width: 12px;
+    height: 12px;
+    stroke-width: 2.2;
+}
+
+.site-settings-redesign-body .pa-badge--ai {
+    border-color: #ddd3f5;
+    background: #f4f0fd;
+    color: #5b3fb0;
+}
+
+.site-settings-redesign-body .pa-badge--manual {
+    border-color: #d6e0ee;
+    background: #eff4fa;
+    color: #1c5097;
+}
+
+.site-settings-redesign-body .pa-badge--active {
+    border-color: #b9e4db;
+    background: #e5f7f3;
+    color: #0f8278;
+}
+
+.site-settings-redesign-body .pa-badge--draft {
+    border-color: #f0d9a4;
+    background: #fdf3dc;
+    color: #8f5f00;
+}
+
+.site-settings-redesign-body .pa-badge--archived {
+    border-color: #dde2e9;
+    background: #f1f3f6;
+    color: #6b7686;
+}
+
+.site-settings-redesign-body .pa-badge--issue {
+    border-color: #f4cbcb;
+    background: #fde7e7;
+    color: #c23b3b;
+}
+
+.site-settings-redesign-body .pa-qcard__question {
+    margin: 12px 0 10px;
+    color: #16264f;
+    font-size: 15px;
+    font-weight: 750;
+    line-height: 1.45;
+    white-space: pre-line;
+    word-break: break-word;
+}
+
+.site-settings-redesign-body .pa-qcard__options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px 10px;
+    margin: 0 0 10px;
+    padding: 0;
+    list-style: none;
+}
+
+.site-settings-redesign-body .pa-qopt {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    min-width: 0;
+    padding: 7px 10px;
+    border: 1px solid #ebe8df;
+    border-radius: 10px;
+    background: #fbfaf7;
+    color: #3f4a5a;
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.site-settings-redesign-body .pa-qopt__letter {
+    width: 22px;
+    height: 22px;
+    display: grid;
+    flex: 0 0 22px;
+    place-items: center;
+    border-radius: 6px;
+    background: #eceae3;
+    color: #5a6675;
+    font-size: 11.5px;
+    font-weight: 850;
+}
+
+.site-settings-redesign-body .pa-qopt__text {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-top: 1px;
+    word-break: break-word;
+}
+
+.site-settings-redesign-body .pa-qopt.is-correct {
+    border-color: #8fd3c5;
+    background: #eefaf7;
+    color: #0c5f57;
+    font-weight: 750;
+}
+
+.site-settings-redesign-body .pa-qopt.is-correct .pa-qopt__letter {
+    background: #0f8278;
+    color: #fff;
+}
+
+.site-settings-redesign-body .pa-qopt__mark {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 3px;
+    padding-top: 2px;
+    color: #0f8278;
+    font-size: 11.5px;
+    font-weight: 850;
+}
+
+.site-settings-redesign-body .pa-qopt__mark svg {
+    width: 14px;
+    height: 14px;
+    stroke-width: 2.6;
+}
+
+/* Review aid: the correct option is noticeably the longest. */
+.site-settings-redesign-body .pa-qcard__hint {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin: -2px 0 10px;
+    color: #a86a07;
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.4;
+}
+
+.site-settings-redesign-body .pa-qcard__hint svg {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 14px;
+    margin-top: 1px;
+}
+
+.site-settings-redesign-body .pa-qcard__hint strong {
+    font-weight: 800;
+}
+
+.site-settings-redesign-body .pa-why {
+    margin: 0;
+    border-top: 1px dashed #e6e2d6;
+}
+
+.site-settings-redesign-body .pa-why > summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 0 2px;
+    color: #8f5f00;
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 800;
+    list-style: none;
+    user-select: none;
+}
+
+.site-settings-redesign-body .pa-why > summary::-webkit-details-marker {
+    display: none;
+}
+
+.site-settings-redesign-body .pa-why > summary svg {
+    width: 15px;
+    height: 15px;
+}
+
+.site-settings-redesign-body .pa-why__chevron {
+    transition: transform 0.16s ease;
+}
+
+.site-settings-redesign-body .pa-why[open] .pa-why__chevron {
+    transform: rotate(180deg);
+}
+
+.site-settings-redesign-body .pa-why > summary:focus-visible {
+    border-radius: 6px;
+    outline: 3px solid rgba(201, 162, 74, 0.35);
+}
+
+.site-settings-redesign-body .pa-why__body {
+    display: grid;
+    gap: 8px;
+    padding: 8px 0 2px;
+}
+
+.site-settings-redesign-body .pa-why__text {
+    margin: 0;
+    color: #3f4a5a;
+    font-size: 13.5px;
+    font-weight: 550;
+    line-height: 1.5;
+    white-space: pre-line;
+}
+
+.site-settings-redesign-body .pa-why__quote {
+    margin: 0;
+    padding: 8px 12px;
+    border-left: 3px solid #c9a24a;
+    border-radius: 0 8px 8px 0;
+    background: #faf6ec;
+    color: #4a5666;
+    font-family: "Spectral", "Newsreader", Georgia, serif;
+    font-size: 14px;
+    font-style: italic;
+    line-height: 1.5;
+    white-space: pre-line;
+}
+
+.site-settings-redesign-body .pa-why__quote > span {
+    display: block;
+    margin-bottom: 3px;
+    color: #b48729;
+    font-family: "Manrope", system-ui, sans-serif;
+    font-size: 10.5px;
+    font-style: normal;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.site-settings-redesign-body .pa-why--empty {
+    padding-top: 8px;
+    color: #9aa3b0;
+    font-size: 12.5px;
+    font-weight: 650;
+}
+
+/* ==========================================================================
+   Narrow screens
+   ========================================================================== */
+
+@media (max-width: 1100px) {
+    .site-settings-redesign-body .pa-policy-head__top {
+        flex-direction: column;
+    }
+
+    .site-settings-redesign-body .pa-policy-head__stats {
+        width: 100%;
+    }
+
+    .site-settings-redesign-body .pa-stat {
+        flex: 1 1 0;
+    }
+}
+
+@media (max-width: 760px) {
+    /* Wrap onto a second row rather than scroll, so the active pill is always on screen. */
+    .site-settings-redesign-body .pa-section-nav a.pa-section-nav__link {
+        flex: 1 1 auto;
+        justify-content: center;
+        padding-right: 12px;
+        padding-left: 12px;
+    }
+
+    .site-settings-redesign-body .pa-qcard__options {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .site-settings-redesign-body .pa-qcard__actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .site-settings-redesign-body .pa-policy-head__top,
+    .site-settings-redesign-body .pa-policy-head__bottom {
+        padding-right: 16px;
+        padding-left: 16px;
+    }
+
+    .site-settings-redesign-body .pa-levels,
+    .site-settings-redesign-body .pa-exams {
+        padding-right: 16px;
+        padding-left: 16px;
+    }
+
+    .site-settings-redesign-body .pa-exams__grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .site-settings-redesign-body .pa-levels__head .pa-exams__tally {
+        margin-left: 0;
+    }
+
+    .site-settings-redesign-body .pa-pattern {
+        margin-right: 16px;
+        margin-left: 16px;
+    }
+
+    .site-settings-redesign-body .pa-levels__grid,
+    .site-settings-redesign-body .pa-level-choice {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .site-settings-redesign-body .pa-level-choice__card {
+        min-height: 52px;
+    }
+
+    .site-settings-redesign-body .pa-breadcrumb-current {
+        max-width: 18ch;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Stats side by side stay readable at phone width. */
+    .site-settings-redesign-body .pa-stat {
+        min-width: 0;
+        padding: 8px 6px;
+    }
+
+    .site-settings-redesign-body .pa-stat strong {
+        font-size: 20px;
+    }
+
+    .site-settings-redesign-body .pa-policy-head__actions,
+    .site-settings-redesign-body .pa-policy-head__actions .ss-btn {
+        width: 100%;
+    }
+
+    .site-settings-redesign-body .pa-policy-head__actions .ss-btn {
+        justify-content: center;
+    }
+}

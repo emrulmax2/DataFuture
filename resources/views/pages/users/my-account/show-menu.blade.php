@@ -30,6 +30,11 @@
             Vacancies
         </a>
     @endif
+    @if(isset($employee->id) && \App\Models\PolicyAssignment::where('employee_id', $employee->id)->visibleToStaff()->exists())
+        <a href="{{ route('user.account.policy') }}" class="my-account-tabs__item {{ str_starts_with(Route::currentRouteName() ?? '', 'user.account.policy') ? 'active' : '' }}">
+            Policy Assessments
+        </a>
+    @endif
     <a href="{{ route('user.account.signature') }}" class="my-account-tabs__item {{ Route::currentRouteName() == 'user.account.signature' ? 'active' : '' }}">
         Email Signature
     </a>

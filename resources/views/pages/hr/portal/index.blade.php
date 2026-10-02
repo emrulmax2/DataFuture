@@ -77,6 +77,12 @@
                         <i data-lucide="bar-chart-3"></i>
                         Reports
                     </a>
+                    @if(\App\Services\PolicyAssessmentService::canManage())
+                        <a href="{{ route('policy.assessment') }}" class="hrd-btn hrd-btn--ghost">
+                            <i data-lucide="clipboard-check"></i>
+                            Policy Assessments
+                        </a>
+                    @endif
                 </div>
             </section>
 

@@ -1,0 +1,796 @@
+/* Policy Assessments: Roles page — the roles list, its help note and first-run state,
+ * and the add / edit modal with the policy tick list (.pa-role-*). */
+
+/* ==========================================================================
+   Roles list
+   ========================================================================== */
+
+.site-settings-redesign-body .pa-roles-card .ss-tabulator .tabulator-row .tabulator-cell {
+    min-height: 68px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+/* "Corporate 5 · Academic 4 · Student 3" under the policy count. */
+.site-settings-redesign-body .pa-role-policies .pa-role-breakdown {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 6px;
+}
+
+.site-settings-redesign-body .pa-role-breakdown__part {
+    white-space: nowrap;
+}
+
+.site-settings-redesign-body .pa-role-breakdown__part b {
+    color: #16264f;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+/* What a role is, once, above the list. */
+.site-settings-redesign-body .pa-role-help {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 26px;
+    border-bottom: 1px solid #f0eee7;
+    background: #fbfaf6;
+}
+
+.site-settings-redesign-body .pa-role-help__icon {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    flex: 0 0 28px;
+    place-items: center;
+    border-radius: 8px;
+    background: #f4ecd9;
+    color: #b48729;
+}
+
+.site-settings-redesign-body .pa-role-help__icon svg {
+    width: 15px;
+    height: 15px;
+}
+
+.site-settings-redesign-body .pa-role-help ul {
+    display: grid;
+    gap: 3px;
+    margin: 0;
+    padding: 0 0 0 16px;
+    color: #5a6675;
+    font-size: 12.5px;
+    font-weight: 650;
+    line-height: 1.5;
+    list-style: disc;
+}
+
+.site-settings-redesign-body .pa-role-help li::marker {
+    color: #c9a24a;
+}
+
+.site-settings-redesign-body .pa-role-help strong {
+    color: #16264f;
+    font-weight: 800;
+}
+
+.site-settings-redesign-body .pa-roles-table-area[hidden],
+.site-settings-redesign-body .pa-roles-empty[hidden] {
+    display: none;
+}
+
+/* First run: no role exists yet. */
+.site-settings-redesign-body .pa-roles-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 44px 26px 48px;
+    text-align: center;
+}
+
+.site-settings-redesign-body .pa-roles-empty__icon {
+    width: 56px;
+    height: 56px;
+    display: grid;
+    place-items: center;
+    border-radius: 16px;
+    background: #f4ecd9;
+    color: #b48729;
+}
+
+.site-settings-redesign-body .pa-roles-empty__icon svg {
+    width: 26px;
+    height: 26px;
+}
+
+.site-settings-redesign-body .pa-roles-empty h3 {
+    margin: 6px 0 0;
+    color: #16264f;
+    font-family: "Spectral", "Newsreader", Georgia, serif;
+    font-size: 23px;
+    font-weight: 700;
+    line-height: 1.15;
+}
+
+.site-settings-redesign-body .pa-roles-empty p {
+    max-width: 54ch;
+    margin: 0 0 8px;
+    color: #6b7686;
+    font-size: 14px;
+    font-weight: 550;
+    line-height: 1.55;
+}
+
+.site-settings-redesign-body .ss-page .pa-roles-empty a.ss-btn--primary,
+.site-settings-redesign-body .ss-page .pa-roles-empty a.ss-btn--primary:hover {
+    color: #fff;
+    text-decoration: none;
+}
+
+/* ==========================================================================
+   Add / edit modal (Tailwind may move an open modal to <body>, so no page scoping)
+   ========================================================================== */
+
+/* One scrolling area: the fields scroll away and the tick list's search bar stays in view. */
+.site-settings-redesign-body .pa-role-modal .ss-settings-modal__body {
+    position: relative;
+    max-height: min(72vh, 820px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.site-settings-redesign-body .pa-role-fields {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 216px;
+    grid-template-areas:
+        "name sort"
+        "description active";
+    gap: 10px 14px;
+}
+
+.site-settings-redesign-body .pa-role-fields__name {
+    grid-area: name;
+}
+
+.site-settings-redesign-body .pa-role-fields__sort {
+    grid-area: sort;
+}
+
+.site-settings-redesign-body .pa-role-fields__description {
+    grid-area: description;
+}
+
+.site-settings-redesign-body .pa-role-fields__active {
+    grid-area: active;
+}
+
+.site-settings-redesign-body .pa-role-fields .ss-modal-textarea {
+    min-height: 54px;
+    padding-top: 9px;
+    padding-bottom: 9px;
+}
+
+/* ---------- The policy tick list ---------- */
+
+.site-settings-redesign-body .pa-role-picker {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    margin-top: 4px;
+}
+
+.site-settings-redesign-body .pa-role-picker [hidden] {
+    display: none !important;
+}
+
+.site-settings-redesign-body .pa-role-picker__intro {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 10px;
+}
+
+.site-settings-redesign-body .pa-role-picker__label {
+    color: #3f4a5a;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.site-settings-redesign-body .pa-role-picker__label > span {
+    color: #d64545;
+    font-weight: 800;
+}
+
+.site-settings-redesign-body .pa-role-picker__empty {
+    margin: 8px 0 0;
+    padding: 14px 16px;
+    border: 1px dashed #d9dee6;
+    border-radius: 12px;
+    background: #faf9f4;
+    color: #5a6675;
+    font-size: 13px;
+    font-weight: 650;
+    line-height: 1.5;
+}
+
+/* Search, bulk ticks and the running total: sticks to the top of the scrolling form.
+   The offset is the form's own top padding, so the bar sits flush under the modal header. */
+.site-settings-redesign-body .pa-role-picker__bar {
+    position: sticky;
+    top: -18px;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0 -26px;
+    padding: 8px 26px 10px;
+    background: #fff;
+    box-shadow: 0 8px 8px -8px rgba(20, 34, 74, 0.12);
+}
+
+.site-settings-redesign-body .pa-role-picker__bar .acc__input-error {
+    min-height: 0;
+    padding: 7px 10px;
+    border-radius: 8px;
+    background: #fdecec;
+    font-size: 12.5px;
+    line-height: 1.3;
+}
+
+.site-settings-redesign-body .pa-role-picker__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+}
+
+.site-settings-redesign-body .pa-role-picker__search {
+    position: relative;
+    display: flex;
+    flex: 1 1 170px;
+    align-items: center;
+    min-width: 0;
+    margin: 0;
+}
+
+.site-settings-redesign-body .pa-role-picker__search > svg {
+    position: absolute;
+    left: 12px;
+    width: 16px;
+    height: 16px;
+    color: #a2abb8;
+    pointer-events: none;
+}
+
+.site-settings-redesign-body .pa-role-picker__search input {
+    width: 100%;
+    height: 38px;
+    padding: 0 10px 0 36px;
+    border: 1px solid #d9dee6;
+    border-radius: 9px;
+    background: #fff;
+    color: #1f2a37;
+    font-size: 13.5px;
+    font-weight: 600;
+    outline: none;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.site-settings-redesign-body .pa-role-picker__search input:focus {
+    border-color: #16264f;
+    box-shadow: 0 0 0 3px rgba(22, 38, 79, 0.12);
+}
+
+.site-settings-redesign-body .pa-role-picker__actions {
+    display: flex;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.site-settings-redesign-body .pa-role-picker__action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 32px;
+    padding: 5px 11px;
+    border: 1px solid #d9dee6;
+    border-radius: 8px;
+    background: #fff;
+    color: #16264f;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+    transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+.site-settings-redesign-body .pa-role-picker__action:hover:not(:disabled) {
+    border-color: #b9c2cf;
+    background: #f6f4ec;
+}
+
+.site-settings-redesign-body .pa-role-picker__action:focus-visible,
+.site-settings-redesign-body .pa-role-group__fold:focus-visible {
+    outline: 3px solid rgba(22, 38, 79, 0.28);
+    outline-offset: 1px;
+}
+
+.site-settings-redesign-body .pa-role-picker__action:disabled {
+    border-color: #e6e9ee;
+    color: #a9b1bd;
+    cursor: default;
+}
+
+.site-settings-redesign-body .pa-role-picker__action-dot {
+    width: 8px;
+    height: 8px;
+    border: 1.5px solid #9aa3b0;
+    border-radius: 999px;
+}
+
+.site-settings-redesign-body .pa-role-picker__action--toggle.is-on {
+    border-color: #1b2f63;
+    background: #1b2f63;
+    color: #fff;
+}
+
+.site-settings-redesign-body .pa-role-picker__action--toggle.is-on:hover {
+    border-color: #16264f;
+    background: #16264f;
+}
+
+.site-settings-redesign-body .pa-role-picker__action--toggle.is-on .pa-role-picker__action-dot {
+    border-color: #e8c877;
+    background: #e8c877;
+}
+
+.site-settings-redesign-body .pa-role-picker__total {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 6px;
+    min-height: 32px;
+    padding: 5px 12px;
+    border: 1px solid #dde2e9;
+    border-radius: 999px;
+    background: #f1f3f6;
+    color: #6b7686;
+    font-size: 12px;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+.site-settings-redesign-body .pa-role-picker__total strong {
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+/* "2 not active": ticked, but not assigned until switched on. */
+.site-settings-redesign-body .pa-role-picker__note {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 4px;
+    color: #a86a07;
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+.site-settings-redesign-body .pa-role-picker__note svg {
+    width: 13px;
+    height: 13px;
+    flex: 0 0 13px;
+}
+
+.site-settings-redesign-body .pa-role-picker.has-ticks .pa-role-picker__total {
+    border-color: #1b2f63;
+    background: #1b2f63;
+    color: #fff;
+}
+
+.site-settings-redesign-body .pa-role-picker__list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+    border-radius: 12px;
+}
+
+.site-settings-redesign-body .pa-role-picker__list.border-danger .pa-role-group {
+    border-color: #d64545;
+}
+
+.site-settings-redesign-body .pa-role-picker__nomatch {
+    margin: 0;
+    padding: 18px 16px;
+    border: 1px dashed #d9dee6;
+    border-radius: 12px;
+    background: #faf9f4;
+    color: #6b7686;
+    font-size: 13px;
+    font-weight: 650;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.site-settings-redesign-body .pa-role-picker__foot {
+    margin-top: 8px;
+}
+
+/* One category: a "select all" row, then its policies. */
+.site-settings-redesign-body .pa-role-group {
+    min-width: 0;
+    border: 1px solid #e6e2d6;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.site-settings-redesign-body .pa-role-group__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px 4px 4px;
+    border-bottom: 1px solid #eeebe1;
+    border-radius: 11px 11px 0 0;
+    background: #faf9f4;
+}
+
+.site-settings-redesign-body .pa-role-group.is-folded .pa-role-group__head {
+    border-bottom-color: transparent;
+    border-radius: 11px;
+}
+
+.site-settings-redesign-body .pa-role-picker.is-filtering .pa-role-group.is-folded .pa-role-group__head {
+    border-bottom-color: #eeebe1;
+    border-radius: 11px 11px 0 0;
+}
+
+.site-settings-redesign-body .pa-role-group__count {
+    flex: 0 0 auto;
+    padding: 4px 9px;
+    border: 1px solid #dde2e9;
+    border-radius: 999px;
+    background: #fff;
+    color: #6b7686;
+    font-size: 11.5px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.site-settings-redesign-body .pa-role-group.has-ticks .pa-role-group__count {
+    border-color: #c5cfe3;
+    background: #eef2f9;
+    color: #16264f;
+}
+
+.site-settings-redesign-body .pa-role-group.is-complete .pa-role-group__count {
+    border-color: #b9e4db;
+    background: #eefaf7;
+    color: #0f6f66;
+}
+
+.site-settings-redesign-body .pa-role-group__fold {
+    position: relative;
+    width: 30px;
+    height: 30px;
+    display: grid;
+    flex: 0 0 30px;
+    place-items: center;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #6b7686;
+    cursor: pointer;
+    transition: background 0.16s ease;
+}
+
+.site-settings-redesign-body .pa-role-group__fold:hover {
+    background: #efece2;
+}
+
+.site-settings-redesign-body .pa-role-group__fold svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.16s ease;
+}
+
+.site-settings-redesign-body .pa-role-group.is-folded .pa-role-group__fold svg {
+    transform: rotate(-90deg);
+}
+
+/* A search shows every match, whatever is folded, so the fold button steps aside. */
+.site-settings-redesign-body .pa-role-picker.is-filtering .pa-role-group__fold {
+    visibility: hidden;
+}
+
+/* Two columns read downwards (the list is alphabetical), one when there is no room. */
+.site-settings-redesign-body .pa-role-group__items {
+    display: block;
+    columns: 2 250px;
+    column-gap: 6px;
+    margin: 0;
+    padding: 6px 6px 4px;
+    list-style: none;
+}
+
+.site-settings-redesign-body .pa-role-group.is-folded .pa-role-group__items {
+    display: none;
+}
+
+.site-settings-redesign-body .pa-role-picker.is-filtering .pa-role-group.is-folded .pa-role-group__items {
+    display: block;
+}
+
+.site-settings-redesign-body .pa-role-item {
+    min-width: 0;
+    margin: 0 0 2px;
+    break-inside: avoid;
+}
+
+/* A checkbox row: the real <input> stays in the tab order, the box is drawn. */
+.site-settings-redesign-body .pa-role-check {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-height: 38px;
+    margin: 0;
+    padding: 8px 10px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: background 0.12s ease;
+}
+
+.site-settings-redesign-body .pa-role-check:hover {
+    background: #f6f4ec;
+}
+
+.site-settings-redesign-body .pa-role-item.is-ticked .pa-role-check {
+    background: #eef2f9;
+}
+
+.site-settings-redesign-body .pa-role-item.is-ticked .pa-role-check:hover {
+    background: #e5ebf6;
+}
+
+.site-settings-redesign-body .pa-role-check > input {
+    position: absolute;
+    top: 9px;
+    left: 10px;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.site-settings-redesign-body .pa-role-check__box {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    border: 1.5px solid #b3bcc9;
+    border-radius: 6px;
+    background: #fff;
+    transition: background 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+/* The tick (and, for "some ticked", the dash). */
+.site-settings-redesign-body .pa-role-check__box::after {
+    position: absolute;
+    top: 2px;
+    left: 6px;
+    width: 5px;
+    height: 10px;
+    border: solid #fff;
+    border-width: 0 2.2px 2.2px 0;
+    content: "";
+    opacity: 0;
+    transform: rotate(45deg);
+}
+
+.site-settings-redesign-body .pa-role-check > input:checked + .pa-role-check__box,
+.site-settings-redesign-body .pa-role-check > input:indeterminate + .pa-role-check__box {
+    border-color: #1b2f63;
+    background: #1b2f63;
+}
+
+.site-settings-redesign-body .pa-role-check > input:checked + .pa-role-check__box::after {
+    opacity: 1;
+}
+
+.site-settings-redesign-body .pa-role-check > input:indeterminate + .pa-role-check__box::after {
+    top: 7.5px;
+    left: 4px;
+    width: 9px;
+    height: 0;
+    border-width: 0 0 2.2px;
+    opacity: 1;
+    transform: none;
+}
+
+.site-settings-redesign-body .pa-role-check > input:focus-visible + .pa-role-check__box {
+    border-color: #16264f;
+    box-shadow: 0 0 0 3px rgba(22, 38, 79, 0.28);
+}
+
+.site-settings-redesign-body .pa-role-check > input:disabled + .pa-role-check__box {
+    border-color: #d9dee6;
+    background: #f1f3f6;
+}
+
+.site-settings-redesign-body .pa-role-check__copy {
+    display: block;
+    min-width: 0;
+    padding-top: 1px;
+    color: #2f3a49;
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.site-settings-redesign-body .pa-role-item.is-ticked .pa-role-check__title {
+    color: #16264f;
+}
+
+.site-settings-redesign-body .pa-role-check__version {
+    margin-left: 4px;
+    color: #8a93a1;
+    font-size: 11.5px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.site-settings-redesign-body .pa-role-check__tag {
+    min-height: 18px;
+    margin-left: 4px;
+    padding: 2px 7px;
+    font-size: 10.5px;
+    vertical-align: 1px;
+}
+
+.site-settings-redesign-body .pa-role-check--group {
+    flex: 1 1 auto;
+    align-items: center;
+    min-width: 0;
+    min-height: 36px;
+    padding: 7px 8px;
+}
+
+.site-settings-redesign-body .pa-role-check--group:hover {
+    background: #efece2;
+}
+
+.site-settings-redesign-body .pa-role-check--group > input {
+    top: 8px;
+    left: 8px;
+}
+
+.site-settings-redesign-body .pa-role-check--group .pa-role-check__copy {
+    padding-top: 0;
+    color: #16264f;
+    font-size: 13px;
+    font-weight: 850;
+    letter-spacing: 0.01em;
+}
+
+/* ==========================================================================
+   Narrow screens
+   ========================================================================== */
+
+@media (min-width: 761px) {
+    /* Room for search, bulk ticks and the total on one line. */
+    .site-settings-redesign-body .pa-role-picker__bar {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 10px;
+    }
+
+    .site-settings-redesign-body .pa-role-picker__bar .acc__input-error {
+        flex: 1 0 100%;
+    }
+
+    .site-settings-redesign-body .pa-role-picker__row {
+        display: contents;
+    }
+
+    /* The search gives way first, so the longer "Tick shown (12)" labels still fit. */
+    .site-settings-redesign-body .pa-role-picker__search {
+        flex-basis: 120px;
+        order: 1;
+    }
+
+    .site-settings-redesign-body .pa-role-picker__actions {
+        order: 2;
+    }
+
+    .site-settings-redesign-body .pa-role-picker__total {
+        order: 3;
+    }
+}
+
+@media (max-width: 760px) {
+    .site-settings-redesign-body .pa-role-help {
+        padding-right: 16px;
+        padding-left: 16px;
+    }
+}
+
+@media (max-width: 560px) {
+    /* The shared modal padding drops to 18px here; the sticky bar follows it. */
+    .site-settings-redesign-body .pa-role-picker__bar {
+        margin-right: -18px;
+        margin-left: -18px;
+        padding-right: 18px;
+        padding-left: 18px;
+    }
+
+    .site-settings-redesign-body .pa-role-modal .ss-settings-modal__body {
+        max-height: calc(100vh - 250px);
+        max-height: calc(100dvh - 250px);
+    }
+
+    .site-settings-redesign-body .pa-role-modal .ss-settings-modal__footer {
+        flex-direction: row;
+        padding-top: 12px;
+        padding-bottom: 14px;
+    }
+
+    .site-settings-redesign-body .pa-role-modal .ss-settings-modal__footer .ss-btn {
+        flex: 1 1 0;
+        width: auto;
+    }
+
+    .site-settings-redesign-body .pa-role-fields {
+        grid-template-columns: 96px minmax(0, 1fr);
+        grid-template-areas:
+            "name name"
+            "description description"
+            "sort active";
+    }
+
+    .site-settings-redesign-body .pa-role-group__items {
+        columns: 1;
+    }
+
+    /* Tighter buttons, so the three of them and the "not active" note share one line. */
+    .site-settings-redesign-body .pa-role-picker__action {
+        padding-right: 8px;
+        padding-left: 8px;
+    }
+
+    .site-settings-redesign-body .pa-role-picker__action-dot {
+        display: none;
+    }
+
+    .site-settings-redesign-body .pa-role-picker__actions {
+        gap: 5px;
+    }
+
+    .site-settings-redesign-body .pa-role-picker__note {
+        margin-left: auto;
+        font-size: 11.5px;
+    }
+
+    .site-settings-redesign-body .pa-roles-empty {
+        padding: 32px 18px 36px;
+    }
+
+    .site-settings-redesign-body .pa-roles-empty .ss-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}

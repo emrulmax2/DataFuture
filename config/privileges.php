@@ -104,6 +104,9 @@ return [
         'my-account*', 'profile*',
         'impersonate*',
         'privilege.denied',
+        // A member of staff's own policy assessments (read, take, submit). Each
+        // action is scoped to the signed-in employee inside the controller.
+        'user.account.policy*',
     ],
 
     /*
@@ -141,6 +144,12 @@ return [
         //   3. `php artisan privileges:audit-report` shows the routes really in
         //      use and who would be denied,
         //   4. map them, confirm the blast radius, then enforce.
+
+        // Policy Assessments (HR). Brand-new screens with no existing users, so
+        // they are mapped and enforced from day one. The controllers also call
+        // PolicyAssessmentService::canManage() on every action.
+        'policy.assessment*' => 'policy_assessment_manage',
+        'employee.policy.assessment*' => 'policy_assessment_manage',
     ],
 
     /*
@@ -157,6 +166,8 @@ return [
     'enforce_routes' => [
         'student',
         'student.list',
+        'policy.assessment*',
+        'employee.policy.assessment*',
     ],
 
     /*
