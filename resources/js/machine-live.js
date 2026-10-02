@@ -106,14 +106,53 @@ import { createIcons, icons } from "lucide";
                 }).then(response => {
                     if (response.status == 200) {
                         let res = response.data.res;
+
+                        /* "Allow All Services". Without it this terminal is a
+                           clock-in point only: breaks and clocking out are done
+                           from the person's own dashboard. The server refuses
+                           those actions regardless — this just avoids offering
+                           a button that would come back with a refusal. */
+                        let allServices = res.all_services === true || res.all_services === 1 || res.all_services === '1';
+
+                        /* The API pads the name with a trailing space, which
+                           reads as "NAME , you are..." once it sits next to
+                           punctuation. */
+                        let name = function () { return $.trim(res.name || ''); };
+
+                        /* Reveals a button only when this person may use it,
+                           so every branch below can stay as it reads. */
+                        let allow = function (type) {
+                            if (type !== 1 && !allServices) {
+                                return $();
+                            }
+                            return $buttonGroup.find('.btn-action.btn-type-' + type).fadeIn().removeAttr('disabled');
+                        };
+
+                        /* Called at the end of each branch. Someone restricted
+                           to clock-in who is already clocked in has nothing to
+                           press here, and a greeting over an empty row reads as
+                           a broken terminal — so it says where to go instead. */
+                        let noteIfNothingToDo = function () {
+                            if ($buttonGroup.find('.btn-action:not([disabled])').length) {
+                                return;
+                            }
+                            $form.find('.theMessage').remove();
+                            /* Icon and text are the only two flex items. Left
+                               loose, each run of text becomes its own item and
+                               a two-word name is laid out as a block of its
+                               own, pushing the comma onto a line by itself. */
+                            $form.prepend('<div class="text-white alert alert-pending theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="info" class="w-6 h-6 mr-2 flex-none"></i> <span>Hi <strong>' + name() + '</strong>, you are clocked in. Please use your dashboard to take a break or clock out.</span></div>');
+                            createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
+                        };
+
                         if(res.loc == '0'){
                             $buttonGroup.fadeIn('fast', function(){
                                 $form.find('.theMessage').remove();
-                                $form.prepend('<div class="text-white alert alert-success theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
+                                $form.prepend('<div class="text-white alert alert-success theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2 flex-none"></i> <span>Hi <strong>'+name()+'</strong>, what would you like to do?</span></div>')
                                 createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
 
                                 $actionButtons.fadeOut().attr('disabled', 'disabled');
-                                $buttonGroup.find('.btn-action.btn-type-1').fadeIn().removeAttr('disabled');
+                                allow(1);
                                 //$backButton.css({ display: 'inline-flex'}).removeAttr('disabled');
                             });
 
@@ -121,12 +160,13 @@ import { createIcons, icons } from "lucide";
                         }else if(res.loc == '1'){
                             $buttonGroup.fadeIn('fast', function(){
                                 $form.find('.theMessage').remove();
-                                $form.prepend('<div class="text-white alert alert-success theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
+                                $form.prepend('<div class="text-white alert alert-success theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2 flex-none"></i> <span>Hi <strong>'+name()+'</strong>, what would you like to do?</span></div>')
                                 createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
 
                                 $actionButtons.fadeOut().attr('disabled', 'disabled');
-                                $buttonGroup.find('.btn-action.btn-type-2').fadeIn().removeAttr('disabled');
-                                $buttonGroup.find('.btn-action.btn-type-4').fadeIn().removeAttr('disabled').attr('data-employee', res.name);
+                                allow(2);
+                                allow(4).attr('data-employee', res.name);
+                                noteIfNothingToDo();
                                 //$backButton.css({ display: 'inline-flex'}).removeAttr('disabled');
                             });
 
@@ -134,11 +174,12 @@ import { createIcons, icons } from "lucide";
                         }else if(res.loc == '2'){
                             $buttonGroup.fadeIn('fast', function(){
                                 $form.find('.theMessage').remove();
-                                $form.prepend('<div class="text-white alert alert-success theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
+                                $form.prepend('<div class="text-white alert alert-success theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2 flex-none"></i> <span>Hi <strong>'+name()+'</strong>, what would you like to do?</span></div>')
                                 createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
 
                                 $actionButtons.fadeOut().attr('disabled', 'disabled');
-                                $buttonGroup.find('.btn-action.btn-type-3').fadeIn().removeAttr('disabled');
+                                allow(3);
+                                noteIfNothingToDo();
                                 //$backButton.css({ display: 'inline-flex'}).removeAttr('disabled');
                             });
 
@@ -146,12 +187,13 @@ import { createIcons, icons } from "lucide";
                         }else if(res.loc == '3'){
                             $buttonGroup.fadeIn('fast', function(){
                                 $form.find('.theMessage').remove();
-                                $form.prepend('<div class="text-white alert alert-success theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
+                                $form.prepend('<div class="text-white alert alert-success theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2 flex-none"></i> <span>Hi <strong>'+name()+'</strong>, what would you like to do?</span></div>')
                                 createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
 
                                 $actionButtons.fadeOut().attr('disabled', 'disabled');
-                                $buttonGroup.find('.btn-action.btn-type-2').fadeIn().removeAttr('disabled');
-                                $buttonGroup.find('.btn-action.btn-type-4').fadeIn().removeAttr('disabled').attr('data-employee', res.name);
+                                allow(2);
+                                allow(4).attr('data-employee', res.name);
+                                noteIfNothingToDo();
                                 //$backButton.css({ display: 'inline-flex'}).removeAttr('disabled');
                             });
 
@@ -159,7 +201,7 @@ import { createIcons, icons } from "lucide";
                         }else if(res.loc == '4'){
                             $buttonGroup.fadeIn('fast', function(){
                                 $form.find('.theMessage').remove();
-                                $form.prepend('<div class="text-white alert alert-danger theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, It seems that you are already clocked out for the day.</div>')
+                                $form.prepend('<div class="text-white alert alert-danger theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2 flex-none"></i> <span>Hi <strong>'+name()+'</strong>, It seems that you are already clocked out for the day.</span></div>')
                                 createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
 
                                 $actionButtons.fadeOut().attr('disabled', 'disabled');
@@ -170,7 +212,7 @@ import { createIcons, icons } from "lucide";
                             $form.addClass('activeForm');
                         }else{
                             $form.find('.theMessage').remove();
-                            $form.prepend('<div class="text-white alert alert-danger theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> User does not foud!</div>')
+                            $form.prepend('<div class="text-white alert alert-danger theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2 flex-none"></i> <span>User not found.</span></div>')
                             createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
 
                             $buttonGroup.fadeIn();
