@@ -85,14 +85,14 @@
             ];
         }
 
-        // Shift panel visibility — unchanged from the previous markup.
+        /* Shift panel visibility. The rule lives on the User model so this and
+           the endpoint that records the punch cannot drift apart — "Desktop
+           Clock In" is required to punch from a computer at all, and off a
+           college IP "Working From Home" is needed as well. */
         $lccdShowShift = Auth::user()
             && (Route::currentRouteName() == 'dashboard' || Route::currentRouteName() == 'staff.dashboard')
             && !empty($home_work_history_btns)
-            && (
-                (!in_array(auth()->user()->last_login_ip, $venue_ips) && isset($home_work) && $home_work)
-                || (in_array(auth()->user()->last_login_ip, $venue_ips) && isset($desktop_login) && $desktop_login)
-            );
+            && auth()->user()->canPunchFromDesktop($venue_ips);
 
         $lccdShowReportAll = !$work_history_lock && isset($reportItAll) && $reportItAll->count() > 0;
         // The member of staff's own policy tests that are not passed yet.

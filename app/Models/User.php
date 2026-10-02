@@ -142,6 +142,38 @@ class User extends Authenticatable
      * The new system is reverse-mapped back onto the legacy names, so the 60+
      * existing priv()['x'] checks keep working untouched.
      */
+    /**
+     * May this person clock in and out from their dashboard?
+     *
+     * "Desktop Clock In" is the permission for punching from a computer rather
+     * than the terminal, so it is required either way. Where they are then
+     * decides what else is needed: on a college IP that is the whole test,
+     * and off it they must also hold "Working From Home".
+     *
+     * Previously the two were read as alternatives, so somebody off campus got
+     * in on "Working From Home" alone and taking "Desktop Clock In" away from
+     * them changed nothing.
+     *
+     * Lives here so the dashboard, the buttons and the endpoint that records
+     * the punch all answer it the same way.
+     *
+     * @param  array<int,string>  $venueIps
+     */
+    public function canPunchFromDesktop(array $venueIps = []): bool
+    {
+        $priv = $this->priv();
+
+        if ((int) ($priv['desktop_login'] ?? 0) !== 1) {
+            return false;
+        }
+
+        if (in_array($this->last_login_ip, $venueIps, true)) {
+            return true;
+        }
+
+        return (int) ($priv['work_home'] ?? 0) === 1;
+    }
+
     public function priv(){
         if ($this->privCache !== null) {
             return $this->privCache;
