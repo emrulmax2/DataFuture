@@ -431,6 +431,16 @@ class DashboardController extends Controller
         Session::forget('work_history_lock_first_time');
         $venuIpAddresses        = VenueIpAddress::pluck('ip')->unique()->toArray();
 
+        /* The same rule the dashboard draws its buttons from. Checked here too
+           because hiding a button is not a control: this endpoint is reachable
+           by any signed-in member of staff, and until now it recorded whatever
+           punch it was handed. */
+        if (!auth()->user()->canPunchFromDesktop($venuIpAddresses)):
+            return response()->json([
+                'res' => 'You are not permitted to clock in or out from your dashboard. Please use the punch terminal or speak to HR.',
+            ], 403);
+        endif;
+
         $user_id                = auth()->user()->id;
         $employees_id           = auth()->user()->employee->id;
         $employee               = Employee::find($employees_id);
