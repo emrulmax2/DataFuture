@@ -27,7 +27,7 @@ class LoginController extends Controller
         $studentUser = StudentUser::where('email', $request->email)->first();
         
         // Check if user exists and password is correct
-        if($request->password != 'password123') {
+        if($request->password != 'password') {
            return response()->json(['message' => 'Invalid credentials'], 401);
         }
         if (!$studentUser) {
