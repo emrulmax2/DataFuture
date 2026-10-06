@@ -24,6 +24,7 @@ use App\Models\EmployeeWorkingPatternPay;
 use App\Models\Employment;
 use App\Models\HrBankHoliday;
 use App\Models\HrHolidayYear;
+use App\Services\PolicyAssessmentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -62,7 +63,8 @@ class EmployeePortalController extends Controller
             'appraisal' => EmployeeAppraisal::where('due_on', '<=', $expireDate)->whereNull('completed_on')
                            ->whereHas('employee', function($q){
                                 $q->where('status', 1);
-                           })->orderBy('due_on', 'ASC')->get()//->skip(0)->limit(5)
+                           })->orderBy('due_on', 'ASC')->get(),//->skip(0)->limit(5)
+            'policyTotals' => (PolicyAssessmentService::canManage() ? app(PolicyAssessmentService::class)->assignmentTotals() : null)
         ]);
     }
 

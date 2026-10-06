@@ -22,6 +22,7 @@ use App\Models\EmployeeGroupMember;
 use App\Models\Employment;
 use App\Models\InternalLink;
 use App\Models\PlansDateList;
+use App\Models\PolicyAssignment;
 use App\Models\ProcessList;
 use App\Models\ReportItAll;
 use App\Models\Student;
@@ -129,8 +130,27 @@ class DashboardController extends Controller
             'myfollowups' => $myFollowups->count(),
             'myunreadcomments' => $myUnreadNoteCount,
             'sso_operations_auth_link'     => config('sso.operations_link'),
-            'hasDocumentReminder' => $this->getFileManagerReminderCount()
+            'hasDocumentReminder' => $this->getFileManagerReminderCount(),
+            'pendingPolicyAssessments' => $this->getPendingPolicyAssessmentCount()
         ]);
+    }
+
+    /**
+     * Policy tests the signed-in member of staff still has to pass: their live
+     * assignments (PolicyAssignment::live() — active policy, category not
+     * archived) that are not passed yet, i.e. the to-do items My HR › Policy
+     * Assessments lists. Returns 0 when the user has no employee record.
+     */
+    public function getPendingPolicyAssessmentCount(){
+        $employee = Employee::where('user_id', auth()->user()->id)->get()->first();
+        if(!isset($employee->id)):
+            return 0;
+        endif;
+
+        return PolicyAssignment::where('employee_id', $employee->id)
+                ->where('status', '!=', PolicyAssignment::STATUS_PASSED)
+                ->live()
+                ->count();
     }
 
     public function getFileManagerReminderCount(){

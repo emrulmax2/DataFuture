@@ -1,0 +1,203 @@
+/* =========================================================================
+   Policy Assessments: level pills and badge medallions.
+   Shared by the HR pages (policy-assessment-admin.css) and My HR
+   (policy-assessment-staff.css), which both @import this file.
+   Markup: pages/hr/policy-assessment/partials/level-pill.blade.php and
+   level-badge.blade.php, or levelPill() / badgeSvg() in
+   resources/js/policy-assessment/levels.js.
+   Colours follow App\Support\PolicyLevel::COLOURS:
+     beginner (bronze)      main #b0703a  soft #f6e6d8  ink #7a4a22
+     intermediate (silver)  main #7b8794  soft #eceff3  ink #4a5563
+     expert (gold)          main #c49a12  soft #fbf2d3  ink #7a5d00
+   ========================================================================= */
+
+/* ------------------------------------------------------------ level pill */
+.pa-level-pill {
+    align-items: center;
+    background: #f6e6d8;
+    border: 1px solid rgba(176, 112, 58, 0.35);
+    border-radius: 999px;
+    color: #7a4a22;
+    display: inline-flex;
+    font-size: 12px;
+    font-weight: 700;
+    gap: 6px;
+    line-height: 1.1;
+    min-height: 22px;
+    padding: 3px 10px;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.pa-level-pill__dot {
+    background: #b0703a;
+    border-radius: 999px;
+    display: block;
+    flex: 0 0 auto;
+    height: 7px;
+    width: 7px;
+}
+
+.pa-level-pill--beginner {
+    background: #f6e6d8;
+    border-color: rgba(176, 112, 58, 0.35);
+    color: #7a4a22;
+}
+
+.pa-level-pill--beginner .pa-level-pill__dot {
+    background: #b0703a;
+}
+
+.pa-level-pill--intermediate {
+    background: #eceff3;
+    border-color: rgba(123, 135, 148, 0.4);
+    color: #4a5563;
+}
+
+.pa-level-pill--intermediate .pa-level-pill__dot {
+    background: #7b8794;
+}
+
+.pa-level-pill--expert {
+    background: #fbf2d3;
+    border-color: rgba(196, 154, 18, 0.4);
+    color: #7a5d00;
+}
+
+.pa-level-pill--expert .pa-level-pill__dot {
+    background: #c49a12;
+}
+
+/* ------------------------------------------------------------ medallion */
+.pa-badge-medal {
+    display: inline-flex;
+    flex: 0 0 auto;
+    line-height: 0;
+    vertical-align: middle;
+}
+
+.pa-badge-medal__svg {
+    display: block;
+    filter: drop-shadow(0 1px 1.5px rgba(15, 23, 42, 0.18));
+    height: auto;
+    max-width: none;
+    overflow: visible;
+    width: 100%;
+}
+
+.pa-badge-medal--sm {
+    width: 28px;
+}
+
+.pa-badge-medal--md {
+    width: 48px;
+}
+
+.pa-badge-medal--lg {
+    width: 88px;
+}
+
+.pa-badge-medal--lg .pa-badge-medal__svg {
+    filter: drop-shadow(0 3px 5px rgba(15, 23, 42, 0.2));
+}
+
+.pa-badge-medal.is-revoked {
+    filter: grayscale(1);
+    opacity: 0.5;
+}
+
+/* ------------------------------------------------ medallion + caption */
+.pa-badge-card {
+    align-items: center;
+    display: inline-flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 12rem;
+    text-align: center;
+    vertical-align: top;
+}
+
+.pa-badge-card__caption {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.pa-badge-card__level {
+    color: #7a4a22;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    line-height: 1.3;
+    text-transform: uppercase;
+}
+
+.pa-badge-card--intermediate .pa-badge-card__level {
+    color: #4a5563;
+}
+
+.pa-badge-card--expert .pa-badge-card__level {
+    color: #7a5d00;
+}
+
+.pa-badge-card__title {
+    color: #1f2937;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.pa-badge-card__date {
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+/* sm: medal beside the caption, for lists and table cells. */
+.pa-badge-card--sm {
+    flex-direction: row;
+    gap: 8px;
+    max-width: none;
+    text-align: left;
+}
+
+.pa-badge-card--sm .pa-badge-card__level {
+    font-size: 10px;
+}
+
+.pa-badge-card--sm .pa-badge-card__title {
+    font-size: 12px;
+}
+
+.pa-badge-card--lg {
+    gap: 12px;
+    max-width: 18rem;
+}
+
+.pa-badge-card--lg .pa-badge-card__level {
+    font-size: 12px;
+}
+
+.pa-badge-card--lg .pa-badge-card__title {
+    font-size: 16px;
+}
+
+.pa-badge-card--lg .pa-badge-card__date {
+    font-size: 13px;
+}
+
+.pa-badge-card.is-revoked .pa-badge-card__caption {
+    opacity: 0.6;
+}
+
+.pa-badge-card.is-revoked .pa-badge-card__title {
+    text-decoration: line-through;
+}
+
+@media print {
+    .pa-badge-medal__svg {
+        filter: none;
+    }
+}

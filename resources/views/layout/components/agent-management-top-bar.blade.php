@@ -232,6 +232,12 @@
                         <i data-lucide="user"></i>
                         <span>Profile</span>
                     </a>
+                    @if(\App\Services\StaffDocumentVaultService::showsMenu())
+                        <a href="{{ route('user.account.document.pin') }}" class="agm-profile__link">
+                            <i data-lucide="key-round"></i>
+                            <span>PIN</span>
+                        </a>
+                    @endif
                     <a href="{{ $agmLogoutUrl }}" class="agm-profile__link agm-profile__link--danger">
                         <i data-lucide="log-out"></i>
                         <span>Logout</span>

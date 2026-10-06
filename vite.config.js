@@ -482,6 +482,20 @@ export default defineConfig({
                 
                 'resources/js/hesa-my-downloads.js',
 
+                'resources/css/policy-assessment-admin.css',
+                'resources/css/policy-assessment-staff.css',
+                'resources/js/policy-assessment-categories.js',
+                'resources/js/policy-assessment-roles.js',
+                'resources/js/policy-assessment-policies.js',
+                'resources/js/policy-assessment-questions.js',
+                'resources/js/policy-assessment-assignments.js',
+                'resources/js/policy-assessment-results.js',
+                'resources/js/employee-policy-assessment.js',
+                'resources/js/user-policy-assessment.js',
+
+                'resources/css/staff-document-pin.css',
+                'resources/js/user-document-pin.js',
+
             ],
             refresh: true,
         }),

@@ -8,13 +8,18 @@ use App\Mail\CommunicationSendMail;
 use App\Models\ComonSmtp;
 use App\Models\DocumentSettings;
 use App\Models\EmailTemplate;
+use App\Models\EmployeeDocumentAccessLog;
 use App\Models\EmployeeDocuments;
 use App\Models\Employee;
 use App\Models\Employment;
 use App\Models\HrHolidayYear;
 use App\Models\PaySlipUploadSync;
+use App\Services\StaffDocumentVaultService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 
 class EmployeeDocumentsController extends Controller
 {
@@ -41,7 +46,29 @@ class EmployeeDocumentsController extends Controller
             "employment" => $employment,
             'docSettings' => DocumentSettings::where('staff', '1')->get(),
             'emailTemplates' => EmailTemplate::where('hr', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
+            'vault' => $this->vaultState(),
         ]);
+    }
+
+    /**
+     * What the page needs to know before asking for a PIN. The server checks
+     * all of it again when a document is actually opened.
+     *
+     * The permission and the PIN are the holder's: in an impersonated
+     * session that is the impersonator, not the account they are signed in as.
+     */
+    protected function vaultState(){
+        $holder = StaffDocumentVaultService::holder();
+        $impersonating = StaffDocumentVaultService::isImpersonating();
+
+        return [
+            'can_use' => ($holder ? StaffDocumentVaultService::canUse($holder) : false),
+            'has_pin' => ($holder ? app(StaffDocumentVaultService::class)->hasPin($holder) : false),
+            'impersonating' => $impersonating,
+            'holder_name' => ($impersonating && $holder ? $holder->full_name : ''),
+            'signed_in_as' => ($impersonating ? auth()->user()->full_name : ''),
+            'pin_max_length' => StaffDocumentVaultService::PIN_MAX_LENGTH,
+        ];
     }
 
     public function list(Request $request){
@@ -90,12 +117,14 @@ class EmployeeDocumentsController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'display_file_name' => (!empty($list->display_file_name) ? $list->display_file_name : 'Unknown'),
-                    'hard_copy_check' => $list->hard_copy_check,    
+                    'hard_copy_check' => $list->hard_copy_check,
                     'url' => (isset($list->current_file_name) && !empty($list->current_file_name) ? $list->current_file_name : ''),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at,
-                    'hasNote' => (isset($list->note->id) && $list->note->id > 0 ? 1 : 0)
+                    'hasNote' => (isset($list->note->id) && $list->note->id > 0 ? 1 : 0),
+                    'is_encrypted' => ($list->is_encrypted == 1 ? 1 : 0),
+                    'viewable' => (StaffDocumentVaultService::isViewable($list) ? 1 : 0)
                 ];
                 $i++;
             endforeach;
@@ -179,10 +208,24 @@ class EmployeeDocumentsController extends Controller
         $documentSetting = DocumentSettings::find($document_setting_id);
         $hard_copy_check = $request->hard_copy_check;
         $display_file_name = (isset($request->display_file_name) && !empty($request->display_file_name) ? $request->display_file_name : '');
+        $is_encrypted = (isset($request->is_encrypted) && $request->is_encrypted == 1 ? 1 : 0);
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/employees/'.$employee_id.'/documents', $imageName, 's3');
+        if($is_encrypted):
+            // Stored encrypted, under a name that says so. Nothing readable
+            // ever reaches the bucket, so no storage link can leak the file.
+            $imageName .= StaffDocumentVaultService::EXTENSION;
+            $stored = Storage::disk('s3')->put(
+                'public/employees/'.$employee_id.'/documents/'.$imageName,
+                app(StaffDocumentVaultService::class)->encrypt(file_get_contents($document->getRealPath()))
+            );
+            if(!$stored):
+                return response()->json(['message' => 'The encrypted document could not be stored. Please try again.'], 500);
+            endif;
+        else:
+            $path = $document->storeAs('public/employees/'.$employee_id.'/documents', $imageName, 's3');
+        endif;
         $displayName = (isset($documentSetting->name) && !empty($documentSetting->name) ? $documentSetting->name.(!empty($display_file_name) ? ' - '.$display_file_name : '') : (!empty($display_file_name) ? $display_file_name : $imageName));
         
         $data = [];
@@ -195,6 +238,7 @@ class EmployeeDocumentsController extends Controller
         $data['display_file_name'] = $displayName;
         $data['current_file_name'] = $imageName;
         $data['type'] = 1;
+        $data['is_encrypted'] = $is_encrypted;
         $data['created_by'] = auth()->user()->id;
         $data['created_at'] = date('Y-m-d H:i:s');
         $employeeDoc = EmployeeDocuments::create($data);
@@ -228,13 +272,149 @@ class EmployeeDocumentsController extends Controller
         $row_id = $request->row_id;
         $has_note = (isset($request->has_note) && $request->has_note > 0 ? $request->has_note : 0);
 
-        $empDoc = EmployeeDocuments::find($row_id);
+        // Archived rows keep their download button, so they are looked up too.
+        $empDoc = EmployeeDocuments::withTrashed()->find($row_id);
+        if(!$empDoc):
+            return response()->json(['message' => 'Document not found.'], 404);
+        endif;
+
+        // An encrypted document never gets a storage link: the stored file is
+        // ciphertext, and it is only handed over by openEncrypted() below.
+        if($empDoc->is_encrypted == 1):
+            return response()->json(['message' => 'This document is encrypted. Enter your document PIN to open it.'], 423);
+        endif;
+
         if($has_note):
             $tmpURL = Storage::disk('s3')->temporaryUrl('public/employees/notes/'.$empDoc->current_file_name, now()->addMinutes(5));
         else:
             $tmpURL = Storage::disk('s3')->temporaryUrl('public/employees/'.$empDoc->employee_id.'/documents/'.$empDoc->current_file_name, now()->addMinutes(5));
         endif;
+
+        // Every open goes on record, every time. The link is only handed
+        // over once it has: no trail, no document.
+        if(!app(StaffDocumentVaultService::class)->log(StaffDocumentVaultService::EVENT_DOWNLOAD, $empDoc)):
+            return response()->json(['message' => StaffDocumentVaultService::NOT_RECORDED], 500);
+        endif;
+
         return response()->json(['res' => $tmpURL], 200);
+    }
+
+    /**
+     * Decrypt an encrypted document and hand it over, once the person at the
+     * keyboard has proved who they are with their own document PIN. Someone
+     * signed in as another user enters their own PIN, not that user's, and
+     * the open is logged as theirs, through impersonation.
+     *
+     * The file is streamed from here rather than linked to: there is no URL
+     * that would still work for somebody else, or after this request.
+     */
+    public function openEncrypted(Request $request){
+        $vault = app(StaffDocumentVaultService::class);
+        $mode = (isset($request->mode) && $request->mode == 'view' ? 'view' : 'download');
+
+        $empDoc = EmployeeDocuments::withTrashed()->find($request->row_id);
+        if(!$empDoc || $empDoc->is_encrypted != 1):
+            return response()->json(['message' => 'Document not found.'], 404);
+        endif;
+
+        $challenge = $vault->challengeForDocument($request->pin, $empDoc);
+        if(!$challenge['ok']):
+            return response()->json(['message' => $challenge['message']], $challenge['status']);
+        endif;
+
+        $payload = Storage::disk('s3')->get('public/employees/'.$empDoc->employee_id.'/documents/'.$empDoc->current_file_name);
+        $contents = (!empty($payload) ? $vault->decrypt($payload) : null);
+        if($contents === null):
+            Log::error('Encrypted employee document '.$empDoc->id.' could not be read or decrypted.');
+            return response()->json(['message' => 'This document could not be opened. Please contact the administrator.'], 500);
+        endif;
+
+        // Only what a browser can show safely is ever served inline.
+        $viewable = StaffDocumentVaultService::isViewable($empDoc);
+        if($mode == 'view' && !$viewable):
+            $mode = 'download';
+        endif;
+
+        // No trail, no document.
+        if(!$vault->log(($mode == 'view' ? StaffDocumentVaultService::EVENT_VIEW : StaffDocumentVaultService::EVENT_DOWNLOAD), $empDoc)):
+            return response()->json(['message' => StaffDocumentVaultService::NOT_RECORDED], 500);
+        endif;
+
+        $name = str_replace(['/', '\\', '%'], '-', StaffDocumentVaultService::downloadName($empDoc));
+        $fallback = preg_replace('/[^A-Za-z0-9._-]+/', '_', Str::ascii($name));
+
+        return response($contents, 200, [
+            'Content-Type' => ($viewable ? StaffDocumentVaultService::VIEWABLE[strtolower($empDoc->doc_type)] : 'application/octet-stream'),
+            'Content-Disposition' => HeaderUtils::makeDisposition(($mode == 'view' ? 'inline' : 'attachment'), $name, ($fallback !== '' ? $fallback : 'document')),
+            'X-Document-Name' => rawurlencode($name),
+            'X-Content-Type-Options' => 'nosniff',
+            'Cache-Control' => 'no-store, private',
+        ]);
+    }
+
+    /**
+     * Who opened this employee's documents, and what happened to their PIN.
+     */
+    public function accessLogList(Request $request){
+        $employeeId = (isset($request->employeeId) && !empty($request->employeeId) ? $request->employeeId : 0);
+        $event = (isset($request->event) && !empty($request->event) ? $request->event : '');
+
+        $query = EmployeeDocumentAccessLog::with(['user.employee', 'impersonator.employee'])->where('employee_id', $employeeId)->orderBy('id', 'DESC');
+        if(isset(StaffDocumentVaultService::EVENT_GROUPS[$event])):
+            $query->whereIn('event', StaffDocumentVaultService::EVENT_GROUPS[$event]);
+        elseif($event == 'impersonated'):
+            $query->whereNotNull('impersonator_id');
+        endif;
+
+        $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+
+        $Query = $query->skip($offset)
+               ->take($limit)
+               ->get();
+
+        $data = array();
+
+        if(!empty($Query)):
+            foreach($Query as $list):
+                $meta = (isset(StaffDocumentVaultService::EVENTS[$list->event]) ? StaffDocumentVaultService::EVENTS[$list->event] : [ucfirst(str_replace('_', ' ', $list->event)), 'info']);
+                $impersonated = ($list->impersonator_id > 0);
+                $account = (isset($list->user->full_name) ? $list->user->full_name : 'Unknown');
+
+                // An open made while signed in as somebody else is not an
+                // ordinary one: say so, and stop it reading as routine.
+                if($impersonated && in_array($list->event, StaffDocumentVaultService::EVENT_GROUPS['opened'])):
+                    $meta = [$meta[0].' through impersonation', 'warning'];
+                endif;
+
+                $data[] = [
+                    'id' => $list->id,
+                    'event' => $meta[0],
+                    'tone' => $meta[1],
+                    'document' => (!empty($list->document_name) ? $list->document_name : ''),
+                    'is_encrypted' => ($list->is_encrypted == 1 ? 1 : 0),
+                    // Who really did it: the impersonator when there was one.
+                    'user' => ($impersonated ? (isset($list->impersonator->full_name) ? $list->impersonator->full_name : 'User #'.$list->impersonator_id) : $account),
+                    // The account they were signed in as at the time.
+                    'signed_in_as' => ($impersonated ? $account : ''),
+                    'ip_address' => (!empty($list->ip_address) ? $list->ip_address : ''),
+                    'date' => (!empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
+                    'time' => (!empty($list->created_at) ? date('h:i:s A', strtotime($list->created_at)) : ''),
+                ];
+            endforeach;
+        endif;
+        return response()->json([
+            'current_page' => $page,
+            'last_page' => $last_page,
+            'per_page' => $perpage,
+            'total_rows' => $total_rows,
+            'data' => $data
+        ]);
     }
 
     public function employeeSentMail(EmployeeSentMailRequest $request){

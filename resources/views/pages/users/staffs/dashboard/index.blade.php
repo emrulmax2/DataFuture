@@ -36,6 +36,7 @@
             ['tutor_2', 'Tutor', 'presentation', 'tutor-dashboard.show.new', null],
             ['personal_tutor', 'Personal Tutor', 'heart-handshake', 'pt.dashboard', null],
             ['hr_porta', 'Human Resources', 'users', 'hr.portal', null],
+            ['policy_assessment_manage', 'Policy Assessments', 'clipboard-check', 'policy.assessment', null],
             ['programme_dashboard', 'Manager', 'layout-dashboard', 'programme.dashboard', null],
             ['access_account', 'Accounts', 'wallet', 'accounts', null],
             // The issue desk (/library-management), not the older dashboard
@@ -94,10 +95,13 @@
             && auth()->user()->canPunchFromDesktop($venue_ips);
 
         $lccdShowReportAll = !$work_history_lock && isset($reportItAll) && $reportItAll->count() > 0;
+        // The member of staff's own policy tests that are not passed yet.
+        $lccdPendingPolicies = (int) ($pendingPolicyAssessments ?? 0);
+        $lccdShowPolicies = !$work_history_lock && $lccdPendingPolicies > 0;
         $lccdCan = fn ($key) => isset($lccdPriv[$key]) && $lccdPriv[$key] == 1;
 
         // Only draw the quick-actions panel when at least one row survives its gate.
-        $lccdHasQuickActions = $myfollowups > 0 || $lccdShowReportAll || (!$work_history_lock && (
+        $lccdHasQuickActions = $myfollowups > 0 || $lccdShowReportAll || $lccdShowPolicies || (!$work_history_lock && (
             trim($internal_link_buttons) !== ''
             || $lccdCan('group_email')
             || $lccdCan('student_due_rep')
@@ -304,6 +308,14 @@
                                         <span class="lccd-action__label">Expired Documents</span>
                                     </a>
                                 @endif
+                            @endif
+
+                            @if($lccdShowPolicies)
+                                <a href="{{ route('user.account.policy') }}" class="lccd-action">
+                                    <i data-lucide="clipboard-check"></i>
+                                    <span class="lccd-action__label">Policy tests to complete</span>
+                                    <span class="lccd-chip">{{ $lccdPendingPolicies }}</span>
+                                </a>
                             @endif
 
                             @if($myfollowups > 0)

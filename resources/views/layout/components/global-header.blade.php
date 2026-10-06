@@ -305,6 +305,14 @@
                                 <small>View & edit your details</small>
                                 <i data-lucide="chevron-right"></i>
                             </a>
+                            @if(\App\Services\StaffDocumentVaultService::showsMenu())
+                                <a href="{{ route('user.account.document.pin') }}" class="lcc-global-header__account-link">
+                                    <span><i data-lucide="key-round"></i></span>
+                                    <strong>PIN</strong>
+                                    <small>For encrypted staff documents</small>
+                                    <i data-lucide="chevron-right"></i>
+                                </a>
+                            @endif
                             <a href="{{ $logoutUrl }}" class="lcc-global-header__account-link lcc-global-header__account-link--danger">
                                 <span><i data-lucide="log-out"></i></span>
                                 <strong>Logout</strong>

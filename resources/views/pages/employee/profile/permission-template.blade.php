@@ -360,6 +360,8 @@
                     'hr_portal_privilege_menu' => 'Privilege Menu',
                     'hr_portal_edit_email' => 'Edit User Email',
                     'hr_portal_login_as' => 'Login As User',
+                    'hr_portal_policy_assessment_manage' => 'Policy Assessments (manage question bank, assign, view results)',
+                    'hr_portal_staff_document_pin' => 'PIN Enabled',
                 ];
             @endphp
             @foreach($hrItems as $key => $label)

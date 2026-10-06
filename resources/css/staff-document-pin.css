@@ -1,0 +1,570 @@
+/* =====================================================================
+   Encrypted staff documents and the document PIN.
+
+   Two screens share this file:
+     - Employee Profile > Documents  (ep-doc-*: the encrypted marker, the
+       PIN prompt and the access log)
+     - Account menu > PIN            (myhr-pin-*)
+
+   Colours follow the tokens each screen already uses (--ep-doc-* on the
+   documents page, the My HR teal on the PIN page) so neither looks bolted on.
+   ===================================================================== */
+
+/* ---------------------------------------------- documents: encrypted row */
+
+.ep-doc-page .ep-doc-namecell {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+}
+
+.ep-doc-page .ep-doc-namecell__name {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.ep-doc-page .ep-doc-lock-chip {
+    align-items: center;
+    background: var(--ep-doc-soft-teal);
+    border: 1px solid var(--ep-doc-soft-teal-border);
+    border-radius: 999px;
+    color: var(--ep-doc-soft-teal-ink);
+    display: inline-flex;
+    flex: none;
+    font-size: 11px;
+    font-weight: 700;
+    gap: 5px;
+    line-height: 1;
+    padding: 4px 9px;
+    white-space: nowrap;
+}
+
+.ep-doc-page .ep-doc-action-btn--locked {
+    background: var(--ep-doc-soft-gold);
+    border-color: var(--ep-doc-soft-gold-border);
+    color: var(--ep-doc-soft-gold-ink);
+}
+
+.ep-doc-page .ep-doc-action-btn--locked:hover {
+    background: #f6e6c2;
+    border-color: var(--ep-doc-soft-gold-ink);
+    color: var(--ep-doc-soft-gold-ink);
+}
+
+/* ------------------------------------------------- documents: access log */
+
+.ep-doc-page .ep-doc-pill--success {
+    background: var(--ep-doc-soft-green);
+    border-color: var(--ep-doc-soft-green-border);
+    color: var(--ep-doc-soft-green-ink);
+}
+
+.ep-doc-page .ep-doc-pill--info {
+    background: var(--ep-doc-soft-blue);
+    border-color: var(--ep-doc-soft-blue-border);
+    color: var(--ep-doc-soft-blue-ink);
+}
+
+.ep-doc-page .ep-doc-pill--warning {
+    background: var(--ep-doc-soft-gold);
+    border-color: var(--ep-doc-soft-gold-border);
+    color: var(--ep-doc-soft-gold-ink);
+}
+
+.ep-doc-page .ep-doc-pill--danger {
+    background: var(--ep-doc-soft-red);
+    border-color: var(--ep-doc-soft-red-border);
+    color: var(--ep-doc-soft-red-ink);
+}
+
+/* The line that matters most in the log: somebody else was at the keyboard. */
+.ep-doc-page .ep-doc-impersonated {
+    align-items: center;
+    color: var(--ep-doc-soft-red-ink);
+    display: flex;
+    font-size: 11.5px;
+    font-weight: 700;
+    gap: 5px;
+    line-height: 1.4;
+    margin-top: 3px;
+}
+
+.ep-doc-page .ep-doc-impersonated svg {
+    flex: none;
+}
+
+/* ------------------------------------------- documents: upload + PIN modal */
+
+body.employee-profile-body .ep-doc-upload-hint {
+    color: #6e8b88;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.5;
+    margin: 9px 0 0;
+}
+
+/* Yes / No as a switch. The look matches the switches already used in the
+   note and appraisal modals; the word beside it follows the switch's state, so
+   the answer can be read without knowing which way is "on". */
+body.employee-profile-body .ep-doc-toggle-row {
+    align-items: center;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+body.employee-profile-body .ep-doc-toggle-row > .form-label {
+    cursor: pointer;
+    margin-bottom: 0 !important;
+}
+
+body.employee-profile-body .ep-doc-toggle {
+    align-items: center;
+    cursor: pointer;
+    display: inline-flex;
+    flex: none;
+    gap: 10px;
+    margin: 0;
+    padding-left: 0;
+}
+
+body.employee-profile-body .ep-doc-toggle .form-check-input {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: #cbd9d7;
+    background-image: none !important;
+    border: 0;
+    border-radius: 999px;
+    box-shadow: none;
+    cursor: pointer;
+    flex: none;
+    height: 24px;
+    margin: 0;
+    position: relative;
+    transition: background-color .18s ease;
+    width: 42px;
+}
+
+body.employee-profile-body .ep-doc-toggle .form-check-input::before {
+    content: none !important;
+    display: none !important;
+}
+
+body.employee-profile-body .ep-doc-toggle .form-check-input::after {
+    background: #ffffff;
+    border-radius: 999px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+    content: "";
+    height: 18px;
+    left: 3px;
+    position: absolute;
+    top: 3px;
+    transition: transform .18s ease;
+    width: 18px;
+}
+
+body.employee-profile-body .ep-doc-toggle .form-check-input:checked {
+    background-color: #0f7b76;
+    background-image: none !important;
+}
+
+body.employee-profile-body .ep-doc-toggle .form-check-input:checked::after {
+    transform: translateX(18px);
+}
+
+body.employee-profile-body .ep-doc-toggle .form-check-input:focus-visible {
+    box-shadow: 0 0 0 3px rgba(15, 123, 118, 0.22);
+    outline: none;
+}
+
+/* Fixed width, so "Yes" and "No" do not nudge the switch sideways. */
+body.employee-profile-body .ep-doc-toggle__state {
+    color: #6e8b88;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    min-width: 26px;
+}
+
+body.employee-profile-body .ep-doc-toggle__state::after {
+    content: "No";
+}
+
+body.employee-profile-body .ep-doc-toggle .form-check-input:checked + .ep-doc-toggle__state {
+    color: #0f7b76;
+}
+
+body.employee-profile-body .ep-doc-toggle .form-check-input:checked + .ep-doc-toggle__state::after {
+    content: "Yes";
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.employee-profile-body .ep-doc-toggle .form-check-input,
+    body.employee-profile-body .ep-doc-toggle .form-check-input::after {
+        transition: none;
+    }
+}
+
+body.employee-profile-body .ep-doc-pin-field {
+    margin-top: 18px;
+}
+
+body.employee-profile-body .ep-doc-pin-input {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.42em;
+    min-height: 48px;
+    text-align: center;
+}
+
+body.employee-profile-body .ep-doc-pin-input::placeholder {
+    color: #c3d2d0;
+    font-weight: 400;
+}
+
+body.employee-profile-body .ep-doc-pin-error {
+    color: #c4432f;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.45;
+    margin-top: 8px;
+    min-height: 18px;
+}
+
+body.employee-profile-body .ep-doc-pin-note {
+    align-items: center;
+    background: #f7faf9;
+    border: 1px solid #e1eae9;
+    border-radius: 10px;
+    color: #5c7977;
+    display: flex;
+    font-size: 12px;
+    font-weight: 600;
+    gap: 9px;
+    line-height: 1.45;
+    margin: 10px 0 0;
+    padding: 10px 12px;
+}
+
+body.employee-profile-body .ep-doc-pin-note svg {
+    color: #0f7b76;
+    flex: none;
+}
+
+/* Signed in as somebody else: louder, because whose PIN is wanted and whose
+   name is logged are both about to matter. */
+body.employee-profile-body .ep-doc-pin-note--impersonating {
+    align-items: flex-start;
+    background: #fef7e7;
+    border-color: #f3e3bd;
+    color: #7a5a11;
+    font-weight: 500;
+}
+
+body.employee-profile-body .ep-doc-pin-note--impersonating svg {
+    color: #b07e14;
+    margin-top: 2px;
+}
+
+body.employee-profile-body .ep-doc-pin-note--impersonating strong {
+    color: #6b4d08;
+    font-weight: 700;
+}
+
+/* Footer buttons in these modals take their icon from ::before and are forced
+   to inline-flex, so each new button needs its icon named here, and hiding one
+   has to be just as insistent. */
+body.employee-profile-body #documentPinViewBtn::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23087f5b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E") !important;
+}
+
+body.employee-profile-body #documentPinDownloadBtn::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23087f5b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3Cpath d='M12 15V3'/%3E%3C/svg%3E") !important;
+}
+
+body.employee-profile-body .ep-doc-pin-modal .modal-footer .btn[hidden] {
+    display: none !important;
+}
+
+/* ------------------------------------------------ account menu > PIN page */
+
+.myhr-pin__layout {
+    display: grid;
+    gap: 0;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+}
+
+.myhr-pin__main {
+    border-right: 1px solid #edf3f2;
+    padding: 30px 26px 34px;
+}
+
+.myhr-pin__aside {
+    background: #fafcfb;
+    padding: 26px;
+}
+
+.myhr-pin-state {
+    max-width: 460px;
+}
+
+/* The panels and the success note are switched with the hidden attribute,
+   which a display rule further down would otherwise override. */
+.myhr-pin-state[hidden],
+.myhr-pin-success[hidden] {
+    display: none;
+}
+
+.myhr-pin-state__eyebrow {
+    align-items: center;
+    color: #0f7b76;
+    display: inline-flex;
+    font-size: 11.5px;
+    font-weight: 700;
+    gap: 7px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.myhr-pin-state__eyebrow svg {
+    height: 14px;
+    width: 14px;
+}
+
+.myhr-pin-state h3 {
+    color: #12302d;
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 10px 0 0;
+}
+
+.myhr-pin-state p {
+    color: #5c7977;
+    font-size: 13.5px;
+    line-height: 1.6;
+    margin: 8px 0 0;
+}
+
+.myhr-pin-state__actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-top: 6px;
+}
+
+.myhr-pin-state__actions .myhr-sign-btn {
+    padding: 11px 16px;
+}
+
+/* One box per question, stacked: a PIN is typed, then typed again, and the
+   two are easiest to compare when one sits under the other. */
+.myhr-pin-form {
+    display: grid;
+    gap: 16px;
+    margin-top: 22px;
+    max-width: 300px;
+}
+
+/* The reset form has three buttons, which do not fit the width of a PIN
+   box: let the row run past it rather than wrap one button onto its own line. */
+.myhr-pin-form .myhr-pin-state__actions {
+    max-width: 460px;
+    width: max-content;
+}
+
+.myhr-pin-field label {
+    color: #17312f;
+    display: block;
+    font-size: 12.5px;
+    font-weight: 700;
+    margin-bottom: 7px;
+}
+
+.myhr-pin-field input {
+    background: #ffffff;
+    border: 1px solid #cfdedb;
+    border-radius: 10px;
+    color: #12302d;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.36em;
+    min-height: 46px;
+    padding: 0 14px;
+    width: 100%;
+}
+
+.myhr-pin-field input:focus {
+    border-color: #0f7b76;
+    box-shadow: 0 0 0 3px rgba(15, 123, 118, 0.14);
+    outline: none;
+}
+
+.myhr-pin-field small {
+    color: #7a9390;
+    display: block;
+    font-size: 12px;
+    line-height: 1.5;
+    margin-top: 6px;
+}
+
+/* Reserves its line, so a message appearing does not push the button down. */
+.myhr-pin-error {
+    color: #c4432f;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.5;
+    min-height: 19px;
+}
+
+.myhr-pin-success {
+    align-items: center;
+    background: #e6f4ec;
+    border: 1px solid #cde7d6;
+    border-radius: 10px;
+    color: #187a45;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 13px;
+    font-weight: 600;
+    gap: 6px 14px;
+    justify-content: space-between;
+    line-height: 1.5;
+    margin-top: 16px;
+    padding: 11px 14px;
+}
+
+.myhr-pin-success__link {
+    align-items: center;
+    color: #0f5f3a;
+    display: inline-flex;
+    font-weight: 700;
+    gap: 5px;
+    text-decoration: underline;
+    white-space: nowrap;
+}
+
+.myhr-pin-success__link[hidden] {
+    display: none;
+}
+
+.myhr-pin-success__link svg {
+    height: 14px;
+    width: 14px;
+}
+
+/* Why they are looking at this page, when sign-in sent them here. */
+.myhr-pin-notice {
+    align-items: flex-start;
+    background: #eaf4f3;
+    border: 1px solid #c7e0dd;
+    border-radius: 10px;
+    color: #17504c;
+    display: flex;
+    font-size: 13px;
+    gap: 10px;
+    line-height: 1.5;
+    margin-bottom: 18px;
+    padding: 11px 14px;
+}
+
+.myhr-pin-notice svg {
+    color: #0f7b76;
+    flex: none;
+    height: 16px;
+    margin-top: 2px;
+    width: 16px;
+}
+
+.myhr-pin-notice strong {
+    color: #0b3f3b;
+    font-weight: 700;
+}
+
+/* "Forgotten it?" sits apart from the change form: it is the other way in. */
+.myhr-pin-forgot {
+    border-top: 1px solid #edf3f2;
+    margin-top: 24px;
+    padding-top: 18px;
+}
+
+.myhr-pin-forgot p {
+    margin: 0 0 12px;
+}
+
+.myhr-pin-forgot strong,
+.myhr-pin-state p strong {
+    color: #17312f;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.myhr-pin-facts h4 {
+    color: #12302d;
+    font-size: 13px;
+    font-weight: 700;
+    margin: 0 0 14px;
+}
+
+.myhr-pin-facts ul {
+    display: grid;
+    gap: 14px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.myhr-pin-facts li {
+    align-items: flex-start;
+    color: #4a6b68;
+    display: flex;
+    font-size: 12.5px;
+    gap: 11px;
+    line-height: 1.55;
+}
+
+.myhr-pin-facts li svg {
+    color: #0f7b76;
+    flex: none;
+    height: 16px;
+    margin-top: 2px;
+    width: 16px;
+}
+
+.myhr-pin-facts li strong {
+    color: #17312f;
+    display: block;
+    font-weight: 700;
+}
+
+@media (max-width: 900px) {
+    .myhr-pin__layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .myhr-pin__main {
+        border-bottom: 1px solid #edf3f2;
+        border-right: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .myhr-pin__main,
+    .myhr-pin__aside {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .myhr-pin-form {
+        max-width: none;
+    }
+
+    .myhr-pin-form .myhr-pin-state__actions {
+        max-width: none;
+        width: auto;
+    }
+}

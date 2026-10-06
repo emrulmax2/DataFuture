@@ -22,8 +22,12 @@ use App\Http\Controllers\Api\RoomSyncController;
 use App\Http\Controllers\Api\VenueSyncController;
 use App\Http\Controllers\Api\StudentSearchController;
 use App\Http\Controllers\Api\UserSyncController;
+use App\Http\Controllers\Api\Student\AttendanceExcuseController;
 use App\Http\Controllers\Api\Student\DashboardController as ApiDashboardController;
 use App\Http\Controllers\Api\Student\ClassRoutineController;
+use App\Http\Controllers\Api\Student\DocumentOrderController;
+use App\Http\Controllers\Api\Student\DocumentPaymentReturnController;
+use App\Http\Controllers\Api\Student\DocumentRequestController;
 use App\Http\Controllers\Api\Student\DoItOnlineController;
 use App\Http\Controllers\Api\Student\ModuleListController;
 use App\Http\Controllers\Api\Student\PerformanceController;
@@ -155,6 +159,15 @@ Route::prefix('/v1')->name('api.')->group(function() {
 
     Route::post('auth/google/callback', [APIAuthGoogleSocialiteStudentController::class, 'handleGoogleCallbackAPI']);
 
+    /* Where Stripe sends the app's in-app browser after the card payment page.
+       Deliberately outside the token guard: the caller is a browser arriving
+       from Stripe, which cannot carry a bearer token. The link names one
+       payment attempt by a random token and the result is read from Stripe,
+       never from the request. */
+    Route::controller(DocumentPaymentReturnController::class)->prefix('student/document-requests/payments')->group(function() {
+        Route::get('{token}/return', 'success')->name('user.document-requests.payment.return');
+        Route::get('{token}/cancel', 'cancel')->name('user.document-requests.payment.cancel');
+    });
 
     // Protected routes (require Bearer Token)
     Route::middleware('auth.api:student-api')->prefix('student')->group(function() {
@@ -189,6 +202,32 @@ Route::prefix('/v1')->name('api.')->group(function() {
 
         Route::controller(StudentProfileController::class)->group(function() {
             Route::get('profile', 'index')->name('user.profile');
+        });
+
+        Route::controller(AttendanceExcuseController::class)->group(function() {
+            Route::get('attendance-excuses/sessions', 'sessions')->name('user.attendance-excuses.sessions');
+            Route::get('attendance-excuses', 'index')->name('user.attendance-excuses');
+            Route::post('attendance-excuses', 'store')->name('user.attendance-excuses.store');
+            Route::get('attendance-excuses/{excuseId}', 'show')->name('user.attendance-excuses.show');
+        });
+
+        Route::controller(DocumentRequestController::class)->prefix('document-requests')->group(function() {
+            Route::get('products', 'products')->name('user.document-requests.products');
+            Route::get('basket', 'basket')->name('user.document-requests.basket');
+            Route::delete('basket', 'clearBasket')->name('user.document-requests.basket.clear');
+            Route::post('basket/items', 'addItem')->name('user.document-requests.basket.items.store');
+            Route::patch('basket/items/{itemId}', 'updateItem')->name('user.document-requests.basket.items.update');
+            Route::delete('basket/items/{itemId}', 'removeItem')->name('user.document-requests.basket.items.destroy');
+            Route::get('checkout', 'checkout')->name('user.document-requests.checkout');
+        });
+
+        Route::controller(DocumentOrderController::class)->prefix('document-requests')->group(function() {
+            Route::get('orders', 'index')->name('user.document-requests.orders');
+            Route::post('orders', 'store')->name('user.document-requests.orders.store');
+            Route::get('orders/{orderId}', 'show')->name('user.document-requests.orders.show');
+            Route::get('orders/{orderId}/invoice', 'invoice')->name('user.document-requests.orders.invoice');
+            Route::post('orders/{orderId}/payment', 'startPayment')->name('user.document-requests.orders.payment.start');
+            Route::get('orders/{orderId}/payment', 'payment')->name('user.document-requests.orders.payment');
         });
 
         Route::post('/logout', [LoginController::class, 'logout']);

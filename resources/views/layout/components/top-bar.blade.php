@@ -519,6 +519,13 @@ $opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site
                                 <i data-lucide="user" class="w-4 h-4 mr-2"></i> Profile
                             </a>
                         </li>
+                        @if(\App\Services\StaffDocumentVaultService::showsMenu())
+                            <li>
+                                <a href="{{ route('user.account.document.pin') }}" class="dropdown-item hover:bg-white/5">
+                                    <i data-lucide="key-round" class="w-4 h-4 mr-2"></i> PIN
+                                </a>
+                            </li>
+                        @endif
                     @endif
                     {{--<li>
                         <a href="" class="dropdown-item hover:bg-white/5">

@@ -198,4 +198,12 @@ class Employee extends Model
     public function emailSignature(){
         return $this->hasOne(EmployeeEmailSignature::class, 'employee_id', 'id');
     }
+
+    public function policyAssignments(){
+        return $this->hasMany(PolicyAssignment::class, 'employee_id', 'id');
+    }
+
+    public function policyBadges(){
+        return $this->hasMany(PolicyBadge::class, 'employee_id', 'id');
+    }
 }

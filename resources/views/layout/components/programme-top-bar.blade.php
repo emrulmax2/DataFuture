@@ -269,6 +269,17 @@
                                 <span class="pgd-profile__menu-desc">View &amp; edit your details</span>
                             </span>
                         </a>
+                        @if(\App\Services\StaffDocumentVaultService::showsMenu())
+                            <a href="{{ route('user.account.document.pin') }}" class="pgd-profile__menu-link">
+                                <span class="pgd-profile__menu-icon">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E3C878" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z"></path><circle cx="16.5" cy="7.5" r=".5"></circle></svg>
+                                </span>
+                                <span>
+                                    <span class="pgd-profile__menu-label">PIN</span>
+                                    <span class="pgd-profile__menu-desc">For encrypted staff documents</span>
+                                </span>
+                            </a>
+                        @endif
                         <a href="{{ $pgdLogoutUrl }}" class="pgd-profile__menu-link pgd-profile__menu-link--danger">
                             <span class="pgd-profile__menu-icon">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F09A93" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h4.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H14"></path><path d="M9 8l-5 4 5 4"></path><path d="M4 12h11"></path></svg>

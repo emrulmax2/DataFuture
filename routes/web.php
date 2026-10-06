@@ -167,6 +167,13 @@ use App\Http\Controllers\HR\Reports\StarterReportController;
 use App\Http\Controllers\HR\Reports\LengthServiceController;
 use App\Http\Controllers\HR\Reports\RecordCardController;
 use App\Http\Controllers\HR\Reports\TelephoneDirectoryController;
+use App\Http\Controllers\HR\PolicyAssessment\EmployeePolicyAssessmentController;
+use App\Http\Controllers\HR\PolicyAssessment\PolicyAssignmentController;
+use App\Http\Controllers\HR\PolicyAssessment\PolicyCategoryController;
+use App\Http\Controllers\HR\PolicyAssessment\PolicyDocumentController;
+use App\Http\Controllers\HR\PolicyAssessment\PolicyQuestionController;
+use App\Http\Controllers\HR\PolicyAssessment\PolicyResultController;
+use App\Http\Controllers\HR\PolicyAssessment\PolicyRoleController;
 
 use App\Http\Controllers\Personal_Tutor\DashboardController;
 use App\Http\Controllers\PlanContentUploadController;
@@ -353,6 +360,7 @@ use App\Http\Controllers\StudentApplicationPrintController;
 use App\Http\Controllers\StudentDocumentRequestFormController;
 use App\Http\Controllers\StudentOrderController;
 use App\Http\Controllers\StudentVisitController;
+use App\Http\Controllers\User\UserDocumentPinController;
 use App\Http\Controllers\User\UserEmailSignatureController;
 use App\Http\Controllers\User\UserHolidayController;
 use App\Http\Controllers\User\UserProfileController;
@@ -361,6 +369,7 @@ use App\Http\Controllers\TutorModuleActivityController;
 use App\Http\Controllers\User\MyGroupController;
 use App\Http\Controllers\User\MyStaffController;
 use App\Http\Controllers\User\MyVacancyController;
+use App\Http\Controllers\User\MyPolicyAssessmentController;
 use App\Http\Controllers\WblProfileController;
 use App\Models\AgentUser;
 use App\Models\EmployeeAttendancePunchHistory;
@@ -1514,11 +1523,29 @@ Route::middleware('auth')->group(function() {
         Route::post('my-account/email-signature/reset', 'reset')->name('user.account.signature.reset');
     });
 
+    Route::controller(UserDocumentPinController::class)->group(function() {
+        Route::get('my-account/document-pin', 'index')->name('user.account.document.pin');
+        Route::post('my-account/document-pin/setup', 'setup')->name('user.account.document.pin.setup');
+        Route::post('my-account/document-pin/change', 'change')->name('user.account.document.pin.change');
+        Route::post('my-account/document-pin/reset/send-code', 'sendResetCode')->name('user.account.document.pin.reset.code');
+        Route::post('my-account/document-pin/reset', 'resetWithCode')->name('user.account.document.pin.reset');
+    });
+
     Route::controller(UserHolidayController::class)->group(function(){
         Route::get('my-account/holidays', 'index')->name('user.account.holiday'); 
         Route::post('my-account/holidays/get-ajax-leave-statistics', 'employeeAjaxLeaveStatistics')->name('user.account.holiday.ajax.statistics'); 
         Route::post('my-account/holidays/get-ajax-leave-limit', 'employeeAjaxLeaveLimit')->name('user.account.holiday.ajax.limit'); 
         Route::post('my-account/holidays/leave-submission', 'employeeLeaveSubmission')->name('user.account.holiday.leave.submission'); 
+    });
+
+    Route::controller(MyPolicyAssessmentController::class)->group(function(){
+        Route::get('my-account/policy-assessments', 'index')->name('user.account.policy');
+        Route::get('my-account/policy-assessments/{assignment}/read', 'read')->name('user.account.policy.read');
+        Route::get('my-account/policy-assessments/{assignment}/test', 'take')->name('user.account.policy.take');
+        Route::post('my-account/policy-assessments/{assignment}/begin', 'begin')->name('user.account.policy.begin');
+        Route::post('my-account/policy-assessments/{assignment}/test/{attempt}/submit', 'submit')->name('user.account.policy.submit');
+        Route::post('my-account/policy-assessments/{assignment}/test/{attempt}/event', 'event')->name('user.account.policy.event');
+        Route::get('my-account/policy-assessments/{assignment}/result/{attempt}', 'result')->name('user.account.policy.result');
     });
 
     Route::controller(EmployeeController::class)->group(function(){
@@ -1641,6 +1668,8 @@ Route::middleware('auth')->group(function() {
         Route::post('employee-profile/documents/uploads-restore', 'restore')->name('employee.documents.restore.uploads');
         
         Route::post('employee-profile/documents/download-url', 'downloadUrl')->name('employee.documents.download.url');
+        Route::post('employee-profile/documents/open-encrypted', 'openEncrypted')->name('employee.documents.open.encrypted');
+        Route::get('employee-profile/documents-upload/access-log-list', 'accessLogList')->name('employee.documents.access.log.list');
         Route::post('employee-profile/documents/sent-mail', 'employeeSentMail')->name('employee.documents.sent.mail'); 
         Route::post('employee-profile/documents/get-template', 'employeeGetTemplate')->name('employee.documents.get.template'); 
     });
@@ -1866,6 +1895,75 @@ Route::middleware('auth')->group(function() {
 
         Route::post('hr/portal/live/get-employee-mail', 'getEmployeeEmail')->name('hr.portal.live.get.employee.mail');
         Route::post('hr/portal/live/sent-mail', 'sentEmail')->name('hr.portal.live.attedance.sent.mail');
+    });
+
+    /* Policy Assessments (HR). Every action is gated by PolicyAssessmentService::canManage(). */
+    Route::controller(PolicyResultController::class)->group(function(){
+        Route::get('hr/policy-assessments', 'index')->name('policy.assessment');
+        Route::get('hr/policy-assessments/results/list', 'list')->name('policy.assessment.results.list');
+        Route::get('hr/policy-assessments/results/employee/{employee}', 'employee')->name('policy.assessment.results.employee');
+        Route::get('hr/policy-assessments/attempts/{attempt}', 'attempt')->name('policy.assessment.attempt.show');
+        Route::get('hr/policy-assessments/badges/list', 'badges')->name('policy.assessment.badge.list');
+    });
+
+    Route::controller(PolicyCategoryController::class)->group(function(){
+        Route::get('hr/policy-assessments/categories', 'index')->name('policy.assessment.category');
+        Route::get('hr/policy-assessments/categories/list', 'list')->name('policy.assessment.category.list');
+        Route::post('hr/policy-assessments/categories/store', 'store')->name('policy.assessment.category.store');
+        Route::get('hr/policy-assessments/categories/edit/{category}', 'edit')->name('policy.assessment.category.edit');
+        Route::post('hr/policy-assessments/categories/update/{category}', 'update')->name('policy.assessment.category.update');
+        Route::delete('hr/policy-assessments/categories/delete/{id}', 'destroy')->name('policy.assessment.category.destroy');
+        Route::post('hr/policy-assessments/categories/restore/{id}', 'restore')->name('policy.assessment.category.restore');
+    });
+
+    Route::controller(PolicyRoleController::class)->group(function(){
+        Route::get('hr/policy-assessments/roles', 'index')->name('policy.assessment.role');
+        Route::get('hr/policy-assessments/roles/list', 'list')->name('policy.assessment.role.list');
+        Route::post('hr/policy-assessments/roles/store', 'store')->name('policy.assessment.role.store');
+        Route::get('hr/policy-assessments/roles/edit/{role}', 'edit')->name('policy.assessment.role.edit');
+        Route::post('hr/policy-assessments/roles/update/{role}', 'update')->name('policy.assessment.role.update');
+        Route::delete('hr/policy-assessments/roles/delete/{id}', 'destroy')->name('policy.assessment.role.destroy');
+        Route::post('hr/policy-assessments/roles/restore/{id}', 'restore')->name('policy.assessment.role.restore');
+    });
+
+    Route::controller(PolicyDocumentController::class)->group(function(){
+        Route::get('hr/policy-assessments/policies', 'index')->name('policy.assessment.policy');
+        Route::get('hr/policy-assessments/policies/list', 'list')->name('policy.assessment.policy.list');
+        Route::post('hr/policy-assessments/policies/store', 'store')->name('policy.assessment.policy.store');
+        Route::get('hr/policy-assessments/policies/edit/{policy}', 'edit')->name('policy.assessment.policy.edit');
+        Route::post('hr/policy-assessments/policies/update/{policy}', 'update')->name('policy.assessment.policy.update');
+        Route::post('hr/policy-assessments/policies/status/{policy}', 'toggleStatus')->name('policy.assessment.policy.status');
+        Route::delete('hr/policy-assessments/policies/delete/{id}', 'destroy')->name('policy.assessment.policy.destroy');
+        Route::post('hr/policy-assessments/policies/restore/{id}', 'restore')->name('policy.assessment.policy.restore');
+    });
+
+    Route::controller(PolicyQuestionController::class)->group(function(){
+        Route::get('hr/policy-assessments/policies/{policy}/questions', 'index')->name('policy.assessment.question');
+        Route::get('hr/policy-assessments/policies/{policy}/questions/list', 'list')->name('policy.assessment.question.list');
+        Route::get('hr/policy-assessments/policies/{policy}/questions/pdf', 'pdf')->name('policy.assessment.question.pdf');
+        Route::post('hr/policy-assessments/policies/{policy}/questions/store', 'store')->name('policy.assessment.question.store');
+        Route::post('hr/policy-assessments/policies/{policy}/questions/activate-all', 'activateAll')->name('policy.assessment.question.activate.all');
+        Route::get('hr/policy-assessments/questions/edit/{question}', 'edit')->name('policy.assessment.question.edit');
+        Route::post('hr/policy-assessments/questions/update/{question}', 'update')->name('policy.assessment.question.update');
+        Route::post('hr/policy-assessments/questions/status/{question}', 'toggleStatus')->name('policy.assessment.question.status');
+        Route::delete('hr/policy-assessments/questions/delete/{id}', 'destroy')->name('policy.assessment.question.destroy');
+        Route::post('hr/policy-assessments/questions/restore/{id}', 'restore')->name('policy.assessment.question.restore');
+    });
+
+    Route::controller(PolicyAssignmentController::class)->group(function(){
+        Route::get('hr/policy-assessments/assignments', 'index')->name('policy.assessment.assignment');
+        Route::get('hr/policy-assessments/assignments/list', 'list')->name('policy.assessment.assignment.list');
+        Route::post('hr/policy-assessments/assignments/store', 'store')->name('policy.assessment.assignment.store');
+        Route::post('hr/policy-assessments/assignments/update/{assignment}', 'update')->name('policy.assessment.assignment.update');
+        Route::post('hr/policy-assessments/assignments/retake/{assignment}', 'retake')->name('policy.assessment.assignment.retake');
+        Route::delete('hr/policy-assessments/assignments/delete/{id}', 'destroy')->name('policy.assessment.assignment.destroy');
+        Route::post('hr/policy-assessments/assignments/restore/{id}', 'restore')->name('policy.assessment.assignment.restore');
+        Route::delete('hr/policy-assessments/badges/delete/{id}', 'destroyBadge')->name('policy.assessment.badge.destroy');
+        Route::post('hr/policy-assessments/badges/restore/{id}', 'restoreBadge')->name('policy.assessment.badge.restore');
+    });
+
+    Route::controller(EmployeePolicyAssessmentController::class)->group(function(){
+        Route::get('employee-profile/policy-assessments/{id}', 'index')->name('employee.policy.assessment');
     });
     
     Route::controller(StaffDashboard::class)->group(function() {

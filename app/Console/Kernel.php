@@ -62,6 +62,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('linemanagerappraisal:cron')->weeklyOn(1, '08:00');
         $schedule->command('linemanagerpendingleave:cron')->dailyAt('08:15');
         $schedule->command('employeenotereminder:cron')->dailyAt('08:30');
+        // Policy assessments that are due within 3 days or overdue (at most one email per person every 3 days).
+        $schedule->command('policyassessmentreminder:cron')->dailyAt('08:45')->withoutOverlapping();
         
         
         //$schedule->command('coursecontentmissingteamnotification:cron')->everyMinute();

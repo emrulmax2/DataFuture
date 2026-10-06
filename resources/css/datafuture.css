@@ -2013,6 +2013,42 @@ body.hr-dashboard-v2-body .content::before {
 .hrd-kpi--red .hrd-kpi__icon { background: #fce9e7; color: #c4432f; }
 .hrd-kpi--gold .hrd-kpi__icon { background: #fbf1dc; color: #b07e14; }
 .hrd-kpi--blue .hrd-kpi__icon { background: #e9edf8; color: #3b5bb5; }
+.hrd-kpi--violet .hrd-kpi__icon { background: #f0eaf8; color: #7a3fb0; }
+/* Policy assessments: one card with three figures side by side; the card is a link.
+   It sits on its own row until the screen is wide enough for five cards in one row. */
+.hrd-kpi--stats {
+    grid-column: 1 / -1;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.hrd-kpi--stats:hover,
+.hrd-kpi--stats:focus-visible {
+    border-color: #c9dad8;
+    box-shadow: 0 6px 16px rgba(11, 43, 40, 0.09);
+}
+.hrd-kpi__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 28px;
+    min-width: 0;
+}
+.hrd-kpi__stat {
+    display: block;
+    white-space: nowrap;
+}
+.hrd-kpi__stat--met strong { color: #0f7b76; }
+.hrd-kpi__stat--not-met strong { color: #b45309; }
+@media (min-width: 1440px) {
+    .hrd-kpis--policy {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) max-content;
+    }
+    .hrd-kpi--stats {
+        grid-column: auto;
+    }
+    .hrd-kpi__stats {
+        flex-wrap: nowrap;
+        gap: 22px;
+    }
+}
 .hrd-main-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 344px;
@@ -8640,6 +8676,27 @@ fieldset.modInstSet legend{
     font-weight: 700;
 }
 .ep-tabs__link i, .ep-tabs__link svg { width: 14px; height: 14px; flex: none; }
+/* A tab that opens a menu of pages (Appraisal & Training). The theme moves the
+   open menu to <body>, so the scrolling tab bar never clips it and the menu
+   is styled by its own class rather than through .ep-tabs. */
+.ep-tabs__dropdown { flex: none; }
+button.ep-tabs__link {
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font-family: inherit;
+    line-height: inherit;
+}
+.ep-tabs__link .ep-tabs__caret { width: 12px; height: 12px; opacity: .65; margin-left: -1px; transition: transform .15s ease; }
+.ep-tabs__dropdown .dropdown-toggle[aria-expanded="true"] .ep-tabs__caret { transform: rotate(180deg); }
+.ep-tabs__menu { width: 232px; font-family: 'Public Sans', system-ui, sans-serif; }
+.ep-tabs__menu .dropdown-item { gap: 9px; font-size: 13px; font-weight: 500; }
+.ep-tabs__menu .dropdown-item i, .ep-tabs__menu .dropdown-item svg { width: 14px; height: 14px; flex: none; }
+.ep-tabs__menu .dropdown-item.is-active {
+    color: rgb(var(--color-success));
+    background: rgb(var(--color-success) / 0.10);
+    font-weight: 700;
+}
 
 /* ---------- Body shell ---------- */
 .ep-grid { max-width: 1320px; margin: 0 auto; padding: 24px 20px 70px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; align-items: start; }

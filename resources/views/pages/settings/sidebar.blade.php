@@ -283,6 +283,49 @@
                     </ul>
                 </li>
             @endif
+            @if(\App\Services\PolicyAssessmentService::canManage())
+                @php
+                    $paRouteName = Route::currentRouteName() ?? '';
+                    $paOpen = str_starts_with($paRouteName, 'policy.assessment');
+                    $paResults = $paRouteName == 'policy.assessment' || str_starts_with($paRouteName, 'policy.assessment.results') || str_starts_with($paRouteName, 'policy.assessment.attempt');
+                    $paAssignments = str_starts_with($paRouteName, 'policy.assessment.assignment');
+                    $paBank = str_starts_with($paRouteName, 'policy.assessment.policy') || str_starts_with($paRouteName, 'policy.assessment.question');
+                    $paRoles = str_starts_with($paRouteName, 'policy.assessment.role');
+                    $paCategories = str_starts_with($paRouteName, 'policy.assessment.category');
+                @endphp
+                <li class="hasChild">
+                    <a class="flex items-center mt-5 {{ $paOpen ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
+                        <i data-lucide="clipboard-check" class="w-4 h-4 mr-2"></i> Policy Assessments <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>
+                    </a>
+                    <ul class="p-0 m-0 pl-5" style="display: {{ $paOpen ? 'block' : 'none' }};">
+                        <li>
+                            <a class="flex items-center mt-4 {{ $paResults ? 'active text-primary font-medium' : '' }}" href="{{ route('policy.assessment') }}">
+                                <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Overview &amp; Results
+                            </a>
+                        </li>
+                        <li>
+                            <a class="flex items-center mt-4 {{ $paAssignments ? 'active text-primary font-medium' : '' }}" href="{{ route('policy.assessment.assignment') }}">
+                                <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Assignments
+                            </a>
+                        </li>
+                        <li>
+                            <a class="flex items-center mt-4 {{ $paBank ? 'active text-primary font-medium' : '' }}" href="{{ route('policy.assessment.policy') }}">
+                                <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Question Bank
+                            </a>
+                        </li>
+                        <li>
+                            <a class="flex items-center mt-4 {{ $paRoles ? 'active text-primary font-medium' : '' }}" href="{{ route('policy.assessment.role') }}">
+                                <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Roles
+                            </a>
+                        </li>
+                        <li>
+                            <a class="flex items-center mt-4 {{ $paCategories ? 'active text-primary font-medium' : '' }}" href="{{ route('policy.assessment.category') }}">
+                                <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Categories
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            @endif
             @if(isset(auth()->user()->priv()['datafuture_settings']) && auth()->user()->priv()['datafuture_settings'] == 1)
                 <li class="hasChild">
                     <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'df.fields' || Route::currentRouteName() == 'df.field.categories' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">

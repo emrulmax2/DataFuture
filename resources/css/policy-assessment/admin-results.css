@@ -1,0 +1,2719 @@
+/* Policy Assessments: overview/results, assignments, employee profile tab (.pa-*). */
+
+/* ==========================================================================
+   Shared pieces (used on the ss-* admin pages and the ep-* profile tab)
+   ========================================================================== */
+
+.pa-state-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 24px;
+    padding: 4px 12px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+.pa-state-pill > span {
+    width: 6px;
+    height: 6px;
+    display: block;
+    flex: 0 0 auto;
+    border-radius: 999px;
+    background: currentColor;
+}
+
+.pa-state-pill--passed {
+    border-color: #b9e4db;
+    background: #e5f7f3;
+    color: #0f8278;
+}
+
+.pa-state-pill--locked {
+    border-color: #f4cbcb;
+    background: #fde7e7;
+    color: #b42318;
+}
+
+.pa-state-pill--in_progress {
+    border-color: #c7d7f0;
+    background: #eaf1fb;
+    color: #1c5097;
+}
+
+.pa-state-pill--overdue {
+    border-color: #f4cbcb;
+    background: #fff1f1;
+    color: #d64545;
+}
+
+.pa-state-pill--failed {
+    border-color: #f6dca5;
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.pa-state-pill--pending {
+    border-color: #e1e5ec;
+    background: #f4f6f9;
+    color: #5a6675;
+}
+
+.pa-state-pill--archived {
+    border-color: #e1e5ec;
+    background: #f1f3f6;
+    color: #8a93a1;
+}
+
+.pa-tag {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 4px;
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: #f1f3f6;
+    color: #5a6675;
+    font-size: 10.5px;
+    font-style: normal;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.pa-tag--muted {
+    background: #f1f3f6;
+    color: #8a93a1;
+}
+
+.pa-tag--red {
+    background: #fde7e7;
+    color: #b42318;
+}
+
+.pa-tag--green {
+    background: #e5f7f3;
+    color: #0f8278;
+}
+
+.pa-muted {
+    color: #a2abb8;
+}
+
+.pa-text-red {
+    color: #d64545;
+    font-weight: 800;
+}
+
+.pa-cell-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    white-space: normal;
+}
+
+.pa-cell-stack strong {
+    color: #1f2a37;
+    font-size: 13.5px;
+    font-weight: 800;
+    line-height: 1.3;
+}
+
+.pa-cell-stack small {
+    color: #8a93a1;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.pa-cell-stack--center {
+    align-items: center;
+}
+
+.pa-due {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.pa-due svg {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 auto;
+}
+
+.pa-due.is-overdue {
+    color: #d64545;
+    font-weight: 800;
+}
+
+.pa-num {
+    display: inline-grid;
+    min-width: 30px;
+    height: 26px;
+    place-items: center;
+    padding: 0 8px;
+    border-radius: 8px;
+    background: #f1f3f6;
+    color: #1f2a37;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.pa-num--zero {
+    background: transparent;
+    color: #b3bac5;
+}
+
+.pa-num--green {
+    background: #e5f7f3;
+    color: #0f8278;
+}
+
+.pa-num--amber {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.pa-num--red {
+    background: #fde7e7;
+    color: #d64545;
+}
+
+.pa-mini-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.pa-mini-progress__track {
+    position: relative;
+    height: 8px;
+    flex: 1 1 auto;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #edf0f5;
+}
+
+.pa-mini-progress__track > span {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: 999px;
+    background: #d64545;
+}
+
+.pa-mini-progress--mid .pa-mini-progress__track > span {
+    background: #c9a24a;
+}
+
+.pa-mini-progress--done .pa-mini-progress__track > span {
+    background: #0f8278;
+}
+
+.pa-mini-progress strong {
+    min-width: 38px;
+    color: #1f2a37;
+    font-size: 12.5px;
+    font-weight: 800;
+    text-align: right;
+}
+
+.pa-empty-note {
+    margin: 0;
+    padding: 18px;
+    border: 1px dashed #dcd8cc;
+    border-radius: 12px;
+    background: #fbfaf7;
+    color: #6b7584;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.pa-empty-note a {
+    color: #1b2f63;
+    font-weight: 800;
+    text-decoration: underline;
+}
+
+.pa-empty-note--inline {
+    padding: 10px 12px;
+    text-align: left;
+}
+
+.pa-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 28px 0;
+    color: #6b7584;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.pa-loading__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: #c9a24a;
+    animation: pa-pulse 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes pa-pulse {
+    from {
+        opacity: 0.25;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+}
+
+.pa-result-counts {
+    margin: 10px auto 0;
+    padding: 0;
+    display: inline-flex;
+    flex-direction: column;
+    gap: 6px;
+    list-style: none;
+    text-align: left;
+}
+
+.pa-result-counts li {
+    color: #475065;
+    font-size: 13.5px;
+    font-weight: 600;
+}
+
+.pa-result-counts strong {
+    display: inline-block;
+    min-width: 26px;
+    color: #16264f;
+    font-weight: 800;
+    text-align: right;
+}
+
+/* ---------- Assign form: role checkbox cards ---------- */
+
+.pa-assign-hint {
+    display: block;
+    margin: 0;
+    color: #8a93a1;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.pa-assign-hint--foot {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #f7f5ef;
+    color: #6b7584;
+}
+
+.pa-assign-hint--foot svg {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 auto;
+    margin-top: 1px;
+    color: #c9a24a;
+}
+
+/* The role picker: a hint, then the cards (or one multi-select when there are many
+   roles), or a note when there is no role to pick. */
+.pa-assign-roles {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.pa-assign-roles__hint a,
+.pa-assign-roles__empty a {
+    color: #1c5097;
+    font-weight: 800;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.pa-assign-roles__hint a:hover,
+.pa-assign-roles__empty a:hover {
+    color: #16264f;
+}
+
+.pa-assign-roles__manage {
+    margin-left: 4px;
+    white-space: nowrap;
+}
+
+.pa-assign-roles__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 10px;
+}
+
+.pa-assign-role {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 58px;
+    margin: 0;
+    padding: 9px 12px;
+    border: 1px solid #d9dee6;
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pa-assign-role:hover {
+    border-color: #b8c1ce;
+}
+
+.pa-assign-role > input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.pa-assign-role__check {
+    width: 22px;
+    height: 22px;
+    display: grid;
+    flex: 0 0 22px;
+    place-items: center;
+    border: 1.5px solid #c3cad5;
+    border-radius: 7px;
+    background: #fff;
+    color: transparent;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.pa-assign-role__check svg {
+    width: 14px;
+    height: 14px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.pa-assign-role > input:checked ~ .pa-assign-role__check svg {
+    opacity: 1;
+}
+
+.pa-assign-role__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.pa-assign-role__copy strong {
+    color: #1f2a37;
+    font-size: 13.5px;
+    font-weight: 800;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.pa-assign-role__copy small {
+    color: #8a93a1;
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.pa-assign-role > input:checked ~ .pa-assign-role__check {
+    border-color: #1b2f63;
+    background: #1b2f63;
+    color: #fff;
+}
+
+.pa-assign-role:has(> input:checked) {
+    border-color: #1b2f63;
+    background: #f4f6fb;
+    box-shadow: 0 0 0 3px rgba(22, 38, 79, 0.08);
+}
+
+.pa-assign-role > input:focus-visible ~ .pa-assign-role__check {
+    box-shadow: 0 0 0 3px rgba(22, 38, 79, 0.2);
+}
+
+/* A role with no active policy has nothing to add, so it cannot be ticked. */
+.pa-assign-role.is-empty {
+    border-style: dashed;
+    background: #fafbfc;
+    cursor: not-allowed;
+}
+
+.pa-assign-role.is-empty:hover {
+    border-color: #d9dee6;
+}
+
+.pa-assign-role.is-empty .pa-assign-role__check {
+    border-color: #dfe3ea;
+    background: #f1f3f6;
+}
+
+.pa-assign-role.is-empty .pa-assign-role__copy strong {
+    color: #8a93a1;
+}
+
+/* No role to pick: say so, and point at the Roles page. */
+.pa-assign-roles__empty {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0;
+    padding: 12px 14px;
+    border: 1px dashed #c9d2e0;
+    border-radius: 12px;
+    background: #f7f9fc;
+    color: #475065;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+.pa-assign-roles__empty svg {
+    width: 17px;
+    height: 17px;
+    flex: 0 0 auto;
+    margin-top: 1px;
+    color: #1c5097;
+}
+
+/* "(filled from the role — add or remove if needed)" beside the Policies label. */
+.pa-assign-label-note {
+    color: #8a93a1;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+/* "14 policies chosen · 1 added by hand" under the policy picker. */
+.pa-assign-count {
+    display: block;
+    margin-top: 6px;
+    color: #5a6675;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.pa-assign-count[hidden] {
+    display: none !important;
+}
+
+/* The role an assignment was made through: a small tag in the lists and detail modals. */
+.pa-tag.pa-tag--role {
+    display: inline-block;
+    max-width: 100%;
+    margin-left: 0;
+    overflow: hidden;
+    border: 1px solid #d5dcea;
+    background: #eef2f9;
+    color: #16264f;
+    font-weight: 800;
+    /* A long role name is cut short rather than pushed out of the cell; its title has it in full. */
+    text-overflow: ellipsis;
+}
+
+/* In the phone layout the table collapses each row into a label/value list
+   with no fixed width, so there is nothing for the ellipsis to cut against:
+   let a long role name wrap inside the card instead of running out of it. */
+.tabulator-responsive-collapse .pa-tag.pa-tag--role {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+}
+
+.pa-tag.pa-tag--role.is-archived {
+    border-color: #e1e5ec;
+    background: #f4f6f9;
+    color: #8a93a1;
+}
+
+/* Category and role tag on one line under a policy title. */
+.pa-cell-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 3px 7px;
+    min-width: 0;
+}
+
+.pa-result-roles {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 0 0 6px;
+    color: #475065;
+    font-size: 12.5px;
+    font-weight: 700;
+}
+
+/* Floating TomSelect dropdowns (appended to <body>) must clear the modal. */
+.ts-dropdown.pa-tom-dropdown {
+    z-index: 100050 !important;
+}
+
+.ts-dropdown.pa-tom-dropdown .optgroup-header {
+    padding: 8px 12px 4px;
+    color: #8a93a1;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+/* ---------- Attempts list + attempt review ---------- */
+
+.pa-detail-modal__body {
+    max-height: min(68vh, 720px);
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.pa-attempt-summary {
+    margin-bottom: 14px;
+    padding: 14px 16px;
+    border: 1px solid #eae7de;
+    border-radius: 14px;
+    background: #fbfaf7;
+}
+
+.pa-attempt-summary__head {
+    margin-bottom: 10px;
+}
+
+.pa-meta-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px 16px;
+    margin: 0;
+}
+
+.pa-meta-list > div {
+    min-width: 0;
+}
+
+.pa-meta-list dt {
+    margin: 0 0 2px;
+    color: #8a93a1;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.pa-meta-list dd {
+    margin: 0;
+    color: #1f2a37;
+    font-size: 13px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.pa-attempts-table-wrap {
+    overflow-x: auto;
+}
+
+.pa-attempts-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.pa-attempts-table th {
+    padding: 8px 10px;
+    border-bottom: 1px solid #eae7de;
+    color: #8a93a1;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.pa-attempts-table td {
+    padding: 9px 10px;
+    border-bottom: 1px solid #f2f0ea;
+    color: #1f2a37;
+    font-weight: 600;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.pa-attempts-table td small {
+    color: #8a93a1;
+    font-weight: 600;
+}
+
+.pa-attempts-table tr:last-child td {
+    border-bottom: 0;
+}
+
+.pa-attempts-table__action {
+    text-align: right;
+}
+
+.pa-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 11px;
+    border: 1px solid #d9dee6;
+    border-radius: 8px;
+    background: #fff;
+    color: #1b2f63;
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 800;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.pa-link-btn:hover {
+    border-color: #1b2f63;
+    background: #f4f6fb;
+}
+
+.pa-link-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.pa-review-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.pa-review-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 11px;
+    border: 1px solid #e3e6ec;
+    border-radius: 999px;
+    background: #fff;
+    color: #5a6675;
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.pa-review-chip strong {
+    color: #1f2a37;
+    font-weight: 800;
+}
+
+.pa-review-chip--green {
+    border-color: #b9e4db;
+    background: #e5f7f3;
+    color: #0f8278;
+}
+
+.pa-review-chip--red {
+    border-color: #f4cbcb;
+    background: #fde7e7;
+    color: #d64545;
+}
+
+.pa-review-chip--blue {
+    border-color: #c7d7f0;
+    background: #eaf1fb;
+    color: #1c5097;
+}
+
+.pa-review-chip--amber {
+    border-color: #f6dca5;
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.pa-review-chip--green strong,
+.pa-review-chip--red strong,
+.pa-review-chip--blue strong,
+.pa-review-chip--amber strong {
+    color: inherit;
+}
+
+.pa-review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pa-review-q {
+    padding: 14px 16px;
+    border: 1px solid #eae7de;
+    border-left: 4px solid #c3cad5;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.pa-review-q.is-correct {
+    border-left-color: #0f8278;
+}
+
+.pa-review-q.is-wrong {
+    border-left-color: #d64545;
+}
+
+.pa-review-q__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.pa-review-q__head p {
+    flex: 1 1 auto;
+    margin: 2px 0 0;
+    color: #16264f;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.45;
+}
+
+.pa-review-q__num {
+    width: 26px;
+    height: 26px;
+    display: grid;
+    flex: 0 0 26px;
+    place-items: center;
+    border-radius: 8px;
+    background: #16264f;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.pa-review-q__mark {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    flex: 0 0 28px;
+    place-items: center;
+    border-radius: 999px;
+}
+
+.pa-review-q__mark svg {
+    width: 16px;
+    height: 16px;
+}
+
+.pa-review-q__mark.is-correct {
+    background: #e5f7f3;
+    color: #0f8278;
+}
+
+.pa-review-q__mark.is-wrong {
+    background: #fde7e7;
+    color: #d64545;
+}
+
+.pa-review-q__mark.is-unanswered {
+    background: #f1f3f6;
+    color: #8a93a1;
+}
+
+.pa-review-options {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0 0 0 36px;
+    list-style: none;
+}
+
+.pa-review-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid #edf0f5;
+    border-radius: 10px;
+    background: #fafbfc;
+    color: #1f2a37;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+.pa-review-option__letter {
+    width: 22px;
+    height: 22px;
+    display: grid;
+    flex: 0 0 22px;
+    place-items: center;
+    border: 1px solid #d9dee6;
+    border-radius: 6px;
+    background: #fff;
+    color: #5a6675;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.pa-review-option__text {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.pa-review-option__tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px;
+}
+
+.pa-review-option.is-correct {
+    border-color: #b9e4db;
+    background: #effaf7;
+}
+
+.pa-review-option.is-correct .pa-review-option__letter {
+    border-color: #0f8278;
+    background: #0f8278;
+    color: #fff;
+}
+
+.pa-review-option.is-selected:not(.is-correct) {
+    border-color: #f4cbcb;
+    background: #fff5f5;
+}
+
+.pa-review-option.is-selected:not(.is-correct) .pa-review-option__letter {
+    border-color: #d64545;
+    background: #d64545;
+    color: #fff;
+}
+
+/* ---------- One member of staff (results modal) ---------- */
+
+.pa-emp-assignments {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.pa-emp-assignment {
+    padding: 14px 16px;
+    border: 1px solid #eae7de;
+    border-radius: 14px;
+    background: #fff;
+}
+
+.pa-emp-assignment__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.pa-emp-assignment .pa-meta-list {
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #fbfaf7;
+}
+
+/* ==========================================================================
+   Admin pages (site-settings layout)
+   ========================================================================== */
+
+.site-settings-redesign-body .pa-card-subtitle {
+    margin: 5px 0 0;
+    color: #8a93a1;
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.site-settings-redesign-body .pa-page .ss-table-card + .ss-table-card,
+.site-settings-redesign-body .pa-page .pa-kpi-grid + .ss-table-card {
+    margin-top: 20px;
+}
+
+.site-settings-redesign-body .pa-page .ss-table-card__header .ss-btn {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.site-settings-redesign-body .pa-page .ss-table-card__header a.ss-btn--primary,
+.site-settings-redesign-body .pa-page .ss-table-card__header a.ss-btn--primary:hover {
+    color: #fff;
+}
+
+.site-settings-redesign-body .pa-assign-modal-dialog {
+    width: min(760px, calc(100vw - 32px)) !important;
+    max-width: calc(100vw - 32px) !important;
+}
+
+.site-settings-redesign-body .pa-wide-modal-dialog {
+    width: min(900px, calc(100vw - 32px)) !important;
+    max-width: calc(100vw - 32px) !important;
+}
+
+.site-settings-redesign-body .pa-detail-modal__heading {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+/* Titles and subtitles carry policy names, so they wrap rather than being cut off
+   (the shared ss-settings header h2 is single-line with an ellipsis). */
+.site-settings-redesign-body .pa-detail-modal__heading small {
+    color: #8a93a1;
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.site-settings-redesign-body .pa-detail-modal__heading h2 {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.site-settings-redesign-body .pa-detail-modal .ss-settings-modal__footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.site-settings-redesign-body .pa-detail-modal .ss-settings-modal__footer a.ss-btn {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.site-settings-redesign-body .pa-warning-modal .ss-success-modal__icon {
+    color: #d64545 !important;
+}
+
+/* Multi-select TomSelects in the Assign modal wrap onto several lines. */
+.site-settings-redesign-body .pa-assign-modal .ts-control.multi .ts-input {
+    height: auto !important;
+    min-height: 44px !important;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-top: 7px !important;
+    padding-bottom: 7px !important;
+    background-image: none !important;
+    padding-right: 14px !important;
+}
+
+/* A long "Name — Job title" chip wraps inside the field; the remove (x) button is pinned
+   to the chip's right edge so it is always visible and tappable. */
+.site-settings-redesign-body .pa-assign-modal .ts-control.multi .ts-input > .item {
+    position: relative;
+    display: block;
+    max-width: 100%;
+    min-width: 0;
+    margin: 0 !important;
+    padding: 4px 36px 4px 9px !important;
+    border: 1px solid #d5dcea !important;
+    border-radius: 7px !important;
+    background: #eef2f9 !important;
+    color: #16264f !important;
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+    white-space: normal;
+}
+
+.site-settings-redesign-body .pa-assign-modal .ts-control.multi .ts-input > .item .remove {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0 !important;
+    border-left: 1px solid #d5dcea !important;
+    border-radius: 0 6px 6px 0;
+    color: #5a6675 !important;
+    font-size: 15px;
+    text-decoration: none;
+}
+
+.site-settings-redesign-body .pa-assign-modal .ts-control.multi .ts-input > .item .remove:hover {
+    background: #dfe6f2;
+    color: #16264f !important;
+}
+
+.site-settings-redesign-body .pa-assign-modal .ts-control.multi .ts-input > input {
+    flex: 1 1 120px;
+}
+
+.site-settings-redesign-body .pa-assign-modal .ss-settings-modal__body {
+    max-height: min(72vh, 760px);
+    overflow-y: auto;
+}
+
+.site-settings-redesign-body .pa-assign-email-field .ss-status-toggle {
+    min-height: 44px;
+}
+
+/* ---------- Filters ---------- */
+
+.site-settings-redesign-body .pa-filter-form .ss-filter-select select {
+    text-overflow: ellipsis;
+}
+
+/* Go and Reset stay together when the filter row wraps. */
+.site-settings-redesign-body .pa-filter-buttons {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.site-settings-redesign-body .pa-filter-employee .ts-control {
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+/* Fixed widths are desktop only: at 900px and below site-settings stretches every
+   filter to the full row, and a narrower select would leave its chevron outside it. */
+@media (min-width: 901px) {
+    .site-settings-redesign-body .pa-filter-form .ss-filter-select select {
+        max-width: 220px;
+    }
+
+    .site-settings-redesign-body .pa-filter-form .pa-filter-select--narrow select {
+        max-width: 170px;
+    }
+
+    .site-settings-redesign-body .pa-filter-form .pa-filter-select--wide select {
+        width: 220px;
+    }
+
+    .site-settings-redesign-body .pa-filter-employee .ts-control {
+        width: 220px;
+    }
+}
+
+@media (max-width: 900px) {
+    .site-settings-redesign-body .pa-filter-buttons {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .site-settings-redesign-body .pa-filter-employee .ts-control {
+        width: 100%;
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+}
+
+.site-settings-redesign-body .pa-filter-employee .ts-input {
+    height: 38px;
+    min-height: 38px !important;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    padding: 0 34px 0 12px !important;
+    border: 1px solid #d9dee6 !important;
+    border-radius: 9px !important;
+    background-color: #fff !important;
+    /* Same chevron as the ss-filter-select dropdowns beside it. */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%238a93a1' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+    background-position: right 12px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 14px 14px !important;
+    box-shadow: none !important;
+    color: #1f2a37;
+    font-size: 13.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.site-settings-redesign-body .pa-filter-employee .ts-input > .item {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.site-settings-redesign-body .pa-filter-employee .ts-control.focus .ts-input,
+.site-settings-redesign-body .pa-filter-employee .ts-input.focus {
+    border-color: #16264f !important;
+    box-shadow: 0 0 0 3px rgba(22, 38, 79, 0.12) !important;
+}
+
+/* ---------- Tables ---------- */
+
+/* Rows never wrap: columns that do not fit collapse into the row's detail list. */
+.site-settings-redesign-body .pa-tabulator .tabulator-tableHolder .tabulator-table {
+    white-space: nowrap !important; /* beats datafuture.css global normal !important */
+}
+
+.site-settings-redesign-body .pa-tabulator .tabulator-header .tabulator-col .tabulator-col-content,
+.site-settings-redesign-body .pa-tabulator .tabulator-row .tabulator-cell {
+    padding-right: 12px;
+    padding-left: 12px;
+}
+
+.site-settings-redesign-body .pa-tabulator .tabulator-row .tabulator-cell {
+    min-height: 62px;
+    white-space: normal;
+}
+
+.site-settings-redesign-body .pa-tabulator .tabulator-row .tabulator-cell.tabulator-row-handle {
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.site-settings-redesign-body .pa-tabulator .tabulator-row .tabulator-cell .tabulator-responsive-collapse-toggle {
+    width: 26px;
+    height: 26px;
+    margin: 0;
+    border: 1px solid #d9dee6;
+    border-radius: 8px;
+    background: #fff;
+    color: #1b2f63;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.site-settings-redesign-body .pa-tabulator .tabulator-row .tabulator-cell .tabulator-responsive-collapse-toggle.open {
+    border-color: #c7d2e6;
+    background: #eef2f9;
+}
+
+/* Collapsed columns: a label/value list under the row. */
+.site-settings-redesign-body .pa-tabulator .tabulator-row .tabulator-responsive-collapse {
+    padding: 2px 14px 14px 52px;
+    border: 0;
+    white-space: normal;
+}
+
+.site-settings-redesign-body .pa-tabulator .tabulator-row .tabulator-responsive-collapse table {
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.site-settings-redesign-body .pa-tabulator .tabulator-row .tabulator-responsive-collapse td {
+    padding: 5px 0 !important;
+    color: #1f2a37;
+    font-weight: 600;
+    vertical-align: top;
+}
+
+.site-settings-redesign-body .pa-tabulator .tabulator-row .tabulator-responsive-collapse td:first-child {
+    width: 1%;
+    padding-right: 16px !important;
+    white-space: nowrap;
+}
+
+.site-settings-redesign-body .pa-tabulator .tabulator-row .tabulator-responsive-collapse td:first-child strong {
+    color: #8a93a1;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.site-settings-redesign-body .pa-tabulator .tabulator-row .tabulator-responsive-collapse .pa-cell-stack strong {
+    font-weight: 800;
+}
+
+.site-settings-redesign-body .pa-tabulator .tabulator-responsive-collapse .pa-row-actions {
+    justify-content: flex-start;
+}
+
+.site-settings-redesign-body .pa-tabulator .pa-row-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0;
+}
+
+.site-settings-redesign-body .pa-row-action--retake {
+    background: rgba(201, 162, 74, 0.16);
+    color: #9a6f12;
+}
+
+.site-settings-redesign-body .pa-row-action--retake:hover {
+    background: rgba(201, 162, 74, 0.28);
+}
+
+.site-settings-redesign-body .pa-tabulator--clickable .tabulator-row {
+    cursor: pointer;
+}
+
+.site-settings-redesign-body .pa-tabulator--clickable .tabulator-row:hover .tabulator-cell {
+    background: #fbfaf5;
+}
+
+/* ---------- KPI cards ---------- */
+
+.site-settings-redesign-body .pa-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.site-settings-redesign-body .pa-kpi {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    overflow: hidden;
+    padding: 18px 20px;
+    border: 1px solid #eae7de;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(20, 34, 74, 0.03);
+}
+
+.site-settings-redesign-body .pa-kpi::after {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: var(--pa-kpi-accent, #c9a24a);
+    content: "";
+    opacity: 0.85;
+}
+
+.site-settings-redesign-body .pa-kpi__icon {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    flex: 0 0 42px;
+    place-items: center;
+    border-radius: 12px;
+    background: var(--pa-kpi-soft, #f4f1e8);
+    color: var(--pa-kpi-accent, #16264f);
+}
+
+.site-settings-redesign-body .pa-kpi__icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.site-settings-redesign-body .pa-kpi__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.site-settings-redesign-body .pa-kpi__label {
+    color: #5a6675;
+    font-size: 12.5px;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.site-settings-redesign-body .pa-kpi__value {
+    color: #16264f;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+}
+
+.site-settings-redesign-body .pa-kpi__hint {
+    color: #8a93a1;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.site-settings-redesign-body .pa-kpi--navy {
+    --pa-kpi-accent: #1b2f63;
+    --pa-kpi-soft: #eef1f8;
+}
+
+.site-settings-redesign-body .pa-kpi--green {
+    --pa-kpi-accent: #0f8278;
+    --pa-kpi-soft: #e5f7f3;
+}
+
+.site-settings-redesign-body .pa-kpi--red {
+    --pa-kpi-accent: #d64545;
+    --pa-kpi-soft: #fde7e7;
+}
+
+.site-settings-redesign-body .pa-kpi--red .pa-kpi__value {
+    color: #d64545;
+}
+
+.site-settings-redesign-body .pa-kpi--blue {
+    --pa-kpi-accent: #1c5097;
+    --pa-kpi-soft: #eaf1fb;
+}
+
+.site-settings-redesign-body .pa-kpi--amber {
+    --pa-kpi-accent: #b45309;
+    --pa-kpi-soft: #fef3c7;
+}
+
+.site-settings-redesign-body .pa-kpi--amber .pa-kpi__value {
+    color: #b45309;
+}
+
+.site-settings-redesign-body .pa-kpi--muted {
+    --pa-kpi-accent: #b3bac5;
+    --pa-kpi-soft: #f1f3f6;
+}
+
+/* ---------- Completion by category ---------- */
+
+.site-settings-redesign-body .pa-category-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px 26px 24px;
+}
+
+.site-settings-redesign-body .pa-category-bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 52px;
+    gap: 8px 14px;
+    align-items: center;
+}
+
+.site-settings-redesign-body .pa-category-bar__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 12px;
+    grid-column: 1 / -1;
+}
+
+.site-settings-redesign-body .pa-category-bar__head strong {
+    color: #16264f;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.site-settings-redesign-body .pa-category-bar__head span {
+    color: #8a93a1;
+    font-size: 12.5px;
+    font-weight: 700;
+}
+
+.site-settings-redesign-body .pa-muted-tag {
+    margin-left: 6px;
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: #f1f3f6;
+    color: #8a93a1;
+    font-size: 10.5px;
+    font-style: normal;
+    font-weight: 800;
+    vertical-align: middle;
+}
+
+.site-settings-redesign-body .pa-category-bar__track {
+    position: relative;
+    height: 10px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #f0eee7;
+}
+
+.site-settings-redesign-body .pa-category-bar__fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #1b2f63, #0f8278);
+}
+
+.site-settings-redesign-body .pa-category-bar__percent {
+    color: #16264f;
+    font-size: 13.5px;
+    font-weight: 800;
+    text-align: right;
+}
+
+@media (max-width: 1279px) {
+    .site-settings-redesign-body .pa-kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 639px) {
+    .site-settings-redesign-body .pa-kpi-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .site-settings-redesign-body .pa-category-bars {
+        padding: 16px 18px 20px;
+    }
+
+    .pa-review-options {
+        padding-left: 0;
+    }
+
+    .pa-emp-assignment__head {
+        flex-direction: column;
+    }
+}
+
+/* ==========================================================================
+   Employee profile tab (employee-profile layout, ep-* design)
+   ========================================================================== */
+
+.pa-ep-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.pa-ep-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border: 1px solid #e1eae9;
+    border-radius: 999px;
+    background: #f6f9f9;
+    color: #5f7a77;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.pa-ep-chip strong {
+    color: #17312f;
+    font-weight: 800;
+}
+
+.pa-ep-chip--green {
+    border-color: #b9e4db;
+    background: #e5f7f3;
+    color: #0f8278;
+}
+
+.pa-ep-chip--red {
+    border-color: #f4cbcb;
+    background: #fdf0f0;
+    color: #c0392b;
+}
+
+.pa-ep-chip--blue {
+    border-color: #c7d7f0;
+    background: #eef4fc;
+    color: #1c5097;
+}
+
+.pa-ep-chip--amber {
+    border-color: #f6dca5;
+    background: #fef6dc;
+    color: #b45309;
+}
+
+.pa-ep-chip--green strong,
+.pa-ep-chip--red strong,
+.pa-ep-chip--blue strong,
+.pa-ep-chip--amber strong {
+    color: inherit;
+}
+
+/* datafuture.css forces white-space: normal !important on every Tabulator
+   table, which wraps the last cells onto a second line; keep rows on one line
+   and let the collapse layout hide low-priority columns instead. */
+body.employee-profile-body .pa-ep-page .pa-tabulator .tabulator-tableHolder .tabulator-table {
+    white-space: nowrap !important;
+}
+
+body.employee-profile-body .pa-ep-page .pa-tabulator .tabulator-cell,
+body.employee-profile-body .pa-ep-page .pa-tabulator .tabulator-responsive-collapse {
+    white-space: normal;
+}
+
+body.employee-profile-body .pa-ep-page .pa-tabulator .tabulator-responsive-collapse .pa-state-pill {
+    white-space: normal;
+}
+
+body.employee-profile-body .pa-ep-page .pa-tabulator .tabulator-responsive-collapse .ep-doc-action-group {
+    justify-content: flex-start;
+}
+
+/* Sized against the modal's own box, not the viewport: this layout pads .modal on
+   the left, so a 100vw width pushed the attempts and review modals off a phone. */
+body.employee-profile-body .pa-ep-detail-modal .modal-dialog {
+    max-width: 880px !important;
+    width: calc(100% - 32px) !important;
+}
+
+body.employee-profile-body .pa-ep-detail-modal .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+body.employee-profile-body .pa-assign-role {
+    border-color: #cfe0dd;
+}
+
+body.employee-profile-body .pa-assign-role > input:checked ~ .pa-assign-role__check {
+    border-color: #0f7b76;
+    background: #0f7b76;
+}
+
+body.employee-profile-body .pa-assign-role:has(> input:checked) {
+    border-color: #0f7b76;
+    background: #f1f9f8;
+    box-shadow: 0 0 0 3px rgba(15, 123, 118, 0.1);
+}
+
+body.employee-profile-body .pa-assign-roles__empty {
+    border-color: #cfe0dd;
+    background: #f6f9f9;
+}
+
+body.employee-profile-body .pa-assign-roles__empty svg,
+body.employee-profile-body .pa-assign-roles__hint a,
+body.employee-profile-body .pa-assign-roles__empty a {
+    color: #0f7b76;
+}
+
+/* The roles multi-select (many roles) looks like the policy picker under it. */
+body.employee-profile-body #assignPolicyModal-PA .pa-assign-roles .ts-control {
+    width: 100%;
+}
+
+body.employee-profile-body .pa-ep-email-field {
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 8px;
+}
+
+body.employee-profile-body #assignPolicyModal-PA .ts-control.multi .ts-input {
+    min-height: 40px;
+    border-radius: 10px;
+}
+
+/* Long policy titles wrap inside the chip and the remove (x) stays on its right edge
+   (datafuture.css keeps modal chips on one line, which pushes the x off a phone screen). */
+body.employee-profile-body #assignPolicyModal-PA .ts-control.multi .ts-input > .item {
+    position: relative !important;
+    display: block !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    padding: 4px 30px 4px 8px !important;
+    line-height: 1.35 !important;
+    overflow-wrap: anywhere;
+    white-space: normal !important;
+}
+
+body.employee-profile-body #assignPolicyModal-PA .ts-control.multi .ts-input > .item .remove {
+    position: absolute !important;
+    top: 50%;
+    right: 6px;
+    width: 18px !important;
+    height: 18px !important;
+    transform: translateY(-50%);
+}
+
+/* Modals are moved to <body> when shown, so modal rules are scoped to the body class, not .pa-ep-page. */
+body.employee-profile-body .ep-holiday-state-modal .pa-result-counts {
+    margin-top: 8px;
+}
+
+/* ==========================================================================
+   Levels and badges (Assign modals, Assignments, Overview & Results,
+   employee profile tab). Pills and medals themselves: levels.css.
+   Colours follow App\Support\PolicyLevel::COLOURS (bronze / silver / gold).
+   ========================================================================== */
+
+/* site-settings-redesign.css sizes every svg inside .ss-page at 18px; a medal
+   takes the width of its .pa-badge-medal--sm|md|lg box instead. */
+.site-settings-redesign-body .ss-page .pa-badge-medal__svg {
+    width: 100%;
+    height: auto;
+}
+
+/* ---------- Assign modal: level radio cards ---------- */
+
+.pa-assign-level {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.pa-assign-level__legend {
+    display: block;
+    float: none;
+    width: 100%;
+    margin: 0 0 4px;
+    padding: 0;
+    color: #3f4a5a;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.pa-assign-level__legend span {
+    color: #d64545;
+    font-weight: 800;
+}
+
+.pa-assign-level > .pa-assign-hint {
+    margin-bottom: 10px;
+}
+
+.pa-assign-level__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.pa-assign-level-card {
+    --pa-lv-main: #b0703a;
+    --pa-lv-soft: #f6e6d8;
+    --pa-lv-ink: #7a4a22;
+    --pa-lv-ring: rgba(176, 112, 58, 0.18);
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 10px;
+    margin: 0;
+    padding: 12px 36px 12px 12px;
+    border: 1px solid #d9dee6;
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pa-assign-level-card--intermediate {
+    --pa-lv-main: #7b8794;
+    --pa-lv-soft: #eceff3;
+    --pa-lv-ink: #4a5563;
+    --pa-lv-ring: rgba(123, 135, 148, 0.22);
+}
+
+.pa-assign-level-card--expert {
+    --pa-lv-main: #c49a12;
+    --pa-lv-soft: #fbf2d3;
+    --pa-lv-ink: #7a5d00;
+    --pa-lv-ring: rgba(196, 154, 18, 0.2);
+}
+
+.pa-assign-level-card:hover {
+    border-color: #b8c1ce;
+}
+
+.pa-assign-level-card > input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.pa-assign-level-card .pa-assign-level-card__medal {
+    display: block;
+    padding-top: 1px;
+    line-height: 0;
+}
+
+.pa-assign-level-card .pa-assign-level-card__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.pa-assign-level-card .pa-assign-level-card__copy strong {
+    color: #1f2a37;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+.pa-assign-level-card .pa-assign-level-card__copy small {
+    color: #6b7584;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.pa-assign-level-card .pa-assign-level-card__copy em {
+    margin-top: 2px;
+    color: var(--pa-lv-ink);
+    font-size: 10.5px;
+    font-style: normal;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    line-height: 1.3;
+    text-transform: uppercase;
+}
+
+.pa-assign-level-card .pa-assign-level-card__radio {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid #c3cad5;
+    border-radius: 999px;
+    background: #fff;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pa-assign-level-card:has(> input:checked) {
+    border-color: var(--pa-lv-main);
+    background: var(--pa-lv-soft);
+    box-shadow: 0 0 0 3px var(--pa-lv-ring);
+}
+
+.pa-assign-level-card > input:checked ~ .pa-assign-level-card__radio {
+    border-color: var(--pa-lv-ink);
+    background: var(--pa-lv-ink);
+    box-shadow: inset 0 0 0 3.5px #fff;
+}
+
+.pa-assign-level-card > input:focus-visible ~ .pa-assign-level-card__radio {
+    box-shadow: 0 0 0 3px rgba(22, 38, 79, 0.25);
+}
+
+.pa-assign-level-card > input:checked:focus-visible ~ .pa-assign-level-card__radio {
+    box-shadow: inset 0 0 0 3.5px #fff, 0 0 0 3px rgba(22, 38, 79, 0.25);
+}
+
+.pa-assign-level .acc__input-error:not(:empty) {
+    margin-top: 6px;
+    color: #d64545;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* One card per row: on a phone, and always in the employee profile tab, whose
+   assign modal is too narrow for three side by side. */
+body.employee-profile-body .pa-assign-level__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+}
+
+body.employee-profile-body .pa-assign-level-card {
+    align-items: center;
+    padding: 10px 36px 10px 10px;
+}
+
+body.employee-profile-body .pa-assign-level-card .pa-assign-level-card__radio {
+    top: 50%;
+    margin-top: -9px;
+}
+
+@media (max-width: 640px) {
+    .pa-assign-level__grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+    }
+
+    .pa-assign-level-card {
+        align-items: center;
+        padding: 10px 36px 10px 10px;
+    }
+
+    .pa-assign-level-card .pa-assign-level-card__radio {
+        top: 50%;
+        margin-top: -9px;
+    }
+}
+
+/* ---------- Assign modal: level readiness hints ---------- */
+
+.pa-assign-role__copy .pa-assign-role__ready {
+    color: #b45309;
+    font-weight: 700;
+}
+
+.pa-assign-role__ready[hidden],
+.pa-assign-level-note[hidden] {
+    display: none !important;
+}
+
+.pa-assign-level-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 8px 0 0;
+    padding: 9px 12px;
+    border: 1px solid #f6dca5;
+    border-radius: 10px;
+    background: #fef6dc;
+    color: #8a5a06;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.pa-assign-level-note svg {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 auto;
+    margin-top: 1px;
+    color: #b45309;
+}
+
+.pa-result-lead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 8px 0 4px;
+    color: #475065;
+    font-size: 13.5px;
+    font-weight: 700;
+}
+
+/* ---------- Tables and detail modals ---------- */
+
+.pa-level-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    vertical-align: middle;
+}
+
+.pa-level-cell .pa-badge-medal--sm,
+.pa-badge-note .pa-badge-medal--sm {
+    width: 22px;
+}
+
+.pa-badge-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #5a6675;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.pa-attempt-summary__head,
+.pa-emp-assignment__state {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.pa-emp-assignment__state {
+    flex: 0 1 auto;
+    justify-content: flex-end;
+}
+
+/* Three tiny medals with a count each: Badges column, employee summary. */
+.pa-badge-counts {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    vertical-align: middle;
+}
+
+.pa-badge-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pa-badge-count .pa-badge-medal--sm {
+    width: 20px;
+}
+
+.pa-badge-count strong {
+    min-width: 8px;
+    color: #1f2a37;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.pa-tabulator .pa-badge-counts {
+    gap: 7px;
+}
+
+.pa-tabulator .pa-badge-count {
+    gap: 3px;
+}
+
+.pa-tabulator .pa-badge-count .pa-badge-medal--sm {
+    width: 18px;
+}
+
+.pa-badge-count.is-zero .pa-badge-medal {
+    filter: grayscale(1);
+    opacity: 0.35;
+}
+
+.pa-badge-count.is-zero strong {
+    color: #b3bac5;
+}
+
+.pa-review-chip.pa-review-chip--badges {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ---------- Overview: Badges awarded KPI (full width) ---------- */
+
+.site-settings-redesign-body .pa-kpi.pa-kpi--badges {
+    --pa-kpi-accent: #c49a12;
+    --pa-kpi-soft: #fbf2d3;
+    grid-column: 1 / -1;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.site-settings-redesign-body .pa-kpi.pa-kpi--badges::after {
+    background: linear-gradient(90deg, #b0703a 0%, #b0703a 33.3%, #7b8794 33.3%, #7b8794 66.6%, #c49a12 66.6%, #c49a12 100%);
+}
+
+.site-settings-redesign-body .pa-kpi-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 0 0 0 auto;
+    padding: 0;
+    list-style: none;
+}
+
+.site-settings-redesign-body .pa-kpi-badges__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 168px;
+    padding: 8px 16px 8px 10px;
+    border: 1px solid rgba(176, 112, 58, 0.3);
+    border-radius: 14px;
+    background: #f6e6d8;
+}
+
+.site-settings-redesign-body .pa-kpi-badges__item--intermediate {
+    border-color: rgba(123, 135, 148, 0.35);
+    background: #eceff3;
+}
+
+.site-settings-redesign-body .pa-kpi-badges__item--expert {
+    border-color: rgba(196, 154, 18, 0.35);
+    background: #fbf2d3;
+}
+
+.site-settings-redesign-body .pa-kpi-badges__item .pa-badge-medal--md {
+    width: 40px;
+}
+
+.site-settings-redesign-body .pa-kpi-badges__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.site-settings-redesign-body .pa-kpi-badges__copy strong {
+    color: #7a4a22;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.site-settings-redesign-body .pa-kpi-badges__copy small {
+    color: #7a4a22;
+    font-size: 11.5px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.site-settings-redesign-body .pa-kpi-badges__item--intermediate .pa-kpi-badges__copy strong,
+.site-settings-redesign-body .pa-kpi-badges__item--intermediate .pa-kpi-badges__copy small {
+    color: #4a5563;
+}
+
+.site-settings-redesign-body .pa-kpi-badges__item--expert .pa-kpi-badges__copy strong,
+.site-settings-redesign-body .pa-kpi-badges__item--expert .pa-kpi-badges__copy small {
+    color: #7a5d00;
+}
+
+.site-settings-redesign-body .pa-kpi-badges__item.is-zero {
+    border-color: #e3e7ec;
+    background: #f5f6f8;
+}
+
+.site-settings-redesign-body .pa-kpi-badges__item.is-zero .pa-badge-medal {
+    filter: grayscale(1);
+    opacity: 0.45;
+}
+
+.site-settings-redesign-body .pa-kpi-badges__item.is-zero .pa-kpi-badges__copy strong,
+.site-settings-redesign-body .pa-kpi-badges__item.is-zero .pa-kpi-badges__copy small {
+    color: #8a93a1;
+}
+
+@media (max-width: 1100px) {
+    .site-settings-redesign-body .pa-kpi-badges {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .site-settings-redesign-body .pa-kpi-badges__item {
+        flex: 1 1 0;
+    }
+}
+
+@media (max-width: 639px) {
+    .site-settings-redesign-body .pa-kpi-badges {
+        gap: 8px;
+    }
+
+    .site-settings-redesign-body .pa-kpi-badges__item {
+        min-width: 0;
+        flex-direction: column;
+        gap: 6px;
+        padding: 10px 6px;
+        text-align: center;
+    }
+
+    .site-settings-redesign-body .pa-kpi-badges__copy strong {
+        font-size: 18px;
+    }
+
+    .site-settings-redesign-body .pa-kpi-badges__copy small {
+        font-size: 10.5px;
+    }
+}
+
+/* ---------- Employee profile tab: badges ---------- */
+
+.pa-ep-chip--gold {
+    border-color: #ecd9a0;
+    background: #fbf2d3;
+    color: #7a5d00;
+}
+
+.pa-ep-chip--gold strong {
+    color: inherit;
+}
+
+.pa-ep-badges {
+    margin: 20px 24px 0;
+    padding: 16px 18px 18px;
+    border: 1px solid #e1eae9;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #fbfaf6 0%, #ffffff 100%);
+}
+
+.pa-ep-badges__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 16px;
+}
+
+.pa-ep-badges__heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    min-width: 0;
+}
+
+.pa-ep-badges__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: #17312f;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.pa-ep-badges__title svg {
+    color: #c49a12;
+}
+
+.pa-ep-badges__switch .form-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pa-ep-badges__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 12px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+    transition: opacity 0.15s ease;
+}
+
+.pa-ep-badges__grid:empty {
+    display: none;
+}
+
+.pa-ep-badges.is-loading .pa-ep-badges__grid {
+    opacity: 0.5;
+}
+
+.pa-ep-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 16px 12px 12px;
+    border: 1px solid rgba(176, 112, 58, 0.28);
+    border-radius: 14px;
+    background: linear-gradient(180deg, #fbf4ee 0%, #ffffff 70%);
+    text-align: center;
+}
+
+.pa-ep-badge--intermediate {
+    border-color: rgba(123, 135, 148, 0.32);
+    background: linear-gradient(180deg, #f4f6f8 0%, #ffffff 70%);
+}
+
+.pa-ep-badge--expert {
+    border-color: rgba(196, 154, 18, 0.32);
+    background: linear-gradient(180deg, #fcf7e4 0%, #ffffff 70%);
+}
+
+.pa-ep-badge.is-revoked {
+    border-style: dashed;
+    border-color: #d5dbe1;
+    background: #f7f8f9;
+}
+
+.pa-ep-badge .pa-badge-card {
+    max-width: 100%;
+}
+
+.pa-ep-badge__meta {
+    color: #5f7a77;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.pa-ep-badge.is-revoked .pa-ep-badge__meta {
+    color: #c0392b;
+}
+
+.pa-ep-badge__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: auto;
+    padding: 5px 11px;
+    border: 1px solid #f4cbcb;
+    border-radius: 8px;
+    background: #fff;
+    color: #c0392b;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.3;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.pa-ep-badge__btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.pa-ep-badge__btn:hover {
+    border-color: #eaa9a9;
+    background: #fdf0f0;
+}
+
+.pa-ep-badge__btn:focus-visible {
+    outline: 2px solid #0f7b76;
+    outline-offset: 2px;
+}
+
+.pa-ep-badge__btn--restore {
+    border-color: #b9e4db;
+    color: #0f8278;
+}
+
+.pa-ep-badge__btn--restore:hover {
+    border-color: #8fd3c5;
+    background: #e5f7f3;
+}
+
+.pa-ep-badges__empty {
+    margin: 14px 0 0;
+    padding: 14px 16px;
+    border: 1px dashed #dfe7e5;
+    border-radius: 12px;
+    color: #7c8f8c;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.pa-ep-badges__empty[hidden] {
+    display: none !important;
+}
+
+/* The employee tab's assign modal: level legend styled like the ep form labels. */
+body.employee-profile-body .pa-assign-level__legend {
+    margin-bottom: 7px;
+    color: #6e8b88;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
+    .pa-ep-badges {
+        margin: 16px 18px 0;
+        padding: 14px;
+    }
+
+    .pa-ep-badges__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .pa-ep-badge {
+        padding: 12px 8px 10px;
+    }
+
+    .pa-ep-badge .pa-badge-card__level {
+        font-size: 10px;
+        letter-spacing: 0.03em;
+    }
+}
+
+/* ==========================================================================
+   Exam mix and timed attempts (Assign modals, attempts tables, attempt review).
+   An exam always draws Beginner, Intermediate and Expert questions in a fixed
+   pattern; the percentages and counts come from the server (PolicyLevel::MIX).
+   ========================================================================== */
+
+/* ---------- Assign modal: the question pattern on each level card ---------- */
+
+.pa-assign-level-card .pa-assign-level-card__mix {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.pa-mix-bar {
+    display: flex;
+    width: 100%;
+    max-width: 220px;
+    height: 6px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e9ecf1;
+}
+
+.pa-mix-bar__part {
+    display: block;
+    flex: 0 0 auto;
+    height: 100%;
+    background: #b0703a;
+}
+
+.pa-mix-bar__part + .pa-mix-bar__part {
+    box-shadow: inset 1px 0 0 #fff;
+}
+
+.pa-mix-bar__part--intermediate {
+    background: #7b8794;
+}
+
+.pa-mix-bar__part--expert {
+    background: #c49a12;
+}
+
+.pa-assign-level-card .pa-assign-level-card__mix-text {
+    color: #3f4a5a;
+    font-size: 11.5px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+/* ---------- Attempts table: time, timed out, answered ---------- */
+
+.pa-tag--amber {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.pa-attempts-table__time small {
+    margin-left: 4px;
+}
+
+/* The result cell may wrap its tags under the pill, so a timed-out row still fits the modal. */
+.pa-attempts-table td.pa-attempts-table__result-cell {
+    white-space: normal;
+}
+
+.pa-attempts-table__result {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 6px;
+}
+
+.pa-attempts-table__result .pa-tag {
+    margin-left: 0;
+}
+
+/* ---------- Attempt review: pattern summary, question level, not answered ---------- */
+
+.pa-review-mix {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border: 1px solid #eae7de;
+    border-radius: 12px;
+    background: #fbfaf7;
+    color: #5a6675;
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.pa-review-mix strong {
+    color: #16264f;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.pa-review-mix__parts {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.pa-review-mix small {
+    color: #8a93a1;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.pa-review-q__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    margin: -4px 0 10px;
+    padding-left: 36px;
+}
+
+.pa-review-q.is-missed {
+    border-left-color: #d97706;
+}
+
+.pa-review-q__mark.is-unanswered.is-missed {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.pa-review-q__missed {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border: 1px solid #f6dca5;
+    border-radius: 999px;
+    background: #fef3c7;
+    color: #b45309;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.3;
+}
+
+.pa-review-q__missed svg {
+    width: 13px;
+    height: 13px;
+    flex: 0 0 auto;
+}
+
+.pa-review-q__missed small {
+    color: #92400e;
+    font-size: 11.5px;
+    font-weight: 600;
+}
+
+@media (max-width: 639px) {
+    .pa-review-q__meta {
+        padding-left: 0;
+    }
+}
+
+/* ---------- Tab activity: the exits tag on an attempt, the block in the attempt review ----------
+   The block itself stays neutral (an exit is a record, not a finding); only the count and the
+   time away are red. */
+
+.pa-tag--exits {
+    background: #fde7e7;
+    color: #b42318;
+    font-variant-numeric: tabular-nums;
+}
+
+.pa-tab-activity {
+    margin: 0 0 14px;
+    padding: 12px 14px;
+    border: 1px solid #eae7de;
+    border-radius: 12px;
+    background: #fbfaf7;
+}
+
+.pa-tab-activity__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+}
+
+.pa-tab-activity .pa-tab-activity__title {
+    margin: 0;
+    color: #16264f;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.3;
+}
+
+.pa-tab-activity .pa-tab-activity__clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    margin: 0;
+    color: #0f8278;
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.pa-tab-activity__clear svg {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 auto;
+}
+
+.pa-tab-activity__totals {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.pa-tab-activity__total {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 6px;
+    padding: 3px 10px;
+    border: 1px solid #f4cbcb;
+    border-radius: 999px;
+    background: #fde7e7;
+    color: #b42318;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.pa-tab-activity__total strong {
+    font-weight: 800;
+}
+
+.pa-tab-activity__total--open {
+    border-color: #f6dca5;
+    background: #fef3c7;
+    color: #b45309;
+}
+
+/* The list scrolls inside its own box once it is long (up to 200 exits are kept per attempt). */
+.pa-tab-activity__table {
+    max-height: 318px;
+    margin-top: 10px;
+    overflow-y: auto;
+    border: 1px solid #eae7de;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.pa-tab-activity__cols,
+.pa-tab-activity__row {
+    display: grid;
+    grid-template-columns: 76px 124px minmax(0, 1fr) 84px;
+    column-gap: 12px;
+    align-items: baseline;
+    padding: 8px 12px;
+}
+
+.pa-tab-activity__cols {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    border-bottom: 1px solid #eae7de;
+    background: #f7f5ef;
+    color: #8a93a1;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.pa-tab-activity__cols span:last-child,
+.pa-tab-activity__away {
+    text-align: right;
+}
+
+.pa-tab-activity .pa-tab-activity__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pa-tab-activity__row {
+    border-bottom: 1px solid #f2f0ea;
+    color: #1f2a37;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.pa-tab-activity__row:last-child {
+    border-bottom: 0;
+}
+
+.pa-tab-activity__at {
+    color: #5a6675;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.pa-tab-activity__where {
+    min-width: 0;
+    color: #16264f;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.pa-tab-activity__what {
+    min-width: 0;
+    color: #3f4a5a;
+    overflow-wrap: anywhere;
+}
+
+.pa-tab-activity__away {
+    color: #b42318;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.pa-tab-activity__open {
+    color: #b45309;
+    font-style: normal;
+}
+
+.pa-tab-activity .pa-tab-activity__note {
+    margin: 10px 0 0;
+    color: #5a6675;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+@media (max-width: 639px) {
+    .pa-tab-activity {
+        padding: 11px 12px;
+    }
+
+    /* Time, where and how long on one line; what happened underneath. */
+    .pa-tab-activity__cols {
+        display: none;
+    }
+
+    .pa-tab-activity__row {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-areas:
+            "at where away"
+            "what what what";
+        gap: 2px 10px;
+        padding: 8px 10px;
+    }
+
+    .pa-tab-activity__at {
+        grid-area: at;
+    }
+
+    .pa-tab-activity__where {
+        grid-area: where;
+    }
+
+    .pa-tab-activity__away {
+        grid-area: away;
+    }
+
+    .pa-tab-activity__what {
+        grid-area: what;
+        color: #5a6675;
+        font-size: 12.5px;
+    }
+}
+
+/* Two-line column header (Target met / Target not met on the Results table). */
+.pa-th-2 {
+    display: inline-block;
+    line-height: 1.2;
+    text-align: center;
+    vertical-align: middle;
+}

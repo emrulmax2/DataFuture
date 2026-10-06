@@ -4,6 +4,10 @@
     <title>{{ $title }}</title>
 @endsection
 
+@section('styles')
+    @vite('resources/css/staff-document-pin.css')
+@endsection
+
 @section('subcontent')
     @php
         $defaultEmailContent = 'Dear ' . $employee->full_name . ',<br/><p>Enclosed herewith is an important communication from the Human Resources Department.</p><br/> Best regards,<br/>Human Resources Department<br/>London Churchill College';
@@ -127,7 +131,8 @@
                         </div>
 
                         <div class="ep-doc-table-wrap">
-                            <div id="employeeDocumentListTable" data-employee="{{ $employee->id }}" class="table-report table-report--tabulator ep-doc-table"></div>
+                            {{-- The data-vault-* flags only pick which message the page shows before asking for a PIN; the server decides. --}}
+                            <div id="employeeDocumentListTable" data-employee="{{ $employee->id }}" data-vault-can-use="{{ $vault['can_use'] ? 1 : 0 }}" data-vault-has-pin="{{ $vault['has_pin'] ? 1 : 0 }}" data-vault-impersonating="{{ $vault['impersonating'] ? 1 : 0 }}" data-vault-pin-url="{{ route('user.account.document.pin') }}" class="table-report table-report--tabulator ep-doc-table"></div>
                         </div>
                     </div>
                 </section>
@@ -207,6 +212,130 @@
                         </div>
                     </div>
                 </section>
+
+                <section class="ep-doc-card">
+                    <div class="ep-doc-card__head">
+                        <div class="ep-doc-card__head-main">
+                            <span class="ep-doc-card__icon ep-doc-card__icon--teal">
+                                <i data-lucide="scan-eye" class="w-4 h-4"></i>
+                            </span>
+                            <div>
+                                <h2 class="ep-doc-card__title">Document Access Log</h2>
+                                <p id="employeeDocumentAccessLogSummary" class="ep-doc-card__meta">Who opened this employee's documents, when, and from which session.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ep-doc-card__body">
+                        <div class="ep-doc-toolbar">
+                            <form id="tabulatorFilterForm-EAL" class="ep-doc-toolbar__form">
+                                <div class="ep-doc-field ep-doc-field--status">
+                                    <label for="event-EAL">Show</label>
+                                    <select id="event-EAL" name="event" class="form-select">
+                                        <option selected value="">Everything</option>
+                                        <option value="opened">Opened (viewed or downloaded)</option>
+                                        <option value="blocked">Blocked attempts</option>
+                                        <option value="impersonated">While impersonating</option>
+                                        <option value="pin">PIN changes</option>
+                                    </select>
+                                </div>
+                                <div class="ep-doc-toolbar__filters">
+                                    <button id="tabulator-html-filter-go-EAL" type="button" class="ep-doc-btn ep-doc-btn--primary">Go</button>
+                                    <button id="tabulator-html-filter-reset-EAL" type="button" class="ep-doc-btn ep-doc-btn--ghost">Reset</button>
+                                </div>
+                            </form>
+
+                            <div class="ep-doc-toolbar__actions">
+                                <button id="tabulator-print-EAL" type="button" class="ep-doc-btn ep-doc-btn--ghost">
+                                    <i data-lucide="printer" class="w-4 h-4"></i>
+                                    Print
+                                </button>
+                                <div class="dropdown ep-doc-export">
+                                    <button class="dropdown-toggle ep-doc-btn ep-doc-btn--ghost" aria-expanded="false" data-tw-toggle="dropdown">
+                                        <i data-lucide="download" class="w-4 h-4"></i>
+                                        Export
+                                        <i data-lucide="chevron-down" class="w-4 h-4 opacity-70"></i>
+                                    </button>
+                                    <div class="dropdown-menu ep-doc-export__dropdown w-44">
+                                        <ul class="dropdown-content ep-doc-export__menu">
+                                            <li>
+                                                <a id="tabulator-export-csv-EAL" href="javascript:;" class="dropdown-item">
+                                                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                                                    Export CSV
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a id="tabulator-export-xlsx-EAL" href="javascript:;" class="dropdown-item">
+                                                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                                                    Export XLSX
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ep-doc-table-wrap">
+                            <div id="employeeDocumentAccessLogTable" data-employee="{{ $employee->id }}" class="table-report table-report--tabulator ep-doc-table"></div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="documentPinModal" class="modal ep-doc-modal ep-doc-pin-modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <form method="post" action="#" id="documentPinForm" autocomplete="off">
+                        <div class="modal-content">
+                            <div class="modal-header ep-doc-modal__header">
+                                <div class="ep-doc-modal__intro">
+                                    <span class="ep-doc-modal__icon">
+                                        <i data-lucide="lock-keyhole" class="w-4 h-4"></i>
+                                    </span>
+                                    <div>
+                                        <h2>Encrypted Document</h2>
+                                        <p>{{ $vault['impersonating'] ? 'Enter your own document PIN to open this file.' : 'Enter your document PIN to open this file.' }}</p>
+                                    </div>
+                                </div>
+                                <a data-tw-dismiss="modal" href="javascript:;" class="ep-doc-modal__close">
+                                    <i data-lucide="x" class="w-5 h-5"></i>
+                                </a>
+                            </div>
+                            <div class="modal-body">
+                                <div class="ep-doc-upload-name">
+                                    <div class="ep-doc-upload-name__prefix">Document</div>
+                                    <div id="documentPinDocName" class="ep-doc-upload-name__value"></div>
+                                </div>
+
+                                <div class="ep-doc-pin-field">
+                                    <label for="documentPinInput" class="form-label ep-doc-upload-label">Document PIN</label>
+                                    <input type="password" id="documentPinInput" name="pin" class="form-control w-full ep-doc-pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="{{ $vault['pin_max_length'] }}" autocomplete="one-time-code"/>
+                                    <div id="documentPinError" class="ep-doc-pin-error" role="alert"></div>
+                                </div>
+
+                                @if($vault['impersonating'])
+                                    {{-- Signed in as somebody else: it is the impersonator's own PIN that is wanted, and their name that goes in the log. --}}
+                                    <p class="ep-doc-pin-note ep-doc-pin-note--impersonating">
+                                        <i data-lucide="user-cog" class="w-4 h-4"></i>
+                                        <span>You are signed in as <strong>{{ $vault['signed_in_as'] }}</strong>. Use your own PIN, not theirs. This will be recorded as opened by <strong>{{ $vault['holder_name'] }}</strong> through impersonation.</span>
+                                    </p>
+                                @else
+                                    <p class="ep-doc-pin-note">
+                                        <i data-lucide="scan-eye" class="w-4 h-4"></i>
+                                        <span>Opening this document is recorded against your name.</span>
+                                    </p>
+                                @endif
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary">Cancel</button>
+                                {{-- Icons come from ::before, like every footer button in these modals (staff-document-pin.css). --}}
+                                <button type="button" id="documentPinViewBtn" data-mode="view" class="documentPinSubmit btn btn-primary">View</button>
+                                <button type="button" id="documentPinDownloadBtn" data-mode="download" class="documentPinSubmit btn btn-primary">Download</button>
+                                <input type="hidden" name="row_id" value="0"/>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
 
             <div id="addCommunicationModal" class="modal ep-doc-modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
@@ -347,6 +476,7 @@
                                 <input type="hidden" name="employee_id" value="{{ $employee->id }}"/>
                                 <input type="hidden" name="document_setting_id" value="0"/>
                                 <input type="hidden" name="hard_copy_check" value="0"/>
+                                <input type="hidden" name="is_encrypted" value="0"/>
                                 <input type="hidden" name="display_file_name" value=""/>
                             </form>
 
@@ -361,24 +491,24 @@
                                     <input type="text" name="doc_name" class="displayNameInput form-control w-full" placeholder="Document name"/>
                                 </div>
 
+                                {{-- Yes / No as a switch: off is No. The word beside it is drawn by CSS from the switch's state. --}}
+                                <div class="ep-doc-toggle-row">
+                                    <label class="form-label ep-doc-upload-label" for="uploadHardCopyToggle">Hard Copy Checked?</label>
+                                    <label class="form-check form-switch ep-doc-toggle">
+                                        <input id="uploadHardCopyToggle" class="form-check-input" type="checkbox" value="1" name="hard_copy_check_status">
+                                        <span class="ep-doc-toggle__state" aria-hidden="true"></span>
+                                    </label>
+                                </div>
+
                                 <div>
-                                    <label class="form-label ep-doc-upload-label">Hard Copy Checked?</label>
-                                    <div class="ep-doc-choice-group">
-                                        <label class="ep-doc-choice" for="hard_copy_check-1">
-                                            <input id="hard_copy_check-1" class="ep-doc-choice__input" type="radio" value="1" name="hard_copy_check_status">
-                                            <span class="ep-doc-choice__control">
-                                                <span class="ep-doc-choice__radio"><span></span></span>
-                                                <span class="ep-doc-choice__label">Yes</span>
-                                            </span>
-                                        </label>
-                                        <label class="ep-doc-choice" for="hard_copy_check-2">
-                                            <input checked id="hard_copy_check-2" class="ep-doc-choice__input" type="radio" value="0" name="hard_copy_check_status">
-                                            <span class="ep-doc-choice__control">
-                                                <span class="ep-doc-choice__radio"><span></span></span>
-                                                <span class="ep-doc-choice__label">No</span>
-                                            </span>
+                                    <div class="ep-doc-toggle-row">
+                                        <label class="form-label ep-doc-upload-label" for="uploadEncryptToggle">Encrypt Document?</label>
+                                        <label class="form-check form-switch ep-doc-toggle">
+                                            <input id="uploadEncryptToggle" class="form-check-input" type="checkbox" value="1" name="is_encrypted_status" aria-describedby="uploadEncryptHint">
+                                            <span class="ep-doc-toggle__state" aria-hidden="true"></span>
                                         </label>
                                     </div>
+                                    <p id="uploadEncryptHint" class="ep-doc-upload-hint">An encrypted document can only be opened with a document PIN, by staff who have PIN Enabled in their privileges. This cannot be changed after upload.</p>
                                 </div>
                             </div>
                         </div>

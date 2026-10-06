@@ -42,6 +42,9 @@ class Kernel extends HttpKernel
             // Blocks nothing while config('privileges.enforce') is false - it only
             // records the decision it would have taken.
             \App\Http\Middleware\PrivilegeGuard::class,
+            // Staff with "PIN Enabled" and no PIN yet are held on the PIN
+            // set-up page from sign-in until they have set one.
+            \App\Http\Middleware\PromptPinSetup::class,
         ],
 
         'api' => [

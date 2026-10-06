@@ -271,6 +271,16 @@
                             </span>
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#cdd8dc" stroke-width="2.2"><path d="M9 6l6 6-6 6"></path></svg>
                         </a>
+                        @if(\App\Services\StaffDocumentVaultService::showsMenu())
+                            <a href="{{ route('user.account.document.pin') }}" class="adm-profile__menu-link">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z"></path><circle cx="16.5" cy="7.5" r=".5"></circle></svg>
+                                <span style="flex:1;">
+                                    <span class="adm-profile__menu-title">PIN</span>
+                                    <span class="adm-profile__menu-desc">For encrypted staff documents</span>
+                                </span>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#cdd8dc" stroke-width="2.2"><path d="M9 6l6 6-6 6"></path></svg>
+                            </a>
+                        @endif
                         <div class="adm-profile__menu-sep"></div>
                         <a href="{{ $admLogoutUrl }}" class="adm-profile__menu-link adm-profile__menu-link--danger">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"></path></svg>

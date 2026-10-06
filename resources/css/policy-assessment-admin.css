@@ -1,0 +1,6 @@
+/* Policy Assessments (HR admin pages + employee profile tab).
+ * Split into partials so each area owns its own rules. */
+@import "./policy-assessment/levels.css";
+@import "./policy-assessment/admin-bank.css";
+@import "./policy-assessment/admin-results.css";
+@import "./policy-assessment/admin-roles.css";
