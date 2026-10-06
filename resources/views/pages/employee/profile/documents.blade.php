@@ -313,6 +313,12 @@
                                     <div id="documentPinError" class="ep-doc-pin-error" role="alert"></div>
                                 </div>
 
+                                {{-- Shown for a file a browser cannot display (Word, Excel...): it can only be saved. --}}
+                                <p id="documentPinSaveNote" class="ep-doc-pin-note" hidden>
+                                    <i data-lucide="file-down" class="w-4 h-4"></i>
+                                    <span>This type of file cannot be shown in the browser, so it will be saved to your computer.</span>
+                                </p>
+
                                 @if($vault['impersonating'])
                                     {{-- Signed in as somebody else: it is the impersonator's own PIN that is wanted, and their name that goes in the log. --}}
                                     <p class="ep-doc-pin-note ep-doc-pin-note--impersonating">
@@ -328,9 +334,9 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary">Cancel</button>
-                                {{-- Icons come from ::before, like every footer button in these modals (staff-document-pin.css). --}}
+                                {{-- The one way in: the file opens in the browser, and a copy is saved from there if one is wanted.
+                                     The icon comes from ::before, like every footer button in these modals (staff-document-pin.css). --}}
                                 <button type="button" id="documentPinViewBtn" data-mode="view" class="documentPinSubmit btn btn-primary">View</button>
-                                <button type="button" id="documentPinDownloadBtn" data-mode="download" class="documentPinSubmit btn btn-primary">Download</button>
                                 <input type="hidden" name="row_id" value="0"/>
                             </div>
                         </div>

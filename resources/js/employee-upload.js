@@ -1001,8 +1001,12 @@ var employeeDocumentAccessLogTable = (function () {
 
         $("#documentPinDocName").text($theLink.attr("data-name"));
         $('#documentPinForm input[name="row_id"]').val(rowId);
-        // View is only offered for what a browser can show (PDFs, images, text).
-        $("#documentPinViewBtn").prop("hidden", $theLink.attr("data-viewable") != 1);
+        // There is no download button: the file opens in the browser and is
+        // saved from there. What a browser cannot show (Word, Excel...) can
+        // only be saved, so the button and the note say that instead.
+        const viewable = $theLink.attr("data-viewable") == 1;
+        $("#documentPinViewBtn").attr("data-mode", viewable ? "view" : "download").text(viewable ? "View" : "Open");
+        $("#documentPinSaveNote").prop("hidden", viewable);
         documentPinModal.show();
     });
 
@@ -1024,10 +1028,10 @@ var employeeDocumentAccessLogTable = (function () {
         submitDocumentPin($(this).attr("data-mode"));
     });
 
-    // Enter in the PIN box: show the file when the browser can, save it when not.
+    // Enter in the PIN box does what the button does.
     $("#documentPinForm").on("submit", function (e) {
         e.preventDefault();
-        submitDocumentPin($("#documentPinViewBtn").prop("hidden") ? "download" : "view");
+        submitDocumentPin($("#documentPinViewBtn").attr("data-mode"));
     });
 
     $("#documentPinInput").on("input", function () {
