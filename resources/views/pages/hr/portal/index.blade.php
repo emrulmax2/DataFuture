@@ -55,6 +55,8 @@
     $passportTotal = $passExpiry->count();
     $visaTotal = $visaExpiry->count();
     $appraisalTotal = $appraisal->count();
+    /* Policy assessment counts: only for staff who manage policy assessments (NULL otherwise). */
+    $policyTotals = $policyTotals ?? null;
 @endphp
 
 @section('subcontent')
@@ -86,7 +88,7 @@
                 </div>
             </section>
 
-            <section class="hrd-kpis" aria-label="HR portal summary">
+            <section class="hrd-kpis{{ $policyTotals ? ' hrd-kpis--policy' : '' }}" aria-label="HR portal summary">
                 <article class="hrd-kpi hrd-kpi--teal">
                     <span class="hrd-kpi__icon"><i data-lucide="users"></i></span>
                     <span>
@@ -115,6 +117,25 @@
                         <small>Appraisals Due</small>
                     </span>
                 </article>
+                @if($policyTotals)
+                    <a href="{{ route('policy.assessment') }}" class="hrd-kpi hrd-kpi--violet hrd-kpi--stats" title="Open Policy Assessments">
+                        <span class="hrd-kpi__icon"><i data-lucide="clipboard-check"></i></span>
+                        <span class="hrd-kpi__stats">
+                            <span class="hrd-kpi__stat">
+                                <strong>{{ number_format($policyTotals['assigned']) }}</strong>
+                                <small>Assessments Assigned</small>
+                            </span>
+                            <span class="hrd-kpi__stat hrd-kpi__stat--met">
+                                <strong>{{ number_format($policyTotals['met']) }}</strong>
+                                <small>Target Met</small>
+                            </span>
+                            <span class="hrd-kpi__stat hrd-kpi__stat--not-met">
+                                <strong>{{ number_format($policyTotals['not_met']) }}</strong>
+                                <small>Target Not Met</small>
+                            </span>
+                        </span>
+                    </a>
+                @endif
             </section>
 
             <div class="hrd-main-grid">

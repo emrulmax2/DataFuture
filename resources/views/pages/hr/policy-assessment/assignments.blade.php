@@ -40,7 +40,7 @@
                     </span>
                     <div>
                         <h1>{{ $subtitle }}</h1>
-                        <p>See who has been asked to read and pass each policy, at which level and through which role, and chase anything outstanding.</p>
+                        <p>See who has been asked to read each policy and meet its target, at which level and through which role, and chase anything outstanding.</p>
                     </div>
                 </div>
                 <a href="{{ route('hr.portal') }}" class="ss-back-btn">
@@ -148,8 +148,8 @@
                                             <option value="">All</option>
                                             <option value="pending">Not started</option>
                                             <option value="in_progress">In progress</option>
-                                            <option value="failed">Failed</option>
-                                            <option value="passed">Passed</option>
+                                            <option value="failed">Target not met</option>
+                                            <option value="passed">Target met</option>
                                             <option value="overdue">Overdue</option>
                                             <option value="locked">No attempts left</option>
                                             <option value="archived">Archived</option>

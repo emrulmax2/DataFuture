@@ -2013,6 +2013,42 @@ body.hr-dashboard-v2-body .content::before {
 .hrd-kpi--red .hrd-kpi__icon { background: #fce9e7; color: #c4432f; }
 .hrd-kpi--gold .hrd-kpi__icon { background: #fbf1dc; color: #b07e14; }
 .hrd-kpi--blue .hrd-kpi__icon { background: #e9edf8; color: #3b5bb5; }
+.hrd-kpi--violet .hrd-kpi__icon { background: #f0eaf8; color: #7a3fb0; }
+/* Policy assessments: one card with three figures side by side; the card is a link.
+   It sits on its own row until the screen is wide enough for five cards in one row. */
+.hrd-kpi--stats {
+    grid-column: 1 / -1;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.hrd-kpi--stats:hover,
+.hrd-kpi--stats:focus-visible {
+    border-color: #c9dad8;
+    box-shadow: 0 6px 16px rgba(11, 43, 40, 0.09);
+}
+.hrd-kpi__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 28px;
+    min-width: 0;
+}
+.hrd-kpi__stat {
+    display: block;
+    white-space: nowrap;
+}
+.hrd-kpi__stat--met strong { color: #0f7b76; }
+.hrd-kpi__stat--not-met strong { color: #b45309; }
+@media (min-width: 1440px) {
+    .hrd-kpis--policy {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) max-content;
+    }
+    .hrd-kpi--stats {
+        grid-column: auto;
+    }
+    .hrd-kpi__stats {
+        flex-wrap: nowrap;
+        gap: 22px;
+    }
+}
 .hrd-main-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 344px;

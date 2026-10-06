@@ -436,7 +436,7 @@ class PolicyDocumentController extends Controller
         $perTest = (int) $policy->questions_per_attempt;
 
         return $perTest.' '.($perTest == 1 ? 'question' : 'questions')
-            .' · '.(int) $policy->pass_mark.'% to pass'
+            .' · target score '.(int) $policy->pass_mark.'%'
             .' · '.self::timeLimitLabel($policy->isTimed() ? (int) $policy->time_limit_minutes : null);
     }
 

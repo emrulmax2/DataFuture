@@ -37,11 +37,11 @@ const escapeHtmlPA = (value) => {
 };
 
 const STATUS_LABELS_PA = {
-    passed: "Passed",
+    passed: "Target met",
     locked: "No attempts left",
     in_progress: "In progress",
     overdue: "Overdue",
-    failed: "Failed – retake available",
+    failed: "Target not met – retake available",
     pending: "Not started",
 };
 
@@ -92,7 +92,7 @@ var employeePolicyAssessmentTable = (function () {
                 if (summaryEl) {
                     summaryEl.textContent = total > 0
                         ? `${total} ${total === 1 ? "policy" : "policies"} in this list`
-                        : "Policies this member of staff must read and pass.";
+                        : "Policies this member of staff must read and meet the target for.";
                 }
 
                 return response;
@@ -404,7 +404,7 @@ var employeePolicyAssessmentTable = (function () {
         if (badgeEmpty) {
             badgeEmpty.textContent = showRevokedBox && showRevokedBox.checked
                 ? "No badges yet, and none revoked."
-                : "No badges yet. A badge is awarded the first time they pass a policy test.";
+                : "No badges yet. A badge is awarded the first time they meet the target in a policy test.";
             badgeEmpty.hidden = rows.length > 0;
         }
 
@@ -740,7 +740,7 @@ var employeePolicyAssessmentTable = (function () {
         }
 
         if (assignment.passed_at) {
-            items.push(["Passed on", escapeHtmlPA(assignment.passed_at)]);
+            items.push(["Target met on", escapeHtmlPA(assignment.passed_at)]);
         }
 
         if (assignment.note) {

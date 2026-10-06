@@ -80,7 +80,7 @@
                 @endforeach
             </ul>
             <div class="myhr-policy-shelf__empty-text">
-                <p class="myhr-policy-shelf__empty-title">Pass a policy test to earn your first badge</p>
+                <p class="myhr-policy-shelf__empty-title">Meet the target in a policy test to earn your first badge</p>
                 <p class="myhr-policy-shelf__empty-note">Beginner tests earn a bronze badge, Intermediate tests silver and Expert tests gold.</p>
             </div>
         </div>

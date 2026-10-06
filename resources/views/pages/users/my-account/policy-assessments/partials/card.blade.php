@@ -3,9 +3,9 @@
     MyPolicyAssessmentController::card(). A policy held at more than one level
     has one card per level; the level pill tells them apart.
 
-    A test still to be sat states its rules ($card['rules']): questions, pass
-    mark, the time limit when there is one, and the mix of question levels as
-    counts — taken from PolicyLevel::quota() in the controller.
+    A test still to be sat states its rules ($card['rules']): questions, target
+    score and the time limit when there is one. The mix of question levels is
+    not shown to staff.
 
     Start / Resume / Retake open the test page (the exam wizard: its Briefing
     first, or the questions when an attempt is in progress). Once an attempt
@@ -36,7 +36,7 @@
         @if($card['status'] == 'passed')
             <p class="myhr-policy-card__passed">
                 <i data-lucide="badge-check"></i>
-                <span>Passed on {{ $card['passed_at'] ?? '—' }}@if($card['best_score'] !== null) &middot; {{ $card['best_score'] }}%@endif</span>
+                <span>Target met on {{ $card['passed_at'] ?? '—' }}@if($card['best_score'] !== null) &middot; {{ $card['best_score'] }}%@endif</span>
             </p>
             @if($card['badge'])
                 <p class="myhr-policy-card__award">
@@ -78,7 +78,7 @@
                     </li>
                     <li>
                         <i data-lucide="target"></i>
-                        <span>Pass mark {{ $card['rules']['pass_mark'] }}%</span>
+                        <span>Target score {{ $card['rules']['pass_mark'] }}%</span>
                     </li>
                     @if($card['rules']['time_limit'] !== null)
                         <li class="is-timed">
@@ -87,9 +87,6 @@
                         </li>
                     @endif
                 </ul>
-                @if($card['rules']['pattern_text'] !== '')
-                    <p class="myhr-policy-card__mix"><span class="myhr-policy-sr">Question mix: </span>{{ $card['rules']['pattern_text'] }}</p>
-                @endif
             </div>
         @endif
 

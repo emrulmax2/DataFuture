@@ -445,6 +445,41 @@ class PolicyAssessmentService
     }
 
     /**
+     * The three figures on the HR Portal: how many policy tests are assigned
+     * to current staff, how many of them have met the target, and how many
+     * were sat without meeting it (whether or not a retake is left). The rest
+     * have not been sat yet.
+     *
+     * Counted the way Overview & Results counts — assignments on policies
+     * that still exist, held by active staff — so the two screens agree.
+     */
+    public function assignmentTotals(): array
+    {
+        /* A timed test whose clock ran out is marked before anything is counted. */
+        $this->finaliseExpiredAttempts();
+
+        $row = DB::table('policy_assignments as pa')
+            ->join('policy_documents as pd', function ($join) {
+                $join->on('pd.id', '=', 'pa.policy_document_id')->whereNull('pd.deleted_at');
+            })
+            ->join('employees as e', function ($join) {
+                $join->on('e.id', '=', 'pa.employee_id')->whereNull('e.deleted_at');
+            })
+            ->whereNull('pa.deleted_at')
+            ->where('e.status', 1)
+            ->selectRaw('COUNT(pa.id) as assigned_count')
+            ->selectRaw('SUM(CASE WHEN pa.status = ? THEN 1 ELSE 0 END) as met_count', [PolicyAssignment::STATUS_PASSED])
+            ->selectRaw('SUM(CASE WHEN pa.status = ? THEN 1 ELSE 0 END) as not_met_count', [PolicyAssignment::STATUS_FAILED])
+            ->first();
+
+        return [
+            'assigned' => (int) (isset($row->assigned_count) ? $row->assigned_count : 0),
+            'met' => (int) (isset($row->met_count) ? $row->met_count : 0),
+            'not_met' => (int) (isset($row->not_met_count) ? $row->not_met_count : 0),
+        ];
+    }
+
+    /**
      * Mark an attempt. $answers is [answer row id => chosen option id].
      *
      * Every drawn question must be answered with one of the options it was
@@ -1027,7 +1062,7 @@ class PolicyAssessmentService
     public function sendAssignmentEmail(Employee $e, Collection $assignments): bool
     {
         $intro = 'You have been asked to read the college '.($assignments->count() == 1 ? 'policy' : 'policies').' below and complete a short test on each one. '
-            .'Open each policy from My HR, read it, then take the test at the level shown. You need to reach the pass mark to complete it.';
+            .'Open each policy from My HR, read it, then take the test at the level shown. You need to reach the target score to complete it.';
 
         return $this->sendPolicyEmail($e, $assignments, 'Policy assessments assigned to you', $intro, false);
     }

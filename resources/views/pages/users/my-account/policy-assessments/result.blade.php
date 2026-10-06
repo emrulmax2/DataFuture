@@ -50,9 +50,9 @@
             <div class="pexam-verdict__text">
                 <p class="pexam-eyebrow">
                     {{ $attemptText }}
-                    <span class="pexam-pill {{ $passed ? 'pexam-pill--ok' : 'pexam-pill--warn' }}">{{ $passed ? 'Passed' : 'Not passed' }}</span>
+                    <span class="pexam-pill {{ $passed ? 'pexam-pill--ok' : 'pexam-pill--warn' }}">{{ $passed ? 'Target met' : 'Target not met' }}</span>
                 </p>
-                <h1 id="pexamTitle" tabindex="-1">{{ $passed ? 'You passed the '.$policy['title'].' test' : 'You did not reach the pass mark' }}</h1>
+                <h1 id="pexamTitle" tabindex="-1">{{ $passed ? 'You met the target for the '.$policy['title'].' test' : 'You did not reach the target score' }}</h1>
                 <p class="pexam-verdict__policy">
                     @if(!$passed)
                         <span>{{ $policy['title'] }}</span>
@@ -61,7 +61,7 @@
                 </p>
                 <p class="pexam-line">
                     {{ $result['correct_count'] }} of {{ $total }} correct
-                    &middot; pass mark {{ $result['pass_mark'] }}% ({{ $result['pass_needed'] }} of {{ $total }})
+                    &middot; target score {{ $result['pass_mark'] }}% ({{ $result['pass_needed'] }} of {{ $total }})
                     @if($result['timed_out'])
                         &middot; time ran out
                     @elseif($result['duration'] !== null)
@@ -100,12 +100,12 @@
             @elseif($result['next'] == 'passed')
                 <div class="pexam-panel">
                     <h2>Test complete</h2>
-                    <p class="pexam-sub">You passed this test. There is nothing more to do.</p>
+                    <p class="pexam-sub">You met the target for this test. There is nothing more to do.</p>
                 </div>
             @elseif($result['next'] == 'passed_since')
                 <div class="pexam-panel">
-                    <h2>Passed since</h2>
-                    <p class="pexam-sub">You have passed this test in a later attempt. There is nothing more to do.</p>
+                    <h2>Target met since</h2>
+                    <p class="pexam-sub">You have met the target for this test in a later attempt. There is nothing more to do.</p>
                 </div>
             @elseif($result['next'] == 'resume')
                 <div class="pexam-panel">

@@ -17,7 +17,7 @@
 <div class="pa-role-picker" data-role-picker data-total="{{ (int) $policyTotal }}">
     <div class="pa-role-picker__intro">
         <span id="{{ $paPickerId }}_label" class="pa-role-picker__label">Policies for this role <span aria-hidden="true">*</span></span>
-        <small class="pa-field-hint">Tick every policy that staff in this role must pass.</small>
+        <small class="pa-field-hint">Tick every policy required for staff in this role.</small>
     </div>
 
     @if(empty($policyGroups))

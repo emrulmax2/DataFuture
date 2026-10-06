@@ -81,7 +81,7 @@
                     </div>
                     <p class="pa-assign-hint pa-assign-hint--foot">
                         <i data-lucide="info"></i>
-                        The policies listed above are what gets assigned. Nobody is given the same policy twice at the same level. If someone already has it at this level, a new due date replaces the old one unless they have passed. Another level is a separate exam.
+                        The policies listed above are what gets assigned. Nobody is given the same policy twice at the same level. If someone already has it at this level, a new due date replaces the old one unless they have already met the target. Another level is a separate exam.
                     </p>
                 </div>
                 <div class="modal-footer ss-settings-modal__footer">

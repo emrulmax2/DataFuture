@@ -27,10 +27,10 @@
                         </span>
                         <div>
                             <h2 class="ep-doc-card__title">Policy Assessments</h2>
-                            <p id="employeePolicySummary-PA" class="ep-doc-card__meta">Policies this member of staff must read and pass.</p>
+                            <p id="employeePolicySummary-PA" class="ep-doc-card__meta">Policies this member of staff must read and meet the target for.</p>
                             <div id="policySummaryChips-PA" class="pa-ep-chips">
                                 <span class="pa-ep-chip"><strong data-pa-count="assigned">{{ $summary['assigned'] }}</strong> assigned</span>
-                                <span class="pa-ep-chip pa-ep-chip--green"><strong data-pa-count="passed">{{ $summary['passed'] }}</strong> passed</span>
+                                <span class="pa-ep-chip pa-ep-chip--green"><strong data-pa-count="passed">{{ $summary['passed'] }}</strong> target met</span>
                                 <span class="pa-ep-chip pa-ep-chip--red"><strong data-pa-count="overdue">{{ $summary['overdue'] }}</strong> overdue</span>
                                 <span class="pa-ep-chip pa-ep-chip--blue"><strong data-pa-count="in_progress">{{ $summary['in_progress'] }}</strong> in progress</span>
                                 <span class="pa-ep-chip pa-ep-chip--amber"><strong data-pa-count="locked">{{ $summary['locked'] }}</strong> no attempts left</span>
@@ -77,7 +77,7 @@
                                 <li class="pa-ep-badge pa-ep-badge--{{ \App\Support\PolicyLevel::isValid($paBadge->level) ? $paBadge->level : 'beginner' }}" data-badge-id="{{ $paBadge->id }}">@include('pages.hr.policy-assessment.partials.level-badge', ['level' => $paBadge->level, 'size' => 'md', 'title' => (isset($paBadge->policy->title) ? $paBadge->policy->title : 'Deleted policy'), 'date' => ($paBadge->awarded_at ? $paBadge->awarded_at->format('d M Y') : null), 'revoked' => false])<span class="pa-ep-badge__meta">{{ $paBadgeScoreText !== '' ? 'Scored '.$paBadgeScoreText : 'Awarded' }}</span><button type="button" class="pa-ep-badge__btn pa-ep-badge__btn--revoke revoke_badge_btn" data-id="{{ $paBadge->id }}"><i data-lucide="ban" class="w-4 h-4"></i>Revoke</button></li>
                             @endforeach
                         </ul>
-                        <p class="pa-ep-badges__empty" data-badge-empty{{ $badges->count() > 0 ? ' hidden' : '' }}>No badges yet. A badge is awarded the first time they pass a policy test.</p>
+                        <p class="pa-ep-badges__empty" data-badge-empty{{ $badges->count() > 0 ? ' hidden' : '' }}>No badges yet. A badge is awarded the first time they meet the target in a policy test.</p>
                     </section>
 
                     <div class="ep-doc-toolbar">
@@ -107,8 +107,8 @@
                                     <option selected value="">All</option>
                                     <option value="pending">Not started</option>
                                     <option value="in_progress">In progress</option>
-                                    <option value="failed">Failed</option>
-                                    <option value="passed">Passed</option>
+                                    <option value="failed">Target not met</option>
+                                    <option value="passed">Target met</option>
                                     <option value="overdue">Overdue</option>
                                     <option value="locked">No attempts left</option>
                                     <option value="archived">Archived</option>
@@ -173,7 +173,7 @@
                                 </span>
                                 <div>
                                     <h2>Assign policies</h2>
-                                    <p>Ask {{ $employee->full_name }} to read and pass these policies.</p>
+                                    <p>Ask {{ $employee->full_name }} to read these policies and meet their targets.</p>
                                 </div>
                             </div>
                             <a data-tw-dismiss="modal" href="javascript:;" class="ep-doc-modal__close">
@@ -223,7 +223,7 @@
                                 <div class="ep-doc-form-grid__full">
                                     <div class="acc__input-error error-employee_ids text-danger"></div>
                                     <p class="pa-assign-hint">
-                                        The policies listed above are what gets assigned. A policy they already have at this level is not assigned twice: a new due date replaces the old one unless they have passed. Another level is a separate exam.
+                                        The policies listed above are what gets assigned. A policy they already have at this level is not assigned twice: a new due date replaces the old one unless they have already met the target. Another level is a separate exam.
                                     </p>
                                 </div>
                             </div>

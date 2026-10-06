@@ -60,12 +60,7 @@
                 <ul>
                     <li>One question per screen. Move back and forward freely until you submit.</li>
                     <li>Flag any question you want to come back to. A question you skip is flagged automatically until you answer it.</li>
-                    <li>
-                        Questions are drawn at random and the answer order is shuffled on every attempt.
-                        @if($test['pattern_text'] !== '')
-                            This test draws <strong>{{ $test['pattern_text'] }}</strong> {{ $questionCount == 1 ? 'question' : 'questions' }}.
-                        @endif
-                    </li>
+                    <li>Questions are drawn at random and the answer order is shuffled on every attempt.</li>
                     @if($isTimed)
                         <li>You have <strong>{{ $test['time_limit_words'] }}</strong>. The clock cannot be paused and keeps running if you close the page. The test submits itself when the timer reaches zero, and unanswered questions count as wrong.</li>
                     @else
@@ -73,13 +68,13 @@
                     @endif
                     <li><strong>Stay on this tab.</strong> Leaving the test tab or window is logged and shown with your result &mdash; HR can see it.</li>
                     @if($test['max_attempts'] === null)
-                        <li>There is no limit on attempts. If you do not pass, read the policy again and retake the test with a new set of questions.</li>
+                        <li>There is no limit on attempts. If you do not meet the target, read the policy again and retake the test with a new set of questions.</li>
                     @elseif($attemptsLeft === 1)
-                        <li>This is your last attempt. If you do not pass, this assessment is locked until HR allows another attempt.</li>
+                        <li>This is your last attempt. If you do not meet the target, this assessment is locked until HR allows another attempt.</li>
                     @else
-                        <li>You have {{ $test['max_attempts'] }} attempts in all. If you use them without passing, this assessment is locked until HR allows another attempt.</li>
+                        <li>You have {{ $test['max_attempts'] }} attempts in all. If you use them without meeting the target, this assessment is locked until HR allows another attempt.</li>
                     @endif
-                    <li>Afterwards you see your score and whether you passed, not the answers.</li>
+                    <li>Afterwards you see your score and whether you met the target, not the answers.</li>
                 </ul>
             </div>
         </div>
@@ -91,7 +86,7 @@
                 </span>
                 <div class="pexam-sheet__level-text">
                     <strong>{{ $test['level_label'] }} exam</strong>
-                    <span>Pass to earn the {{ $test['level_label'] }} badge ({{ strtolower($test['badge_name']) }}).</span>
+                    <span>Meet the target to earn the {{ $test['level_label'] }} badge ({{ strtolower($test['badge_name']) }}).</span>
                 </div>
             </div>
 
@@ -110,7 +105,7 @@
                     @endif
                 </div>
                 <div>
-                    <dt>to pass ({{ $test['pass_needed'] }} of {{ $questionCount }})</dt>
+                    <dt>target score ({{ $test['pass_needed'] }} of {{ $questionCount }})</dt>
                     <dd>{{ $test['pass_mark'] }}%</dd>
                 </div>
                 <div>

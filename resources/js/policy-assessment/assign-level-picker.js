@@ -193,5 +193,5 @@ export const initLevelPicker = (form, tomSelect, onLevel = null) => {
 export const assignedLevelHtml = (level) => {
     const key = isLevel(level) ? level : DEFAULT_LEVEL;
 
-    return `<p class="pa-result-lead">${levelPill(key)}<span>exams &middot; a pass earns the ${BADGE_NAMES[key]} badge</span></p>`;
+    return `<p class="pa-result-lead">${levelPill(key)}<span>exams &middot; meeting the target earns the ${BADGE_NAMES[key]} badge</span></p>`;
 };

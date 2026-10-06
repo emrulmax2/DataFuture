@@ -40,7 +40,7 @@
                     </span>
                     <div>
                         <h1>{{ $subtitle }}</h1>
-                        <p>Set up each job role once with the policies its staff must pass, then assign by role.</p>
+                        <p>Set up each job role once with its required policies, then assign by role.</p>
                     </div>
                 </div>
                 <a href="{{ route('hr.portal') }}" class="ss-back-btn">
@@ -66,7 +66,7 @@
                         <div class="ss-table-card__header">
                             <div>
                                 <h2>Roles</h2>
-                                <p>A role is a job role, such as Lecturer, Admissions Officer or Finance, with the policies its staff must pass ticked.</p>
+                                <p>A role is a job role, such as Lecturer, Admissions Officer or Finance, with its required policies ticked.</p>
                             </div>
                             <button data-tw-toggle="modal" data-tw-target="#addModal" type="button" class="ss-btn ss-btn--primary ss-btn--compact" @if($policyTotal < 1) disabled title="Add a policy to the Question Bank first" @endif>
                                 <i data-lucide="plus"></i>
@@ -87,7 +87,7 @@
                             <span class="pa-roles-empty__icon"><i data-lucide="briefcase"></i></span>
                             <h3>No roles yet</h3>
                             @if($policyTotal > 0)
-                                <p>Create your first role, for example &ldquo;Lecturer&rdquo;, and tick the policies its staff must pass. From then on, assigning those policies is one pick.</p>
+                                <p>Create your first role, for example &ldquo;Lecturer&rdquo;, and tick its required policies. From then on, assigning those policies is one pick.</p>
                                 <button data-tw-toggle="modal" data-tw-target="#addModal" type="button" class="ss-btn ss-btn--primary">
                                     <i data-lucide="plus"></i>
                                     Create the first role

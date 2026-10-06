@@ -1141,9 +1141,9 @@
 }
 
 /* =========================================================================
-   Exam mix and time limit on the list: the rules a card states
-   (questions, pass mark, time limit, the mix of question levels), the
-   clock of a test in progress and the link to the last result.
+   Exam rules on the list: what a card states (questions, target score,
+   time limit), the clock of a test in progress and the link to the last
+   result.
    ========================================================================= */
 
 /* a second "how it works" note (timed tests) sits clear of the first */
@@ -1189,12 +1189,6 @@
 }
 .myhr-policy-card__facts li.is-timed svg {
     color: #0f7b76;
-}
-.myhr-policy-card__mix {
-    color: #7a9391;
-    font-size: 12px;
-    line-height: 1.45;
-    margin: 0;
 }
 .myhr-policy-card__clock {
     align-items: center;

@@ -291,7 +291,7 @@ import { LEVELS, escapeHtml, levelLabel, levelPill } from "./policy-assessment/l
 
     /*
      * The test rules in one cell, so the table still fits a laptop screen:
-     *   10 questions · 80% to pass
+     *   10 questions · target score 80%
      *   15 min                       (or "No time limit")
      *   3 attempts                   (or "Unlimited attempts")
      * The rules apply to every exam. The tooltip shows how the questions per
@@ -308,7 +308,7 @@ import { LEVELS, escapeHtml, levelLabel, levelPill } from "./policy-assessment/l
         const dot = `<span class="pa-meta__dot" aria-hidden="true">·</span>`;
 
         return `<span class="pa-stack pa-rules" title="${escapeHtml(shares)}">`
-            + `<strong>${plural(perTest, "question", "questions")} ${dot} ${escapeHtml(data.pass_mark)}% to pass</strong>`
+            + `<strong>${plural(perTest, "question", "questions")} ${dot} target score ${escapeHtml(data.pass_mark)}%</strong>`
             + `<small class="pa-rules__line${timed ? " is-timed" : ""}" data-rule="time">${iconSvg("timer")}${escapeHtml(time)}</small>`
             + `<small class="pa-rules__line" data-rule="attempts">${iconSvg("rotate-cw")}${escapeHtml(attempts)}</small>`
             + `</span>`;
@@ -337,7 +337,7 @@ import { LEVELS, escapeHtml, levelLabel, levelPill } from "./policy-assessment/l
             return `<span class="pa-bank-num pa-bank-num--muted" title="Not assigned to anyone yet">None</span>`;
         }
 
-        return `<span class="pa-stack" title="${plural(assigned, "member of staff", "staff")} assigned, ${passed} passed"><strong>${assigned} assigned</strong><small>${passed} passed</small></span>`;
+        return `<span class="pa-stack" title="${plural(assigned, "member of staff", "staff")} assigned, ${passed} target met"><strong>${assigned} assigned</strong><small>${passed} target met</small></span>`;
     };
 
     const statusLabel = (data) => {
@@ -456,11 +456,11 @@ import { LEVELS, escapeHtml, levelLabel, levelPill } from "./policy-assessment/l
                     download: true,
                 },
                 {
-                    /* rules_summary is the server's one-line wording ("10 questions · 80% to pass · 15 min"): what the export shows. */
+                    /* rules_summary is the server's one-line wording ("10 questions · target score 80% · 15 min"): what the export shows. */
                     title: "Test rules",
                     field: "rules_summary",
                     headerHozAlign: "left",
-                    headerTooltip: "Questions per test, pass mark, time limit and attempts, for every exam. Sorts by questions per test.",
+                    headerTooltip: "Questions per test, target score, time limit and attempts, for every exam. Sorts by questions per test.",
                     width: 200,
                     formatter: rulesFormatter,
                 },
@@ -471,7 +471,7 @@ import { LEVELS, escapeHtml, levelLabel, levelPill } from "./policy-assessment/l
                     download: true,
                 },
                 {
-                    title: "Pass mark (%)",
+                    title: "Target score (%)",
                     field: "pass_mark",
                     visible: false,
                     download: true,
@@ -496,7 +496,7 @@ import { LEVELS, escapeHtml, levelLabel, levelPill } from "./policy-assessment/l
                     headerHozAlign: "left",
                     width: 104,
                     formatter: assignedFormatter,
-                    accessorDownload: (value, data) => `${data.assigned} assigned / ${data.passed} passed`,
+                    accessorDownload: (value, data) => `${data.assigned} assigned / ${data.passed} target met`,
                 },
                 {
                     title: "Status",

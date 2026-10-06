@@ -535,13 +535,13 @@ class PolicyAssignmentController extends Controller
         $this->guard();
 
         if($assignment->status == PolicyAssignment::STATUS_PASSED):
-            return response()->json(['message' => 'This policy has already been passed.'], 422);
+            return response()->json(['message' => 'The target for this policy has already been met.'], 422);
         endif;
         if($assignment->maxAttemptsAllowed() === null):
             return response()->json(['message' => 'This policy allows unlimited attempts, so there is nothing to allow.'], 422);
         endif;
         if($assignment->status != PolicyAssignment::STATUS_FAILED):
-            return response()->json(['message' => 'A retake can only be allowed after a failed attempt.'], 422);
+            return response()->json(['message' => 'A retake can only be allowed after an attempt that did not meet the target.'], 422);
         endif;
 
         $service->grantExtraAttempt($assignment);

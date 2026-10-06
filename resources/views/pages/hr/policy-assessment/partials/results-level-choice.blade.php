@@ -20,7 +20,7 @@
 @endphp
 <fieldset class="pa-assign-level" aria-describedby="{{ $paLevelChoiceId }}_hint">
     <legend class="pa-assign-level__legend">Exam level <span>*</span></legend>
-    <small id="{{ $paLevelChoiceId }}_hint" class="pa-assign-hint">Every exam mixes Beginner, Intermediate and Expert questions in the pattern shown. Passing earns the level's badge.</small>
+    <small id="{{ $paLevelChoiceId }}_hint" class="pa-assign-hint">Every exam mixes Beginner, Intermediate and Expert questions in the pattern shown. Meeting the target earns the level's badge.</small>
     <div class="pa-assign-level__grid">
         @foreach(\App\Support\PolicyLevel::labels() as $paLevelKey => $paLevelLabel)
             @php

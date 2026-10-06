@@ -30,11 +30,11 @@ import { roleTagHtml } from "./policy-assessment/assign-role-picker";
     let reviewReturnModal = null;
 
     const STATUS_LABELS = {
-        passed: "Passed",
+        passed: "Target met",
         locked: "No attempts left",
         in_progress: "In progress",
         overdue: "Overdue",
-        failed: "Failed – retake available",
+        failed: "Target not met – retake available",
         pending: "Not started",
     };
 
@@ -76,6 +76,10 @@ import { roleTagHtml } from "./policy-assessment/assign-role-picker";
 
         return `<div class="pa-cell-stack"><strong>${escapeHtml(data.employee_name)}${tag}</strong>${meta ? `<small>${meta}</small>` : ""}</div>`;
     };
+
+    /* A long label over a narrow count column: the header shows it on two lines.
+       The column's plain `title` is still what the exports use. */
+    const twoLineTitle = (first, second) => () => `<span class="pa-th-2">${first}<br>${second}</span>`;
 
     const countFormatter = (tone) => (cell) => {
         const value = Number(cell.getValue() || 0);
@@ -168,8 +172,8 @@ import { roleTagHtml } from "./policy-assessment/assign-role-picker";
                 { title: "Department", field: "department", visible: false, download: true },
                 { title: "Job title", field: "job_title", visible: false, download: true },
                 { title: "Assigned", field: "assigned_count", hozAlign: "center", headerHozAlign: "center", width: 88, formatter: countFormatter("") },
-                { title: "Passed", field: "passed_count", hozAlign: "center", headerHozAlign: "center", width: 82, formatter: countFormatter("green") },
-                { title: "Failed", field: "failed_count", hozAlign: "center", headerHozAlign: "center", width: 82, formatter: failedFormatter },
+                { title: "Target met", titleFormatter: twoLineTitle("Target", "met"), field: "passed_count", hozAlign: "center", headerHozAlign: "center", width: 82, formatter: countFormatter("green") },
+                { title: "Target not met", titleFormatter: twoLineTitle("Target", "not met"), field: "failed_count", hozAlign: "center", headerHozAlign: "center", width: 82, formatter: failedFormatter },
                 { title: "No attempts left", field: "locked_count", visible: false, download: true },
                 { title: "In progress", field: "in_progress_count", visible: false, download: true },
                 { title: "Not started", field: "not_started_count", hozAlign: "center", headerHozAlign: "center", width: 104, formatter: countFormatter("") },
@@ -244,7 +248,7 @@ import { roleTagHtml } from "./policy-assessment/assign-role-picker";
     const summaryHtml = (summary) => {
         const chips = [
             ["", summary.assigned, "assigned"],
-            ["green", summary.passed, "passed"],
+            ["green", summary.passed, "target met"],
             ["red", summary.overdue, "overdue"],
             ["blue", summary.in_progress, "in progress"],
             ["amber", summary.locked, "no attempts left"],
@@ -280,7 +284,7 @@ import { roleTagHtml } from "./policy-assessment/assign-role-picker";
         ];
 
         if (assignment.passed_at) {
-            items.push(["Passed on", escapeHtml(assignment.passed_at)]);
+            items.push(["Target met on", escapeHtml(assignment.passed_at)]);
         }
 
         return `<dl class="pa-meta-list">${items.map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("")}</dl>`;

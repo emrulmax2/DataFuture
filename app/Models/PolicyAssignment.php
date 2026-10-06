@@ -30,11 +30,11 @@ class PolicyAssignment extends Model
     const STATUS_PASSED = 'passed';
 
     const DISPLAY_LABELS = [
-        'passed' => 'Passed',
+        'passed' => 'Target met',
         'locked' => 'No attempts left',
         'in_progress' => 'In progress',
         'overdue' => 'Overdue',
-        'failed' => 'Failed – retake available',
+        'failed' => 'Target not met – retake available',
         'pending' => 'Not started',
     ];
 

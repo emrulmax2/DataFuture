@@ -98,7 +98,7 @@
                                 </span>
                                 <h2>{{ $policy->title }}</h2>
                                 <div class="pa-policy-head__facts">
-                                    <span><i data-lucide="award"></i>Pass mark {{ (int) $policy->pass_mark }}%</span>
+                                    <span><i data-lucide="award"></i>Target score {{ (int) $policy->pass_mark }}%</span>
                                     <span><i data-lucide="list-checks"></i><span data-fact="per-test">{{ $paPerTest }} {{ $paPerTest == 1 ? 'question' : 'questions' }} per test</span></span>
                                     <span><i data-lucide="rotate-cw"></i>{{ $policy->max_attempts !== null ? $policy->max_attempts.' '.((int) $policy->max_attempts == 1 ? 'attempt' : 'attempts') : 'Unlimited attempts' }}</span>
                                     <span title="{{ $counts['time_limit_minutes'] !== null ? 'The clock starts when the member of staff starts the test; it is submitted automatically when the time runs out.' : 'Staff can take as long as they need.' }}"><i data-lucide="timer"></i><span data-fact="time-limit">{{ $paTimeText }}</span></span>

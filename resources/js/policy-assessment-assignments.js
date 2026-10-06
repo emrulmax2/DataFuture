@@ -40,11 +40,11 @@ import { attemptReviewHtml, attemptsTableHtml, formatScore } from "./policy-asse
     let reviewReturnModal = null;
 
     const STATUS_LABELS = {
-        passed: "Passed",
+        passed: "Target met",
         locked: "No attempts left",
         in_progress: "In progress",
         overdue: "Overdue",
-        failed: "Failed – retake available",
+        failed: "Target not met – retake available",
         pending: "Not started",
     };
 
@@ -675,7 +675,7 @@ import { attemptReviewHtml, attemptsTableHtml, formatScore } from "./policy-asse
         }
 
         if (assignment.passed_at) {
-            items.push(["Passed on", escapeHtml(assignment.passed_at)]);
+            items.push(["Target met on", escapeHtml(assignment.passed_at)]);
         }
 
         return `<dl class="pa-meta-list">${items.map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("")}</dl>`;

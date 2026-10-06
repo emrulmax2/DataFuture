@@ -2709,3 +2709,11 @@ body.employee-profile-body .pa-assign-level__legend {
         font-size: 12.5px;
     }
 }
+
+/* Two-line column header (Target met / Target not met on the Results table). */
+.pa-th-2 {
+    display: inline-block;
+    line-height: 1.2;
+    text-align: center;
+    vertical-align: middle;
+}

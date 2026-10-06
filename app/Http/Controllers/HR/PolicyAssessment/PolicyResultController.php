@@ -651,7 +651,7 @@ class PolicyResultController extends Controller
             'level_label' => PolicyLevel::label($level),
             'attempt_no' => (int) $attempt->attempt_no,
             'status' => $attempt->status,
-            'status_label' => ($submitted ? ($attempt->passed ? 'Passed' : 'Not passed') : 'In progress'),
+            'status_label' => ($submitted ? ($attempt->passed ? 'Target met' : 'Target not met') : 'In progress'),
             'started_at' => ($attempt->started_at ? $attempt->started_at->format('d M Y H:i') : ''),
             'submitted_at' => ($attempt->submitted_at ? $attempt->submitted_at->format('d M Y H:i') : ''),
             'score' => ($attempt->score !== null ? (float) $attempt->score : null),

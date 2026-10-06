@@ -134,7 +134,7 @@ export const attemptsTableHtml = (attempts, options = {}) => {
     const rows = attempts.map((attempt) => {
         const submitted = isSubmitted(attempt);
         const pill = submitted
-            ? `<span class="pa-state-pill pa-state-pill--${attempt.passed ? "passed" : "failed"}"><span></span>${attempt.passed ? "Passed" : "Not passed"}</span>`
+            ? `<span class="pa-state-pill pa-state-pill--${attempt.passed ? "passed" : "failed"}"><span></span>${attempt.passed ? "Target met" : "Target not met"}</span>`
             : '<span class="pa-state-pill pa-state-pill--in_progress"><span></span>In progress</span>';
         const score = submitted ? `${escapeHtml(formatScore(attempt.score))} <small>(${escapeHtml(attempt.correct_count)} of ${escapeHtml(attempt.total_questions)})</small>` : "—";
         const time = `${submitted && attempt.time_taken_label ? escapeHtml(attempt.time_taken_label) : "—"} <small>${escapeHtml(limitText(attempt))}</small>`;
@@ -178,7 +178,7 @@ export const attemptReviewHtml = (payload) => {
     const chips = [levelPill(payload.level || attempt.level)];
 
     if (submitted) {
-        chips.push(`<span class="pa-review-chip pa-review-chip--${attempt.passed ? "green" : "red"}">${attempt.passed ? "Passed" : "Not passed"}</span>`);
+        chips.push(`<span class="pa-review-chip pa-review-chip--${attempt.passed ? "green" : "red"}">${attempt.passed ? "Target met" : "Target not met"}</span>`);
 
         if (attempt.timed_out) {
             chips.push('<span class="pa-review-chip pa-review-chip--amber">Timed out</span>');
@@ -194,7 +194,7 @@ export const attemptReviewHtml = (payload) => {
         chips.push('<span class="pa-review-chip pa-review-chip--blue">In progress</span>');
     }
 
-    chips.push(`<span class="pa-review-chip">Pass mark <strong>${escapeHtml(attempt.pass_mark)}%</strong></span>`);
+    chips.push(`<span class="pa-review-chip">Target score <strong>${escapeHtml(attempt.pass_mark)}%</strong></span>`);
     chips.push(`<span class="pa-review-chip">Time limit <strong>${escapeHtml(attempt.time_limit_label || "Untimed")}</strong></span>`);
 
     if (submitted && attempt.time_taken_label) {

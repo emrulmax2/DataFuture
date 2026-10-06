@@ -34,8 +34,9 @@ use Illuminate\Validation\ValidationException;
  * Expert), so the same policy can have more than one card. The list opens
  * with the badges the member of staff holds — their own, and only live ones.
  *
- * An exam draws a fixed mix of question levels (PolicyLevel::quota()). The
- * pages state that mix as counts; they never say which level a question is.
+ * An exam draws a fixed mix of question levels (PolicyLevel::quota()). That
+ * mix is HR's business: these pages never state it, and never say which level
+ * a question is.
  *
  * A test is sat as a four-step wizard in its own exam shell:
  *   1 Briefing   take() with nothing in progress: the rules and the read
@@ -110,16 +111,9 @@ class MyPolicyAssessmentController extends Controller
             ->visibleToStaff()
             ->get();
 
-        /* Two lookups for the whole list rather than one per card: the mix of
-           each test in progress, and each test's last marked attempt (for the
-           link to its result, and to say when it ended on the clock). */
-        $openIds = [];
-        foreach($assignments as $assignment):
-            if($assignment->openAttempt):
-                $openIds[] = (int) $assignment->openAttempt->id;
-            endif;
-        endforeach;
-        $drawn = $this->drawnLevels($openIds);
+        /* One lookup for the whole list rather than one per card: each test's
+           last marked attempt (for the link to its result, and to say when it
+           ended on the clock). */
         $lastMarked = $this->lastMarkedAttempts($assignments->pluck('id')->all());
 
         $grouped = $assignments->groupBy(function ($assignment) {
@@ -143,11 +137,9 @@ class MyPolicyAssessmentController extends Controller
             $cards = [];
             $passed = 0;
             foreach($rows as $assignment):
-                $open = $assignment->openAttempt;
                 $card = $this->card(
                     $assignment,
                     (($number - 1) % self::COVER_TONES) + 1,
-                    ($open && isset($drawn[$open->id]) ? $drawn[$open->id] : null),
                     (isset($lastMarked[(int) $assignment->id]) ? $lastMarked[(int) $assignment->id] : null)
                 );
                 $cards[] = $card;
@@ -258,8 +250,7 @@ class MyPolicyAssessmentController extends Controller
            an attempt keeps the level its questions were drawn at. */
         $level = (PolicyLevel::isValid($open->level) ? $open->level : $this->examLevel($assignment));
         $questions = $this->questionsForStaff($open);
-        $drawn = $this->drawnLevels([(int) $open->id]);
-        $rules = $this->attemptRules($open, $level, (isset($drawn[$open->id]) ? $drawn[$open->id] : null));
+        $rules = $this->attemptRules($open);
         /* Exits already logged on this attempt (the page was reloaded part-way). */
         $activity = $this->service->tabActivity($open);
         $test = array_merge($rules, [
@@ -584,7 +575,7 @@ class MyPolicyAssessmentController extends Controller
         $examName = PolicyLevel::label($this->examLevel($assignment)).' exam';
 
         if($assignment->status == PolicyAssignment::STATUS_PASSED):
-            return 'You have already passed the '.$examName.' for "'.$policy->title.'". There is nothing more to do.';
+            return 'You have already met the target in the '.$examName.' for "'.$policy->title.'". There is nothing more to do.';
         endif;
 
         if(!$open && !$assignment->canAttempt()):
@@ -640,7 +631,7 @@ class MyPolicyAssessmentController extends Controller
     protected function briefing(PolicyAssignment $assignment){
         $policy = $assignment->policy;
         $level = $this->examLevel($assignment);
-        $rules = $this->examRules($policy, $level);
+        $rules = $this->examRules($policy);
         $test = array_merge($rules, [
             'assignment_id' => $assignment->id,
             'attempt_no' => (int) $assignment->attempts_count + 1,
@@ -725,57 +716,36 @@ class MyPolicyAssessmentController extends Controller
 
     /**
      * The rules of the next test on a policy, as the pages state them: how
-     * many questions, the pass mark, the time limit (NULL when untimed) and
-     * the mix of question levels — the counts PolicyLevel::quota() gives for
-     * this exam level, so the pattern is never written out by hand here.
+     * many questions, the pass mark and the time limit (NULL when untimed).
      */
-    protected function examRules(PolicyDocument $policy, string $level): array
+    protected function examRules(PolicyDocument $policy): array
     {
         $questions = max(1, (int) $policy->questions_per_attempt);
         $limit = ($policy->isTimed() ? (int) $policy->time_limit_minutes : null);
 
-        return $this->rules($questions, (int) $policy->pass_mark, $limit, PolicyLevel::quota($level, $questions));
+        return $this->rules($questions, (int) $policy->pass_mark, $limit);
     }
 
     /**
      * The rules a test in progress was started under — its own snapshot, not
-     * the policy as it stands now. $drawn is [question level => count] for
-     * the questions it holds (see drawnLevels()); NULL when that is not
-     * known, and then no mix is stated.
+     * the policy as it stands now.
      */
-    protected function attemptRules(PolicyAttempt $attempt, string $level, ?array $drawn): array
+    protected function attemptRules(PolicyAttempt $attempt): array
     {
         $limit = ($attempt->isTimed() && $attempt->time_limit_minutes !== null ? (int) $attempt->time_limit_minutes : null);
 
-        return $this->rules((int) $attempt->total_questions, (int) $attempt->pass_mark, $limit, ($drawn !== null ? $drawn : []));
+        return $this->rules((int) $attempt->total_questions, (int) $attempt->pass_mark, $limit);
     }
 
-    /**
-     * $counts is [question level => count]. 'pattern' keeps the levels that
-     * have questions, easiest first; 'pattern_text' is the same as one line
-     * ("7 Beginner · 2 Intermediate · 1 Expert").
-     */
-    protected function rules(int $questions, int $passMark, ?int $limit, array $counts): array
+    /** What a card and the Briefing state about a test. The mix of question levels is deliberately not part of it. */
+    protected function rules(int $questions, int $passMark, ?int $limit): array
     {
-        $pattern = [];
-        $parts = [];
-        foreach(PolicyLevel::all() as $level):
-            $count = (isset($counts[$level]) ? (int) $counts[$level] : 0);
-            if($count <= 0):
-                continue;
-            endif;
-            $pattern[] = ['level' => $level, 'label' => PolicyLevel::label($level), 'count' => $count];
-            $parts[] = $count.' '.PolicyLevel::label($level);
-        endforeach;
-
         return [
             'question_count' => $questions,
             'pass_mark' => $passMark,
             'time_limit' => $limit,
             'time_limit_label' => ($limit !== null ? $this->minutesLabel($limit) : null),
             'time_limit_words' => ($limit !== null ? $this->minutesLabel($limit, true) : null),
-            'pattern' => $pattern,
-            'pattern_text' => implode(' · ', $parts),
         ];
     }
 
@@ -795,38 +765,6 @@ class MyPolicyAssessmentController extends Controller
         endif;
 
         return implode(' ', $parts);
-    }
-
-    /**
-     * How many questions of each level these attempts hold:
-     * [attempt id => [question level => count]], one query for the lot.
-     * An attempt drawn before question levels were recorded is left out, so
-     * nothing is claimed about its mix. Only ever used as totals — the pages
-     * do not say which level a question is.
-     */
-    protected function drawnLevels(array $attemptIds): array
-    {
-        if(empty($attemptIds)):
-            return [];
-        endif;
-
-        $rows = PolicyAttemptAnswer::whereIn('policy_attempt_id', $attemptIds)
-            ->selectRaw('policy_attempt_id, question_level, COUNT(*) as aggregate')
-            ->groupBy('policy_attempt_id', 'question_level')
-            ->get();
-
-        $drawn = [];
-        $unknown = [];
-        foreach($rows as $row):
-            $attemptId = (int) $row->policy_attempt_id;
-            if(!PolicyLevel::isValid($row->question_level)):
-                $unknown[$attemptId] = true;
-                continue;
-            endif;
-            $drawn[$attemptId][(string) $row->question_level] = (int) $row->aggregate;
-        endforeach;
-
-        return array_diff_key($drawn, $unknown);
     }
 
     /**
@@ -995,11 +933,10 @@ class MyPolicyAssessmentController extends Controller
     }
 
     /**
-     * Everything a policy card on the list shows. $drawn is the mix of the
-     * test in progress, when there is one and it is known (see drawnLevels());
-     * $lastMarked is the last marked attempt, if any (see lastMarkedAttempts()).
+     * Everything a policy card on the list shows. $lastMarked is the last
+     * marked attempt, if any (see lastMarkedAttempts()).
      */
-    protected function card(PolicyAssignment $assignment, int $tone, ?array $drawn = null, ?array $lastMarked = null): array
+    protected function card(PolicyAssignment $assignment, int $tone, ?array $lastMarked = null): array
     {
         $policy = $assignment->policy;
         $ranOut = ($lastMarked !== null && $lastMarked['timed_out']);
@@ -1045,8 +982,7 @@ class MyPolicyAssessmentController extends Controller
         $clock = null;
         if($status != 'passed'):
             if($open):
-                $openLevel = (PolicyLevel::isValid($open->level) ? $open->level : $level);
-                $rules = $this->attemptRules($open, $openLevel, $drawn);
+                $rules = $this->attemptRules($open);
                 if($open->isTimed()):
                     $left = (int) $open->secondsRemaining();
                     $clock = ($left > 0
@@ -1054,7 +990,7 @@ class MyPolicyAssessmentController extends Controller
                         : 'Time is up — open the test to finish it');
                 endif;
             else:
-                $rules = $this->examRules($policy, $level);
+                $rules = $this->examRules($policy);
             endif;
         endif;
 

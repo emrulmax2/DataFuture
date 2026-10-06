@@ -59,7 +59,7 @@
     </p>
 
     <div class="ss-modal-field">
-        <label for="{{ $prefix }}_policy_pass">Pass mark (%) <span>*</span></label>
+        <label for="{{ $prefix }}_policy_pass">Target score (%) <span>*</span></label>
         <input id="{{ $prefix }}_policy_pass" type="number" min="1" max="100" step="1" name="pass_mark" class="ss-modal-input pass_mark" value="80">
         <div class="acc__input-error error-pass_mark"></div>
     </div>

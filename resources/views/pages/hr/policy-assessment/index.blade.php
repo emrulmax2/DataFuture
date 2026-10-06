@@ -17,8 +17,8 @@
         $paKpiCards = [
             ['icon' => 'users', 'label' => 'Staff with assignments', 'value' => number_format($kpis['staff']), 'hint' => 'Current staff only', 'tone' => 'navy'],
             ['icon' => 'clipboard-list', 'label' => 'Total assignments', 'value' => number_format($kpis['total']), 'hint' => 'Live policies only', 'tone' => 'navy'],
-            ['icon' => 'badge-check', 'label' => 'Passed', 'value' => $kpis['passed_percent'].'%', 'hint' => number_format($kpis['passed']).' of '.number_format($kpis['total']).' passed', 'tone' => 'green'],
-            ['icon' => 'alarm-clock', 'label' => 'Overdue', 'value' => number_format($kpis['overdue']), 'hint' => 'Past due and not passed', 'tone' => ($kpis['overdue'] > 0 ? 'red' : 'muted')],
+            ['icon' => 'badge-check', 'label' => 'Target met', 'value' => $kpis['passed_percent'].'%', 'hint' => number_format($kpis['passed']).' of '.number_format($kpis['total']).' met the target', 'tone' => 'green'],
+            ['icon' => 'alarm-clock', 'label' => 'Overdue', 'value' => number_format($kpis['overdue']), 'hint' => 'Past due, target not met', 'tone' => ($kpis['overdue'] > 0 ? 'red' : 'muted')],
             ['icon' => 'timer', 'label' => 'In progress', 'value' => number_format($kpis['in_progress']), 'hint' => 'Test started, not submitted', 'tone' => 'blue'],
             ['icon' => 'lock', 'label' => 'No attempts left', 'value' => number_format($kpis['locked']), 'hint' => 'Need HR to allow a retake', 'tone' => ($kpis['locked'] > 0 ? 'amber' : 'muted')],
         ];
@@ -51,7 +51,7 @@
                     </span>
                     <div>
                         <h1>{{ $subtitle }}</h1>
-                        <p>How staff are getting on with reading and passing the college policies.</p>
+                        <p>How staff are getting on with reading the college policies and meeting their targets.</p>
                     </div>
                 </div>
                 <a href="{{ route('hr.portal') }}" class="ss-back-btn">
@@ -109,7 +109,7 @@
                         <div class="ss-table-card__header">
                             <div>
                                 <h2>Completion by category</h2>
-                                <p class="pa-card-subtitle">Passed assignments out of all assignments, current staff only.</p>
+                                <p class="pa-card-subtitle">Assignments with the target met, out of all assignments, current staff only.</p>
                             </div>
                         </div>
                         <div class="pa-category-bars">
@@ -124,7 +124,7 @@
                                         </strong>
                                         <span>
                                             @if($paBar['assigned'] > 0)
-                                                {{ number_format($paBar['passed']) }} of {{ number_format($paBar['assigned']) }} passed
+                                                {{ number_format($paBar['passed']) }} of {{ number_format($paBar['assigned']) }} target met
                                             @else
                                                 Not assigned yet
                                             @endif

@@ -20,7 +20,7 @@
             </span>
             <div class="myhr-policy__header-text">
                 <h2>Policy Assessments</h2>
-                <p>Read each college policy, confirm you have understood it, then pass a short test.</p>
+                <p>Read each college policy, confirm you have understood it, then meet the target score in a short test.</p>
             </div>
         </header>
 
@@ -55,9 +55,9 @@
                     <span class="myhr-policy-summary__label">Your progress</span>
                     <p class="myhr-policy-summary__figure">
                         <strong>{{ $summary['passed'] }}</strong>
-                        <span>of {{ $summary['assigned'] }} {{ $summary['assigned'] == 1 ? 'test' : 'tests' }} passed</span>
+                        <span>of {{ $summary['assigned'] }} {{ $summary['assigned'] == 1 ? 'test' : 'tests' }} with the target met</span>
                     </p>
-                    <div class="myhr-policy-progress" role="progressbar" aria-label="Tests passed" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $summary['percent'] }}">
+                    <div class="myhr-policy-progress" role="progressbar" aria-label="Tests with the target met" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $summary['percent'] }}">
                         <span style="width: {{ $summary['percent'] }}%;"></span>
                     </div>
                     <ul class="myhr-policy-summary__stats">
@@ -81,11 +81,11 @@
                     <ol class="myhr-policy-steps">
                         <li><span>1</span>Read the policy</li>
                         <li><span>2</span>Confirm you have understood it</li>
-                        <li><span>3</span>Pass the short test to earn a badge</li>
+                        <li><span>3</span>Meet the target score in the short test to earn a badge</li>
                     </ol>
                     <p class="myhr-policy-howto__note">
                         <i data-lucide="eye-off"></i>
-                        After a test you see your score and whether you passed &mdash; not the answers. If you do not pass, read the policy again and retake the test.
+                        After a test you see your score and whether you met the target &mdash; not the answers. If you do not meet the target, read the policy again and retake the test.
                     </p>
                     @if($summary['timed'] > 0)
                         <p class="myhr-policy-howto__note">
@@ -106,7 +106,7 @@
                                 @if($section['passed'] == $section['total'])
                                     <i data-lucide="check"></i>
                                 @endif
-                                {{ $section['passed'] }} of {{ $section['total'] }} passed
+                                {{ $section['passed'] }} of {{ $section['total'] }} target met
                             </span>
                             <i data-lucide="chevron-down" class="myhr-policy-section__chevron"></i>
                         </summary>
