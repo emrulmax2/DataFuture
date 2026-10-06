@@ -24,15 +24,23 @@ use Symfony\Component\HttpFoundation\Response;
  * It lives here rather than in the login controllers because there are three
  * ways in (password, Google, Microsoft) and all of them should behave alike.
  *
- * The question is settled once per sign-in for everyone who has nothing to
- * set up, so it costs them nothing afterwards. That also means switching PIN
- * on for somebody who is signed in takes effect when they next sign in, not
- * in the middle of what they are doing.
+ * Nothing is remembered about somebody who has no PIN to set up: the question
+ * is asked afresh on every page, so switching PIN on for them takes effect on
+ * the very next page they open. (An earlier version remembered "nothing to do"
+ * in the session. Signing out here does not clear the session, so signing out
+ * and in again after being given the permission changed nothing.) Only "has a
+ * PIN" is remembered, because that does not change back.
  */
 class PromptPinSetup
 {
-    /** Holds the user id this session has already been settled for. */
-    const SETTLED_KEY = 'pin_setup_settled_for';
+    /**
+     * Holds the id of the user this session knows to have a PIN already.
+     *
+     * Not 'pin_setup_settled_for': sessions written by the earlier version
+     * carry that key with the old meaning ("nothing to set up"), and reading
+     * it now would skip the very people this is for.
+     */
+    const SETTLED_KEY = 'pin_setup_has_pin_for';
 
     /** Where they were first heading when they were sent to set a PIN. */
     const RETURN_KEY = 'pin_setup_return_to';
@@ -73,11 +81,14 @@ class PromptPinSetup
             return $next($request);
         }
 
-        // Super admins hold every privilege without anybody switching it on,
-        // and are never held up: they set a PIN from the menu when they want one.
-        if ($user->isSuperAdmin() || !$this->needsSetup($user)) {
-            $request->session()->put(self::SETTLED_KEY, $user->id);
+        $state = $this->state($user);
 
+        // Has a PIN (or the check failed): nothing more to ask in this session.
+        if ($state === 'done') {
+            $request->session()->put(self::SETTLED_KEY, $user->id);
+        }
+
+        if ($state !== 'due') {
             return $next($request);
         }
 
@@ -95,20 +106,29 @@ class PromptPinSetup
     }
 
     /**
-     * PIN enabled, and no PIN yet?
+     * Where this user stands:
+     *   none  PIN is not switched on for them - ask again on the next page
+     *   due   switched on, and no PIN yet
+     *   done  they have a PIN
      *
-     * If that cannot be worked out, the answer is no. A fault here must never
-     * come between somebody and every page of the application.
+     * If it cannot be worked out the answer is "done", for the rest of the
+     * session. A fault here must never come between somebody and every page
+     * of the application.
      */
-    private function needsSetup($user): bool
+    private function state($user): string
     {
         try {
-            return StaffDocumentVaultService::canUse($user)
-                && !app(StaffDocumentVaultService::class)->hasPin($user);
+            $vault = app(StaffDocumentVaultService::class);
+
+            if (!$vault->switchedOnFor($user)) {
+                return 'none';
+            }
+
+            return $vault->hasPin($user) ? 'done' : 'due';
         } catch (\Throwable $e) {
             Log::error('PIN set-up check failed for user '.$user->id.': '.$e->getMessage());
 
-            return false;
+            return 'done';
         }
     }
 
