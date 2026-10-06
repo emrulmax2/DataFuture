@@ -1691,18 +1691,6 @@
     stroke-width: 2.2;
 }
 
-.site-settings-redesign-body .pa-badge--ai {
-    border-color: #ddd3f5;
-    background: #f4f0fd;
-    color: #5b3fb0;
-}
-
-.site-settings-redesign-body .pa-badge--manual {
-    border-color: #d6e0ee;
-    background: #eff4fa;
-    color: #1c5097;
-}
-
 .site-settings-redesign-body .pa-badge--active {
     border-color: #b9e4db;
     background: #e5f7f3;

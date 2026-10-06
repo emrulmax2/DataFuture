@@ -23,8 +23,6 @@
     $paSvg = function ($inner, $colour, $stroke = 2.2) {
         return 'data:image/svg+xml;base64,'.base64_encode('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="'.$colour.'" stroke-width="'.$stroke.'" stroke-linecap="round" stroke-linejoin="round">'.$inner.'</g></svg>');
     };
-    $paIconAi = $paSvg('<path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>', '#5b3fb0');
-    $paIconManual = $paSvg('<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>', '#1c5097');
     $paIconActive = $paSvg('<path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/>', '#0f8278');
     $paIconIssue = $paSvg('<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>', '#c23b3b');
     $paIconTick = $paSvg('<polyline points="20 6 9 17 4 12"/>', '#0f8278', 2.9);
@@ -385,18 +383,6 @@
             color: #ffffff;
         }
 
-        .pill-ai {
-            border-color: #ddd3f5;
-            background: #f4f0fd;
-            color: #5b3fb0;
-        }
-
-        .pill-manual {
-            border-color: #d6e0ee;
-            background: #eff4fa;
-            color: #1c5097;
-        }
-
         .pill-active {
             border-color: #b9e4db;
             background: #e5f7f3;
@@ -718,11 +704,6 @@
                 <div class="card-in">
                     <div class="head">
                         <span class="num">Q{{ $paCard['sl'] }}</span><span class="pill pill-level" style="background: {{ $paCardLevel['soft'] }}; border-color: {{ $paCardLevel['edge'] }}; color: {{ $paCardLevel['ink'] }};"><span class="dot" style="background: {{ $paCardLevel['main'] }};"></span>{{ $paCard['level_label'] }}</span>
-                        @if($paCard['origin'] === \App\Models\PolicyQuestion::ORIGIN_AI_DRAFT)
-                            <span class="pill pill-ai"><img src="{{ $paIconAi }}" alt="">AI draft</span>
-                        @else
-                            <span class="pill pill-manual"><img src="{{ $paIconManual }}" alt="">Manual</span>
-                        @endif
                         @if($paCard['is_active'] == 1)
                             <span class="pill pill-active"><img src="{{ $paIconActive }}" alt="">Active</span>
                         @else

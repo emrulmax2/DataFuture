@@ -393,10 +393,6 @@ import { LEVELS, badgeSvg, escapeHtml, isLevel, levelLabel, levelPill } from "./
         const state = archived ? "is-archived" : active ? "is-active" : "is-draft";
         const badges = [levelPill(data.level)];
 
-        badges.push(data.origin === "ai_draft"
-            ? `<span class="pa-badge pa-badge--ai">${iconSvg("sparkles")}AI draft</span>`
-            : `<span class="pa-badge pa-badge--manual">${iconSvg("user")}Manual</span>`);
-
         if (archived) {
             badges.push(`<span class="pa-badge pa-badge--archived">Archived</span>`);
         } else if (active) {
@@ -526,7 +522,6 @@ import { LEVELS, badgeSvg, escapeHtml, isLevel, levelLabel, levelPill } from "./
                 },
                 { title: "Level", field: "level_label", visible: false, download: true },
                 { title: "Status", field: "status_label", visible: false, download: true },
-                { title: "Origin", field: "origin_label", visible: false, download: true },
                 { title: "Options", field: "options_plain", visible: false, download: true },
                 { title: "Correct answer", field: "correct_text", visible: false, download: true },
                 { title: "Why this answer", field: "explanation", visible: false, download: true },
@@ -718,7 +713,7 @@ import { LEVELS, badgeSvg, escapeHtml, isLevel, levelLabel, levelPill } from "./
             const dataset = response.data || {};
 
             resetQuestionForm();
-            $("#questionModalTitle").text(dataset.origin === "ai_draft" ? "Edit question (AI draft)" : "Edit question");
+            $("#questionModalTitle").text("Edit question");
             $form.find('textarea[name="question"]').val(dataset.question || "");
             $form.find('textarea[name="explanation"]').val(dataset.explanation || "");
             $form.find('textarea[name="source_excerpt"]').val(dataset.source_excerpt || "");
