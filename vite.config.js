@@ -493,6 +493,9 @@ export default defineConfig({
                 'resources/js/employee-policy-assessment.js',
                 'resources/js/user-policy-assessment.js',
 
+                'resources/css/staff-document-pin.css',
+                'resources/js/user-document-pin.js',
+
             ],
             refresh: true,
         }),

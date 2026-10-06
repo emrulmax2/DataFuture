@@ -76,6 +76,13 @@
                                 <i data-lucide="user"></i> Profile
                             </a>
                         </li>
+                        @if(\App\Services\StaffDocumentVaultService::showsMenu())
+                            <li>
+                                <a href="{{ route('user.account.document.pin') }}" class="dropdown-item">
+                                    <i data-lucide="key-round"></i> PIN
+                                </a>
+                            </li>
+                        @endif
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <a href="{{ route('logout') }}" class="dropdown-item">

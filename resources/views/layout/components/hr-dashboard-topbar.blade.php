@@ -108,6 +108,11 @@
                     <a href="{{ route('user.account') }}" class="dropdown-item">
                         <i data-lucide="user"></i> Profile
                     </a>
+                    @if(\App\Services\StaffDocumentVaultService::showsMenu())
+                        <a href="{{ route('user.account.document.pin') }}" class="dropdown-item">
+                            <i data-lucide="key-round"></i> PIN
+                        </a>
+                    @endif
                     <a href="{{ route('logout') }}" class="dropdown-item">
                         <i data-lucide="log-out"></i> Logout
                     </a>

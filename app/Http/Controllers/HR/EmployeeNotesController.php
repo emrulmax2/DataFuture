@@ -8,6 +8,7 @@ use App\Models\Employee;
 use App\Models\EmployeeDocuments;
 use App\Models\User;
 use App\Models\Employment;
+use App\Services\StaffDocumentVaultService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -290,7 +291,23 @@ class EmployeeNotesController extends Controller
         $row_id = $request->row_id;
 
         $empDoc = EmployeeDocuments::find($row_id);
+        if(!$empDoc):
+            return response()->json(['message' => 'Document not found.'], 404);
+        endif;
+
+        // Encrypted documents are only ever opened from the Documents tab, with a PIN.
+        if($empDoc->is_encrypted == 1):
+            return response()->json(['message' => 'This document is encrypted. Open it from the Documents tab with your document PIN.'], 423);
+        endif;
+
         $tmpURL = Storage::disk('s3')->temporaryUrl('public/employees/notes/'.$empDoc->current_file_name, now()->addMinutes(5));
+
+        // A note's attachment is one of the employee's documents, so opening
+        // it goes on the same record as the Documents tab: no trail, no document.
+        if(!app(StaffDocumentVaultService::class)->log(StaffDocumentVaultService::EVENT_DOWNLOAD, $empDoc)):
+            return response()->json(['message' => StaffDocumentVaultService::NOT_RECORDED], 500);
+        endif;
+
         return response()->json(['res' => $tmpURL], 200);
     }
 }

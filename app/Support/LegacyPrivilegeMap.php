@@ -100,6 +100,9 @@ class LegacyPrivilegeMap
         // Policy assessments: question bank, assignments and results — see
         // PolicyAssessmentService::canManage().
         'hr_portal.policy_assessment_manage' => 'hr_portal_policy_assessment_manage',
+        // Encrypted staff documents: may hold a document PIN and, with it,
+        // open them — see StaffDocumentVaultService::canUse().
+        'hr_portal.staff_document_pin' => 'hr_portal_staff_document_pin',
 
         // Applicant portal
         'applicant_live_portal.login_as_applicant' => 'applicant_portal_login_as',

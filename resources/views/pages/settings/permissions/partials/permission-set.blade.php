@@ -464,6 +464,10 @@
                         <input id="hr-policy-assessment-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][hr_portal_policy_assessment_manage]" {{ isset($values['hr_portal_policy_assessment_manage']) && $values['hr_portal_policy_assessment_manage'] ? 'checked' : '' }}>
                         <label for="hr-policy-assessment-{{ $uid }}" class="ml-2 font-medium">Policy Assessments (manage question bank, assign, view results)</label>
                     </div>
+                    <div class="flex items-center">
+                        <input id="hr-staff-document-pin-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][hr_portal_staff_document_pin]" {{ isset($values['hr_portal_staff_document_pin']) && $values['hr_portal_staff_document_pin'] ? 'checked' : '' }}>
+                        <label for="hr-staff-document-pin-{{ $uid }}" class="ml-2 font-medium">PIN Enabled</label>
+                    </div>
                 </div>
             </div>
         </div>

@@ -107,6 +107,9 @@ return [
         // A member of staff's own policy assessments (read, take, submit). Each
         // action is scoped to the signed-in employee inside the controller.
         'user.account.policy*',
+        // A member of staff's own document PIN. The controller checks the
+        // "PIN Enabled" privilege and refuses impersonated sessions.
+        'user.account.document.pin*',
     ],
 
     /*

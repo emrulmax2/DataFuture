@@ -84,6 +84,9 @@
                         <div class="ep-account__head-mail">{{ optional($epUser)->email }}</div>
                     </div>
                     <a href="{{ route('user.account') }}" class="ep-nav__dropitem"><i data-lucide="user" class="w-[14px] h-[14px]"></i><span>Profile</span></a>
+                    @if(\App\Services\StaffDocumentVaultService::showsMenu())
+                        <a href="{{ route('user.account.document.pin') }}" class="ep-nav__dropitem"><i data-lucide="key-round" class="w-[14px] h-[14px]"></i><span>PIN</span></a>
+                    @endif
                     <a href="{{ route('logout') }}" class="ep-nav__dropitem"><i data-lucide="toggle-right" class="w-[14px] h-[14px]"></i><span>Logout</span></a>
                 </div>
             </div>

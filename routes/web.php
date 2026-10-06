@@ -360,6 +360,7 @@ use App\Http\Controllers\StudentApplicationPrintController;
 use App\Http\Controllers\StudentDocumentRequestFormController;
 use App\Http\Controllers\StudentOrderController;
 use App\Http\Controllers\StudentVisitController;
+use App\Http\Controllers\User\UserDocumentPinController;
 use App\Http\Controllers\User\UserEmailSignatureController;
 use App\Http\Controllers\User\UserHolidayController;
 use App\Http\Controllers\User\UserProfileController;
@@ -1522,6 +1523,14 @@ Route::middleware('auth')->group(function() {
         Route::post('my-account/email-signature/reset', 'reset')->name('user.account.signature.reset');
     });
 
+    Route::controller(UserDocumentPinController::class)->group(function() {
+        Route::get('my-account/document-pin', 'index')->name('user.account.document.pin');
+        Route::post('my-account/document-pin/setup', 'setup')->name('user.account.document.pin.setup');
+        Route::post('my-account/document-pin/change', 'change')->name('user.account.document.pin.change');
+        Route::post('my-account/document-pin/reset/send-code', 'sendResetCode')->name('user.account.document.pin.reset.code');
+        Route::post('my-account/document-pin/reset', 'resetWithCode')->name('user.account.document.pin.reset');
+    });
+
     Route::controller(UserHolidayController::class)->group(function(){
         Route::get('my-account/holidays', 'index')->name('user.account.holiday'); 
         Route::post('my-account/holidays/get-ajax-leave-statistics', 'employeeAjaxLeaveStatistics')->name('user.account.holiday.ajax.statistics'); 
@@ -1659,6 +1668,8 @@ Route::middleware('auth')->group(function() {
         Route::post('employee-profile/documents/uploads-restore', 'restore')->name('employee.documents.restore.uploads');
         
         Route::post('employee-profile/documents/download-url', 'downloadUrl')->name('employee.documents.download.url');
+        Route::post('employee-profile/documents/open-encrypted', 'openEncrypted')->name('employee.documents.open.encrypted');
+        Route::get('employee-profile/documents-upload/access-log-list', 'accessLogList')->name('employee.documents.access.log.list');
         Route::post('employee-profile/documents/sent-mail', 'employeeSentMail')->name('employee.documents.sent.mail'); 
         Route::post('employee-profile/documents/get-template', 'employeeGetTemplate')->name('employee.documents.get.template'); 
     });

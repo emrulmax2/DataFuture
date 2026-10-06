@@ -158,6 +158,16 @@
                                 </span>
                                 <i data-lucide="chevron-right"></i>
                             </a>
+                            @if(\App\Services\StaffDocumentVaultService::showsMenu())
+                                <a href="{{ route('user.account.document.pin') }}">
+                                    <span><i data-lucide="key-round"></i></span>
+                                    <span>
+                                        <strong>PIN</strong>
+                                        <small>For encrypted staff documents</small>
+                                    </span>
+                                    <i data-lucide="chevron-right"></i>
+                                </a>
+                            @endif
                             <a href="{{ $logoutUrl }}" class="ss-user-menu__danger">
                                 <span><i data-lucide="log-out"></i></span>
                                 <span>

@@ -70,10 +70,37 @@ const buildCreatedByCell = (name, date) => {
     `;
 };
 
+const escapeHtml = (value) => {
+    return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+};
+
+const buildEncryptedChip = () => {
+    return '<span class="ep-doc-lock-chip" title="Stored encrypted. Opens with a document PIN."><i data-lucide="lock" class="w-3 h-3"></i>Encrypted</span>';
+};
+
+const buildDocumentNameCell = (cellData) => {
+    const name = `<span class="ep-doc-namecell__name">${escapeHtml(cellData.display_file_name)}</span>`;
+
+    return `<div class="ep-doc-namecell">${name}${cellData.is_encrypted == 1 ? buildEncryptedChip() : ""}</div>`;
+};
+
 const buildActionButtons = (cellData, includeNote = false) => {
     const actions = [];
 
-    if (cellData.url !== "") {
+    if (cellData.url !== "" && cellData.is_encrypted == 1) {
+        // No storage link exists for an encrypted document: it is asked for
+        // with a PIN and comes back through the app.
+        actions.push(`
+            <a data-id="${cellData.id}" data-name="${escapeHtml(cellData.display_file_name)}" data-viewable="${cellData.viewable == 1 ? 1 : 0}" href="javascript:void(0);" class="openEncryptedDoc ep-doc-action-btn ep-doc-action-btn--locked" title="Open with document PIN">
+                <i data-lucide="lock-keyhole" class="w-4 h-4"></i>
+            </a>
+        `);
+    } else if (cellData.url !== "") {
         const noteAttr = includeNote ? ` data-note="${cellData.hasNote}"` : "";
         actions.push(`
             <a${noteAttr} data-id="${cellData.id}" target="_blank" href="javascript:void(0);" class="downloadDoc ep-doc-action-btn ep-doc-action-btn--download" title="Download">
@@ -140,6 +167,9 @@ var employeeDocumentListTable = (function () {
                     title: "Name",
                     field: "display_file_name",
                     headerHozAlign: "left",
+                    formatter(cell) {
+                        return buildDocumentNameCell(cell.getData());
+                    }
                 },
                 {
                     title: "Checked",
@@ -345,8 +375,163 @@ var employeeCommunicationDocumentListTable = (function () {
     };
 })();
 
+// The audit trail: every open of this employee's documents, and what happened
+// to their document PIN. Read-only, newest first.
+var employeeDocumentAccessLogTable = (function () {
+    let tableContent = null;
+    let resizeBound = false;
+    let currentTotalRows = 0;
+
+    var _tableGen = function () {
+        let employeeId = $("#employeeDocumentAccessLogTable").attr("data-employee") !== "" ? $("#employeeDocumentAccessLogTable").attr("data-employee") : "0";
+        let event = $("#event-EAL").val() !== "" ? $("#event-EAL").val() : "";
+
+        if (tableContent && typeof tableContent.destroy === "function") {
+            tableContent.destroy();
+        }
+
+        tableContent = new Tabulator("#employeeDocumentAccessLogTable", {
+            ajaxURL: route("employee.documents.access.log.list"),
+            ajaxParams: { employeeId: employeeId, event: event },
+            ajaxFiltering: true,
+            printAsHtml: true,
+            printStyled: true,
+            pagination: "remote",
+            paginationSize: 10,
+            layout: "fitColumns",
+            responsiveLayout: "collapse",
+            placeholder: "Nothing has been recorded yet",
+            ajaxResponse(url, params, response) {
+                currentTotalRows = Number(response.total_rows || 0);
+                return response;
+            },
+            columns: [
+                {
+                    title: "When",
+                    field: "date",
+                    headerSort: false,
+                    headerHozAlign: "left",
+                    width: 190,
+                    formatter(cell) {
+                        return buildCreatedByCell(escapeHtml(cell.getData().date), escapeHtml(cell.getData().time));
+                    }
+                },
+                {
+                    title: "Time",
+                    field: "time",
+                    visible: false,
+                    download: true,
+                },
+                {
+                    title: "Event",
+                    field: "event",
+                    headerSort: false,
+                    headerHozAlign: "left",
+                    width: 270,
+                    formatter(cell) {
+                        return `<span class="ep-doc-pill ep-doc-pill--${escapeHtml(cell.getData().tone)}">${escapeHtml(cell.getData().event)}</span>`;
+                    }
+                },
+                {
+                    title: "Document",
+                    field: "document",
+                    headerSort: false,
+                    headerHozAlign: "left",
+                    formatter(cell) {
+                        const row = cell.getData();
+                        if (row.document === "") {
+                            return '<span class="ep-doc-usercell__meta">Document PIN</span>';
+                        }
+
+                        return `<div class="ep-doc-namecell"><span class="ep-doc-namecell__name">${escapeHtml(row.document)}</span>${row.is_encrypted == 1 ? buildEncryptedChip() : ""}</div>`;
+                    }
+                },
+                {
+                    title: "By",
+                    field: "user",
+                    headerSort: false,
+                    headerHozAlign: "left",
+                    widthGrow: 1.2,
+                    // `user` is who really did it. When they were signed in as
+                    // somebody else at the time, that account is named below.
+                    formatter(cell) {
+                        const row = cell.getData();
+                        const who = `<div class="ep-doc-usercell__name">${escapeHtml(row.user)}</div>`;
+                        const through = row.signed_in_as !== ""
+                            ? `<div class="ep-doc-impersonated"><i data-lucide="user-cog" class="w-3 h-3"></i>Through impersonation, signed in as ${escapeHtml(row.signed_in_as)}</div>`
+                            : "";
+
+                        return `<div class="ep-doc-usercell">${who}${through}</div>`;
+                    }
+                },
+                {
+                    title: "Signed In As (Impersonated)",
+                    field: "signed_in_as",
+                    visible: false,
+                    download: true,
+                },
+                {
+                    title: "IP Address",
+                    field: "ip_address",
+                    headerSort: false,
+                    headerHozAlign: "left",
+                    width: 150,
+                },
+            ],
+            renderComplete() {
+                renderLucideIcons();
+                updateTableFooterMeta(this, currentTotalRows, "record");
+            }
+        });
+
+        if (!resizeBound) {
+            window.addEventListener("resize", () => {
+                if (tableContent) {
+                    tableContent.redraw();
+                    renderLucideIcons();
+                }
+            });
+            resizeBound = true;
+        }
+
+        $("#tabulator-export-csv-EAL").off("click").on("click", function () {
+            tableContent.download("csv", "employee-document-access-log.csv");
+        });
+
+        $("#tabulator-export-xlsx-EAL").off("click").on("click", function () {
+            window.XLSX = xlsx;
+            tableContent.download("xlsx", "employee-document-access-log.xlsx", {
+                sheetName: "Document Access Log",
+            });
+        });
+
+        $("#tabulator-print-EAL").off("click").on("click", function () {
+            tableContent.print();
+        });
+    };
+
+    return {
+        init: function () {
+            _tableGen();
+        },
+    };
+})();
+
 (function () {
     renderLucideIcons();
+
+    if ($("#employeeDocumentAccessLogTable").length) {
+        employeeDocumentAccessLogTable.init();
+
+        $("#tabulator-html-filter-go-EAL").on("click", function () {
+            employeeDocumentAccessLogTable.init();
+        });
+
+        $("#tabulator-html-filter-reset-EAL").on("click", function () {
+            $("#event-EAL").val("");
+            employeeDocumentAccessLogTable.init();
+        });
+    }
 
     if ($("#employeeDocumentListTable").length) {
         employeeDocumentListTable.init();
@@ -479,7 +664,8 @@ var employeeCommunicationDocumentListTable = (function () {
         $('#uploadEmployeeDocumentModal input[name="hard_copy_check"]').val("0");
         uploadDocNameInput.val("");
         uploadDocTypeDisplay.text("Selected document type");
-        $('#uploadEmployeeDocumentModal input[name="hard_copy_check_status"][value="0"]').prop("checked", true);
+        $('#uploadEmployeeDocumentModal input[name="is_encrypted"]').val("0");
+        $("#uploadHardCopyToggle, #uploadEncryptToggle").prop("checked", false);
         document.querySelector("#uploadEmpDocBtn").removeAttribute("disabled");
         document.querySelector("#uploadEmpDocBtn svg").style.cssText = "display: none;";
 
@@ -598,21 +784,10 @@ var employeeCommunicationDocumentListTable = (function () {
             document.querySelector("#uploadEmpDocBtn").setAttribute("disabled", "disabled");
             document.querySelector("#uploadEmpDocBtn svg").style.cssText = "display: inline-block;";
 
-            if ($('#uploadEmployeeDocumentModal [name="hard_copy_check_status"]:checked').length > 0) {
-                let hardCopyChecked = $('#uploadEmployeeDocumentModal [name="hard_copy_check_status"]:checked').val();
-                $('#uploadEmployeeDocumentModal input[name="hard_copy_check"]').val(hardCopyChecked);
-                drzn1.processQueue();
-            } else {
-                $("#uploadEmployeeDocumentModal .modal-content .uploadError").remove();
-                $("#uploadEmployeeDocumentModal .modal-content").prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please select the hard copy check status.</div>');
-                renderLucideIcons();
-
-                setTimeout(function () {
-                    $("#uploadEmployeeDocumentModal .modal-content .uploadError").remove();
-                    document.querySelector("#uploadEmpDocBtn").removeAttribute("disabled");
-                    document.querySelector("#uploadEmpDocBtn svg").style.cssText = "display: none;";
-                }, 2000);
-            }
+            // Both are switches, so each always has an answer: on is Yes, off is No.
+            $('#uploadEmployeeDocumentModal input[name="hard_copy_check"]').val($("#uploadHardCopyToggle").is(":checked") ? "1" : "0");
+            $('#uploadEmployeeDocumentModal input[name="is_encrypted"]').val($("#uploadEncryptToggle").is(":checked") ? "1" : "0");
+            drzn1.processQueue();
         });
     }
 
@@ -711,6 +886,178 @@ var employeeCommunicationDocumentListTable = (function () {
         }
     });
 
+    /*
+     * Encrypted documents.
+     *
+     * The file never has a link. It is asked for with the reader's document
+     * PIN and comes back in the response itself, so there is nothing to copy,
+     * bookmark or pass on. The checks below only choose what to say first —
+     * the server makes every decision again, and records the attempt.
+     */
+    const documentPinModalEl = document.getElementById("documentPinModal");
+    const documentPinModal = documentPinModalEl ? tailwind.Modal.getOrCreateInstance(documentPinModalEl) : null;
+    const $documentTable = $("#employeeDocumentListTable");
+    const vaultState = {
+        canUse: $documentTable.attr("data-vault-can-use") == 1,
+        hasPin: $documentTable.attr("data-vault-has-pin") == 1,
+        impersonating: $documentTable.attr("data-vault-impersonating") == 1,
+        pinUrl: $documentTable.attr("data-vault-pin-url"),
+    };
+    const vaultFallbackError = "This document could not be opened. Please try again or contact the administrator.";
+
+    const setDocumentPinBusy = (busy) => {
+        $("#documentPinModal .documentPinSubmit").prop("disabled", busy);
+    };
+
+    // An error arrives as a Blob too, because the request asked for one.
+    const readVaultError = async (error) => {
+        try {
+            const body = JSON.parse(await error.response.data.text());
+            return body.message || vaultFallbackError;
+        } catch (e) {
+            return vaultFallbackError;
+        }
+    };
+
+    const requestEncryptedDocument = (rowId, pin, mode) => {
+        // Opened here, while this is still the user's own click: a tab opened
+        // after the response would be blocked as a pop-up.
+        const viewer = mode === "view" ? window.open("", "_blank") : null;
+
+        setDocumentPinBusy(true);
+
+        axios({
+            method: "post",
+            url: route("employee.documents.open.encrypted"),
+            data: { row_id: rowId, pin: pin, mode: mode },
+            responseType: "blob",
+            headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"), Accept: "application/json" },
+        }).then(response => {
+            setDocumentPinBusy(false);
+
+            const blobUrl = URL.createObjectURL(response.data);
+            if (viewer) {
+                viewer.location.href = blobUrl;
+            } else {
+                let fileName = "document";
+                try {
+                    fileName = decodeURIComponent(response.headers["x-document-name"] || fileName);
+                } catch (e) {}
+
+                const link = document.createElement("a");
+                link.href = blobUrl;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+            }
+
+            if (documentPinModal) {
+                documentPinModal.hide();
+            }
+            employeeDocumentAccessLogTable.init();
+        }).catch(async error => {
+            setDocumentPinBusy(false);
+            if (viewer) {
+                viewer.close();
+            }
+
+            const message = error.response ? await readVaultError(error) : vaultFallbackError;
+            employeeDocumentAccessLogTable.init();
+
+            if (documentPinModalEl && documentPinModalEl.classList.contains("show")) {
+                $("#documentPinError").text(message);
+                $("#documentPinInput").val("").trigger("focus");
+            } else {
+                showWarningModal("Document Locked", escapeHtml(message));
+            }
+        });
+    };
+
+    $("#employeeDocumentListTable").on("click", ".openEncryptedDoc", function (e) {
+        e.preventDefault();
+        const $theLink = $(this);
+        const rowId = $theLink.attr("data-id");
+
+        // canUse and hasPin describe whoever is really at the keyboard: when
+        // signed in as somebody else, that is the impersonator's own account.
+
+        // Nothing a PIN could change, so do not ask for one. The request is
+        // still made: the refusal belongs in the access log.
+        if (!vaultState.canUse) {
+            requestEncryptedDocument(rowId, "", "download");
+            return;
+        }
+
+        if (!vaultState.hasPin) {
+            // The PIN page is closed to an impersonated session, so there is
+            // nothing useful to link to from one.
+            showWarningModal("No Document PIN Yet", vaultState.impersonating
+                ? "Your own account has no document PIN yet. Leave impersonation, set one up from <strong>PIN</strong> in your account menu, then try again."
+                : 'You need a document PIN to open encrypted documents. <a href="' + escapeHtml(vaultState.pinUrl) + '" class="font-medium underline">Set up your PIN</a>, then come back to this page.');
+            return;
+        }
+
+        $("#documentPinDocName").text($theLink.attr("data-name"));
+        $('#documentPinForm input[name="row_id"]').val(rowId);
+        // View is only offered for what a browser can show (PDFs, images, text).
+        $("#documentPinViewBtn").prop("hidden", $theLink.attr("data-viewable") != 1);
+        documentPinModal.show();
+    });
+
+    const submitDocumentPin = (mode) => {
+        const pin = $("#documentPinInput").val().trim();
+        $("#documentPinError").text("");
+
+        if (pin === "") {
+            $("#documentPinError").text("Enter your document PIN.");
+            $("#documentPinInput").trigger("focus");
+            return;
+        }
+
+        requestEncryptedDocument($('#documentPinForm input[name="row_id"]').val(), pin, mode);
+    };
+
+    $("#documentPinModal .documentPinSubmit").on("click", function (e) {
+        e.preventDefault();
+        submitDocumentPin($(this).attr("data-mode"));
+    });
+
+    // Enter in the PIN box: show the file when the browser can, save it when not.
+    $("#documentPinForm").on("submit", function (e) {
+        e.preventDefault();
+        submitDocumentPin($("#documentPinViewBtn").prop("hidden") ? "download" : "view");
+    });
+
+    $("#documentPinInput").on("input", function () {
+        $(this).val($(this).val().replace(/\D/g, ""));
+    });
+
+    if (documentPinModalEl) {
+        documentPinModalEl.addEventListener("shown.tw.modal", function () {
+            $("#documentPinInput").trigger("focus");
+        });
+
+        // The PIN does not outlive the dialog it was typed into.
+        documentPinModalEl.addEventListener("hide.tw.modal", function () {
+            $("#documentPinInput").val("");
+            $("#documentPinError").text("");
+            $('#documentPinForm input[name="row_id"]').val("0");
+            setDocumentPinBusy(false);
+        });
+    }
+
+    // A document is only handed over once the open has been recorded, so a
+    // refusal has to be said out loud rather than leaving a dead button.
+    const showDocumentRefused = (error) => {
+        const message = error.response && error.response.data && error.response.data.message
+            ? error.response.data.message
+            : vaultFallbackError;
+
+        showWarningModal("Document Not Opened", escapeHtml(message));
+    };
+
     $("#employeeDocumentListTable").on("click", ".downloadDoc", function (e) {
         e.preventDefault();
         let $theLink = $(this);
@@ -732,12 +1079,11 @@ var employeeCommunicationDocumentListTable = (function () {
                 if (res !== "") {
                     window.open(res, "_blank");
                 }
+                employeeDocumentAccessLogTable.init();
             }
         }).catch(error => {
-            if (error.response) {
-                $theLink.css({ "opacity": "1", "cursor": "pointer" });
-                console.log("error");
-            }
+            $theLink.css({ "opacity": "1", "cursor": "pointer" });
+            showDocumentRefused(error);
         });
     });
 
@@ -761,12 +1107,11 @@ var employeeCommunicationDocumentListTable = (function () {
                 if (res !== "") {
                     window.open(res, "_blank");
                 }
+                employeeDocumentAccessLogTable.init();
             }
         }).catch(error => {
-            if (error.response) {
-                $theLink.css({ "opacity": "1", "cursor": "pointer" });
-                console.log("error");
-            }
+            $theLink.css({ "opacity": "1", "cursor": "pointer" });
+            showDocumentRefused(error);
         });
     });
 

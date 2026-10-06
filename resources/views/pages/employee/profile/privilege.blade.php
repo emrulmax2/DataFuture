@@ -566,6 +566,12 @@
                             <label class="form-check-label ml-4" for="permission_hr_portal_7">Policy Assessments (manage question bank, assign, view results)</label>
                         </div>
                     </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['hr_portal']['staff_document_pin']) && $priv['hr_portal']['staff_document_pin'] == 1 ? 'checked' : '') }} id="permission_hr_portal_8" class="form-check-input" type="checkbox" value="1" name="permission[hr_portal][staff_document_pin]">
+                            <label class="form-check-label ml-4" for="permission_hr_portal_8">PIN Enabled</label>
+                        </div>
+                    </div>
                     {{-- <div class="col-span-12 sm:col-span-3">
                         <div class="form-check form-switch">
                             <input {{ (isset($priv['hr_portal']['login_as_student']) && $priv['hr_portal']['login_as_student'] == 1 ? 'checked' : '') }} id="permission_hr_portal_6" class="form-check-input" type="checkbox" value="1" name="permission[hr_portal][login_as_student]">
