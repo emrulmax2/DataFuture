@@ -10,6 +10,8 @@ use App\Models\EmployeeDocumentAccessLog;
 use App\Models\EmployeeDocuments;
 use App\Models\User;
 use App\Models\UserDocumentPin;
+use App\Models\UserPrivilege;
+use App\Support\LegacyPrivilegeMap;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
@@ -135,6 +137,28 @@ class StaffDocumentVaultService
         $priv = $user->priv();
 
         return isset($priv[self::PRIVILEGE]) && $priv[self::PRIVILEGE] == 1;
+    }
+
+    /**
+     * Has "PIN Enabled" actually been ticked for this user?
+     *
+     * For nearly everybody that is the same question as canUse(). A super
+     * admin is the exception: they pass every privilege check without holding
+     * anything, so canUse() says yes whether or not anybody ticked the box.
+     * They may use a PIN either way, but they are only made to set one up
+     * once it has really been switched on for them.
+     */
+    public function switchedOnFor($user): bool
+    {
+        if(!$user->isSuperAdmin()):
+            return self::canUse($user);
+        endif;
+
+        if(config('privileges.source') === 'new'):
+            return $user->hasPerm((string) LegacyPrivilegeMap::resolve('hr_portal', self::PRIVILEGE));
+        endif;
+
+        return UserPrivilege::where('user_id', $user->id)->where('name', self::PRIVILEGE)->where('access', 1)->exists();
     }
 
     /**
