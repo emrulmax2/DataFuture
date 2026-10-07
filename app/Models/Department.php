@@ -23,6 +23,11 @@ class Department extends Model
         return $this->hasMany(Employment::class, 'department_id', 'id');
     }
 
+    /** Job titles assigned to this department. */
+    public function jobTitles(){
+        return $this->hasMany(EmployeeJobTitle::class, 'department_id', 'id')->orderBy('name');
+    }
+
     /** Sub departments, each holding its own permission template. */
     public function permissionCategories(){
         return $this->hasMany(PermissionCategory::class)->orderBy('name');

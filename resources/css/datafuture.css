@@ -16921,6 +16921,141 @@ body.employee-public-form-body .dataCollectionFormWrap {
 .employee-create-page .ts-control.dropdown-active {
     z-index: 80;
 }
+/* ------------------------------------------------------------------
+   Employee create: the Tom Select dropdown panel.
+
+   The panel is parented to <body> (dropdownParent: 'body'), so it is not a
+   descendant of .employee-create-page and none of the
+   `.employee-create-page .ts-dropdown` rules above can reach it. These rules
+   ride on the page's own dropdownClass instead, set in employee-new.js, so
+   they cannot leak into the other screens that share .lcc-tom-float.
+   !important because app.css loads the vendor sheet and the global
+   .tom-select/.lcc-tom-select overrides after this file.
+   ------------------------------------------------------------------ */
+.ts-dropdown.employee-create-dropdown {
+    background: #ffffff !important;
+    border: 1px solid #d5e2e0 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 14px 34px rgba(11, 43, 40, 0.14) !important;
+    color: #17312f !important;
+    font-size: 13.5px !important;
+    margin-top: 6px !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    z-index: 1100 !important;
+}
+
+/* The search box. */
+.ts-dropdown.employee-create-dropdown .dropdown-input-wrap {
+    background: #ffffff !important;
+    border-bottom: 1px solid #eef2f1 !important;
+    padding: 10px !important;
+}
+
+.ts-dropdown.employee-create-dropdown .dropdown-input {
+    background: #ffffff !important;
+    border: 1px solid #d5e2e0 !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    color: #17312f !important;
+    font-size: 13.5px !important;
+    height: 38px !important;
+    outline: none !important;
+    padding: 0 12px !important;
+    width: 100% !important;
+}
+
+.ts-dropdown.employee-create-dropdown .dropdown-input:focus {
+    border-color: #0f7b76 !important;
+    box-shadow: 0 0 0 3px rgba(15, 123, 118, 0.12) !important;
+}
+
+.ts-dropdown.employee-create-dropdown .dropdown-input::placeholder {
+    color: #9fb4b2 !important;
+}
+
+.ts-dropdown.employee-create-dropdown .ts-dropdown-content {
+    background: #ffffff !important;
+    max-height: 240px !important;
+    overflow-y: auto !important;
+    padding: 6px !important;
+}
+
+.ts-dropdown.employee-create-dropdown .option {
+    background: #ffffff !important;
+    border-radius: 8px !important;
+    color: #17312f !important;
+    cursor: pointer !important;
+    line-height: 1.35 !important;
+    padding: 9px 12px !important;
+}
+
+/* A tinted row rather than a solid teal block: the page's accent is used for
+   the focus ring and nothing else, so a filled row shouted over the form. */
+.ts-dropdown.employee-create-dropdown .option:hover,
+.ts-dropdown.employee-create-dropdown .option.active,
+.ts-dropdown.employee-create-dropdown .active {
+    background: #eef5f4 !important;
+    color: #0f7b76 !important;
+}
+
+/* The value already chosen, so it reads as current rather than hovered. */
+.ts-dropdown.employee-create-dropdown .option.selected {
+    color: #0f7b76 !important;
+    font-weight: 600 !important;
+}
+
+.ts-dropdown.employee-create-dropdown .option.selected.active,
+.ts-dropdown.employee-create-dropdown .option.selected:hover {
+    background: #e3efed !important;
+}
+
+.ts-dropdown.employee-create-dropdown .optgroup-header {
+    background: #ffffff !important;
+    color: #7c9290 !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.04em !important;
+    padding: 10px 12px 6px !important;
+    text-transform: uppercase !important;
+}
+
+.ts-dropdown.employee-create-dropdown .optgroup + .optgroup .optgroup-header {
+    border-top: 1px solid #eef2f1 !important;
+    margin-top: 4px !important;
+}
+
+.ts-dropdown.employee-create-dropdown .no-results,
+.ts-dropdown.employee-create-dropdown .create {
+    color: #7c9290 !important;
+    padding: 10px 12px !important;
+}
+
+.ts-dropdown.employee-create-dropdown .create strong {
+    color: #0f7b76 !important;
+}
+
+.ts-dropdown.employee-create-dropdown .highlight {
+    background: rgba(15, 123, 118, 0.14) !important;
+    border-radius: 3px !important;
+    color: inherit !important;
+}
+
+/* Slim scrollbar: the default one ate into the 240px of list. */
+.ts-dropdown.employee-create-dropdown .ts-dropdown-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.ts-dropdown.employee-create-dropdown .ts-dropdown-content::-webkit-scrollbar-thumb {
+    background: #d5e2e0;
+    border: 2px solid #ffffff;
+    border-radius: 999px;
+}
+
+.ts-dropdown.employee-create-dropdown .ts-dropdown-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
 .employee-create-address-row {
     align-items: flex-start;
     display: flex;

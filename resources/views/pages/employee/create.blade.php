@@ -362,17 +362,6 @@
                             </div>
 
                             <div class="employee-create-field">
-                                <label for="job_title" class="form-label">Job Title <span class="text-danger">*</span></label>
-                                <select id="job_title" name="job_title" class="job_title w-full lccToms lcc-tom-select">
-                                    <option value="">Please Select</option>
-                                    @foreach($jobTitles as $jobTitle)
-                                        <option {{ (isset($employee->employment->employee_job_title_id) && $employee->employment->employee_job_title_id == $jobTitle->id ? 'Selected' : '') }} value="{{ $jobTitle->id }}">{{ $jobTitle->name }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="acc__input-error error-job_title text-danger mt-2"></div>
-                            </div>
-
-                            <div class="employee-create-field">
                                 <label for="department" class="form-label">Department <span class="text-danger">*</span></label>
                                 <select id="department" name="department" class="department w-full lccToms lcc-tom-select">
                                     <option value="">Please Select</option>
@@ -381,6 +370,17 @@
                                     @endforeach
                                 </select>
                                 <div class="acc__input-error error-department text-danger mt-2"></div>
+                            </div>
+
+                            <div class="employee-create-field">
+                                <label for="job_title" class="form-label">Job Title <span class="text-danger">*</span></label>
+                                <select id="job_title" name="job_title" class="job_title w-full lccToms lcc-tom-select">
+                                    <option value="">Please Select</option>
+                                    @foreach($jobTitles as $jobTitle)
+                                        <option {{ (isset($employee->employment->employee_job_title_id) && $employee->employment->employee_job_title_id == $jobTitle->id ? 'Selected' : '') }} value="{{ $jobTitle->id }}">{{ $jobTitle->name }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="acc__input-error error-job_title text-danger mt-2"></div>
                             </div>
 
                             <div class="employee-create-field">

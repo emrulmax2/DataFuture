@@ -53,6 +53,7 @@ export default defineConfig({
                 'resources/js/bankholiday.js',
                 'resources/js/permissioncategory.js',
                 'resources/js/department.js',
+                'resources/js/job-title.js',
                 'resources/js/roles.js',
                 'resources/js/permissiontemplate.js',
                 'resources/js/processlist.js',

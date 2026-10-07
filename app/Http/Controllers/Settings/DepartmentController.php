@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Models\Department;
+use App\Models\EmployeeJobTitle;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\DepartmentRequest;
@@ -38,7 +39,8 @@ class DepartmentController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = Department::orderByRaw(implode(',', $sorts));
+        /* Counted with the row so a page of departments stays one query. */
+        $query = Department::withCount('jobTitles')->orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
             $query->where('name','LIKE','%'.$queryStr.'%');
         endif;
@@ -68,12 +70,20 @@ class DepartmentController extends Controller
                     'sl' => $i,
                     'name' => $list->name,
                     'available_for_all' => $list->available_for_all,
+                    'job_titles' => (int) $list->job_titles_count,
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        /* Sent once rather than per row: the backlog is the same whichever
+           department you are looking at, and it decides whether the link
+           button is worth showing at all. */
+        return response()->json([
+            'last_page' => $last_page,
+            'unassigned_total' => EmployeeJobTitle::whereNull('department_id')->count(),
+            'data' => $data,
+        ]);
     }
 
     /**
