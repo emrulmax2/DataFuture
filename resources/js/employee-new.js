@@ -34,7 +34,7 @@ import IMask from 'imask';
         },
         placeholder: 'Search Here...',
         dropdownParent: 'body',
-        dropdownClass: 'ts-dropdown lcc-tom-float',
+        dropdownClass: 'ts-dropdown lcc-tom-float employee-create-dropdown',
         persist: false,
         create: true,
         allowEmptyOption: true,
@@ -46,7 +46,7 @@ import IMask from 'imask';
         plugins: {},
         placeholder: 'Please Select',
         dropdownParent: 'body',
-        dropdownClass: 'ts-dropdown lcc-tom-float',
+        dropdownClass: 'ts-dropdown lcc-tom-float employee-create-dropdown',
         persist: false,
         create: false,
         allowEmptyOption: false,
@@ -79,11 +79,37 @@ import IMask from 'imask';
 
         return options;
     };
+    /* tom-select 1.7.8 sizes a body-parented dropdown from `control`, which is
+       the inner .ts-input, not the .ts-control box you can see. This page insets
+       .ts-input by 14px either side, so the panel came out 28px narrow and
+       shifted right. Measure the wrapper instead so it matches the field edge to
+       edge. Overriding the instance method covers open, scroll and resize, which
+       all route through positionDropdown. */
+    const alignDropdownToField = function (tom) {
+        if (!tom || tom.settings.dropdownParent !== 'body') {
+            return tom;
+        }
+
+        const basePosition = tom.positionDropdown.bind(tom);
+
+        tom.positionDropdown = function () {
+            basePosition();
+
+            const rect = tom.wrapper.getBoundingClientRect();
+
+            tom.dropdown.style.width = rect.width + 'px';
+            tom.dropdown.style.left = (rect.left + window.scrollX) + 'px';
+            tom.dropdown.style.top = (rect.top + rect.height + window.scrollY) + 'px';
+        };
+
+        return tom;
+    };
+
     //var employment_status = new TomSelect('#employment_status', tomOptions);
     const workpermitTypeEl = document.querySelector('#workpermit_type');
     const employeeWorkTypeEl = document.querySelector('#employee_work_type');
-    var workpermit_type_tom = workpermitTypeEl ? new TomSelect(workpermitTypeEl, getTomOptions(workpermitTypeEl)) : null;
-    var employee_work_type_tom = employeeWorkTypeEl ? new TomSelect(employeeWorkTypeEl, getTomOptions(employeeWorkTypeEl)) : null;
+    var workpermit_type_tom = workpermitTypeEl ? alignDropdownToField(new TomSelect(workpermitTypeEl, getTomOptions(workpermitTypeEl))) : null;
+    var employee_work_type_tom = employeeWorkTypeEl ? alignDropdownToField(new TomSelect(employeeWorkTypeEl, getTomOptions(employeeWorkTypeEl))) : null;
     const addressRequiredFields = ['address_line_1', 'city', 'post_code', 'country'];
     const addressModalValue = ($form, name) => $.trim(($form.find('[name="' + name + '"]').val() || '').toString());
     const setAddressModalValue = ($form, name, value) => $form.find('[name="' + name + '"]').val(value || '');
@@ -108,8 +134,87 @@ import IMask from 'imask';
     };
 
     $('.lccToms').each(function(){
-        new TomSelect(this, getTomOptions(this));
+        alignDropdownToField(new TomSelect(this, getTomOptions(this)));
     })
+
+    /* Department drives Job Title on the Employment step. Picking a department
+       narrows the title list to the titles filed under it. Most titles are not
+       filed anywhere yet, so the endpoint hands back the full list for a
+       department with none and flags it, rather than leaving a required field
+       with nothing to choose. Only a user-initiated change repopulates: on an
+       edit the saved title must survive an untouched form. */
+    const $departmentSelect = $('#department');
+    const jobTitleEl = document.getElementById('job_title');
+
+    if ($departmentSelect.length && jobTitleEl) {
+        /* The full list as rendered, to restore when the department is cleared. */
+        const allJobTitles = $('#job_title option')
+            .map(function () {
+                return this.value ? { value: String(this.value), text: $(this).text() } : null;
+            })
+            .get();
+
+        const $jobTitleNote = $('<div class="job-title-note text-muted mt-2" style="font-size:12px;"></div>').hide();
+        $('.error-job_title').after($jobTitleNote);
+
+        const fillJobTitles = function (titles) {
+            const tom = jobTitleEl.tomselect;
+            if (!tom) {
+                return;
+            }
+
+            const previous = tom.getValue();
+
+            tom.clear(true);
+            tom.clearOptions();
+            tom.addOption(titles);
+
+            if (titles.some((t) => String(t.value) === String(previous))) {
+                tom.setValue(previous, true);
+            }
+
+            tom.refreshOptions(false);
+        };
+
+        $departmentSelect.on('change', function () {
+            const departmentId = $(this).val();
+
+            if (!departmentId) {
+                fillJobTitles(allJobTitles);
+                $jobTitleNote.hide().text('');
+                return;
+            }
+
+            $.ajax({
+                method: 'GET',
+                url: route('job.title.by.department', departmentId),
+                dataType: 'json',
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                success: function (res) {
+                    const titles = (res.data || []).map((t) => ({
+                        value: String(t.id),
+                        text: t.name,
+                    }));
+
+                    fillJobTitles(titles.length ? titles : allJobTitles);
+
+                    if (res.filtered) {
+                        $jobTitleNote.hide().text('');
+                    } else {
+                        $jobTitleNote
+                            .text('No job titles are linked to ' + res.department + ' yet, so every job title is listed.')
+                            .show();
+                    }
+                },
+                error: function () {
+                    /* Leave the list as it is: a failed lookup must not strip
+                       the field of its options mid-form. */
+                    fillJobTitles(allJobTitles);
+                    $jobTitleNote.hide().text('');
+                },
+            });
+        });
+    }
 
     const updateCreateWizardStatus = function () {
         const $wizard = $('.employee-create-wizard');

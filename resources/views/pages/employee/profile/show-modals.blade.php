@@ -227,18 +227,6 @@
                             <div class="acc__input-error error-punch_number text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-4">
-                            <label for="employee_job_title_id" class="form-label">Job Title <span class="text-danger">*</span></label>
-                            <select id="employee_job_title_id" class="lccTom lcc-tom-select w-full" name="employee_job_title_id">
-                                <option value="" selected>Please Select</option>
-                                @if($employeeJobTitles->count() > 0)
-                                    @foreach($employeeJobTitles as $si)
-                                        <option {{ isset($employment->employee_job_title_id) && $employment->employee_job_title_id == $si->id ? 'Selected' : '' }} value="{{ $si->id }}">{{ $si->name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <div class="acc__input-error error-employee_job_title_id text-danger mt-2"></div>
-                        </div>
-                        <div class="col-span-12 sm:col-span-4">
                             <label for="department_id" class="form-label">Department <span class="text-danger">*</span></label>
                             <select id="department_id" class="lccTom lcc-tom-select w-full" name="department_id">
                                 <option value="" selected>Please Select</option>
@@ -249,6 +237,23 @@
                                 @endif
                             </select>
                             <div class="acc__input-error error-department_id text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-4">
+                            <label for="employee_job_title_id" class="form-label">Job Title <span class="text-danger">*</span></label>
+                            <select id="employee_job_title_id" class="lccTom lcc-tom-select w-full" name="employee_job_title_id">
+                                <option value="" selected>Please Select</option>
+                                @if($employeeJobTitles->count() > 0)
+                                    @foreach($employeeJobTitles as $si)
+                                        {{-- data-department drives the dependent filtering in employee-profile.js.
+                                             Titles with no department stay available under every
+                                             department until they are assigned one. --}}
+                                        <option {{ isset($employment->employee_job_title_id) && $employment->employee_job_title_id == $si->id ? 'Selected' : '' }}
+                                                value="{{ $si->id }}"
+                                                data-department="{{ $si->department_id ?? '' }}">{{ $si->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-employee_job_title_id text-danger mt-2"></div>
                         </div>
                         
                         <div class="col-span-12 sm:col-span-4">

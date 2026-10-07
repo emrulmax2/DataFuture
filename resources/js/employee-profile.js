@@ -37,6 +37,117 @@ import { createIcons, icons } from 'lucide';
         tomOptions
     );
 
+    /* Job Title follows Department.
+     *
+     * Every option carries data-department from the blade, so the filtering is
+     * done here rather than over the wire - the whole list is already on the
+     * page and a round trip per change would only add lag.
+     *
+     * Picking a department loads that department's own titles. A department
+     * with none linked yet falls back to the titles that belong to no
+     * department, so the field is never empty, and the title the employee is
+     * already on stays selectable when the modal opens.
+     */
+    function wireJobTitleToDepartment() {
+        const deptEl = document.getElementById('department_id');
+        const jobEl = document.getElementById('employee_job_title_id');
+
+        if (!deptEl || !jobEl) return;
+
+        // Captured before TomSelect rewrites the markup.
+        const allTitles = Array.from(jobEl.options)
+            .filter((o) => o.value !== '')
+            .map((o) => ({ value: o.value, text: o.text.trim(), department: o.dataset.department || '' }));
+
+        const savedTitle = jobEl.value || '';
+
+        const departmentName = (departmentId) => {
+            const option = Array.from(deptEl.options).find(
+                (o) => String(o.value) === String(departmentId)
+            );
+
+            return option ? option.text.trim() : '';
+        };
+
+        // Groups render in insertion order (no sortField is set); a group is
+        // only given a heading when the heading says something the list does
+        // not, such as the fallback or the title the employee is already on.
+        const fill = (groups, keepValue) => {
+            const ts = jobEl.tomselect;
+            if (!ts) return;
+
+            // clearOptions() keeps whatever is selected, which would leave the
+            // old title in a department it does not belong to.
+            ts.clear(true);
+            ts.clearOptions();
+            ts.clearOptionGroups();
+            ts.addOption({ value: '', text: 'Please Select' });
+
+            const shown = [];
+
+            groups.forEach((group) => {
+                if (!group.titles.length) return;
+
+                // A group without a label is listed plain, with no heading.
+                if (group.label) ts.addOptionGroup(group.id, { label: group.label });
+
+                group.titles.forEach((t) => {
+                    ts.addOption(
+                        group.label
+                            ? { value: t.value, text: t.text, optgroup: group.id }
+                            : { value: t.value, text: t.text }
+                    );
+                    shown.push(t.value);
+                });
+            });
+
+            ts.refreshOptions(false);
+
+            // Silent: restoring the value must not re-fire this handler.
+            ts.setValue(shown.includes(keepValue) ? keepValue : '', true);
+        };
+
+        const groupsFor = (departmentId) => {
+            const linked = departmentId
+                ? allTitles.filter((t) => t.department === String(departmentId))
+                : [];
+            const unlinked = allTitles.filter((t) => t.department === '');
+
+            // A department with its own titles shows only those. Only when it
+            // has none does the field fall back to the unassigned titles, so
+            // it never ends up empty.
+            if (linked.length) {
+                return [{ id: 'linked', label: '', titles: linked }];
+            }
+
+            return [
+                { id: 'unlinked', label: 'Not linked to a department', titles: unlinked },
+            ];
+        };
+
+        $(deptEl).on('change', function () {
+            // Picking a department reloads the field with that department's
+            // titles; the old title only survives if it belongs there too.
+            fill(
+                groupsFor(this.value),
+                jobEl.tomselect ? jobEl.tomselect.getValue() : ''
+            );
+        });
+
+        // On open the saved title has to stay selected even when it belongs to
+        // no department, or to another one, so it gets its own group on top.
+        const initialGroups = groupsFor(deptEl.value);
+        const saved = savedTitle
+            ? allTitles.find((t) => t.value === savedTitle)
+            : null;
+
+        if (saved && !initialGroups.some((g) => g.titles.some((t) => t.value === savedTitle))) {
+            initialGroups.unshift({ id: 'current', label: 'Current job title', titles: [saved] });
+        }
+
+        fill(initialGroups, savedTitle);
+    }
+
     $('.lccTom').each(function () {
         const isMultiple = $(this).attr('multiple') !== undefined;
         const options =
@@ -54,6 +165,8 @@ import { createIcons, icons } from 'lucide';
 
         new TomSelect(this, options);
     });
+
+    wireJobTitleToDepartment();
 
     $('.date-picker').each(function () {
         var maskOptions = {

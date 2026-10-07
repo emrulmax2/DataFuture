@@ -12,7 +12,7 @@
 @endsection
 
 @section('content')
-    <div id="siteSettingsPage" class="ss-page ss-department-page">
+    <div id="siteSettingsPage" class="ss-page ss-job-title-page">
         @include('pages.settings.partials.isolated-header')
 
         <nav class="ss-breadcrumb" aria-label="Breadcrumb">
@@ -23,7 +23,7 @@
             <i data-lucide="chevron-right"></i>
             <span>Site Settings</span>
             <i data-lucide="chevron-right"></i>
-            <span>Departments</span>
+            <span>Job Titles</span>
         </nav>
 
         <main class="ss-main">
@@ -33,11 +33,11 @@
                         <i data-lucide="panel-left"></i>
                     </button>
                     <span class="ss-title-card__icon">
-                        <i data-lucide="building-2"></i>
+                        <i data-lucide="briefcase"></i>
                     </span>
                     <div>
                         <h1>{{ $subtitle }}</h1>
-                        <p>Manage departments used for staff visibility, privileges and attendance ownership.</p>
+                        <p>Manage the job titles staff are appointed to on their employment record.</p>
                     </div>
                 </div>
                 <a href="{{ route('dashboard') }}" class="ss-back-btn">
@@ -57,15 +57,27 @@
                 </aside>
 
                 <section class="ss-content">
-                    <div class="ss-table-card ss-department-card">
+                    <div class="ss-table-card ss-job-title-card">
                         <div class="ss-table-card__header">
                             <div>
-                                <h2>Departments List</h2>
-                                <p>Staff department records and shared availability</p>
+                                <h2>Job Titles List</h2>
+                                @php
+                                    $filteredDept = $selectedDepartment
+                                        ? $departments->firstWhere('id', (int) $selectedDepartment)
+                                        : null;
+                                @endphp
+                                @if($filteredDept)
+                                    {{-- Named explicitly: a short list that is actually filtered
+                                         should not read as the whole list. --}}
+                                    <p>Showing titles in <strong>{{ $filteredDept->name }}</strong> &middot;
+                                        <a href="{{ route('job.title') }}">show all departments</a></p>
+                                @else
+                                    <p>Titles available when appointing staff, and how many hold each</p>
+                                @endif
                             </div>
-                            <button data-tw-toggle="modal" data-tw-target="#addDepartmentModal" type="button" class="ss-btn ss-btn--primary ss-btn--compact">
+                            <button data-tw-toggle="modal" data-tw-target="#addJobTitleModal" type="button" class="ss-btn ss-btn--primary ss-btn--compact">
                                 <i data-lucide="plus"></i>
-                                Add Department
+                                Add Job Title
                             </button>
                         </div>
 
@@ -75,7 +87,19 @@
                                     <span>Query</span>
                                     <label class="ss-filter-input" for="query">
                                         <i data-lucide="search"></i>
-                                        <input id="query" name="query" type="text" placeholder="Search departments...">
+                                        <input id="query" name="query" type="text" placeholder="Search job titles...">
+                                    </label>
+                                </div>
+                                <div class="ss-filter-field">
+                                    <span>Department</span>
+                                    <label class="ss-filter-select" for="department_id">
+                                        <select id="department_id" name="department_id">
+                                            <option value="">All departments</option>
+                                            @foreach($departments as $dept)
+                                                <option value="{{ $dept->id }}" @selected((string) ($selectedDepartment ?? '') === (string) $dept->id)>{{ $dept->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        <i data-lucide="chevron-down"></i>
                                     </label>
                                 </div>
                                 <div class="ss-filter-field">
@@ -124,21 +148,21 @@
                         </div>
 
                         <div class="ss-tabulator-wrap">
-                            <div id="departmentTableId" class="ss-tabulator table-report table-report--tabulator"></div>
+                            <div id="jobTitleTableId" class="ss-tabulator table-report table-report--tabulator"></div>
                         </div>
                     </div>
                 </section>
             </div>
         </main>
 
-        <div id="addDepartmentModal" class="modal ss-modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div id="addJobTitleModal" class="modal ss-modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog ss-settings-modal__dialog ss-department-modal-dialog">
-                <form method="POST" action="#" id="addDepartmentForm" enctype="multipart/form-data" autocomplete="off">
+                <form method="POST" action="#" id="addJobTitleForm" autocomplete="off">
                     <div class="modal-content ss-settings-modal ss-compact-settings-modal ss-department-modal">
                         <div class="ss-settings-modal__header">
                             <div>
                                 <span></span>
-                                <h2>Add Department</h2>
+                                <h2>Add Job Title</h2>
                             </div>
                             <button type="button" data-tw-dismiss="modal" class="ss-modal-close" aria-label="Close modal">
                                 <i data-lucide="x"></i>
@@ -146,36 +170,23 @@
                         </div>
                         <div class="modal-body ss-settings-modal__body">
                             <div class="ss-modal-field">
-                                <label for="add_department_name">Name <span>*</span></label>
-                                <input id="add_department_name" type="text" name="name" class="ss-modal-input name" placeholder="Department name">
-                                <div class="acc__input-error error-name"></div>
+                                <label for="add_job_title_department">Department <span>*</span></label>
+                                <div class="ss-input-select">
+                                    <i data-lucide="building-2"></i>
+                                    <select id="add_job_title_department" name="department_id" class="ss-modal-input department_id">
+                                        <option value="">Select a department</option>
+                                        @foreach($departments as $dept)
+                                            <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <i data-lucide="chevron-down"></i>
+                                </div>
+                                <div class="acc__input-error error-department_id"></div>
                             </div>
                             <div class="ss-modal-field">
-                                <label>Available For Everyone</label>
-                                <div class="ss-department-choice-grid">
-                                    <label class="ss-status-toggle" for="available_for_1">
-                                        <input checked id="available_for_1" type="radio" name="available_for_all" value="1" autocomplete="off">
-                                        <span class="ss-status-toggle__control">
-                                            <span class="ss-status-toggle__icon ss-status-toggle__icon--on"><i data-lucide="check"></i></span>
-                                            <span class="ss-status-toggle__icon ss-status-toggle__icon--off"><i data-lucide="x"></i></span>
-                                        </span>
-                                        <span class="ss-status-toggle__copy">
-                                            <strong>Yes</strong>
-                                            <small>Visible to everyone</small>
-                                        </span>
-                                    </label>
-                                    <label class="ss-status-toggle" for="available_for_2">
-                                        <input id="available_for_2" type="radio" name="available_for_all" value="0" autocomplete="off">
-                                        <span class="ss-status-toggle__control">
-                                            <span class="ss-status-toggle__icon ss-status-toggle__icon--on"><i data-lucide="check"></i></span>
-                                            <span class="ss-status-toggle__icon ss-status-toggle__icon--off"><i data-lucide="x"></i></span>
-                                        </span>
-                                        <span class="ss-status-toggle__copy">
-                                            <strong>No</strong>
-                                            <small>Restricted visibility</small>
-                                        </span>
-                                    </label>
-                                </div>
+                                <label for="add_job_title_name">Name <span>*</span></label>
+                                <input id="add_job_title_name" type="text" name="name" class="ss-modal-input name" placeholder="Job title">
+                                <div class="acc__input-error error-name"></div>
                             </div>
                         </div>
                         <div class="modal-footer ss-settings-modal__footer">
@@ -203,14 +214,14 @@
             </div>
         </div>
 
-        <div id="editDepartmentModal" class="modal ss-modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div id="editJobTitleModal" class="modal ss-modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog ss-settings-modal__dialog ss-department-modal-dialog">
-                <form method="POST" action="#" id="editDepartmentForm" autocomplete="off">
+                <form method="POST" action="#" id="editJobTitleForm" autocomplete="off">
                     <div class="modal-content ss-settings-modal ss-compact-settings-modal ss-department-modal">
                         <div class="ss-settings-modal__header">
                             <div>
                                 <span></span>
-                                <h2>Edit Department</h2>
+                                <h2>Edit Job Title</h2>
                             </div>
                             <button type="button" data-tw-dismiss="modal" class="ss-modal-close" aria-label="Close modal">
                                 <i data-lucide="x"></i>
@@ -218,37 +229,27 @@
                         </div>
                         <div class="modal-body ss-settings-modal__body">
                             <div class="ss-modal-field">
-                                <label for="edit_department_name">Name <span>*</span></label>
-                                <input id="edit_department_name" type="text" name="name" class="ss-modal-input name" placeholder="Department name">
-                                <div class="acc__input-error error-name"></div>
+                                <label for="edit_job_title_department">Department <span>*</span></label>
+                                <div class="ss-input-select">
+                                    <i data-lucide="building-2"></i>
+                                    <select id="edit_job_title_department" name="department_id" class="ss-modal-input department_id">
+                                        <option value="">Select a department</option>
+                                        @foreach($departments as $dept)
+                                            <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <i data-lucide="chevron-down"></i>
+                                </div>
+                                <div class="acc__input-error error-department_id"></div>
                             </div>
                             <div class="ss-modal-field">
-                                <label>Available For Everyone</label>
-                                <div class="ss-department-choice-grid">
-                                    <label class="ss-status-toggle" for="edit_available_for_1">
-                                        <input checked id="edit_available_for_1" type="radio" name="available_for_all" value="1" autocomplete="off">
-                                        <span class="ss-status-toggle__control">
-                                            <span class="ss-status-toggle__icon ss-status-toggle__icon--on"><i data-lucide="check"></i></span>
-                                            <span class="ss-status-toggle__icon ss-status-toggle__icon--off"><i data-lucide="x"></i></span>
-                                        </span>
-                                        <span class="ss-status-toggle__copy">
-                                            <strong>Yes</strong>
-                                            <small>Visible to everyone</small>
-                                        </span>
-                                    </label>
-                                    <label class="ss-status-toggle" for="edit_available_for_2">
-                                        <input id="edit_available_for_2" type="radio" name="available_for_all" value="0" autocomplete="off">
-                                        <span class="ss-status-toggle__control">
-                                            <span class="ss-status-toggle__icon ss-status-toggle__icon--on"><i data-lucide="check"></i></span>
-                                            <span class="ss-status-toggle__icon ss-status-toggle__icon--off"><i data-lucide="x"></i></span>
-                                        </span>
-                                        <span class="ss-status-toggle__copy">
-                                            <strong>No</strong>
-                                            <small>Restricted visibility</small>
-                                        </span>
-                                    </label>
-                                </div>
+                                <label for="edit_job_title_name">Name <span>*</span></label>
+                                <input id="edit_job_title_name" type="text" name="name" class="ss-modal-input name" placeholder="Job title">
+                                <div class="acc__input-error error-name"></div>
                             </div>
+                            {{-- Renaming a title renames it for everyone who holds it, so the
+                                 count is shown rather than left to be discovered. --}}
+                            <p class="ss-modal-note" id="editJobTitleUsage" hidden></p>
                         </div>
                         <div class="modal-footer ss-settings-modal__footer">
                             <button type="button" data-tw-dismiss="modal" class="ss-btn ss-btn--danger-soft">
@@ -270,68 +271,6 @@
                                 Update
                             </button>
                             <input type="hidden" name="id" value="0">
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        {{-- Bulk-linking the titles that still have no department. Offered from
-             the department they would be linked to, so the target is never in
-             doubt. --}}
-        <div id="linkJobTitleModal" class="modal ss-modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog ss-settings-modal__dialog ss-department-modal-dialog">
-                <form method="POST" action="#" id="linkJobTitleForm" autocomplete="off">
-                    <div class="modal-content ss-settings-modal ss-compact-settings-modal ss-department-modal">
-                        <div class="ss-settings-modal__header">
-                            <div>
-                                <span></span>
-                                <h2>Link Job Titles</h2>
-                            </div>
-                            <button type="button" data-tw-dismiss="modal" class="ss-modal-close" aria-label="Close modal">
-                                <i data-lucide="x"></i>
-                            </button>
-                        </div>
-                        <div class="modal-body ss-settings-modal__body">
-                            <div class="ss-link-dept">
-                                <span class="ss-link-dept__icon"><i data-lucide="building-2"></i></span>
-                                <div>
-                                    <strong id="linkDeptName">—</strong>
-                                    <small id="linkDeptMeta"></small>
-                                </div>
-                            </div>
-
-                            <div class="ss-modal-field">
-                                <label for="link_job_titles">Unassigned job titles <span>*</span></label>
-                                <select id="link_job_titles" name="job_title_ids[]" multiple placeholder="Search job titles..."></select>
-                                <div class="acc__input-error error-job_title_ids"></div>
-                                <p class="ss-modal-note" id="linkJobTitleNote">
-                                    Only titles with no department are listed. Linking them here does not
-                                    change anyone&rsquo;s recorded job title &mdash; it only files the title
-                                    under this department.
-                                </p>
-                            </div>
-                            <input type="hidden" name="department_id" value="0">
-                        </div>
-                        <div class="modal-footer ss-settings-modal__footer">
-                            <button type="button" data-tw-dismiss="modal" class="ss-btn ss-btn--danger-soft">
-                                <i data-lucide="x"></i>
-                                Cancel
-                            </button>
-                            <button type="submit" id="linkSave" class="ss-btn ss-btn--primary">
-                                <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="white" class="ss-spinner">
-                                    <g fill="none" fill-rule="evenodd">
-                                        <g transform="translate(1 1)" stroke-width="4">
-                                            <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                            <path d="M36 18c0-9.94-8.06-18-18-18">
-                                                <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                            </path>
-                                        </g>
-                                    </g>
-                                </svg>
-                                <i data-lucide="check"></i>
-                                Link Selected
-                            </button>
                         </div>
                     </div>
                 </form>
@@ -383,6 +322,6 @@
 
 @section('script')
     @vite('resources/js/settings.js')
-    @vite('resources/js/department.js')
+    @vite('resources/js/job-title.js')
     @vite('resources/js/site-settings-redesign.js')
 @endsection

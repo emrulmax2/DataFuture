@@ -56,6 +56,7 @@ use App\Http\Controllers\Settings\Studentoptions\CountryController;
 use App\Http\Controllers\Settings\Studentoptions\DisabilityController;
 use App\Http\Controllers\Settings\DocumentSettingsController;
 use App\Http\Controllers\Settings\DepartmentController;
+use App\Http\Controllers\Settings\JobTitleController;
 use App\Http\Controllers\Settings\PermissionCategoryController;
 use App\Http\Controllers\Settings\RoleController;
 use App\Http\Controllers\Settings\PermissionTemplateController;
@@ -2129,6 +2130,21 @@ Route::middleware('auth')->group(function() {
         
         Route::get('bankholidays/export/', 'export')->name('bankholidays.export');
         Route::post('bankholidays/import', 'import')->name('bankholidays.import');
+    });
+
+    Route::controller(JobTitleController::class)->group(function() {
+        Route::get('site-settings/job-title', 'index')->name('job.title');
+        Route::get('site-settings/job-title/list', 'list')->name('job.title.list');
+        Route::post('site-settings/job-title/store', 'store')->name('job.title.store');
+        Route::get('site-settings/job-title/edit/{id}', 'edit')->name('job.title.edit');
+        Route::post('site-settings/job-title/update', 'update')->name('job.title.update');
+        Route::delete('site-settings/job-title/delete/{id}', 'destroy')->name('job.title.destory');
+        Route::post('site-settings/job-title/restore/{id}', 'restore')->name('job.title.restore');
+        /* Bulk-linking the backlog of titles that have no department yet,
+           driven from the Department list. */
+        Route::get('site-settings/job-title/unassigned', 'unassigned')->name('job.title.unassigned');
+        Route::get('site-settings/job-title/by-department/{departmentId}', 'byDepartment')->name('job.title.by.department');
+        Route::post('site-settings/job-title/assign', 'assign')->name('job.title.assign');
     });
 
     Route::controller(DepartmentController::class)->group(function() {

@@ -10782,3 +10782,234 @@
     height: 17px;
     margin-top: 1px;
 }
+
+/* ------------------------------------------------------- Job Titles */
+
+/* The archive control is disabled while staff still hold the title, so it
+   reads as unavailable rather than simply failing when pressed. */
+.site-settings-redesign-body .ss-row-action.is-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.site-settings-redesign-body .ss-row-action.is-disabled:hover {
+    background: rgba(214, 69, 69, 0.12);
+}
+
+/* Said in the edit modal, because renaming a title renames it on every
+   employment record that points at it. */
+.ss-modal-note {
+    margin: 12px 0 0;
+    padding: 10px 12px;
+    border-left: 3px solid #c9a227;
+    border-radius: 8px;
+    background: #fdf8ec;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: #6f5a2a;
+}
+
+/* The job-title count on the Department list, linking to that department's
+   titles. */
+.site-settings-redesign-body .ss-count-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border: 1px solid #dfe3e9;
+    border-radius: 999px;
+    background: #fff;
+    color: #1c5097;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.site-settings-redesign-body .ss-count-link:hover {
+    border-color: #c3d2ea;
+    background: #eef3fb;
+}
+
+.site-settings-redesign-body .ss-count-link svg {
+    width: 13px;
+    height: 13px;
+}
+
+/* The department being linked to, shown at the top of the modal so the target
+   of a bulk action is never in doubt. */
+.ss-link-dept {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding: 12px 14px;
+    border: 1px solid #e4e7ec;
+    border-radius: 10px;
+    background: #fafbfc;
+}
+
+.ss-link-dept__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: #e9edf8;
+    color: #3b5bb5;
+}
+
+.ss-link-dept__icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.ss-link-dept strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: #1b2230;
+}
+
+.ss-link-dept small {
+    display: block;
+    margin-top: 2px;
+    font-size: 11.5px;
+    color: #76808f;
+}
+
+/* ------------------------- Job title picker (link modal) */
+
+/* Tom Select 1.7.8 nests the chips inside .ts-input, not directly in
+   .ts-control — every working rule elsewhere in this codebase targets
+   .ts-input > .item, and selectors that skip it match nothing. Both are
+   listed so this survives a v2 upgrade. !important throughout because Tom
+   Select ships its own stylesheet and loads after this one. */
+
+/* v1.7.8 has no .ts-wrapper: the outer element is .ts-control and it
+   carries the plugin classes. .ts-wrapper is listed for a future v2. */
+#linkJobTitleModal .ts-control,
+#linkJobTitleModal .ts-wrapper {
+    width: 100%;
+}
+
+#linkJobTitleModal .ts-control,
+#linkJobTitleModal .ts-control .ts-input {
+    min-height: 46px !important;
+    padding: 7px 34px 7px 10px !important;
+    border: 1px solid #dfe3e9 !important;
+    border-radius: 10px !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    align-items: center !important;
+}
+
+/* The wrapper would otherwise draw a second border around the inner input. */
+#linkJobTitleModal .ts-control {
+    border: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+}
+
+#linkJobTitleModal .ts-input.focus,
+#linkJobTitleModal .ts-input.dropdown-active,
+#linkJobTitleModal .ts-control.focus .ts-input,
+#linkJobTitleModal .ts-control.dropdown-active .ts-input {
+    border-color: #16264f !important;
+    box-shadow: 0 0 0 3px rgba(22, 38, 79, 0.1) !important;
+}
+
+/* One selected title. */
+#linkJobTitleModal .ts-input > .item,
+#linkJobTitleModal .ts-control > .item {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    margin: 0 !important;
+    padding: 5px 7px 5px 11px !important;
+    border: 1px solid #ccd6ea !important;
+    border-radius: 999px !important;
+    background: #eef3fb !important;
+    color: #1c5097 !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    max-width: 100% !important;
+    white-space: nowrap !important;
+}
+
+#linkJobTitleModal .ts-control.plugin-remove_button .item.active .remove {
+    border-left-color: transparent !important;
+}
+
+#linkJobTitleModal .ts-input > .item.active,
+#linkJobTitleModal .ts-control > .item.active {
+    border-color: #a9bedd !important;
+    background: #e2ebf8 !important;
+}
+
+/* The remove control. The plugin gives it its own left border and padding,
+   which is the extra line running down the middle of the chip. */
+#linkJobTitleModal .ts-input > .item .remove,
+#linkJobTitleModal .ts-control > .item .remove,
+#linkJobTitleModal .ts-control.plugin-remove_button .item .remove {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: none !important;
+    width: 16px !important;
+    height: 16px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-left: 0 !important;
+    border-radius: 999px !important;
+    background: rgba(28, 80, 151, 0.14) !important;
+    color: #1c5097 !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    text-decoration: none !important;
+}
+
+#linkJobTitleModal .ts-input > .item .remove:hover,
+#linkJobTitleModal .ts-control > .item .remove:hover,
+#linkJobTitleModal .ts-control.plugin-remove_button .item .remove:hover {
+    background: #1c5097 !important;
+    color: #fff !important;
+}
+
+/* Room for the caret so the last chip never sits under it. */
+#linkJobTitleModal .ts-control.multi.plugin-remove_button .ts-input,
+#linkJobTitleModal .plugin-remove_button .ts-input {
+    padding-right: 34px !important;
+}
+
+/* Dropdown. Not scoped to the modal: dropdownParent moves it onto <body>. */
+.ts-dropdown.lcc-tom-float {
+    border: 1px solid #dfe3e9;
+    border-radius: 10px;
+    box-shadow: 0 12px 28px rgba(20, 34, 74, 0.12);
+    overflow: hidden;
+}
+
+.ts-dropdown.lcc-tom-float .option {
+    padding: 9px 12px;
+    font-size: 13px;
+    color: #2b3240;
+}
+
+.ts-dropdown.lcc-tom-float .option.active {
+    background: #eef3fb;
+    color: #1c5097;
+}
+
+.ts-dropdown.lcc-tom-float .no-results {
+    padding: 10px 12px;
+    font-size: 12.5px;
+    color: #8a93a1;
+}

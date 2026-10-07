@@ -88,8 +88,8 @@
                 @if(isset($employment->employeeWorkType->name) && $employment->employeeWorkType->name == "Employee")
                     @include('pages.employee.profile.partials.field', ['label' => 'Works number', 'value' => $employment->works_number ?? null])
                 @endif
-                @include('pages.employee.profile.partials.field', ['label' => 'Job Title', 'value' => $employment->employeeJobTitle->name ?? null])
                 @include('pages.employee.profile.partials.field', ['label' => 'Department', 'value' => $employment->department->name ?? null])
+                @include('pages.employee.profile.partials.field', ['label' => 'Job Title', 'value' => $employment->employeeJobTitle->name ?? null])
 
                 <div class="min-w-0">
                     <div class="text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-1.5">Site locations</div>
