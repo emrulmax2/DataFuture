@@ -1,5 +1,6 @@
 /*
- * Service Desk tickets on the student notes page.
+ * Service Desk tickets on the student notes page — and, through
+ * employee-service-desk.js, on an employee's.
  *
  * The list is rendered by the server; this only opens one. A ticket carries its
  * whole conversation, so it is fetched when a row is clicked rather than with
@@ -23,6 +24,11 @@ import { createIcons, icons } from 'lucide';
     }
 
     const modal = tailwind.Modal.getOrCreateInstance(modalEl);
+
+    /* Where a ticket is asked for. A student's record is the default; an
+       employee's profile names its own address on the panel, because Operations
+       has to be told whose profile is asking. */
+    const base = (modalEl.dataset.sdBase || '/student/service-desk').replace(/\/+$/, '');
 
     const pinEl = document.getElementById('sdConfidentialModal');
     const pinModal = pinEl ? tailwind.Modal.getOrCreateInstance(pinEl) : null;
@@ -94,7 +100,7 @@ import { createIcons, icons } from 'lucide';
         bodyEl.innerHTML = '<div class="p-5 text-center text-slate-500">Loading…</div>';
         modal.show();
 
-        fetch('/student/service-desk/ticket/' + encodeURIComponent(ticketId), {
+        fetch(base + '/ticket/' + encodeURIComponent(ticketId), {
             headers: { Accept: 'application/json' },
             credentials: 'same-origin',
         })
@@ -134,7 +140,7 @@ import { createIcons, icons } from 'lucide';
             pinSubmit.disabled = true;
             pinError.textContent = '';
 
-            fetch('/student/service-desk/ticket/' + encodeURIComponent(pendingTicket) + '/unlock', {
+            fetch(base + '/ticket/' + encodeURIComponent(pendingTicket) + '/unlock', {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',

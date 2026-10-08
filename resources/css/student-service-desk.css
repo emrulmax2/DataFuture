@@ -213,3 +213,41 @@
     flex-shrink: 0;
 }
 .sd-panel-close:hover { background: #F6F8F5; color: #3C463F; }
+
+/* ------------------------------------------------- the employee profile */
+
+/*
+ * The same tickets on an employee's notes page. The table there is the
+ * profile's own Tabulator (ep-doc-table), so all that is needed here is what a
+ * ticket row adds to it: it is clickable, its reference is set in mono like the
+ * student list's, and its small pieces sit the way that design spaces things.
+ */
+.ep-doc-page .ep-sd-table .tabulator-row.sd-ticket-row { cursor: pointer; }
+.ep-doc-page .ep-sd-table .tabulator-cell.is-ref {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.ep-doc-page .ep-sd-subject { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
+.ep-doc-page .ep-sd-count { color: var(--ep-doc-muted); font-size: 11.5px; font-weight: 600; }
+.ep-doc-page .ep-sd-lock { gap: 5px; }
+.ep-doc-page .ep-sd-badges { display: flex; flex-wrap: wrap; gap: 5px 6px; }
+.ep-doc-page .ep-sd-when { color: var(--ep-doc-muted); font-size: 12px; font-weight: 600; white-space: nowrap; }
+
+/* Operations could not be reached: said plainly, where the table would be. */
+.ep-doc-page .ep-sd-unreachable {
+    align-items: flex-start;
+    color: var(--ep-doc-muted);
+    display: flex;
+    font-size: 13px;
+    gap: 8px;
+    line-height: 1.5;
+    margin: 0;
+}
+.ep-doc-page .ep-sd-unreachable i,
+.ep-doc-page .ep-sd-unreachable svg { color: #b0741a; flex: 0 0 auto; margin-top: 2px; }
+
+/* The panel sits inside this profile's modal, which pads its body; the
+   conversation brings its own spacing. */
+.ep-doc-modal #serviceDeskTicketBody { padding: 0; }

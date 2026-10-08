@@ -1697,6 +1697,16 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(EmployeeNotesController::class)->group(function(){
         Route::get('employee-profile/notes/{id}', 'index')->name('employee.notes'); 
+
+        /* Service Desk tickets this employee is tagged on, read live from
+           Operations for the list and panel on the notes page. The employee is
+           in the address so Operations can be told whose profile is asking. */
+        Route::get('employee-profile/{id}/service-desk/ticket/{ticketId}', 'serviceDeskTicket')
+            ->whereNumber(['id', 'ticketId'])->name('employee.service-desk.ticket');
+        Route::post('employee-profile/{id}/service-desk/ticket/{ticketId}/unlock', 'serviceDeskTicketUnlock')
+            ->whereNumber(['id', 'ticketId'])->name('employee.service-desk.ticket.unlock');
+        Route::get('employee-profile/{id}/service-desk/attachment/{attachmentId}', 'serviceDeskAttachment')
+            ->whereNumber(['id', 'attachmentId'])->name('employee.service-desk.attachment');
        
         Route::post('employee-profile/store-notes', 'store')->name('employee.store.note');
         Route::get('employee-profile/notes-list', 'list')->name('employee.note.list');

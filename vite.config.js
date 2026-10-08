@@ -94,6 +94,7 @@ export default defineConfig({
                 'resources/js/student-quick-communication.js',
                 'resources/js/student-note.js',
                 'resources/js/student-service-desk.js',
+                'resources/js/employee-service-desk.js',
                 'resources/js/student-form.js',
                 'resources/js/student-upload.js',
                 'resources/js/student-process.js',

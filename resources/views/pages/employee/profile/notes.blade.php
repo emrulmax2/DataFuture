@@ -2,6 +2,9 @@
 
 @section('subhead')
     <title>{{ $title }}</title>
+    {{-- The ticket panel's conversation styles, and the PIN dialog's. --}}
+    @vite('resources/css/student-service-desk.css')
+    @vite('resources/css/staff-document-pin.css')
 @endsection
 
 @section('subcontent')
@@ -88,7 +91,12 @@
                     </div>
                 </div>
             </section>
+
+            {{-- Service Desk tickets tagged to this employee, read from Operations. --}}
+            @include('pages.employee.profile.partials.service-desk-tickets')
         </div>
+
+        @include('pages.employee.profile.partials.service-desk-modals')
 
         <!-- BEGIN: View Modal -->
         <div id="viewEmpNoteModal" class="modal ep-doc-modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
@@ -390,4 +398,5 @@
 
 @section('script')
     @vite('resources/js/employee-note.js')
+    @vite('resources/js/employee-service-desk.js')
 @endsection

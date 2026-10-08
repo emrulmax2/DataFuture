@@ -1,5 +1,7 @@
 {{--
-    One Service Desk ticket, rendered into the panel on the student notes page.
+    One Service Desk ticket, rendered into the panel on the student notes page
+    — and on an employee's, which passes $attachmentUrl so its files come back
+    through that profile's own route.
 
     Laid out as the conversation it is: the facts at the top, then the thread,
     with the person who raised it on one side and everyone answering on the
@@ -60,10 +62,20 @@
 
         @if (! empty($ticket['students']))
             <div class="mt-3">
-                <div class="sd-panel-label">About</div>
+                <div class="sd-panel-label">{{ ! empty($ticket['employees']) ? 'About (students)' : 'About' }}</div>
                 <div>
                     {{ implode(', ', array_column($ticket['students'], 'label')) }}
                     <span class="text-slate-400">· tagged for the record; students are not notified</span>
+                </div>
+            </div>
+        @endif
+
+        @if (! empty($ticket['employees']))
+            <div class="mt-3">
+                <div class="sd-panel-label">{{ ! empty($ticket['students']) ? 'About (employees)' : 'About' }}</div>
+                <div>
+                    {{ implode(', ', array_column($ticket['employees'], 'label')) }}
+                    <span class="text-slate-400">· tagged for the record; they are not notified</span>
                 </div>
             </div>
         @endif
@@ -93,7 +105,7 @@
                                  endpoint answers to a shared key a browser cannot
                                  present. Operations still refuses anything on an
                                  internal note. --}}
-                            <a href="{{ route('student.service-desk.attachment', $file['id']) }}"
+                            <a href="{{ isset($attachmentUrl) ? $attachmentUrl($file['id']) : route('student.service-desk.attachment', $file['id']) }}"
                                class="sd-msg-file" title="{{ $file['name'] }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
                                      fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
