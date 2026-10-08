@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 
 /**
  * A member of staff's own document PIN: the number that opens encrypted
- * staff documents.
+ * documents, staff and student alike.
  *
  * They choose it themselves (6 to 8 digits). The page has two states: before
  * a PIN exists it asks for one, twice; once one exists it can only be changed,

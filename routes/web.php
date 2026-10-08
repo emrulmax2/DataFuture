@@ -1264,6 +1264,8 @@ Route::middleware('auth')->group(function() {
         Route::get('student/uploads-list', 'list')->name('student.uploads.list');
         Route::delete('student/uploads-destroy', 'destroy')->name('student.destory.uploads');
         Route::post('student/uploads-restore', 'restore')->name('student.resotore.uploads');
+        Route::post('student/uploads-open-encrypted', 'openEncrypted')->name('student.uploads.open.encrypted');
+        Route::get('student/uploads-access-log', 'accessLogList')->name('student.uploads.access.log.list');
         Route::post('student/download-id-cards', 'downloadIdCard')->name('student.download.id.card'); 
     });
 

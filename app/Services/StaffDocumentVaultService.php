@@ -8,18 +8,26 @@ use App\Models\ComonSmtp;
 use App\Models\Employee;
 use App\Models\EmployeeDocumentAccessLog;
 use App\Models\EmployeeDocuments;
+use App\Models\StudentDocument;
+use App\Models\StudentDocumentAccessLog;
 use App\Models\User;
 use App\Models\UserDocumentPin;
 use App\Models\UserPrivilege;
 use App\Support\LegacyPrivilegeMap;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Lab404\Impersonate\Services\ImpersonateManager;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 
 /**
- * Encrypted staff documents and the PIN that opens them.
+ * Encrypted documents and the PIN that opens them: staff documents (Employee
+ * Profile > Documents) and student documents (Live Student > Documents) alike.
+ * One member of staff has one PIN, and it opens both.
  *
  * A document uploaded as "encrypted" is stored encrypted, so the stored file
  * is unreadable on its own and no storage link to it is ever handed out. It
@@ -40,7 +48,8 @@ use Lab404\Impersonate\Services\ImpersonateManager;
  * a code is emailed to the address they sign in with, and entering it lets
  * them choose a new PIN. HR plays no part in that.
  *
- * Every open — encrypted or not — is written to employee_document_access_logs
+ * Every open — encrypted or not — is written to the access log of whose
+ * document it is (employee_document_access_logs, student_document_access_logs)
  * together with the impersonator, when there is one.
  */
 class StaffDocumentVaultService
@@ -413,7 +422,7 @@ class StaffDocumentVaultService
         $firstName = trim((string) (isset($user->employee->first_name) && $user->employee->first_name != '' ? $user->employee->first_name : $user->name));
 
         $html = '<p style="margin:0 0 14px; font-size:15px; line-height:1.5; color:#1f2937;">Hello '.e($firstName !== '' ? $firstName : 'there').',</p>';
-        $html .= '<p style="margin:0 0 14px; font-size:15px; line-height:1.5; color:#1f2937;">Use this code to reset your PIN for encrypted staff documents:</p>';
+        $html .= '<p style="margin:0 0 14px; font-size:15px; line-height:1.5; color:#1f2937;">Use this code to reset your PIN for encrypted documents:</p>';
         $html .= '<p style="margin:0 0 14px; font-size:30px; line-height:1.2; font-weight:bold; letter-spacing:6px; color:#0f7b76;">'.e($code).'</p>';
         $html .= '<p style="margin:0 0 14px; font-size:15px; line-height:1.5; color:#1f2937;">Enter it on the PIN page, in the browser you asked from. It works once, for '.self::RESET_CODE_MINUTES.' minutes.</p>';
         $html .= '<p style="margin:0; font-size:13px; line-height:1.5; color:#64748b;">If you did not ask for this, ignore this email. Your PIN has not been changed, and nobody can change it without this code.</p>';
@@ -455,7 +464,7 @@ class StaffDocumentVaultService
      *
      * @return array ['ok' => bool, 'status' => int, 'message' => string]
      */
-    public function challengeForDocument($pin, EmployeeDocuments $document): array
+    public function challengeForDocument($pin, Model $document): array
     {
         $impersonating = self::isImpersonating();
         $holder = self::holder();
@@ -503,7 +512,7 @@ class StaffDocumentVaultService
      * Check a PIN against its holder's, counting wrong attempts against that
      * holder. $impersonating only changes the wording.
      */
-    protected function verifyPin($holder, $pin, ?EmployeeDocuments $document, bool $impersonating): array
+    protected function verifyPin($holder, $pin, ?Model $document, bool $impersonating): array
     {
         $row = $this->pinFor($holder);
         if(!$row):
@@ -609,10 +618,23 @@ class StaffDocumentVaultService
     }
 
     /**
+     * Where the document's file is kept. Staff and student documents live in
+     * different folders; an encrypted file sits where a plain one would.
+     */
+    public static function storagePath(Model $document): string
+    {
+        if($document instanceof StudentDocument):
+            return 'public/students/'.$document->student_id.'/'.$document->current_file_name;
+        endif;
+
+        return 'public/employees/'.$document->employee_id.'/documents/'.$document->current_file_name;
+    }
+
+    /**
      * The name to hand the file back under: the stored name without the
      * upload timestamp in front or the vault extension behind.
      */
-    public static function downloadName(EmployeeDocuments $document): string
+    public static function downloadName(Model $document): string
     {
         $name = (string) $document->current_file_name;
         if(Str::endsWith($name, self::EXTENSION)):
@@ -623,45 +645,127 @@ class StaffDocumentVaultService
         return ($name !== '' ? $name : 'document');
     }
 
-    public static function isViewable(EmployeeDocuments $document): bool
+    public static function isViewable(Model $document): bool
     {
         return isset(self::VIEWABLE[strtolower((string) $document->doc_type)]);
     }
 
     /**
+     * What a documents page needs to know before asking for a PIN. The server
+     * checks all of it again when a document is actually opened.
+     *
+     * The permission and the PIN are the holder's: in an impersonated
+     * session that is the impersonator, not the account they are signed in as.
+     */
+    public function pageState(): array
+    {
+        $holder = self::holder();
+        $impersonating = self::isImpersonating();
+
+        return [
+            'can_use' => ($holder ? self::canUse($holder) : false),
+            'has_pin' => ($holder ? $this->hasPin($holder) : false),
+            'impersonating' => $impersonating,
+            'holder_name' => ($impersonating && $holder ? $holder->full_name : ''),
+            'signed_in_as' => ($impersonating ? auth()->user()->full_name : ''),
+            'pin_max_length' => self::PIN_MAX_LENGTH,
+        ];
+    }
+
+    /**
+     * Decrypt an encrypted document and hand it over, once the person at the
+     * keyboard has proved who they are with their own PIN. Someone signed in
+     * as another user enters their own PIN, not that user's, and the open is
+     * logged as theirs, through impersonation.
+     *
+     * The file is streamed from here rather than linked to: there is no URL
+     * that would still work for somebody else, or after this request.
+     *
+     * $mode is 'view' or 'download'; anything a browser cannot show safely
+     * is downloaded whatever was asked for.
+     */
+    public function open(Model $document, $pin, $mode)
+    {
+        $challenge = $this->challengeForDocument($pin, $document);
+        if(!$challenge['ok']):
+            return response()->json(['message' => $challenge['message']], $challenge['status']);
+        endif;
+
+        $payload = Storage::disk('s3')->get(self::storagePath($document));
+        $contents = (!empty($payload) ? $this->decrypt($payload) : null);
+        if($contents === null):
+            Log::error('Encrypted '.class_basename($document).' '.$document->id.' could not be read or decrypted.');
+            return response()->json(['message' => 'This document could not be opened. Please contact the administrator.'], 500);
+        endif;
+
+        $viewable = self::isViewable($document);
+        $mode = ($mode == 'view' && $viewable ? 'view' : 'download');
+
+        // No trail, no document.
+        if(!$this->log(($mode == 'view' ? self::EVENT_VIEW : self::EVENT_DOWNLOAD), $document)):
+            return response()->json(['message' => self::NOT_RECORDED], 500);
+        endif;
+
+        $name = str_replace(['/', '\\', '%'], '-', self::downloadName($document));
+        $fallback = preg_replace('/[^A-Za-z0-9._-]+/', '_', Str::ascii($name));
+
+        return response($contents, 200, [
+            'Content-Type' => ($viewable ? self::VIEWABLE[strtolower($document->doc_type)] : 'application/octet-stream'),
+            'Content-Disposition' => HeaderUtils::makeDisposition(($mode == 'view' ? 'inline' : 'attachment'), $name, ($fallback !== '' ? $fallback : 'document')),
+            'X-Document-Name' => rawurlencode($name),
+            'X-Content-Type-Options' => 'nosniff',
+            'Cache-Control' => 'no-store, private',
+        ]);
+    }
+
+    /**
      * Write one line of the audit trail.
      *
-     * $employeeId is whose record the line is about. It is read from the
-     * document when there is one; a PIN event has no document, so pass the
-     * PIN owner's employee id (it defaults to the signed-in user's own).
+     * A student document goes to the student log. Everything else — a staff
+     * document, or a PIN event, which concerns no document — goes to the
+     * staff log, where $employeeId is whose record the line is about: read
+     * from the document when there is one, otherwise the PIN owner's
+     * employee id (it defaults to the signed-in user's own).
      *
      * Returns false when the line could not be written, so a caller about to
-     * hand over an encrypted document can refuse instead of doing it unseen.
+     * hand over a document can refuse instead of doing it unseen.
      */
-    public function log(string $event, ?EmployeeDocuments $document = null, ?int $employeeId = null): bool
+    public function log(string $event, ?Model $document = null, ?int $employeeId = null): bool
     {
         $user = auth()->user();
         if(!$user):
             return false;
         endif;
 
-        if($document):
-            $employeeId = $document->employee_id;
-        elseif(!$employeeId):
-            $employeeId = Employee::where('user_id', $user->id)->value('id');
-        endif;
+        $line = [
+            'user_id' => $user->id,
+            'impersonator_id' => self::impersonatorId(),
+            'event' => $event,
+            'is_encrypted' => ($document && $document->is_encrypted == 1 ? 1 : 0),
+            'document_name' => ($document ? Str::limit((string) $document->display_file_name, 188, '...') : null),
+            'ip_address' => request()->ip(),
+            'user_agent' => Str::limit((string) request()->userAgent(), 252, '...'),
+        ];
 
         try {
-            EmployeeDocumentAccessLog::create([
+            if($document instanceof StudentDocument):
+                StudentDocumentAccessLog::create($line + [
+                    'student_document_id' => $document->id,
+                    'student_id' => $document->student_id,
+                ]);
+
+                return true;
+            endif;
+
+            if($document):
+                $employeeId = $document->employee_id;
+            elseif(!$employeeId):
+                $employeeId = Employee::where('user_id', $user->id)->value('id');
+            endif;
+
+            EmployeeDocumentAccessLog::create($line + [
                 'employee_document_id' => ($document ? $document->id : null),
                 'employee_id' => $employeeId,
-                'user_id' => $user->id,
-                'impersonator_id' => self::impersonatorId(),
-                'event' => $event,
-                'is_encrypted' => ($document && $document->is_encrypted == 1 ? 1 : 0),
-                'document_name' => ($document ? Str::limit((string) $document->display_file_name, 188, '...') : null),
-                'ip_address' => request()->ip(),
-                'user_agent' => Str::limit((string) request()->userAgent(), 252, '...'),
             ]);
 
             return true;
@@ -670,5 +774,65 @@ class StaffDocumentVaultService
 
             return false;
         }
+    }
+
+    /**
+     * One page of an access log, in the shape the log tables on the staff
+     * and student Documents tabs both read.
+     *
+     * $query is the log already narrowed to one employee or one student.
+     */
+    public function logPage(Request $request, $query): array
+    {
+        $event = (isset($request->event) && !empty($request->event) ? $request->event : '');
+
+        $query->with(['user.employee', 'impersonator.employee'])->orderBy('id', 'DESC');
+        if(isset(self::EVENT_GROUPS[$event])):
+            $query->whereIn('event', self::EVENT_GROUPS[$event]);
+        elseif($event == 'impersonated'):
+            $query->whereNotNull('impersonator_id');
+        endif;
+
+        $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+
+        $data = array();
+        foreach($query->skip($offset)->take($perpage)->get() as $list):
+            $meta = (isset(self::EVENTS[$list->event]) ? self::EVENTS[$list->event] : [ucfirst(str_replace('_', ' ', $list->event)), 'info']);
+            $impersonated = ($list->impersonator_id > 0);
+            $account = (isset($list->user->full_name) ? $list->user->full_name : 'Unknown');
+
+            // An open made while signed in as somebody else is not an
+            // ordinary one: say so, and stop it reading as routine.
+            if($impersonated && in_array($list->event, self::EVENT_GROUPS['opened'])):
+                $meta = [$meta[0].' through impersonation', 'warning'];
+            endif;
+
+            $data[] = [
+                'id' => $list->id,
+                'event' => $meta[0],
+                'tone' => $meta[1],
+                'document' => (!empty($list->document_name) ? $list->document_name : ''),
+                'is_encrypted' => ($list->is_encrypted == 1 ? 1 : 0),
+                // Who really did it: the impersonator when there was one.
+                'user' => ($impersonated ? (isset($list->impersonator->full_name) ? $list->impersonator->full_name : 'User #'.$list->impersonator_id) : $account),
+                // The account they were signed in as at the time.
+                'signed_in_as' => ($impersonated ? $account : ''),
+                'ip_address' => (!empty($list->ip_address) ? $list->ip_address : ''),
+                'date' => (!empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
+                'time' => (!empty($list->created_at) ? date('h:i:s A', strtotime($list->created_at)) : ''),
+            ];
+        endforeach;
+
+        return [
+            'current_page' => $page,
+            'last_page' => $last_page,
+            'per_page' => $perpage,
+            'total_rows' => $total_rows,
+            'data' => $data,
+        ];
     }
 }

@@ -2980,6 +2980,246 @@ body.student-profile-body .modal .ts-dropdown .dropdown-input:focus {
     color: #ffffff !important;
 }
 
+/* Encrypted documents on the Documents page: the marker on a row, the button
+   that asks for a PIN, and the access log under the list. The PIN prompt and
+   the upload switches are modals, so those rules hang off the body instead. */
+.student-profile-redesign .student-profile-vault-namecell {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    min-width: 0;
+}
+
+.student-profile-redesign .student-profile-vault-name {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+/* Gold, like the button that opens it, and not the page accent: the accent is
+   set per course here, and on a red course an accent chip reads as an error. */
+.student-profile-redesign .student-profile-vault-chip {
+    align-items: center;
+    background: var(--student-profile-warning-soft);
+    border: 1px solid var(--student-profile-warning-border);
+    border-radius: 999px;
+    color: var(--student-profile-warning);
+    display: inline-flex;
+    flex: none;
+    font-size: 11px;
+    font-weight: 700;
+    gap: 5px;
+    line-height: 1;
+    padding: 4px 9px;
+    white-space: nowrap;
+}
+
+.student-profile-redesign .student-profile-vault-chip svg {
+    height: 12px;
+    width: 12px;
+}
+
+.student-profile-redesign #studentUploadListTable .tabulator-cell .openEncryptedDoc {
+    --student-action-soft: var(--student-profile-warning-soft);
+    --student-action-border: var(--student-profile-warning-border);
+    --student-action-color: var(--student-profile-warning);
+}
+
+.student-profile-redesign .student-profile-vault-log-meta {
+    color: var(--student-profile-muted);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.student-profile-redesign .student-profile-vault-log-filter {
+    min-width: 250px;
+}
+
+.student-profile-redesign .student-profile-vault-pill {
+    background: #eef2f3;
+    border: 1px solid var(--student-profile-line);
+    border-radius: 999px;
+    color: #43585d;
+    display: inline-block;
+    font-size: 11.5px;
+    font-weight: 700;
+    line-height: 1.3;
+    padding: 3px 10px;
+}
+
+.student-profile-redesign .student-profile-vault-pill.is-success {
+    background: var(--student-profile-success-soft);
+    border-color: var(--student-profile-success-border);
+    color: var(--student-profile-success);
+}
+
+.student-profile-redesign .student-profile-vault-pill.is-info {
+    background: #eaf6fb;
+    border-color: #bfe1eb;
+    color: #1b7188;
+}
+
+.student-profile-redesign .student-profile-vault-pill.is-warning {
+    background: var(--student-profile-warning-soft);
+    border-color: var(--student-profile-warning-border);
+    color: var(--student-profile-warning);
+}
+
+.student-profile-redesign .student-profile-vault-pill.is-danger {
+    background: var(--student-profile-danger-soft);
+    border-color: var(--student-profile-danger-border);
+    color: var(--student-profile-danger);
+}
+
+/* Who did it, and under it who they were signed in as: long enough to need
+   more than one line, which a table cell would otherwise cut short. */
+.student-profile-redesign .student-profile-vault-by {
+    min-width: 0;
+    white-space: normal;
+}
+
+/* The line that matters most in the log: somebody else was at the keyboard. */
+.student-profile-redesign .student-profile-vault-impersonated {
+    align-items: flex-start;
+    color: var(--student-profile-danger);
+    display: flex;
+    font-size: 11.5px;
+    font-weight: 700;
+    gap: 5px;
+    line-height: 1.4;
+    margin-top: 3px;
+}
+
+.student-profile-redesign .student-profile-vault-impersonated svg {
+    flex: none;
+    height: 12px;
+    margin-top: 2px;
+    width: 12px;
+}
+
+/* Yes / No as a switch in the upload modal. The word beside it follows the
+   switch's state, so the answer can be read without knowing which way is "on". */
+body.student-profile-body .modal .student-profile-vault-toggle .form-check-input:checked {
+    background-color: var(--student-profile-accent);
+    border-color: var(--student-profile-accent);
+}
+
+/* Fixed width, so "Yes" and "No" do not nudge the switch sideways. */
+body.student-profile-body .modal .student-profile-vault-toggle-state {
+    color: var(--student-profile-muted);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    margin-left: 10px;
+    min-width: 26px;
+}
+
+body.student-profile-body .modal .student-profile-vault-toggle-state::after {
+    content: "No";
+}
+
+body.student-profile-body .modal .student-profile-vault-toggle .form-check-input:checked + .student-profile-vault-toggle-state {
+    color: var(--student-profile-accent);
+}
+
+body.student-profile-body .modal .student-profile-vault-toggle .form-check-input:checked + .student-profile-vault-toggle-state::after {
+    content: "Yes";
+}
+
+body.student-profile-body .modal .student-profile-vault-hint {
+    color: var(--student-profile-muted);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.5;
+    margin: 8px 0 0;
+}
+
+/* The PIN prompt. */
+body.student-profile-body .modal .student-profile-vault-docname {
+    align-items: center;
+    background: #f6f9f9;
+    border: 1px solid var(--student-profile-soft-line);
+    border-radius: 8px;
+    color: var(--student-profile-ink);
+    display: flex;
+    font-size: 13px;
+    font-weight: 700;
+    gap: 9px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+    padding: 10px 12px;
+}
+
+body.student-profile-body .modal .student-profile-vault-docname svg {
+    color: var(--student-profile-warning);
+    flex: none;
+}
+
+body.student-profile-body .modal .form-control.student-profile-vault-pin {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 20px;
+    font-weight: 700;
+    height: 46px;
+    letter-spacing: 0.42em;
+    max-height: 46px;
+    min-height: 46px;
+    text-align: center;
+}
+
+/* Reserves its line, so a message appearing does not push the notes down. */
+body.student-profile-body .modal .student-profile-vault-error {
+    color: var(--student-profile-danger);
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.45;
+    margin-top: 8px;
+    min-height: 18px;
+}
+
+body.student-profile-body .modal .student-profile-vault-note {
+    align-items: center;
+    background: #f6f9f9;
+    border: 1px solid var(--student-profile-soft-line);
+    border-radius: 8px;
+    color: var(--student-profile-muted);
+    display: flex;
+    font-size: 12px;
+    font-weight: 600;
+    gap: 9px;
+    line-height: 1.45;
+    margin: 10px 0 0;
+    padding: 10px 12px;
+}
+
+body.student-profile-body .modal .student-profile-vault-note svg {
+    color: var(--student-profile-accent);
+    flex: none;
+}
+
+/* Signed in as somebody else: louder, because whose PIN is wanted and whose
+   name is logged are both about to matter. */
+body.student-profile-body .modal .student-profile-vault-note--impersonating {
+    align-items: flex-start;
+    background: var(--student-profile-warning-soft);
+    border-color: var(--student-profile-warning-border);
+    color: var(--student-profile-warning);
+    font-weight: 500;
+}
+
+body.student-profile-body .modal .student-profile-vault-note--impersonating svg {
+    color: var(--student-profile-warning-solid);
+    margin-top: 2px;
+}
+
+body.student-profile-body .modal .student-profile-vault-note--impersonating strong {
+    font-weight: 700;
+}
+
+/* The "will be saved" note is only for files a browser cannot show. */
+body.student-profile-body .modal .student-profile-vault-note[hidden] {
+    display: none;
+}
+
 .student-profile-redesign #studentNotesListTable .tabulator-cell[tabulator-field="note"],
 .student-profile-redesign #studentNotesListTable .tabulator-cell[tabulator-field="followed_up"] {
     align-items: flex-start;

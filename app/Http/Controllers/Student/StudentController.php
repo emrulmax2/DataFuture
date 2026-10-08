@@ -425,6 +425,8 @@ class  StudentController extends Controller
             'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
             'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
             'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
+            // What the page needs to know before asking for a PIN (encrypted documents).
+            'vault' => app(\App\Services\StaffDocumentVaultService::class)->pageState(),
         ]);
     }
 
@@ -2447,8 +2449,26 @@ class  StudentController extends Controller
         $row_id = $request->row_id;
 
         $studentDoc = StudentDocument::where('id',$row_id)->withTrashed()->get()->first();
+        if(!$studentDoc):
+            return response()->json(['message' => 'Document not found.'], 404);
+        endif;
+
+        // An encrypted document never gets a storage link: the stored file is
+        // ciphertext, and it is only handed over by UploadController::openEncrypted().
+        if($studentDoc->is_encrypted == 1):
+            return response()->json(['message' => 'This document is encrypted. Open it from the student\'s Documents tab with your PIN.'], 423);
+        endif;
+
         $student_id = $studentDoc->student_id;
         $tmpURL = Storage::disk('s3')->temporaryUrl('public/students/'.$student_id.'/'.$studentDoc->current_file_name, now()->addMinutes(5));
+
+        // Every open goes on record, every time, whichever screen asked for it.
+        // The link is only handed over once it has: no trail, no document.
+        $vault = app(\App\Services\StaffDocumentVaultService::class);
+        if(!$vault->log(\App\Services\StaffDocumentVaultService::EVENT_DOWNLOAD, $studentDoc)):
+            return response()->json(['message' => \App\Services\StaffDocumentVaultService::NOT_RECORDED], 500);
+        endif;
+
         return response()->json(['res' => $tmpURL], 200);
     }
 

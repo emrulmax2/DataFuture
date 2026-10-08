@@ -103,10 +103,63 @@
                 </div>
             </div>
             <div class="student-profile-tablebody">
-                <div id="studentUploadListTable" data-student="{{ $student->id }}" class="table-report table-report--tabulator"></div>
+                {{-- The data-vault-* flags only pick which message the page shows before asking for a PIN; the server decides. --}}
+                <div id="studentUploadListTable" data-student="{{ $student->id }}" data-vault-can-use="{{ $vault['can_use'] ? 1 : 0 }}" data-vault-has-pin="{{ $vault['has_pin'] ? 1 : 0 }}" data-vault-impersonating="{{ $vault['impersonating'] ? 1 : 0 }}" data-vault-pin-url="{{ route('user.account.document.pin') }}" class="table-report table-report--tabulator"></div>
             </div>
         </div>
     </div>
+
+    <!-- BEGIN: Document Access Log -->
+    <div class="intro-y box mt-5 student-profile-documents student-profile-vault-log">
+        <div class="student-profile-secthead">
+            <div class="student-profile-secthead-title">
+                <div class="font-medium text-base">Document Access Log</div>
+                <div class="student-profile-vault-log-meta">Who opened this student's documents, when, and from which session.</div>
+            </div>
+        </div>
+        <div class="intro-y">
+            <div class="student-profile-tablefilter student-profile-documents-filter">
+                <form id="tabulatorFilterForm-SAL" class="student-profile-tablefilter-form">
+                    <select id="event-SAL" name="event" class="form-select student-profile-tablefilter-status student-profile-vault-log-filter">
+                        <option selected value="">Everything</option>
+                        <option value="opened">Opened (viewed or downloaded)</option>
+                        <option value="blocked">Blocked attempts</option>
+                        <option value="impersonated">While impersonating</option>
+                    </select>
+                    <button id="tabulator-html-filter-go-SAL" type="button" class="btn btn-primary">Go</button>
+                    <button id="tabulator-html-filter-reset-SAL" type="button" class="btn btn-outline-secondary student-profile-tablefilter-reset">Reset</button>
+                </form>
+                <div class="student-profile-tablefilter-actions hidden md:flex">
+                    <button id="tabulator-print-SAL" class="btn btn-outline-secondary">
+                        <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
+                    </button>
+                    <div class="dropdown">
+                        <button class="dropdown-toggle btn btn-outline-secondary" aria-expanded="false" data-tw-toggle="dropdown">
+                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+                        </button>
+                        <div class="dropdown-menu w-40">
+                            <ul class="dropdown-content">
+                                <li>
+                                    <a id="tabulator-export-csv-SAL" href="javascript:;" class="dropdown-item">
+                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
+                                    </a>
+                                </li>
+                                <li>
+                                    <a id="tabulator-export-xlsx-SAL" href="javascript:;" class="dropdown-item">
+                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="student-profile-tablebody">
+                <div id="studentDocumentAccessLogTable" data-student="{{ $student->id }}" class="table-report table-report--tabulator"></div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Document Access Log -->
 
 
     <!-- BEGIN: Import Modal -->
@@ -134,6 +187,7 @@
                         <input type="hidden" name="student_id" value="{{ $student->id }}"/>
                         <input type="hidden" name="document_setting_id" value="0"/>
                         <input type="hidden" name="hard_copy_check" value="0"/>
+                        <input type="hidden" name="is_encrypted" value="0"/>
                         <input type="hidden" name="display_file_name" value=""/>
                     </form>
                     <div class="mt-3">
@@ -141,16 +195,21 @@
                         <span id="documentNameDisplay" class="block mb-1"></span>
                         <input type="text" name="display_name" value="" class="displayNameInput form-control w-full"/>
                     </div>
-                    <div class="mt-3">
-                        <label>Hard Copy Checked?</label>
-                        <div class="form-check mt-2">
-                            <input id="hard_copy_check-1" class="form-check-input" type="radio" value="1" name="hard_copy_check_status" value="vertical-radio-chris-evans">
-                            <label class="form-check-label" for="hard_copy_check-1">Yes</label>
+                    {{-- Yes / No as a switch: off is No. The word beside it is drawn by CSS from the switch's state. --}}
+                    <div class="mt-4">
+                        <div class="form-check form-switch m-0 flex items-center student-profile-vault-toggle">
+                            <label class="form-check-label mr-auto ml-0" for="uploadHardCopyToggle">Hard Copy Checked?</label>
+                            <input id="uploadHardCopyToggle" name="hard_copy_check_status" class="form-check-input" value="1" type="checkbox">
+                            <span class="student-profile-vault-toggle-state" aria-hidden="true"></span>
                         </div>
-                        <div class="form-check mt-2">
-                            <input checked id="hard_copy_check-2" class="form-check-input" type="radio" value="0" name="hard_copy_check_status" value="vertical-radio-liam-neeson">
-                            <label class="form-check-label" for="hard_copy_check-2">No</label>
+                    </div>
+                    <div class="mt-4">
+                        <div class="form-check form-switch m-0 flex items-center student-profile-vault-toggle">
+                            <label class="form-check-label mr-auto ml-0" for="uploadEncryptToggle">Encrypt Document?</label>
+                            <input id="uploadEncryptToggle" name="is_encrypted_status" class="form-check-input" value="1" type="checkbox" aria-describedby="uploadEncryptHint">
+                            <span class="student-profile-vault-toggle-state" aria-hidden="true"></span>
                         </div>
+                        <p id="uploadEncryptHint" class="student-profile-vault-hint">An encrypted document can only be opened with a document PIN, by staff who have PIN Enabled in their privileges. This cannot be changed after upload.</p>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -175,6 +234,59 @@
         </div>
     </div>
     <!-- END: Import Modal -->
+
+    <!-- BEGIN: Encrypted Document PIN Modal -->
+    <div id="documentPinModal" class="modal student-profile-vault-modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="post" action="#" id="documentPinForm" autocomplete="off">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Encrypted Document</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div class="student-profile-vault-docname">
+                            <i data-lucide="lock-keyhole" class="w-4 h-4"></i>
+                            <span id="documentPinDocName"></span>
+                        </div>
+                        <div class="mt-4">
+                            <label for="documentPinInput" class="form-label">{{ $vault['impersonating'] ? 'Enter your own document PIN to open this file' : 'Enter your document PIN to open this file' }}</label>
+                            <input type="password" id="documentPinInput" name="pin" class="form-control w-full student-profile-vault-pin" inputmode="numeric" pattern="[0-9]*" maxlength="{{ $vault['pin_max_length'] }}" autocomplete="one-time-code"/>
+                            <div id="documentPinError" class="student-profile-vault-error" role="alert"></div>
+                        </div>
+
+                        {{-- Shown for a file a browser cannot display (Word, Excel...): it can only be saved. --}}
+                        <p id="documentPinSaveNote" class="student-profile-vault-note" hidden>
+                            <i data-lucide="file-down" class="w-4 h-4"></i>
+                            <span>This type of file cannot be shown in the browser, so it will be saved to your computer.</span>
+                        </p>
+
+                        @if($vault['impersonating'])
+                            {{-- Signed in as somebody else: it is the impersonator's own PIN that is wanted, and their name that goes in the log. --}}
+                            <p class="student-profile-vault-note student-profile-vault-note--impersonating">
+                                <i data-lucide="user-cog" class="w-4 h-4"></i>
+                                <span>You are signed in as <strong>{{ $vault['signed_in_as'] }}</strong>. Use your own PIN, not theirs. This will be recorded as opened by <strong>{{ $vault['holder_name'] }}</strong> through impersonation.</span>
+                            </p>
+                        @else
+                            <p class="student-profile-vault-note">
+                                <i data-lucide="scan-eye" class="w-4 h-4"></i>
+                                <span>Opening this document is recorded against your name.</span>
+                            </p>
+                        @endif
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        {{-- The one way in: the file opens in the browser, and a copy is saved from there if one is wanted. --}}
+                        <button type="button" id="documentPinViewBtn" data-mode="view" class="documentPinSubmit btn btn-primary w-auto">View</button>
+                        <input type="hidden" name="row_id" value="0"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Encrypted Document PIN Modal -->
 
 
     <!-- BEGIN: Success Modal Content -->

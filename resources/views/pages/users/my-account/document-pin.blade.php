@@ -25,7 +25,7 @@
             </span>
             <div class="myhr-sign__header-text">
                 <h2>PIN</h2>
-                <p>Your personal PIN for opening encrypted staff documents. You choose it: {{ $minLength }} to {{ $maxLength }} digits.</p>
+                <p>Your personal PIN for opening encrypted staff and student documents. You choose it: {{ $minLength }} to {{ $maxLength }} digits.</p>
             </div>
         </header>
 
@@ -52,7 +52,7 @@
                         @endif
                         <span class="myhr-pin-state__eyebrow"><i data-lucide="sparkles"></i> Not set up yet</span>
                         <h3>Set up your PIN</h3>
-                        <p>Choose a PIN of {{ $minLength }} to {{ $maxLength }} digits. You will be asked for it each time you view or download an encrypted staff document.</p>
+                        <p>Choose a PIN of {{ $minLength }} to {{ $maxLength }} digits. You will be asked for it each time you view or download an encrypted staff or student document.</p>
 
                         <form id="documentPinSetupForm" class="myhr-pin-form" autocomplete="off" novalidate>
                             <div class="myhr-pin-field">

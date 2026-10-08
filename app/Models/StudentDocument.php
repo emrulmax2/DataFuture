@@ -20,6 +20,7 @@ class StudentDocument extends Model
         'path',
         'display_file_name',
         'current_file_name',
+        'is_encrypted',
         'created_by',
         'updated_by',
         'deleted_at',
