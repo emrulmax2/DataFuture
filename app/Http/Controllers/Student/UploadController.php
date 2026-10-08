@@ -7,6 +7,8 @@ use App\Services\StudentIdCardPalette;
 use App\Models\DocumentSettings;
 use App\Models\Student;
 use App\Models\StudentDocument;
+use App\Models\StudentDocumentAccessLog;
+use App\Services\StaffDocumentVaultService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -25,9 +27,22 @@ class UploadController extends Controller
         $display_file_name = (isset($request->display_file_name) && !empty($request->display_file_name) ? $request->display_file_name : '');
         $display_file_name = ($document_settings_name != '' ? $document_settings_name : '') . ($display_file_name != '' ? ($document_settings_name != '' ? ' - ' . $display_file_name : $display_file_name) : '');
 
+        $is_encrypted = (isset($request->is_encrypted) && $request->is_encrypted == 1 ? 1 : 0);
+
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/students/'.$student_id, $imageName, 's3');
+        if($is_encrypted):
+            // Stored encrypted, under a name that says so. Nothing readable
+            // ever reaches the bucket, so no storage link can leak the file.
+            $imageName .= StaffDocumentVaultService::EXTENSION;
+            $path = 'public/students/'.$student_id.'/'.$imageName;
+            $stored = Storage::disk('s3')->put($path, app(StaffDocumentVaultService::class)->encrypt(file_get_contents($document->getRealPath())));
+            if(!$stored):
+                return response()->json(['message' => 'The encrypted document could not be stored. Please try again.'], 500);
+            endif;
+        else:
+            $path = $document->storeAs('public/students/'.$student_id, $imageName, 's3');
+        endif;
         $data = [];
         $data['student_id'] = $student_id;
         $data['document_setting_id'] = ($document_setting_id > 0 ? $document_setting_id : 0);
@@ -36,6 +51,7 @@ class UploadController extends Controller
         $data['path'] = Storage::disk('s3')->url($path);
         $data['display_file_name'] = $display_file_name; //(isset($documentSetting->name) && !empty($documentSetting->name) ? $documentSetting->name : $imageName);
         $data['current_file_name'] = $imageName;
+        $data['is_encrypted'] = $is_encrypted;
         $data['created_by'] = auth()->user()->id;
         $studentDoc = StudentDocument::create($data);
 
@@ -95,7 +111,9 @@ class UploadController extends Controller
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at,
-                    'can_delete' => (isset(auth()->user()->priv()['document_delete']) && auth()->user()->priv()['document_delete'] == 1 ? 1 : 0)
+                    'can_delete' => (isset(auth()->user()->priv()['document_delete']) && auth()->user()->priv()['document_delete'] == 1 ? 1 : 0),
+                    'is_encrypted' => ($list->is_encrypted == 1 ? 1 : 0),
+                    'viewable' => (StaffDocumentVaultService::isViewable($list) ? 1 : 0)
                 ];
                 $i++;
             endforeach;
@@ -116,6 +134,29 @@ class UploadController extends Controller
         $data = StudentDocument::where('id', $recordid)->withTrashed()->restore();
 
         response()->json($data);
+    }
+
+    /**
+     * Open an encrypted document with the reader's PIN. Everything that has to
+     * hold first, the decrypting and the log line are the service's — the same
+     * rules as for staff documents.
+     */
+    public function openEncrypted(Request $request){
+        $studentDoc = StudentDocument::withTrashed()->find($request->row_id);
+        if(!$studentDoc || $studentDoc->is_encrypted != 1):
+            return response()->json(['message' => 'Document not found.'], 404);
+        endif;
+
+        return app(StaffDocumentVaultService::class)->open($studentDoc, $request->pin, $request->mode);
+    }
+
+    /**
+     * Who opened this student's documents.
+     */
+    public function accessLogList(Request $request){
+        $studentId = (isset($request->studentId) && !empty($request->studentId) ? $request->studentId : 0);
+
+        return response()->json(app(StaffDocumentVaultService::class)->logPage($request, StudentDocumentAccessLog::where('student_id', $studentId)));
     }
 
     public function downloadIdCard(Request $request){

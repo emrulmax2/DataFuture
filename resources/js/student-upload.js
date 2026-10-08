@@ -4,8 +4,12 @@ import Tabulator from "tabulator-tables";
 import Dropzone from "dropzone";
 import html2canvas from "html2canvas";
 import { saveAs } from 'file-saver';
+import { escapeHtml, initDocumentVault } from "./document-vault";
 
 ("use strict");
+
+const encryptedChip = '<span class="student-profile-vault-chip" title="Stored encrypted. Opens with a document PIN."><i data-lucide="lock" class="w-3 h-3"></i>Encrypted</span>';
+
 var studentUploadListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
@@ -39,6 +43,17 @@ var studentUploadListTable = (function () {
                     field: "display_file_name",
                     headerHozAlign: "left",
                     minWidth: 180,
+                    formatter(cell, formatterParams) {
+                        var html = '';
+                        html += '<div class="student-profile-vault-namecell">';
+                            html += '<span class="student-profile-vault-name">'+escapeHtml(cell.getData().display_file_name)+'</span>';
+                            if(cell.getData().is_encrypted == 1){
+                                html += encryptedChip;
+                            }
+                        html += '</div>';
+
+                        return html;
+                    }
                 },
                 {
                     title: "Checked",
@@ -79,7 +94,13 @@ var studentUploadListTable = (function () {
                     minWidth: 120,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
-                        btns +='<a data-id="'+cell.getData().id+'" href="javascript:void(0);" class="downloadDoc btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="cloud-lightning" class="w-4 h-4"></i></a>';
+                        if(cell.getData().is_encrypted == 1){
+                            // No storage link exists for an encrypted document: it is
+                            // asked for with a PIN and comes back through the app.
+                            btns +='<a data-id="'+cell.getData().id+'" data-name="'+escapeHtml(cell.getData().display_file_name)+'" data-viewable="'+(cell.getData().viewable == 1 ? 1 : 0)+'" href="javascript:void(0);" title="Open with document PIN" class="openEncryptedDoc btn-rounded btn text-white p-0 w-9 h-9 ml-1"><i data-lucide="lock-keyhole" class="w-4 h-4"></i></a>';
+                        }else{
+                            btns +='<a data-id="'+cell.getData().id+'" href="javascript:void(0);" class="downloadDoc btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="cloud-lightning" class="w-4 h-4"></i></a>';
+                        }
                         if (cell.getData().deleted_at == null && cell.getData().can_delete == 1) {
                             btns += '<button data-id="' + cell.getData().id + '"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
                         }else if(cell.getData().deleted_at != null && cell.getData().can_delete == 1) {
@@ -149,7 +170,183 @@ var studentUploadListTable = (function () {
     };
 })();
 
+// The audit trail: every open of this student's documents, and every attempt
+// that was turned away. Read-only, newest first.
+var studentDocumentAccessLogTable = (function () {
+    let tableContent = null;
+    let resizeBound = false;
+
+    var _tableGen = function () {
+        let studentId = $("#studentDocumentAccessLogTable").attr('data-student') != "" ? $("#studentDocumentAccessLogTable").attr('data-student') : "0";
+        let event = $("#event-SAL").val() != "" ? $("#event-SAL").val() : "";
+
+        // Redrawn after every open, so the old table has to go first.
+        if (tableContent && typeof tableContent.destroy === "function") {
+            tableContent.destroy();
+        }
+
+        tableContent = new Tabulator("#studentDocumentAccessLogTable", {
+            ajaxURL: route("student.uploads.access.log.list"),
+            ajaxParams: { studentId: studentId, event: event },
+            ajaxFiltering: true,
+            printAsHtml: true,
+            printStyled: true,
+            pagination: "remote",
+            paginationSize: 10,
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            layout: "fitColumns",
+            responsiveLayout: "collapse",
+            placeholder: "Nothing has been recorded yet",
+            columns: [
+                {
+                    title: "When",
+                    field: "date",
+                    headerSort: false,
+                    headerHozAlign: "left",
+                    width: 190,
+                    formatter(cell, formatterParams){
+                        var html = '';
+                        html += '<div>';
+                            html += '<div class="font-medium whitespace-nowrap">'+escapeHtml(cell.getData().date)+'</div>';
+                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+escapeHtml(cell.getData().time)+'</div>';
+                        html += '</div>';
+
+                        return html;
+                    }
+                },
+                {
+                    title: "Time",
+                    field: "time",
+                    visible: false,
+                    download: true,
+                },
+                {
+                    title: "Event",
+                    field: "event",
+                    headerSort: false,
+                    headerHozAlign: "left",
+                    width: 270,
+                    formatter(cell, formatterParams){
+                        return '<span class="student-profile-vault-pill is-'+escapeHtml(cell.getData().tone)+'">'+escapeHtml(cell.getData().event)+'</span>';
+                    }
+                },
+                {
+                    title: "Document",
+                    field: "document",
+                    headerSort: false,
+                    headerHozAlign: "left",
+                    minWidth: 180,
+                    formatter(cell, formatterParams){
+                        var html = '';
+                        html += '<div class="student-profile-vault-namecell">';
+                            html += '<span class="student-profile-vault-name">'+escapeHtml(cell.getData().document)+'</span>';
+                            if(cell.getData().is_encrypted == 1){
+                                html += encryptedChip;
+                            }
+                        html += '</div>';
+
+                        return html;
+                    }
+                },
+                {
+                    title: "By",
+                    field: "user",
+                    headerSort: false,
+                    headerHozAlign: "left",
+                    minWidth: 200,
+                    // `user` is who really did it. When they were signed in as
+                    // somebody else at the time, that account is named below.
+                    formatter(cell, formatterParams){
+                        var html = '';
+                        html += '<div class="student-profile-vault-by">';
+                            html += '<div class="font-medium">'+escapeHtml(cell.getData().user)+'</div>';
+                            if(cell.getData().signed_in_as != ''){
+                                html += '<div class="student-profile-vault-impersonated"><i data-lucide="user-cog" class="w-3 h-3"></i>Through impersonation, signed in as '+escapeHtml(cell.getData().signed_in_as)+'</div>';
+                            }
+                        html += '</div>';
+
+                        return html;
+                    }
+                },
+                {
+                    title: "Signed In As (Impersonated)",
+                    field: "signed_in_as",
+                    visible: false,
+                    download: true,
+                },
+                {
+                    title: "IP Address",
+                    field: "ip_address",
+                    headerSort: false,
+                    headerHozAlign: "left",
+                    width: 150,
+                },
+            ],
+            renderComplete() {
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+            }
+        });
+
+        // Redraw table onresize
+        if (!resizeBound) {
+            window.addEventListener("resize", () => {
+                if (tableContent) {
+                    tableContent.redraw();
+                    createIcons({
+                        icons,
+                        "stroke-width": 1.5,
+                        nameAttr: "data-lucide",
+                    });
+                }
+            });
+            resizeBound = true;
+        }
+
+        // Export
+        $("#tabulator-export-csv-SAL").off("click").on("click", function (event) {
+            tableContent.download("csv", "student-document-access-log.csv");
+        });
+
+        $("#tabulator-export-xlsx-SAL").off("click").on("click", function (event) {
+            window.XLSX = xlsx;
+            tableContent.download("xlsx", "student-document-access-log.xlsx", {
+                sheetName: "Document Access Log",
+            });
+        });
+
+        // Print
+        $("#tabulator-print-SAL").off("click").on("click", function (event) {
+            tableContent.print();
+        });
+    };
+    return {
+        init: function () {
+            _tableGen();
+        },
+    };
+})();
+
 (function(){
+    if ($("#studentDocumentAccessLogTable").length) {
+        // Init Table
+        studentDocumentAccessLogTable.init();
+
+        // On click go button
+        $("#tabulator-html-filter-go-SAL").on("click", function (event) {
+            studentDocumentAccessLogTable.init();
+        });
+
+        // On reset filter form
+        $("#tabulator-html-filter-reset-SAL").on("click", function (event) {
+            $("#event-SAL").val("");
+            studentDocumentAccessLogTable.init();
+        });
+    }
+
     if ($("#studentUploadListTable").length) {
         // Init Table
         studentUploadListTable.init();
@@ -184,7 +381,8 @@ var studentUploadListTable = (function () {
     uploadDocumentModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#uploadDocumentModal input[name="document_setting_id"]').val('0');
         $('#uploadDocumentModal input[name="hard_copy_check"]').val('0');
-        $('#uploadDocumentModal input[name="hard_copy_check_status"][value="0"]').prop('checked', false);
+        $('#uploadDocumentModal input[name="is_encrypted"]').val('0');
+        $('#uploadHardCopyToggle, #uploadEncryptToggle').prop('checked', false);
         $('#uploadDocumentModal input[name="display_file_name"]').val('');
         $('#uploadDocumentModal input[name="display_name"]').val('');
         document.querySelector('#uploadDocBtn').removeAttribute('disabled', 'disabled');
@@ -318,7 +516,7 @@ var studentUploadListTable = (function () {
                     $("#warningModal .warningModalTitle").html("Error Found!" );
                     $("#warningModal .warningModalDesc").html('Something went wrong. Please try later or contact administrator.');
                     $("#warningModal .warningCloser").attr('data-action', 'DISMISS');
-                });
+                }, { once: true });
                 setTimeout(function(){
                     warningModal.hide();
                     //window.location.reload();
@@ -336,26 +534,10 @@ var studentUploadListTable = (function () {
             document.querySelector("#uploadDocBtn svg").style.cssText ="display: inline-block;";
             
             if(drzn1.files.length > 0){
-                if($('#uploadDocumentModal [name="hard_copy_check_status"]:checked').length > 0){
-                    var hardCopyChecked = $('#uploadDocumentModal [name="hard_copy_check_status"]:checked').val();
-                    $('#uploadDocumentModal input[name="hard_copy_check"]').val(hardCopyChecked)
-                    drzn1.processQueue();
-                }else{
-                    $('#uploadDocumentModal .modal-content .uploadError').remove();
-                    $('#uploadDocumentModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please select the hard copy check status.</div>');
-                    
-                    createIcons({
-                        icons,
-                        "stroke-width": 1.5,
-                        nameAttr: "data-lucide",
-                    });
-
-                    setTimeout(function(){
-                        $('#uploadDocumentModal .modal-content .uploadError').remove();
-                        document.querySelector('#uploadDocBtn').removeAttribute('disabled', 'disabled');
-                        document.querySelector("#uploadDocBtn svg").style.cssText ="display: none;";
-                    }, 2000)
-                }
+                // Both are switches, so each always has an answer: on is Yes, off is No.
+                $('#uploadDocumentModal input[name="hard_copy_check"]').val($('#uploadHardCopyToggle').is(':checked') ? '1' : '0');
+                $('#uploadDocumentModal input[name="is_encrypted"]').val($('#uploadEncryptToggle').is(':checked') ? '1' : '0');
+                drzn1.processQueue();
             }else{
                 $('#uploadDocumentModal .modal-content .uploadError').remove();
                 $('#uploadDocumentModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please select at least one file.</div>');
@@ -507,6 +689,22 @@ var studentUploadListTable = (function () {
         }
     });
 
+    // Encrypted documents: the PIN prompt and the open that follows it are
+    // shared with the staff Documents tab (document-vault.js).
+    const documentVault = initDocumentVault({
+        table: '#studentUploadListTable',
+        openRoute: 'student.uploads.open.encrypted',
+        showWarning: function(title, description){
+            $('#warningModal .warningModalTitle').html(title);
+            $('#warningModal .warningModalDesc').html(description);
+            $('#warningModal .warningCloser').attr('data-action', 'DISMISS');
+            warningModal.show();
+        },
+        onActivity: function(){
+            studentDocumentAccessLogTable.init();
+        },
+    });
+
     $('#studentUploadListTable').on('click', '.downloadDoc', function(e){
         e.preventDefault();
         var $theLink = $(this);
@@ -527,12 +725,11 @@ var studentUploadListTable = (function () {
                 if(res != ''){
                     window.open(res, '_blank');
                 }
+                studentDocumentAccessLogTable.init();
             } 
         }).catch(error => {
-            if(error.response){
-                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
-                console.log('error');
-            }
+            $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
+            documentVault.showRefused(error);
         });
     });
 

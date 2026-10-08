@@ -16,10 +16,7 @@ use App\Models\HrHolidayYear;
 use App\Models\PaySlipUploadSync;
 use App\Services\StaffDocumentVaultService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Symfony\Component\HttpFoundation\HeaderUtils;
 
 class EmployeeDocumentsController extends Controller
 {
@@ -46,29 +43,8 @@ class EmployeeDocumentsController extends Controller
             "employment" => $employment,
             'docSettings' => DocumentSettings::where('staff', '1')->get(),
             'emailTemplates' => EmailTemplate::where('hr', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
-            'vault' => $this->vaultState(),
+            'vault' => app(StaffDocumentVaultService::class)->pageState(),
         ]);
-    }
-
-    /**
-     * What the page needs to know before asking for a PIN. The server checks
-     * all of it again when a document is actually opened.
-     *
-     * The permission and the PIN are the holder's: in an impersonated
-     * session that is the impersonator, not the account they are signed in as.
-     */
-    protected function vaultState(){
-        $holder = StaffDocumentVaultService::holder();
-        $impersonating = StaffDocumentVaultService::isImpersonating();
-
-        return [
-            'can_use' => ($holder ? StaffDocumentVaultService::canUse($holder) : false),
-            'has_pin' => ($holder ? app(StaffDocumentVaultService::class)->hasPin($holder) : false),
-            'impersonating' => $impersonating,
-            'holder_name' => ($impersonating && $holder ? $holder->full_name : ''),
-            'signed_in_as' => ($impersonating ? auth()->user()->full_name : ''),
-            'pin_max_length' => StaffDocumentVaultService::PIN_MAX_LENGTH,
-        ];
     }
 
     public function list(Request $request){
@@ -300,56 +276,16 @@ class EmployeeDocumentsController extends Controller
     }
 
     /**
-     * Decrypt an encrypted document and hand it over, once the person at the
-     * keyboard has proved who they are with their own document PIN. Someone
-     * signed in as another user enters their own PIN, not that user's, and
-     * the open is logged as theirs, through impersonation.
-     *
-     * The file is streamed from here rather than linked to: there is no URL
-     * that would still work for somebody else, or after this request.
+     * Open an encrypted document with the reader's PIN. Everything that has to
+     * hold first, the decrypting and the log line are the service's.
      */
     public function openEncrypted(Request $request){
-        $vault = app(StaffDocumentVaultService::class);
-        $mode = (isset($request->mode) && $request->mode == 'view' ? 'view' : 'download');
-
         $empDoc = EmployeeDocuments::withTrashed()->find($request->row_id);
         if(!$empDoc || $empDoc->is_encrypted != 1):
             return response()->json(['message' => 'Document not found.'], 404);
         endif;
 
-        $challenge = $vault->challengeForDocument($request->pin, $empDoc);
-        if(!$challenge['ok']):
-            return response()->json(['message' => $challenge['message']], $challenge['status']);
-        endif;
-
-        $payload = Storage::disk('s3')->get('public/employees/'.$empDoc->employee_id.'/documents/'.$empDoc->current_file_name);
-        $contents = (!empty($payload) ? $vault->decrypt($payload) : null);
-        if($contents === null):
-            Log::error('Encrypted employee document '.$empDoc->id.' could not be read or decrypted.');
-            return response()->json(['message' => 'This document could not be opened. Please contact the administrator.'], 500);
-        endif;
-
-        // Only what a browser can show safely is ever served inline.
-        $viewable = StaffDocumentVaultService::isViewable($empDoc);
-        if($mode == 'view' && !$viewable):
-            $mode = 'download';
-        endif;
-
-        // No trail, no document.
-        if(!$vault->log(($mode == 'view' ? StaffDocumentVaultService::EVENT_VIEW : StaffDocumentVaultService::EVENT_DOWNLOAD), $empDoc)):
-            return response()->json(['message' => StaffDocumentVaultService::NOT_RECORDED], 500);
-        endif;
-
-        $name = str_replace(['/', '\\', '%'], '-', StaffDocumentVaultService::downloadName($empDoc));
-        $fallback = preg_replace('/[^A-Za-z0-9._-]+/', '_', Str::ascii($name));
-
-        return response($contents, 200, [
-            'Content-Type' => ($viewable ? StaffDocumentVaultService::VIEWABLE[strtolower($empDoc->doc_type)] : 'application/octet-stream'),
-            'Content-Disposition' => HeaderUtils::makeDisposition(($mode == 'view' ? 'inline' : 'attachment'), $name, ($fallback !== '' ? $fallback : 'document')),
-            'X-Document-Name' => rawurlencode($name),
-            'X-Content-Type-Options' => 'nosniff',
-            'Cache-Control' => 'no-store, private',
-        ]);
+        return app(StaffDocumentVaultService::class)->open($empDoc, $request->pin, $request->mode);
     }
 
     /**
@@ -357,64 +293,8 @@ class EmployeeDocumentsController extends Controller
      */
     public function accessLogList(Request $request){
         $employeeId = (isset($request->employeeId) && !empty($request->employeeId) ? $request->employeeId : 0);
-        $event = (isset($request->event) && !empty($request->event) ? $request->event : '');
 
-        $query = EmployeeDocumentAccessLog::with(['user.employee', 'impersonator.employee'])->where('employee_id', $employeeId)->orderBy('id', 'DESC');
-        if(isset(StaffDocumentVaultService::EVENT_GROUPS[$event])):
-            $query->whereIn('event', StaffDocumentVaultService::EVENT_GROUPS[$event]);
-        elseif($event == 'impersonated'):
-            $query->whereNotNull('impersonator_id');
-        endif;
-
-        $total_rows = $query->count();
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
-
-        $limit = $perpage;
-        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
-
-        $Query = $query->skip($offset)
-               ->take($limit)
-               ->get();
-
-        $data = array();
-
-        if(!empty($Query)):
-            foreach($Query as $list):
-                $meta = (isset(StaffDocumentVaultService::EVENTS[$list->event]) ? StaffDocumentVaultService::EVENTS[$list->event] : [ucfirst(str_replace('_', ' ', $list->event)), 'info']);
-                $impersonated = ($list->impersonator_id > 0);
-                $account = (isset($list->user->full_name) ? $list->user->full_name : 'Unknown');
-
-                // An open made while signed in as somebody else is not an
-                // ordinary one: say so, and stop it reading as routine.
-                if($impersonated && in_array($list->event, StaffDocumentVaultService::EVENT_GROUPS['opened'])):
-                    $meta = [$meta[0].' through impersonation', 'warning'];
-                endif;
-
-                $data[] = [
-                    'id' => $list->id,
-                    'event' => $meta[0],
-                    'tone' => $meta[1],
-                    'document' => (!empty($list->document_name) ? $list->document_name : ''),
-                    'is_encrypted' => ($list->is_encrypted == 1 ? 1 : 0),
-                    // Who really did it: the impersonator when there was one.
-                    'user' => ($impersonated ? (isset($list->impersonator->full_name) ? $list->impersonator->full_name : 'User #'.$list->impersonator_id) : $account),
-                    // The account they were signed in as at the time.
-                    'signed_in_as' => ($impersonated ? $account : ''),
-                    'ip_address' => (!empty($list->ip_address) ? $list->ip_address : ''),
-                    'date' => (!empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
-                    'time' => (!empty($list->created_at) ? date('h:i:s A', strtotime($list->created_at)) : ''),
-                ];
-            endforeach;
-        endif;
-        return response()->json([
-            'current_page' => $page,
-            'last_page' => $last_page,
-            'per_page' => $perpage,
-            'total_rows' => $total_rows,
-            'data' => $data
-        ]);
+        return response()->json(app(StaffDocumentVaultService::class)->logPage($request, EmployeeDocumentAccessLog::where('employee_id', $employeeId)));
     }
 
     public function employeeSentMail(EmployeeSentMailRequest $request){
