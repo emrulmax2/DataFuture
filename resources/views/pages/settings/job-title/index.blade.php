@@ -72,7 +72,7 @@
                                     <p>Showing titles in <strong>{{ $filteredDept->name }}</strong> &middot;
                                         <a href="{{ route('job.title') }}">show all departments</a></p>
                                 @else
-                                    <p>Titles available when appointing staff, and how many hold each</p>
+                                    <p>Titles available when appointing staff, and how many active staff hold each</p>
                                 @endif
                             </div>
                             <button data-tw-toggle="modal" data-tw-target="#addJobTitleModal" type="button" class="ss-btn ss-btn--primary ss-btn--compact">

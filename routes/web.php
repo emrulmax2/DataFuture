@@ -88,6 +88,7 @@ use App\Http\Controllers\Auth\MicrosoftSocialiteStudentController;
 use App\Http\Controllers\Student\Frontend\Auth\LoginController as StudentLoginController;
 use App\Http\Controllers\Student\Frontend\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Student\Frontend\LibraryController as StudentLibraryController;
+use App\Http\Controllers\Student\Frontend\StudentFormController;
 use App\Http\Controllers\PayPalWebhookController;
 use App\Http\Controllers\Library\FinePaymentController;
 use App\Http\Controllers\Library\IssueDeskController;
@@ -687,6 +688,22 @@ Route::prefix('/students')->name('students.')->group(function() {
             Route::post('/dashboard/update-address-request', 'updateAddressRequest')->name('update.address.request');
         });
 
+        /* "Do it online" forms built into the portal. The id is the
+           forms_table row, so one pair of routes serves every form; anything
+           without a page here falls through to its external link. */
+        Route::controller(StudentFormController::class)->group(function() {
+            Route::get('/do-it-online/form/{form}', 'show')->name('doitonline.form.show');
+            Route::post('/do-it-online/form/{form}/course-change', 'storeCourseChange')->name('doitonline.form.course-change.store');
+            Route::post('/do-it-online/form/{form}/discontinuation', 'storeDiscontinuation')->name('doitonline.form.discontinuation.store');
+            Route::post('/do-it-online/form/{form}/refund', 'storeRefund')->name('doitonline.form.refund.store');
+            Route::post('/do-it-online/form/{form}/academic-appeal', 'storeAcademicAppeal')->name('doitonline.form.appeal.store');
+            Route::post('/do-it-online/form/{form}/mitigating-circumstances', 'storeMitigatingCircumstances')->name('doitonline.form.mitigating.store');
+            Route::post('/do-it-online/form/{form}/mitigating-attendance', 'storeMitigatingAttendance')->name('doitonline.form.mitigating-attendance.store');
+            Route::post('/do-it-online/form/{form}/complaint', 'storeComplaint')->name('doitonline.form.complaint.store');
+            Route::post('/do-it-online/form/{form}/it-report', 'storeItReport')->name('doitonline.form.it-report.store');
+            Route::get('/do-it-online/form/{form}/submitted/{requestId}', 'submitted')->name('doitonline.form.submitted');
+        });
+
         /* Student library: catalogue search proxied to Operations, the Stripe
            deposit, and the student's own loans. */
         Route::controller(StudentLibraryController::class)->group(function() {
@@ -1084,6 +1101,7 @@ Route::middleware('auth')->group(function() {
         /* One Service Desk ticket, read live from Operations for the panel that
            opens from the notes page. */
         Route::get('student/service-desk/ticket/{ticketId}', 'serviceDeskTicket')->name('student.service-desk.ticket');
+        Route::post('student/service-desk/ticket/{ticketId}/unlock', 'serviceDeskTicketUnlock')->name('student.service-desk.ticket.unlock');
         Route::get('student/service-desk/attachment/{attachmentId}', 'serviceDeskAttachment')->name('student.service-desk.attachment');
         Route::get('student/process/{id}', 'process')->name('student.process');
         Route::get('student/workplacement/{id}', 'workplacement')->name('student.workplacement');

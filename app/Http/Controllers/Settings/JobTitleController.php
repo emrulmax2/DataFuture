@@ -38,9 +38,18 @@ class JobTitleController extends Controller
         endforeach;
 
         /* The holder count comes back with the row rather than per row, so a
-           page of titles is one query and not one per title. */
+           page of titles is one query and not one per title. Two counts: the
+           table shows active staff only, while the archive guard still has to
+           see every employment pointing at the title, leavers included. */
         $query = EmployeeJobTitle::with('department:id,name')
-            ->withCount('employments')
+            ->withCount([
+                'employments',
+                'employments as active_employments_count' => function($q){
+                    $q->whereHas('employee', function($sq){
+                        $sq->where('status', 1);
+                    });
+                },
+            ])
             ->orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
             $query->where('name','LIKE','%'.$queryStr.'%');
@@ -77,7 +86,8 @@ class JobTitleController extends Controller
                     /* Null reads as "not assigned" in the table rather than as
                        a blank cell that looks like a missing value. */
                     'department' => optional($list->department)->name,
-                    'in_use' => (int) $list->employments_count,
+                    'in_use' => (int) $list->active_employments_count,
+                    'holders' => (int) $list->employments_count,
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;

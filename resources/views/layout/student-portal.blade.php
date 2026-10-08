@@ -36,7 +36,9 @@
                 @yield('subcontent')
             </main>
 
-            @if($portalStudent)
+            {{-- A page can drop the rail ($hideRail) when it needs the width,
+                 as the in-portal forms do for their own progress panel. --}}
+            @if($portalStudent && !($hideRail ?? false))
                 @include('../layout/components/student-portal-rail', ['student' => $portalStudent])
             @endif
         </div>

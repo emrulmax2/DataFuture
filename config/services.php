@@ -125,6 +125,82 @@ return [
         'api_key' => env('OPERATIONS_API_KEY'),
         'timeout' => (int) env('OPERATIONS_API_TIMEOUT', 10),
         'verify_tls' => env('OPERATIONS_API_VERIFY_TLS', true),
+
+        /*
+         * Service Desk tickets raised from the student portal.
+         *
+         * A student submitting an in-portal form opens a ticket in Operations;
+         * these say where it lands. Registry (19) answers course changes under
+         * its "Student Course Change Request" issue type (55). Both are ids in
+         * the Operations database, so they are configurable rather than
+         * hard-coded — and both must be switched on for students there before
+         * a ticket can be raised at all.
+         */
+        'service_desk' => [
+            'course_change' => [
+                'department_id' => (int) env('OPERATIONS_SD_COURSE_CHANGE_DEPARTMENT', 19),
+                'issue_type_id' => (int) env('OPERATIONS_SD_COURSE_CHANGE_ISSUE_TYPE', 55),
+            ],
+
+            /* Discontinuations go to the same queue as course changes for now;
+               they get their own issue type the moment Registry adds one, and
+               only this value changes. */
+            'discontinuation' => [
+                'department_id' => (int) env('OPERATIONS_SD_DISCONTINUATION_DEPARTMENT', 19),
+                'issue_type_id' => (int) env('OPERATIONS_SD_DISCONTINUATION_ISSUE_TYPE', 55),
+            ],
+
+            /* Refunds will belong to Finance rather than Registry once they
+               have an issue type of their own; until then they follow the
+               others, and only these two values change. */
+            'refund' => [
+                'department_id' => (int) env('OPERATIONS_SD_REFUND_DEPARTMENT', 19),
+                'issue_type_id' => (int) env('OPERATIONS_SD_REFUND_ISSUE_TYPE', 55),
+            ],
+
+            'academic_appeal' => [
+                'department_id' => (int) env('OPERATIONS_SD_APPEAL_DEPARTMENT', 19),
+                'issue_type_id' => (int) env('OPERATIONS_SD_APPEAL_ISSUE_TYPE', 55),
+            ],
+
+            'mitigating_circumstances' => [
+                'department_id' => (int) env('OPERATIONS_SD_MITIGATING_DEPARTMENT', 19),
+                'issue_type_id' => (int) env('OPERATIONS_SD_MITIGATING_ISSUE_TYPE', 55),
+            ],
+
+            /* The attendance claim is routed separately from the assignment
+               one, even though both go to the same place today. */
+            /* IT & Monitoring answers for many kinds of request, so this form
+               has no fixed issue type: the student picks one from the types
+               that department has opened to students, and the id travels with
+               the request. Only the department is configured here. */
+            'it_support' => [
+                'department_id' => (int) env('OPERATIONS_SD_IT_DEPARTMENT', 14),
+                'issue_type_id' => null,
+            ],
+
+            'complaint' => [
+                'department_id' => (int) env('OPERATIONS_SD_COMPLAINT_DEPARTMENT', 19),
+                'issue_type_id' => (int) env('OPERATIONS_SD_COMPLAINT_ISSUE_TYPE', 55),
+            ],
+
+            'mitigating_attendance' => [
+                'department_id' => (int) env('OPERATIONS_SD_MITIGATING_ATTENDANCE_DEPARTMENT', 19),
+                'issue_type_id' => (int) env('OPERATIONS_SD_MITIGATING_ATTENDANCE_ISSUE_TYPE', 55),
+            ],
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | College Registry
+    |--------------------------------------------------------------------------
+    | Who a student is told to contact about a request they did not make. The
+    | phone number is the college's own switchboard, as held in Site Settings.
+    */
+    'registry' => [
+        'email' => env('REGISTRY_EMAIL', 'registry@lcc.ac.uk'),
+        'phone' => env('REGISTRY_PHONE', '020 7377 1077'),
     ],
 
 ];

@@ -4,6 +4,12 @@ import { viteStaticCopy } from 'vite-plugin-static-copy';
 import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
+    // server: {
+    //     headers: {
+    //         //'Access-Control-Allow-Origin': 'http://127.0.0.1:8000'
+    //         'Access-Control-Allow-Origin': 'https://lcc_datafuture.test'
+    //     }
+    // },
     plugins: [
         viteStaticCopy({
             targets: [
@@ -25,6 +31,7 @@ export default defineConfig({
                 'resources/css/library-pay.css',
                 'resources/css/student-library.css',
                 'resources/css/student-service-desk.css',
+                'resources/css/student-form.css',
                 'resources/css/admission-redesign.css',
                 'resources/css/course-management-redesign.css',
                 'resources/css/agent-management-redesign.css',
@@ -87,6 +94,7 @@ export default defineConfig({
                 'resources/js/student-quick-communication.js',
                 'resources/js/student-note.js',
                 'resources/js/student-service-desk.js',
+                'resources/js/student-form.js',
                 'resources/js/student-upload.js',
                 'resources/js/student-process.js',
                 'resources/js/student-course.js',

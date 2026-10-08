@@ -8,6 +8,12 @@
 
     $serviceDeskTickets is null when Operations could not be reached, which is a
     different thing from "no tickets" and is said differently.
+
+    A ticket marked confidential in Operations opens only after the reader has
+    entered their own document PIN — the same PIN that opens an encrypted
+    document, counted and locked out the same way. Until then Operations refuses
+    its contents to this application at all, so the lock is real and not a
+    matter of what this page chooses to draw.
 --}}
 <div class="intro-y box mt-5 student-profile-notes">
     <div class="student-profile-secthead">
@@ -56,13 +62,27 @@
                                 'reopened'    => 'text-danger bg-danger/10',
                                 default       => 'text-slate-500 bg-slate-100',
                             };
+
+                            $confidential = ! empty($ticket['is_confidential']);
                         @endphp
 
-                        <tr class="sd-ticket-row" data-ticket="{{ $ticket['id'] }}">
+                        {{-- A confidential row is still a row you can click; it
+                             asks for the PIN first. --}}
+                        <tr class="sd-ticket-row {{ $confidential ? 'sd-ticket-row--locked' : '' }}"
+                            data-ticket="{{ $ticket['id'] }}"
+                            @if ($confidential) data-confidential="1" @endif>
                             <td class="is-ref">{{ $ticket['ref'] }}</td>
                             <td>
                                 {{ $ticket['subject'] }}
-                                @if (($ticket['messages_count'] ?? 0) > 0)
+
+                                @if ($confidential)
+                                    {{-- The subject is listed; the conversation
+                                         behind it is not, and the row does not
+                                         open. --}}
+                                    <span class="sd-badge text-slate-500 bg-slate-100">
+                                        <i data-lucide="lock" class="w-3 h-3 inline-block"></i> Confidential
+                                    </span>
+                                @elseif (($ticket['messages_count'] ?? 0) > 0)
                                     <span class="text-slate-400 text-xs">· {{ $ticket['messages_count'] }} {{ \Illuminate\Support\Str::plural('message', $ticket['messages_count']) }}</span>
                                 @endif
                             </td>

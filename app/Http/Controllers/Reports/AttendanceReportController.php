@@ -170,7 +170,12 @@ class AttendanceReportController extends Controller
                     ->leftJoin('student_course_relations as scr', function($j){
                         $j->on('scr.student_id', '=', 'std.id');
                         $j->on('scr.active', DB::raw(1));
-                        $j->on('scr.id', DB::raw('(SELECT MAX(scrr.id) FROM student_course_relations as scrr WHERE scrr.student_id = std.id AND scrr.active = 1)'));
+                        $j->whereNull('scr.deleted_at');
+                        /* The same row Student::activeCR() gives. A student can hold
+                           several active relations; that hasOne has no ordering, so
+                           it lands on the first one - the lowest id - and, the model
+                           being soft-deleting, never on a deleted row. */
+                        $j->on('scr.id', DB::raw('(SELECT MIN(scrr.id) FROM student_course_relations as scrr WHERE scrr.student_id = std.id AND scrr.active = 1 AND scrr.deleted_at IS NULL)'));
                     })
                     ->leftJoin('student_proposed_courses as spc', 'scr.id', 'spc.student_course_relation_id')
                     ->leftJoin('statuses as sts', 'std.status_id', 'sts.id')
@@ -406,7 +411,12 @@ class AttendanceReportController extends Controller
                     ->leftJoin('student_course_relations as scr', function($j){
                         $j->on('scr.student_id', '=', 'std.id');
                         $j->on('scr.active', DB::raw(1));
-                        $j->on('scr.id', DB::raw('(SELECT MAX(scrr.id) FROM student_course_relations as scrr WHERE scrr.student_id = std.id AND scrr.active = 1)'));
+                        $j->whereNull('scr.deleted_at');
+                        /* The same row Student::activeCR() gives. A student can hold
+                           several active relations; that hasOne has no ordering, so
+                           it lands on the first one - the lowest id - and, the model
+                           being soft-deleting, never on a deleted row. */
+                        $j->on('scr.id', DB::raw('(SELECT MIN(scrr.id) FROM student_course_relations as scrr WHERE scrr.student_id = std.id AND scrr.active = 1 AND scrr.deleted_at IS NULL)'));
                     })
                     ->leftJoin('student_proposed_courses as spc', 'scr.id', 'spc.student_course_relation_id')
                     ->leftJoin('statuses as sts', 'std.status_id', 'sts.id')

@@ -140,12 +140,19 @@ import Tabulator from "tabulator-tables";
             return `<button data-id="${escapeHtml(data.id)}" type="button" class="restore_btn ss-row-action ss-row-action--restore" aria-label="Restore job title"><i data-lucide="rotate-cw"></i></button>`;
         }
 
-        const archive = Number(data.in_use) > 0
-            ? `<button type="button" class="ss-row-action ss-row-action--delete is-disabled" disabled aria-label="In use, cannot archive" title="Held by ${escapeHtml(data.in_use)} staff — move them to another title first"><i data-lucide="trash-2"></i></button>`
+        /* The In Use column counts active staff only, but archiving and
+           renaming reach every employment on the title, so these two work
+           from the full holder count and say how many of them are inactive. */
+        const holders = Number(data.holders || 0);
+        const inactive = Math.max(holders - Number(data.in_use || 0), 0);
+        const inactiveNote = inactive > 0 ? ` (${inactive} inactive)` : "";
+
+        const archive = holders > 0
+            ? `<button type="button" class="ss-row-action ss-row-action--delete is-disabled" disabled aria-label="In use, cannot archive" title="Held by ${escapeHtml(holders)} staff${inactiveNote} — move them to another title first"><i data-lucide="trash-2"></i></button>`
             : `<button data-id="${escapeHtml(data.id)}" type="button" class="delete_btn ss-row-action ss-row-action--delete" aria-label="Archive job title"><i data-lucide="trash-2"></i></button>`;
 
         return [
-            `<button data-id="${escapeHtml(data.id)}" data-use="${escapeHtml(data.in_use)}" type="button" class="edit_btn ss-row-action ss-row-action--edit" aria-label="Edit job title"><i data-lucide="pencil"></i></button>`,
+            `<button data-id="${escapeHtml(data.id)}" data-use="${escapeHtml(holders)}" data-inactive="${escapeHtml(inactive)}" type="button" class="edit_btn ss-row-action ss-row-action--edit" aria-label="Edit job title"><i data-lucide="pencil"></i></button>`,
             archive,
         ].join("");
     };
@@ -312,6 +319,7 @@ import Tabulator from "tabulator-tables";
     $("#jobTitleTableId").on("click.jobtitles", ".edit_btn", function () {
         const editId = $(this).attr("data-id");
         const inUse = Number($(this).attr("data-use") || 0);
+        const inactive = Number($(this).attr("data-inactive") || 0);
         const $form = $("#editJobTitleForm");
 
         resetEditForm();
@@ -332,7 +340,7 @@ import Tabulator from "tabulator-tables";
                     $("#editJobTitleUsage")
                         .removeAttr("hidden")
                         .text(
-                            `Held by ${inUse} ${inUse === 1 ? "employee" : "employees"} — renaming it changes their recorded job title too.`
+                            `Held by ${inUse} ${inUse === 1 ? "employee" : "employees"}${inactive > 0 ? ` (${inactive} inactive)` : ""} — renaming it changes their recorded job title too.`
                         );
                 }
 
