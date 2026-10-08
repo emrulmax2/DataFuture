@@ -107,6 +107,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Number;
 
 use PDF;
+use Illuminate\Support\Facades\Log;
 
 class  StudentController extends Controller
 {
@@ -471,9 +472,23 @@ class  StudentController extends Controller
      */
     public function serviceDeskTicket($ticketId)
     {
-        $ticket = app(\App\Services\OperationsServiceDeskClient::class)->ticket((int) $ticketId);
+        /* Already unlocked in this session, so it opens without asking again. */
+        $unlocked = $this->ticketUnlocked($ticketId);
+        $operations = app(\App\Services\OperationsServiceDeskClient::class);
+
+        $ticket = $operations->ticket((int) $ticketId, $unlocked);
 
         if (! $ticket):
+            /* Operations refuses a confidential ticket outright, so a 403 here
+               means "ask for the PIN", not "something went wrong". */
+            if ($operations->lastStatus() === 403):
+                return response()->json([
+                    'status' => false,
+                    'confidential' => true,
+                    'message' => 'This ticket is confidential. Enter your document PIN to open it.',
+                ], 403);
+            endif;
+
             return response()->json([
                 'status' => false,
                 'message' => 'That ticket could not be loaded from Operations.',
@@ -487,6 +502,60 @@ class  StudentController extends Controller
     }
 
     /**
+     * Open a confidential ticket, after the reader's own document PIN.
+     *
+     * A ticket marked confidential in Operations is kept off the student's
+     * record: the row says one exists and nothing more. This is the way past
+     * it, and it costs the same PIN that opens an encrypted document — the
+     * person is challenged, the attempt is counted and locked out like any
+     * other, and the unlock lasts for this session and this ticket only.
+     */
+    public function serviceDeskTicketUnlock(Request $request, $ticketId)
+    {
+        $vault = app(\App\Services\StaffDocumentVaultService::class);
+        $result = $vault->challengeOwner(auth()->user(), $request->input('pin'));
+
+        if (! $result['ok']):
+            return response()->json([
+                'status' => false,
+                'message' => $result['message'],
+            ], $result['status']);
+        endif;
+
+        $ticket = app(\App\Services\OperationsServiceDeskClient::class)->ticket((int) $ticketId, true);
+
+        if (! $ticket):
+            return response()->json([
+                'status' => false,
+                'message' => 'That ticket could not be loaded from Operations.',
+            ], 502);
+        endif;
+
+        /* Remembered so the attachments on it can be fetched too, and so a
+           reader is not asked again while they are reading. Per session, per
+           ticket - closing the browser locks it again. */
+        $unlocked = (array) $request->session()->get('sd_unlocked_tickets', []);
+        $unlocked[(int) $ticketId] = true;
+        $request->session()->put('sd_unlocked_tickets', $unlocked);
+
+        Log::info('[Service Desk] Confidential ticket opened.', [
+            'ticket' => $ticket['ref'] ?? $ticketId,
+            'by' => auth()->id(),
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'html'   => view('pages.students.live.service-desk-ticket', ['ticket' => $ticket])->render(),
+        ]);
+    }
+
+    /** Whether this session has already unlocked a confidential ticket. */
+    private function ticketUnlocked($ticketId): bool
+    {
+        return ! empty(session('sd_unlocked_tickets')[(int) $ticketId]);
+    }
+
+    /**
      * Hand a ticket attachment to a member of staff.
      *
      * Served through this app rather than linked straight to Operations: that
@@ -497,7 +566,12 @@ class  StudentController extends Controller
      */
     public function serviceDeskAttachment($attachmentId)
     {
-        $file = app(\App\Services\OperationsServiceDeskClient::class)->attachment((int) $attachmentId);
+        /* A file on a confidential ticket comes only after that ticket has
+           been unlocked in this session, the same as its conversation. */
+        $file = app(\App\Services\OperationsServiceDeskClient::class)->attachment(
+            (int) $attachmentId,
+            ! empty(session('sd_unlocked_tickets'))
+        );
 
         if (! $file):
             abort(404, 'That file could not be fetched from Operations.');

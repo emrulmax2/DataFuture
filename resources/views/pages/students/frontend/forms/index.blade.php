@@ -12,6 +12,12 @@
         })->values();
 
         $formLink = function ($form) use ($reportItAll) {
+            /* Forms that now live in the portal are served by one dynamic
+               route keyed by the forms_table id. */
+            if (App\Http\Controllers\Student\Frontend\StudentFormController::internalPage($form->form_name)) {
+                return route('students.doitonline.form.show', $form->id);
+            }
+
             if ($form->form_name == 'Document / ID Card Replacement request / Printer Balance Top up') {
                 return route('students.document-request-form.products');
             }

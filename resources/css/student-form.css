@@ -1,0 +1,1045 @@
+/*
+ |--------------------------------------------------------------------------
+ | Student portal — in-house "Do it online" forms
+ |--------------------------------------------------------------------------
+ |
+ | The forms that used to be Google Forms, rebuilt inside the portal: a column
+ | of numbered step cards beside a sticky progress panel.
+ |
+ | Scoped to `body.student-portal-body` and owning the `.sfm-*` namespace, so
+ | it borrows the portal's palette (`_student-portal.css`) without touching
+ | any `.spf-*` rule. The page hides the portal rail ($hideRail) and uses the
+ | width for the progress panel instead.
+ */
+
+/* The global Litepicker skin reads these, so the calendar on this page comes
+   up in the portal's bronze rather than the staff navy. */
+body.student-portal-body .sfm,
+body.student-portal-body .litepicker {
+    --lcc-cal-accent: #b98a4e;
+    --lcc-cal-accent-ink: #ffffff;
+    --lcc-cal-accent-soft: #f9f3e7;
+}
+
+/* The month and year dropdowns sit in a plain <div> that the global skin
+   leaves as a block, so they stack and the panel reads as broken. Scoped to
+   this page's own panel class rather than fixed globally. */
+.litepicker.sfm-picker {
+    --litepicker-month-width: 288px;
+}
+
+.litepicker.sfm-picker .container__months .month-item {
+    width: var(--litepicker-month-width);
+}
+
+.litepicker.sfm-picker .container__months .month-item-header {
+    gap: 8px;
+}
+
+.litepicker.sfm-picker .container__months .month-item-header div {
+    align-items: center;
+    display: flex;
+    flex: 1 1 auto;
+    gap: 8px;
+    justify-content: center;
+}
+
+.litepicker.sfm-picker .container__months .month-item-header .month-item-name,
+.litepicker.sfm-picker .container__months .month-item-header .month-item-year {
+    flex: 0 1 auto;
+    min-width: 0;
+}
+
+/* A class that sets `display` beats the browser's own [hidden] rule, so a
+   hidden notice would still be drawn. This has to win over every block below. */
+body.student-portal-body .sfm [hidden],
+body.student-portal-body .sfm-card [hidden] {
+    display: none !important;
+}
+
+body.student-portal-body .sfm {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    align-items: start;
+}
+
+/* ── Head ──────────────────────────────────────────────────────────────── */
+
+body.student-portal-body .sfm-head {
+    align-items: flex-start;
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+    margin-bottom: 22px;
+}
+
+body.student-portal-body .sfm-crumb {
+    color: var(--spf-muted);
+    font-size: 12.5px;
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+body.student-portal-body .sfm-title {
+    color: var(--spf-ink);
+    font-family: var(--spf-serif);
+    font-size: 34px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    margin: 0 0 8px;
+}
+
+body.student-portal-body .sfm-sub {
+    color: var(--spf-dim);
+    font-size: 14px;
+    margin: 0;
+    max-width: 62ch;
+}
+
+body.student-portal-body .sfm-counter {
+    background: var(--spf-creambg);
+    border: 1px solid var(--spf-cream);
+    border-radius: 999px;
+    color: var(--spf-goldtxt);
+    flex: none;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 7px 14px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+/* ── Step cards ────────────────────────────────────────────────────────── */
+
+body.student-portal-body .sfm-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+body.student-portal-body .sfm-card {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-line);
+    border-radius: 16px;
+    padding: 24px 26px 26px;
+}
+
+body.student-portal-body .sfm-card__head {
+    align-items: flex-start;
+    display: flex;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+body.student-portal-body .sfm-card__num {
+    align-items: center;
+    background: var(--spf-creambg);
+    border-radius: 10px;
+    color: var(--spf-goldtxt);
+    display: flex;
+    flex: none;
+    font-family: var(--spf-serif);
+    font-size: 16px;
+    font-weight: 600;
+    height: 34px;
+    justify-content: center;
+    width: 34px;
+}
+
+body.student-portal-body .sfm-card__headtext {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+body.student-portal-body .sfm-card__title {
+    color: var(--spf-ink);
+    font-family: var(--spf-serif);
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+body.student-portal-body .sfm-card__sub {
+    color: var(--spf-muted);
+    font-size: 13px;
+    margin-top: 3px;
+}
+
+body.student-portal-body .sfm-tag {
+    align-items: center;
+    background: var(--spf-paper);
+    border: 1px solid var(--spf-line);
+    border-radius: 999px;
+    color: var(--spf-faint);
+    display: inline-flex;
+    flex: none;
+    font-size: 10.5px;
+    font-weight: 700;
+    gap: 6px;
+    letter-spacing: 0.08em;
+    padding: 6px 12px;
+    text-transform: uppercase;
+}
+
+body.student-portal-body .sfm-note {
+    color: var(--spf-muted);
+    font-size: 12.5px;
+    margin-top: 14px;
+}
+
+/* ── Read-only record panel ────────────────────────────────────────────── */
+
+body.student-portal-body .sfm-record {
+    background: var(--spf-paper);
+    border: 1px solid var(--spf-hairline);
+    border-radius: 12px;
+    display: grid;
+    gap: 20px 28px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 20px 22px;
+}
+
+body.student-portal-body .sfm-record__label {
+    color: var(--spf-muted);
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+body.student-portal-body .sfm-record__value {
+    color: var(--spf-ink);
+    font-size: 15px;
+    font-weight: 600;
+    word-break: break-word;
+}
+
+/* ── Fields ────────────────────────────────────────────────────────────── */
+
+body.student-portal-body .sfm-grid {
+    display: grid;
+    gap: 18px 22px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body.student-portal-body .sfm-field--full {
+    grid-column: 1 / -1;
+}
+
+body.student-portal-body .sfm-label {
+    color: var(--spf-ink);
+    display: block;
+    font-size: 13.5px;
+    font-weight: 600;
+    margin-bottom: 7px;
+}
+
+body.student-portal-body .sfm-req {
+    color: #b42318;
+    margin-left: 2px;
+}
+
+body.student-portal-body .sfm-hint {
+    color: var(--spf-muted);
+    font-size: 12.5px;
+    margin: -3px 0 8px;
+}
+
+/* A hint that sits under its field rather than above it. */
+body.student-portal-body .sfm-hint--after {
+    margin: 6px 0 0;
+}
+
+body.student-portal-body .sfm-input,
+body.student-portal-body .sfm-select,
+body.student-portal-body .sfm-textarea {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-border2);
+    border-radius: 10px;
+    box-sizing: border-box;
+    color: var(--spf-ink);
+    font-family: var(--spf-sans);
+    font-size: 14.5px;
+    padding: 12px 14px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    width: 100%;
+}
+
+body.student-portal-body .sfm-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%236b6b66' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+    background-position: right 14px center;
+    background-repeat: no-repeat;
+    padding-right: 38px;
+}
+
+body.student-portal-body .sfm-textarea {
+    min-height: 130px;
+    resize: vertical;
+}
+
+body.student-portal-body .sfm-input:focus,
+body.student-portal-body .sfm-select:focus,
+body.student-portal-body .sfm-textarea:focus {
+    border-color: var(--spf-gold);
+    box-shadow: 0 0 0 3px var(--spf-goldsoft);
+    outline: none;
+}
+
+body.student-portal-body .sfm-input.sfm-invalid,
+body.student-portal-body .sfm-select.sfm-invalid,
+body.student-portal-body .sfm-textarea.sfm-invalid {
+    border-color: #d6a9a4;
+}
+
+body.student-portal-body .sfm-error {
+    color: #b42318;
+    font-size: 12.5px;
+    margin-top: 6px;
+}
+
+body.student-portal-body .sfm-count {
+    color: var(--spf-muted);
+    font-size: 12px;
+    margin-top: 6px;
+    text-align: right;
+}
+
+/* ── Upload ────────────────────────────────────────────────────────────── */
+
+body.student-portal-body .sfm-drop {
+    background: var(--spf-paper);
+    border: 1px dashed var(--spf-border2);
+    border-radius: 12px;
+    cursor: pointer;
+    display: block;
+    padding: 26px 20px;
+    text-align: center;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+body.student-portal-body .sfm-drop:hover,
+body.student-portal-body .sfm-drop.sfm-drop--over {
+    background: var(--spf-creambg);
+    border-color: var(--spf-gold);
+}
+
+body.student-portal-body .sfm-drop__title {
+    color: var(--spf-ink);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+body.student-portal-body .sfm-drop__hint {
+    color: var(--spf-muted);
+    font-size: 12.5px;
+    margin-top: 4px;
+}
+
+body.student-portal-body .sfm-files {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+body.student-portal-body .sfm-file {
+    align-items: center;
+    background: var(--spf-card);
+    border: 1px solid var(--spf-line);
+    border-radius: 10px;
+    display: flex;
+    font-size: 13px;
+    gap: 10px;
+    padding: 9px 12px;
+}
+
+body.student-portal-body .sfm-file__name {
+    color: var(--spf-ink);
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.student-portal-body .sfm-file__size {
+    color: var(--spf-muted);
+    flex: none;
+    font-size: 12px;
+}
+
+/* ── Declaration + submit ──────────────────────────────────────────────── */
+
+body.student-portal-body .sfm-declare {
+    align-items: flex-start;
+    background: var(--spf-paper);
+    border: 1px solid var(--spf-hairline);
+    border-radius: 12px;
+    display: flex;
+    gap: 12px;
+    padding: 18px 20px;
+}
+
+body.student-portal-body .sfm-declare input[type="checkbox"] {
+    accent-color: var(--spf-bronze);
+    flex: none;
+    height: 17px;
+    margin-top: 2px;
+    width: 17px;
+}
+
+body.student-portal-body .sfm-declare__text {
+    color: var(--spf-body);
+    font-size: 13.5px;
+    line-height: 1.55;
+}
+
+body.student-portal-body .sfm-actions {
+    align-items: center;
+    display: flex;
+    gap: 14px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+body.student-portal-body .sfm-btn {
+    background: var(--spf-graphite);
+    border: 1px solid var(--spf-graphite);
+    border-radius: 10px;
+    color: #fff;
+    cursor: pointer;
+    font-family: var(--spf-sans);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 12px 22px;
+    transition: opacity 0.15s ease;
+}
+
+body.student-portal-body .sfm-btn:hover {
+    opacity: 0.88;
+}
+
+body.student-portal-body .sfm-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+body.student-portal-body .sfm-btn--ghost {
+    background: transparent;
+    border-color: var(--spf-border2);
+    color: var(--spf-body);
+}
+
+/* ── Progress panel ────────────────────────────────────────────────────── */
+
+body.student-portal-body .sfm-aside {
+    position: sticky;
+    top: 24px;
+}
+
+body.student-portal-body .sfm-panel {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-line);
+    border-radius: 16px;
+    padding: 22px 22px 20px;
+}
+
+body.student-portal-body .sfm-panel__title {
+    color: var(--spf-muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+}
+
+body.student-portal-body .sfm-prog {
+    border-left: 2px solid var(--spf-line);
+    display: block;
+    padding: 6px 0 6px 14px;
+    text-decoration: none;
+}
+
+body.student-portal-body .sfm-prog + .sfm-prog {
+    margin-top: 2px;
+}
+
+body.student-portal-body .sfm-prog.sfm-prog--done,
+body.student-portal-body .sfm-prog.sfm-prog--active {
+    border-left-color: var(--spf-gold);
+}
+
+body.student-portal-body .sfm-prog__name {
+    color: var(--spf-ink);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+body.student-portal-body .sfm-prog__state {
+    color: var(--spf-muted);
+    font-size: 12.5px;
+    margin-top: 2px;
+}
+
+body.student-portal-body .sfm-prog--done .sfm-prog__state {
+    color: var(--spf-goldtxt);
+}
+
+body.student-portal-body .sfm-panel__foot {
+    border-top: 1px solid var(--spf-hairline);
+    color: var(--spf-muted);
+    font-size: 12.5px;
+    margin-top: 18px;
+    padding-top: 14px;
+}
+
+/* ── Submitted state ───────────────────────────────────────────────────── */
+
+body.student-portal-body .sfm-flash {
+    align-items: flex-start;
+    background: var(--spf-greenbg);
+    border: 1px solid #cfdcc9;
+    border-radius: 12px;
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 16px 18px;
+}
+
+body.student-portal-body .sfm-flash__title {
+    color: var(--spf-green);
+    font-size: 14.5px;
+    font-weight: 700;
+}
+
+body.student-portal-body .sfm-flash__text {
+    color: var(--spf-body);
+    font-size: 13.5px;
+    margin-top: 3px;
+}
+
+body.student-portal-body .sfm-alert {
+    background: #fbeceb;
+    border: 1px solid #e7c3bf;
+    border-radius: 12px;
+    color: #8c2b22;
+    font-size: 13.5px;
+    margin-bottom: 20px;
+    padding: 14px 18px;
+}
+
+body.student-portal-body .sfm-alert ul {
+    list-style: disc;
+    margin: 6px 0 0;
+    padding-left: 18px;
+}
+
+/* ── Narrow screens ────────────────────────────────────────────────────── */
+
+@media (max-width: 1100px) {
+    body.student-portal-body .sfm {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    body.student-portal-body .sfm-aside {
+        order: -1;
+        position: static;
+    }
+}
+
+@media (max-width: 640px) {
+    body.student-portal-body .sfm-record,
+    body.student-portal-body .sfm-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    body.student-portal-body .sfm-head {
+        flex-direction: column;
+    }
+
+    body.student-portal-body .sfm-title {
+        font-size: 27px;
+    }
+}
+
+/* ── Confirmation page ─────────────────────────────────────────────────── */
+
+body.student-portal-body .sfm-done {
+    background: var(--spf-card);
+    border: 1px solid var(--spf-line);
+    border-radius: 16px;
+    margin: 0 auto;
+    max-width: 640px;
+    padding: 40px 44px 34px;
+    text-align: center;
+}
+
+body.student-portal-body .sfm-done__icon {
+    align-items: center;
+    background: var(--spf-greenbg);
+    border-radius: 50%;
+    color: var(--spf-green);
+    display: inline-flex;
+    height: 54px;
+    justify-content: center;
+    margin-bottom: 18px;
+    width: 54px;
+}
+
+body.student-portal-body .sfm-done__title {
+    color: var(--spf-ink);
+    font-family: var(--spf-serif);
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.2;
+    margin: 0 0 10px;
+}
+
+body.student-portal-body .sfm-done__lead {
+    color: var(--spf-dim);
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0 auto 24px;
+    max-width: 48ch;
+}
+
+body.student-portal-body .sfm-done__ref {
+    background: var(--spf-creambg);
+    border: 1px solid var(--spf-cream);
+    border-radius: 12px;
+    margin-bottom: 24px;
+    padding: 20px 22px;
+}
+
+body.student-portal-body .sfm-done__ref-label {
+    color: var(--spf-goldtxt);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+body.student-portal-body .sfm-done__ref-value {
+    color: var(--spf-ink);
+    font-family: var(--spf-serif);
+    font-size: 28px;
+    letter-spacing: 0.01em;
+    margin-top: 6px;
+}
+
+body.student-portal-body .sfm-done__ref-note {
+    color: var(--spf-muted);
+    font-size: 12.5px;
+    margin-top: 6px;
+}
+
+body.student-portal-body .sfm-done__summary {
+    border-top: 1px solid var(--spf-hairline);
+    margin-bottom: 22px;
+    text-align: left;
+}
+
+body.student-portal-body .sfm-done__row {
+    align-items: baseline;
+    border-bottom: 1px solid var(--spf-hairline);
+    display: flex;
+    gap: 18px;
+    justify-content: space-between;
+    padding: 11px 2px;
+}
+
+body.student-portal-body .sfm-done__row span {
+    color: var(--spf-muted);
+    flex: none;
+    font-size: 13px;
+}
+
+body.student-portal-body .sfm-done__row strong {
+    color: var(--spf-ink);
+    font-size: 14px;
+    font-weight: 600;
+    text-align: right;
+}
+
+body.student-portal-body .sfm-done__next {
+    color: var(--spf-body);
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0 auto 26px;
+    max-width: 48ch;
+}
+
+body.student-portal-body .sfm-done__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+}
+
+body.student-portal-body .sfm-done__timer {
+    color: var(--spf-muted);
+    font-size: 12.5px;
+    margin-top: 20px;
+}
+
+@media (max-width: 640px) {
+    body.student-portal-body .sfm-done {
+        padding: 32px 22px 26px;
+    }
+
+    body.student-portal-body .sfm-done__row {
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    body.student-portal-body .sfm-done__row strong {
+        text-align: left;
+    }
+}
+
+/* ── Yes / no questions ────────────────────────────────────────────────── */
+
+body.student-portal-body .sfm-question {
+    border: none;
+    margin: 0;
+    min-width: 0;
+    padding: 0;
+}
+
+body.student-portal-body .sfm-question legend {
+    padding: 0;
+    margin-bottom: 10px;
+}
+
+body.student-portal-body .sfm-choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+body.student-portal-body .sfm-choice {
+    align-items: center;
+    background: var(--spf-card);
+    border: 1px solid var(--spf-border2);
+    border-radius: 10px;
+    color: var(--spf-ink);
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 14.5px;
+    gap: 10px;
+    min-height: 46px;
+    min-width: 104px;
+    padding: 0 18px 0 14px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+body.student-portal-body .sfm-choice:hover {
+    border-color: var(--spf-gold);
+}
+
+body.student-portal-body .sfm-choice input {
+    accent-color: var(--spf-bronze);
+    height: 17px;
+    margin: 0;
+    width: 17px;
+}
+
+body.student-portal-body .sfm-choice:has(input:checked) {
+    background: var(--spf-creambg);
+    border-color: var(--spf-gold);
+    box-shadow: 0 0 0 1px var(--spf-gold);
+    font-weight: 600;
+}
+
+body.student-portal-body .sfm-followup {
+    background: var(--spf-paper);
+    border: 1px solid var(--spf-hairline);
+    border-radius: 12px;
+    margin-top: 14px;
+    padding: 18px 20px;
+}
+
+body.student-portal-body .sfm-divider {
+    background: var(--spf-hairline);
+    border: none;
+    height: 1px;
+    margin: 22px 0;
+}
+
+body.student-portal-body .sfm-panel__version {
+    color: var(--spf-muted);
+    font-size: 11.5px;
+    margin-top: 10px;
+}
+
+/* ── Policy notices and the amount field ───────────────────────────────── */
+
+body.student-portal-body .sfm-notice {
+    align-items: flex-start;
+    background: var(--spf-creambg);
+    border: 1px solid var(--spf-cream);
+    border-radius: 12px;
+    color: var(--spf-goldtxt);
+    display: flex;
+    font-size: 13.5px;
+    gap: 12px;
+    line-height: 1.55;
+    margin-bottom: 20px;
+    padding: 14px 18px;
+}
+
+/* Inside a card the notice is one block among several, so it keeps a gap
+   below it; the card itself has no flex gap to lean on. */
+body.student-portal-body .sfm-card .sfm-notice {
+    margin-bottom: 18px;
+}
+
+body.student-portal-body .sfm-note + .sfm-grid,
+body.student-portal-body .sfm-record + .sfm-grid,
+body.student-portal-body .sfm-note + .sfm-declare,
+body.student-portal-body .sfm-record + .sfm-record {
+    margin-top: 18px;
+}
+
+body.student-portal-body .sfm-notice a {
+    color: var(--spf-ink);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+body.student-portal-body .sfm-notice strong {
+    color: var(--spf-ink);
+}
+
+body.student-portal-body .sfm-money {
+    position: relative;
+}
+
+body.student-portal-body .sfm-money__sign {
+    color: var(--spf-muted);
+    font-size: 15px;
+    left: 14px;
+    pointer-events: none;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+body.student-portal-body .sfm-money .sfm-input {
+    padding-left: 30px;
+}
+
+/* ── Guidance, option cards and the declaration text ───────────────────── */
+
+body.student-portal-body .sfm-before {
+    margin-bottom: 20px;
+}
+
+body.student-portal-body .sfm-eyebrow {
+    color: var(--spf-dim);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+}
+
+body.student-portal-body .sfm-guidance {
+    color: var(--spf-body);
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    gap: 8px;
+    line-height: 1.6;
+    list-style: disc;
+    margin: 0;
+    padding-left: 20px;
+}
+
+body.student-portal-body .sfm-guidance a {
+    color: var(--spf-ink);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    overflow-wrap: anywhere;
+}
+
+body.student-portal-body .sfm-helplist {
+    list-style: disc;
+    margin: 6px 0 0;
+    padding-left: 20px;
+}
+
+body.student-portal-body .sfm-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+body.student-portal-body .sfm-option {
+    align-items: flex-start;
+    background: var(--spf-card);
+    border: 1px solid var(--spf-border2);
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    gap: 12px;
+    padding: 13px 16px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+body.student-portal-body .sfm-option:hover {
+    border-color: var(--spf-gold);
+}
+
+body.student-portal-body .sfm-option input {
+    accent-color: var(--spf-bronze);
+    flex: none;
+    height: 17px;
+    margin-top: 3px;
+    width: 17px;
+}
+
+body.student-portal-body .sfm-option:has(input:checked) {
+    background: var(--spf-creambg);
+    border-color: var(--spf-gold);
+    box-shadow: 0 0 0 1px var(--spf-gold);
+}
+
+body.student-portal-body .sfm-option__title {
+    color: var(--spf-ink);
+    display: block;
+    font-size: 14.5px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+body.student-portal-body .sfm-option__desc {
+    color: var(--spf-muted);
+    display: block;
+    font-size: 13px;
+    line-height: 1.55;
+    margin-top: 3px;
+}
+
+body.student-portal-body .sfm-strong-note {
+    color: var(--spf-body);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.55;
+    margin: 12px 0 0;
+}
+
+body.student-portal-body .sfm-declaration {
+    background: var(--spf-paper);
+    border: 1px solid var(--spf-hairline);
+    border-radius: 12px;
+    margin-bottom: 18px;
+    padding: 18px 20px;
+}
+
+body.student-portal-body .sfm-declaration > p {
+    color: var(--spf-ink);
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 10px;
+}
+
+body.student-portal-body .sfm-notice--warning {
+    background: #fbeceb;
+    border-color: #e7c3bf;
+    color: #8c2b22;
+}
+
+body.student-portal-body .sfm-notice--warning strong {
+    color: #6a1522;
+}
+
+body.student-portal-body .sfm-question + .sfm-notice,
+body.student-portal-body .sfm-question .sfm-notice {
+    margin-top: 14px;
+}
+
+body.student-portal-body .sfm-textarea--tall {
+    min-height: 200px;
+}
+
+/* Cards on this form hold several blocks in a row rather than one grid. */
+body.student-portal-body .sfm-card > .sfm-question + .sfm-question,
+body.student-portal-body .sfm-card > .sfm-question + div,
+body.student-portal-body .sfm-card > div + div {
+    margin-top: 20px;
+}
+
+/* ── Repeating rows ────────────────────────────────────────────────────── */
+
+body.student-portal-body .sfm-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+body.student-portal-body .sfm-row {
+    align-items: flex-end;
+    background: var(--spf-paper);
+    border: 1px solid var(--spf-hairline);
+    border-radius: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 20px;
+    padding: 16px 18px;
+}
+
+body.student-portal-body .sfm-row__field {
+    flex: 1 1 170px;
+    min-width: 0;
+}
+
+body.student-portal-body .sfm-row__field--wide {
+    flex: 3 1 260px;
+}
+
+/* The details of an absence need the whole row to themselves. */
+body.student-portal-body .sfm-row__field--full {
+    flex: 1 1 100%;
+}
+
+body.student-portal-body .sfm-row__remove {
+    align-items: center;
+    background: var(--spf-card);
+    border: 1px solid var(--spf-border2);
+    border-radius: 10px;
+    color: var(--spf-muted);
+    cursor: pointer;
+    display: flex;
+    flex: none;
+    height: 44px;
+    justify-content: center;
+    transition: border-color 0.15s ease, color 0.15s ease;
+    width: 44px;
+}
+
+body.student-portal-body .sfm-row__remove:hover {
+    border-color: #b42318;
+    color: #b42318;
+}
+
+body.student-portal-body .sfm-btn--add {
+    align-self: flex-start;
+    display: inline-flex;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 10px 18px;
+}
+
+body.student-portal-body .sfm-options--grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+
+body.student-portal-body .sfm-record__full {
+    grid-column: 1 / -1;
+}

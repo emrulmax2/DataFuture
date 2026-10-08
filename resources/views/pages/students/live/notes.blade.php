@@ -498,6 +498,53 @@
     </div>
     <!-- END: Service Desk ticket panel -->
 
+    <!-- BEGIN: Confidential ticket PIN -->
+    {{-- A ticket marked confidential in Operations opens only after the reader
+         identifies themselves with their own document PIN — the same PIN that
+         opens an encrypted document, counted and locked out the same way. --}}
+    <div id="sdConfidentialModal" class="modal student-profile-vault-modal" data-tw-backdrop="static"
+         tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="sdConfidentialForm" method="post" action="#" autocomplete="off">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Confidential ticket</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;" aria-label="Close">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div class="student-profile-vault-docname">
+                            <i data-lucide="lock-keyhole" class="w-4 h-4"></i>
+                            <span id="sdConfidentialRef"></span>
+                        </div>
+
+                        <div class="mt-4">
+                            <label for="sdConfidentialPin" class="form-label">
+                                Enter your document PIN to open this ticket
+                            </label>
+                            <input type="password" id="sdConfidentialPin" name="pin"
+                                   class="form-control w-full student-profile-vault-pin"
+                                   inputmode="numeric" pattern="[0-9]*" maxlength="8"
+                                   autocomplete="one-time-code">
+                            <div id="sdConfidentialError" class="student-profile-vault-error" role="alert"></div>
+                        </div>
+
+                        <p class="student-profile-vault-note">
+                            <i data-lucide="scan-eye" class="w-4 h-4"></i>
+                            <span>This ticket was marked confidential by the department that holds it. Opening it is recorded against your name.</span>
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">Cancel</button>
+                        <button type="submit" class="btn btn-primary w-24" id="sdConfidentialSubmit">Open</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Confidential ticket PIN -->
+
     <!-- BEGIN: Delete Confirm Modal Content -->
     <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">

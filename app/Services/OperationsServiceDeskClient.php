@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -23,6 +24,20 @@ use Illuminate\Support\Facades\Log;
  */
 class OperationsServiceDeskClient
 {
+    /**
+     * The HTTP status of the last call, or null if it never got that far.
+     *
+     * Kept because "refused" and "unreachable" are different answers that both
+     * come back as null: a confidential ticket is a 403 and should be met with
+     * a PIN prompt, not an error about Operations being down.
+     */
+    private ?int $lastStatus = null;
+
+    public function lastStatus(): ?int
+    {
+        return $this->lastStatus;
+    }
+
     private function request()
     {
         $key = (string) config('services.operations.api_key');
@@ -42,6 +57,135 @@ class OperationsServiceDeskClient
     private function url(string $path): string
     {
         return rtrim((string) config('services.operations.url'), '/').'/api/service-desk/'.ltrim($path, '/');
+    }
+
+    /**
+     * The issue types a student may raise in one department.
+     *
+     * Service Desk settings in Operations decide what appears here, so the
+     * portal's dropdown is never out of step with what that end will accept.
+     * Cached briefly: the list changes when somebody edits the settings, which
+     * is rare, and a form page should not wait on a round trip every time.
+     *
+     * @return array<int, array{id: int, name: string}>  empty when Operations
+     *         cannot be reached, or the department is not open to students
+     */
+    public function studentIssueTypes(int $departmentId): array
+    {
+        return Cache::remember(
+            'operations.sd.issue-types.'.$departmentId,
+            now()->addMinutes(10),
+            function () use ($departmentId) {
+                $request = $this->request();
+
+                if (! $request):
+                    return [];
+                endif;
+
+                try {
+                    $response = $request->get($this->url('portal/departments/'.$departmentId.'/issue-types'));
+                } catch (\Throwable $e) {
+                    Log::warning('[Operations] Issue types could not be read.', [
+                        'department' => $departmentId, 'error' => $e->getMessage(),
+                    ]);
+
+                    return [];
+                }
+
+                if (! $response->successful()):
+                    Log::warning('[Operations] Issue types refused.', [
+                        'department' => $departmentId, 'status' => $response->status(),
+                    ]);
+
+                    return [];
+                endif;
+
+                return $response->json('data', []);
+            }
+        );
+    }
+
+    /**
+     * Raise a ticket on a student's behalf.
+     *
+     * The student has no account in Operations, so the ticket is requested by
+     * the portal account there and carries the student's name and registration
+     * number as who it came from. Everything else - reference, response target,
+     * who it is assigned to, who is told about it - is decided at that end, the
+     * same way a ticket raised by a member of staff is.
+     *
+     * `idempotencyKey` is the request this came from. Operations holds it
+     * unique, so a call that times out can be repeated without opening a second
+     * ticket: the same one comes back, flagged as a duplicate.
+     *
+     * @param  array{id: string|int, ref: ?string, name: string, course: ?string, email: ?string}  $student
+     * @param  array<int, array{name: string, contents: string}>  $files  already read, so a
+     *         retry can send the same files back from storage
+     * @return array{ok: bool, ticket?: array<string, mixed>, error?: string}
+     */
+    public function raiseStudentTicket(
+        string $idempotencyKey,
+        int $departmentId,
+        int $issueTypeId,
+        string $subject,
+        string $body,
+        array $student,
+        array $files = [],
+        string $priority = 'normal',
+    ): array {
+        $request = $this->request();
+
+        if (! $request):
+            return ['ok' => false, 'error' => 'Operations API key is not configured.'];
+        endif;
+
+        $payload = [
+            ['name' => 'idempotency_key', 'contents' => $idempotencyKey],
+            ['name' => 'department_id', 'contents' => (string) $departmentId],
+            ['name' => 'issue_type_id', 'contents' => (string) $issueTypeId],
+            ['name' => 'subject', 'contents' => $subject],
+            ['name' => 'body', 'contents' => $body],
+            ['name' => 'priority', 'contents' => $priority],
+            ['name' => 'student[id]', 'contents' => (string) $student['id']],
+            ['name' => 'student[name]', 'contents' => (string) $student['name']],
+        ];
+
+        foreach (['ref', 'course', 'email'] as $field):
+            if (! empty($student[$field])):
+                $payload[] = ['name' => 'student['.$field.']', 'contents' => (string) $student[$field]];
+            endif;
+        endforeach;
+
+        try {
+            /* Multipart throughout: the student's own files go with it, so the
+               ticket carries what they attached rather than a link back here. */
+            foreach ($files as $file):
+                $request = $request->attach('attachments[]', $file['contents'], $file['name']);
+            endforeach;
+
+            $response = $request->asMultipart()->post($this->url('portal/tickets'), $payload);
+        } catch (\Throwable $e) {
+            Log::warning('[Operations] Student ticket could not be raised.', [
+                'key' => $idempotencyKey, 'error' => $e->getMessage(),
+            ]);
+
+            return ['ok' => false, 'error' => $e->getMessage()];
+        }
+
+        if (! $response->successful()):
+            Log::warning('[Operations] Student ticket refused.', [
+                'key' => $idempotencyKey,
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
+            return [
+                'ok' => false,
+                'error' => $response->json('message') ?: 'Operations refused the ticket ('.$response->status().').',
+            ];
+        endif;
+
+        return ['ok' => true, 'ticket' => $response->json('data', [])];
     }
 
     /**
@@ -87,7 +231,7 @@ class OperationsServiceDeskClient
      *
      * @return array{body: string, type: string, name: string}|null
      */
-    public function attachment(int $attachmentId): ?array
+    public function attachment(int $attachmentId, bool $unlocked = false): ?array
     {
         $request = $this->request();
 
@@ -96,7 +240,10 @@ class OperationsServiceDeskClient
         endif;
 
         try {
-            $response = $request->get($this->url("attachments/{$attachmentId}"));
+            $response = $request->get(
+                $this->url("attachments/{$attachmentId}"),
+                $unlocked ? ['unlocked' => 1] : []
+            );
         } catch (\Throwable $e) {
             Log::warning('[Operations] Service Desk attachment failed.', ['attachment' => $attachmentId, 'error' => $e->getMessage()]);
 
@@ -132,7 +279,7 @@ class OperationsServiceDeskClient
      *
      * @return array<string, mixed>|null
      */
-    public function ticket(int $ticketId): ?array
+    public function ticket(int $ticketId, bool $unlocked = false): ?array
     {
         $request = $this->request();
 
@@ -140,13 +287,20 @@ class OperationsServiceDeskClient
             return null;
         endif;
 
+        $this->lastStatus = null;
+
         try {
-            $response = $request->get($this->url("tickets/{$ticketId}"));
+            /* `unlocked` is only ever true after this application has
+               challenged the reader for their own document PIN - it is this
+               app vouching for a person, not a way around the rule. */
+            $response = $request->get($this->url("tickets/{$ticketId}"), $unlocked ? ['unlocked' => 1] : []);
         } catch (\Throwable $e) {
             Log::warning('[Operations] Service Desk ticket failed.', ['ticket' => $ticketId, 'error' => $e->getMessage()]);
 
             return null;
         }
+
+        $this->lastStatus = $response->status();
 
         return $response->successful() ? $response->json('data') : null;
     }

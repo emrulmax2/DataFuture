@@ -8000,3 +8000,15 @@ body.student-profile-body .modal .modal-content > .alert:first-child {
     border-width: 0 0 1px;
     margin: 0;
 }
+
+/* A Service Desk ticket marked confidential in Operations. Listed so the record
+   is honest that one exists, but there is nothing to click: the row carries no
+   ticket id, and Operations will not serve its contents to this application. */
+body.student-profile-body .sd-ticket-row--locked {
+    background: #fafafa;
+    cursor: default;
+}
+
+body.student-profile-body .sd-ticket-row--locked td {
+    color: #8a8f98;
+}
