@@ -40,6 +40,9 @@ class UserHolidayController extends Controller
         $empLeaveDisableDates = (!empty($empLeaveDisableDates) ? implode(',', $empLeaveDisableDates) : '');
 
         $activePattern = $this->employeePossibleActivePattern($employeeId);
+        /* Notice period applies to a member of staff booking their own leave,
+           hence the 1 — the bounds helper keeps that and adds the pattern. */
+        $calendarBounds = $this->leaveCalendarBounds($employeeId, 0, $activePattern, 1);
         $empLeaveDisableDays = $this->employeeNonWorkingDays($employeeId, $activePattern);
         $empLeaveDisableDays = (!empty($empLeaveDisableDays) ? implode(',', $empLeaveDisableDays) : '');
 
@@ -58,14 +61,59 @@ class UserHolidayController extends Controller
                     })->where('effective_from', '<=', $today)->where('active', 1)->orderBy('effective_from', 'ASC')->get(),
             'activePattern' => $this->employeePossibleActivePattern($employeeId),
             'leaveOptionTypes' => $this->employeeLeaveOptionTypes($employeeId),
+            /* Bounded by the pattern as well as the year: a pattern that ends
+               in October cannot be booked against in December. */
             'calendarOptions' => [
-                'startDate' => $this->employeeLeaveStartDate($employeeId, 0, 1),
-                'endDate' => (isset($hrHolidayYear->end_date) && !empty($hrHolidayYear->end_date) ? date('Y-m-d', strtotime($hrHolidayYear->end_date)) : 'unknown'),
+                'startDate' => $calendarBounds['start'],
+                'endDate' => $calendarBounds['end'],
                 'disableDates' => $empLeaveDisableDates,
                 'disableDays' => $empLeaveDisableDays,
+                'closed' => $calendarBounds['closed'],
             ],
             'vacanties' => HrVacancy::where('active', 1)->get()->count()
         ]);
+    }
+
+    /**
+     * Does this working pattern apply to any part of this holiday year?
+     *
+     * Two ranges overlap when each starts on or before the other ends. That is
+     * the whole rule, and writing it that way matters: the hand-rolled version
+     * this replaces tested `effective_from` as strictly before or strictly
+     * after the year start and had no case for the two being equal, so a
+     * pattern beginning on the first day of a holiday year dropped out of that
+     * year the moment it was given an end date — taking the employee's whole
+     * entitlement off the page with it.
+     *
+     * An empty `$endTo` is a pattern still in force, so it reaches any year
+     * that has started.
+     *
+     * All four dates are Y-m-d, which compares correctly as a string.
+     */
+    protected function patternCoversYear($effectiveFrom, $endTo, $yearStart, $yearEnd): bool
+    {
+        if(empty($effectiveFrom) || empty($yearStart) || empty($yearEnd)):
+            return false;
+        endif;
+
+        return $effectiveFrom <= $yearEnd && (empty($endTo) || $endTo >= $yearStart);
+    }
+
+    /**
+     * The part of a holiday year this pattern actually covers.
+     *
+     * Entitlement, bank holidays and leave are all counted over this window
+     * rather than the whole year: a pattern that starts in June or ends in
+     * October earns only its own share.
+     *
+     * @return array{0: string, 1: string}  [start, end], both Y-m-d
+     */
+    protected function patternWindowForYear($effectiveFrom, $endTo, $yearStart, $yearEnd): array
+    {
+        $start = (!empty($effectiveFrom) && $effectiveFrom > $yearStart ? $effectiveFrom : $yearStart);
+        $end = (!empty($endTo) && $endTo < $yearEnd ? $endTo : $yearEnd);
+
+        return [$start, $end];
     }
 
     protected function employeeHolidayDetails($employee_id){
@@ -82,19 +130,11 @@ class UserHolidayController extends Controller
                 $empPatterms = [];
                 if(!empty($hrEmployeePatterns)):
                     foreach($hrEmployeePatterns as $pattern):
-                        $effective_from = (isset($pattern->effective_from) && !empty($pattern->effective_from) & $pattern->effective_from != '0000-00-00' ? date('Y-m-d', strtotime($pattern->effective_from)) : '');
-                        $end_to = (isset($pattern->end_to) && !empty($pattern->end_to) & $pattern->end_to != '0000-00-00' ? date('Y-m-d', strtotime($pattern->end_to)) : '');
-                        //dd($yearStart.' - '.$yearEnd.' - '.$effective_from.' '.$end_to);
-                        if(
-                            ((!empty($end_to) && $end_to > $yearStart && ($end_to <= $yearEnd || $end_to >= $yearEnd)) && ($effective_from < $yearStart || ($effective_from > $yearStart && $effective_from < $yearEnd)))
-                            || 
-                            ($end_to != '' && $effective_from < $yearStart && $end_to > $yearEnd) 
-                            || 
-                            ($end_to == '' && $effective_from < $yearEnd)
-                        ):
-                            //$psd = ($yearStart < $effective_from && $effective_from <= date('Y-m-d') ? $effective_from : $yearStart);
-                            $psd = ($yearStart < $effective_from && ($effective_from <= $yearEnd || $effective_from <= date('Y-m-d')) ? $effective_from : $yearStart);
-                            $ped = (($end_to != '' && $end_to != '0000-00-00') && $end_to < $yearEnd ? $end_to : $yearEnd);
+                        $effective_from = (isset($pattern->effective_from) && !empty($pattern->effective_from) && $pattern->effective_from != '0000-00-00' ? date('Y-m-d', strtotime($pattern->effective_from)) : '');
+                        $end_to = (isset($pattern->end_to) && !empty($pattern->end_to) && $pattern->end_to != '0000-00-00' ? date('Y-m-d', strtotime($pattern->end_to)) : '');
+
+                        if($this->patternCoversYear($effective_from, $end_to, $yearStart, $yearEnd)):
+                            [$psd, $ped] = $this->patternWindowForYear($effective_from, $end_to, $yearStart, $yearEnd);
                             $pattern['pattern_start'] = $psd;
                             $pattern['pattern_end'] = $ped;
                             
@@ -348,11 +388,8 @@ class UserHolidayController extends Controller
                 foreach($patternRes as $ptr):
                     $effective_from = (isset($ptr->effective_from) && !empty($ptr->effective_from) ? date('Y-m-d', strtotime($ptr->effective_from)) : '');
                     $end_to = (isset($ptr->end_to) && !empty($ptr->end_to) ? date('Y-m-d', strtotime($ptr->end_to)) : '');
-                    if(
-                        (($end_to != '' && $end_to > $year_start && ($end_to <= $year_end || $end_to >= $year_end)) && ($effective_from < $year_start || ($effective_from > $year_start && $effective_from < $year_end)))
-                        || ($end_to != '' && $effective_from < $year_start && $end_to > $year_end)
-                        || ($end_to == '' && $effective_from < $year_end)
-                    ):
+
+                    if($this->patternCoversYear($effective_from, $end_to, $year_start, $year_end)):
                         $pattern_id = $ptr->id;
                     endif;
                 endforeach;
@@ -377,8 +414,7 @@ class UserHolidayController extends Controller
         $effective_from = (isset($pattern->effective_from) && ($pattern->effective_from != '' && $pattern->effective_from != '0000-00-00') ? date('Y-m-d', strtotime($pattern->effective_from)) : '');
         $end_to = (isset($pattern->end_to) && ($pattern->end_to != '' && $pattern->end_to != '0000-00-00') ? date('Y-m-d', strtotime($pattern->end_to)) : '');
 
-        $sd = ($effective_from != '' && $year_start < $effective_from && ($effective_from <= date('Y-m-d') || $effective_from <= $year_end) ? $effective_from : $year_start);
-        $ed = ($end_to != '' && $end_to < $year_end ? $end_to : $year_end);
+        [$sd, $ed] = $this->patternWindowForYear($effective_from, $end_to, $year_start, $year_end);
 
         $holiday_entitlement = $this->employeeHolidayEntitlement($employee_id, $year_id, $pattern_id, $sd, $ed);
         $adjustmentArr = $this->employeeHolidayAdjustment($employee_id, $year_id, $pattern_id);
@@ -622,16 +658,10 @@ class UserHolidayController extends Controller
         
         if(!empty($patternRes) && $patternRes->count() > 0):
             foreach($patternRes as $r):
-                $effective_from = (isset($r->effective_from) && $r->effective_from != '' & $r->effective_from != '0000-00-00' ? date('Y-m-d', strtotime($r->effective_from)) : '');
-                $end_to = (isset($r->end_to) && $r->end_to != '' & $r->end_to != '0000-00-00' ? date('Y-m-d', strtotime($r->end_to)) : '');
-                
-                if(
-                    ($end_to != '' && $end_to > $start && ($end_to <= $end || $end_to >= $end)) && ($effective_from < $start || ($effective_from > $start && $effective_from < $end)) 
-                    || 
-                    ($end_to != '' && $effective_from < $start && $end_to > $end) 
-                    || 
-                    ($end_to == '' && $effective_from < $end)
-                ):
+                $effective_from = (isset($r->effective_from) && $r->effective_from != '' && $r->effective_from != '0000-00-00' ? date('Y-m-d', strtotime($r->effective_from)) : '');
+                $end_to = (isset($r->end_to) && $r->end_to != '' && $r->end_to != '0000-00-00' ? date('Y-m-d', strtotime($r->end_to)) : '');
+
+                if($this->patternCoversYear($effective_from, $end_to, $start, $end)):
                     $pattern = $r->id;
                 endif;
             endforeach;
@@ -671,6 +701,65 @@ class UserHolidayController extends Controller
         }
 
         return $html;
+    }
+
+    /**
+     * The dates the leave calendar may offer.
+     *
+     * The holiday year sets the outer limits, but a working pattern can be
+     * narrower than the year: one that ends in October cannot be booked
+     * against in December. Without this the calendar offered the whole year,
+     * and leave taken after the pattern ended belonged to no pattern at all —
+     * so it counted against nothing and showed nowhere.
+     *
+     * 'unknown' is passed through as it always was: it means there is no
+     * holiday year to bound the calendar with.
+     *
+     * `closed` means the window has already run out — a pattern that ended
+     * before the earliest date this person could book. The two dates are then
+     * made equal rather than left crossed over, because a calendar handed a
+     * minimum later than its maximum behaves unpredictably; the page shows a
+     * line of explanation instead of an empty month.
+     *
+     * @return array{start: string, end: string, closed: bool}
+     */
+    protected function leaveCalendarBounds($employee_id, $year_id = 0, $pattern_id = 0, $leave_start = 0): array
+    {
+        $today = date('Y-m-d');
+
+        if($year_id > 0):
+            $hrHolidayYear = HrHolidayYear::find($year_id);
+        else:
+            $hrHolidayYear = HrHolidayYear::where('start_date', '<=', $today)->where('end_date', '>=', $today)->where('active', 1)->get()->first();
+        endif;
+
+        $start = $this->employeeLeaveStartDate($employee_id, $year_id, $leave_start);
+        $end = (isset($hrHolidayYear->end_date) && !empty($hrHolidayYear->end_date) ? date('Y-m-d', strtotime($hrHolidayYear->end_date)) : 'unknown');
+
+        $pattern = ($pattern_id > 0 ? EmployeeWorkingPattern::find($pattern_id) : null);
+
+        if(!$pattern):
+            return ['start' => $start, 'end' => $end, 'closed' => false];
+        endif;
+
+        $effective_from = (isset($pattern->effective_from) && $pattern->effective_from != '' && $pattern->effective_from != '0000-00-00' ? date('Y-m-d', strtotime($pattern->effective_from)) : '');
+        $end_to = (isset($pattern->end_to) && $pattern->end_to != '' && $pattern->end_to != '0000-00-00' ? date('Y-m-d', strtotime($pattern->end_to)) : '');
+
+        if($effective_from != '' && $start != 'unknown' && $effective_from > $start):
+            $start = $effective_from;
+        endif;
+
+        if($end_to != '' && $end != 'unknown' && $end_to < $end):
+            $end = $end_to;
+        endif;
+
+        $closed = ($start != 'unknown' && $end != 'unknown' && $start > $end);
+
+        if($closed):
+            $start = $end;
+        endif;
+
+        return ['start' => $start, 'end' => $end, 'closed' => $closed];
     }
 
     public function employeeLeaveStartDate($employee_id, $year_id = 0, $leave_start = 0){
@@ -949,9 +1038,12 @@ class UserHolidayController extends Controller
         $empLeaveDisableDays = (!empty($empLeaveDisableDays) ? implode(',', $empLeaveDisableDays) : []);
 
         $res = [];
+        $calendarBounds = $this->leaveCalendarBounds($employee_id, $year_id, $pattern_id, 1);
+
         $res['statistics'] = $this->employeeLeaveStatistics($employee_id, $year_id, $pattern_id);
-        $res['startDate'] = $this->employeeLeaveStartDate($employee_id, $year_id, 1);
-        $res['endDate'] = (isset($hrHolidayYear->end_date) && !empty($hrHolidayYear->end_date) ? date('Y-m-d', strtotime($hrHolidayYear->end_date)) : 'unknown');
+        $res['startDate'] = $calendarBounds['start'];
+        $res['endDate'] = $calendarBounds['end'];
+        $res['closed'] = $calendarBounds['closed'];
         $res['disableDates'] = $empLeaveDisableDates;
         $res['disableDays'] = $empLeaveDisableDays;
 
