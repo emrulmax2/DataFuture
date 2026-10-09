@@ -282,7 +282,18 @@
                                         </div>
                                     </div>
 
-                                    <div class="ep-leave-calendar-wrap relative">
+                                    {{-- The pattern has already ended, so there is
+                                         nothing bookable left in this year. Said
+                                         plainly rather than shown as an empty
+                                         calendar nobody can select from. --}}
+                                    @if(!empty($calendarOptions['closed']))
+                                        <div class="ep-leave-closed" data-leave-closed>
+                                            <i data-lucide="calendar-x" class="w-4 h-4"></i>
+                                            <span>This working pattern has ended, so there are no dates left to book in this holiday year.</span>
+                                        </div>
+                                    @endif
+
+                                    <div class="ep-leave-calendar-wrap relative" data-leave-calendar-wrap>
                                         <div
                                             class="leaveCalendar"
                                             id="leaveCalendar"

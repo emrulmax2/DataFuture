@@ -330,8 +330,17 @@ import 'litepicker/dist/plugins/multiselect';
                             nameAttr: "data-lucide",
                         });
 
+                        /* A pattern that has already ended has nothing left to
+                           book in this year: say so and take the calendar out
+                           of play rather than offering dates it will refuse. */
+                        $('[data-leave-closed]').toggle(!!dataset.closed);
+                        $('[data-leave-calendar-wrap]').toggle(!dataset.closed);
+                        if(dataset.closed){
+                            $('.leaveFormStep2').fadeOut('fast').html('');
+                            $('#confirmRequest').attr('disabled', 'disabled');
+                        }
+
                         $('#leaveCalendar').attr('data-start', dataset.startDate);
-                        $('#leaveCalendar').attr('data-end', dataset.endDate);
                         $('#leaveCalendar').attr('data-end', dataset.endDate);
                         $('#leaveCalendar').attr('data-disable-dates', dataset.disableDates);
                         $('#leaveCalendar').attr('data-disable-days', dataset.disableDays);
