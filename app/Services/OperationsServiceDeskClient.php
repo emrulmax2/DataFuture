@@ -219,6 +219,52 @@ class OperationsServiceDeskClient
     }
 
     /**
+     * Every ticket this employee has been tagged on.
+     *
+     * Asked for by email. It is the one identifier both systems hold for a
+     * member of staff — their account in Operations was created from the one
+     * here by that address, and each side numbers people its own way.
+     *
+     * @return array<int, array<string, mixed>>|null  null means Operations could not be reached
+     */
+    public function ticketsForEmployee(string $email): ?array
+    {
+        $request = $this->request();
+
+        if (! $request):
+            return null;
+        endif;
+
+        try {
+            $response = $request->get($this->url('employees/tickets'), ['email' => $email]);
+        } catch (\Throwable $e) {
+            Log::warning('[Operations] Service Desk ticket list failed.', ['employee' => $email, 'error' => $e->getMessage()]);
+
+            return null;
+        }
+
+        if (! $response->successful()):
+            Log::warning('[Operations] Service Desk ticket list refused.', ['employee' => $email, 'status' => $response->status()]);
+
+            return null;
+        endif;
+
+        return $response->json('data', []);
+    }
+
+    /**
+     * Who is asking, when it is an employee's profile rather than a student's
+     * record. Operations serves an employee profile only a ticket tagged with
+     * that employee, so the address has to travel with every request.
+     *
+     * @return array<string, string>
+     */
+    private function audience(?string $employeeEmail): array
+    {
+        return $employeeEmail ? ['audience' => 'employee', 'email' => $employeeEmail] : [];
+    }
+
+    /**
      * A file from a ticket's conversation.
      *
      * Fetched rather than linked. The Operations endpoint is guarded by a
@@ -231,7 +277,7 @@ class OperationsServiceDeskClient
      *
      * @return array{body: string, type: string, name: string}|null
      */
-    public function attachment(int $attachmentId, bool $unlocked = false): ?array
+    public function attachment(int $attachmentId, bool $unlocked = false, ?string $employeeEmail = null): ?array
     {
         $request = $this->request();
 
@@ -242,7 +288,7 @@ class OperationsServiceDeskClient
         try {
             $response = $request->get(
                 $this->url("attachments/{$attachmentId}"),
-                $unlocked ? ['unlocked' => 1] : []
+                $this->audience($employeeEmail) + ($unlocked ? ['unlocked' => 1] : [])
             );
         } catch (\Throwable $e) {
             Log::warning('[Operations] Service Desk attachment failed.', ['attachment' => $attachmentId, 'error' => $e->getMessage()]);
@@ -275,11 +321,14 @@ class OperationsServiceDeskClient
     }
 
     /**
-     * One ticket, with the conversation the student's record may show.
+     * One ticket, with the conversation the tagged person's record may show.
+     *
+     * Pass `$employeeEmail` when it is being read from an employee's profile;
+     * without it the request is for a student record, as it always was.
      *
      * @return array<string, mixed>|null
      */
-    public function ticket(int $ticketId, bool $unlocked = false): ?array
+    public function ticket(int $ticketId, bool $unlocked = false, ?string $employeeEmail = null): ?array
     {
         $request = $this->request();
 
@@ -293,7 +342,10 @@ class OperationsServiceDeskClient
             /* `unlocked` is only ever true after this application has
                challenged the reader for their own document PIN - it is this
                app vouching for a person, not a way around the rule. */
-            $response = $request->get($this->url("tickets/{$ticketId}"), $unlocked ? ['unlocked' => 1] : []);
+            $response = $request->get(
+                $this->url("tickets/{$ticketId}"),
+                $this->audience($employeeEmail) + ($unlocked ? ['unlocked' => 1] : [])
+            );
         } catch (\Throwable $e) {
             Log::warning('[Operations] Service Desk ticket failed.', ['ticket' => $ticketId, 'error' => $e->getMessage()]);
 
