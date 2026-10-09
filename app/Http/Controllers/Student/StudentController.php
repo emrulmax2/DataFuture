@@ -1115,6 +1115,9 @@ class  StudentController extends Controller
                 ['label' => 'Accounts', 'href' => 'javascript:void(0);'],
             ],
             'student' => $student,
+            /* Both Edit buttons on the page hang off this: "Attendance > Edit"
+               under Live Student Portal Privileges. View alone shows the page. */
+            'can_edit' => (isset(auth()->user()->priv()['attendance_edit']) && auth()->user()->priv()['attendance_edit'] == 1 ? true : false),
             'dataSet' => $data,
             "term" =>$termData,
             "planDetails" => $planDetails,
@@ -1712,6 +1715,13 @@ class  StudentController extends Controller
     }
 
     public function AttendanceEditDetail(Student $student) {
+
+            /* The Edit buttons that lead here are hidden without this privilege;
+               the page has to refuse as well, or "view only" is one typed URL
+               away from the edit screen. */
+            if(!(isset(auth()->user()->priv()['attendance_edit']) && auth()->user()->priv()['attendance_edit'] == 1)):
+                abort(403, 'You are not permitted to access this page.');
+            endif;
 
             $attendanceFeedStatus = AttendanceFeedStatus::all();
             $termData = [];
