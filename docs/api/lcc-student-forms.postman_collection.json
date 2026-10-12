@@ -1,0 +1,1180 @@
+{
+  "info": {
+    "_postman_id": "8f3c1e2a-5d47-4b19-9a6e-7c2f10b4d3e5",
+    "name": "LCC Student Portal · Do It Online Forms (App API)",
+    "description": "The eight \"Do it online\" forms the College now takes in-house, as endpoints for the React Native app.\n\n**One pair per form.** `GET` hands over what the app cannot know - the student's own record and the lists it has to choose from. `POST` takes the filled-in form, saves the row, raises a Service Desk ticket in Operations and emails the student a receipt. There is no form builder: build the screens with native inputs and post the field names below.\n\n**Auth.** Every endpoint sits behind the `student-api` bearer guard. Run *Auth → Login* first; it writes the token into the `access_token` collection variable and the rest of the requests pick it up.\n\n**Dates** go out and come back as `YYYY-MM-DD`.\n\n**Bodies** are `multipart/form-data` so that uploads and repeating blocks work the same way everywhere. Repeating blocks are indexed (`assignments[0][title]`); multi-selects repeat the key (`reasons[]`).\n\n**Responses.** Success is `201` with `{ success: true, data: { id, reference, status, submitted_at, message } }`. `status` is `raised` when the ticket exists, or `queued` when Operations could not be reached - the submission is safe either way and a retry job finishes it, so treat `queued` as success and show the student the message from the response.\n\n**Validation** failures are `422` with `{ success: false, message, errors: { field: [...] } }`, keyed by the field names in these requests (nested rows come back as `absences.0.absent_to`). The messages are written for students and can be shown as they are.\n\n**Uploads** are optional on most forms, capped at 5 files of 5MB (10MB on form 9), pdf/doc/docx/jpg/jpeg/png. On forms 4, 8 and 16 at least one file is required when `evidence_method=upload`.\n\nEvery GET returns the same `student` block - `id`, `full_name`, `name`, `student_id`, `email`, `mobile`, `address`, `course`, `course_start_date`, `intake` - so the app can show the details box without a second call. The lists each GET returns (courses, reasons, grounds, issue types) are the only values the matching POST will accept, so build the pickers from them rather than hard-coding labels.\n\nThe four `device_*` fields are optional everywhere and are only recorded against the submission for support.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://lcc_datafuture.test",
+      "type": "string",
+      "description": "No trailing slash. Live: https://portal.lcc.ac.uk"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string",
+      "description": "Filled in by Auth -> Login."
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "description": "Run this first. The token it returns is stored in `access_token` and used by every other request.",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const token = body.token || body.access_token || (body.data && (body.data.token || body.data.access_token));",
+                  "if (token) {",
+                  "    pm.collectionVariables.set('access_token', token);",
+                  "    console.log('access_token stored');",
+                  "} else {",
+                  "    console.warn('No token in the login response - set access_token by hand.');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "email",
+                  "value": "student@example.com",
+                  "type": "text",
+                  "description": "The student's portal email address."
+                },
+                {
+                  "key": "password",
+                  "value": "password",
+                  "type": "text",
+                  "description": "The student's portal password."
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "login"
+              ]
+            },
+            "description": "The portal's existing student login. Returns the Passport bearer token the form endpoints need."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "9 · Course Change Request",
+      "description": "Form 9. The GET gives the student's current course plus the courses they may move to (their current course is excluded). The POST raises a Registry ticket and emails the student a receipt.",
+      "item": [
+        {
+          "name": "GET course-change",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/student/forms/course-change",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "student",
+                "forms",
+                "course-change"
+              ]
+            },
+            "description": "Returns `student`, `courses` and `limits`.\n\n`courses` is the proposed-course list with the student's own course removed - the only ids the POST will accept. The course they are on now is in `student.course` / `student.course_start_date`."
+          },
+          "response": []
+        },
+        {
+          "name": "POST course-change",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "proposed_course_id",
+                  "value": "27",
+                  "type": "text",
+                  "description": "Required. An id from `courses` in the GET. Must not be the student's current course."
+                },
+                {
+                  "key": "proposed_start_date",
+                  "value": "2027-01-05",
+                  "type": "text",
+                  "description": "Required. YYYY-MM-DD."
+                },
+                {
+                  "key": "reason",
+                  "value": "I would like to move onto the HND so that I can progress to the final year next September.",
+                  "type": "text",
+                  "description": "Required. At least 20 characters."
+                },
+                {
+                  "key": "declaration",
+                  "value": "1",
+                  "type": "text",
+                  "description": "Required. Must be 1/true - the student has agreed the declaration."
+                },
+                {
+                  "key": "device_type",
+                  "value": "mobile",
+                  "type": "text",
+                  "description": "Optional. Recorded on the request for support purposes."
+                },
+                {
+                  "key": "device_os",
+                  "value": "iOS 18.2",
+                  "type": "text",
+                  "description": "Optional."
+                },
+                {
+                  "key": "device_browser",
+                  "value": "LCC App 2.4.0",
+                  "type": "text",
+                  "description": "Optional. Send the app name and version."
+                },
+                {
+                  "key": "device_screen",
+                  "value": "390x844",
+                  "type": "text",
+                  "description": "Optional."
+                },
+                {
+                  "key": "documents[]",
+                  "type": "file",
+                  "src": [],
+                  "description": "Optional. Up to 5 files, 5MB each, pdf/doc/docx/jpg/jpeg/png. Tick the row and pick a file to test.",
+                  "disabled": true
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/student/forms/course-change",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "student",
+                "forms",
+                "course-change"
+              ]
+            },
+            "description": "201 with `{ id, reference, status, submitted_at, message }`. `status` is `raised` once the Service Desk ticket exists; if Operations is unreachable the row is still saved, `status` is `queued` and a retry job finishes the job."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "12 · Registration Discontinuation",
+      "description": "Form 12. Two conditional branches: `staff_details` is required when `discussed_with_staff=yes`, and `institute_name` is required when `offer_from_other_institute=yes`.",
+      "item": [
+        {
+          "name": "GET registration-discontinuation",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/student/forms/registration-discontinuation",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "student",
+                "forms",
+                "registration-discontinuation"
+              ]
+            },
+            "description": "Returns `student` and `limits`. The course they are on is in `student.course`."
+          },
+          "response": []
+        },
+        {
+          "name": "POST registration-discontinuation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "effective_from",
+                  "value": "2026-11-30",
+                  "type": "text",
+                  "description": "Required. YYYY-MM-DD. The date the student wants to stop."
+                },
+                {
+                  "key": "reason",
+                  "value": "I have been offered a place closer to home and cannot keep travelling to London.",
+                  "type": "text",
+                  "description": "Required. At least 20 characters."
+                },
+                {
+                  "key": "discussed_with_staff",
+                  "value": "yes",
+                  "type": "text",
+                  "description": "Optional. yes|no."
+                },
+                {
+                  "key": "staff_details",
+                  "value": "Discussed with my course tutor, Mr Ahmed, on 2 October.",
+                  "type": "text",
+                  "description": "Required when discussed_with_staff=yes. Max 191 characters."
+                },
+                {
+                  "key": "offer_from_other_institute",
+                  "value": "yes",
+                  "type": "text",
+                  "description": "Optional. yes|no."
+                },
+                {
+                  "key": "institute_name",
+                  "value": "Birmingham City College",
+                  "type": "text",
+                  "description": "Required when offer_from_other_institute=yes. Max 191 characters."
+                },
+                {
+                  "key": "institute_start_date",
+                  "value": "2027-01-11",
+                  "type": "text",
+                  "description": "Optional. YYYY-MM-DD."
+                },
+                {
+                  "key": "declaration",
+                  "value": "1",
+                  "type": "text",
+                  "description": "Required."
+                },
+                {
+                  "key": "device_type",
+                  "value": "mobile",
+                  "type": "text",
+                  "description": "Optional. Recorded on the request for support purposes."
+                },
+                {
+                  "key": "device_os",
+                  "value": "iOS 18.2",
+                  "type": "text",
+                  "description": "Optional."
+                },
+                {
+                  "key": "device_browser",
+                  "value": "LCC App 2.4.0",
+                  "type": "text",
+                  "description": "Optional. Send the app name and version."
+                },
+                {
+                  "key": "device_screen",
+                  "value": "390x844",
+                  "type": "text",
+                  "description": "Optional."
+                },
+                {
+                  "key": "documents[]",
+                  "type": "file",
+                  "src": [],
+                  "description": "Optional. Up to 5 files, 5MB each, pdf/doc/docx/jpg/jpeg/png. Tick the row and pick a file to test.",
+                  "disabled": true
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/student/forms/registration-discontinuation",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "student",
+                "forms",
+                "registration-discontinuation"
+              ]
+            },
+            "description": "201 with `{ id, reference, status, submitted_at, message }`."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "11 · Refund Request",
+      "description": "Form 11. Bank details are stored encrypted; only the last four digits of the account number are kept readable, and the receipt email never shows the full number.",
+      "item": [
+        {
+          "name": "GET refund-request",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/student/forms/refund-request",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "student",
+                "forms",
+                "refund-request"
+              ]
+            },
+            "description": "Returns `student`, `account_holder_name` (taken from the student record - the POST ignores any name you send), `policy_url` and `limits`."
+          },
+          "response": []
+        },
+        {
+          "name": "POST refund-request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "refund_amount",
+                  "value": "250.50",
+                  "type": "text",
+                  "description": "Required. Pounds, 0.01 to 999999.99. Commas and a leading currency symbol are stripped before validation."
+                },
+                {
+                  "key": "reason",
+                  "value": "I paid the tuition instalment twice in September and would like the duplicate returned.",
+                  "type": "text",
+                  "description": "Required. At least 20 characters."
+                },
+                {
+                  "key": "account_number",
+                  "value": "12345678",
+                  "type": "text",
+                  "description": "Required. 8 digits. Spaces and dashes are stripped."
+                },
+                {
+                  "key": "sort_code",
+                  "value": "123456",
+                  "type": "text",
+                  "description": "Required. 6 digits. Spaces and dashes are stripped."
+                },
+                {
+                  "key": "declaration",
+                  "value": "1",
+                  "type": "text",
+                  "description": "Required."
+                },
+                {
+                  "key": "device_type",
+                  "value": "mobile",
+                  "type": "text",
+                  "description": "Optional. Recorded on the request for support purposes."
+                },
+                {
+                  "key": "device_os",
+                  "value": "iOS 18.2",
+                  "type": "text",
+                  "description": "Optional."
+                },
+                {
+                  "key": "device_browser",
+                  "value": "LCC App 2.4.0",
+                  "type": "text",
+                  "description": "Optional. Send the app name and version."
+                },
+                {
+                  "key": "device_screen",
+                  "value": "390x844",
+                  "type": "text",
+                  "description": "Optional."
+                },
+                {
+                  "key": "documents[]",
+                  "type": "file",
+                  "src": [],
+                  "description": "Optional. Up to 5 files, 5MB each, pdf/doc/docx/jpg/jpeg/png. Tick the row and pick a file to test.",
+                  "disabled": true
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/student/forms/refund-request",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "student",
+                "forms",
+                "refund-request"
+              ]
+            },
+            "description": "201 with `{ id, reference, status, submitted_at, message }`. The account holder name is taken from the student record, not from the request."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4 · Academic Appeal (Stage 1)",
+      "description": "Form 4. An appeal can only be made once results have been formally notified, so `notified=no` is rejected with a 422 on that field. Choosing `evidence_method=upload` makes at least one document mandatory; choosing `none` makes `evidence_statement` mandatory instead.",
+      "item": [
+        {
+          "name": "GET academic-appeal",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/student/forms/academic-appeal",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "student",
+                "forms",
+                "academic-appeal"
+              ]
+            },
+            "description": "Returns `student`, `policy_url`, `registrar_email`, `grounds[]`, `evidence_methods[]`, `rules` and `limits`. Use `grounds[]` and `evidence_methods[]` to build the two pickers - do not hard-code the labels."
+          },
+          "response": []
+        },
+        {
+          "name": "POST academic-appeal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "notified",
+                  "value": "yes",
+                  "type": "text",
+                  "description": "Required. yes|no. `no` is refused - the student must wait for formal notification."
+                },
+                {
+                  "key": "grounds",
+                  "value": "mitigating_circumstances",
+                  "type": "text",
+                  "description": "Required. mitigating_circumstances|procedural_irregularity."
+                },
+                {
+                  "key": "early_resolution",
+                  "value": "I emailed my tutor and the module leader before submitting this appeal.",
+                  "type": "text",
+                  "description": "Required. At least 20 characters."
+                },
+                {
+                  "key": "decision",
+                  "value": "The late submission penalty applied to my November assignment.",
+                  "type": "text",
+                  "description": "Required. At least 20 characters."
+                },
+                {
+                  "key": "outcome",
+                  "value": "I would like the penalty removed and the original mark reinstated.",
+                  "type": "text",
+                  "description": "Required. At least 20 characters."
+                },
+                {
+                  "key": "evidence_method",
+                  "value": "none",
+                  "type": "text",
+                  "description": "Required. upload|none."
+                },
+                {
+                  "key": "evidence_statement",
+                  "value": "My GP surgery cannot issue a letter in time, so I have described the illness here.",
+                  "type": "text",
+                  "description": "Required when evidence_method=none. At least 20 characters."
+                },
+                {
+                  "key": "declaration",
+                  "value": "1",
+                  "type": "text",
+                  "description": "Required."
+                },
+                {
+                  "key": "device_type",
+                  "value": "mobile",
+                  "type": "text",
+                  "description": "Optional. Recorded on the request for support purposes."
+                },
+                {
+                  "key": "device_os",
+                  "value": "iOS 18.2",
+                  "type": "text",
+                  "description": "Optional."
+                },
+                {
+                  "key": "device_browser",
+                  "value": "LCC App 2.4.0",
+                  "type": "text",
+                  "description": "Optional. Send the app name and version."
+                },
+                {
+                  "key": "device_screen",
+                  "value": "390x844",
+                  "type": "text",
+                  "description": "Optional."
+                },
+                {
+                  "key": "documents[]",
+                  "type": "file",
+                  "src": [],
+                  "description": "Required when evidence_method=upload. Up to 5 files, 5MB each.",
+                  "disabled": true
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/student/forms/academic-appeal",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "student",
+                "forms",
+                "academic-appeal"
+              ]
+            },
+            "description": "201 with `{ id, reference, status, submitted_at, message }`."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "8 · Mitigating Circumstances (Assignment)",
+      "description": "Form 8. `assignments` is a repeating block - send it indexed, `assignments[0][title]`, `assignments[1][title]` and so on, up to 10. `reasons[]` is a multi-select; sending `other` makes `other_reason` mandatory.",
+      "item": [
+        {
+          "name": "GET mitigating-circumstances",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/student/forms/mitigating-circumstances",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "student",
+                "forms",
+                "mitigating-circumstances"
+              ]
+            },
+            "description": "Returns `student`, `policy_url`, `reasons[]`, `evidence_methods[]`, `rules`, `limits` (including the 10-assignment cap) and `outcome_working_days`."
+          },
+          "response": []
+        },
+        {
+          "name": "POST mitigating-circumstances",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "assignments[0][title]",
+                  "value": "Managing Financial Resources - Assignment 2",
+                  "type": "text",
+                  "description": "Required. Max 191 characters."
+                },
+                {
+                  "key": "assignments[0][submission_date]",
+                  "value": "2026-11-20",
+                  "type": "text",
+                  "description": "Required. YYYY-MM-DD."
+                },
+                {
+                  "key": "assignments[1][title]",
+                  "value": "Business Decision Making - Assignment 1",
+                  "type": "text",
+                  "description": "Optional second row. Up to 10 rows."
+                },
+                {
+                  "key": "assignments[1][submission_date]",
+                  "value": "2026-12-04",
+                  "type": "text",
+                  "description": "Required for each row sent."
+                },
+                {
+                  "key": "reasons[]",
+                  "value": "personal_illness",
+                  "type": "text",
+                  "description": "Required, at least one. personal_illness|bereavement|domestic_personal_problems|victim_of_serious_crime|other. Repeat the key to send several."
+                },
+                {
+                  "key": "other_reason",
+                  "value": "",
+                  "type": "text",
+                  "description": "Required only when reasons[] contains `other`. Max 191 characters."
+                },
+                {
+                  "key": "claim_details",
+                  "value": "I was in hospital for eight days over the submission week and could not complete the work.",
+                  "type": "text",
+                  "description": "Required. At least 20 characters."
+                },
+                {
+                  "key": "evidence_method",
+                  "value": "none",
+                  "type": "text",
+                  "description": "Required. upload|none. Switch to `upload` and attach the documents[] row below."
+                },
+                {
+                  "key": "declaration",
+                  "value": "1",
+                  "type": "text",
+                  "description": "Required."
+                },
+                {
+                  "key": "device_type",
+                  "value": "mobile",
+                  "type": "text",
+                  "description": "Optional. Recorded on the request for support purposes."
+                },
+                {
+                  "key": "device_os",
+                  "value": "iOS 18.2",
+                  "type": "text",
+                  "description": "Optional."
+                },
+                {
+                  "key": "device_browser",
+                  "value": "LCC App 2.4.0",
+                  "type": "text",
+                  "description": "Optional. Send the app name and version."
+                },
+                {
+                  "key": "device_screen",
+                  "value": "390x844",
+                  "type": "text",
+                  "description": "Optional."
+                },
+                {
+                  "key": "documents[]",
+                  "type": "file",
+                  "src": [],
+                  "description": "Required when evidence_method=upload - tick this row and pick a file. Up to 5 files, 5MB each.",
+                  "disabled": true
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/student/forms/mitigating-circumstances",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "student",
+                "forms",
+                "mitigating-circumstances"
+              ]
+            },
+            "description": "201 with `{ id, reference, status, submitted_at, message }`. Reference prefix MCA."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "16 · Mitigating Circumstances (Attendance)",
+      "description": "Form 16. Same shape as form 8 but the repeating block is `absences` (up to 20 rows) and `absent_to` must not be earlier than `absent_from`.",
+      "item": [
+        {
+          "name": "GET mitigating-attendance",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/student/forms/mitigating-attendance",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "student",
+                "forms",
+                "mitigating-attendance"
+              ]
+            },
+            "description": "Returns `student`, `policy_urls`, `reasons[]`, `evidence_methods[]`, `rules`, `limits` (including the 20-absence cap) and `outcome_working_days`."
+          },
+          "response": []
+        },
+        {
+          "name": "POST mitigating-attendance",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "absences[0][absent_from]",
+                  "value": "2026-09-18",
+                  "type": "text",
+                  "description": "Required. YYYY-MM-DD."
+                },
+                {
+                  "key": "absences[0][absent_to]",
+                  "value": "2026-10-06",
+                  "type": "text",
+                  "description": "Optional. YYYY-MM-DD. Must not be before absent_from."
+                },
+                {
+                  "key": "absences[0][details]",
+                  "value": "Admitted to hospital and signed off by my GP for three weeks.",
+                  "type": "text",
+                  "description": "Required. Max 500 characters."
+                },
+                {
+                  "key": "reasons[]",
+                  "value": "personal_illness",
+                  "type": "text",
+                  "description": "Required, at least one. Repeat the key to send several."
+                },
+                {
+                  "key": "other_reason",
+                  "value": "",
+                  "type": "text",
+                  "description": "Required only when reasons[] contains `other`."
+                },
+                {
+                  "key": "claim_details",
+                  "value": "I was unwell for most of September and have attached the fit note covering the period.",
+                  "type": "text",
+                  "description": "Required. At least 20 characters."
+                },
+                {
+                  "key": "evidence_method",
+                  "value": "none",
+                  "type": "text",
+                  "description": "Required. upload|none."
+                },
+                {
+                  "key": "declaration",
+                  "value": "1",
+                  "type": "text",
+                  "description": "Required."
+                },
+                {
+                  "key": "device_type",
+                  "value": "mobile",
+                  "type": "text",
+                  "description": "Optional. Recorded on the request for support purposes."
+                },
+                {
+                  "key": "device_os",
+                  "value": "iOS 18.2",
+                  "type": "text",
+                  "description": "Optional."
+                },
+                {
+                  "key": "device_browser",
+                  "value": "LCC App 2.4.0",
+                  "type": "text",
+                  "description": "Optional. Send the app name and version."
+                },
+                {
+                  "key": "device_screen",
+                  "value": "390x844",
+                  "type": "text",
+                  "description": "Optional."
+                },
+                {
+                  "key": "documents[]",
+                  "type": "file",
+                  "src": [],
+                  "description": "Required when evidence_method=upload. Up to 5 files, 5MB each.",
+                  "disabled": true
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/student/forms/mitigating-attendance",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "student",
+                "forms",
+                "mitigating-attendance"
+              ]
+            },
+            "description": "201 with `{ id, reference, status, submitted_at, message }`. Reference prefix MCT."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "7 · Complaint (Stage 1)",
+      "description": "Form 7. `spoken_to_details` is required when `spoken_to_anyone=yes`.",
+      "item": [
+        {
+          "name": "GET complaint",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/student/forms/complaint",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "student",
+                "forms",
+                "complaint"
+              ]
+            },
+            "description": "Returns `student`, `relationship`, `policy_url`, `registrar_emails[]`, `rules` and `limits`."
+          },
+          "response": []
+        },
+        {
+          "name": "POST complaint",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "complaint_details",
+                  "value": "The classroom in the Barking campus has had no working heating since the start of term.",
+                  "type": "text",
+                  "description": "Required. At least 20 characters."
+                },
+                {
+                  "key": "spoken_to_anyone",
+                  "value": "yes",
+                  "type": "text",
+                  "description": "Optional. yes|no."
+                },
+                {
+                  "key": "spoken_to_details",
+                  "value": "Reported it to reception twice and to my tutor on 5 October.",
+                  "type": "text",
+                  "description": "Required when spoken_to_anyone=yes. Max 191 characters."
+                },
+                {
+                  "key": "attempts",
+                  "value": "I reported it at reception on two occasions and emailed the campus manager.",
+                  "type": "text",
+                  "description": "Required. At least 20 characters."
+                },
+                {
+                  "key": "desired_outcome",
+                  "value": "I would like the heating repaired or the class moved to another room.",
+                  "type": "text",
+                  "description": "Required. At least 20 characters."
+                },
+                {
+                  "key": "declaration",
+                  "value": "1",
+                  "type": "text",
+                  "description": "Required."
+                },
+                {
+                  "key": "device_type",
+                  "value": "mobile",
+                  "type": "text",
+                  "description": "Optional. Recorded on the request for support purposes."
+                },
+                {
+                  "key": "device_os",
+                  "value": "iOS 18.2",
+                  "type": "text",
+                  "description": "Optional."
+                },
+                {
+                  "key": "device_browser",
+                  "value": "LCC App 2.4.0",
+                  "type": "text",
+                  "description": "Optional. Send the app name and version."
+                },
+                {
+                  "key": "device_screen",
+                  "value": "390x844",
+                  "type": "text",
+                  "description": "Optional."
+                },
+                {
+                  "key": "documents[]",
+                  "type": "file",
+                  "src": [],
+                  "description": "Optional. Up to 5 files, 5MB each, pdf/doc/docx/jpg/jpeg/png. Tick the row and pick a file to test.",
+                  "disabled": true
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/student/forms/complaint",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "student",
+                "forms",
+                "complaint"
+              ]
+            },
+            "description": "201 with `{ id, reference, status, submitted_at, message }`."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "15 · Report an IT Issue",
+      "description": "Form 15. This one goes to the IT & Monitoring department, and the issue types come live from Operations - only the types IT has opened to students appear, and the field is required. Call the GET each time the screen opens rather than caching the list.",
+      "item": [
+        {
+          "name": "GET it-report",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/student/forms/it-report",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "student",
+                "forms",
+                "it-report"
+              ]
+            },
+            "description": "Returns `student`, `issue_types` (live from Operations, student-enabled only), `issue_types_available`, `campuses` and `limits`. If Operations is unreachable `issue_types` is empty and `issue_types_available` is false - show the student a try-again message rather than an empty picker."
+          },
+          "response": []
+        },
+        {
+          "name": "POST it-report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "issue_type_id",
+                  "value": "22",
+                  "type": "text",
+                  "description": "Required. An id from `issue_types` in the GET. Ids IT has not opened to students are refused with a 422."
+                },
+                {
+                  "key": "venue_id",
+                  "value": "40",
+                  "type": "text",
+                  "description": "Required. An id from `campuses` in the GET."
+                },
+                {
+                  "key": "location",
+                  "value": "Room 204, second floor",
+                  "type": "text",
+                  "description": "Optional. Max 191 characters."
+                },
+                {
+                  "key": "description",
+                  "value": "The projector in the room will not connect to any laptop and the cable port is loose.",
+                  "type": "text",
+                  "description": "Required. At least 20 characters."
+                },
+                {
+                  "key": "device_type",
+                  "value": "mobile",
+                  "type": "text",
+                  "description": "Optional. Recorded on the request for support purposes."
+                },
+                {
+                  "key": "device_os",
+                  "value": "iOS 18.2",
+                  "type": "text",
+                  "description": "Optional."
+                },
+                {
+                  "key": "device_browser",
+                  "value": "LCC App 2.4.0",
+                  "type": "text",
+                  "description": "Optional. Send the app name and version."
+                },
+                {
+                  "key": "device_screen",
+                  "value": "390x844",
+                  "type": "text",
+                  "description": "Optional."
+                },
+                {
+                  "key": "documents[]",
+                  "type": "file",
+                  "src": [],
+                  "description": "Optional. Up to 5 files, 5MB each, pdf/doc/docx/jpg/jpeg/png. Tick the row and pick a file to test.",
+                  "disabled": true
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/student/forms/it-report",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "student",
+                "forms",
+                "it-report"
+              ]
+            },
+            "description": "201 with `{ id, reference, status, submitted_at, message }`."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
