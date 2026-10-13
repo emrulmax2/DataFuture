@@ -272,7 +272,7 @@ class StudentDataReportController extends Controller
 
         
 
-        $StudentData = Student::with('other','other.leaver','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest','qualHigest','qualHigest.previous_providers','qualHigest.qualification_type_identifiers','slcAgreement','assign','assignSingle','assignSingle.plan','assignSingle.plan.group','residency','criminalConviction','residency.residencyStatus')->whereIn('id',$studentIds)->get();
+        $StudentData = Student::with('other','other.leaver','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest','qualHigest','qualHigest.previous_providers','qualHigest.qualification_type_identifiers','slcAgreement','assign','assignSingle','assignSingle.plan','assignSingle.plan.group','residency','criminalConviction','residency.residencyStatus','activeCR')->whereIn('id',$studentIds)->get();
 
         $theCollection = [];
         $i=1;
@@ -445,6 +445,9 @@ class StudentDataReportController extends Controller
             foreach($StudentData as $student):
                 $j=0;
 
+                // crel follows the course relation last opened on the student's profile; the report always uses the active one
+                $student->setRelation('crel', $student->activeCR);
+
                 $theCollection[$row][$j++] = $student->registration_no;
                 $theCollection[$row][$j++] = $student->id;
                 $theCollection[$row][$j++] = $student->status->name;
@@ -560,7 +563,8 @@ class StudentDataReportController extends Controller
                             switch ($key) {
                                 case "full_time":
 
-                                    $theCollection[$row][$j++] = (isset($student->crel->propose->full_time) && $student->crel->propose->full_time == 1) ? 'Yes' : 'No';
+                                    $currentProposed = $this->currentProposedCourse($student);
+                                    $theCollection[$row][$j++] = (isset($currentProposed->full_time) && $currentProposed->full_time == 1) ? 'Yes' : 'No';
                                     
                                   break;
                                 case "SLC_course_code":
@@ -622,7 +626,8 @@ class StudentDataReportController extends Controller
                                     
                             elseif($key == "venue_id"):
 
-                                $theCollection[$row][$j++] = (isset($student->crel->propose->venue->name)) ? $student->crel->propose->venue->name : "";
+                                $currentProposed = $this->currentProposedCourse($student);
+                                $theCollection[$row][$j++] = (isset($currentProposed->venue->name)) ? $currentProposed->venue->name : "";
                             endif;
                     endforeach; 
 
@@ -801,5 +806,20 @@ class StudentDataReportController extends Controller
         return Excel::download(new ArrayCollectionExport($theCollection,"Student Data Sheet 01",$dfSidColumnIndex), 'student_data_report.xlsx');
                 
         //return Excel::download(new StudentDataReportBySelectionExport($returnData), 'student_data_report.xlsx');
+    }
+
+    // Same proposed course row the student's Course page shows and the venue change form updates
+    protected function currentProposedCourse($student) {
+        if(!isset($student->crel->id)) {
+            return null;
+        }
+
+        $currentCourse = StudentProposedCourse::with('venue')->where('student_id', $student->id)
+                        ->where('course_creation_id', $student->crel->course_creation_id)
+                        ->where('student_course_relation_id', $student->crel->id)
+                        ->get()
+                        ->first();
+
+        return (isset($currentCourse->id)) ? $currentCourse : $student->crel->propose;
     }
 }
