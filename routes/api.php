@@ -29,6 +29,14 @@ use App\Http\Controllers\Api\Student\DocumentOrderController;
 use App\Http\Controllers\Api\Student\DocumentPaymentReturnController;
 use App\Http\Controllers\Api\Student\DocumentRequestController;
 use App\Http\Controllers\Api\Student\DoItOnlineController;
+use App\Http\Controllers\Api\Student\Forms\AcademicAppealFormController;
+use App\Http\Controllers\Api\Student\Forms\ComplaintFormController;
+use App\Http\Controllers\Api\Student\Forms\CourseChangeFormController;
+use App\Http\Controllers\Api\Student\Forms\ItReportFormController;
+use App\Http\Controllers\Api\Student\Forms\MitigatingAttendanceFormController;
+use App\Http\Controllers\Api\Student\Forms\MitigatingCircumstancesFormController;
+use App\Http\Controllers\Api\Student\Forms\RefundFormController;
+use App\Http\Controllers\Api\Student\Forms\RegistrationDiscontinuationFormController;
 use App\Http\Controllers\Api\Student\ModuleListController;
 use App\Http\Controllers\Api\Student\PerformanceController;
 use App\Http\Controllers\Api\Student\PlanDetailsController;
@@ -182,6 +190,60 @@ Route::prefix('/v1')->name('api.')->group(function() {
 
         Route::controller(DoItOnlineController::class)->group(function() {
             Route::get('do-it-online/forms', 'formsList')->name('user.doitonline.forms');
+        });
+
+        /*
+         * The "Do it online" forms the College now takes in-house.
+         *
+         * One pair of endpoints per form, because they are different forms and
+         * not variations of one: GET hands over what the app cannot know - the
+         * student's own record and the lists it must choose from - and POST
+         * takes the submission. The app draws its own screens.
+         *
+         * A submission is stored here and raised as a Service Desk ticket in
+         * Operations, which issues the reference the student is emailed. That
+         * is the same code the website runs; nothing about it is duplicated.
+         */
+        Route::prefix('forms')->name('user.forms.')->group(function() {
+            Route::controller(CourseChangeFormController::class)->group(function() {
+                Route::get('course-change', 'show')->name('course-change.show');
+                Route::post('course-change', 'store')->name('course-change.store');
+            });
+
+            Route::controller(RegistrationDiscontinuationFormController::class)->group(function() {
+                Route::get('registration-discontinuation', 'show')->name('registration-discontinuation.show');
+                Route::post('registration-discontinuation', 'store')->name('registration-discontinuation.store');
+            });
+
+            Route::controller(RefundFormController::class)->group(function() {
+                Route::get('refund-request', 'show')->name('refund-request.show');
+                Route::post('refund-request', 'store')->name('refund-request.store');
+            });
+
+            Route::controller(AcademicAppealFormController::class)->group(function() {
+                Route::get('academic-appeal', 'show')->name('academic-appeal.show');
+                Route::post('academic-appeal', 'store')->name('academic-appeal.store');
+            });
+
+            Route::controller(ComplaintFormController::class)->group(function() {
+                Route::get('complaint', 'show')->name('complaint.show');
+                Route::post('complaint', 'store')->name('complaint.store');
+            });
+
+            Route::controller(MitigatingCircumstancesFormController::class)->group(function() {
+                Route::get('mitigating-circumstances', 'show')->name('mitigating-circumstances.show');
+                Route::post('mitigating-circumstances', 'store')->name('mitigating-circumstances.store');
+            });
+
+            Route::controller(MitigatingAttendanceFormController::class)->group(function() {
+                Route::get('mitigating-attendance', 'show')->name('mitigating-attendance.show');
+                Route::post('mitigating-attendance', 'store')->name('mitigating-attendance.store');
+            });
+
+            Route::controller(ItReportFormController::class)->group(function() {
+                Route::get('it-report', 'show')->name('it-report.show');
+                Route::post('it-report', 'store')->name('it-report.store');
+            });
         });
 
         Route::controller(ModuleListController::class)->group(function() {
