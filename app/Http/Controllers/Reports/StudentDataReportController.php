@@ -272,7 +272,7 @@ class StudentDataReportController extends Controller
 
         
 
-        $StudentData = Student::with('other','other.leaver','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest','qualHigest','qualHigest.previous_providers','qualHigest.qualification_type_identifiers','slcAgreement','assign','assignSingle','assignSingle.plan','assignSingle.plan.group','assignSingle.plan.venu','residency','criminalConviction','residency.residencyStatus')->whereIn('id',$studentIds)->get();
+        $StudentData = Student::with('other','other.leaver','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest','qualHigest','qualHigest.previous_providers','qualHigest.qualification_type_identifiers','slcAgreement','assign','assignSingle','assignSingle.plan','assignSingle.plan.group','residency','criminalConviction','residency.residencyStatus')->whereIn('id',$studentIds)->get();
 
         $theCollection = [];
         $i=1;
@@ -560,7 +560,7 @@ class StudentDataReportController extends Controller
                             switch ($key) {
                                 case "full_time":
 
-                                    $theCollection[$row][$j++] = (($student->course->$key)==1) ? 'Yes' : 'No'; 
+                                    $theCollection[$row][$j++] = (isset($student->crel->propose->full_time) && $student->crel->propose->full_time == 1) ? 'Yes' : 'No';
                                     
                                   break;
                                 case "SLC_course_code":
@@ -622,7 +622,7 @@ class StudentDataReportController extends Controller
                                     
                             elseif($key == "venue_id"):
 
-                                $theCollection[$row][$j++] = (isset($student->assignSingle->plan->venu)) ? $student->assignSingle->plan->venu->name : "";
+                                $theCollection[$row][$j++] = (isset($student->crel->propose->venue->name)) ? $student->crel->propose->venue->name : "";
                             endif;
                     endforeach; 
 
