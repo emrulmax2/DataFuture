@@ -106,6 +106,18 @@ class EmployeeTimeKeepingController extends Controller
            applied on each day is resolved inside the loop instead. */
         $patterns = $this->employeePatternPeriods($employee_id);
 
+        /* A day that falls before the employee's very first pattern keeps the
+           behaviour it has always had - read through the current pattern, and
+           hidden until that pattern starts. No pattern covers such a day, so
+           nothing here can say what the employee was contracted to or paid at
+           the time; touching it would restate historic pay rather than fix the
+           bug in hand. */
+        $activePattern = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)
+                         ->orderBy('id', 'DESC')->get()->first();
+        $effective_from = (isset($activePattern->effective_from) && !empty($activePattern->effective_from) ? date('Y-m-d', strtotime($activePattern->effective_from)) : '');
+        $workStart = (!empty($effective_from) ? ($effective_from > $monthStart ? $effective_from : $monthStart) : $monthStart);
+        $fallbackPatternID = (isset($activePattern->id) && $activePattern->id > 0 ? $activePattern->id : 0);
+
         $html = '';
         $workingHoursTotal = $holidayHoursTotal = $monthTotalPay = 0;
 
@@ -129,13 +141,19 @@ class EmployeeTimeKeepingController extends Controller
             $today = date('Y-m', strtotime($date)).($i < 10 ? '-0'.$i : '-'.$i);
             $D = date('D', strtotime($today));
             $N = date('N', strtotime($today));
-            /* The pattern the employee was actually on this day. An employee
-               with no pattern on record at all is treated as started, exactly as
-               before; only a day falling before their first pattern counts as
-               not yet started. */
+            /* The pattern the employee was actually on this day. When one
+               covers the day it answers for the schedule and the rate; when none
+               does - the day predates every pattern on record - the old
+               current-pattern rule above answers instead, so those days are left
+               exactly as they were. */
             $dayPattern = $this->patternForDate($patterns, $today);
-            $patternID = (isset($dayPattern['id']) && $dayPattern['id'] > 0 ? $dayPattern['id'] : 0);
-            $isWorkStarted = (empty($patterns) || $dayPattern !== null);
+            if($dayPattern !== null):
+                $patternID = $dayPattern['id'];
+                $isWorkStarted = true;
+            else:
+                $patternID = $fallbackPatternID;
+                $isWorkStarted = $today >= $workStart ? true : false;
+            endif;
             $payRate = $this->getEmployeeActivePatternsActivePayRate($employee_id, $patternID, $today);
 
             $todayPattern = EmployeeWorkingPatternDetail::where('employee_working_pattern_id', $patternID)->where('day_name', $D)->orderBy('id', 'desc')->get()->first();
