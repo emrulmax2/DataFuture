@@ -97,13 +97,14 @@ class EmployeeTimeKeepingController extends Controller
         $bhAutoBook = (isset($employee->payment->bank_holiday_auto_book) && $employee->payment->bank_holiday_auto_book == 'Yes' ? true : false);
         $hrHolidayYear = HrHolidayYear::find($holiday_year);
         $yearID = (isset($hrHolidayYear->id) && $hrHolidayYear->id > 0 ? $hrHolidayYear->id : 0);
-        $activePattern = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)
-                         ->orderBy('id', 'DESC')->get()->first();
-        $effective_from = (isset($activePattern->effective_from) && !empty($activePattern->effective_from) ? date('Y-m-d', strtotime($activePattern->effective_from)) : '');
-        $workStart = (!empty($effective_from) ? ($effective_from > $monthStart ? $effective_from : $monthStart) : $monthStart);
-
-        $patternID = (isset($activePattern->id) && $activePattern->id > 0 ? $activePattern->id : 0);
-        //$payRate = $this->getEmployeeActivePatternsActivePayRate($employee_id);
+        /* Every pattern this employee has been on, not just the current one.
+           `active` marks the pattern in force today, which is the wrong question
+           for a historic month: the moment a new pattern is added the old one is
+           switched off, and reading the timesheet through it blanked out every
+           earlier month - worked days fell through the "not started yet" gate
+           below and were dropped from the hours and the pay. The pattern that
+           applied on each day is resolved inside the loop instead. */
+        $patterns = $this->employeePatternPeriods($employee_id);
 
         $html = '';
         $workingHoursTotal = $holidayHoursTotal = $monthTotalPay = 0;
@@ -128,9 +129,15 @@ class EmployeeTimeKeepingController extends Controller
             $today = date('Y-m', strtotime($date)).($i < 10 ? '-0'.$i : '-'.$i);
             $D = date('D', strtotime($today));
             $N = date('N', strtotime($today));
+            /* The pattern the employee was actually on this day. An employee
+               with no pattern on record at all is treated as started, exactly as
+               before; only a day falling before their first pattern counts as
+               not yet started. */
+            $dayPattern = $this->patternForDate($patterns, $today);
+            $patternID = (isset($dayPattern['id']) && $dayPattern['id'] > 0 ? $dayPattern['id'] : 0);
+            $isWorkStarted = (empty($patterns) || $dayPattern !== null);
             $payRate = $this->getEmployeeActivePatternsActivePayRate($employee_id, $patternID, $today);
-            $isWorkStarted = $today >= $workStart ? true : false;
-            
+
             $todayPattern = EmployeeWorkingPatternDetail::where('employee_working_pattern_id', $patternID)->where('day_name', $D)->orderBy('id', 'desc')->get()->first();
             $isWorkingDay = (isset($todayPattern->id) && !empty($todayPattern->total) && $todayPattern->total != '00:00' ? true : false);
             $todayContractedHour = (isset($todayPattern->id) && !empty($todayPattern->total) && $todayPattern->total != '00:00' ? $this->convertStringToMinute($todayPattern->total) : 0);
@@ -143,7 +150,7 @@ class EmployeeTimeKeepingController extends Controller
             
             $todayWorkingHour = (isset($todayAttendance->total_work_hour) && $todayAttendance->total_work_hour > 0 ? $todayAttendance->total_work_hour : 0);
             $todayBankHoliday = HrBankHoliday::where('hr_holiday_year_id', $yearID)->where('start_date', $today)->get()->first();
-            $isBankHoliday = ($today >= $workStart && isset($todayBankHoliday->id) && $todayBankHoliday->id > 0 ? true : false);
+            $isBankHoliday = ($isWorkStarted && isset($todayBankHoliday->id) && $todayBankHoliday->id > 0 ? true : false);
 
             $note = [];
             $clockin_punch = (isset($todayAttendance->clockin_punch) && !empty($todayAttendance->clockin_punch) && $todayAttendance->clockin_punch != '00:00' ? $todayAttendance->clockin_punch.':00' : '');
@@ -408,6 +415,45 @@ class EmployeeTimeKeepingController extends Controller
         return $res;
     }
 
+    /* The employee's working patterns as plain [id, from, to] periods, oldest
+       first and normalised to Y-m-d. The model's accessors hand these dates back
+       as d-m-Y, which compares wrongly as a string, so the normalising is done
+       once here rather than at each use. */
+    protected function employeePatternPeriods($employee_id){
+        $periods = [];
+        $rows = EmployeeWorkingPattern::where('employee_id', $employee_id)->orderBy('id', 'ASC')->get();
+        foreach($rows as $row):
+            $from = (!empty($row->effective_from) && strtotime($row->effective_from) ? date('Y-m-d', strtotime($row->effective_from)) : '');
+            if($from === ''): continue; endif;
+            $periods[] = [
+                'id' => $row->id,
+                'from' => $from,
+                'to' => (!empty($row->end_to) && strtotime($row->end_to) ? date('Y-m-d', strtotime($row->end_to)) : ''),
+            ];
+        endforeach;
+
+        return $periods;
+    }
+
+    /* The pattern in force on $date: the latest one that had started by then and
+       has not ended. A pattern that has ended with no newer one to replace it
+       still answers for the day - that is what the old current-pattern lookup
+       did, and dropping it would blank out any day worked after a pattern's end
+       date. Null means the day falls before the employee's first pattern. */
+    protected function patternForDate($patterns, $date){
+        $covering = null;
+        $started = null;
+        foreach($patterns as $pattern):
+            if($pattern['from'] > $date): continue; endif;
+            if($started === null || $pattern['from'] >= $started['from']): $started = $pattern; endif;
+            if($pattern['to'] === '' || $pattern['to'] >= $date):
+                if($covering === null || $pattern['from'] >= $covering['from']): $covering = $pattern; endif;
+            endif;
+        endforeach;
+
+        return ($covering !== null ? $covering : $started);
+    }
+
     public function getEmployeeActivePatternsActivePayRate($employee_id, $pattern_id, $the_date){
         $the_date = date('Y-m-d', strtotime($the_date));
         $activePay = EmployeeWorkingPatternPay::where('employee_working_pattern_id', $pattern_id)
@@ -478,9 +524,10 @@ class EmployeeTimeKeepingController extends Controller
 
         $companyReg = Option::where('category', 'SITE_SETTINGS')->where('name', 'company_registration')->get()->first();
         $employment = Employment::where("employee_id", $employee_id)->orderBy('id', 'DESC')->get()->first();
-        $activePattern = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)
-                         ->orderBy('id', 'DESC')->get()->first();
-        $patternID = (isset($activePattern->id) && $activePattern->id > 0 ? $activePattern->id : 0);
+        /* The header rate has to come from the pattern in force in the month
+           being exported, or it contradicts the rows underneath it. */
+        $monthPattern = $this->patternForDate($this->employeePatternPeriods($employee_id), $the_date);
+        $patternID = (isset($monthPattern['id']) && $monthPattern['id'] > 0 ? $monthPattern['id'] : 0);
         $payRate = $this->getEmployeeActivePatternsActivePayRate($employee_id, $patternID, $the_date);
 
         $monthTitle = date('F Y', strtotime($the_date));

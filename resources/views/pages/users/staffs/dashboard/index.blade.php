@@ -103,10 +103,13 @@
         // Only draw the quick-actions panel when at least one row survives its gate.
         $lccdHasQuickActions = $myfollowups > 0 || $lccdShowReportAll || $lccdShowPolicies || (!$work_history_lock && (
             trim($internal_link_buttons) !== ''
-            || $lccdCan('group_email')
+            // Group Email, Expired Documents and Report Issue are hidden for now;
+            // their clauses stay commented out here so the panel is not drawn empty
+            // for someone whose only quick action was one of them.
+            // || $lccdCan('group_email')
             || $lccdCan('student_due_rep')
-            || ($lccdCan('expired_docs') && $hasDocumentReminder)
-            || $lccdCan('report_it_all')
+            // || ($lccdCan('expired_docs') && $hasDocumentReminder)
+            // || $lccdCan('report_it_all')
         ));
 
         // Processes with something outstanding — the only ones the old grid drew.
@@ -288,12 +291,14 @@
                             @if(!$work_history_lock)
                                 {!! $internal_link_buttons !!}
 
+                                {{-- Hidden for now - uncomment to bring back.
                                 @if($lccdCan('group_email'))
                                     <a href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#senGroupMailModal" class="lccd-action">
                                         <i data-lucide="mails"></i>
                                         <span class="lccd-action__label">Group Email</span>
                                     </a>
                                 @endif
+                                --}}
 
                                 @if($lccdCan('student_due_rep'))
                                     <a href="{{ route('report.student.due') }}" class="lccd-action">
@@ -302,12 +307,14 @@
                                     </a>
                                 @endif
 
+                                {{-- Hidden for now - uncomment to bring back.
                                 @if($lccdCan('expired_docs') && $hasDocumentReminder)
                                     <a href="{{ route('file.manager.reminder') }}" class="lccd-action">
                                         <i data-lucide="file-clock"></i>
                                         <span class="lccd-action__label">Expired Documents</span>
                                     </a>
                                 @endif
+                                --}}
                             @endif
 
                             @if($lccdShowPolicies)
@@ -337,12 +344,14 @@
                                 </a>
                             @endif
 
+                            {{-- Hidden for now - uncomment to bring back.
                             @if(!$work_history_lock && $lccdCan('report_it_all'))
                                 <a href="{{ route('report.any.it.employee') }}" class="lccd-action lccd-action--danger">
                                     <i data-lucide="life-buoy"></i>
                                     <span class="lccd-action__label">Report Issue</span>
                                 </a>
                             @endif
+                            --}}
                         </div>
                     </div>
                 @endif
