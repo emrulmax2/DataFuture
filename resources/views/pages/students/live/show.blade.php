@@ -48,7 +48,7 @@
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Nationality</div>
-                        <div class="col-span-6 md:col-span-8 font-medium">{{ $student->nation->name }}</div>
+                        <div class="col-span-6 md:col-span-8 font-medium">{{ isset($student->nation->name)  ? $student->nation->name : '' }}</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-3">
