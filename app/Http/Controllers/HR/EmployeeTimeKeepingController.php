@@ -132,6 +132,22 @@ class EmployeeTimeKeepingController extends Controller
             'Sick'                => ['sl', 'Sick'],
             'Authorise Unpaid'    => ['au', 'Authorised unpaid'],
             'Authorise Paid'      => ['ap', 'Authorised paid'],
+            'Maternity Leave'     => ['ml', 'Maternity leave'],
+            'Paternity Leave'     => ['pl', 'Paternity leave'],
+        ];
+        /* Hours away from work, split by the reason, for the month header. This
+           is a tally for display only - it is built from the status each day has
+           already been given and never feeds the worked, holiday or pay totals. */
+        $leaveTotals = [];
+        $leaveKeys = [
+            'Bank Holiday'        => ['bh', 'Bank Holiday'],
+            'Holiday Vacation'    => ['hv', 'Holiday'],
+            'Sick'                => ['sl', 'Sick'],
+            'Authorise Unpaid'    => ['au', 'Auth Unpaid'],
+            'Authorise Paid'      => ['ap', 'Auth Paid'],
+            'Unauthorised Absent' => ['mt', 'Unauth Absent'],
+            'Maternity Leave'     => ['ml', 'Maternity'],
+            'Paternity Leave'     => ['pl', 'Paternity'],
         ];
         $noteWarnings = ['Late', 'Leave Early', 'Clock Out Not Found', 'Break Not Found'];
         $warnSvg = '<svg class="ep-tk-note__ico" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -163,7 +179,7 @@ class EmployeeTimeKeepingController extends Controller
                                     $q->whereNotNull('clockin_system')->where('clockin_system', '!=', '00:00')->where('clockin_system', '!=', '');
                                 })->get()->first();
             $isClockedIn = (isset($todayAttendance->id) && $todayAttendance->id > 0 ? true : false);
-            $todayLeave = EmployeeAttendance::where('employee_id', $employee_id)->where('date', $today)->whereIn('leave_status', [1, 2, 3, 4, 5])->get()->first();
+            $todayLeave = EmployeeAttendance::where('employee_id', $employee_id)->where('date', $today)->whereIn('leave_status', [1, 2, 3, 4, 5, 6, 7])->get()->first();
             $isLeaveDay = (isset($todayLeave->id) && $todayLeave->id > 0 ? true : false);
             
             $todayWorkingHour = (isset($todayAttendance->total_work_hour) && $todayAttendance->total_work_hour > 0 ? $todayAttendance->total_work_hour : 0);
@@ -259,6 +275,7 @@ class EmployeeTimeKeepingController extends Controller
                 $holidayHoursTotal += $todayContractedHour;
             endif;
 
+            $leaveHour = 0;
             if(isset($todayLeave->id) && $todayLeave->id > 0):
                 $leaveHour = (isset($todayLeave->leaveDay->hour) && $todayLeave->leaveDay->hour > 0 ? $todayLeave->leaveDay->hour : (isset($todayLeave->leave_hour) && $todayLeave->leave_hour > 0 ? $todayLeave->leave_hour : 0));
                 switch($todayLeave->leave_status):
@@ -286,7 +303,28 @@ class EmployeeTimeKeepingController extends Controller
                         $dayHour += $leaveHour; 
                         $workingHoursTotal += $leaveHour;
                         break;
+                    case 6:
+                        $dayClass .= 'mlRow';
+                        $dayStatus = 'Maternity Leave';
+                        break;
+                    case 7:
+                        $dayClass .= 'plRow';
+                        $dayStatus = 'Paternity Leave';
+                        break;
                 endswitch;
+            endif;
+
+            /* Tally the day under its final status. A leave row that lands on a
+               bank holiday has already overwritten the status above, so reading
+               it here rather than at each branch is what stops the day being
+               counted twice. Sick, unpaid and absent days carry no leave hours
+               of their own, so they count the hours the employee was contracted
+               to work that day. */
+            if(isset($leaveKeys[$dayStatus])):
+                $statusMinutes = ($dayStatus === 'Bank Holiday' ? $todayContractedHour : ($leaveHour > 0 ? $leaveHour : $todayContractedHour));
+                if($statusMinutes > 0):
+                    $leaveTotals[$dayStatus] = (isset($leaveTotals[$dayStatus]) ? $leaveTotals[$dayStatus] : 0) + $statusMinutes;
+                endif;
             endif;
 
             // Pay is computed for both web + PDF so the month totals stay identical.
@@ -429,6 +467,18 @@ class EmployeeTimeKeepingController extends Controller
         $res['workingHourTotal'] = ($workingHoursTotal > 0 ? $this->calculateHourMinute($workingHoursTotal) : '00:00');
         $res['holidayHourTotal'] = ($holidayHoursTotal > 0 ? $this->calculateHourMinute($holidayHoursTotal) : '00:00');
         $res['monthTotalPay'] = ($monthTotalPay > 0 ? '£'.number_format($monthTotalPay, 2) : '£0.00');
+        /* Kept in the order declared above rather than the order the month
+           happened to run, so the month headers all read the same way. */
+        $res['leaveBreakdown'] = [];
+        foreach($leaveKeys as $leaveStatus => $leaveKey):
+            if(!empty($leaveTotals[$leaveStatus])):
+                $res['leaveBreakdown'][] = [
+                    'key' => $leaveKey[0],
+                    'label' => $leaveKey[1],
+                    'hours' => $this->calculateHourMinute($leaveTotals[$leaveStatus]),
+                ];
+            endif;
+        endforeach;
         $res['html'] = $html;
         return $res;
     }

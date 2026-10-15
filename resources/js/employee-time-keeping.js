@@ -12,9 +12,11 @@
         let theYear = $theBtn.attr('data-year');
         let $monthItem = $theBtn.closest('.lcc_month_accordion_item');
         let $monthBadge = $monthItem.find('.js-month-worked-total').first();
+        let $monthChips = $monthItem.find('.js-month-leave-totals').first();
 
         $theBtn.addClass('dataLoading');
         $monthBadge.text('Loading...');
+        $monthChips.empty();
 
         axios({
             method: "post",
@@ -33,10 +35,24 @@
                 $(target+' .ep-tk-table tfoot .tfootTotalHolidayHour').html(res.holidayHourTotal);
                 $(target+' .ep-tk-table tfoot .tfootTotalPay').html(res.monthTotalPay);
                 $monthBadge.text(res.workingHourTotal + ' worked').addClass('is-loaded');
+
+                // Hours away from work, one chip per reason. The server sends
+                // only the reasons this month actually used, already ordered.
+                $monthChips.empty();
+                (res.leaveBreakdown || []).forEach(function(item){
+                    $('<span/>', {
+                        'class': 'ep-tk-month-chip ep-tk-month-chip--' + item.key,
+                        'title': item.label + ': ' + item.hours
+                    }).append(
+                        $('<span/>', {'class': 'ep-tk-month-chip__label', text: item.label}),
+                        $('<span/>', {'class': 'ep-tk-month-chip__value', text: item.hours})
+                    ).appendTo($monthChips);
+                });
             }
         })
         .catch((error) => {
             $monthBadge.text('Try again');
+            $monthChips.empty();
             if (error.response) {
                 console.log("error");
             }

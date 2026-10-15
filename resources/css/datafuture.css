@@ -11056,11 +11056,65 @@ body.employee-profile-body .ep-tk-year-toggle__title {
 }
 body.employee-profile-body .ep-tk-month-toggle__title {
     font-size: 14.5px;
+    flex: 0 1 auto;
 }
 body.employee-profile-body .ep-tk-year-toggle__meta {
     color: #6e8b88;
     font-size: 11.5px;
     font-weight: 600;
+}
+/* Month header: hours away from work, one chip per reason. The chips sit
+   beside the worked badge, each in the colour its row pill already uses. */
+body.employee-profile-body .ep-tk-month-chips {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-left: auto;
+}
+body.employee-profile-body .ep-tk-month-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 23px;
+    padding: 3px 9px;
+    border: 1px solid currentColor;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+body.employee-profile-body .ep-tk-month-chip__label {
+    opacity: 0.85;
+    font-weight: 600;
+}
+body.employee-profile-body .ep-tk-month-chip--bh {
+    color: #b35418;
+    background: #fdf3ec;
+}
+body.employee-profile-body .ep-tk-month-chip--hv {
+    color: #1f689c;
+    background: #eef5fa;
+}
+body.employee-profile-body .ep-tk-month-chip--sl,
+body.employee-profile-body .ep-tk-month-chip--mt {
+    color: #b42318;
+    background: #fdeeed;
+}
+body.employee-profile-body .ep-tk-month-chip--au {
+    color: #6f4aa3;
+    background: #f3eefa;
+}
+body.employee-profile-body .ep-tk-month-chip--ap {
+    color: #187a45;
+    background: #ecf6f0;
+}
+body.employee-profile-body .ep-tk-month-chip--ml,
+body.employee-profile-body .ep-tk-month-chip--pl {
+    color: #9c4a7a;
+    background: #faeef5;
 }
 body.employee-profile-body .ep-tk-month-toggle__badge {
     display: inline-flex;
@@ -11452,7 +11506,8 @@ body.employee-profile-body .ep-tk-empty {
         width: 100%;
     }
     body.employee-profile-body .ep-tk-year-toggle__meta,
-    body.employee-profile-body .ep-tk-month-toggle__badge {
+    body.employee-profile-body .ep-tk-month-toggle__badge,
+    body.employee-profile-body .ep-tk-month-chips {
         display: none;
     }
     body.employee-profile-body .ep-tk-shell__body {

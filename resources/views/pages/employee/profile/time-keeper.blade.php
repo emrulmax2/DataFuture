@@ -56,6 +56,7 @@
                                                         <i data-lucide="calendar" class="w-4 h-4"></i>
                                                     </span>
                                                     <span class="ep-tk-month-toggle__title">{{ date('F Y', strtotime($month['start_date'])) }}</span>
+                                                    <span class="ep-tk-month-chips js-month-leave-totals"></span>
                                                     <span class="ep-tk-month-toggle__badge js-month-worked-total">{{ $isInitialMonth ? 'Loading...' : 'Time recorded' }}</span>
                                                     <span class="ep-tk-toggle__mark" aria-hidden="true"></span>
                                                 </button>
