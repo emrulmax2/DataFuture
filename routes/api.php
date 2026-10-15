@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\BudgetSyncController;
 use App\Http\Controllers\Api\BudgetTransactionController;
 use App\Http\Controllers\Api\FileManagerSyncController;
 use App\Http\Controllers\Api\UserMobileSyncController;
+use App\Http\Controllers\Api\WorkingPatternSyncController;
 use App\Http\Controllers\Api\ApplicantSyncController;
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Auth\SsoServerController;
@@ -89,6 +90,8 @@ Route::middleware(['client.credentials:sms.rooms.read'])->get('/rooms/sync', [Ro
 Route::middleware(['client.credentials:sms.book-locations.read'])->get('/book-locations/sync', [BookLocationSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.library-books.read'])->get('/library/books/sync', [LibraryBookSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.user-mobiles.read', 'throttle:sms-sync'])->withoutMiddleware('throttle:api')->get('/users/mobiles/sync', [UserMobileSyncController::class, 'index']);
+// Contracted hours, read off each employee's current working pattern.
+Route::middleware(['client.credentials:sms.working-patterns.read', 'throttle:sms-sync'])->withoutMiddleware('throttle:api')->get('/employees/working-patterns/sync', [WorkingPatternSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.file-manager.read', 'throttle:sms-sync'])->withoutMiddleware('throttle:api')->get('/file-manager/sync', [FileManagerSyncController::class, 'index']);
 
 /* Book covers for the Operations library sync. Taken by query parameter
