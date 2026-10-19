@@ -47,8 +47,6 @@ use App\Models\ResidencyStatus;
 use App\Models\SexIdentifier;
 use App\Models\Student;
 use App\Models\Venue;
-use Barryvdh\Debugbar\Facades\Debugbar as FacadesDebugbar;
-use DebugBar\DebugBar;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -232,7 +230,6 @@ class ApplicationController extends Controller
                 $applicantKin->country = $student->kin->address->country;
                 $applicantKin->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
                 $applicantKin->save();
-                FacadesDebugbar::info('Here is the proof of id: ' . $student->ProofOfIdLatest);
                 $applicantProofofId = new ApplicantProofOfId();
                 $applicantProofofId->applicant_id = $applicant->id;
                 $applicantProofofId->proof_type = isset($student->ProofOfIdLatest->proof_type) ? $student->ProofOfIdLatest->proof_type : null;
@@ -688,8 +685,13 @@ class ApplicationController extends Controller
             $applicant = Applicant::find($applicant_id);
             $agentUserId = auth('agent')->user()->id;
             
-            $referral = ReferralCode::where('code',$applicant->referral_code)->get()->first();
-            $applicant->agent_user_id = $referral->agent_user_id;
+            // The referral code is optional; without an agent code the application stays with the submitting agent.
+            $referral = (!empty($applicant->referral_code) ? ReferralCode::where('code', $applicant->referral_code)->first() : null);
+            if(isset($referral->agent_user_id) && $referral->agent_user_id > 0):
+                $applicant->agent_user_id = $referral->agent_user_id;
+            elseif(empty($applicant->agent_user_id)):
+                $applicant->agent_user_id = $agentUserId;
+            endif;
             $applicant->updated_by = auth('agent')->user()->id;
             $applicant->save();
             if(isset($applicant->contact)) {
@@ -705,12 +707,12 @@ class ApplicationController extends Controller
                                 ->orderBy('id', 'desc')
                                 ->get()
                                 ->first();
-            $application->applicant_id = $applicant_id;
-            $application->updated_by = auth('agent')->user()->id;
-            $application->save();
+            if(isset($application->id)):
+                $application->applicant_id = $applicant_id;
+                $application->updated_by = auth('agent')->user()->id;
+                $application->save();
+            endif;
             //Auth::guard('applicant')->logout();
-
-            FacadesDebugbar::info("Application updated with agent: ".$referral->agent_user_id );
         }
         session(['applicantSubmission' => 'Application successfully submitted.']);
 
