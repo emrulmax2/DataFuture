@@ -2591,7 +2591,7 @@ class AdmissionController extends Controller
                 $this->seedStudentConversionLogs($applicant_id, $chainedBatch->id);
                 /* Student Process END */
             elseif($statusidID == 6):
-                $docuSealDoc = $this->sendDocusealForm($applicant_id);
+                $this->sendDocusealForm($applicant_id);
             endif;
 
             $statusRow = Status::find($statusidID);
@@ -3086,8 +3086,8 @@ class AdmissionController extends Controller
     public function sendDocusealForm($applicant_id){
         $applicant = Applicant::find($applicant_id);
         
-        $DOCUSEALAPI = env("DOCUSEAL_API_KEY", false);
-        $OFFER_ACCEPTANCE_TEMPLATE_ID = env("OFFER_ACCEPTANCE_FORM_TEMPLATE_ID", false);
+        $DOCUSEALAPI = config('services.docuseal.api_key');
+        $OFFER_ACCEPTANCE_TEMPLATE_ID = config('services.docuseal.offer_acceptance_template_id');
         if($DOCUSEALAPI && $OFFER_ACCEPTANCE_TEMPLATE_ID):
             $address = (isset($applicant->contact->full_address) && !empty($applicant->contact->full_address) ? strip_tags($applicant->contact->full_address) : '');
             $postArray = [
@@ -3151,7 +3151,7 @@ class AdmissionController extends Controller
                     ],
                     [
                         'role' => 'Applicant',
-                        'email' => (in_array(env('APP_ENV'), ['local', 'development'])) ? env('DOCUSEAL_TEST_EMAIL') : $applicant->users->email,
+                        'email' => app()->environment(['local', 'development']) ? config('services.docuseal.test_email') : $applicant->users->email,
                     ]
                 ]
             ];
@@ -3169,6 +3169,7 @@ class AdmissionController extends Controller
             $statusCode = $res->getStatusCode();
             return $statusCode;
         else:
+            Log::warning('DocuSeal Offer Acceptance form not sent: DOCUSEAL_API_KEY or OFFER_ACCEPTANCE_FORM_TEMPLATE_ID is not configured.', ['applicant_id' => $applicant_id]);
             return false;
         endif;
     }
