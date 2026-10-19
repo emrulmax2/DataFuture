@@ -53,6 +53,8 @@ class LegacyPrivilegeMap
         'settings.accounts_settings' => 'menu_accounts_settings',
         'settings.file_manager_settings' => 'menu_file_manager_settings',
         'settings.workplacement' => 'menu_workplacement',
+        // Developer log viewer (Site Settings > Error Logs) — see ErrorLogService::canView().
+        'settings.error_logs' => 'menu_error_logs',
         'settings_workplacement.workplacement_details' => 'menu_workplacement_details',
         'settings_workplacement.workplacement_companies' => 'menu_workplacement_companies',
         'settings_workplacement.workplacement_settings' => 'menu_workplacement_settings',

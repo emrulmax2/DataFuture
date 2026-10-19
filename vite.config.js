@@ -27,6 +27,7 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/css/site-settings-redesign.css',
+                'resources/css/error-logs.css',
                 'resources/css/library-management.css',
                 'resources/css/library-pay.css',
                 'resources/css/student-library.css',
@@ -105,6 +106,7 @@ export default defineConfig({
                 'resources/js/settings.js',
                 'resources/js/site-settings-redesign.js',
                 'resources/js/student-conversion-logs.js',
+                'resources/js/error-logs.js',
                 'resources/js/awardingbody.js',
                 'resources/js/academicyears.js',
                 'resources/js/sourcetuitionfee.js',

@@ -213,9 +213,13 @@
                                     <input id="settings-accounts-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][menu_accounts_settings]" {{ isset($values['menu_accounts_settings']) && $values['menu_accounts_settings'] ? 'checked' : '' }}>
                                     <label for="settings-accounts-{{ $uid }}" class="ml-2">Accounts Settings</label>
                                 </div>
-                                <div class="col-span-12 sm:col-span-8 flex">
+                                <div class="col-span-12 sm:col-span-4 flex">
                                     <input id="settings-file-manager-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][menu_file_manager_settings]" {{ isset($values['menu_file_manager_settings']) && $values['menu_file_manager_settings'] ? 'checked' : '' }}>
                                     <label for="settings-file-manager-{{ $uid }}" class="ml-2">File Manager Settings</label>
+                                </div>
+                                <div class="col-span-12 sm:col-span-4 flex">
+                                    <input id="settings-error-logs-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][menu_error_logs]" {{ isset($values['menu_error_logs']) && $values['menu_error_logs'] ? 'checked' : '' }}>
+                                    <label for="settings-error-logs-{{ $uid }}" class="ml-2">Error Logs (developer log viewer)</label>
                                 </div>
                                 <div class="col-span-12">
                                     <div class="flex items-center">

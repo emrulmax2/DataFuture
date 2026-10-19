@@ -153,6 +153,10 @@ return [
         // PolicyAssessmentService::canManage() on every action.
         'policy.assessment*' => 'policy_assessment_manage',
         'employee.policy.assessment*' => 'policy_assessment_manage',
+
+        // Error Logs (developer log viewer). New screen, and log entries carry
+        // stack traces, SQL and personal data, so it is enforced from day one.
+        'error.logs*' => 'error_logs',
     ],
 
     /*
@@ -171,6 +175,7 @@ return [
         'student.list',
         'policy.assessment*',
         'employee.policy.assessment*',
+        'error.logs*',
     ],
 
     /*

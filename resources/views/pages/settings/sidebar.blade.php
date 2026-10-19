@@ -462,6 +462,14 @@
                         <i data-lucide="clipboard-list" class="w-4 h-4 mr-2"></i> Student Conversion Logs
                     </a>
                 </li>
+
+            @if(\App\Services\ErrorLogService::canView())
+                <li>
+                    <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'error.logs' ? 'active text-primary font-medium' : '' }}" href="{{ route('error.logs') }}">
+                        <i data-lucide="bug" class="w-4 h-4 mr-2"></i> Error Logs
+                    </a>
+                </li>
+            @endif
         </ul>
     </div>
 </div>

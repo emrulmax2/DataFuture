@@ -145,6 +145,7 @@
                             'menu_internal_site_link' => 'Internal Site Link',
                             'menu_accounts_settings' => 'Accounts Settings',
                             'menu_file_manager_settings' => 'File Manager Settings',
+                            'menu_error_logs' => 'Error Logs (developer log viewer)',
                         ];
                     @endphp
                     @foreach($settingsChildren as $key => $label)
