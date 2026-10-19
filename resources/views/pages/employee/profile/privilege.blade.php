@@ -346,7 +346,10 @@
                                 </div>
                             </div>
                             <div class="col-span-4">
-                                
+                                <div class="form-check form-switch mb-4 mr-4">
+                                    <input {{ (isset($priv['settings']['error_logs']) && $priv['settings']['error_logs'] == 1 ? 'checked' : '') }} id="permission_settings_19" class="form-check-input" type="checkbox" value="1" name="permission[settings][error_logs]">
+                                    <label class="form-check-label ml-4" for="permission_settings_19">Error Logs (developer log viewer)</label>
+                                </div>
                             </div>
                             <div class="col-span-6">
                                 <div class="form-check form-switch">

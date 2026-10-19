@@ -299,6 +299,7 @@ use App\Http\Controllers\Reports\TermPerformance\TermRetentionReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermSubmissionPerformanceReportController;
 use App\Http\Controllers\ResidencyStatusController;
 use App\Http\Controllers\StudentConversionLogController;
+use App\Http\Controllers\ErrorLogController;
 use App\Http\Controllers\Settings\LibrarySettingController;
 use App\Http\Controllers\ResultComparisonController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
@@ -3308,6 +3309,15 @@ Route::middleware('auth')->group(function() {
     Route::controller(StudentConversionLogController::class)->group(function() {
         Route::get('site-settings/student-conversion-logs', 'index')->name('student.conversion.logs');
         Route::get('site-settings/student-conversion-logs/list', 'list')->name('student.conversion.logs.list');
+    });
+
+    Route::controller(ErrorLogController::class)->group(function() {
+        Route::get('site-settings/error-logs', 'index')->name('error.logs');
+        Route::post('site-settings/error-logs/sync', 'sync')->name('error.logs.sync');
+        Route::get('site-settings/error-logs/list', 'list')->name('error.logs.list');
+        Route::get('site-settings/error-logs/entry', 'show')->name('error.logs.entry');
+        Route::get('site-settings/error-logs/entry/download', 'downloadEntry')->name('error.logs.entry.download');
+        Route::get('site-settings/error-logs/download', 'download')->name('error.logs.download');
     });
     
 

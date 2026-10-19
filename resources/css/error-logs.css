@@ -1,0 +1,1050 @@
+/* Site Settings > Error Logs (pages/settings/error-logs/index.blade.php).
+   Every rule also matches #errorLogEntryModal: tw-starter moves an open
+   modal to the end of <body>, outside .ss-error-logs-page.
+   Builds on site-settings-redesign.css; everything here is el-* scoped. */
+
+:is(.ss-error-logs-page, #errorLogEntryModal) {
+    --el-ink: #16264f;
+    --el-text: #1f2a37;
+    --el-muted: #6b7686;
+    --el-line: #f0eee7;
+    --el-line-strong: #e4e0d5;
+    --el-soft: #faf9f5;
+    --el-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+    --el-critical-fg: #ffffff;
+    --el-critical-bg: #7f1d1d;
+    --el-error-fg: #b42318;
+    --el-error-bg: #fde7e7;
+    --el-error-dot: #d64545;
+    --el-warning-fg: #b45309;
+    --el-warning-bg: #fef3c7;
+    --el-warning-dot: #d97706;
+    --el-notice-fg: #1d4ed8;
+    --el-notice-bg: #e3edff;
+    --el-info-fg: #0f8278;
+    --el-info-bg: #e5f7f3;
+    --el-debug-fg: #475569;
+    --el-debug-bg: #eef2f6;
+}
+
+/* Code is shown as written: no ligatures turning PHP's -> into an arrow. */
+:is(.ss-error-logs-page, #errorLogEntryModal) :is(code, pre, .el-head__file h2, .el-file-select select, .el-msg__class, .el-msg__where, .el-frame__n, .el-context th) {
+    font-variant-ligatures: none;
+    font-feature-settings: "liga" 0, "calt" 0;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-muted {
+    color: var(--el-muted);
+    font-style: normal;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* Header: file name, size and the file actions */
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-head {
+    flex-wrap: wrap;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-head__file h2 {
+    font-family: var(--el-mono);
+    font-size: 17px;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-head__file p {
+    margin: 5px 0 0;
+    color: var(--el-muted);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-head__actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-file-select select {
+    min-width: 230px;
+    font-family: var(--el-mono);
+    font-size: 12.5px;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-head__actions .ss-btn {
+    display: inline-flex;
+    align-items: center;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-head__actions .ss-btn:disabled {
+    cursor: progress;
+    opacity: 0.6;
+}
+
+/* Indexing progress */
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-progress {
+    padding: 14px 26px;
+    border-bottom: 1px solid var(--el-line);
+    background: var(--el-soft);
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-progress[hidden] {
+    display: none;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-progress__track {
+    height: 6px;
+    overflow: hidden;
+    border-radius: 99px;
+    background: #e9e6dc;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-progress__track span {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: #1b2f63;
+    transition: width 0.25s ease;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-progress p {
+    margin: 8px 0 0;
+    color: var(--el-muted);
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+/* Level chips, entry count and the Grouped / All entries switch */
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-summary {
+    display: flex;
+    align-items: center;
+    gap: 12px 18px;
+    flex-wrap: wrap;
+    min-height: 66px;
+    padding: 14px 26px;
+    border-bottom: 1px solid var(--el-line);
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-levels {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 34px;
+    padding: 0 13px;
+    border: 1px solid #dfe3ea;
+    border-radius: 99px;
+    background: #fff;
+    color: #3b4656;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-chip:hover {
+    border-color: #c4cad4;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-chip:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(22, 38, 79, 0.16);
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-chip__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-chip__count {
+    color: var(--el-muted);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-chip.is-active {
+    border-color: var(--el-ink);
+    background: var(--el-ink);
+    color: #fff;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-chip.is-active .el-chip__count {
+    color: rgba(255, 255, 255, 0.78);
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-chip--emergency .el-chip__dot,
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-chip--alert .el-chip__dot,
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-chip--critical .el-chip__dot { background: var(--el-critical-bg); }
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-chip--error .el-chip__dot { background: var(--el-error-dot); }
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-chip--warning .el-chip__dot { background: var(--el-warning-dot); }
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-chip--notice .el-chip__dot { background: var(--el-notice-fg); }
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-chip--info .el-chip__dot { background: var(--el-info-fg); }
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-chip--debug .el-chip__dot { background: var(--el-debug-fg); }
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-chip.is-active .el-chip__dot {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85);
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-levels__total {
+    margin-left: auto;
+    color: var(--el-muted);
+    font-size: 12.5px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Tools: view switch and filters */
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-tools {
+    gap: 14px 18px;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-mode {
+    display: inline-flex;
+    padding: 3px;
+    border-radius: 11px;
+    background: #f1efe8;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-mode__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 32px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #5a6675;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-mode__btn svg {
+    width: 15px;
+    height: 15px;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-mode__btn.is-active {
+    background: #fff;
+    color: var(--el-ink);
+    box-shadow: 0 1px 3px rgba(20, 34, 74, 0.14);
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-filter {
+    gap: 10px;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-search input {
+    width: 220px;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: #5a6675;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-date input {
+    height: 38px;
+    padding: 0 10px;
+    border: 1px solid #d9dee6;
+    border-radius: 9px;
+    background: #fff;
+    color: var(--el-text);
+    font-size: 13px;
+    font-weight: 600;
+    outline: none;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-date input:focus {
+    border-color: var(--el-ink);
+    box-shadow: 0 0 0 3px rgba(22, 38, 79, 0.12);
+}
+
+/* "Every occurrence of …" scope */
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-scope {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 26px;
+    border-bottom: 1px solid #e3e9f6;
+    background: #f2f6ff;
+    color: var(--el-ink);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-scope[hidden] {
+    display: none;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-scope > svg {
+    flex: 0 0 auto;
+    width: 16px;
+    height: 16px;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-scope span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-scope button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: auto;
+    padding: 5px 10px;
+    border: 1px solid #c9d5ee;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--el-ink);
+    font-size: 12.5px;
+    font-weight: 800;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-scope button svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Table. Rows must not wrap their cells: when the columns are wider than
+   the card (narrow screens) the table scrolls sideways instead. */
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-table-wrap .tabulator-row {
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-table-wrap .tabulator-tableHolder {
+    overflow-x: auto;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-table-wrap .tabulator-cell {
+    vertical-align: top;
+}
+
+.site-settings-redesign-body :is(.ss-error-logs-page, #errorLogEntryModal) .el-table-wrap .tabulator-cell.el-cell-wrap {
+    flex-wrap: wrap;
+    align-content: center;
+    gap: 4px;
+    padding-block: 10px;
+    white-space: normal;
+    text-overflow: clip;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-level {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 24px;
+    padding: 0 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-level > span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-level--emergency,
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-level--alert,
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-level--critical { background: var(--el-critical-bg); color: var(--el-critical-fg); }
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-level--error { background: var(--el-error-bg); color: var(--el-error-fg); }
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-level--warning { background: var(--el-warning-bg); color: var(--el-warning-fg); }
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-level--notice { background: var(--el-notice-bg); color: var(--el-notice-fg); }
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-level--info { background: var(--el-info-bg); color: var(--el-info-fg); }
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-level--debug { background: var(--el-debug-bg); color: var(--el-debug-fg); }
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-msg {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-msg__text {
+    display: -webkit-box;
+    overflow: hidden;
+    color: var(--el-text);
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-msg__meta {
+    display: flex;
+    align-items: center;
+    gap: 6px 12px;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-msg__class,
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-msg__where {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    color: var(--el-muted);
+    font-family: var(--el-mono);
+    font-size: 11.5px;
+    overflow-wrap: anywhere;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-msg__class {
+    color: #8a3b12;
+    font-weight: 600;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-msg__where svg {
+    flex: 0 0 auto;
+    width: 13px;
+    height: 13px;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-when {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    line-height: 1.25;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-when strong {
+    color: var(--el-text);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-when small {
+    color: var(--el-muted);
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-when .el-when__since {
+    color: #a0a8b5;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-count {
+    color: var(--el-ink);
+    font-size: 14px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-count--link {
+    padding: 2px 8px;
+    border: 1px solid #d6dcea;
+    border-radius: 7px;
+    background: #fff;
+    font-size: 12.5px;
+    cursor: pointer;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-count--link:hover {
+    border-color: var(--el-ink);
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-env {
+    display: inline-block;
+    margin: 1px 0;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: #f1efe8;
+    color: #5a6675;
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-env--prod {
+    background: #e8ecf7;
+    color: var(--el-ink);
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-user {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-user small {
+    color: var(--el-muted);
+    font-size: 11.5px;
+    font-weight: 600;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-row-actions {
+    display: inline-flex;
+    gap: 6px;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-icon-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid #e1e5ec;
+    border-radius: 9px;
+    background: #fff;
+    color: #475065;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-icon-btn:hover {
+    border-color: #c4cad4;
+    background: #f5f6f9;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-icon-btn.is-done {
+    border-color: var(--el-info-fg);
+    color: var(--el-info-fg);
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-icon-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Empty / loading */
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 60px 26px;
+    color: var(--el-muted);
+    text-align: center;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-empty svg {
+    width: 34px;
+    height: 34px;
+    color: #a7b0bd;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-empty h2 {
+    margin: 4px 0 0;
+    color: var(--el-ink);
+    font-size: 18px;
+    font-weight: 800;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-empty p {
+    margin: 0;
+    font-size: 13.5px;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-empty--inline {
+    padding: 40px 10px;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 70px 0;
+    color: var(--el-muted);
+    font-weight: 700;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-loading span {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #d9dee6;
+    border-top-color: var(--el-ink);
+    border-radius: 50%;
+    animation: el-spin 0.8s linear infinite;
+}
+
+@keyframes el-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Entry modal (parked outside .ss-page, so it does not get the page's
+   button font rule) */
+#errorLogEntryModal button {
+    font-family: inherit;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .ss-settings-modal__dialog.el-modal-dialog {
+    width: 1120px;
+    max-width: calc(100vw - 32px);
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-modal__header h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-modal__time {
+    color: var(--el-text);
+    font-size: 15px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-modal__actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-modal__actions .ss-btn {
+    display: inline-flex;
+    align-items: center;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-modal__body {
+    max-height: calc(100vh - 170px);
+    padding: 22px 26px 26px;
+    overflow: auto;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-detail__summary {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-detail__message {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 18px;
+    border: 1px solid #f3d6d6;
+    border-left: 4px solid var(--el-error-dot);
+    border-radius: 12px;
+    background: #fffafa;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-detail__message p {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    color: var(--el-text);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 10px 22px;
+    margin: 0;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-facts > div {
+    min-width: 0;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-facts dt {
+    margin-bottom: 3px;
+    color: var(--el-muted);
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-facts dd {
+    margin: 0;
+    color: var(--el-text);
+    font-size: 13.5px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-facts code,
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-exc__loc code {
+    font-family: var(--el-mono);
+    font-size: 12.5px;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-link {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #1d4ed8;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-link:hover {
+    text-decoration: underline;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-tabs {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 22px 0 16px;
+    border-bottom: 1px solid var(--el-line-strong);
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-tab {
+    margin-bottom: -1px;
+    padding: 10px 14px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: none;
+    color: #5a6675;
+    font-size: 13.5px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-tab span {
+    margin-left: 4px;
+    padding: 1px 7px;
+    border-radius: 99px;
+    background: #f1efe8;
+    font-size: 11.5px;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-tab.is-active {
+    border-bottom-color: var(--el-ink);
+    color: var(--el-ink);
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-tabs__extra {
+    margin-left: auto;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-panel[hidden],
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-tabs__extra[hidden] {
+    display: none;
+}
+
+/* Exceptions and frames */
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-exc + .el-exc {
+    margin-top: 26px;
+    padding-top: 22px;
+    border-top: 1px dashed var(--el-line-strong);
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-exc__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-exc__label {
+    color: var(--el-muted);
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-exc__class {
+    color: #8a3b12;
+    font-family: var(--el-mono);
+    font-size: 13px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-exc__code {
+    padding: 1px 7px;
+    border-radius: 6px;
+    background: #f1efe8;
+    color: #5a6675;
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-exc__message {
+    margin: 8px 0 6px;
+    color: var(--el-text);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-exc__loc {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+    color: var(--el-muted);
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-exc__loc > svg {
+    width: 14px;
+    height: 14px;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-frames {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-frames > li + li {
+    border-top: 1px solid var(--el-line);
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-frame {
+    display: flex;
+    gap: 12px;
+    padding: 8px 10px;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-frame__n {
+    flex: 0 0 34px;
+    padding-top: 1px;
+    color: #a7b0bd;
+    font-family: var(--el-mono);
+    font-size: 11.5px;
+    text-align: right;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-frame__body {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-frame__file {
+    color: #5a6675;
+    font-family: var(--el-mono);
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-frame__file strong {
+    color: var(--el-text);
+    font-weight: 600;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-frame__call {
+    color: var(--el-muted);
+    font-family: var(--el-mono);
+    font-size: 11.5px;
+    overflow-wrap: anywhere;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-frame__view {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #0f8278;
+    font-family: var(--el-mono);
+    font-size: 12px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-frame__view svg {
+    flex: 0 0 auto;
+    width: 13px;
+    height: 13px;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-frame--app,
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-frame--view {
+    border-radius: 8px;
+    background: #fff8e8;
+    box-shadow: inset 3px 0 0 #d97706;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-frame--app .el-frame__n,
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-frame--view .el-frame__n {
+    color: #b45309;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-frame--app .el-frame__file strong,
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-frame--view .el-frame__file strong {
+    color: #7a3e06;
+    font-weight: 700;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-fold > button {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    padding: 7px 10px 7px 56px;
+    border: 0;
+    background: none;
+    color: var(--el-muted);
+    font-size: 12.5px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-fold > button:hover {
+    background: var(--el-soft);
+    color: var(--el-ink);
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-fold > button svg {
+    width: 14px;
+    height: 14px;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-fold > button.is-open {
+    color: var(--el-ink);
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-frames--folded {
+    border-left: 2px solid var(--el-line-strong);
+    margin-left: 22px;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-frames--folded[hidden] {
+    display: none;
+}
+
+/* Context and raw */
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-context {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-context th,
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-context td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--el-line);
+    text-align: left;
+    vertical-align: top;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-context th {
+    width: 180px;
+    color: var(--el-muted);
+    font-family: var(--el-mono);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-context pre {
+    margin: 0;
+    color: var(--el-text);
+    font-family: var(--el-mono);
+    font-size: 12px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-raw__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+    color: var(--el-muted);
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-raw__bar .ss-btn {
+    display: inline-flex;
+    align-items: center;
+}
+
+:is(.ss-error-logs-page, #errorLogEntryModal) .el-raw {
+    max-height: 60vh;
+    margin: 0;
+    padding: 16px 18px;
+    overflow: auto;
+    border-radius: 12px;
+    background: #14182a;
+    color: #dfe5f2;
+    font-family: var(--el-mono);
+    font-size: 12px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+    :is(.ss-error-logs-page, #errorLogEntryModal) .el-summary,
+    :is(.ss-error-logs-page, #errorLogEntryModal) .el-progress,
+    :is(.ss-error-logs-page, #errorLogEntryModal) .el-scope {
+        padding-inline: 16px;
+    }
+
+    :is(.ss-error-logs-page, #errorLogEntryModal) .el-levels__total {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    :is(.ss-error-logs-page, #errorLogEntryModal) .el-search input,
+    :is(.ss-error-logs-page, #errorLogEntryModal) .el-file-select select {
+        width: 100%;
+        min-width: 0;
+    }
+
+    :is(.ss-error-logs-page, #errorLogEntryModal) .el-search,
+    :is(.ss-error-logs-page, #errorLogEntryModal) .el-file-select {
+        flex: 1 1 100%;
+    }
+
+    :is(.ss-error-logs-page, #errorLogEntryModal) .el-modal__body {
+        padding: 16px;
+    }
+
+    :is(.ss-error-logs-page, #errorLogEntryModal) .el-frame__n {
+        flex-basis: 26px;
+    }
+
+    :is(.ss-error-logs-page, #errorLogEntryModal) .el-fold > button {
+        padding-left: 46px;
+    }
+}
