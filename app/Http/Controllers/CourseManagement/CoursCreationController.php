@@ -259,15 +259,16 @@ class CoursCreationController extends Controller
     }
 
     public function getCourseListBySemester(Request $request) {
-    
-        $courseCreationList = CourseCreation::with('course')->whereIn('semester_id',$request->semesters)->get();
+        // Removing the last semester from the filter sends no "semesters" at all.
+        $semesters = array_filter((array) $request->input('semesters', []));
+        if(empty($semesters)):
+            return response()->json([]);
+        endif;
 
-        foreach($courseCreationList as $courCreation) {
-            $courseList[$courCreation->course->id]["id"] = $courCreation->course->id;
-            $courseList[$courCreation->course->id]["name"] = $courCreation->course->name;
-        }
-
-        $courses = array_values($courseList);
+        $courses = CourseCreation::with('course')->whereIn('semester_id', $semesters)->get()
+            ->pluck('course')->filter()->unique('id')
+            ->map(fn($course) => ['id' => $course->id, 'name' => $course->name])
+            ->values();
 
         return response()->json($courses);
     }
