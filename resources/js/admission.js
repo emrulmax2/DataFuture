@@ -912,7 +912,11 @@ var employmentHistoryTable = (function () {
         });
 
         semestersADM.on('change',function(event){
-            
+            // Rebuild the course list for the chosen semesters; courses already
+            // picked stay selected (clearOptions keeps selected items).
+            coursesADM.clearOptions();
+            if(!event || event.length == 0) return;
+
             axios({
                 method: "get",
                 url: route("course.creation.coursesbysemester"),
