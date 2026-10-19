@@ -26,8 +26,26 @@ class SendEmailRequest extends FormRequest
         return [
             'comon_smtp_id' => 'required',
             'subject' => 'required',
-            'body' => 'required'
+            'body' => 'required',
+            'bcc_emails' => ['nullable', function ($attribute, $value, $fail) {
+                $invalid = array_filter($this->bccEmails(), fn ($email) => filter_var($email, FILTER_VALIDATE_EMAIL) === false);
+                if (!empty($invalid)) {
+                    $fail('Invalid BCC email: '.implode(', ', $invalid).'. Separate multiple emails with a comma.');
+                }
+            }],
         ];
+    }
+
+    /**
+     * BCC addresses split on commas, semicolons or whitespace.
+     *
+     * @return array<int, string>
+     */
+    public function bccEmails()
+    {
+        $emails = preg_split('/[\s,;]+/', (string) $this->input('bcc_emails', ''), -1, PREG_SPLIT_NO_EMPTY);
+
+        return array_values(array_unique($emails));
     }
 
     public function messages()

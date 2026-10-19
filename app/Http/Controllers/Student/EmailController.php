@@ -39,7 +39,7 @@ class EmailController extends Controller
             $sendTo[] = $student->contact->personal_email;
         endif;
         $sendTo = (!empty($sendTo) ? $sendTo : [$student->users->email]);
-        $bcc_emails = (isset($request->bcc_emails) && !empty($request->bcc_emails) ? explode(',', $request->bcc_emails) : []);
+        $bcc_emails = $request->bccEmails();
 
 
         $studentEmail = StudentEmail::create([
