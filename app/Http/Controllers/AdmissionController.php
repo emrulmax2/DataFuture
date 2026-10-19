@@ -2592,7 +2592,7 @@ class AdmissionController extends Controller
                 /* Student Process END */
             elseif($statusidID == 6):
                 $this->sendDocusealForm($applicant_id);
-                Log::warning('DocuSeal form sent to applicant #'.$applicant_id.' by user #'.auth()->user()->id.'.');
+                Log::info('DocuSeal form sent to applicant #'.$applicant_id.' by user #'.auth()->user()->id.'.');
             endif;
 
             $statusRow = Status::find($statusidID);
