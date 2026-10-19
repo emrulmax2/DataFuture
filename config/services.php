@@ -89,6 +89,18 @@ return [
         'key' => env('GOOGLE_MAP_API'),
     ],
 
+    /*
+     * DocuSeal Offer Acceptance form, sent when an applicant moves to Offer
+     * Placed. Read through config for the same reason as above: under the
+     * deploy's config:cache, env() in the controller returned null and the
+     * form was silently never sent.
+     */
+    'docuseal' => [
+        'api_key' => env('DOCUSEAL_API_KEY'),
+        'offer_acceptance_template_id' => env('OFFER_ACCEPTANCE_FORM_TEMPLATE_ID'),
+        'test_email' => env('DOCUSEAL_TEST_EMAIL'),
+    ],
+
     'library' => [
         /*
          * Where every library notification goes. The desk is a room, not a user
