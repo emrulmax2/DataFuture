@@ -405,7 +405,12 @@ class PaymentUploadManagementController extends Controller
 
             $message = ($insertCount > 0 ? '<strong>'.$insertCount.'</strong> Transactions successully inserted as Money Receipt. ' : '');
             $message .= ($errorCount > 0 ? ' Errors found for <span data-transdate="'.date('d-m-Y', strtotime($transaction_date)).'" class="transactionErrors text-primary" style="cursor: pointer;"><strong><u>'.$errorCount.'</u></strong></span> transactions.' : '');
-            return response()->json(['msg' => $message], 200);
+            return response()->json([
+                'msg' => $message,
+                'insert_count' => $insertCount,
+                'error_count' => $errorCount,
+                'trans_date' => date('d-m-Y', strtotime($transaction_date)),
+            ], 200);
         else:
             return response()->json(['msg' => 'Transactions not found. Please insert some valid transactions.'], 422);
         endif;
