@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\TermSyncController;
 use App\Http\Controllers\Api\CourseModuleSyncController;
 use App\Http\Controllers\Api\HrDepartmentSyncController;
 use App\Http\Controllers\Api\HrPayClaimSyncController;
+use App\Http\Controllers\Api\HrVacancySyncController;
 use App\Http\Controllers\Api\RoomSyncController;
 use App\Http\Controllers\Api\VenueSyncController;
 use App\Http\Controllers\Api\StudentSearchController;
@@ -137,6 +138,13 @@ Route::middleware(['client.credentials:sms.file-manager.read', 'throttle:sms-syn
 Route::middleware(['client.credentials:sms.hr-pay-claims.write', 'throttle:sms-sync'])
     ->withoutMiddleware('throttle:api')
     ->post('/hr/pay-claims/push', [HrPayClaimSyncController::class, 'store']);
+
+/* Internal vacancies published in the Operations recruitment module, listed
+   under HR Portal > Vacancies so staff can find them here. Idempotent on the
+   requisition reference — publishing, or a retry, never adds a second row. */
+Route::middleware(['client.credentials:sms.hr-vacancies.write', 'throttle:sms-sync'])
+    ->withoutMiddleware('throttle:api')
+    ->post('/hr/vacancies/push', [HrVacancySyncController::class, 'store']);
 
 // Attach a finalised interview-outcome PDF to an applicant and complete their
 // interview task (task_list_id = 7). Called by the LCC Operations app.
