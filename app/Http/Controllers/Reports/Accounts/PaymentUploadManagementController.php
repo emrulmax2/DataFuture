@@ -13,6 +13,7 @@ use App\Models\SlcMoneyReceipt;
 use App\Models\SlcPaymentHistory;
 use App\Models\Student;
 use App\Models\TermType;
+use App\Services\Slc\RemittanceFile;
 use Illuminate\Http\Request;
 
 class PaymentUploadManagementController extends Controller
@@ -73,17 +74,21 @@ class PaymentUploadManagementController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
+    /**
+     * Previews an SLC remittance file - the `.dat` the SLC issues, or a `.csv`
+     * saved from it - as the table of transactions the office then confirms.
+     * Nothing is written here; storeCsvTransactions() does that.
+     */
     public function uploadCSV(Request $request){
         if($request->hasFile('payment_file_csv')):
             $csv_doc = $request->file('payment_file_csv');
-            $csvTmpPath = $csv_doc->getPathname();
-
-            $csvData = [];
-            $theCSVFile = fopen($csvTmpPath, 'r');
-            while (($line = fgetcsv($theCSVFile)) !== FALSE) {
-                $csvData[] = $line;
-            }
-            fclose($theCSVFile);
+            if(!$csv_doc->isValid() || !in_array(strtolower($csv_doc->getClientOriginalExtension()), RemittanceFile::EXTENSIONS, true)):
+                $HTML = '<div class="alert alert-danger-soft show flex items-center mb-2" role="alert">
+                            <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Please upload the SLC remittance file as .dat or .csv.
+                        </div>';
+                return response()->json(['htm' => $HTML], 200);
+            endif;
+            $csvData = RemittanceFile::rows($csv_doc->getPathname());
 
             $HTML = '';
             if(!empty($csvData) && count($csvData) > 0):
@@ -278,14 +283,14 @@ class PaymentUploadManagementController extends Controller
                 $HTML = str_replace('[ERRORS]', $errorHTML, $HTML);
             else:
                 $HTML = '<div class="alert alert-danger-soft show flex items-center mb-2" role="alert">
-                            <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Empty csv file uploaded. Please upload a valid .csv file with transactions.
+                            <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> The file has no transactions in it. Please upload the SLC remittance file (.dat or .csv).
                         </div>';
             endif;
 
             return response()->json(['htm' => $HTML], 200);
         else:
             $HTML = '<div class="alert alert-danger-soft show flex items-center mb-2" role="alert">
-                        <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> File Not Found. Please upload a valid .csv file.
+                        <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> No file received. Please upload the SLC remittance file (.dat or .csv).
                     </div>';
             return response()->json(['htm' => $HTML], 200);
         endif;

@@ -147,8 +147,8 @@
                                 <form method="POST" action="#" id="slcPaymentDocUploadForm" class="text-right" enctype="multipart/form-data">
                                     @csrf
                                     <label class="btn btn-success w-auto relative text-white" style="margin-top: 31px;">
-                                        <i data-lucide="upload-cloud" class="w-4 h-4 mr-2"></i> Upload Payment File (.csv)
-                                        <input type="file" accept=".csv" id="payment_file_csv" name="payment_file_csv" style="width: 0; height: 0; opacity: 0; visibility: hidden; position: absolute;">
+                                        <i data-lucide="upload-cloud" class="w-4 h-4 mr-2"></i> Upload Payment File (.dat / .csv)
+                                        <input type="file" accept=".dat,.csv" id="payment_file_csv" name="payment_file_csv" style="width: 0; height: 0; opacity: 0; visibility: hidden; position: absolute;">
                                         <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                                             stroke="white" class="w-4 h-4 ml-2 loaders">
                                             <g fill="none" fill-rule="evenodd">
