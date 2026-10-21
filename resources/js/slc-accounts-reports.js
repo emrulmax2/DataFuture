@@ -305,13 +305,47 @@ var slcPaymentHistoryListTable = (function () {
         document.querySelector('#saveCSVTransBtn').setAttribute('disabled', 'disabled');
         document.querySelector("#saveCSVTransBtn svg").style.cssText ="display: inline-block;";
 
-        let form_data = new FormData(form);
-        axios({
-            method: "post",
-            url: route('reports.account.payment.save.csv.transactions'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
+        // Big files exceed the server's request-size / max_input_vars limits, so post the rows in chunks.
+        const CHUNK_ROWS = 50;
+        const rows = {};
+        const common = [];
+        for (const [key, value] of new FormData(form).entries()) {
+            const m = key.match(/^trans\[(\d+)\]/);
+            if (m) {
+                (rows[m[1]] = rows[m[1]] || []).push([key, value]);
+            } else {
+                common.push([key, value]);
+            }
+        }
+        const rowKeys = Object.keys(rows);
+        const chunks = [];
+        for (let i = 0; i < rowKeys.length; i += CHUNK_ROWS) {
+            const fd = new FormData();
+            common.forEach(([k, v]) => fd.append(k, v));
+            rowKeys.slice(i, i + CHUNK_ROWS).forEach(r => rows[r].forEach(([k, v]) => fd.append(k, v)));
+            chunks.push(fd);
+        }
+        if (!chunks.length) {
+            const fd = new FormData();
+            common.forEach(([k, v]) => fd.append(k, v));
+            chunks.push(fd);
+        }
+
+        const headers = {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')};
+        const url = route('reports.account.payment.save.csv.transactions');
+        let insertCount = 0, errorCount = 0, transDate = '';
+
+        (async () => {
+            for (const fd of chunks) {
+                const response = await axios({method: "post", url: url, data: fd, headers: headers});
+                insertCount += response.data.insert_count || 0;
+                errorCount += response.data.error_count || 0;
+                transDate = response.data.trans_date || transDate;
+            }
+            let msg = (insertCount > 0 ? '<strong>'+insertCount+'</strong> Transactions successully inserted as Money Receipt. ' : '');
+            msg += (errorCount > 0 ? ' Errors found for <span data-transdate="'+transDate+'" class="transactionErrors text-primary" style="cursor: pointer;"><strong><u>'+errorCount+'</u></strong></span> transactions.' : '');
+            return {status: 200, data: {msg: msg}};
+        })().then(response => {
             document.querySelector('#saveCSVTransBtn').removeAttribute('disabled');
             document.querySelector("#saveCSVTransBtn svg").style.cssText = "display: none;";
             if (response.status == 200) {
@@ -323,7 +357,7 @@ var slcPaymentHistoryListTable = (function () {
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                     $("#successModal .successModalTitle").html( "Congratulations!" );
                     $("#successModal .successModalDesc").html(response.data.msg);
-                });     
+                });
 
                 setTimeout(() => {
                     successModal.hide();
