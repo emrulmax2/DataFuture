@@ -47,6 +47,7 @@ class AuthServiceProvider extends ServiceProvider
             'sms.working-patterns.read' => 'Read employees\' contracted hours for external synchronization.',
             'sms.students.read' => 'Search students, so external systems can record which student a record concerns.',
             'sms.hr-pay-claims.write' => 'Receive paid HR payment claims from the Operations pay portal.',
+            'sms.hr-vacancies.write' => 'Receive internal vacancies published in the Operations recruitment module.',
         ]);
         
         Passport::tokensExpireIn(now()->addDays(15));

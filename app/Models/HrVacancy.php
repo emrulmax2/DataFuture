@@ -13,6 +13,7 @@ class HrVacancy extends Model
     
     protected $fillable = [
         'hr_vacancy_type_id',
+        'ops_requisition_ref',
         'title',
         'link',
         'date',
