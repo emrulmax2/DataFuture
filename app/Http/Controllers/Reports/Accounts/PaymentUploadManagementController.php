@@ -132,6 +132,62 @@ class PaymentUploadManagementController extends Controller
                         $r = 1;
                         $errorCount = 0;
                         // Rows with errors are listed first so they are not lost in a long file.
+                        // Look everything up in a few bulk queries instead of several queries per row.
+                        $rowDob = function($row){
+                            $d = (strlen($row[4]) == 7
+                                ? '0'.substr($row[4], 0, 1).'-'.substr($row[4], 1, 2).'-'.substr($row[4], 3, 4)
+                                : substr($row[4], 0, 2).'-'.substr($row[4], 2, 2).'-'.substr($row[4], 4, 4));
+                            return date('Y-m-d', strtotime($d));
+                        };
+                        $fileSsns = [];
+                        $fileCourseCodes = [];
+                        foreach(array_slice($csvData, 1) as $row):
+                            $fileSsns[$row[1]] = $row[1];
+                            $fileCourseCodes[$row[6]] = $row[6];
+                        endforeach;
+
+                        $studentMap = [];
+                        $students = Student::whereIn('ssn_no', array_values($fileSsns))->orderBy('id', 'DESC')->with('activeCR.creation')->get();
+                        foreach($students as $st):
+                            $key = trim($st->ssn_no).'|'.substr((string) $st->getRawOriginal('date_of_birth'), 0, 10);
+                            if(!isset($studentMap[$key])):
+                                $studentMap[$key] = $st;
+                            endif;
+                        endforeach;
+
+                        $courseIdMap = [];
+                        foreach(array_chunk(array_values($fileCourseCodes), 500) as $codes):
+                            $venues = CourseCreationVenue::whereIn('slc_code', $codes)->get(['slc_code', 'course_creation_id']);
+                            $creationCourse = CourseCreation::whereIn('id', $venues->pluck('course_creation_id')->unique()->all())->pluck('course_id', 'id');
+                            foreach($venues->groupBy('slc_code') as $code => $vs):
+                                $ids = [];
+                                foreach($vs->pluck('course_creation_id')->unique()->sort() as $ccId):
+                                    if(isset($creationCourse[$ccId])):
+                                        $ids[$creationCourse[$ccId]] = $creationCourse[$ccId];
+                                    endif;
+                                endforeach;
+                                $first = reset($ids);
+                                $courseIdMap[$code] = ($first > 0 ? $first : '');
+                            endforeach;
+                        endforeach;
+
+                        $agreementMap = [];
+                        $installmentMap = [];
+                        $studentIds = $students->pluck('id')->all();
+                        foreach(array_chunk($studentIds, 1000) as $ids):
+                            foreach(SlcAgreement::whereIn('student_id', $ids)->orderBy('id', 'DESC')->get() as $ag):
+                                $key = $ag->student_id.'|'.$ag->student_course_relation_id.'|'.$ag->year;
+                                if(!isset($agreementMap[$key])):
+                                    $agreementMap[$key] = $ag;
+                                endif;
+                            endforeach;
+                            foreach(SlcInstallment::whereIn('student_id', $ids)->orderBy('id', 'DESC')->get(['id', 'student_id', 'slc_agreement_id', 'student_course_relation_id']) as $inst):
+                                $key = $inst->slc_agreement_id.'|'.$inst->student_id;
+                                if(!isset($installmentMap[$key])):
+                                    $installmentMap[$key] = $inst;
+                                endif;
+                            endforeach;
+                        endforeach;
                         $headHTML = $HTML;
                         $HTML = '';
                         $errHTML = '';
@@ -147,19 +203,11 @@ class PaymentUploadManagementController extends Controller
                                 $year = $row[8];
                                 $amount = $row[10];
 
-                                if(strlen($row[4]) == 7):
-                                    $dob = '0'.substr($row[4], 0, 1).'-'.substr($row[4], 1, 2).'-'.substr($row[4], 3, 4);
-                                    $dob = date('Y-m-d', strtotime($dob));
-                                else:
-                                    $dob = substr($row[4], 0, 2).'-'.substr($row[4], 2, 2).'-'.substr($row[4], 4, 4);
-                                    $dob = date('Y-m-d', strtotime($dob));
-                                endif;
-                                $student = Student::where('ssn_no', $ssn)->where('date_of_birth', $dob)->orderBy('id', 'DESC')->get()->first();
+                                $dob = $rowDob($row);
+                                $student = $studentMap[trim($ssn).'|'.$dob] ?? null;
                                 $student_course_id = (isset($student->activeCR->creation->course_id) && $student->activeCR->creation->course_id > 0 ? $student->activeCR->creation->course_id : false);
                                 $student_course_relation_id = (isset($student->activeCR->id) && $student->activeCR->id > 0 ? $student->activeCR->id : 0);
-                                $courseCreationIds = CourseCreationVenue::where('slc_code', $course_code)->pluck('course_creation_id')->unique()->toArray();
-                                $courseIds = (!empty($courseCreationIds) ? CourseCreation::whereIn('id', $courseCreationIds)->pluck('course_id')->unique()->toArray() : []);
-                                $courseId = (isset($courseIds[0]) && $courseIds[0] > 0 ? $courseIds[0] : '');
+                                $courseId = $courseIdMap[$course_code] ?? '';
 
                                 $errors = array();
                                 $tr_class = $term_class = $ssn_class = $dob_class = $course_class = '';
@@ -173,7 +221,11 @@ class PaymentUploadManagementController extends Controller
                                 $course_relation_id = 0;
 
                                 if(isset($student->id) && $student->id > 0 && ($student_course_id && $student_course_id == $courseId)):
-                                    $exist_installment = $this->get_exist_installment($student->id, $year, $term, $courseId, $student_course_relation_id);
+                                    $exist_installment = false;
+                                    $agreementRow = ($year > 0 && !empty($term) ? ($agreementMap[$student->id.'|'.$student_course_relation_id.'|'.$year] ?? null) : null);
+                                    if($agreementRow):
+                                        $exist_installment = $installmentMap[$agreementRow->id.'|'.$student->id] ?? false;
+                                    endif;
                                     if($exist_installment){
                                         $exist_installment_ID = (isset($exist_installment->id) && $exist_installment->id > 0 ? $exist_installment->id : 0);
                                         $agreement_id = (isset($exist_installment->slc_agreement_id) && $exist_installment->slc_agreement_id > 0 ? $exist_installment->slc_agreement_id : 0);
