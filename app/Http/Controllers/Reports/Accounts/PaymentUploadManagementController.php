@@ -131,6 +131,11 @@ class PaymentUploadManagementController extends Controller
                     $HTML .= '<tbody>';
                         $r = 1;
                         $errorCount = 0;
+                        // Rows with errors are listed first so they are not lost in a long file.
+                        $headHTML = $HTML;
+                        $HTML = '';
+                        $errHTML = '';
+                        $okHTML = '';
                         foreach($csvData as $row):
                             if($r > 1):
                                 $term = $row[0];
@@ -256,9 +261,17 @@ class PaymentUploadManagementController extends Controller
                                     $HTML .= '</tr>';
                                     $errorCount += 1;
                                 endif;
+
+                                if($error):
+                                    $errHTML .= $HTML;
+                                else:
+                                    $okHTML .= $HTML;
+                                endif;
+                                $HTML = '';
                             endif;
                             $r++;
                         endforeach;
+                        $HTML = $headHTML.$errHTML.$okHTML;
                     $HTML .= '</tbody>';
                 $HTML .= '</table>';
                 $HTML .= '<div class="pt-5 text-right">';
