@@ -149,7 +149,7 @@ class PaymentUploadManagementController extends Controller
                         $studentMap = [];
                         $students = Student::whereIn('ssn_no', array_values($fileSsns))->orderBy('id', 'DESC')->with('activeCR.creation')->get();
                         foreach($students as $st):
-                            $key = trim($st->ssn_no).'|'.substr((string) $st->getRawOriginal('date_of_birth'), 0, 10);
+                            $key = strtoupper(trim($st->ssn_no)).'|'.substr((string) $st->getRawOriginal('date_of_birth'), 0, 10);
                             if(!isset($studentMap[$key])):
                                 $studentMap[$key] = $st;
                             endif;
@@ -167,7 +167,7 @@ class PaymentUploadManagementController extends Controller
                                     endif;
                                 endforeach;
                                 $first = reset($ids);
-                                $courseIdMap[$code] = ($first > 0 ? $first : '');
+                                $courseIdMap[strtoupper(trim($code))] = ($first > 0 ? $first : '');
                             endforeach;
                         endforeach;
 
@@ -204,10 +204,10 @@ class PaymentUploadManagementController extends Controller
                                 $amount = $row[10];
 
                                 $dob = $rowDob($row);
-                                $student = $studentMap[trim($ssn).'|'.$dob] ?? null;
+                                $student = $studentMap[strtoupper(trim($ssn)).'|'.$dob] ?? null;
                                 $student_course_id = (isset($student->activeCR->creation->course_id) && $student->activeCR->creation->course_id > 0 ? $student->activeCR->creation->course_id : false);
                                 $student_course_relation_id = (isset($student->activeCR->id) && $student->activeCR->id > 0 ? $student->activeCR->id : 0);
-                                $courseId = $courseIdMap[$course_code] ?? '';
+                                $courseId = $courseIdMap[strtoupper(trim($course_code))] ?? '';
 
                                 $errors = array();
                                 $tr_class = $term_class = $ssn_class = $dob_class = $course_class = '';
