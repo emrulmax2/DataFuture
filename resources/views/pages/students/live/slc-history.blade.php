@@ -78,7 +78,8 @@
         @if(!empty($slcRegistrations) && $slcRegistrations->count() > 0)
             @foreach($slcRegistrations as $regs)
                 <div class="slc-card">
-                    <div class="slc-reg-head">
+                    {{-- A registration confirmed as "Yes" is shown in green. --}}
+                    <div class="slc-reg-head{{ strtolower(trim($regs->regStatus->name ?? '')) === 'yes' ? ' is-confirmed' : '' }}">
                         <span class="slc-reg-badge">Y{{ $regs->registration_year }}</span>
                         <div>
                             <div class="slc-reg-title">Registration &mdash; <u class="text-success">Year {{ $regs->registration_year }}</u></div>

@@ -481,7 +481,7 @@
                         <div class="grid grid-cols-12 gap-4">
                             <div class="col-span-6 sm:col-span-6">
                                 <label for="agr_edit_slc_coursecode" class="form-label">SLC Course Code <span class="text-danger">*</span></label>
-                                <input type="text" value="" placeholder="DD-MM-YYYY" id="agr_edit_slc_coursecode" class="form-control" name="slc_coursecode">
+                                <input data-code="{{ $slcCode }}" type="text" value="" placeholder="SLC course code" id="agr_edit_slc_coursecode" class="form-control" name="slc_coursecode">
                                 <div class="acc__input-error error-slc_coursecode text-danger mt-2"></div>
                             </div>
                             <div class="col-span-12 sm:col-span-6">
