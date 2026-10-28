@@ -395,6 +395,52 @@ import Litepicker from "litepicker";
         downloadExcel.setAttribute('aria-disabled', isLoading ? 'true' : 'false');
     };
 
+    /* Download Excel asks first how Working Hour and Holiday Hour should be
+       written: as minutes (109:31) or as decimal hours (109.52). The button
+       keeps its filtered link; the choice is added to it as ?hours=. */
+    const exportChoice = document.querySelector('[data-ar-export]');
+
+    const closeExportChoice = () => {
+        if(exportChoice){
+            exportChoice.hidden = true;
+        }
+    };
+
+    if(downloadExcel && exportChoice){
+        downloadExcel.addEventListener('click', (event) => {
+            event.preventDefault();
+
+            if(downloadExcel.getAttribute('aria-disabled') === 'true'){
+                return;
+            }
+
+            exportChoice.hidden = false;
+            exportChoice.querySelector('[data-ar-export-format]')?.focus();
+        });
+
+        exportChoice.querySelectorAll('[data-ar-export-close]').forEach((el) => {
+            el.addEventListener('click', closeExportChoice);
+        });
+
+        exportChoice.querySelectorAll('[data-ar-export-format]').forEach((option) => {
+            option.addEventListener('click', (event) => {
+                event.preventDefault();
+
+                const url = new URL(downloadExcel.getAttribute('href'), window.location.href);
+                url.searchParams.set('hours', option.getAttribute('data-ar-export-format'));
+
+                closeExportChoice();
+                window.location.href = url.toString();
+            });
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if(event.key === 'Escape'){
+                closeExportChoice();
+            }
+        });
+    }
+
     function fetchReport(){
         const theDate = dateInput ? dateInput.value : '';
         const employeeIds = selectedEmployeeIds();
