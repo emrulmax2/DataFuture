@@ -685,12 +685,23 @@ class AttendanceReportController extends Controller
         $the_date = (!empty($date) ? date('Y-m-d', strtotime($date)) : date('Y-m-d'));
         $employee_id = (array) $request->query('employee_id', []);
         $employee_work_type_id = ($request->query('employee_work_type_id') > 0 ? $request->query('employee_work_type_id') : 0);
-        $theCollection = $this->generateReportArray($the_date, $employee_id, $employee_work_type_id);
+        // Chosen in the dialog before the download: hours as HH:MM (default) or as decimal hours.
+        $hoursFormat = ($request->query('hours') === 'decimal' ? 'decimal' : 'minutes');
+        $theCollection = $this->generateReportArray($the_date, $employee_id, $employee_work_type_id, $hoursFormat);
 
         return Excel::download(new ArrayCollectionExport($theCollection), date('F_Y', strtotime($the_date)).'_Attendance_Report.xlsx');
     }
 
-    public function generateReportArray($the_month, $employee_id = [], $employee_work_type_id = 0){
+    public function generateReportArray($the_month, $employee_id = [], $employee_work_type_id = 0, $hoursFormat = 'minutes'){
+        /* Working Hour and Holiday Hour are held in minutes. They print as
+           hours:minutes (109:31) unless decimal hours were asked for, where
+           109:31 becomes 109.52. Nothing else in the sheet changes. */
+        $formatHours = function ($minutes) use ($hoursFormat) {
+            return ($hoursFormat === 'decimal'
+                ? number_format(intval(trim($minutes)) / 60, 2, '.', '')
+                : $this->calculateHourMinute($minutes));
+        };
+
         $theCollection = [];
         $theCollection[1][] = 'Work Number';
         $theCollection[1][] = 'NI Number';
@@ -768,8 +779,8 @@ class AttendanceReportController extends Controller
                         $theCollection[$row][] = (isset($emp->employment->employeeJobTitle->name) && !empty($emp->employment->employeeJobTitle->name) ? $emp->employment->employeeJobTitle->name : '');
                         $theCollection[$row][] = (isset($emp->employment->employeeWorkType->name) && !empty($emp->employment->employeeWorkType->name) ? $emp->employment->employeeWorkType->name : '');
                         $theCollection[$row][] = number_format($payRate, 2, '.', '');
-                        $theCollection[$row][] = $this->calculateHourMinute($working_hours);
-                        $theCollection[$row][] = $this->calculateHourMinute($holiday_hours);
+                        $theCollection[$row][] = $formatHours($working_hours);
+                        $theCollection[$row][] = $formatHours($holiday_hours);
                         $theCollection[$row][] = number_format($working_pays, 2, '.', '');
                         $theCollection[$row][] = number_format($holiday_pays, 2, '.', '');
                         $theCollection[$row][] = ($sickDays > 0 ? ($sickDays == 1 ? $sickDays.' Day' : $sickDays.' Days') : '');
