@@ -131,6 +131,62 @@
             pointer-events: none;
         }
 
+        /* Download choice: minutes or decimal hours */
+        #attendanceReportPage .ar-export {
+            align-items: center;
+            display: flex;
+            inset: 0;
+            justify-content: center;
+            padding: 20px;
+            position: fixed;
+            z-index: 60;
+        }
+        #attendanceReportPage .ar-export[hidden] { display: none; }
+        #attendanceReportPage .ar-export-backdrop { background: rgba(18, 49, 46, .45); inset: 0; position: absolute; }
+        #attendanceReportPage .ar-export-panel {
+            background: #fff;
+            border: 1px solid var(--ar-line);
+            border-radius: 14px;
+            box-shadow: 0 24px 60px -20px rgba(18, 49, 46, .45);
+            max-width: 440px;
+            padding: 22px 24px 24px;
+            position: relative;
+            width: 100%;
+        }
+        #attendanceReportPage .ar-export-head { align-items: center; display: flex; justify-content: space-between; gap: 12px; }
+        #attendanceReportPage .ar-export-title { color: var(--ar-ink); font-size: 17px; font-weight: 800; margin: 0; }
+        #attendanceReportPage .ar-export-x {
+            background: none;
+            border: 0;
+            color: var(--ar-muted);
+            cursor: pointer;
+            font-size: 24px;
+            line-height: 1;
+            padding: 0 2px;
+        }
+        #attendanceReportPage .ar-export-x:hover { color: var(--ar-ink); }
+        #attendanceReportPage .ar-export-lead { color: var(--ar-muted); font-size: 13px; line-height: 1.55; margin: 8px 0 16px; }
+        #attendanceReportPage .ar-export-lead b { color: var(--ar-ink); }
+        #attendanceReportPage .ar-export-options { display: grid; gap: 10px; }
+        #attendanceReportPage .ar-export-option {
+            border: 1px solid var(--ar-line);
+            border-radius: 10px;
+            color: var(--ar-ink);
+            display: block;
+            padding: 13px 16px;
+            transition: border-color .15s, background-color .15s;
+        }
+        #attendanceReportPage .ar-export-option:hover,
+        #attendanceReportPage .ar-export-option:focus-visible {
+            background: #f1f8f4;
+            border-color: #18864f;
+            color: var(--ar-ink);
+            outline: none;
+        }
+        #attendanceReportPage .ar-export-option-title { display: block; font-size: 14px; font-weight: 800; }
+        #attendanceReportPage .ar-export-option-eg { color: var(--ar-muted); display: block; font-size: 12.5px; margin-top: 3px; }
+        #attendanceReportPage .ar-export-option-eg b { color: #18864f; font-family: ui-monospace, Menlo, monospace; }
+
         #attendanceReportPage .ar-filter-line {
             border-top: 1px solid var(--ar-soft-line);
             margin-top: 22px;
@@ -824,6 +880,29 @@
 
         <div class="attendanceReportWrap" style="display: {{ (isset($reportHtml['html']) && !empty($reportHtml['html']) ? 'block;' : 'none;') }}">
             {!! (isset($reportHtml['html']) && !empty($reportHtml['html']) ? $reportHtml['html'] : '') !!}
+        </div>
+
+        {{-- Asked before every download: how Working Hour and Holiday Hour
+             are written in the sheet. Each option is the download itself. --}}
+        <div class="ar-export" data-ar-export hidden>
+            <div class="ar-export-backdrop" data-ar-export-close></div>
+            <div class="ar-export-panel" role="dialog" aria-modal="true" aria-labelledby="arExportTitle">
+                <div class="ar-export-head">
+                    <h2 id="arExportTitle" class="ar-export-title">Download Excel</h2>
+                    <button type="button" class="ar-export-x" data-ar-export-close aria-label="Close">&times;</button>
+                </div>
+                <p class="ar-export-lead">How should <b>Working Hour</b> and <b>Holiday Hour</b> be shown? The rest of the report is the same either way.</p>
+                <div class="ar-export-options">
+                    <a href="#" class="ar-export-option" data-ar-export-format="minutes">
+                        <span class="ar-export-option-title">Excel in Minutes</span>
+                        <span class="ar-export-option-eg">Hours and minutes, e.g. <b>109:31</b></span>
+                    </a>
+                    <a href="#" class="ar-export-option" data-ar-export-format="decimal">
+                        <span class="ar-export-option-title">Excel in Decimal</span>
+                        <span class="ar-export-option-eg">Hours as a number, e.g. <b>109.52</b></span>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 @endsection
