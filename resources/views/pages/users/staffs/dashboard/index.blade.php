@@ -36,7 +36,6 @@
             ['tutor_2', 'Tutor', 'presentation', 'tutor-dashboard.show.new', null],
             ['personal_tutor', 'Personal Tutor', 'heart-handshake', 'pt.dashboard', null],
             ['hr_porta', 'Human Resources', 'users', 'hr.portal', null],
-            ['policy_assessment_manage', 'Policy Assessments', 'clipboard-check', 'policy.assessment', null],
             ['programme_dashboard', 'Manager', 'layout-dashboard', 'programme.dashboard', null],
             ['access_account', 'Accounts', 'wallet', 'accounts', null],
             // The issue desk (/library-management), not the older dashboard
