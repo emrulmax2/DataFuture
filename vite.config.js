@@ -45,7 +45,7 @@ export default defineConfig({
                 'resources/css/programme-dashboard.css',
                 'resources/css/group-leader-dashboard.css',
                 'resources/css/task-manager-detail.css',
-                // 'resources/css/slc-registration.css',
+                'resources/css/slc-registration.css',
                 'resources/js/app.js',
                 'resources/js/ckeditor-classic.js',
                 'resources/js/ckeditor-inline.js',
