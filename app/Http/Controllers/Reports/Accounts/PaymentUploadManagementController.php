@@ -383,8 +383,7 @@ class PaymentUploadManagementController extends Controller
         $parent_total = (isset($request->parent_total) && $request->parent_total > 0 ? $request->parent_total : 0);
         $transactions = (isset($request->trans) && !empty($request->trans) ? $request->trans : []);
 
-        $receipts = SlcMoneyReceipt::max('invoice_no');
-        $invoice = preg_replace('~\D~', '', $receipts);
+        $invoice = \App\Services\Slc\InvoiceNumber::highest(); // not MAX(invoice_no): that is a text max, the highest "R-" refund
 
         if(!empty($transactions)):
             $errorCount = 0;
@@ -535,8 +534,7 @@ class PaymentUploadManagementController extends Controller
     public function historyReCheckInsert(Request $request){
         $history_ids = $request->history_ids;
 
-        $receipts = SlcMoneyReceipt::max('invoice_no');
-        $invoice = preg_replace('~\D~', '', $receipts);
+        $invoice = \App\Services\Slc\InvoiceNumber::highest(); // not MAX(invoice_no): that is a text max, the highest "R-" refund
 
         foreach($history_ids as $history_id):
             $history = SlcPaymentHistory::find($history_id);
@@ -649,8 +647,7 @@ class PaymentUploadManagementController extends Controller
         $student = Student::find($student_id);
         $history = SlcPaymentHistory::find($history_id);
 
-        $receipts = SlcMoneyReceipt::max('invoice_no');
-        $invoice = preg_replace('~\D~', '', $receipts);
+        $invoice = \App\Services\Slc\InvoiceNumber::highest(); // not MAX(invoice_no): that is a text max, the highest "R-" refund
 
         $invoice += 1;
         $invoice_no = '';

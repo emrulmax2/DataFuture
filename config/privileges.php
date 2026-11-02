@@ -157,6 +157,11 @@ return [
         // Error Logs (developer log viewer). New screen, and log entries carry
         // stack traces, SQL and personal data, so it is enforced from day one.
         'error.logs*' => 'error_logs',
+
+        // SLC bulk registration (/slc-registration). New screen holding students' SLC
+        // finance details, so it is enforced from day one like Error Logs.
+        // The dashboard's SLC Records box opens it too, so either key lets you in.
+        'slc.registration*' => ['slc_registration', 'slc_records'],
     ],
 
     /*
@@ -176,6 +181,7 @@ return [
         'policy.assessment*',
         'employee.policy.assessment*',
         'error.logs*',
+        'slc.registration*',
     ],
 
     /*

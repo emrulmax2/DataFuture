@@ -294,6 +294,12 @@
             </div>
             <div class="col-span-12 sm:col-span-3">
                 <div class="form-check form-switch">
+                    <input {{ $on('dashboard_slc_registration') }} id="dashboard-slc-registration-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][dashboard_slc_registration]">
+                    <label class="form-check-label ml-4" for="dashboard-slc-registration-{{ $d }}">SLC Registration</label>
+                </div>
+            </div>
+            <div class="col-span-12 sm:col-span-3">
+                <div class="form-check form-switch">
                     <input {{ $on('dashboard_file_manager') }} id="dashboard-file-manager-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][dashboard_file_manager]">
                     <label class="form-check-label ml-4" for="dashboard-file-manager-{{ $d }}">File Manager</label>
                 </div>
@@ -314,6 +320,12 @@
                         <input {{ $on('dashboard_show_all_issue') }} {{ $off('dashboard_report_issue') }} id="dashboard-show-all-issue-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][dashboard_show_all_issue]">
                         <label class="form-check-label ml-4" for="dashboard-show-all-issue-{{ $d }}">Show All Issue</label>
                     </div>
+                </div>
+            </div>
+            <div class="col-span-12 sm:col-span-3">
+                <div class="form-check form-switch">
+                    <input {{ $on('dashboard_slc_records') }} id="dashboard-slc-records-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][dashboard_slc_records]">
+                    <label class="form-check-label ml-4" for="dashboard-slc-records-{{ $d }}">SLC Records</label>
                 </div>
             </div>
         </div>

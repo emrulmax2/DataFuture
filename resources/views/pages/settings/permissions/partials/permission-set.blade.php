@@ -317,6 +317,12 @@
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <div class="flex items-center">
+                                <input id="dashboard-slc-registration-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][dashboard_slc_registration]" {{ isset($values['dashboard_slc_registration']) && $values['dashboard_slc_registration'] ? 'checked' : '' }}>
+                                <label for="dashboard-slc-registration-{{ $uid }}" class="ml-2 font-medium">SLC Registration</label>
+                            </div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-3">
+                            <div class="flex items-center">
                                 <input id="dashboard-tutor-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][dashboard_tutor]" {{ isset($values['dashboard_tutor']) && $values['dashboard_tutor'] ? 'checked' : '' }}>
                                 <label for="dashboard-tutor-{{ $uid }}" class="ml-2 font-medium">Tutor Dashboard</label>
                             </div>
@@ -389,6 +395,12 @@
                                     <input id="dashboard-show-all-issue-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][dashboard_show_all_issue]" {{ isset($values['dashboard_show_all_issue']) && $values['dashboard_show_all_issue'] ? 'checked' : '' }} {{ empty($values['dashboard_report_issue']) ? 'disabled' : '' }}>
                                     <label for="dashboard-show-all-issue-{{ $uid }}" class="ml-2">Show All Issue</label>
                                 </div>
+                            </div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-3">
+                            <div class="flex items-center">
+                                <input id="dashboard-slc-records-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][dashboard_slc_records]" {{ isset($values['dashboard_slc_records']) && $values['dashboard_slc_records'] ? 'checked' : '' }}>
+                                <label for="dashboard-slc-records-{{ $uid }}" class="ml-2 font-medium">SLC Records</label>
                             </div>
                         </div>
                     </div>
