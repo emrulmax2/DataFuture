@@ -79,10 +79,13 @@ class LegacyPrivilegeMap
         'dashboard.budget_manager' => 'dashboard_budget',
         'dashboard.news_events' => 'dashboard_news',
         'dashboard.student_due_rep' => 'dashboard_due_report',
+        // SLC bulk registration (/slc-registration, 2 Nov 2026)
+        'dashboard.slc_registration' => 'dashboard_slc_registration',
         'dashboard.file_manager' => 'dashboard_file_manager',
         'dashboard.expired_docs' => 'dashboard_expired_docs',
         'dashboard.report_it_all' => 'dashboard_report_issue',
         'dashboard.show_all_issue' => 'dashboard_show_all_issue',
+        'dashboard.slc_records' => 'dashboard_slc_records',
         'programme_dashboard.reports' => 'dashboard_programme_reports',
         'programme_dashboard.student_other_details_report_show' => 'dashboard_programme_student_data',
         'programme_dashboard.budget_edit' => 'dashboard_budget_edit',

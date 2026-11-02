@@ -42,6 +42,8 @@
             // that `library.management.index` points at.
             ['library_management', 'Library', 'library', 'library.management', null],
             ['news_events', 'News & Events', 'megaphone', 'news.updates', null],
+            // Privileges › Dashboard › SLC Records
+            ['slc_records', 'SLC Records', 'badge-pound-sterling', 'slc.registration', null],
         ];
 
         foreach ($lccdGated as [$lccdKey, $lccdLabel, $lccdIcon, $lccdRoute, $lccdCount]) {
@@ -107,6 +109,7 @@
             // for someone whose only quick action was one of them.
             // || $lccdCan('group_email')
             || $lccdCan('student_due_rep')
+            || $lccdCan('slc_registration')
             // || ($lccdCan('expired_docs') && $hasDocumentReminder)
             // || $lccdCan('report_it_all')
         ));
@@ -303,6 +306,13 @@
                                     <a href="{{ route('report.student.due') }}" class="lccd-action">
                                         <i data-lucide="receipt"></i>
                                         <span class="lccd-action__label">Student Due</span>
+                                    </a>
+                                @endif
+
+                                @if($lccdCan('slc_registration'))
+                                    <a href="{{ route('slc.registration') }}" class="lccd-action">
+                                        <i data-lucide="badge-pound-sterling"></i>
+                                        <span class="lccd-action__label">SLC Registration</span>
                                     </a>
                                 @endif
 

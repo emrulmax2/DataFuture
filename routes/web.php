@@ -62,6 +62,7 @@ use App\Http\Controllers\Settings\RoleController;
 use App\Http\Controllers\Settings\PermissionTemplateController;
 use App\Http\Controllers\Settings\ProcessListController;
 use App\Http\Controllers\Settings\TaskListController;
+// use App\Http\Controllers\Settings\TaskAssignmentRuleController;
 
 use App\Http\Controllers\InterviewListController;
 use App\Http\Controllers\ApplicantInterviewListController;
@@ -483,6 +484,14 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
 
         Route::get('logout', [LoginController::class, 'logout'])->name('logout');
 
+        /* The applicant's own sign-in details. Password changes go through here,
+           not the `change-password` route below, which `applicant.loggedin`
+           keeps out of reach of a signed-in applicant. */
+        // Route::controller(\App\Http\Controllers\Applicant\AccountController::class)->group(function() {
+        //     Route::get('/account', 'index')->name('account');
+        //     Route::post('/account/password', 'updatePassword')->name('account.password');
+        // });
+
         Route::controller(ApplicantDashboard::class)->group(function() {
             Route::get('/dashboard', 'index')->name('dashboard');
             Route::get('/dashboard/list', 'list')->name('dashboard.applications.list');
@@ -500,6 +509,7 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
             Route::get('application/show/{id}', 'show')->name('application.show');
 
             Route::post('application/verify-referral-code', 'verifyReferralCode')->name('application.verify.referral.code');
+            //Route::post('application/clear-referral-code', 'clearReferralCode')->name('application.clear.referral.code');
             Route::post('application/get-evening-weekend-status', 'getEveningWeekendStatus')->name('application.get.evening.weekend.status');
         });
 
@@ -525,6 +535,13 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
 });
 // all Agent have a prefix route name agent.* value
 Route::prefix('/agent')->name('agent.')->group(function() {
+
+    /* lab404/laravel-impersonate: a staff member signed in as this agent
+       goes back to their own account (the applicant group has the same). */
+    // Route::get('/impersonate/leave', function () {
+    //     auth('agent')->user()->leaveImpersonation();
+    //     return redirect()->route('dashboard');
+    // })->name('impersonate.leave');
 
     Route::controller(AgentLoginController::class)->middleware('agent.loggedin')->group(function() {
 
@@ -570,6 +587,7 @@ Route::prefix('/agent')->name('agent.')->group(function() {
         Route::controller(AgentDashboardController::class)->group(function() {
             Route::get('/dashboard', 'index')->name('dashboard');
             Route::get('/dashboard/list', 'list')->name('dashboard.applications.list');
+            // Route::get('/dashboard/drafts', 'drafts')->name('dashboard.drafts');
         });
         Route::controller(ApplicationCheckController::class)->group(function() {
             Route::post('/store', 'store')->name('apply.check');
@@ -595,6 +613,7 @@ Route::prefix('/agent')->name('agent.')->group(function() {
             Route::get('agent-application/course-creation-edit/{id}', 'CourseCreationList')->name('application.course.creation.edit');
             Route::post('agent-application/review', 'review')->name('application.review');
             Route::post('agent-application/verify-referral-code', 'verifyReferralCode')->name('application.verify.referral.code');
+            // Route::post('agent-application/clear-referral-code', 'clearReferralCode')->name('application.clear.referral.code');
 
             Route::post('agent-application/get-evening-weekend-status', 'getEveningWeekendStatus')->name('application.get.evening.weekend.status');
         });
@@ -618,7 +637,8 @@ Route::prefix('/agent')->name('agent.')->group(function() {
         });
 
         Route::controller(AgentMyAccountController::class)->group(function() {
-            Route::get('my-account', 'index')->name('account'); 
+            Route::get('my-account', 'index')->name('account');
+            // Route::post('my-account/password', 'updatePassword')->name('account.password');
         });
 
      
@@ -1070,6 +1090,64 @@ Route::middleware('auth')->group(function() {
         Route::post('course-management/plans/tree/store-tutorial', 'storeTutorial')->name('plans.tree.store.tutorial');
     });
 
+    /* Plan tree › Send Class ICP: the group's class routine PDF emailed to each of its students (30 Oct 2026). */
+    // Route::controller(\App\Http\Controllers\CourseManagement\PlanTreeClassIcpController::class)->group(function() {
+    //     Route::post('course-management/plans/tree/class-icp/prepare', 'prepare')->name('plans.tree.class.icp.prepare');
+    //     Route::get('course-management/plans/tree/class-icp/preview', 'preview')->name('plans.tree.class.icp.preview');
+    //     Route::post('course-management/plans/tree/class-icp/send', 'send')->name('plans.tree.class.icp.send');
+    // });
+
+    // SLC bulk registration (user, 2 Nov 2026). Privilege "SLC Registration", enforced (config/privileges.php).
+    Route::controller(\App\Http\Controllers\SlcRegistration\SlcRegistrationController::class)->group(function() {
+        Route::get('slc-registration', 'index')->name('slc.registration');
+        Route::get('slc-registration/state', 'state')->name('slc.registration.state');
+        Route::get('slc-registration/multiple-agreements', 'multipleAgreements')->name('slc.registration.multiple');
+        Route::post('slc-registration/upload', 'upload')->name('slc.registration.upload');
+        Route::get('slc-registration/students', 'students')->name('slc.registration.students');
+        Route::post('slc-registration/link', 'link')->name('slc.registration.link');
+        Route::post('slc-registration/unlink', 'unlink')->name('slc.registration.unlink');
+        Route::post('slc-registration/route', 'setRoute')->name('slc.registration.route');
+        Route::post('slc-registration/route/clear', 'clearRoute')->name('slc.registration.route.clear');
+        Route::post('slc-registration/suggested', 'suggested')->name('slc.registration.suggested');
+        Route::post('slc-registration/action', 'action')->name('slc.registration.action');
+        Route::post('slc-registration/decide', 'decide')->name('slc.registration.decide');
+        Route::post('slc-registration/undo', 'undo')->name('slc.registration.undo');
+        Route::post('slc-registration/attendance', 'attendance')->name('slc.registration.attendance');
+        Route::post('slc-registration/confirm', 'confirm')->name('slc.registration.confirm');
+        Route::post('slc-registration/batch/download', 'download')->name('slc.registration.batch.download');
+        Route::get('slc-registration/batch/file', 'batchFile')->name('slc.registration.batch.file');
+        Route::post('slc-registration/batch/uploaded', 'uploaded')->name('slc.registration.batch.uploaded');
+        Route::post('slc-registration/batch/register', 'bulkRegister')->name('slc.registration.batch.register');
+        Route::post('slc-registration/course/map', 'mapCourse')->name('slc.registration.course.map');
+        // Bulk attendance (steps 1–2)
+        Route::post('slc-registration/att/upload', 'attUpload')->name('slc.registration.att.upload');
+        Route::post('slc-registration/att/link', 'attLink')->name('slc.registration.att.link');
+        Route::post('slc-registration/att/unlink', 'attUnlink')->name('slc.registration.att.unlink');
+        Route::post('slc-registration/att/route', 'attRoute')->name('slc.registration.att.route');
+        Route::post('slc-registration/att/route/clear', 'attClearRoute')->name('slc.registration.att.route.clear');
+        Route::post('slc-registration/att/suggested', 'attSuggested')->name('slc.registration.att.suggested');
+        Route::post('slc-registration/att/code', 'attCode')->name('slc.registration.att.code');
+        Route::post('slc-registration/att/confirm', 'attConfirm')->name('slc.registration.att.confirm');
+        Route::post('slc-registration/att/undo', 'attUndo')->name('slc.registration.att.undo');
+        Route::post('slc-registration/att/coc', 'attCocDone')->name('slc.registration.att.coc');
+        Route::post('slc-registration/att/batch/download', 'attDownload')->name('slc.registration.att.batch.download');
+        Route::get('slc-registration/att/batch/file', 'attBatchFile')->name('slc.registration.att.batch.file');
+        Route::post('slc-registration/att/batch/uploaded', 'attUploaded')->name('slc.registration.att.batch.uploaded');
+        // Bulk payment upload (SLC remittance → money receipts)
+        Route::post('slc-registration/pay/upload', 'payUpload')->name('slc.registration.pay.upload');
+        Route::post('slc-registration/pay/link', 'payLink')->name('slc.registration.pay.link');
+        Route::post('slc-registration/pay/unlink', 'payUnlink')->name('slc.registration.pay.unlink');
+        Route::post('slc-registration/pay/agreement', 'payAgreement')->name('slc.registration.pay.agreement');
+        Route::post('slc-registration/pay/skip', 'paySkip')->name('slc.registration.pay.skip');
+        Route::post('slc-registration/pay/unskip', 'payUnskip')->name('slc.registration.pay.unskip');
+        Route::post('slc-registration/pay/record', 'payRecord')->name('slc.registration.pay.record');
+        Route::get('slc-registration/pay/file', 'payFile')->name('slc.registration.pay.file');
+        Route::post('slc-registration/pay/bring-in', 'payBringIn')->name('slc.registration.pay.bring.in');
+        Route::post('slc-registration/pay/open', 'payOpen')->name('slc.registration.pay.open');
+        Route::get('slc-registration/pay/history', 'payHistory')->name('slc.registration.pay.history');
+        Route::get('slc-registration/pay/history/date', 'payHistoryDate')->name('slc.registration.pay.history.date');
+    });
+
     Route::controller(PlansDateListController::class)->group(function() {
         Route::get('course-management/plan-dates/all/{planId}', 'index')->name('plan.dates'); 
         Route::get('course-management/plan-dates/list', 'list')->name('plan.dates.list'); 
@@ -1395,6 +1473,13 @@ Route::middleware('auth')->group(function() {
         Route::post('student/reassign-slc-payment-to-agreement', 'reAssignPaymentToAgreement')->name('student.sync.slc.payment.to.agreement');
     });
 
+    /* Staff presence on an applicant's record (applicant_view_sessions): start / heartbeat / end. */
+    // Route::controller(\App\Http\Controllers\AdmissionPresenceController::class)->group(function() {
+    //     Route::post('admission/presence/start', 'start')->name('admission.presence.start');
+    //     Route::post('admission/presence/beat', 'beat')->name('admission.presence.beat');
+    //     Route::post('admission/presence/end', 'end')->name('admission.presence.end');
+    // });
+
     Route::controller(AdmissionController::class)->middleware('update.admission.status')->group(function() {
 
         Route::get('admission', 'index')->name('admission'); 
@@ -1410,6 +1495,7 @@ Route::middleware('auth')->group(function() {
         //Route::get('admission/employment-list', 'employmentList')->name('admission.employment.list');
 
         Route::post('admission/update-personal-details', 'updatePersonalDetails')->name('admission.update.personal.details');
+        // Route::post('admission/update-proof-of-id', 'updateProofOfId')->name('admission.update.proof.id');
         Route::post('admission/update-contact-details', 'updateContactDetails')->name('admission.update.contact.details');
         Route::post('admission/update-kin-details', 'updateKinDetails')->name('admission.update.kin.details');
         Route::post('admission/update-course-details', 'updateCourseAndProgrammeDetails')->name('admission.update.course.details');
@@ -1477,6 +1563,7 @@ Route::middleware('auth')->group(function() {
 
         Route::get('admission/conversion-log/{applicantId}', 'admissionConversionLog')->name('admission.conversion.log');
         Route::get('admission/conversion-log-list', 'admissionConversionLogList')->name('admission.conversion.log.list');
+        // Route::get('admission/timeline/{applicantId}', 'admissionTimeline')->name('admission.timeline');
 
         //Route::get('admission/convertstudent','convertStudentDemo')->name('admission.convertstudent');
 
@@ -1491,6 +1578,7 @@ Route::middleware('auth')->group(function() {
         Route::post('admission/send-e-signature-request', 'sendApplicantESignatureRequest')->name('admission.send.e.signature.request');
 
         Route::get('admission/e-signature/{applicantId}', 'showEsignature')->name('admission.show.e.signature');
+        // Route::get('admission/e-signature/{applicantId}/request', 'showEsignatureRequest')->name('admission.show.e.signature.request');
         
     });
 
@@ -1972,7 +2060,9 @@ Route::middleware('auth')->group(function() {
     Route::controller(PolicyQuestionController::class)->group(function(){
         Route::get('hr/policy-assessments/policies/{policy}/questions', 'index')->name('policy.assessment.question');
         Route::get('hr/policy-assessments/policies/{policy}/questions/list', 'list')->name('policy.assessment.question.list');
+        // [class, method] on purpose: a bare 'pdf' is taken for the global pdf() helper once a PDF has been rendered in-process.
         Route::get('hr/policy-assessments/policies/{policy}/questions/pdf', 'pdf')->name('policy.assessment.question.pdf');
+        // Route::get('hr/policy-assessments/policies/{policy}/questions/pdf', [PolicyQuestionController::class, 'pdf'])->name('policy.assessment.question.pdf');
         Route::post('hr/policy-assessments/policies/{policy}/questions/store', 'store')->name('policy.assessment.question.store');
         Route::post('hr/policy-assessments/policies/{policy}/questions/activate-all', 'activateAll')->name('policy.assessment.question.activate.all');
         Route::get('hr/policy-assessments/questions/edit/{question}', 'edit')->name('policy.assessment.question.edit');
@@ -2468,6 +2558,18 @@ Route::middleware('auth')->group(function() {
         Route::post('site-settings/tasklist/restore/{id}', 'restore')->name('tasklist.restore');
         Route::post('site-settings/tasklist/restore', 'getAssignedUserList')->name('tasklist.users');
     });
+
+    // Route::controller(TaskAssignmentRuleController::class)->group(function() {
+    //     Route::get('site-settings/task-automation', 'index')->name('taskrules');
+    //     Route::get('site-settings/task-automation/list', 'list')->name('taskrules.list');
+    //     Route::post('site-settings/task-automation/store', 'store')->name('taskrules.store');
+    //     Route::get('site-settings/task-automation/edit/{id}', 'edit')->name('taskrules.edit');
+    //     Route::post('site-settings/task-automation/update', 'update')->name('taskrules.update');
+    //     Route::delete('site-settings/task-automation/delete/{id}', 'destroy')->name('taskrules.destroy');
+    //     Route::post('site-settings/task-automation/restore/{id}', 'restore')->name('taskrules.restore');
+    //     Route::get('site-settings/task-automation/preview', 'preview')->name('taskrules.preview');
+    //     Route::get('site-settings/task-automation/runs', 'runs')->name('taskrules.runs');
+    // });
 
     Route::controller(SmsTemplateController::class)->group(function() {
         Route::get('site-settings/sms-template', 'index')->name('sms.template'); 
@@ -3389,6 +3491,10 @@ Route::middleware('auth')->group(function() {
         Route::get('task-manager/download-task-students-emails', 'downloadTaskStudentEmailListExcel')->name('task.manager.students.email.excel'); 
         Route::post('task-manager/complete-email-id-task', 'completeTaskStudentEmailTask')->name('task.manager.comlete.students.email.id.task'); 
         Route::post('task-manager/download-id-cards', 'downloadIdCard')->name('task.manager.download.id.card'); 
+        // Route::post('task-manager/download-id-cards', 'downloadIdCard')->name('task.manager.download.id.card');
+        // Route::post('task-manager/send-class-routine', 'sendClassRoutine')->name('task.manager.send.class.routine');
+        // Route::post('task-manager/class-routine/prepare', 'prepareClassRoutine')->name('task.manager.class.routine.prepare');
+        // Route::get('task-manager/class-routine/preview', 'previewClassRoutine')->name('task.manager.class.routine.preview');
 
         Route::post('task-manager/update-task-status', 'updateTaskStatus')->name('task.manager.update.task.status'); 
         Route::get('task-manager/download-task-students-list', 'downloadTaskStudentListExcel')->name('task.manager.students.list.excel'); 
@@ -4528,6 +4634,30 @@ Route::controller(ApplicanESignatureController::class)->group(function() {
 Route::post('paypal/webhook', [PayPalWebhookController::class, 'handle'])
     ->middleware('throttle:120,1')
     ->name('paypal.webhook');
+
+/* DocuSeal offer acceptance form events (console.docuseal.com/webhooks). Outside
+   every auth group: the caller is DocuSeal. Checked by the secret header, and the
+   queued job re-reads the submission from DocuSeal's API before acting. */
+// Route::post('docuseal/webhook', [\App\Http\Controllers\DocusealWebhookController::class, 'handle'])
+//     ->middleware('throttle:120,1')
+//     ->name('docuseal.webhook');
+
+/* The Decline button in the DocuSeal offer acceptance email links here with
+   {{submitter.slug}} (the applicant's signing key). Public: the applicant is not
+   signed in. Opening it only shows a confirmation page; the POST declines. */
+// Route::get('offer/decline/{slug}', [\App\Http\Controllers\OfferDeclineController::class, 'show'])
+//     ->middleware('throttle:30,1')
+//     ->name('offer.decline');
+// Route::post('offer/decline/{slug}', [\App\Http\Controllers\OfferDeclineController::class, 'store'])
+//     ->middleware('throttle:10,1')
+//     ->name('offer.decline.store');
+
+/* The class routine (ICP) link in the student's email and text message. Public: the
+   student is not signed in; the token is signed and expires (ClassRoutineLink). */
+// Route::get('class-routine/{token}', [\App\Http\Controllers\ClassRoutineDownloadController::class, 'show'])
+//     ->middleware('throttle:30,1')
+//     ->where('token', '[0-9a-z.]+')
+//     ->name('class.routine.download');
 
 /* Paying a library charge from the link the desk hands out.
    -------------------------------------------------------------------------

@@ -467,6 +467,12 @@
                     </div>
                     <div class="col-span-12 sm:col-span-3">
                         <div class="form-check form-switch">
+                            <input {{ (isset($priv['dashboard']['slc_registration']) && $priv['dashboard']['slc_registration'] == 1 ? 'checked' : '') }} id="permission_dashboard_79" class="form-check-input" type="checkbox" value="1" name="permission[dashboard][slc_registration]">
+                            <label class="form-check-label ml-4" for="permission_dashboard_79">SLC Registration</label>
+                        </div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
                             <input {{ (isset($priv['dashboard']['file_manager']) && $priv['dashboard']['file_manager'] == 1 ? 'checked' : '') }} id="permission_dashboard_16" class="form-check-input" type="checkbox" value="1" name="permission[dashboard][file_manager]">
                             <label class="form-check-label ml-4" for="permission_dashboard_16">File Manager</label>
                         </div>
@@ -492,6 +498,12 @@
                                 <input {{ (isset($priv['dashboard']['show_all_issue']) && $priv['dashboard']['show_all_issue'] == 1 ? 'checked' : '') }} id="permission_dashboard_78" class="form-check-input" type="checkbox" value="1" name="permission[dashboard][show_all_issue]" {{ $childAttribute }}>
                                 <label class="form-check-label ml-4" for="permission_dashboard_78">Show All Issue</label>
                             </div>
+                        </div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['dashboard']['slc_records']) && $priv['dashboard']['slc_records'] == 1 ? 'checked' : '') }} id="permission_dashboard_80" class="form-check-input" type="checkbox" value="1" name="permission[dashboard][slc_records]">
+                            <label class="form-check-label ml-4" for="permission_dashboard_80">SLC Records</label>
                         </div>
                     </div>
 
