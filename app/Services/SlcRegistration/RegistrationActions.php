@@ -17,7 +17,6 @@ use App\Models\Student;
 use App\Models\StudentArchive;
 use App\Models\StudentContact;
 use App\Models\Title;
-use App\Support\ApplicantDocumentDisk;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -73,7 +72,7 @@ class RegistrationActions
             $this->fail('The file is for academic year '.$p['header']['ay'].', which is not set up under Academic Years.');
         }
 
-        $disk = ApplicantDocumentDisk::name();
+        $disk = FileDisk::name();
         $path = 'slc-registration/imports/'.now()->format('Ymd_His').'_'.Str::slug(pathinfo($fileName, PATHINFO_FILENAME)).'.txt';
         Storage::disk($disk)->put($path, $text);
 
@@ -599,7 +598,7 @@ class RegistrationActions
             }
             $text = SisFile::build($batch->header, $items->pluck('raw')->all(), now());
             $name = SisFile::fileName($batch->header, $batch->code);
-            $disk = ApplicantDocumentDisk::name();
+            $disk = FileDisk::name();
             $path = 'slc-registration/batches/'.$name;
             Storage::disk($disk)->put($path, $text);
             $batch->update(['status' => 'downloaded', 'file_name' => $name, 'disk' => $disk, 'path' => $path, 'file_date' => now()->toDateString(), 'downloaded_by' => $this->user(), 'downloaded_at' => now()]);

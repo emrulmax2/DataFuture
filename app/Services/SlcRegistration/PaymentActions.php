@@ -10,7 +10,6 @@ use App\Models\SlcPaymentUploadRow;
 use App\Models\Student;
 use App\Models\StudentArchive;
 use App\Services\Slc\InvoiceNumber;
-use App\Support\ApplicantDocumentDisk;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -54,7 +53,7 @@ class PaymentActions
         }
         $h = $p['header'];
         $text = (string) file_get_contents($path);
-        $disk = ApplicantDocumentDisk::name();
+        $disk = FileDisk::name();
         $stored = 'slc-registration/payments/'.now()->format('Ymd_His').'_'.Str::slug(pathinfo($fileName, PATHINFO_FILENAME)).'.'.strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
         Storage::disk($disk)->put($stored, $text);
         $match = self::matchStudents($p['lines']);
@@ -310,7 +309,7 @@ class PaymentActions
         $latest = $waiting->max('transaction_date');
         $text = implode("\r\n", array_merge([implode(',', [$hei, $heiName, count($lines), $dmy($latest), 'T', number_format($total, 2, '.', ''), '', '', '', '', '', '', '', '', '', ''])], array_column($lines, 'raw')))."\r\n";
         $name = 'Waiting in Reports – '.now()->format('d-m-Y').'.csv';
-        $disk = ApplicantDocumentDisk::name();
+        $disk = FileDisk::name();
         $stored = 'slc-registration/payments/'.now()->format('Ymd_His').'_waiting-in-reports.csv';
         Storage::disk($disk)->put($stored, $text);
         $match = self::matchStudents(array_map(fn ($l) => ['line' => $l['line'], 'ssn' => $l['data']['ssn'], 'slcCode' => $l['data']['slcCode'], 'dob' => $l['data']['dob']], $lines));

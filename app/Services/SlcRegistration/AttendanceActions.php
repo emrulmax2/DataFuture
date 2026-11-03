@@ -9,7 +9,6 @@ use App\Models\SlcAttendanceImportRow;
 use App\Models\SlcBulkActivity;
 use App\Models\Student;
 use App\Models\StudentArchive;
-use App\Support\ApplicantDocumentDisk;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -54,7 +53,7 @@ class AttendanceActions
             $this->fail('No academic year under Academic Years covers the report date '.Text::fmtIso($date).'.');
         }
 
-        $disk = ApplicantDocumentDisk::name();
+        $disk = FileDisk::name();
         $path = 'slc-registration/attendance/'.now()->format('Ymd_His').'_'.Str::slug(pathinfo($fileName, PATHINFO_FILENAME)).'.txt';
         Storage::disk($disk)->put($path, $text);
 
@@ -439,7 +438,7 @@ class AttendanceActions
             }
             $text = AttendanceFile::build($batch->header, $lines, now());
             $name = AttendanceFile::fileName(explode('~', $batch->header)[0], (string) $batch->term, $batch->code);
-            $disk = ApplicantDocumentDisk::name();
+            $disk = FileDisk::name();
             $path = 'slc-registration/attendance-batches/'.$name;
             Storage::disk($disk)->put($path, $text);
             $batch->update(['status' => 'downloaded', 'file_name' => $name, 'disk' => $disk, 'path' => $path, 'file_date' => now()->toDateString(), 'downloaded_by' => $this->user(), 'downloaded_at' => now()]);
