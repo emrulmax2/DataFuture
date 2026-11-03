@@ -326,6 +326,7 @@ export default defineConfig({
                 'resources/js/student-slc-history-merge.js',
                 'resources/js/student-group-search-form.js',
                 'resources/js/student-attendance-reports.js',
+                'resources/js/non-tutor-attendance-report.js',
 
                 'resources/js/student-attendance-excuse.js',
                 'resources/js/slc-accounts-reports.js',

@@ -277,6 +277,7 @@ use App\Http\Controllers\Reports\ActiveStudentByDateController;
 use App\Http\Controllers\Reports\ApplicantAnalysisReportController;
 use App\Http\Controllers\Reports\ApplicationAnalysisController;
 use App\Http\Controllers\Reports\AttendanceReportController as ReportsAttendanceReportController;
+use App\Http\Controllers\Reports\NonTutorAttendanceUpdateController;
 use App\Http\Controllers\Reports\ClassStatusByTermController;
 use App\Http\Controllers\Reports\DatafutureReportController;
 use App\Http\Controllers\Reports\IntakePerformance\AttendanceRateReportController;
@@ -509,7 +510,7 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
             Route::get('application/show/{id}', 'show')->name('application.show');
 
             Route::post('application/verify-referral-code', 'verifyReferralCode')->name('application.verify.referral.code');
-            //Route::post('application/clear-referral-code', 'clearReferralCode')->name('application.clear.referral.code');
+            // Route::post('application/clear-referral-code', 'clearReferralCode')->name('application.clear.referral.code');
             Route::post('application/get-evening-weekend-status', 'getEveningWeekendStatus')->name('application.get.evening.weekend.status');
         });
 
@@ -3904,7 +3905,14 @@ Route::middleware('auth')->group(function() {
     Route::controller(ReportsAttendanceReportController::class)->group(function(){
         Route::get('reports/attendance-reports', 'index')->name('report.attendance.reports'); 
         Route::get('reports/attendance-reports-list', 'list')->name('report.attendance.reports.list'); 
-        Route::post('reports/attendance-excel-download', 'excelDownload')->name('report.attendance.reports.excel'); 
+        // Route::post('reports/attendance-excel-download', 'excelDownload')->name('report.attendance.reports.excel');
+    });
+
+    // Staff who changed attendance in classes they are not the tutor or personal tutor of.
+    Route::controller(NonTutorAttendanceUpdateController::class)->group(function(){
+        Route::get('reports/non-tutor-attendance-updates', 'index')->name('reports.non.tutor.attendance');
+        Route::get('reports/non-tutor-attendance-updates/list', 'list')->name('reports.non.tutor.attendance.list');
+        Route::get('reports/non-tutor-attendance-updates/details', 'details')->name('reports.non.tutor.attendance.details');
     });
 
     Route::controller(SystemReportController::class)->group(function(){
