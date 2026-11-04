@@ -375,6 +375,7 @@
                     'hr_portal_login_as' => 'Login As User',
                     'hr_portal_policy_assessment_manage' => 'Policy Assessments (manage question bank, assign, view results)',
                     'hr_portal_staff_document_pin' => 'PIN Enabled',
+                    'hr_portal_payslip_manage' => 'Payslips (delete / re-upload)',
                 ];
             @endphp
             @foreach($hrItems as $key => $label)

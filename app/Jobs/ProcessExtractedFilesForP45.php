@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Employee;
 use App\Models\PaySlipUploadSync;
+use App\Services\PayslipManagementService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -208,7 +209,8 @@ class ProcessExtractedFilesForP45 implements ShouldQueue
 
         ]);
         if ($paySlipUploadSync) {
-            $updated = true;
+            // The same file name for the same month is overwritten, not added.
+            PayslipManagementService::log(($paySlipUploadSync->wasRecentlyCreated ? 'uploaded' : 'replaced'), $paySlipUploadSync, $this->created_by);
         }
     }
 }

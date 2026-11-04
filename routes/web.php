@@ -1870,6 +1870,7 @@ Route::middleware('auth')->group(function() {
         Route::post('hr/payslip-upload-email-progress', 'emailProgress')->name('payslip-upload.email-progress');
 
         Route::post('hr/payslip-upload-delete', 'deleteResultBulk')->name('payslip-upload.deleteAll');
+        Route::post('hr/payslip-upload/{payslip_upload}/replace', 'replace')->name('payslip-upload.replace');
         Route::get('hr/payslip-download/{id}', 'downloadPaySlip')->name('payslip-upload.download');
         
     });
@@ -3175,6 +3176,7 @@ Route::middleware('auth')->group(function() {
         Route::post('attendance/update-all', 'updateAll')->name('attendance.update.all'); 
         Route::delete('attendance/delete/{id}', 'destroy')->name('attendance.destory');
         Route::post('attendance/restore', 'restore')->name('attendance.restore');
+        // Route::post('attendance/restore/{id}', 'restore')->name('attendance.restore');
         Route::get('attendance/{data}', 'generatePDF')->name('attendance.print');
     });
 
@@ -3395,6 +3397,9 @@ Route::middleware('auth')->group(function() {
         Route::get('site-settings/library/fine-charges', 'fineCharges')->name('library.settings.fine.charges');
         Route::post('site-settings/library/{group}/save', 'save')->name('library.settings.save');
     });
+
+    // Attendance Settings moved to Attendance Integrity > Settings (user, 3 Nov 2026); the old address redirects.
+    // Route::redirect('site-settings/attendance-settings', '/attendance-integrity/settings')->name('site.settings.attendance');
 
     Route::controller(ResidencyStatusController::class)->group(function() {
         Route::get('site-settings/residency-status', 'index')->name('residency.status'); 
@@ -3905,7 +3910,7 @@ Route::middleware('auth')->group(function() {
     Route::controller(ReportsAttendanceReportController::class)->group(function(){
         Route::get('reports/attendance-reports', 'index')->name('report.attendance.reports'); 
         Route::get('reports/attendance-reports-list', 'list')->name('report.attendance.reports.list'); 
-        // Route::post('reports/attendance-excel-download', 'excelDownload')->name('report.attendance.reports.excel');
+        Route::post('reports/attendance-excel-download', 'excelDownload')->name('report.attendance.reports.excel'); 
     });
 
     // Staff who changed attendance in classes they are not the tutor or personal tutor of.
@@ -3914,6 +3919,56 @@ Route::middleware('auth')->group(function() {
         Route::get('reports/non-tutor-attendance-updates/list', 'list')->name('reports.non.tutor.attendance.list');
         Route::get('reports/non-tutor-attendance-updates/details', 'details')->name('reports.non.tutor.attendance.details');
     });
+
+    // Attendance Integrity monitoring (/attendance-integrity). Every action checks its own
+    // privilege (App\Services\AttendanceIntegrity\IntegrityAccess); see config/privileges.php.
+    // Route::prefix('attendance-integrity')->name('attendance.integrity')->group(function () {
+    //     $ai = 'App\\Http\\Controllers\\AttendanceIntegrity\\';
+    //     Route::get('/', [$ai.'DashboardController', 'home']);
+    //     Route::get('dashboard', [$ai.'DashboardController', 'index'])->name('.dashboard');
+    //     Route::get('records', [$ai.'DashboardController', 'records'])->name('.records');
+    //     Route::get('records/data', [$ai.'DashboardController', 'recordsData'])->name('.records.data');
+    //     Route::get('settings', [$ai.'DashboardController', 'settings'])->name('.settings');
+    //     Route::post('settings', [$ai.'DashboardController', 'saveSettings'])->name('.settings.save');
+    //     Route::post('settings/scan', [$ai.'DashboardController', 'queueScan'])->name('.settings.scan');
+
+    //     Route::get('staff', [$ai.'AnalysisController', 'staff'])->name('.staff');
+    //     Route::get('staff/data', [$ai.'AnalysisController', 'staffData'])->name('.staff.data');
+    //     Route::get('staff/{user}', [$ai.'AnalysisController', 'staffShow'])->whereNumber('user')->name('.staff.show');
+    //     Route::get('students', [$ai.'AnalysisController', 'students'])->name('.students');
+    //     Route::get('students/data', [$ai.'AnalysisController', 'studentsData'])->name('.students.data');
+    //     Route::get('students/{student}', [$ai.'AnalysisController', 'studentShow'])->whereNumber('student')->name('.students.show');
+
+    //     Route::get('retrospective', [$ai.'FindingController', 'page'])->defaults('page', 'retrospective')->name('.retrospective');
+    //     Route::get('bulk-entries', [$ai.'FindingController', 'page'])->defaults('page', 'bulk')->name('.bulk');
+    //     Route::get('staff-student-patterns', [$ai.'FindingController', 'page'])->defaults('page', 'patterns')->name('.patterns');
+    //     Route::get('timetable-conflicts', [$ai.'FindingController', 'page'])->defaults('page', 'timetable')->name('.timetable');
+    //     Route::get('findings', [$ai.'FindingController', 'page'])->defaults('page', 'findings')->name('.findings');
+    //     Route::get('findings/data', [$ai.'FindingController', 'data'])->name('.findings.data');
+    //     Route::post('findings/{finding}/dismiss', [$ai.'FindingController', 'dismiss'])->whereNumber('finding')->name('.findings.dismiss');
+    //     Route::post('findings/{finding}/reopen', [$ai.'FindingController', 'reopen'])->whereNumber('finding')->name('.findings.reopen');
+    //     Route::get('amendments', [$ai.'FindingController', 'amendments'])->name('.amendments');
+    //     Route::get('amendments/history', [$ai.'FindingController', 'history'])->name('.amendments.history');
+
+    //     Route::get('investigations', [$ai.'CaseController', 'index'])->name('.cases');
+    //     Route::post('investigations', [$ai.'CaseController', 'store'])->name('.cases.store');
+    //     Route::get('investigations/open', [$ai.'CaseController', 'openCases'])->name('.cases.open');
+    //     Route::get('investigations/{case}', [$ai.'CaseController', 'show'])->whereNumber('case')->name('.cases.show');
+    //     Route::post('investigations/{case}/status', [$ai.'CaseController', 'status'])->whereNumber('case')->name('.cases.status');
+    //     Route::post('investigations/{case}/assign', [$ai.'CaseController', 'assign'])->whereNumber('case')->name('.cases.assign');
+    //     Route::post('investigations/{case}/note', [$ai.'CaseController', 'note'])->whereNumber('case')->name('.cases.note');
+    //     Route::post('investigations/{case}/outcome', [$ai.'CaseController', 'outcome'])->whereNumber('case')->name('.cases.outcome');
+    //     Route::post('investigations/{case}/evidence', [$ai.'CaseController', 'evidence'])->whereNumber('case')->name('.cases.evidence');
+    //     Route::get('investigations/{case}/evidence/{evidence}', [$ai.'CaseController', 'download'])->whereNumber(['case', 'evidence'])->name('.cases.evidence.download');
+    //     Route::post('investigations/{case}/findings', [$ai.'CaseController', 'addFindings'])->whereNumber('case')->name('.cases.findings');
+
+    //     Route::get('reports', [$ai.'ReportController', 'index'])->name('.reports');
+    //     Route::get('reports/{report}/export', [$ai.'ReportController', 'export'])->name('.reports.export');
+
+    //     Route::get('guide', [$ai.'DashboardController', 'guide'])->name('.guide');
+    //     Route::get('lookup/{kind}', [$ai.'DashboardController', 'lookup'])->whereIn('kind', ['staff', 'students'])->name('.lookup');
+    //     Route::get('term-options', [$ai.'DashboardController', 'termOptions'])->name('.term.options');
+    // });
 
     Route::controller(SystemReportController::class)->group(function(){
         Route::get('reports', 'index')->name('reports'); 
@@ -4615,6 +4670,8 @@ Route::controller(StudentOrderController::class)->group(function() {
 
 });
 
+// Staff-only screens (Live student > Visits); they were outside the login group.
+// Route::middleware('auth')->controller(StudentVisitController::class)->group(function() {
 Route::controller(StudentVisitController::class)->group(function() {
 
     Route::post('student-visits/store', 'store')->name('student.visits.store');

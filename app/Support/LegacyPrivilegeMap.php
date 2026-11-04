@@ -108,6 +108,8 @@ class LegacyPrivilegeMap
         // Encrypted staff documents: may hold a document PIN and, with it,
         // open them — see StaffDocumentVaultService::canUse().
         'hr_portal.staff_document_pin' => 'hr_portal_staff_document_pin',
+        // Delete or replace a payslip, P45 or P60 - see PayslipManagementService::canManage().
+        'hr_portal.payslip_manage' => 'hr_portal_payslip_manage',
 
         // Applicant portal
         'applicant_live_portal.login_as_applicant' => 'applicant_portal_login_as',

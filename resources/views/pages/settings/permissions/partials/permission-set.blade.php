@@ -484,6 +484,10 @@
                         <input id="hr-staff-document-pin-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][hr_portal_staff_document_pin]" {{ isset($values['hr_portal_staff_document_pin']) && $values['hr_portal_staff_document_pin'] ? 'checked' : '' }}>
                         <label for="hr-staff-document-pin-{{ $uid }}" class="ml-2 font-medium">PIN Enabled</label>
                     </div>
+                    <div class="flex items-center">
+                        <input id="hr-payslip-manage-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][hr_portal_payslip_manage]" {{ isset($values['hr_portal_payslip_manage']) && $values['hr_portal_payslip_manage'] ? 'checked' : '' }}>
+                        <label for="hr-payslip-manage-{{ $uid }}" class="ml-2 font-medium">Payslips (delete / re-upload)</label>
+                    </div>
                 </div>
             </div>
         </div>
