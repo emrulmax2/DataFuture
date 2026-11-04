@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PayslipSyncUploadUpdateRequest;
 use App\Jobs\ProcessSendPaySlipEmail;
 use App\Models\PaySlipUploadSync;
+use App\Services\PayslipManagementService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -128,22 +130,67 @@ class PaySlipUploadSyncController extends Controller
      */
     public function destroy(PaySlipUploadSync $payslip_upload)
     {
+        if (!PayslipManagementService::canManage()) {
+            return response()->json(['message' => 'You do not have permission to delete payslips.'], 403);
+        }
 
-        // Assuming the file path is stored in a column named 'file_path'
-            $location = $this->resolveStorageLocation($payslip_upload);
-
-            if (!empty($location)) {
-                Storage::disk($location['disk'])->delete($location['path']);
-            }
-
-        // Delete the record from the database
-        $payslip_upload->forceDelete();
+        if (!$this->removePaySlip($payslip_upload)) {
+            return response()->json(['message' => 'The payslip could not be deleted. Please try again.'], 500);
+        }
 
         return response()->json(['message' => 'Payslip deleted successfully.']);
-
     }
 
-    
+    /**
+     * Put a new PDF in place of the one stored for this payslip. The record,
+     * its month, type and file name stay as they are; only the file changes.
+     */
+    public function replace(Request $request, PaySlipUploadSync $payslip_upload)
+    {
+        if (!PayslipManagementService::canManage()) {
+            return response()->json(['message' => 'You do not have permission to replace payslips.'], 403);
+        }
+
+        $request->validate([
+            'file' => 'required|file|mimes:pdf|max:20480',
+        ]);
+
+        $location = $this->resolveStorageLocation($payslip_upload);
+        if (empty($location)) {
+            return response()->json(['message' => 'The stored file for this payslip could not be located.'], 422);
+        }
+
+        try {
+            DB::transaction(function () use ($request, $payslip_upload, $location) {
+                $payslip_upload->update([
+                    'is_file_uploaded' => 1,
+                    'updated_by' => auth()->id(),
+                ]);
+
+                // The line is written first and the file last, inside one
+                // transaction: if either fails neither is kept.
+                if (!PayslipManagementService::log('replaced', $payslip_upload)) {
+                    throw new \RuntimeException('The action could not be logged.');
+                }
+
+                $stream = fopen($request->file('file')->getRealPath(), 'r');
+                try {
+                    Storage::disk($location['disk'])->put($location['path'], $stream);
+                } finally {
+                    if (is_resource($stream)) {
+                        fclose($stream);
+                    }
+                }
+            });
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json(['message' => 'The payslip could not be replaced. Nothing was changed.'], 500);
+        }
+
+        return response()->json(['message' => 'Payslip replaced successfully.']);
+    }
+
     /**
      * Remove the specified resource from storage.
      */
@@ -154,24 +201,57 @@ class PaySlipUploadSyncController extends Controller
 
     public function deleteResultBulk(Request $request)
     {
-        
-        $resultIds = array_filter(array_unique($request->input('ids')));
-        
-            PaySlipUploadSync::whereIn('id', $resultIds)->get()->each(function($result){
-                $location = $this->resolveStorageLocation($result);
-                if (!empty($location)) {
-                    Storage::disk($location['disk'])->delete($location['path']);
-                }
-            });
-        
-        
-        $baseResultDelete = PaySlipUploadSync::whereIn('id', $resultIds)->delete();
+        if (!PayslipManagementService::canManage()) {
+            return response()->json(['message' => 'You do not have permission to delete payslips.'], 403);
+        }
 
-        if($baseResultDelete)
+        $resultIds = array_filter(array_unique($request->input('ids', [])));
+
+        $deleted = 0;
+        foreach (PaySlipUploadSync::whereIn('id', $resultIds)->get() as $result) {
+            if ($this->removePaySlip($result)) {
+                $deleted++;
+            }
+        }
+
+        if ($deleted > 0)
             return response()->json(['message' => 'Result successfully deleted.'], 200);
         else
             return response()->json(['message' => 'Result could not be deleted'], 302);
-        
+
+    }
+
+    /**
+     * Delete the record and its stored file. The log line and the record go
+     * together or not at all; the file is removed once they are committed.
+     */
+    protected function removePaySlip(PaySlipUploadSync $payslip): bool
+    {
+        $location = $this->resolveStorageLocation($payslip);
+
+        try {
+            DB::transaction(function () use ($payslip) {
+                if (!PayslipManagementService::log('deleted', $payslip)) {
+                    throw new \RuntimeException('The action could not be logged.');
+                }
+
+                $payslip->forceDelete();
+            });
+        } catch (\Throwable $e) {
+            report($e);
+
+            return false;
+        }
+
+        if (!empty($location)) {
+            try {
+                Storage::disk($location['disk'])->delete($location['path']);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
+        return true;
     }
 
 

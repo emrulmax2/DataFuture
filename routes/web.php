@@ -1870,6 +1870,7 @@ Route::middleware('auth')->group(function() {
         Route::post('hr/payslip-upload-email-progress', 'emailProgress')->name('payslip-upload.email-progress');
 
         Route::post('hr/payslip-upload-delete', 'deleteResultBulk')->name('payslip-upload.deleteAll');
+        Route::post('hr/payslip-upload/{payslip_upload}/replace', 'replace')->name('payslip-upload.replace');
         Route::get('hr/payslip-download/{id}', 'downloadPaySlip')->name('payslip-upload.download');
         
     });

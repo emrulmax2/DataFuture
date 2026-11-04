@@ -154,6 +154,12 @@ return [
         'policy.assessment*' => 'policy_assessment_manage',
         'employee.policy.assessment*' => 'policy_assessment_manage',
 
+        // Deleting or replacing a payslip. Listed one by one: a wildcard would
+        // also gate the download and email-progress routes next to them.
+        'payslip-upload.destroy' => 'payslip_manage',
+        'payslip-upload.deleteAll' => 'payslip_manage',
+        'payslip-upload.replace' => 'payslip_manage',
+
         // Error Logs (developer log viewer). New screen, and log entries carry
         // stack traces, SQL and personal data, so it is enforced from day one.
         'error.logs*' => 'error_logs',

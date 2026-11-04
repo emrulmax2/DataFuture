@@ -119,6 +119,7 @@
                                                                             {{-- <td class="whitespace-nowrap">{{ $record->file_name }}</td> --}}
                                                                             <td class="whitespace-nowrap">
                                                                                 <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->month_year.(in_array(strtolower($record->type ?? ''), ['p45','p60']) ? '/'.strtolower($record->type) : '').'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="download" class="w-4 h-4 mr-2"></i>Download</a>
+                                                                                @include('pages.employee.profile.partials.payslip-actions')
                                                                             </td>
                                                                         </tr>
                                                                         @endforeach
@@ -178,6 +179,7 @@
                                                                             <td class="whitespace-nowrap">{{ $record->file_name }}</td> --}}
                                                                             <td class="whitespace-nowrap">
                                                                                 <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->month_year.(in_array(strtolower($record->type ?? ''), ['p45','p60']) ? '/'.strtolower($record->type) : '').'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="download" class="w-4 h-4 mr-2"></i> Download</a>
+                                                                                @include('pages.employee.profile.partials.payslip-actions')
                                                                             </td>
                                                                         </tr>
                                                                         @endforeach
@@ -228,6 +230,7 @@
                                                                             <td class="whitespace-nowrap">{{ $record->holidayYear->holiday_year }}</td>
                                                                             <td class="whitespace-nowrap">
                                                                                 <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->type.'_'.$record->holiday_year_id."/".strtolower($record->type).'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="download" class="w-4 h-4 mr-2"></i>Download</a>
+                                                                                @include('pages.employee.profile.partials.payslip-actions')
                                                                             </td>
                                                                         </tr>
                                                                         @endforeach
@@ -257,6 +260,64 @@
                             @endif
                         </div>
                     </div>
+                </div>
+                <div class="intro-y box p-5 mt-5">
+                    <div class="font-medium text-base">Payslip Log</div>
+                    <div class="text-slate-500 mt-1">Every payslip, P45 and P60 uploaded, replaced or deleted for this employee, newest first.</div>
+                    <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
+                    @if(isset($payslipLogs) && $payslipLogs->count() > 0)
+                        @php
+                            $payslipTones = [
+                                'success' => ['#0f8278', '#e5f7f3'],
+                                'warning' => ['#b45309', '#fef3c7'],
+                                'danger' => ['#d64545', '#fde7e7'],
+                            ];
+                        @endphp
+                        <div class="overflow-x-auto">
+                            <table class="table table-bordered table-hover payslipLogTable">
+                                <thead>
+                                    <tr>
+                                        <th class="whitespace-nowrap uppercase">Date</th>
+                                        <th class="whitespace-nowrap uppercase">Event</th>
+                                        <th class="whitespace-nowrap uppercase">Document</th>
+                                        <th class="whitespace-nowrap uppercase">Done By</th>
+                                        <th class="whitespace-nowrap uppercase">IP Address</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($payslipLogs as $log)
+                                        @php
+                                            $meta = \App\Services\PayslipManagementService::EVENTS[$log->event] ?? [ucfirst($log->event), 'warning'];
+                                            $tone = $payslipTones[$meta[1]] ?? $payslipTones['warning'];
+                                            $impersonated = ($log->impersonator_id > 0);
+                                            $account = (isset($log->user->full_name) ? $log->user->full_name : ($log->user_id > 0 ? 'User #'.$log->user_id : 'Unknown'));
+                                        @endphp
+                                        <tr>
+                                            <td class="whitespace-nowrap">{{ $log->created_at->format('d M, Y h:i A') }}</td>
+                                            <td class="whitespace-nowrap"><span style="display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600;color:{{ $tone[0] }};background:{{ $tone[1] }};">{{ $meta[0] }}</span></td>
+                                            <td>
+                                                <div class="font-medium">{{ \App\Services\PayslipManagementService::label($log->type, $log->month_year, $log->holidayYear) }}</div>
+                                                <div class="text-slate-500 text-xs">{{ $log->file_name }}</div>
+                                            </td>
+                                            <td>
+                                                @if($impersonated)
+                                                    <div class="font-medium">{{ isset($log->impersonator->full_name) ? $log->impersonator->full_name : 'User #'.$log->impersonator_id }}</div>
+                                                    <div class="text-xs" style="color:#b45309;">signed in as {{ $account }}</div>
+                                                @else
+                                                    <div class="font-medium">{{ $account }}</div>
+                                                @endif
+                                            </td>
+                                            <td class="whitespace-nowrap">{{ $log->ip_address ?: '-' }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="alert alert-warning-soft show flex items-center mb-0" role="alert">
+                            <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Nothing has been logged for this employee yet.
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -308,8 +369,8 @@
                         </a>
                             <div class="p-5 text-center">
                                 <i data-lucide="badge-pound-sterling" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                                <div class="text-3xl mt-5 ">Upload P45</div>
-                                <div class="text-slate-500 mt-2 ">Please Upload P45 from below</div>
+                                <div class="text-3xl mt-5 ">Upload {{ $canManagePayslips ? 'Payslip / P45' : 'P45' }}</div>
+                                <div class="text-slate-500 mt-2 ">Please Upload {{ $canManagePayslips ? 'the payslip or P45' : 'P45' }} from below</div>
                                 <div class="intro-y intro-y w-90 mx-auto my-3">
                                     <form method="post"  action="{{ route('hr.attendance.payslip.upload.eid') }}" class="dropzone" id="uploadDocumentForm" style="padding: 5px;" enctype="multipart/form-data">
                                         @csrf    
@@ -329,11 +390,14 @@
                                         <input type="hidden" name="user_id" value="{{ $employee->user_id }}"/>
                                     </form>
                                 </div>
-                                <div class="intro-y intro-y w-90 mx-auto my-3 hidden">
+                                <div class="intro-y intro-y w-90 mx-auto my-3 {{ $canManagePayslips ? '' : 'hidden' }}">
                                     <select id="type" name="typePaySlip" class="lccTom lcc-tom-select w-full  text-left">
                                         <option value="">Please Select Type</option>
                                         
                                         <option selected value="P45">P45</option>
+                                        @if($canManagePayslips)
+                                            <option value="Payslips">Payslip</option>
+                                        @endif
                                     </select> 
                                     <div class="acc__input-error error-type text-danger mt-2"></div>
                                 </div>
@@ -373,6 +437,45 @@
             </div>
         </div>
     <!-- END: synPaySlipModal Modal -->
+    <!-- BEGIN: Replace Payslip Modal -->
+    @if(isset($canManagePayslips) && $canManagePayslips)
+    <div id="replacePaySlipModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0"><a class="absolute right-0 top-0 mr-3 mt-3" data-tw-dismiss="modal" href="#">
+                    <i data-tw-merge data-lucide="x" class="stroke-1.5  h-8 w-8 text-slate-400"></i>
+                </a>
+                    <div class="p-5 text-center">
+                        <i data-lucide="upload" class="w-16 h-16 text-primary mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5">Replace File</div>
+                        <div class="text-slate-500 mt-2 replacePaySlipLabel"></div>
+                        <div class="text-slate-500 mt-1">The current file is overwritten and the change is written to the payslip log.</div>
+                        <div class="intro-y w-90 mx-auto my-3">
+                            <input type="file" id="replacePaySlipFile" accept=".pdf,application/pdf" class="form-control w-full"/>
+                            <div class="text-danger mt-2 replacePaySlipError"></div>
+                        </div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">Cancel</button>
+                        <button id="replacePaySlipBtn" type="button" data-id="" class="btn btn-success w-24">Replace<svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+    <!-- END: Replace Payslip Modal -->
     <!-- BEGIN: Delete Confirm Modal Content -->
     <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">

@@ -11,6 +11,7 @@ use App\Models\EmployeeEligibilites;
 use App\Models\EmployeeEmergencyContact;
 use App\Models\EmployeeJobTitle;
 use App\Models\EmployeeNoticePeriod;
+use App\Models\EmployeePayslipLog;
 use App\Models\EmployeeTerm;
 use App\Models\EmployeeWorkDocumentType;
 use App\Models\EmployeeWorkPermitType;
@@ -28,6 +29,7 @@ use App\Models\SexIdentifier;
 use App\Models\Title;
 use App\Models\User;
 use App\Models\Venue;
+use App\Services\PayslipManagementService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -146,6 +148,7 @@ class EmployeeProfileController extends Controller
             $paySlipUploadSync = [];
         }
         $holidayList = HrHolidayYear::orderBy('start_date','desc')->get();
+        $payslipLogs = EmployeePayslipLog::with(['user', 'impersonator', 'holidayYear'])->where('employee_id', $id)->orderBy('id', 'DESC')->limit(200)->get();
 
         return view('pages.employee.profile.payslip', [
             'title' => 'HR Portal - London Churchill College',
@@ -155,6 +158,8 @@ class EmployeeProfileController extends Controller
             ],
             'employee'=> Employee::find($id),
             'holiday_years' => $holidayList,
+            'canManagePayslips' => PayslipManagementService::canManage(),
+            'payslipLogs' => $payslipLogs,
             'paySlipUploadSync' => $paySlipUploadSync,
             'holidayYearIds' => $holidayYearIds ?? [],
         ]);

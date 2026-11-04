@@ -463,4 +463,113 @@ import Toastify from 'toastify-js';
     //             }
     //         });
     // });
+    /* Delete or replace a payslip. The buttons only exist for someone holding
+       the "Payslips (delete / re-upload)" privilege, and the server checks it again. */
+    const csrfHeaders = { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') };
+    const replaceModalEl = document.getElementById('replacePaySlipModal');
+    const replaceModal = replaceModalEl ? tailwind.Modal.getOrCreateInstance(replaceModalEl) : null;
+
+    function paySlipMessage(error, fallback) {
+        const data = error && error.response ? error.response.data : null;
+        if (data && data.errors && data.errors.file) {
+            return data.errors.file[0];
+        }
+        return data && data.message ? data.message : fallback;
+    }
+
+    function paySlipDone(title, desc) {
+        $('#successModal .successModalTitle').html(title);
+        $('#successModal .successModalDesc').html(desc);
+        successModal.show();
+        setTimeout(function () {
+            location.reload();
+        }, 1500);
+    }
+
+    $(document).on('click', '.payslipDeleteBtn', function (e) {
+        e.preventDefault();
+        const $btn = $(this);
+        $('#confirmModal .confModTitle').html('Delete ' + $btn.attr('data-label') + '?');
+        $('#confirmModal .confModDesc').html(
+            'This removes the file and its record for good, and the deletion is written to the payslip log. To put it back it has to be uploaded again.'
+        );
+        $('#confirmModal .agreeWith')
+            .attr('data-id', $btn.attr('data-id'))
+            .attr('data-action', 'DELETE_PAYSLIP');
+        confirmModal.show();
+    });
+
+    $('#confirmModal .agreeWith').on('click', function () {
+        const $agree = $(this);
+        if ($agree.attr('data-action') != 'DELETE_PAYSLIP') {
+            return;
+        }
+
+        $('#confirmModal button').attr('disabled', 'disabled');
+        axios({
+            method: 'delete',
+            url: route('payslip-upload.destroy', $agree.attr('data-id')),
+            headers: csrfHeaders,
+        })
+            .then(() => {
+                $('#confirmModal button').removeAttr('disabled');
+                confirmModal.hide();
+                paySlipDone('Deleted', 'The file has been deleted and logged.');
+            })
+            .catch((error) => {
+                $('#confirmModal button').removeAttr('disabled');
+                confirmModal.hide();
+                $('#warningModal .warningModalTitle').html('Could not delete');
+                $('#warningModal .warningModalDesc').html(
+                    paySlipMessage(error, 'Something went wrong. Please try again or contact the administrator.')
+                );
+                warningModal.show();
+            });
+    });
+
+    $(document).on('click', '.payslipReplaceBtn', function (e) {
+        e.preventDefault();
+        if (!replaceModal) {
+            return;
+        }
+        const $btn = $(this);
+        $('#replacePaySlipFile').val('');
+        $('#replacePaySlipModal .replacePaySlipError').html('');
+        $('#replacePaySlipModal .replacePaySlipLabel').html($btn.attr('data-label'));
+        $('#replacePaySlipBtn').attr('data-id', $btn.attr('data-id'));
+        replaceModal.show();
+    });
+
+    $('#replacePaySlipBtn').on('click', function () {
+        const $btn = $(this);
+        const file = $('#replacePaySlipFile')[0].files[0];
+        const $error = $('#replacePaySlipModal .replacePaySlipError');
+        $error.html('');
+        if (!file) {
+            $error.html('Please choose a PDF file.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        $btn.attr('disabled', 'disabled');
+        $btn.find('svg').css('display', 'inline-block');
+        axios({
+            method: 'post',
+            url: route('payslip-upload.replace', $btn.attr('data-id')),
+            data: formData,
+            headers: csrfHeaders,
+        })
+            .then(() => {
+                $btn.removeAttr('disabled');
+                $btn.find('svg').css('display', 'none');
+                replaceModal.hide();
+                paySlipDone('Replaced', 'The file has been replaced and logged.');
+            })
+            .catch((error) => {
+                $btn.removeAttr('disabled');
+                $btn.find('svg').css('display', 'none');
+                $error.html(paySlipMessage(error, 'Something went wrong. Please try again.'));
+            });
+    });
 })();
