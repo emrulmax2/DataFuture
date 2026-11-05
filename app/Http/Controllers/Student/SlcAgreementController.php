@@ -54,7 +54,14 @@ class SlcAgreementController extends Controller
         $agreement_id = $request->agreement_id;
         $slcAgreement = SlcAgreement::find($agreement_id);
 
-        return response()->json(['res' => $slcAgreement], 200);
+        // Year name of the saved instance, for the Edit form when that instance is not in its list.
+        $instanceYear = '';
+        if(isset($slcAgreement->course_creation_instance_id) && $slcAgreement->course_creation_instance_id > 0):
+            $instance = CourseCreationInstance::withTrashed()->with('year')->find($slcAgreement->course_creation_instance_id);
+            $instanceYear = (isset($instance->year->name) ? $instance->year->name : '');
+        endif;
+
+        return response()->json(['res' => $slcAgreement, 'instance_year' => $instanceYear], 200);
     }
 
     public function update(SlcAgreementUpdateRequest $request){
@@ -79,7 +86,14 @@ class SlcAgreementController extends Controller
             'note' => (isset($request->note) && !empty($request->note) ? $request->note : ''),
             'updated_by' => auth()->user()->id
         ];
-        
+
+        // Instance Year: only when the form sent it. The column is NOT NULL, so "none" is 0,
+        // as on the older agreements that never had one.
+        if($request->has('course_creation_instance_id')):
+            $instanceId = (int) $request->course_creation_instance_id;
+            $agreementData['course_creation_instance_id'] = ($instanceId > 0 ? $instanceId : 0);
+        endif;
+
         $agreement->fill($agreementData);
         $changes = $agreement->getDirty();
         $agreement->save();

@@ -143,7 +143,7 @@ class RegistrationState
                 'cocsOpen' => (int) ($cocs->open ?? 0), 'cocsSubmitted' => (int) ($cocs->submitted ?? 0), 'cocsFromCheck' => (int) ($cocs->from_check ?? 0),
             ],
             // "Duplicate agreements": the box counts them and opens their list on its own page
-            'duplicates' => ['count' => self::duplicateAgreementGroups()->count(), 'url' => route('slc.registration.multiple')],
+            'duplicates' => ['count' => self::duplicateAgreementGroups()->count(), 'hidden' => self::duplicateAgreementGroups(true)->count(), 'url' => route('slc.registration.multiple')],
         ];
     }
 
@@ -151,17 +151,32 @@ class RegistrationState
      * Dashboard › "Duplicate agreements": a student with two or more agreements (not deleted) for the
      * same year — the agreements table's `year` (year of study) — on the same course relation.
      */
-    public static function duplicateAgreementGroups()
+    public static function duplicateAgreementGroups(bool $hidden = false)
     {
-        return DB::table('slc_agreements')->whereNull('deleted_at')
-            ->select('student_id', 'student_course_relation_id', 'year', DB::raw('COUNT(*) as n'))
+        $groups = DB::table('slc_agreements')->whereNull('deleted_at')
+            ->select('student_id', 'student_course_relation_id', 'year', DB::raw('COUNT(*) as n'), DB::raw('GROUP_CONCAT(id ORDER BY id) as ids'))
             ->groupBy('student_id', 'student_course_relation_id', 'year')->havingRaw('COUNT(*) > 1')->get();
+        // "Reviewed & Hide" (user, 5 Nov 2026): a group stays hidden while it has exactly the agreements it had when reviewed
+        $reviews = $groups->isEmpty() ? collect() : \App\Models\SlcAgreementDuplicateReview::whereIn('student_id', $groups->pluck('student_id')->unique())
+            ->orderBy('id')->get()->keyBy(fn ($r) => self::groupKey($r->student_id, $r->student_course_relation_id, $r->year));
+        foreach ($groups as $g) {
+            $g->agreementIds = array_map('intval', explode(',', (string) $g->ids));
+            $g->review = $reviews->get(self::groupKey($g->student_id, $g->student_course_relation_id, $g->year));
+            $g->hidden = $g->review && $g->review->hidden && $g->review->agreement_ids == $g->agreementIds;
+        }
+
+        return $groups->filter(fn ($g) => $g->hidden === $hidden)->values();
     }
 
-    /** Those students with their agreements, newest first — the list behind the box (/slc-registration/multiple-agreements). */
-    public static function duplicateAgreements(): array
+    public static function groupKey($studentId, $crelId, $year): string
     {
-        $groups = self::duplicateAgreementGroups();
+        return (int) $studentId.'|'.(int) $crelId.'|'.(int) $year;
+    }
+
+    /** Those students with their agreements, newest first — the list behind the box (/slc-registration/multiple-agreements); with $hidden, the ones reviewed & hidden. */
+    public static function duplicateAgreements(bool $hidden = false): array
+    {
+        $groups = self::duplicateAgreementGroups($hidden);
         if ($groups->isEmpty()) {
             return [];
         }
@@ -176,7 +191,7 @@ class RegistrationState
         $courses = DB::table('student_course_relations as r')->join('course_creations as cc', 'cc.id', '=', 'r.course_creation_id')
             ->leftJoin('courses as c', 'c.id', '=', 'cc.course_id')->leftJoin('semesters as sm', 'sm.id', '=', 'cc.semester_id')
             ->whereIn('r.id', $groups->pluck('student_course_relation_id')->filter()->unique())->get(['r.id', 'c.name as course', 'sm.name as intake'])->keyBy('id');
-        $names = self::names($agreements->pluck('created_by')->all());
+        $names = self::names(array_merge($agreements->pluck('created_by')->all(), $groups->map(fn ($g) => $g->review->reviewed_by ?? null)->all()));
         $when = fn ($t) => $t ? \Carbon\Carbon::parse($t)->format('d/m/Y H:i') : '';
 
         return $groups->map(function ($g) use ($agreements, $students, $courses, $names, $when) {
@@ -185,7 +200,10 @@ class RegistrationState
             $course = $courses[$g->student_course_relation_id] ?? null;
 
             return [
-                'studentId' => (int) $g->student_id, 'regNo' => $st->registration_no ?? '', 'name' => trim(($st->first_name ?? '').' '.($st->last_name ?? '')),
+                'studentId' => (int) $g->student_id, 'crelId' => $g->student_course_relation_id ? (int) $g->student_course_relation_id : null, 'agreementIds' => $g->agreementIds,
+                'review' => $g->review ? ['by' => $names[$g->review->reviewed_by] ?? '', 'at' => $g->review->reviewed_at?->format('d/m/Y H:i'), 'hidden' => $g->hidden,
+                    'changed' => !$g->hidden && $g->review->hidden] : null,
+                'regNo' => $st->registration_no ?? '', 'name' => trim(($st->first_name ?? '').' '.($st->last_name ?? '')),
                 'course' => trim((string) ($course->course ?? '')), 'intake' => (string) ($course->intake ?? ''), 'year' => (int) $g->year, 'count' => (int) $g->n,
                 'url' => route('student.accounts', $g->student_id),
                 'latest' => (string) $list->max('created_at'),

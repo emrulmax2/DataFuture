@@ -141,6 +141,7 @@ class NonTutorAttendanceUpdates
             $rows = DB::select("SELECT x.student_id,
                     MAX(st.registration_no) AS registration_no,
                     MAX(TRIM(CONCAT_WS(' ', st.first_name, st.last_name))) AS student_name,
+                    MAX(sst.name) AS student_status,
                     COUNT(*) AS rows_changed,
                     COUNT(DISTINCT x.plans_date_list_id) AS sessions,
                     COUNT(DISTINCT x.plan_id) AS classes,
@@ -157,6 +158,7 @@ class NonTutorAttendanceUpdates
                 'student_id' => (int) $r->student_id,
                 'registration_no' => (string) $r->registration_no,
                 'student_name' => (string) $r->student_name,
+                'student_status' => (string) $r->student_status,
                 'student_url' => $r->student_id ? route('student.show', $r->student_id) : null,
                 'rows_changed' => (int) $r->rows_changed,
                 'sessions' => (int) $r->sessions,
@@ -311,7 +313,7 @@ class NonTutorAttendanceUpdates
 
             $total = (int) DB::selectOne("SELECT COUNT(*) AS n $from", $bindings)->n;
 
-            $sql = "SELECT x.*, st.registration_no, st.first_name AS student_first_name, st.last_name AS student_last_name,
+            $sql = "SELECT x.*, st.registration_no, st.first_name AS student_first_name, st.last_name AS student_last_name, sst.name AS student_status,
                     mc.module_name, mc.code AS module_code, g.name AS group_name, c.name AS course_name, td.name AS term_name,
                     p.class_type, p.tutor_id, p.personal_tutor_id, d.proxy_tutor_id,
                     TRIM(COALESCE(p.virtual_room, '')) <> '' AS is_online,
@@ -353,6 +355,7 @@ class NonTutorAttendanceUpdates
                         'student_id' => (int) $r->student_id,
                         'registration_no' => (string) $r->registration_no,
                         'student_name' => trim($r->student_first_name.' '.$r->student_last_name),
+                        'student_status' => (string) $r->student_status,
                         'student_url' => $r->student_id ? route('student.show', $r->student_id) : null,
                         'status' => trim(($r->status_code ? $r->status_code.' - ' : '').$r->status_name),
                         'how' => self::HOW[$r->how] ?? $r->how,
@@ -371,7 +374,7 @@ class NonTutorAttendanceUpdates
 
     /**
      * FROM ... WHERE for one member of staff's rows, joined to what the details list
-     * shows and searches (student, module, group). $filters: student_id, session_id,
+     * shows (student and their student status, class) and searches (student, module, group). $filters: student_id, session_id,
      * tutor => users.id of who teaches the class (see tutorColumn), 0 for nobody.
      */
     private function detailFrom(int $userId, string $search, array $filters = []): array
@@ -382,6 +385,7 @@ class NonTutorAttendanceUpdates
             JOIN plans p ON p.id = x.plan_id
             JOIN plans_date_lists d ON d.id = x.plans_date_list_id
             LEFT JOIN students st ON st.id = x.student_id
+            LEFT JOIN statuses sst ON sst.id = st.status_id
             LEFT JOIN module_creations mc ON mc.id = p.module_creation_id
             LEFT JOIN `groups` g ON g.id = p.group_id
             LEFT JOIN courses c ON c.id = p.course_id
@@ -520,6 +524,7 @@ class NonTutorAttendanceUpdates
                     'student_id' => $sid,
                     'registration_no' => $students[$sid]['registration_no'] ?? '',
                     'student_name' => $students[$sid]['name'] ?? '',
+                    'student_status' => $students[$sid]['status'] ?? '',
                     'student_url' => route('student.show', $sid),
                     'overturned' => $s['overturned'],
                     'lone' => $s['lone'],
@@ -605,6 +610,7 @@ class NonTutorAttendanceUpdates
                     'student_id' => (int) $r->student_id,
                     'registration_no' => $students[(int) $r->student_id]['registration_no'] ?? '',
                     'student_name' => $students[(int) $r->student_id]['name'] ?? '',
+                    'student_status' => $students[(int) $r->student_id]['status'] ?? '',
                     'plan_id' => (int) $r->plan_id,
                     'module' => trim((string) $r->module_name.($r->module_code ? ' ('.$r->module_code.')' : '')),
                     'group' => (string) $r->group_name,
@@ -779,7 +785,7 @@ class NonTutorAttendanceUpdates
         return $out;
     }
 
-    /** student_id => registration number and name. */
+    /** student_id => registration number, name and student status (statuses.name). */
     private function studentInfo(array $studentIds): array
     {
         if (! $studentIds) {
@@ -787,8 +793,9 @@ class NonTutorAttendanceUpdates
         }
         $in = implode(',', array_fill(0, count($studentIds), '?'));
         $out = [];
-        foreach (DB::select("SELECT id, registration_no, TRIM(CONCAT_WS(' ', first_name, last_name)) AS name FROM students WHERE id IN ($in)", $studentIds) as $r) {
-            $out[(int) $r->id] = ['registration_no' => (string) $r->registration_no, 'name' => (string) $r->name];
+        foreach (DB::select("SELECT s.id, s.registration_no, TRIM(CONCAT_WS(' ', s.first_name, s.last_name)) AS name, ss.name AS status
+                FROM students s LEFT JOIN statuses ss ON ss.id = s.status_id WHERE s.id IN ($in)", $studentIds) as $r) {
+            $out[(int) $r->id] = ['registration_no' => (string) $r->registration_no, 'name' => (string) $r->name, 'status' => (string) $r->status];
         }
 
         return $out;

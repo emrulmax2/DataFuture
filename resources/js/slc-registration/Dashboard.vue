@@ -70,7 +70,7 @@
         <div class="kpi t-ok"><span class="k-label">Recorded in bulk</span><span class="k-val">{{ reg.recorded }}</span><span class="k-note">{{ reg.toRecord }} uploaded, still to record</span></div>
         <div class="kpi"><span class="k-label">Batches</span><span class="k-val">{{ reg.batches.awaiting + reg.batches.downloaded + reg.batches.uploaded }}</span><span class="k-note">{{ reg.batches.awaitingStudents }} awaiting download · {{ reg.batches.downloaded }} downloaded · {{ reg.batches.uploaded }} uploaded</span></div>
         <a v-if="d.duplicates" :class="'kpi kpi-link ' + (d.duplicates.count ? 't-bad' : 't-ok')" :href="d.duplicates.url" target="_blank" rel="noopener">
-            <span class="k-label">Duplicate agreements</span><span class="k-val">{{ d.duplicates.count }}</span><span class="k-note">Students with 2+ agreements for one year · open the list ↗</span>
+            <span class="k-label">Duplicate agreements</span><span class="k-val">{{ d.duplicates.count }}</span><span class="k-note">Students with 2+ agreements for one year, still to review{{ d.duplicates.hidden ? ' · ' + d.duplicates.hidden + ' reviewed & hidden' : '' }} · open the list ↗</span>
         </a>
     </section>
 </template>
