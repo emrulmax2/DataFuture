@@ -270,6 +270,30 @@ class PaySlipUploadSyncController extends Controller
         return response()->json(['message' => 'File not found.'], 404);
     }
 
+    /**
+     * Where the file sits in S3: the key the Download button on the employee's
+     * Payslips tab builds from the month, type and file name. P60s live in a
+     * folder named for the tax year instead of a month.
+     */
+    protected function paySlipKey(PaySlipUploadSync $paySlip): string
+    {
+        if (empty($paySlip->file_name)) {
+            return '';
+        }
+
+        if ($paySlip->type === 'P60') {
+            return 'public/employee_payslips/' . $paySlip->type . '_' . $paySlip->holiday_year_id . '/' . strtolower($paySlip->type) . '/' . $paySlip->file_name;
+        }
+
+        if (empty($paySlip->month_year)) {
+            return '';
+        }
+
+        return 'public/employee_payslips/' . $paySlip->month_year
+            . (in_array(strtolower($paySlip->type ?? ''), ['p45', 'p60']) ? '/' . strtolower($paySlip->type) : '')
+            . '/' . $paySlip->file_name;
+    }
+
     protected function resolveStorageLocation(?PaySlipUploadSync $paySlip): array
     {
         if (!$paySlip || empty($paySlip->file_path)) {
@@ -291,6 +315,23 @@ class PaySlipUploadSyncController extends Controller
         }
 
         if (Str::startsWith($filePath, ['http://', 'https://'])) {
+            // AWS_URL is not set on every server, so the configured base above can
+            // be empty. Recognise an S3 link by the disk's own URL base, or by an
+            // Amazon host, and then use the same key the Download button reads.
+            try {
+                $diskBase = rtrim(Str::beforeLast(Storage::disk('s3')->url('x'), 'x'), '/');
+            } catch (\Throwable $e) {
+                $diskBase = '';
+            }
+            $isS3Link = ($diskBase !== '' && Str::startsWith($filePath, $diskBase . '/'))
+                || preg_match('~^https?://[^/]*amazonaws\.com/~i', $filePath);
+
+            if ($isS3Link) {
+                $key = $this->paySlipKey($paySlip);
+
+                return $key !== '' ? ['disk' => 's3', 'path' => $key] : [];
+            }
+
             return [];
         }
 
