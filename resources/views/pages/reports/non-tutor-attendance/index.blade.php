@@ -137,6 +137,13 @@
     .ntu-modal .ntu-chip--alert .ntu-chip__value { color: #b91c1c; }
     .ntu-modal .ntu-cell { line-height: 1.3; white-space: normal; }
     .ntu-modal .ntu-cell__sub { font-size: 11px; color: #64748b; }
+    .ntu-modal .ntu-cell__badge { margin-top: 4px; }
+    .ntu-modal .ntu-cell__badge .ntu-badge { padding: 3px 7px; font-size: 10.5px; }
+    .ntu-modal .ntu-tl__head strong .ntu-badge { vertical-align: 1px; margin-left: 4px; padding: 3px 7px; font-size: 10.5px; }
+    /* Student status (students.status_id): green while studying, red once they have left. */
+    .ntu-modal .ntu-sstatus { display: inline-block; max-width: 100%; font-size: 10.5px; font-weight: 600; line-height: 1.25; padding: 2px 7px; border-radius: 4px; background: #f1f5f9; color: #475569; white-space: normal; overflow-wrap: anywhere; }
+    .ntu-modal .ntu-sstatus.is-on { background: #dcfce7; color: #166534; }
+    .ntu-modal .ntu-sstatus.is-left { background: #fee2e2; color: #991b1b; }
     .ntu-modal .ntu-note { font-size: 12px; color: #64748b; line-height: 1.5; }
 
     /* Date range box: calendar icon on the left, clear button on the right. */

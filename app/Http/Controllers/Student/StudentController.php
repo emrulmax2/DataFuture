@@ -626,11 +626,25 @@ class  StudentController extends Controller
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
 
             'processGroup' => $processGroup,
+            'wrapUp' => $this->processWrapUp((int) $studentId),
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
             'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
             'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
             'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
         ]);
+    }
+
+    /**
+     * The student's open "Change student status to SLC New" task and the other tasks of its process
+     * still open, so Mark as Complete can ask first (user, 29 Oct 2026). null when there is none.
+     */
+    private function processWrapUp(int $studentId): ?array
+    {
+        $service = app(\App\Services\TaskAssignment\StudentProcessWrapUp::class);
+        $task = $service->task($studentId);
+        $manual = $task ? $service->manualCompletion($task) : null;
+
+        return $manual ? ['id' => (int) $task->id] + $manual : null;
     }
 
     public function UploadStudentPhoto(Request $request){
@@ -759,6 +773,7 @@ class  StudentController extends Controller
             'agreements' => SlcAgreement::with([
                                 'scr',
                                 'scr.creation',
+                                'instance.year',
                                 'user.employee',
                                 'installments',
                                 'installments.declaraton.termType',
@@ -2544,7 +2559,12 @@ class  StudentController extends Controller
         endif;
 
         $student_id = $studentDoc->student_id;
-        $tmpURL = Storage::disk('s3')->temporaryUrl('public/students/'.$student_id.'/'.$studentDoc->current_file_name, now()->addMinutes(5));
+        // $tmpURL = Storage::disk('s3')->temporaryUrl('public/students/'.$student_id.'/'.$studentDoc->current_file_name, now()->addMinutes(5));
+        // A document written to the local disk (disk_type "local", e.g. a class routine on a local
+        // install) is served from /storage; everything else is on S3 as before.
+        $tmpURL = $studentDoc->disk_type === 'local'
+            ? url('storage/students/'.$student_id.'/'.$studentDoc->current_file_name)
+            : Storage::disk('s3')->temporaryUrl('public/students/'.$student_id.'/'.$studentDoc->current_file_name, now()->addMinutes(5));
 
         // Every open goes on record, every time, whichever screen asked for it.
         // The link is only handed over once it has: no trail, no document.
@@ -2931,6 +2951,12 @@ class  StudentController extends Controller
                 StudentArchive::create($data);
             endforeach;
             if($student->wasChanged() && !empty($changes)):
+                /* Task Automation "Student status changed" rules (Site settings > Task
+                   Automation > Student) now assign the tasks for a status change. The
+                   process attached to a status became rules (migration 2026_10_23_210000). */
+                //event(new \App\Events\StudentStatusChanged((int) $student_id, $studentOld->status_id !== null ? (int) $studentOld->status_id : null, (int) $status_id));
+
+                /* Replaced by the rules above; kept for reference, not run:*/
                 if(isset($statusDetails->process_list_id) && $statusDetails->process_list_id > 0):
                     $processTask = TaskList::where('process_list_id', $statusDetails->process_list_id)->orderBy('id', 'ASC')->get();
                     if(!empty($processTask) && $processTask->count() > 0 ):

@@ -44,8 +44,36 @@ class SlcRegistrationController extends Controller
             'logo' => $this->logo(),
             'page' => 'multiple',
             'state' => null,
-            'multiple' => ['students' => RegistrationState::duplicateAgreements()],
+            'multiple' => ['students' => RegistrationState::duplicateAgreements(), 'hidden' => RegistrationState::duplicateAgreements(true)],
         ]);
+    }
+
+    /** Duplicate agreements › Reviewed & Hide / Unhide: the message and both lists back. */
+    public function duplicateReview(Request $request)
+    {
+        $request->validate(['student_id' => 'required|integer', 'crel_id' => 'nullable|integer', 'year' => 'required|integer', 'agreement_ids' => 'required|array|min:2', 'agreement_ids.*' => 'integer']);
+
+        return $this->duplicateRun(fn () => $this->actions->reviewDuplicate((int) $request->student_id, $request->crel_id ? (int) $request->crel_id : null, (int) $request->year, $request->agreement_ids));
+    }
+
+    public function duplicateUnhide(Request $request)
+    {
+        $request->validate(['student_id' => 'required|integer', 'crel_id' => 'nullable|integer', 'year' => 'required|integer']);
+
+        return $this->duplicateRun(fn () => $this->actions->unhideDuplicate((int) $request->student_id, $request->crel_id ? (int) $request->crel_id : null, (int) $request->year));
+    }
+
+    private function duplicateRun(callable $fn)
+    {
+        try {
+            $text = $fn();
+            $tone = 'ok';
+            $status = 200;
+        } catch (SlcRegistrationException $e) {
+            [$text, $tone, $status] = [$e->getMessage(), 'bad', 422];
+        }
+
+        return response()->json(['flash' => ['text' => $text, 'tone' => $tone], 'multiple' => ['students' => RegistrationState::duplicateAgreements(), 'hidden' => RegistrationState::duplicateAgreements(true)]], $status);
     }
 
     public function state()

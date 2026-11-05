@@ -18,6 +18,7 @@ import Tabulator from "tabulator-tables";
         $('#editAgreementModal .modal-body input:not([type="checkbox"])').val('');
         $('#editAgreementModal .modal-body input[type="checkbox"]').prop('checked', false);
         $('#editAgreementModal .modal-body input[name="slc_agreement_id"]').val('0');
+        $('#editAgreementModal [name="course_creation_instance_id"] option[data-extra]').remove();
     });
 
     const addAgreementModalEl = document.getElementById('addAgreementModal')
@@ -182,9 +183,22 @@ import Tabulator from "tabulator-tables";
         }).then(response => {
             var res = response.data.res;
 
-            $('#editAgreementModal [name="slc_coursecode"]').val(res.slc_coursecode);
+            // An agreement saved without a code gets the course's code, as the Add form does.
+            var $slcCode = $('#editAgreementModal [name="slc_coursecode"]');
+            $slcCode.val(res.slc_coursecode ? res.slc_coursecode : ($slcCode.attr('data-code') || ''));
             $('#editAgreementModal [name="date"]').val(res.date);
             $('#editAgreementModal [name="year"]').val(res.year);
+
+            // The list holds the current course's instances. An agreement saved against another
+            // instance gets it added, so saving the form never drops the stored value.
+            var $instance = $('#editAgreementModal [name="course_creation_instance_id"]');
+            $instance.find('option[data-extra]').remove();
+            var instanceId = (res.course_creation_instance_id > 0 ? String(res.course_creation_instance_id) : '');
+            if(instanceId !== '' && $instance.find('option[value="' + instanceId + '"]').length === 0){
+                $('<option data-extra="1"></option>').val(instanceId).text(response.data.instance_year ? response.data.instance_year : 'Instance #' + instanceId).appendTo($instance);
+            }
+            $instance.val(instanceId);
+
             $('#editAgreementModal [name="commission_amount"]').val(res.commission_amount);
             $('#editAgreementModal [name="fees"]').val(res.fees);
             $('#editAgreementModal [name="discount"]').val(res.discount);
