@@ -446,6 +446,42 @@ class SlcRegistrationTest extends TestCase
         $this->actingAs($other)->get(route('slc.registration.multiple'))->assertForbidden();
     }
 
+    public function test_reviewed_and_hide_takes_a_duplicate_off_the_list_and_the_count_until_it_changes(): void
+    {
+        $groups = fn ($hidden = false) => \App\Services\SlcRegistration\RegistrationState::duplicateAgreementGroups($hidden);
+        $before = $groups()->count();
+        $agr = SlcAgreement::whereNull('deleted_at')->whereNotNull('student_course_relation_id')->whereNotIn('student_id', $groups()->pluck('student_id'))->latest('id')->first();
+        $make = fn () => SlcAgreement::create(['student_id' => $agr->student_id, 'student_course_relation_id' => $agr->student_course_relation_id, 'course_creation_instance_id' => $agr->course_creation_instance_id, 'slc_coursecode' => $agr->slc_coursecode, 'is_self_funded' => 0, 'date' => now()->toDateString(), 'year' => $agr->year, 'fees' => 100, 'total' => 100, 'created_by' => 7]);
+        $second = $make();
+        $row = collect(\App\Services\SlcRegistration\RegistrationState::duplicateAgreements())->first(fn ($r) => $r['studentId'] === (int) $agr->student_id && $r['year'] === (int) $agr->year);
+        $this->assertSame([(int) $agr->id, $second->id], $row['agreementIds']);
+        $body = ['student_id' => $row['studentId'], 'crel_id' => $row['crelId'], 'year' => $row['year'], 'agreement_ids' => $row['agreementIds']];
+
+        // agreements the page didn't show are refused; the ones it showed are reviewed & hidden
+        $this->postJson(route('slc.registration.multiple.review'), ['agreement_ids' => [$agr->id, 999999999]] + $body)->assertStatus(422);
+        $res = $this->postJson(route('slc.registration.multiple.review'), $body)->assertOk();
+        $this->assertStringStartsWith('Reviewed & hidden', $res->json('flash.text'));
+        $this->assertFalse(collect($res->json('multiple.students'))->contains(fn ($r) => $r['studentId'] === (int) $agr->student_id && $r['year'] === (int) $agr->year));
+        $hidden = collect($res->json('multiple.hidden'))->first(fn ($r) => $r['studentId'] === (int) $agr->student_id);
+        $this->assertTrue($hidden['review']['hidden']);
+        $this->assertNotSame('', $hidden['review']['by']);
+        $this->assertSame($before, $this->getJson(route('slc.registration.state'))->json('dashboard.duplicates.count'));
+        $this->assertSame(1, $groups(true)->where('student_id', $agr->student_id)->count());
+
+        // a third agreement for that year: back on the list, flagged as changed since the review
+        $make();
+        $back = collect(\App\Services\SlcRegistration\RegistrationState::duplicateAgreements())->first(fn ($r) => $r['studentId'] === (int) $agr->student_id && $r['year'] === (int) $agr->year);
+        $this->assertSame([3, true], [$back['count'], $back['review']['changed']]);
+        $this->assertSame($before + 1, $groups()->count());
+
+        // reviewed again, then unhidden
+        $this->postJson(route('slc.registration.multiple.review'), ['agreement_ids' => $back['agreementIds']] + $body)->assertOk();
+        $this->assertSame($before, $groups()->count());
+        $res = $this->postJson(route('slc.registration.multiple.unhide'), array_diff_key($body, ['agreement_ids' => 1]))->assertOk();
+        $this->assertTrue(collect($res->json('multiple.students'))->contains(fn ($r) => $r['studentId'] === (int) $agr->student_id && $r['year'] === (int) $agr->year));
+        $this->assertSame($before + 1, $groups()->count());
+    }
+
     public function test_sis_file_and_slc_address_parts(): void
     {
         $p = SisFile::parse("HH26LCHC00001CR\r\n01012026~26~Mr~JOHN~~SMITH~M~01011990~~~123~X~1~07092026~14 GREEN LANE   LONDON ~N4 1AA~SSN1~6350.00~6350.00\r\nbad~line\r\n");

@@ -28,6 +28,7 @@ class SlcAgreementUpdateRequest extends FormRequest
             'date' => 'required',
             'year' => 'required',
             'fees' => 'required',
+            'course_creation_instance_id' => 'nullable|integer|exists:course_creation_instances,id',
         ];
     }
 
@@ -38,6 +39,8 @@ class SlcAgreementUpdateRequest extends FormRequest
             'date.required' => 'This field is required.',
             'year.required' => 'This field is required.',
             'fees.required' => 'This field is required.',
+            'course_creation_instance_id.integer' => 'Please select a valid instance year.',
+            'course_creation_instance_id.exists' => 'Please select a valid instance year.',
         ];
     }
 }

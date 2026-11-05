@@ -311,7 +311,8 @@ import TomSelect from "tom-select";
     ];
 
     const sessionHtml = (d) => `<div class="ntu-cell"><div>${esc(d.session_day)} ${esc(d.session_date)}</div><div class="ntu-cell__sub">${esc(d.class_time)}</div></div>`;
-    const classHtml = (d) => `<div class="ntu-cell"><div>${esc(d.module)}</div><div class="ntu-cell__sub">${esc([d.group, d.class_type, d.term].filter(Boolean).join(" · "))}</div></div>`;
+    const classHtml = (d) => `<div class="ntu-cell"><div>${esc(d.module)}</div><div class="ntu-cell__sub">${esc([d.group, d.class_type, d.term].filter(Boolean).join(" · "))}</div>`
+        + `<div class="ntu-cell__badge">${modeHtml(d.class_mode)}</div></div>`;
     /** Who made the last change, when (UK) and how long after the class ended. */
     const changedHtml = (d) => `<div class="ntu-cell"><div>${esc(d.changed_by)}</div>`
         + `<div class="ntu-cell__sub">${esc([d.updated_at, d.after_class].filter(Boolean).join(" · "))}</div></div>`;
@@ -319,9 +320,23 @@ import TomSelect from "tom-select";
     const tutorsHtml = (d) => `<div class="ntu-cell">${[["Tutor", d.class_tutor], ["Personal tutor", d.personal_tutor], ["Cover", d.cover_tutor]]
         .filter(([, name]) => name)
         .map(([label, name]) => `<div><span class="ntu-cell__sub">${label}:</span> ${esc(name)}</div>`).join("")}</div>`;
+    /* Student status (students.status_id): green while studying, red once they have left, grey otherwise. */
+    const STUDENT_TONE = [
+        [/discard|terminat|\bleft\b|suspend|withdraw|ghost|refused|obsolete|expired/i, "is-left"],
+        [/enrol|\bregistered\b|\bnew\b|extended/i, "is-on"],
+    ];
+    const studentStatusHtml = (status) => {
+        if (!status) return '<span class="ntu-sstatus" title="Student status">No student status</span>';
+        const tone = (STUDENT_TONE.find(([pattern]) => pattern.test(status)) || [null, ""])[1];
+        return `<span class="ntu-sstatus ${tone}" title="Student status">${esc(status)}</span>`;
+    };
+    /* Online = the class plan has a virtual room (plans.virtual_room), else Physical. */
+    const modeHtml = (mode) => (mode
+        ? `<span class="ntu-badge ntu-badge--mode ${mode === "Online" ? "is-online" : "is-physical"}" title="Class mode">${esc(mode)}</span>` : "");
     const studentHtml = (d) => {
         const reg = d.student_url ? `<a href="${esc(d.student_url)}" target="_blank" class="text-primary">${esc(d.registration_no)}</a>` : esc(d.registration_no);
-        return `<div class="ntu-cell"><div>${reg}</div><div class="ntu-cell__sub">${esc(d.student_name)}</div></div>`;
+        return `<div class="ntu-cell"><div>${reg}</div><div class="ntu-cell__sub">${esc(d.student_name)}</div>`
+            + `<div class="ntu-cell__badge">${studentStatusHtml(d.student_status)}</div></div>`;
     };
 
     /* "All changes" tab: every row, newest first, paged on the server. */
@@ -464,7 +479,7 @@ import TomSelect from "tom-select";
             + (teachers ? `<span>${teachers}</span>` : "") + "</div>"
             + '<div class="ntu-class__held"><span class="ntu-class__badges">'
             + `<span class="ntu-badge ${STATUS_CLASS[s.session_status] || ""}">${esc(s.session_status || "Unknown")}</span>`
-            + `<span class="ntu-badge ntu-badge--mode ${s.class_mode === "Online" ? "is-online" : "is-physical"}">${esc(s.class_mode)}</span>`
+            + modeHtml(s.class_mode)
             + `</span><span>${held}</span></div>`
             + '<div class="ntu-class__facts">'
             + `<span class="ntu-fact ntu-fact--main"><strong>${num(s.rows_changed)}</strong> of ${num(s.register_size)} rows changed</span>`
@@ -654,7 +669,7 @@ import TomSelect from "tom-select";
             const teachers = [["Tutor", f.class_tutor], ["Personal tutor", f.personal_tutor]].filter(([, n]) => n).map(([l, n]) => `${l}: ${esc(n)}`).join(" · ");
 
             return '<div class="ntu-tl__class"><div class="ntu-tl__head">'
-                + `<div><strong>${esc(f.module)}</strong><span>${esc([f.group, f.class_type, f.class_mode, f.term].filter(Boolean).join(" · "))}</span>${teachers ? `<span>${teachers}</span>` : ""}</div>`
+                + `<div><strong>${esc(f.module)} ${modeHtml(f.class_mode)}</strong><span>${esc([f.group, f.class_type, f.term].filter(Boolean).join(" · "))}</span>${teachers ? `<span>${teachers}</span>` : ""}</div>`
                 + '<div class="ntu-tl__facts">'
                 + `<span class="ntu-fact ntu-fact--alert">${plural(here, "absence")} changed to Present by ${esc(detailUser.name)}</span>`
                 + `<span class="ntu-fact">Attended ${num(attended)} of ${num(total)} (${share(attended)})</span>`
@@ -762,9 +777,9 @@ import TomSelect from "tom-select";
                 const extra = [...filterRows(), ["Flagged because", detailUser.review_reasons.join(". ")], ["Needs review rule", current.meta.review_rule]];
 
                 const summary = headerBlock(title, extra);
-                summary.push(["Registration no", "Student", "Absences changed to Present", "Lone Presents", "Present after a rejected excuse", "Classes",
+                summary.push(["Registration no", "Student", "Student status", "Absences changed to Present", "Lone Presents", "Present after a rejected excuse", "Classes",
                     "Class dates in these classes", "Attended now", "Attendance now %", "Attendance without these changes %", "First change (UK)", "Last change (UK)"]);
-                students.forEach((s) => summary.push([s.registration_no, s.student_name, s.overturned, s.lone, s.after_rejected, s.classes,
+                students.forEach((s) => summary.push([s.registration_no, s.student_name, s.student_status, s.overturned, s.lone, s.after_rejected, s.classes,
                     s.class_dates, s.attended, s.rate_now, s.rate_without, s.first_update, s.last_update]));
 
                 // Same order as the window: student, then class, then class date.
@@ -774,19 +789,19 @@ import TomSelect from "tom-select";
                     || a.session_iso.localeCompare(b.session_iso) || a.class_time.localeCompare(b.class_time));
                 const yes = (v) => (v ? "Yes" : "");
                 const attendance = headerBlock(title, extra);
-                attendance.push(["Registration no", "Student", "Module", "Group", "Class type", "Online / physical", "Term", "Class tutor", "Personal tutor",
+                attendance.push(["Registration no", "Student", "Student status", "Module", "Group", "Class type", "Online / physical", "Term", "Class tutor", "Personal tutor",
                     "Class date", "Day", "Class time", "Class status", "Status now", "First entered by", "First entered (UK)", "Last changed by", "Last changed (UK)",
                     `Absent to Present by ${detailUser.name}`, "Lone Present (absent before and after)", "Absent to Present by someone else",
                     "Excuse", "Excuse type", "Student's reason", "Excuse decided by", "Excuse decided (UK)", "Reply to student", "Note"]);
-                rows.forEach((r) => attendance.push([r.registration_no, r.student_name, r.module, r.group, r.class_type, r.class_mode, r.term, r.class_tutor, r.personal_tutor,
+                rows.forEach((r) => attendance.push([r.registration_no, r.student_name, r.student_status, r.module, r.group, r.class_type, r.class_mode, r.term, r.class_tutor, r.personal_tutor,
                     r.session_date, r.session_day, r.class_time, r.session_status, r.status, r.first_entered_by, r.first_entered_at, r.changed_by, r.changed_at,
                     yes(r.overturned_here), yes(r.lone), yes(r.overturned_by_other),
                     r.excuse ? r.excuse.status : "", r.excuse ? r.excuse.type : "", r.excuse ? r.excuse.reason : "", r.excuse ? r.excuse.actioned_by : "",
                     r.excuse ? r.excuse.actioned_at : "", r.excuse ? r.excuse.remarks : "", r.note]));
 
                 writeBook([
-                    { title: "Students", aoa: summary, widths: [15, 26, 14, 10, 14, 9, 12, 10, 12, 16, 17, 17] },
-                    { title: "Attendance", aoa: attendance, widths: [15, 24, 32, 14, 10, 10, 14, 22, 22, 11, 5, 12, 11, 16, 22, 17, 22, 17, 16, 14, 16, 10, 8, 40, 20, 17, 40, 20] },
+                    { title: "Students", aoa: summary, widths: [15, 26, 18, 14, 10, 14, 9, 12, 10, 12, 16, 17, 17] },
+                    { title: "Attendance", aoa: attendance, widths: [15, 24, 18, 32, 14, 10, 10, 14, 22, 22, 11, 5, 12, 11, 16, 22, 17, 22, 17, 16, 14, 16, 10, 8, 40, 20, 17, 40, 20] },
                 ], `Non-tutor attendance updates - ${detailUser.name} - needs review - ${fileScope()}`);
             })
             .catch((error) => alert(errorMessage(error)))
@@ -879,17 +894,17 @@ import TomSelect from "tom-select";
     const exportStudents = () => {
         const aoa = headerBlock("Non-Tutor Attendance Updates - by student", filterRows());
         aoa.push([
-            "Registration no", "Student", "Rows changed to Present", "Sessions", "Classes", "Single changes", "Register saved again",
+            "Registration no", "Student", "Student status", "Rows changed to Present", "Sessions", "Classes", "Single changes", "Register saved again",
             "Over 7 days after class", "First change (UK)", "Last change (UK)",
         ]);
         const rows = detailTable ? detailTable.getData("active") : studentRows;
         rows.forEach((s) => aoa.push([
-            s.registration_no, s.student_name, s.rows_changed, s.sessions, s.classes, s.single_changes, s.register_saves,
+            s.registration_no, s.student_name, s.student_status, s.rows_changed, s.sessions, s.classes, s.single_changes, s.register_saves,
             s.after_week, s.first_update, s.last_update,
         ]));
 
         writeWorkbook(aoa, "By student", `Non-tutor attendance updates - ${detailUser.name} - by student - ${fileScope()}`,
-            [15, 26, 14, 10, 10, 12, 12, 14, 17, 17]);
+            [15, 26, 18, 14, 10, 10, 12, 12, 14, 17, 17]);
     };
 
     const exportChanges = () => {
@@ -902,20 +917,20 @@ import TomSelect from "tom-select";
                 aoa.push([
                     "Session date", "Day", "Class time", "Term", "Course", "Module", "Group", "Class type", "Online / physical",
                     "Class tutor", "Personal tutor", "Cover tutor",
-                    "Registration no", "Student", "Status now", "How",
+                    "Registration no", "Student", "Student status", "Status now", "How",
                     "First entered by", "First entered (UK)", "Changed by", "Changed (UK)", "Hours after class end", "Note",
                 ]);
                 rows.forEach((r) => aoa.push([
                     r.session_date, r.session_day, r.class_time, r.term, r.course, r.module, r.group, r.class_type, r.class_mode,
                     r.class_tutor, r.personal_tutor, r.cover_tutor,
-                    r.registration_no, r.student_name, r.status, r.how,
+                    r.registration_no, r.student_name, r.student_status, r.status, r.how,
                     r.first_entered_by, r.first_entered_at, r.changed_by, r.updated_at,
                     r.minutes_after_class === null ? "" : Math.round(r.minutes_after_class / 6) / 10,
                     r.note,
                 ]));
 
                 writeWorkbook(aoa, "Changes", `Non-tutor attendance updates - ${detailUser.name} - ${fileScope()}`,
-                    [12, 6, 12, 18, 28, 32, 14, 10, 10, 22, 22, 22, 15, 24, 14, 22, 22, 17, 22, 17, 10, 24]);
+                    [12, 6, 12, 18, 28, 32, 14, 10, 10, 22, 22, 22, 15, 24, 18, 14, 22, 22, 17, 22, 17, 10, 24]);
             })
             .catch((error) => alert(errorMessage(error)))
             .finally(() => setBusy(detailExportBtn, false));
@@ -945,14 +960,14 @@ import TomSelect from "tom-select";
                     || a.registration_no.localeCompare(b.registration_no));
                 const changes = headerBlock(title, filterRows());
                 changes.push(["Tutor / personal tutor", "Role", "Class date", "Day", "Class time", "Module", "Group", "Class type", "Online / physical", "Term", "Class tutor", "Personal tutor", "Cover tutor",
-                    "Registration no", "Student", "Status now", "How", "Changed by", "Changed (UK)", "Hours after class end", "First entered by", "First entered (UK)", "Note"]);
+                    "Registration no", "Student", "Student status", "Status now", "How", "Changed by", "Changed (UK)", "Hours after class end", "First entered by", "First entered (UK)", "Note"]);
                 rows.forEach((r) => changes.push([teacherOf(r), r.class_tutor ? "Tutor" : (r.personal_tutor ? "Personal tutor" : ""), r.session_date, r.session_day, r.class_time, r.module, r.group, r.class_type, r.class_mode, r.term,
-                    r.class_tutor, r.personal_tutor, r.cover_tutor, r.registration_no, r.student_name, r.status, r.how, r.changed_by, r.updated_at,
+                    r.class_tutor, r.personal_tutor, r.cover_tutor, r.registration_no, r.student_name, r.student_status, r.status, r.how, r.changed_by, r.updated_at,
                     r.minutes_after_class === null ? "" : Math.round(r.minutes_after_class / 6) / 10, r.first_entered_by, r.first_entered_at, r.note]));
 
                 writeBook([
                     { title: "By tutor", aoa: summary, widths: [28, 34, 30, 14, 11, 10, 10, 12, 12, 14, 17, 17] },
-                    { title: "Changes", aoa: changes, widths: [26, 14, 12, 6, 12, 32, 14, 10, 10, 16, 22, 22, 22, 15, 24, 14, 22, 22, 17, 10, 22, 17, 24] },
+                    { title: "Changes", aoa: changes, widths: [26, 14, 12, 6, 12, 32, 14, 10, 10, 16, 22, 22, 22, 15, 24, 18, 14, 22, 22, 17, 10, 22, 17, 24] },
                 ], `Non-tutor attendance updates - ${detailUser.name} - by tutor - ${fileScope()}`);
             })
             .catch((error) => alert(errorMessage(error)))

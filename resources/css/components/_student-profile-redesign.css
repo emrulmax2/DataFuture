@@ -5806,6 +5806,14 @@ body.student-profile-body .sp-rmodal-foot-note {
     gap: 14px;
     padding: 13px 24px;
 }
+/* Registration confirmed ("Yes"): green instead of the course accent. The
+   accent is redefined here rather than each colour overridden, so the top
+   bar, background, border, badge, underline and status pill change together. */
+.student-profile-redesign .slc-reg-head.is-confirmed {
+    --student-profile-accent: #1B7F4B;
+    --student-profile-accent-soft: #E7F5EC;
+    --student-profile-accent-border: #B9DEC8;
+}
 .student-profile-redesign .slc-reg-badge {
     align-items: center;
     background: var(--student-profile-accent);
@@ -6435,7 +6443,7 @@ body.student-profile-body .modal #confirmModal .text-3xl {
 
 .student-profile-redesign .acc-summary-grid {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 14px 20px;
     padding: 14px 24px;
     border-bottom: 1px solid #edf1f2;
@@ -6478,7 +6486,6 @@ body.student-profile-body .modal #confirmModal .text-3xl {
     font-size: 11px;
     font-weight: 600;
 }
-
 .student-profile-redesign .acc-state-pill,
 .student-profile-redesign .acc-meta-pill,
 .student-profile-redesign .acc-panel-count {
@@ -6808,7 +6815,7 @@ body.student-profile-body .modal #confirmModal .text-3xl {
 
 @media (max-width: 1279px) {
     .student-profile-redesign .acc-summary-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 0 18px;
     }
 }

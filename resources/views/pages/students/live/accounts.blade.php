@@ -65,6 +65,7 @@
                         $agreementStateLabel = ($agreementSettled ? 'Settled' : 'Outstanding');
                         $agreementStateClass = ($agreementSettled ? 'acc-meta-pill--settled' : 'acc-meta-pill--open');
                         $selfFundingLabel = (isset($agr->is_self_funded) && $agr->is_self_funded == 1 ? 'Yes — self funded' : 'No — SLC funded');
+                        $instanceYear = (isset($agr->instance->year->name) && !empty($agr->instance->year->name) ? $agr->instance->year->name : '');
                     @endphp
 
                     <section class="acc-card {{ (isset($agr->student_course_relation_id) && $agr->student_course_relation_id > 0 ? '' : 'acc-card--unassigned') }}">
@@ -119,6 +120,10 @@
                         </div>
 
                         <div class="acc-summary-grid">
+                            <div class="acc-summary-item">
+                                <div class="acc-summary-label">Instance Year</div>
+                                <div class="acc-summary-value" @if(!empty($instanceYear)) title="Course instance #{{ $agr->course_creation_instance_id }}" @endif>{{ (!empty($instanceYear) ? $instanceYear : '---') }}</div>
+                            </div>
                             <div class="acc-summary-item">
                                 <div class="acc-summary-label">Fees</div>
                                 <div class="acc-summary-value">
@@ -423,7 +428,7 @@
                                         @endforeach
                                     @endif
                                 </select>
-                                <div class="acc__input-error error-instance_year text-danger mt-2"></div>
+                                <div class="acc__input-error error-course_creation_instance_id text-danger mt-2"></div>
                             </div>
                             <div class="col-span-12 sm:col-span-3">
                                 <label for="agr_add_fees" class="form-label">Fees <span class="text-danger">*</span></label>
@@ -503,6 +508,18 @@
                                     <option value="3">Year 3</option>
                                 </select>
                                 <div class="acc__input-error error-year text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-3">
+                                <label for="agr_edit_course_creation_instance_id" class="form-label">Instance Year</label>
+                                <select id="agr_edit_course_creation_instance_id" class="form-control w-full" name="course_creation_instance_id">
+                                    <option value="">Please Select</option>
+                                    @if(!empty($instances) && $instances->count())
+                                        @foreach($instances as $inst)
+                                            <option value="{{ $inst->id }}">{{ $inst->year->name ?? ('Instance #'.$inst->id) }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-course_creation_instance_id text-danger mt-2"></div>
                             </div>
                             <div class="col-span-12 sm:col-span-3">
                                 <label for="agr_edit_fees" class="form-label">Fees <span class="text-danger">*</span></label>

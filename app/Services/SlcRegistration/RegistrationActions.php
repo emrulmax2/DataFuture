@@ -636,6 +636,52 @@ class RegistrationActions
         return 'Batch '.$batch->code.' marked uploaded. Tick the students SIS accepted and use Bulk SLC Registration to record their SLC registration.';
     }
 
+    /**
+     * Duplicate agreements › "Reviewed & Hide" (user, 5 Nov 2026): the group (student, course relation,
+     * year) is hidden from the list and the Dashboard count while it has the agreements it has now.
+     * $seenIds are the agreements the page showed; if they've changed since, nothing is hidden.
+     */
+    public function reviewDuplicate(int $studentId, ?int $crelId, int $year, array $seenIds): string
+    {
+        $g = $this->duplicateGroup($studentId, $crelId, $year, false) ?? $this->fail('That student no longer has duplicate agreements for year '.$year.' on that course. Reload the page.');
+        sort($seenIds);
+        if (array_map('intval', $seenIds) != $g->agreementIds) {
+            $this->fail('The agreements changed since the page loaded (now #'.implode(', #', $g->agreementIds).'). Reload and review them again.');
+        }
+        \App\Models\SlcAgreementDuplicateReview::updateOrCreate(
+            ['student_id' => $studentId, 'student_course_relation_id' => $crelId, 'year' => $year],
+            ['agreement_ids' => $g->agreementIds, 'hidden' => true, 'reviewed_by' => $this->user(), 'reviewed_at' => now()]
+        );
+        $who = $this->duplicateWho($studentId);
+        $this->log('Duplicate agreements – reviewed & hid '.$who.' year '.$year.' (agreements #'.implode(', #', $g->agreementIds).')');
+
+        return 'Reviewed & hidden: '.$who.', year '.$year.'. It comes back if an agreement is added or removed.';
+    }
+
+    public function unhideDuplicate(int $studentId, ?int $crelId, int $year): string
+    {
+        $review = \App\Models\SlcAgreementDuplicateReview::where('student_id', $studentId)->where('year', $year)
+            ->where(fn ($q) => $crelId ? $q->where('student_course_relation_id', $crelId) : $q->whereNull('student_course_relation_id'))->first() ?? $this->fail('That group isn’t hidden.');
+        $review->update(['hidden' => false]);
+        $who = $this->duplicateWho($studentId);
+        $this->log('Duplicate agreements – unhid '.$who.' year '.$year);
+
+        return 'Back on the list: '.$who.', year '.$year.'.';
+    }
+
+    private function duplicateGroup(int $studentId, ?int $crelId, int $year, bool $hidden): ?object
+    {
+        return RegistrationState::duplicateAgreementGroups($hidden)
+            ->first(fn ($g) => (int) $g->student_id === $studentId && (int) $g->student_course_relation_id === (int) $crelId && (int) $g->year === $year);
+    }
+
+    private function duplicateWho(int $studentId): string
+    {
+        $st = Student::find($studentId);
+
+        return $st ? trim($st->registration_no.' '.$st->first_name.' '.$st->last_name) : 'student '.$studentId;
+    }
+
     /** What each kind of outcome is called (slc_bulk_import_rows.slc_recorded). */
     public const RECORDED = [
         'created' => 'registration and agreement created',
