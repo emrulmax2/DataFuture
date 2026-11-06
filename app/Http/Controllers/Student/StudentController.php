@@ -626,7 +626,7 @@ class  StudentController extends Controller
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
 
             'processGroup' => $processGroup,
-            'wrapUp' => $this->processWrapUp((int) $studentId),
+            //'wrapUp' => $this->processWrapUp((int) $studentId),
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
             'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
             'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
@@ -638,14 +638,14 @@ class  StudentController extends Controller
      * The student's open "Change student status to SLC New" task and the other tasks of its process
      * still open, so Mark as Complete can ask first (user, 29 Oct 2026). null when there is none.
      */
-    private function processWrapUp(int $studentId): ?array
-    {
-        $service = app(\App\Services\TaskAssignment\StudentProcessWrapUp::class);
-        $task = $service->task($studentId);
-        $manual = $task ? $service->manualCompletion($task) : null;
+    // private function processWrapUp(int $studentId): ?array
+    // {
+    //     $service = app(\App\Services\TaskAssignment\StudentProcessWrapUp::class);
+    //     $task = $service->task($studentId);
+    //     $manual = $task ? $service->manualCompletion($task) : null;
 
-        return $manual ? ['id' => (int) $task->id] + $manual : null;
-    }
+    //     return $manual ? ['id' => (int) $task->id] + $manual : null;
+    // }
 
     public function UploadStudentPhoto(Request $request){
         $applicant_id = $request->applicant_id;
