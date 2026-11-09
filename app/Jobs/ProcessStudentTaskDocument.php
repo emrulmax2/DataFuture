@@ -45,7 +45,8 @@ class ProcessStudentTaskDocument implements ShouldQueue
     {
         $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
         $user = StudentUser::where(["email"=> $ApplicantUser->email])->get()->first();
-        $student = Student::where(["student_user_id"=> $user->id])->get()->first();
+        // $student = Student::where(["student_user_id"=> $user->id])->get()->first(); // the login's first student, not the one this conversion created
+        $student = \App\Services\Admission\StudentConversion::studentFor($this->applicant, $user);
         //--BEGIN: Student Document Sync
         $applicantTaskidList = [];
         $studentDocumentList = [];
@@ -84,7 +85,16 @@ class ProcessStudentTaskDocument implements ShouldQueue
                         $studentDocument->save();
                         //endDocuemnt saved
                         $studentDocumentList[$applicantTaskData->id][] = $studentDocument->id;
-                        Storage::disk('s3')->copy('public/applicants/'.$this->applicant->id.'/'.$applicantDocument->current_file_name, 'public/students/'.$student->id.'/'.$applicantDocument->current_file_name);
+                        // Copied on the disk the document lives on (ApplicantDocumentDisk: disk_type, S3
+                        // when empty). On a server that is S3 as before; a local install has no working
+                        // S3 key, so an S3 document is skipped there instead of stopping the conversion.
+                        $docDisk = \App\Support\ApplicantDocumentDisk::of($applicantDocument);
+                        if ($docDisk === 's3' && app()->environment(['local', 'testing'])) {
+                            \Illuminate\Support\Facades\Log::info('Student conversion: S3 task document not copied on a local install.', ['applicant_id' => $this->applicant->id, 'file' => $applicantDocument->current_file_name]);
+                        } else {
+                            Storage::disk($docDisk)->copy('public/applicants/'.$this->applicant->id.'/'.$applicantDocument->current_file_name, 'public/students/'.$student->id.'/'.$applicantDocument->current_file_name);
+                        }
+                        /* was: Storage::disk('s3')->copy('public/applicants/'.$this->applicant->id.'/'.$applicantDocument->current_file_name, 'public/students/'.$student->id.'/'.$applicantDocument->current_file_name); */
 
                     }
                 endforeach;

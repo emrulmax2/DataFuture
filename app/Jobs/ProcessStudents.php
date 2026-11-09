@@ -111,13 +111,31 @@ class ProcessStudents implements ShouldQueue
 
         // No need to makeDirectory for S3; S3 creates folders as needed when you upload/copy files.
 
-        Storage::copy($sourceDir."/".$this->applicant->photo, $destinationDir."/".$this->applicant->photo);
+        // Storage::copy($sourceDir."/".$this->applicant->photo, $destinationDir."/".$this->applicant->photo);
+        // The applicant photo (uploaded by staff, or set by the "Update student photo" task action) is
+        // always on the local disk (Applicant::photo_url), and so is the student's (Student::photo_url):
+        // copy it there explicitly rather than on whatever the default disk is.
+        if (!empty($this->applicant->photo) && Storage::disk('local')->exists($sourceDir.'/'.$this->applicant->photo)) {
+            Storage::disk('local')->copy($sourceDir.'/'.$this->applicant->photo, $destinationDir.'/'.$this->applicant->photo);
+        }
+
+        // The applicant's files are on ApplicantDocumentDisk: the local disk on a local install
+        // (no working S3 key there, which stopped every local conversion here), S3 on the
+        // servers - so on a server this is exactly the S3 copy it always was.
+        $applicantDisk = \App\Support\ApplicantDocumentDisk::name();
+        $files = Storage::disk($applicantDisk)->files($sourceDir);
+        foreach ($files as $file) {
+            $filename = basename($file);
+            Storage::disk($applicantDisk)->copy($file, $destinationDir . '/' . $filename);
+        }
+        /* was:
         $files = Storage::disk('s3')->files($sourceDir);
 
         foreach ($files as $file) {
             $filename = basename($file);
             Storage::disk('s3')->copy($file, $destinationDir . '/' . $filename);
         }
+        */
         
 
     }

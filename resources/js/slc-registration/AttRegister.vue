@@ -24,7 +24,7 @@
         <div v-else class="tablebox"><table class="tbl" style="min-width: 1120px">
             <thead><tr><th scope="col">Student</th><th scope="col">Liability period</th><th scope="col" style="min-width: 260px">Attendance</th><th scope="col">First attended</th><th scope="col">Suggested code</th></tr></thead>
             <tbody><tr v-for="i in items" :key="i.id">
-                <th scope="row"><a class="plain" :href="i.s.url" target="_blank" rel="noopener">{{ i.s.title }} {{ i.s.first }} {{ i.s.last }}</a>
+                <th scope="row"><a class="plain" :href="i.s.url" target="_blank" rel="noopener">{{ i.s.title }} {{ i.s.first }} {{ i.s.last }}</a><StatusTag :status="i.s.status" />
                     <div class="muted small" style="font-weight: 400">{{ i.s.id }} · {{ i.status || 'No status' }}</div></th>
                 <td>
                     <template v-if="i.liab.start"><b>{{ i.liab.termName }}</b> · {{ fmtIso(i.liab.start) }} – {{ fmtIso(i.liab.end) }}
@@ -47,6 +47,7 @@
 import { computed, inject, ref } from "vue";
 import { fmtIso } from "./helpers";
 import AttCell from "./AttCell.vue";
+import StatusTag from "./StatusTag.vue";
 
 /*
  * Bulk attendance › step 4 (user, 2 Nov 2026): the register in each matched student's liability
@@ -55,7 +56,7 @@ import AttCell from "./AttCell.vue";
 const FILTERS = [["all", "All"], ["ok", "Attending"], ["warn", "To check"], ["none", "No attendance"], ["noterm", "No term"]];
 
 export default {
-    components: { AttCell },
+    components: { StatusTag, AttCell },
     setup() {
         const { store } = inject("slr");
         const att = computed(() => store.state.attendance);

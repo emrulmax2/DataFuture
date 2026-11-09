@@ -101,6 +101,11 @@ class StudentConversionLogSubscriber
             $this->fileLog()->error('['.$row->batch_id.'] '.$row->job_name.' FAILED for applicant #'.$row->applicant_id.' ('.get_class($exception).'): '.$exception->getMessage());
 
             if ($isFinal) {
+                // emailed to CONVERSION_ERROR_REPORT_TO (user, 30 Oct 2026)
+                \App\Services\Conversion\ConversionErrorReport::report('Conversion: '.$row->job_name, 'The conversion stopped: '.Str::limit($exception->getMessage(), 300), [
+                    'applicant_id' => $row->applicant_id, 'student_id' => $row->student_id, 'detail' => Str::limit((string) $exception, 4000),
+                ]);
+
                 // The chain halts here, so the steps still queued never run.
                 StudentConversionLog::where('batch_id', $row->batch_id)
                     ->where('status', StudentConversionLog::STATUS_QUEUED)

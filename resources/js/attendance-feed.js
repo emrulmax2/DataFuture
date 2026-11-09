@@ -1,6 +1,7 @@
 import { createIcons, icons } from "lucide";
 import TomSelect from "tom-select";
 import IMask from 'imask';
+import { askCorrectionReason, showAttendanceNotice, needsReason, refusalMessage } from "./attendance-correction-reason";
 
 ("use strict");
 
@@ -147,11 +148,14 @@ import IMask from 'imask';
     $('#attendanceFeedForm').on('submit', function(e){
         e.preventDefault();
         const form = document.getElementById('attendanceFeedForm');
-    
+        sendAttendanceFeed(new FormData(form));
+    })
+
+    // Sent again with `change_reason` when a late correction needs a reason.
+    function sendAttendanceFeed(form_data){
         document.querySelector('#saveAtnBtn').setAttribute('disabled', 'disabled');
         document.querySelector("#saveAtnBtn svg").style.cssText ="display: inline-block;";
 
-        let form_data = new FormData(form);
         axios({
             method: "post",
             url: route('attendance.create.and.store'),
@@ -180,6 +184,21 @@ import IMask from 'imask';
             document.querySelector('#saveAtnBtn').removeAttribute('disabled');
             document.querySelector("#saveAtnBtn svg").style.cssText = "display: none;";
             if (error.response) {
+                const data = error.response.data;
+                if (needsReason(error.response.status, data)) {
+                    askCorrectionReason(data.message, data.min_length).then((reason) => {
+                        if (reason) {
+                            form_data.set('change_reason', reason);
+                            sendAttendanceFeed(form_data);
+                        }
+                    });
+                    return;
+                }
+                const refusal = refusalMessage(error.response.status, data);
+                if (refusal) {
+                    showAttendanceNotice('Attendance not saved', refusal);
+                    return;
+                }
                 if (error.response.status == 422) {
                     for (const [key, val] of Object.entries(error.response.data.errors)) {
                         $(`#attendanceFeedForm .${key}`).addClass('border-danger')
@@ -190,6 +209,5 @@ import IMask from 'imask';
                 }
             }
         });
-        
-    })
+    }
 })();

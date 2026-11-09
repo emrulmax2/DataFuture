@@ -288,9 +288,15 @@
 	</style>
 </head>
 	@php
+		/* The Site Settings logo, attached to the message and shown inline
+		   (cid:), so it renders in Gmail and the rest without a reachable
+		   host - a link to this server works only on this network. The
+		   email-sized copy comes from App\Support\EmailLogo. Outside a mail
+		   (a browser preview) the hosted file is linked instead. */
 		$opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site_logo')->pluck('value', 'name')->toArray(); 
 		$logoUrl = (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? url('storage/'.$opt['site_logo']) : asset('build/assets/images/logo.svg'));
-		
+		$emailLogoPath = App\Support\EmailLogo::path();
+		$logoSrc = (isset($message) && $emailLogoPath) ? $message->embed($emailLogoPath) : $logoUrl;
 	@endphp
 	<body width="100%" style="margin: 0; padding: 15px 0 !important; background-color: #f1f1f1;">
 		<div style="max-width: 600px; margin: 0 auto; background: #FFF; border-radius: 5px;" class="email-container">
@@ -299,7 +305,7 @@
 				<tr>
 					<td style="text-align: center; background: rgb(22, 78, 99); padding: 40px 0; border-radius: 5px 5px 0 0;">
 						@if(!empty($logoUrl))
-							<a href="https://lcc.ac.uk"><img style="max-width: 150px; height: auto;" src="{{ $logoUrl }}" /></a>
+							<a href="https://lcc.ac.uk"><img alt="London Churchill College" width="150" style="display: inline-block; max-width: 150px; height: auto; border: 0;" src="{{ $logoSrc }}" /></a>
 						@else 
 							<a href="https://lcc.ac.uk"  style="color: #FFF; font-size: 22px; font-weight: bold; text-decoration: none; font-family: 'Lato', sans-serif;">London Churchill College</a>
 						@endif

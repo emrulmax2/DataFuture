@@ -23,6 +23,9 @@ class RegistrationState
     /** decided_at of the earlier lines that lines were carried from: a decision equal to it came across */
     private array $prevDecided = [];
 
+    /** the remembered No actions of the upload's students (NoActionMemory), by student id */
+    private ?\Illuminate\Support\Collection $noActions = null;
+
     public function build(): array
     {
         $import = SlcBulkImport::with('academicYear')->latest('id')->first();
@@ -42,6 +45,8 @@ class RegistrationState
         $batches = SlcBulkBatch::orderBy('id')->get();
         $batchById = $batches->keyBy('id');
         $userIds = $rows->flatMap(fn ($r) => array_merge([$r->linked_by, $r->decided_by], $r->fields->pluck('state_by')->all(), array_column($r->history ?? [], 'by')))->filter()->all();
+        $this->noActions = NoActionMemory::forStudents($rows->pluck('student_id')->all());
+        $userIds = array_merge($userIds, $this->noActions->flatten(1)->pluck('created_by')->all());
 
         $info = [];
         foreach ($rows as $row) {
@@ -53,6 +58,7 @@ class RegistrationState
             ->get(['id', 'slc_bulk_import_id', 'slc_bulk_batch_id', 'ssn', 'data', 'student_id', 'decided_by', 'decided_at', 'slc_registration_id', 'slc_agreement_id', 'slc_recorded', 'slc_recorded_by', 'slc_recorded_at']);
         $itemRecords = $this->itemRecords($batchItems);
         $itemStudents = DB::table('students')->whereIn('id', $batchItems->pluck('student_id')->filter()->unique())->get(['id', 'first_name', 'last_name', 'registration_no'])->keyBy('id');
+        $statuses = StudentStatus::forIds(array_merge($batchItems->pluck('student_id')->all(), $rows->pluck('student_id')->all()));
         $userIds = array_merge($userIds, $batchItems->pluck('decided_by')->all(), $batches->flatMap(fn ($b) => [$b->created_by, $b->downloaded_by, $b->uploaded_by])->all());
 
         // changes made to these students' records from SLC data, on this upload or an earlier one
@@ -61,6 +67,8 @@ class RegistrationState
         $userIds = array_merge($userIds, $updates->pluck('created_by')->all(), $log->pluck('user_id')->all(), [$import?->created_by]);
         $this->names = self::names($userIds);
         $updateStudents = DB::table('students')->whereIn('id', $updates->pluck('student_id')->unique())->get(['id', 'first_name', 'last_name', 'registration_no'])->keyBy('id');
+        // their mobile numbers (student_contacts, the newest row), shown on Actions › Our record updated
+        $updateMobiles = DB::table('student_contacts')->whereIn('student_id', $updates->pluck('student_id')->unique())->whereNull('deleted_at')->orderBy('id')->get(['student_id', 'mobile'])->keyBy('student_id');
 
         return [
             'import' => $import ? [
@@ -77,7 +85,7 @@ class RegistrationState
                     'rowId' => $it->id, 'r' => ['ssn' => $it->ssn],
                     'name' => trim(($itemStudents[$it->student_id]->first_name ?? '').' '.($itemStudents[$it->student_id]->last_name ?? '')),
                     'sid' => $itemStudents[$it->student_id]->registration_no ?? '', 'by' => $this->name($it->decided_by), 'at' => $this->when($it->decided_at),
-                    'url' => $it->student_id ? route('student.show', $it->student_id) : null,
+                    'url' => $it->student_id ? route('student.show', $it->student_id) : null, 'status' => $statuses[$it->student_id] ?? null,
                     'course' => trim(($it->data['slcCode'] ?? '').' · Year '.($it->data['year'] ?? ''), ' ·'),
                     // Bulk SLC Registration: what was done for the line, or what the student already has
                     'record' => $itemRecords[$it->id],
@@ -88,9 +96,10 @@ class RegistrationState
                 'uploadedBy' => $b->uploaded_by ? $this->name($b->uploaded_by) : null, 'uploadedAt' => $this->when($b->uploaded_at),
             ])->all(),
             'updates' => $updates->map(fn ($u) => [
-                'at' => $this->when($u->created_at), 'by' => $this->name($u->created_by), 'sid' => $updateStudents[$u->student_id]->registration_no ?? '',
+                'at' => $this->when($u->created_at), 'by' => $this->name($u->created_by), 'sid' => $updateStudents[$u->student_id]->registration_no ?? '', 'studentId' => (int) $u->student_id,
                 'name' => trim(($updateStudents[$u->student_id]->first_name ?? '').' '.($updateStudents[$u->student_id]->last_name ?? '')),
-                'field' => $u->field, 'from' => $u->from_value, 'to' => $u->to_value,
+                'field' => $u->field, 'from' => $u->from_value, 'to' => $u->to_value, 'status' => $statuses[$u->student_id] ?? null,
+                'mobile' => trim((string) ($updateMobiles[$u->student_id]->mobile ?? '')),
             ])->all(),
             'log' => $log->map(fn ($e) => ['at' => $this->when($e->created_at), 'user' => $e->user_id ? $this->name($e->user_id) : 'System', 'text' => $e->text])->all(),
             'courses' => $this->courses($rows, $codeMap, $yearId),
@@ -194,7 +203,9 @@ class RegistrationState
         $names = self::names(array_merge($agreements->pluck('created_by')->all(), $groups->map(fn ($g) => $g->review->reviewed_by ?? null)->all()));
         $when = fn ($t) => $t ? \Carbon\Carbon::parse($t)->format('d/m/Y H:i') : '';
 
-        return $groups->map(function ($g) use ($agreements, $students, $courses, $names, $when) {
+        $statuses = StudentStatus::forIds($groups->pluck('student_id')->all());
+
+        return $groups->map(function ($g) use ($agreements, $students, $courses, $names, $when, $statuses) {
             $list = $agreements->filter(fn ($a) => (int) $a->student_id === (int) $g->student_id && (int) $a->student_course_relation_id === (int) $g->student_course_relation_id && (int) $a->year === (int) $g->year)->values();
             $st = $students[$g->student_id] ?? null;
             $course = $courses[$g->student_course_relation_id] ?? null;
@@ -205,7 +216,7 @@ class RegistrationState
                     'changed' => !$g->hidden && $g->review->hidden] : null,
                 'regNo' => $st->registration_no ?? '', 'name' => trim(($st->first_name ?? '').' '.($st->last_name ?? '')),
                 'course' => trim((string) ($course->course ?? '')), 'intake' => (string) ($course->intake ?? ''), 'year' => (int) $g->year, 'count' => (int) $g->n,
-                'url' => route('student.accounts', $g->student_id),
+                'url' => route('student.accounts', $g->student_id), 'status' => $statuses[$g->student_id] ?? null,
                 'latest' => (string) $list->max('created_at'),
                 'agreements' => $list->map(fn ($a) => [
                     'id' => (int) $a->id, 'date' => $a->date, 'instanceYear' => $a->instance_year, 'fees' => (float) $a->fees, 'total' => (float) $a->total,
@@ -297,6 +308,9 @@ class RegistrationState
                 $ch['sugg'] = $ch['ok'] ? null : Checks::suggest($ch);
                 $ch['state'] = $f && $f->state ? ['state' => $f->state, 'byId' => $f->state_by, 'at' => $this->when($f->state_at)] : null;
                 $ch['carried'] = (bool) $f?->carried_from_id;
+                // a No action that later uploads of the same difference get by themselves (here = chosen on this line)
+                $m = $ch['route'] === 'accept' ? NoActionMemory::find($this->noActions?->get($row->student_id), $r, $ch) : null;
+                $ch['remembered'] = $m ? ['here' => (int) $m->slc_bulk_import_row_id === (int) $row->id, 'byId' => $m->created_by, 'at' => $this->when($m->created_at), 'file' => (string) ($m->source_file ?? '')] : null;
                 $checks[] = $ch;
             }
             $ab = Checks::awardingBody($s);
@@ -349,8 +363,11 @@ class RegistrationState
         return [
             'id' => $s['reg_no'], 'sid' => $s['id'], 'title' => $s['title'], 'first' => $s['first'], 'last' => $s['last'], 'gender' => $s['gender'],
             'dob' => $s['dob'], 'ssn' => $s['ssn'], 'address' => $addr['text'] ?? '', 'postcode' => $addr['postcode'] ?? '',
-            'course' => ['name' => $s['course_name'], 'intake' => $s['intake'], 'ab' => $s['awarding_body']],
+            'course' => ['name' => $s['course_name'], 'intake' => $s['intake'], 'ab' => $s['awarding_body'], 'slcCode' => (string) ($s['slc_code'] ?? ''), 'venue' => (string) ($s['venue'] ?? '')],
             'year' => $s['instance']['rank'] ?? null, 'fee' => $s['instance']['fee'] ?? null, 'url' => $s['url'],
+            'uploadsUrl' => route('student.uploads', $s['id']), // the Data check's address rows link here (proof of address)
+            'mobile' => $s['mobile'] ?? '', // student_contacts.mobile, shown on Actions (user, 6 Nov 2026)
+            'status' => $s['status'] ?? null,
             'registration' => $s['registration'],
         ];
     }
@@ -485,6 +502,9 @@ class RegistrationState
             foreach ($i['checks'] as &$c) {
                 if ($c['state']) {
                     $c['state']['by'] = $this->name($c['state']['byId']);
+                }
+                if (!empty($c['remembered'])) {
+                    $c['remembered']['by'] = $this->name($c['remembered']['byId']);
                 }
             }
             unset($c);

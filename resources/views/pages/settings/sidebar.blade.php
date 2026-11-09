@@ -84,10 +84,10 @@
             @endif
             @if(isset(auth()->user()->priv()['applicant_settings']) && auth()->user()->priv()['applicant_settings'] == 1)
                 <li class="hasChild">
-                    <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'tasklist' || Route::currentRouteName() == 'processlist' || Route::currentRouteName() == 'documentsettings' || Route::currentRouteName() == 'statuses' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
+                    <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'tasklist' || Route::currentRouteName() == 'taskrules' || Route::currentRouteName() == 'processlist' || Route::currentRouteName() == 'documentsettings' || Route::currentRouteName() == 'statuses' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
                         <i data-lucide="user-check" class="w-4 h-4 mr-2"></i> Applicant Settings <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>
                     </a>
-                    <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'tasklist' || Route::currentRouteName() == 'processlist' || Route::currentRouteName() == 'documentsettings' || Route::currentRouteName() == 'statuses' ? 'block' : 'none' }};">
+                    <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'tasklist' || Route::currentRouteName() == 'taskrules' || Route::currentRouteName() == 'processlist' || Route::currentRouteName() == 'documentsettings' || Route::currentRouteName() == 'statuses' ? 'block' : 'none' }};">
                         <li>
                             <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'statuses' ? 'active text-primary' : '' }}" href="{{ route('statuses') }}">
                                 <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Statuses
@@ -106,6 +106,11 @@
                         <li>
                             <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'tasklist' ? 'active text-primary' : '' }}" href="{{ route('tasklist') }}">
                                 <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Task List
+                            </a>
+                        </li>
+                        <li>
+                            <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'taskrules' ? 'active text-primary' : '' }}" href="{{ route('taskrules') }}">
+                                <i data-lucide="zap" class="w-3 h-3 mr-2"></i> Task Automation
                             </a>
                         </li>
                     </ul>

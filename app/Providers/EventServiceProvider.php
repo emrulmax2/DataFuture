@@ -23,6 +23,12 @@ class EventServiceProvider extends ServiceProvider
         SocialiteWasCalled::class => [
             'SocialiteProviders\\Microsoft\\MicrosoftExtendSocialite@handle',
         ],
+        \App\Events\ApplicationSubmitted::class => [
+            \App\Listeners\AssignTasksOnSubmission::class,
+        ],
+        \App\Events\StudentStatusChanged::class => [
+            \App\Listeners\AssignTasksOnStudentStatusChange::class,
+        ],
     ];
 
     /**
@@ -33,6 +39,8 @@ class EventServiceProvider extends ServiceProvider
     protected $subscribe = [
         // Applicant-to-student conversion audit trail (student_conversion_logs).
         StudentConversionLogSubscriber::class,
+        // A queued Task Automation student action that failed: emailed to CONVERSION_ERROR_REPORT_TO.
+        \App\Listeners\StudentActionFailureSubscriber::class,
     ];
 
     /**

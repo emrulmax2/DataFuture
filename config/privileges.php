@@ -168,6 +168,12 @@ return [
         // finance details, so it is enforced from day one like Error Logs.
         // The dashboard's SLC Records box opens it too, so either key lets you in.
         'slc.registration*' => ['slc_registration', 'slc_records'],
+
+        // Attendance Integrity monitoring (/attendance-integrity), including its
+        // Settings page. New screens holding staff and student investigation data,
+        // so they are enforced from day one. Each controller action also checks its own
+        // key plus the parent switch (IntegrityAccess::authorize()).
+        'attendance.integrity*' => ['ai_view_dashboard', 'ai_view_staff', 'ai_view_students', 'ai_view_audit_logs', 'ai_view_investigations', 'ai_manage_investigations', 'ai_export', 'ai_manage_settings'],
     ],
 
     /*
@@ -188,6 +194,7 @@ return [
         'employee.policy.assessment*',
         'error.logs*',
         'slc.registration*',
+        'attendance.integrity*',
     ],
 
     /*

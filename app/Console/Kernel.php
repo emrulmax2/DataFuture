@@ -30,6 +30,11 @@ class Kernel extends ConsoleKernel
            harmless — it only calls out for rows still pending. */
         $schedule->command('library:reconcile-deposits')->everyTenMinutes()->withoutOverlapping();
 
+        /* Signed DocuSeal offer acceptance forms (sent at Offer Placed): once both
+           parties are done, the signed form and DocuSeal's audit log are stored in
+           the applicant's uploads as "Offer Acceptance / Audit Trail". */
+        $schedule->command('docuseal:collect-signed-offers')->everyTenMinutes()->withoutOverlapping();
+
         /* A reservation holds a copy off the shelf. Uncollected ones are
            released so the next borrower is not told a book on the hold shelf is
            unavailable. */
@@ -64,6 +69,13 @@ class Kernel extends ConsoleKernel
         $schedule->command('employeenotereminder:cron')->dailyAt('08:30');
         // Policy assessments that are due within 3 days or overdue (at most one email per person every 3 days).
         $schedule->command('policyassessmentreminder:cron')->dailyAt('08:45')->withoutOverlapping();
+
+        // Attendance Integrity: term scans queued from the screens, the nightly scan of
+        // running terms (time and on/off in Attendance Settings), and the nightly seal
+        // of the attendance history. Reads attendance only; no queue worker needed.
+        $schedule->command('attendance-integrity:scan --pending')->everyFiveMinutes()->withoutOverlapping(180)->runInBackground();
+        $schedule->command('attendance-integrity:scan --daily')->dailyAt($this->attendanceScanTime())->withoutOverlapping(240)->runInBackground();
+        $schedule->command('attendance-integrity:seal')->dailyAt('04:10')->withoutOverlapping();
         
         
         //$schedule->command('coursecontentmissingteamnotification:cron')->everyMinute();
@@ -78,6 +90,18 @@ class Kernel extends ConsoleKernel
         //$schedule->command('linemanagerappraisal:cron')->everyMinute();
         //$schedule->command('linemanagerpendingleave:cron')->everyMinute();
         //$schedule->command('employeenotereminder:cron')->everyMinute();
+    }
+
+    /** Attendance Settings > Scans > daily scan time (HH:MM, UK); 02:30 if it cannot be read. */
+    private function attendanceScanTime(): string
+    {
+        try {
+            $time = (string) \App\Services\AttendanceIntegrity\AttendanceSettings::get('att_scan_time');
+
+            return preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $time) ? $time : '02:30';
+        } catch (\Throwable $e) {
+            return '02:30';
+        }
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Applicant;
 
 use App\Http\Controllers\Controller;
 use App\Models\Applicant;
+use App\Models\Status;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -12,13 +13,24 @@ class DashboardController extends Controller
     {
         
         $userData = \Auth::guard('applicant')->user();
-        $applicant = Applicant::with('status')->orderBy('id','DESC')->where('applicant_user_id', $userData->id)->get()->first();
+
+        /* The dashboard draws a card per application rather than a table, so the
+           course, intake and campus each one names are eager loaded here instead
+           of being fetched again per row while rendering. */
+        $applications = Applicant::with(['status', 'reason', 'course.creation.course', 'course.semester', 'course.venue'])
+            ->where('applicant_user_id', $userData->id)
+            ->orderBy('id', 'DESC')
+            ->get();
 
         return view('pages.applicant.index', [
             'title' => 'Applicant Dashboard - London Churchill College',
+            'layout' => 'applicant-portal',
             'breadcrumbs' => [],
             'user' => $userData,
-            'applicant' => $applicant,
+            'applicant' => $applications->first(),
+            'applications' => $applications,
+            // Names for the progress track and the legend, so neither invents its own.
+            'applicantStatuses' => Status::where('type', 'Applicant')->pluck('name', 'id')->toArray(),
         ]);
     }
 

@@ -23,6 +23,7 @@ use App\Jobs\ProcessStudentResidencyAndCriminalConviction;
 use App\Jobs\ProcessStudentSms;
 use App\Jobs\ProcessStudentTask;
 use App\Jobs\ProcessStudentTaskDocument;
+use App\Jobs\ProcessStudentTaskRules;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -64,6 +65,8 @@ class StudentConversionLog extends Model
         ProcessStudentEmail::class,
         ProcessStudentConsent::class,
         ProcessStudentDocuments::class,
+        // Task Automation "Student created" rules: last, once every detail is copied.
+        ProcessStudentTaskRules::class,
     ];
 
     const JOB_LABELS = [
@@ -88,6 +91,7 @@ class StudentConversionLog extends Model
         ProcessStudentEmail::class => 'Copy Emails',
         ProcessStudentConsent::class => 'Create Consents',
         ProcessStudentDocuments::class => 'Copy Documents',
+        ProcessStudentTaskRules::class => 'Assign Student Tasks',
     ];
 
     protected $fillable = [

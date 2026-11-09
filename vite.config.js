@@ -4,12 +4,12 @@ import { viteStaticCopy } from 'vite-plugin-static-copy';
 import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
-    // server: {
-    //     headers: {
-    //         //'Access-Control-Allow-Origin': 'http://127.0.0.1:8000'
-    //         'Access-Control-Allow-Origin': 'http://127.0.0.1:8000'
-    //     }
-    // },
+    server: {
+        headers: {
+            //'Access-Control-Allow-Origin': 'http://127.0.0.1:8000'
+            'Access-Control-Allow-Origin': 'http://127.0.0.1:8000'
+        }
+    },
     plugins: [
         viteStaticCopy({
             targets: [
@@ -34,15 +34,16 @@ export default defineConfig({
                 'resources/css/student-service-desk.css',
                 'resources/css/student-form.css',
                 'resources/css/admission-redesign.css',
-                // 'resources/css/admission-portal.css',
-                // 'resources/css/applicant-portal.css',
-                // 'resources/css/agent-portal.css',
-                // 'resources/css/esignature.css',
+                'resources/css/admission-portal.css',
+                'resources/css/applicant-portal.css',
+                'resources/css/agent-portal.css',
+                'resources/css/esignature.css',
                 'resources/css/course-management-redesign.css',
                 'resources/css/agent-management-redesign.css',
                 'resources/css/staff-dashboard.css',
                 'resources/css/report-it.css',
                 'resources/css/programme-dashboard.css',
+                'resources/css/attendance-integrity.css',
                 'resources/css/group-leader-dashboard.css',
                 'resources/css/task-manager-detail.css',
                 'resources/css/slc-registration.css',
@@ -71,7 +72,7 @@ export default defineConfig({
                 'resources/js/permissiontemplate.js',
                 'resources/js/processlist.js',
                 'resources/js/tasklist.js',
-                // 'resources/js/taskrules.js',
+                'resources/js/taskrules.js',
                 'resources/js/user.js',
 
                 'resources/js/interview-assigned.js',
@@ -82,16 +83,16 @@ export default defineConfig({
 
                 'resources/js/admission.js',
                 'resources/js/admission-redesign.js',
-                // 'resources/js/admission-portal.js',
-                // 'resources/js/admission-list.js',
-                // 'resources/js/admission-show.js',
-                // 'resources/js/admission-presence.js',
+                'resources/js/admission-portal.js',
+                'resources/js/admission-list.js',
+                'resources/js/admission-show.js',
+                'resources/js/admission-presence.js',
                 'resources/js/admission-vue.js',
                 'resources/js/admission-process.js',
                 'resources/js/admission-uploads.js',
                 'resources/js/admission-notes.js',
                 'resources/js/admission-conversion-log.js',
-                // 'resources/js/admission-timeline.js',
+                'resources/js/admission-timeline.js',
 
                 'resources/js/students.js',
                 'resources/js/student-global.js',
@@ -327,6 +328,7 @@ export default defineConfig({
                 'resources/js/student-group-search-form.js',
                 'resources/js/student-attendance-reports.js',
                 'resources/js/non-tutor-attendance-report.js',
+                'resources/js/attendance-integrity.js',
 
                 'resources/js/student-attendance-excuse.js',
                 'resources/js/slc-accounts-reports.js',
@@ -481,7 +483,7 @@ export default defineConfig({
                 'resources/js/report-any-it-student.js',
                 'resources/js/report-it-show.js',
                 'resources/js/admission-offer-acceptance.js',
-                // 'resources/js/esignature.js',
+                'resources/js/esignature.js',
                 'resources/js/department-permissions.js',
                 'resources/js/employee-privilege-new.js',
 

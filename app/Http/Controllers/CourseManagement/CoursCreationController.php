@@ -199,6 +199,7 @@ class CoursCreationController extends Controller
             'has_evening_and_weekend'=> $has_evening_and_weekend,
             'is_workplacement'=> $is_workplacement,
             'required_hours'=> $required_hours,
+            'induction_booking_link' => $request->induction_booking_link ?: null,
             'updated_by' => auth()->user()->id,
             'course_creation_qualification_id' => (isset($request->course_creation_qualification_id) && $request->course_creation_qualification_id > 0 ? $request->course_creation_qualification_id : null),
         ]);

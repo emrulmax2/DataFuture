@@ -5,443 +5,140 @@
 @endsection
 
 @section('subcontent')
-    <!-- BEGIN: Profile Info -->
+    {{--
+        Applicant processes on the admission portal shell: one board per
+        Applicant-phase process (Pending / In Progress / Completed lanes), an
+        archived view per process and the task dialogs. Behaviour lives in
+        resources/js/admission-process.js, whose only markup is this page;
+        the record header's status, photo and e-signature actions keep going
+        through admission-global.js and admission-vue.js (partials/
+        portal-record-modals). Hook classes kept from the previous page:
+        .markAsCompleted, .markAsPending, .deleteApplicantTask,
+        .updateTaskOutcome, .uploadTaskDoc, .viewTaskLogBtn, .taskUserLoader,
+        .downloadDoc, .restore_btn, .task_list_id, #studentProcessListForm,
+        #addProcessItemsAdd, #updateTaskOutcomeForm, #uploadTaskDocumentForm,
+        #processTaskLogTable, .processTaskArchiveListTable, #confirmModal
+        (.agreeWith data-recordid/data-status/data-applicant).
+    --}}
+    <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
 
-    @include('pages.students.admission.show-info')
-    
-    <!-- END: Profile Info -->
-    <div class="adm-process-page">
-    <div class="adm-section adm-section--row adm-process-toolbar">
-        <div class="adm-section__head" style="margin-bottom:0;">
-            <div class="adm-section__title">My Task</div>
-            <div class="adm-tabletools__actions">
-                <div class="dropdown adm-process-taskmenu" id="processDropdown" data-tw-placement="bottom-end">
-                    <button type="button" class="dropdown-toggle adm-btn adm-btn--primary adm-process-taskmenu__trigger" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="activity" class="w-4 h-4"></i>Add Task<i data-lucide="chevron-down" class="w-3 h-3"></i></button>
-                    <div class="dropdown-menu w-72 adm-process-taskmenu__menu">
-                        <form method="post" action="#" id="studentProcessListForm" class="adm-process-taskmenu__form">
-                            <ul class="dropdown-content adm-process-taskmenu__panel">
-                                <li><h6 class="dropdown-header adm-process-taskmenu__head">Task List</h6></li>
-                                <li><hr class="dropdown-divider mt-0 adm-process-taskmenu__rule"></li>
-                                <li class="processAccrodionWrap adm-process-taskmenu__body">
-                                    @if(isset($process) && !empty($process))
-                                        <div id="processListAccordion" class="accordion adm-process-taskmenu__accordion">
-                                            @foreach($process as $pro)
-                                                @php
-                                                    $exists = 0;
-                                                    if(isset($pro->tasks) && !empty($pro->tasks)):
-                                                        foreach($pro->tasks as $task):
-                                                            $exists += (in_array($task->id, $existingTask) ? 1 : 0);
-                                                        endforeach;
-                                                    endif;
-                                                    $processListOpen = $loop->first;
-                                                    $processCollapseId = 'process-list-collapse-'.$pro->id;
-                                                @endphp
-                                                <div class="accordion-item adm-process-taskmenu__group">
-                                                    <div id="process-list-heading-{{ $pro->id }}" class="accordion-header">
-                                                        <button class="accordion-button adm-process-taskmenu__group-head {{ $processListOpen ? '' : 'collapsed' }}" type="button" data-tw-toggle="collapse" data-tw-target="#{{ $processCollapseId }}" aria-expanded="{{ $processListOpen ? 'true' : 'false' }}" aria-controls="{{ $processCollapseId }}">
-                                                            <i data-lucide="{{ $exists ? 'check-circle' : 'circle' }}"></i>
-                                                            <span>{{ $pro->name }}</span>
-                                                            <i data-lucide="chevron-down" class="adm-process-taskmenu__group-caret"></i>
-                                                        </button>
-                                                    </div>
-                                                    <div id="{{ $processCollapseId }}" class="accordion-collapse collapse {{ $processListOpen ? 'show' : '' }}" aria-labelledby="process-list-heading-{{ $pro->id }}" data-tw-parent="#processListAccordion">
-                                                        @if(isset($pro->tasks) && !empty($pro->tasks))
-                                                            <div class="accordion-body adm-process-taskmenu__rows">
-                                                                @foreach($pro->tasks as $task)
-                                                                    @php
-                                                                        $taskInputId = 'process_task_'.$pro->id.'_'.$task->id;
-                                                                    @endphp
-                                                                    <label class="adm-process-taskmenu__row {{ in_array($task->id, $existingTask) ? 'is-checked' : '' }}" for="{{ $taskInputId }}" data-adm-task-row>
-                                                                        <span class="adm-process-taskmenu__row-title">
-                                                                            <i data-lucide="activity"></i>
-                                                                            <span>{{ $task->name }}</span>
-                                                                        </span>
-                                                                        <input {{ (in_array($task->id, $existingTask) ? 'checked' : '') }} id="{{ $taskInputId }}" name="task_list_ids[]" class="task_list_id adm-process-taskmenu__input" type="checkbox" value="{{ $task->id }}" style="display:none !important;">
-                                                                        <span class="adm-process-taskmenu__check" aria-hidden="true"></span>
-                                                                    </label>
-                                                                @endforeach
-                                                            </div>
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    @endif
-                                </li>
-                                <li><hr class="dropdown-divider adm-process-taskmenu__rule"></li>
-                                <li>
-                                    <div class="adm-process-taskmenu__foot">
-                                        <button type="submit" id="addProcessItemsAdd" class="btn btn-primary py-1 px-2 w-auto">
-                                            <i data-lucide="plus-circle" class="adm-btn-icon"></i> Add Items
-                                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                                stroke="white" class="w-4 h-4 ml-2 theLoader adm-btn-loader">
-                                                <g fill="none" fill-rule="evenodd">
-                                                    <g transform="translate(1 1)" stroke-width="4">
-                                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                                        </path>
-                                                    </g>
-                                                </g>
-                                            </svg>
-                                        </button>
-                                        <button type="button" id="closeProcessDropdown" class="btn btn-secondary py-1 px-2 ml-auto">
-                                            <i data-lucide="x" class="adm-btn-icon"></i> Close
-                                        </button>
-                                        <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
-                                    </div>
-                                </li>
-                            </ul>
-                        </form>
+    @php
+        $adpStatusId = (int) ($applicant->status_id ?? 0);
+        $adpPriv = auth()->user()->priv();
+        $adpNext = \App\Support\AdmissionStatusFlow::next($applicant, $allStatuses, $adpPriv);
+        $adpStatusHelp = \App\Support\AdmissionStatusFlow::HELP;
+        $adpTab = 'process';
+        $adpUserId = (int) auth()->user()->id;
+        $adpExisting = $existingTask ?? [];
+
+        $adpPaths = [
+            'check' => '<path d="M20 6 9 17l-5-5"/>',
+            'undo' => '<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/>',
+            'flag' => '<path d="M4 22V4a1 1 0 0 1 1-1h11l-1 4 1 4H5"/>',
+            'users' => '<circle cx="9" cy="8" r="4"/><path d="M2 21c0-3.5 3-6 7-6s7 2.5 7 6M17 4.5a4 4 0 0 1 0 7M22 21c0-2.8-1.8-4.8-4.5-5.6"/>',
+            'upload' => '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/>',
+            'download' => '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+            'clock' => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+            'trash' => '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+            'file' => '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
+            'list' => '<path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/>',
+            'archive' => '<rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/>',
+            'plus' => '<path d="M12 5v14M5 12h14"/>',
+            'x' => '<path d="M18 6 6 18M6 6l12 12"/>',
+            'ok' => '<circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/>',
+        ];
+        $adpIcon = fn ($name, $size = 16) => '<svg width="'.$size.'" height="'.$size.'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'.$adpPaths[$name].'</svg>';
+        $adpCheck = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+        $adpX = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+        $adpSpin = '<svg class="adm-btn-loader adp-btn-spin" style="display: none;" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" aria-hidden="true"><g fill="none" fill-rule="evenodd"><g transform="translate(1 1)" stroke-width="4"><circle stroke-opacity=".4" cx="18" cy="18" r="18"></circle><path d="M36 18c0-9.94-8.06-18-18-18"><animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform></path></g></g></svg>';
+        $adpClose = '<button type="button" class="adp-btn adp-btn--ghost adp-btn--sm adp-modal__close" data-tw-dismiss="modal" aria-label="Close">✕</button>';
+        // Staff avatar (photo or initials) for the popovers.
+        $adpWho = function ($employee, $fallback = '') {
+            $name = trim((string) ($employee->full_name ?? $fallback));
+            $photo = $employee ? (string) $employee->photo_url : '';
+            $inner = ($photo !== '' && !\App\Support\Avatar::isGenerated($photo)) ? '<img src="'.e($photo).'" alt="">' : e(\App\Support\Avatar::initialsOnly($name !== '' ? $name : 'Unknown'));
+            return '<span class="adp-who">'.$inner.'</span>';
+        };
+    @endphp
+
+    @include('pages.students.admission.partials.portal-record')
+
+    @if(empty($processGroup))
+        <section class="adp-panel adp-proc">
+            <h3 class="adp-h3">Processes</h3>
+            <div class="adp-empty"><b>No processes yet.</b><span>No Applicant-phase process has tasks configured in Process settings.</span></div>
+        </section>
+    @else
+        @foreach($processGroup as $adpProc)
+            @php
+                $adpLive = $adpProc['pendingTask']->count() + $adpProc['inProgressTask']->count() + $adpProc['completedTask']->count();
+                $adpDone = $adpProc['completedTask']->count();
+                $adpPct = $adpLive > 0 ? (int) round($adpDone / $adpLive * 100) : 0;
+                $adpLanes = [
+                    ['Pending', $adpProc['pendingTask'], 'pending'],
+                    ['In Progress', $adpProc['inProgressTask'], 'in-progress'],
+                    ['Completed', $adpProc['completedTask'], 'completed'],
+                ];
+            @endphp
+            <section class="adp-panel adp-proc" data-adp-proc="{{ $adpProc['id'] }}">
+                <div class="adp-proc__head">
+                    <div class="adp-proc__copy">
+                        <div class="adp-proc__title">
+                            <h3 class="adp-h3">{{ $adpProc['name'] }}</h3>
+                            <span class="adp-pill adp-pill--{{ $adpProc['phase'] === 'Applicant' ? 'blue' : 'muted' }} adp-pill--tight"><i></i>{{ $adpProc['phase'] }} phase</span>
+                        </div>
+                        <p class="adp-proc__desc">Tasks {{ $adpProc['auto'] ? 'are generated on submission' : 'are assigned by the admissions team' }}. Tasks with an outcome or upload stay Pending until both are in, then move to In Progress, where they can be marked complete; tasks needing neither are completed from Pending. Archive any that do not apply.</p>
+                    </div>
+                    <div class="adp-proc__tools">
+                        {{-- Add tasks: hidden for now at the user's request (22 Oct 2026); the dialog and its script stay in place.
+                        <button type="button" class="adp-btn adp-btn--ghost adp-btn--sm" data-tw-toggle="modal" data-tw-target="#addTasksModal">{!! $adpIcon('plus', 13) !!}Add tasks</button>
+                        --}}
+                        <span class="adp-tprog" title="{{ $adpDone }} of {{ $adpLive }} tasks complete"><span class="adp-tprog__bar"><i style="width:{{ $adpPct }}%"></i></span><small>{{ $adpDone }} of {{ $adpLive }} complete</small></span>
+                        <div class="adp-seg" role="group" aria-label="{{ $adpProc['name'] }} view">
+                            <button type="button" class="on" aria-pressed="true" data-adp-view="board">{!! $adpIcon('list', 13) !!}Board<b>{{ $adpLive }}</b></button>
+                            <button type="button" aria-pressed="false" data-adp-view="archive">{!! $adpIcon('archive', 13) !!}Archived<b>{{ $adpProc['archivedCount'] }}</b></button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    <div class="adm-process-list">
-        @if(!empty($processGroup))
-            <div id="studentProcessAccordion" class="accordion">
-                @foreach($processGroup as $proGroup)
-                    <div class="accordion-item">
-                        <div id="studentProcessAccordion-{{ $loop->index }}" class="accordion-header">
-                            <button class="processListAccordionBtn accordion-button collapsed relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#studentProcessAccordion-collapse-{{ $loop->index }}" aria-expanded="false" aria-controls="studentProcessAccordion-collapse-{{ $loop->index }}">
-                                <span class="adm-process-acc-icon"><i data-lucide="clipboard-check"></i></span>
-                                <span class="adm-process-acc-copy">
-                                    <span class="adm-process-acc-title">{{ $proGroup['name'] }}</span>
-                                    @php
-                                        $processTaskCount = $proGroup['pendingTask']->count() + $proGroup['inProgressTask']->count() + $proGroup['completedTask']->count();
-                                        $processCreated = !empty($proGroup['created_at']) ? date('j M, Y', strtotime($proGroup['created_at'])) : '';
-                                    @endphp
-                                    <span class="adm-process-acc-meta">{{ $processCreated != '' ? 'Created '.$processCreated.' · ' : '' }}{{ $processTaskCount }} {{ $processTaskCount == 1 ? 'task' : 'tasks' }}</span>
-                                </span>
-                                @if($proGroup['pendingTask']->count() > 0)
-                                    <span class="py-1 px-4 inline-flex rounded-full bg-warning text-sm font-semibold text-white ml-2 relative">{{ $proGroup['pendingTask']->count() }} Pendings</span>
-                                @endif
-                                <span class="accordionCollaps" aria-hidden="true">
-                                    <i data-lucide="plus" class="accordionCollaps__plus"></i>
-                                    <i data-lucide="minus" class="accordionCollaps__minus"></i>
-                                </span>
-                            </button>
-                        </div>
-                        <div id="studentProcessAccordion-collapse-{{ $loop->index }}" class="accordion-collapse collapse" aria-labelledby="studentProcessAccordion-{{ $loop->index }}" data-tw-parent="#studentProcessAccordion">
-                            <div class="accordion-body text-slate-600 dark:text-slate-500 leading-relaxed">
-                                <ul class="nav nav-link-tabs border-b border-slate-200/60" role="tablist">
-                                    <li id="process-{{ $loop->index }}-1-tab" class="nav-item mr-10 flex" role="presentation">
-                                        <button class="nav-link font-medium text-slate-500 py-2 px-0 active" data-tw-toggle="pill" 
-                                            data-tw-target="#process-tab-{{ $loop->index }}-1" type="button" role="tab" aria-controls="process-tab-{{ $loop->index }}-1" 
-                                            aria-selected="true">
-                                            Pending
-                                        </button>
-                                    </li>
-                                    <li id="process-{{ $loop->index }}-4-tab" class="nav-item  mr-10 flex" role="presentation">
-                                        <button class="nav-link font-medium text-slate-500 py-2  px-0" data-tw-toggle="pill" 
-                                            data-tw-target="#process-tab-{{ $loop->index }}-4" type="button" role="tab" aria-controls="process-tab-{{ $loop->index }}-4" 
-                                            aria-selected="false">
-                                            In Progress
-                                        </button>
-                                    </li>
-                                    <li id="process-{{ $loop->index }}-2-tab" class="nav-item flex" role="presentation">
-                                        <button class="nav-link font-medium text-slate-500 py-2  px-0" data-tw-toggle="pill" 
-                                            data-tw-target="#process-tab-{{ $loop->index }}-2" type="button" role="tab" aria-controls="process-tab-{{ $loop->index }}-2" 
-                                            aria-selected="false">
-                                            Completed
-                                        </button>
-                                    </li>
-                                    <li id="process-{{ $loop->index }}-3-tab" class="nav-item ml-10 flex" role="presentation">
-                                        <button class="nav-link font-medium text-slate-500 py-2  px-0" data-tw-toggle="pill" 
-                                            data-tw-target="#process-tab-{{ $loop->index }}-3" type="button" role="tab" aria-controls="process-tab-{{ $loop->index }}-3" 
-                                            aria-selected="false">
-                                            Archived
-                                        </button>
-                                    </li>
-                                </ul>
-                                <div class="tab-content mt-5">
-                                    <div id="process-tab-{{ $loop->index }}-1" class="tab-pane leading-relaxed active" role="tabpanel" aria-labelledby="process-{{ $loop->index }}-1-tab">
-                                        @if($proGroup['pendingTask']->count() > 0)
-                                            @foreach($proGroup['pendingTask'] as $task)
-                                                @include('pages.students.admission.partials.process-task-card', ['task' => $task, 'applicant' => $applicant, 'variant' => 'pending'])
-                                            @endforeach
-                                        @else 
-                                            <div class="adm-alert adm-alert--warning" role="alert">
-                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v5M12 16h.01"></path></svg> Oops! There are no pending process found for this applicant.
-                                            </div>
-                                        @endif
-                                    </div>
-                                    <div id="process-tab-{{ $loop->index }}-4" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="process-{{ $loop->index }}-4-tab">
-                                        @if($proGroup['inProgressTask']->count() > 0)
-                                            @foreach($proGroup['inProgressTask'] as $task)
-                                                @include('pages.students.admission.partials.process-task-card', ['task' => $task, 'applicant' => $applicant, 'variant' => 'progress'])
-                                            @endforeach
-                                        @else 
-                                            <div class="adm-alert adm-alert--warning" role="alert">
-                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v5M12 16h.01"></path></svg> Oops! There are no "In Progress" task found for this applicant.
-                                            </div>
-                                        @endif
-                                    </div>
-                                    <div id="process-tab-{{ $loop->index }}-2" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="process-{{ $loop->index }}-2-tab">
-                                        @if($proGroup['completedTask']->count() > 0)
-                                            @foreach($proGroup['completedTask'] as $task)
-                                            @include('pages.students.admission.partials.process-task-card', ['task' => $task, 'applicant' => $applicant, 'variant' => 'completed'])
-                                            @endforeach
-                                        @else 
-                                            <div class="adm-alert adm-alert--warning" role="alert">
-                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v5M12 16h.01"></path></svg> Oops! There are no completed process found for this applicant.
-                                            </div>
-                                        @endif
-                                    </div>
-                                    <div id="process-tab-{{ $loop->index }}-3" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="process-{{ $loop->index }}-3-tab">
-                                        <div class="overflow-x-auto scrollbar-hidden">
-                                            <div id="processTaskArchiveListTable_{{ $proGroup['id'] }}" data-process="{{ $proGroup['id'] }}" data-applicant="{{ $applicant->id }}" class="mt-5 table-report table-report--tabulator processTaskArchiveListTable"></div>
-                                        </div>
-                                    </div>
+
+                <div data-adp-board>
+                    @if($adpLive === 0)
+                        <div class="adp-empty"><b>No open tasks in this process.</b><span>Open <b>Archived</b> to restore one.</span></div>
+                    @else
+                        <div class="adp-board">
+                            @foreach($adpLanes as [$adpLaneName, $adpLaneTasks, $adpLaneKey])
+                                <div class="adp-lane">
+                                    <div class="adp-lane__h"><span>{{ $adpLaneName }}</span><b>{{ $adpLaneTasks->count() }}</b></div>
+                                    @forelse($adpLaneTasks as $task)
+                                        @include('pages.students.admission.partials.portal-task-card', ['task' => $task, 'lane' => $adpLaneKey])
+                                    @empty
+                                        <div class="adp-lane__empty">—</div>
+                                    @endforelse
                                 </div>
-                            </div>
+                            @endforeach
                         </div>
-                    </div>
-                @endforeach
-            </div>
-        @else 
-            <div class="adm-alert adm-alert--warning" role="alert">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v5M12 16h.01"></path></svg> Oops! No task found under this process.
-            </div>
-        @endif
-    </div>
-    </div>
+                    @endif
+                </div>
 
-    
-    <!-- BEGIN: View Log Modal -->
-    <div id="viewTaskLogModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="font-medium text-base mr-auto">Task Change Log</h2>
-                    <a data-tw-dismiss="modal" href="javascript:;">
-                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                    </a>
-                </div>
-                <div class="modal-body">
-                    <div class="overflow-x-auto scrollbar-hidden">
-                        <div id="processTaskLogTable" data-interview="0" data-applicantid="{{ $applicant->id }}" data-applicanttaskid="0" class="mt-0 table-report table-report--tabulator"></div>
+                <div data-adp-archive hidden>
+                    <div class="adp-arch-loading" role="status" aria-live="polite" data-adp-archive-loading><span class="adp-spin"></span>Loading archived tasks…</div>
+                    <div class="adp-empty" data-adp-archive-empty hidden><b>Nothing archived.</b><span>Tasks you archive from the board appear here and can be restored.</span></div>
+                    <div class="adp-dtable" data-adp-archive-table hidden>
+                        <div id="processTaskArchiveListTable_{{ $adpProc['id'] }}" data-process="{{ $adpProc['id'] }}" data-applicant="{{ $applicant->id }}" class="processTaskArchiveListTable adp-table"></div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-0"><i data-lucide="x" class="adm-btn-icon"></i> Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: View Log Modal -->
-    
-    <!-- BEGIN: Update Outcome Modal -->
-    <div id="updateTaskOutcomeModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <form method="POST" action="#" id="updateTaskOutcomeForm">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Update Outcome</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
-                    </div>
-                    <div class="modal-body">
-                         
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1"><i data-lucide="x" class="adm-btn-icon"></i> Cancel</button>
-                        <button type="submit" id="updateOutcomeBtn" class="btn btn-primary w-auto">
-                            <i data-lucide="check" class="adm-btn-icon"></i> Update
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2 adm-btn-loader">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                        </button>
-                        <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
-                        <input type="hidden" name="applicant_task_id" value="0"/>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    <!-- END: Update Outcome Modal -->
+            </section>
+        @endforeach
+    @endif
 
-    <!-- BEGIN: Import Modal -->
-    <div id="uploadTaskDocumentModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="font-medium text-base mr-auto">Upload Documents</h2>
-                    <a data-tw-dismiss="modal" href="javascript:;">
-                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                    </a>
-                </div>
-                <div class="modal-body">
-                    <form method="post" action="{{ route('admission.upload.task.documents') }}" class="dropzone adm-upload-dropzone adm-process-dropzone" id="uploadTaskDocumentForm" enctype="multipart/form-data">
-                        <div class="fallback">
-                            <input name="documents[]" multiple type="file" />
-                        </div>
-                        <div class="dz-message" data-dz-message>
-                            <span class="adm-upload-dropzone__icon"><i data-lucide="upload-cloud" class="w-5 h-5"></i></span>
-                            <div class="text-lg font-medium">Drop files here or click to upload.</div>
-                            <div class="text-slate-500 adm-upload-dropzone__hint">
-                                Max file size 5MB & max file limit 10.
-                            </div>
-                        </div>
-                        <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
-                        <input type="hidden" name="applicant_task_id" value="0"/>
-                        <input type="hidden" name="display_file_name" value=""/>
-                        <input type="hidden" name="hard_copy_check" value="0"/>
-                    </form>
-                    <div class="mt-4 adm-upload-name">
-                        <label for="process_doc_name" class="form-label">Document Name</label>
-                        <input type="text" id="process_doc_name" class="form-control w-full" name="process_doc_name">
-                    </div>
-                    <div class="mt-4 adm-upload-hardcopy">
-                        <label class="form-label">Hard Copy Checked?</label>
-                        <div class="adm-upload-choice-group">
-                            <label class="adm-upload-choice" for="hard_copy_check-1">
-                                <input id="hard_copy_check-1" type="radio" value="1" name="hard_copy_check_status">
-                                <span class="adm-upload-choice__chip"><i data-lucide="check" class="w-4 h-4"></i></span>
-                                <span>Yes</span>
-                            </label>
-                            <label class="adm-upload-choice" for="hard_copy_check-2">
-                                <input checked id="hard_copy_check-2" type="radio" value="0" name="hard_copy_check_status">
-                                <span class="adm-upload-choice__chip"><i data-lucide="x" class="w-4 h-4"></i></span>
-                                <span>No</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1"><i data-lucide="x" class="adm-btn-icon"></i> Cancel</button>
-                    <button type="submit" id="uploadProcessDoc" class="btn btn-primary w-auto">     
-                        <i data-lucide="upload-cloud" class="adm-btn-icon"></i> Upload
-                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                            stroke="white" class="w-4 h-4 ml-2 adm-btn-loader">
-                            <g fill="none" fill-rule="evenodd">
-                                <g transform="translate(1 1)" stroke-width="4">
-                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                    <path d="M36 18c0-9.94-8.06-18-18-18">
-                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                    </path>
-                                </g>
-                            </g>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Import Modal -->
-
-    <!-- BEGIN: Task User Modal -->
-    <div id="taskUserModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="font-medium text-base mr-auto">Task Assigned Users</h2>
-                    <a data-tw-dismiss="modal" href="javascript:;">
-                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                    </a>
-                </div>
-                <div class="modal-body">
-                    <div class="taskUserModalLoader text-center flex justify-center">
-                        <i data-loading-icon="rings" class="w-20 h-20"></i>
-                    </div>
-                    <div class="taskUserModalContent" style="display: none;">
-                        <table class="table table-report">
-                            <thead>
-                                <tr>
-                                    <th class="whitespace-nowrap">NAME</th>
-                                    <th class="whitespace-nowrap">Department</th>
-                                    <th class="whitespace-nowrap">Work Type</th>
-                                    <th class="whitespace-nowrap">Work No.</th>
-                                    <th class="whitespace-nowrap">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1"><i data-lucide="x" class="adm-btn-icon"></i> Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Task User Modal -->
-
-    <!-- BEGIN: Success Modal Content -->
-    <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitle"></div>
-                        <div class="text-slate-500 mt-2 successModalDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-action="DISMISS" class="successCloser btn btn-primary w-24"><i data-lucide="check" class="adm-btn-icon"></i> Ok</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Success Modal Content -->
-
-    <!-- BEGIN: Warning Modal Content -->
-    <div id="warningModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="alert-octagon" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 warningModalTitle"></div>
-                        <div class="text-slate-500 mt-2 warningModalDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-action="DISMISS" class="warningCloser btn btn-primary w-24"><i data-lucide="check" class="adm-btn-icon"></i> Ok</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Warning Modal Content -->
-
-    <!-- BEGIN: Delete Confirm Modal Content -->
-    <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
-                        <div class="text-slate-500 mt-2 confModDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" class="disAgreeWith btn btn-outline-secondary w-24 mr-1"><i data-lucide="x" class="adm-btn-icon"></i> No, Cancel</button>
-                        <button type="button" data-recordid="0" data-status="none" data-applicant="{{ $applicant->id }}" class="agreeWith btn btn-danger w-auto"><i data-lucide="check" class="adm-btn-icon"></i> Yes, I agree</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Delete Confirm Modal Content -->
+    @include('pages.students.admission.partials.portal-process-modals')
+    @include('pages.students.admission.partials.portal-record-modals')
+    @include('pages.students.admission.partials.portal-dialogs', ['adpConfirmAttrs' => 'data-recordid="0" data-status="none" data-applicant="'.$applicant->id.'"'])
 @endsection
 
 @section('script')
     @vite('resources/js/admission-process.js')
+    {{-- The record header's Change status dialog (admission-show.js guards its other, details-only blocks). --}}
+    @vite('resources/js/admission-show.js')
     @vite('resources/js/admission-vue.js')
 @endsection

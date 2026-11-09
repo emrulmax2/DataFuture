@@ -1,6 +1,7 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
+import { askCorrectionReason, showAttendanceNotice, needsReason, refusalMessage } from "./attendance-correction-reason";
 
 ("use strict");
 
@@ -22,11 +23,13 @@ import Tabulator from "tabulator-tables";
     $('#attendance-update_all').on('submit', function(e) {
         e.preventDefault();
         const form = document.getElementById('attendance-update_all');
+        updateAllAttendance(new FormData(form));
+    });
 
+    // Sent again with `change_reason` when a late correction needs a reason.
+    function updateAllAttendance(form_data) {
         $('.load-update').removeClass('hidden');
-        //document.querySelector("#save svg").style.cssText ="display: inline-block;";
 
-        let form_data = new FormData(form);
         axios({
             method: "post",
             url: route('attendance.update.all'),
@@ -53,6 +56,21 @@ import Tabulator from "tabulator-tables";
             
 
             if (error.response) {
+                const data = error.response.data;
+                if (needsReason(error.response.status, data)) {
+                    askCorrectionReason(data.message, data.min_length).then((reason) => {
+                        if (reason) {
+                            form_data.set('change_reason', reason);
+                            updateAllAttendance(form_data);
+                        }
+                    });
+                    return;
+                }
+                const refusal = refusalMessage(error.response.status, data);
+                if (refusal) {
+                    showAttendanceNotice('Attendance not saved', refusal);
+                    return;
+                }
                 if (error.response.status == 422) {
 
                     errorModal.show();
@@ -68,7 +86,7 @@ import Tabulator from "tabulator-tables";
                 }
             }
         });
-    });
+    }
 
     $(".tablepoint-toggle").on('click', function(e) {
         let tthis = $(this)
@@ -113,28 +131,7 @@ import Tabulator from "tabulator-tables";
 
         $('#confirmModal button').attr('disabled', 'disabled');
         if(action == 'DELETE'){
-            axios({
-                method: 'delete',
-                url: route('attendance.destory', recordID),
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-
-                    succModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('WOW!');
-                        $('#successModal .successModalDesc').html('Record successfully deleted from DB row.');
-                    });
-                }
-                setTimeout(function(){
-                    succModal.hide();
-                    window.location.reload();
-                }, 1500);
-            }).catch(error =>{
-                console.log(error)
-            });
+            deleteAttendance(recordID, null);
         } else if(action == 'RESTORE'){
             axios({
                 method: 'post',
@@ -156,9 +153,57 @@ import Tabulator from "tabulator-tables";
                     window.location.reload();
                 }, 1500);
             }).catch(error =>{
+                $('#confirmModal button').removeAttr('disabled');
+                const refusal = error.response ? refusalMessage(error.response.status, error.response.data) : null;
+                if (refusal) {
+                    confirmModal.hide();
+                    showAttendanceNotice('Attendance not restored', refusal);
+                }
                 console.log(error)
             });
         }
     })
+
+    // Sent again with `change_reason` when deleting is a late correction.
+    function deleteAttendance(recordID, reason) {
+        axios({
+            method: 'delete',
+            url: route('attendance.destory', recordID),
+            data: reason ? { change_reason: reason } : {},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                $('#confirmModal button').removeAttr('disabled');
+                confirmModal.hide();
+
+                succModal.show();
+                document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                    $('#successModal .successModalTitle').html('WOW!');
+                    $('#successModal .successModalDesc').html('Record successfully deleted from DB row.');
+                });
+            }
+            setTimeout(function(){
+                succModal.hide();
+                window.location.reload();
+            }, 1500);
+        }).catch(error =>{
+            $('#confirmModal button').removeAttr('disabled');
+            const data = error.response ? error.response.data : null;
+            const status = error.response ? error.response.status : 0;
+            if (needsReason(status, data)) {
+                confirmModal.hide();
+                askCorrectionReason(data.message, data.min_length).then((typed) => {
+                    if (typed) deleteAttendance(recordID, typed);
+                });
+                return;
+            }
+            const refusal = refusalMessage(status, data);
+            if (refusal) {
+                confirmModal.hide();
+                showAttendanceNotice('Attendance not deleted', refusal);
+            }
+            console.log(error)
+        });
+    }
 }
 })();

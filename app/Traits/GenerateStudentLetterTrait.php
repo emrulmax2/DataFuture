@@ -16,7 +16,9 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 trait GenerateStudentLetterTrait{
 
-    public function generateLetter($student_id, $letter_title, $letter_content, $issued_date, $pin, $signatory = 0){
+    /* $disk: where the PDF is written. Callers that pass nothing keep S3 exactly as before; the
+       automated welcome letter passes ApplicantDocumentDisk::name() (local on a local install). */
+    public function generateLetter($student_id, $letter_title, $letter_content, $issued_date, $pin, $signatory = 0, $disk = null){
         $student = Student::find($student_id);
         $issued_date = (!empty($issued_date) ? date('d/m/Y', strtotime($issued_date)) : date('d/m/Y'));
         $signature = Signatory::find($signatory);
@@ -126,6 +128,15 @@ trait GenerateStudentLetterTrait{
                     elseif($field == 'post'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($signature->signatory_post) && !empty($signature->signatory_post) ? $signature->signatory_post : ''), $letter_content);
                     endif;
+                elseif($table == 'course_creations'):
+                    /* Course Creation > Induction Booking Link: the booking form for this
+                       student's own course, so one letter serves every intake. */
+                    $inductionLink = trim((string) (isset($student->activeCR->creation->induction_booking_link) ? $student->activeCR->creation->induction_booking_link : ''));
+                    if($field == 'induction_booking_link'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", e($inductionLink), $letter_content);
+                    elseif($field == 'induction_booking_button'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (!empty($inductionLink) ? '<a href="'.e($inductionLink).'" style="display:inline-block;padding:11px 18px;border-radius:8px;background:#102A5C;color:#ffffff;text-decoration:none;font-weight:700">Book your induction</a>' : ''), $letter_content);
+                    endif;
                 elseif($table == 'today_date'):
                     $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", date('d/m/Y'), $letter_content);
                 elseif($table == 'page_break'):
@@ -222,10 +233,13 @@ trait GenerateStudentLetterTrait{
             ->setPaper('a4', 'portrait')
             ->setWarnings(false);
         $content = $pdf->output();
-        Storage::disk('s3')->put('public/students/'.$student_id.'/'.$fileName, $content );
+        $disk = $disk ?: 's3';
+        // Storage::disk('s3')->put('public/students/'.$student_id.'/'.$fileName, $content );
+        Storage::disk($disk)->put('public/students/'.$student_id.'/'.$fileName, $content );
 
         $the_content = $letter_content.'<div class="pageBreak"></div>';
-        return ['path' => Storage::disk('s3')->url('public/students/'.$student_id.'/'.$fileName), 'filename' => $fileName, 'the_content' => $the_content];
+        // return ['path' => Storage::disk('s3')->url('public/students/'.$student_id.'/'.$fileName), 'filename' => $fileName, 'the_content' => $the_content];
+        return ['path' => Storage::disk($disk)->url('public/students/'.$student_id.'/'.$fileName), 'filename' => $fileName, 'the_content' => $the_content, 'disk' => $disk];
     }
 
     public function parseLetterContent($student_id, $letter_title, $letter_content, $issued_date, $signatory = 0){
@@ -333,6 +347,15 @@ trait GenerateStudentLetterTrait{
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($signature->signatory_name) && !empty($signature->signatory_name) ? $signature->signatory_name : ''), $letter_content);
                     elseif($field == 'post'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($signature->signatory_post) && !empty($signature->signatory_post) ? $signature->signatory_post : ''), $letter_content);
+                    endif;
+                elseif($table == 'course_creations'):
+                    /* Course Creation > Induction Booking Link: the booking form for this
+                       student's own course, so one letter serves every intake. */
+                    $inductionLink = trim((string) (isset($student->activeCR->creation->induction_booking_link) ? $student->activeCR->creation->induction_booking_link : ''));
+                    if($field == 'induction_booking_link'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", e($inductionLink), $letter_content);
+                    elseif($field == 'induction_booking_button'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (!empty($inductionLink) ? '<a href="'.e($inductionLink).'" style="display:inline-block;padding:11px 18px;border-radius:8px;background:#102A5C;color:#ffffff;text-decoration:none;font-weight:700">Book your induction</a>' : ''), $letter_content);
                     endif;
                 elseif($table == 'today_date'):
                     $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", date('d/m/Y'), $letter_content);

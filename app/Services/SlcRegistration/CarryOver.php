@@ -20,7 +20,8 @@ use App\Models\SlcBulkRowField;
  *   - each field decision (CoC to issue, Contact student, No action) and how far it got stays while
  *     SLC still sends the same value — the same CoC, never a second one. When SLC's value changed
  *     or it now matches ours, the decision goes into the line's history instead (shown on the page)
- *     and the field is decided again if it still differs.
+ *     and the field is decided again if it still differs. No action also needs our value to be the
+ *     same (NoActionMemory, which also brings it back when there is no earlier line to carry from).
  *
  * History accumulates from upload to upload, so the whole trail stays with the student's line.
  */
@@ -39,7 +40,8 @@ class CarryOver
             return $counts;
         }
         $infos = $state->infoFor($rows);
-        $batches = SlcBulkBatch::whereIn('id', $prevBySsn->flatMap(fn ($p) => [$p->slc_bulk_batch_id, $p->earlier_batch_id])->filter()->unique())->get()->keyBy('id');
+        $memories = NoActionMemory::forStudents($rows->pluck('student_id')->all());
+        $batches =SlcBulkBatch::whereIn('id', $prevBySsn->flatMap(fn ($p) => [$p->slc_bulk_batch_id, $p->earlier_batch_id])->filter()->unique())->get()->keyBy('id');
 
         foreach ($rows as $row) {
             $prev = $prevBySsn->get($row->ssn);
@@ -87,7 +89,17 @@ class CarryOver
             foreach ($prev->fields as $f) {
                 $ch = $checks->get($f->field);
                 $same = self::slcValue($prev->data, $f->field) === self::slcValue($row->data, $f->field);
-                if ($ch && !$ch['ok'] && $same) {
+                // No action is remembered with what we held as well (NoActionMemory): when we now hold
+                // something else it is decided again. One chosen before that was kept is remembered now.
+                $oursChanged = false;
+                if ($same && $ch && !$ch['ok'] && $f->route === 'accept' && $row->student_id) {
+                    if (NoActionMemory::known((int) $row->student_id, $f->field)) {
+                        $oursChanged = !NoActionMemory::find($memories->get($row->student_id), $row->data, $ch);
+                    } else {
+                        NoActionMemory::remember($row, $ch, (int) $f->created_by);
+                    }
+                }
+                if ($ch && !$ch['ok'] && $same && !$oursChanged) {
                     SlcBulkRowField::create([
                         'slc_bulk_import_row_id' => $row->id, 'field' => $f->field, 'route' => $f->route, 'state' => $f->state,
                         'state_by' => $f->state_by, 'state_at' => $f->state_at, 'slc_coc_id' => $f->slc_coc_id, 'carried_from_id' => $f->id, 'created_by' => $f->created_by,
@@ -95,8 +107,8 @@ class CarryOver
                     $counts['fields']++;
                     continue;
                 }
-                $now = !$ch ? 'unchecked' : ($ch['ok'] ? 'matches' : 'changed');
-                $history[] = $this->entry($prev, $f->field, $f->route, $f->state, $f->state_by ?: $f->created_by, $f->state_at ?? $f->created_at, $file, $now, $ch && !$ch['ok'] ? $ch['slc'] : null, $f->slc_coc_id);
+                $now = !$ch ? 'unchecked' : ($ch['ok'] ? 'matches' : ($oursChanged ? 'ours' : 'changed'));
+                $history[] = $this->entry($prev, $f->field, $f->route, $f->state, $f->state_by ?: $f->created_by, $f->state_at ?? $f->created_at, $file, $now, $ch && !$ch['ok'] ? ($oursChanged ? $ch['ours'] : $ch['slc']) : null, $f->slc_coc_id);
                 $counts['history']++;
             }
 
@@ -125,7 +137,7 @@ class CarryOver
     {
         $v = match ($key) {
             'first' => trim(($r['first'] ?? '').' '.($r['other'] ?? '')),
-            'course' => ($r['slcCode'] ?? '').'|'.($r['courseName'] ?? ''),
+            'course' => $r['slcCode'] ?? '', // the code only: the course name isn't compared
             default => (string) ($r[$key] ?? ''),
         };
 

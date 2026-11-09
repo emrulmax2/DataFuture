@@ -11,284 +11,157 @@ import IMask from 'imask';
 
 
 ("use strict");
+/* The academic-qualification list.
+ *
+ * A plain table rather than a Tabulator grid: the design asks for one, and an
+ * applicant lists a handful of qualifications, so remote paging, sorting and
+ * the export toolbar were machinery with nothing to do. The module keeps its
+ * `init()` so every existing call site - the Yes/No toggle, the add, edit and
+ * delete handlers - is unchanged, and it reads the same endpoint, asking for
+ * every row at once (`size: true`).
+ */
 var educationQualTable = (function () {
+    var _esc = function (v) {
+        if (v === null || v === undefined || v === '') return '';
+        return $('<i></i>').text(v).html();
+    };
+    var _cell = function (v) {
+        var s = _esc(v);
+        return s === '' ? '&mdash;' : s;
+    };
+
+    var _render = function (rows) {
+        var $host = $('#educationQualTable');
+        var $wrap = $host.closest('.educationQualificationTableWrap');
+
+        /* The design shows no empty table and no "no records" placeholder:
+           with nothing to list there is only the Add button. */
+        if (!rows || rows.length === 0) {
+            $host.empty();
+            $wrap.removeClass('has-rows').hide();
+            return;
+        }
+
+        var html = '<table class="apd-table">'
+            + '<thead><tr>'
+            + '<th>Qualification</th><th>Awarding body</th><th>Subjects</th>'
+            + '<th>Result</th><th>Awarded</th><th class="apd-table__act"></th>'
+            + '</tr></thead><tbody>';
+
+        $.each(rows, function (i, r) {
+            var acts = r.deleted_at
+                ? '<button type="button" data-id="' + _esc(r.id) + '" class="restore_btn apd-linkbtn">Restore</button>'
+                : '<button type="button" data-id="' + _esc(r.id) + '" data-tw-toggle="modal" data-tw-target="#editQualificationModal" class="edit_btn apd-linkbtn">Edit</button>'
+                  + ' <span class="apd-linkbtn__sep">&middot;</span> '
+                  + '<button type="button" data-id="' + _esc(r.id) + '" class="delete_btn apd-linkbtn apd-linkbtn--danger">Remove</button>';
+
+            html += '<tr>'
+                + '<td>' + _cell(r.highest_academic) + '</td>'
+                + '<td>' + _cell(r.awarding_body) + '</td>'
+                + '<td>' + _cell(r.subjects) + '</td>'
+                + '<td>' + _cell(r.result) + '</td>'
+                + '<td>' + _cell(r.degree_award_date) + '</td>'
+                + '<td class="apd-table__act">' + acts + '</td>'
+                + '</tr>';
+        });
+
+        $host.html(html + '</tbody></table>');
+        $wrap.addClass('has-rows').show();
+    };
+
     var _tableGen = function () {
-        // Setup Tabulator
-        let applicantId = $("#educationQualTable").attr('data-applicant') != "" ? $("#educationQualTable").attr('data-applicant') : "0";
-        let querystr = $("#query-EQ").val() != "" ? $("#query-EQ").val() : "";
-        let status = $("#status-EQ").val() != "" ? $("#status-EQ").val() : "";
+        var $host = $('#educationQualTable');
+        if ($host.length === 0) return;
 
-        let tableContent = new Tabulator("#educationQualTable", {
-            ajaxURL: route("agent.qualification.list"),
-            ajaxParams: { applicantId: applicantId, querystr: querystr, status: status},
-            ajaxFiltering: true,
-            ajaxSorting: true,
-            printAsHtml: true,
-            printStyled: true,
-            pagination: "remote",
-            paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
-            layout: "fitColumns",
-            responsiveLayout: "collapse",
-            placeholder: "No matching records found",
-            columns: [
-                {
-                    title: "#SL",
-                    field: "sl",
-                    width: "110",
-                },
-                {
-                    title: "Awarding Body",
-                    field: "awarding_body",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Highest Academic Qualification",
-                    field: "highest_academic",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Subjects",
-                    field: "subjects",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Result",
-                    field: "result",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Award Date",
-                    field: "degree_award_date",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Actions",
-                    field: "id",
-                    headerSort: false,
-                    hozAlign: "right",
-                    headerHozAlign: "right",
-                    width: "150",
-                    download: false,
-                    formatter(cell, formatterParams) {                        
-                        var btns = "";
-                        if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editQualificationModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
-                        }
-                        
-                        return btns;
-                    },
-                },
-            ],
-            renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }
-            }
-        });
+        var applicantId = $host.attr('data-applicant') || '0';
 
-        // Redraw table onresize
-        window.addEventListener("resize", () => {
-            tableContent.redraw();
-            createIcons({
-                icons,
-                "stroke-width": 1.5,
-                nameAttr: "data-lucide",
-            });
-        });
-
-        // Export
-        $("#tabulator-export-csv-EQ").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
-        });
-
-        $("#tabulator-export-json-EQ").on("click", function (event) {
-            tableContent.download("json", "data.json");
-        });
-
-        $("#tabulator-export-xlsx-EQ").on("click", function (event) {
-            window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Venues Details",
-            });
-        });
-
-        $("#tabulator-export-html-EQ").on("click", function (event) {
-            tableContent.download("html", "data.html", {
-                style: true,
-            });
-        });
-
-        // Print
-        $("#tabulator-print-EQ").on("click", function (event) {
-            tableContent.print();
+        $.ajax({
+            url: route('agent.qualification.list'),
+            type: 'GET',
+            data: { applicantId: applicantId, status: 1, size: true },
+            success: function (res) { _render(res && res.data ? res.data : []); },
+            error: function () { _render([]); },
         });
     };
+
     return {
         init: function () {
             _tableGen();
         },
     };
 })();
+/* The employment-history list.
+ *
+ * The plain table the design asks for, in place of the Tabulator grid - same
+ * reasoning as the qualification list: a handful of rows never needed remote
+ * paging, sorting or an export toolbar. `init()` is unchanged, so the
+ * employment-status toggle and the add, edit and delete handlers all still
+ * call it, and it reads the same endpoint with every row at once.
+ */
 var employmentHistoryTable = (function () {
+    var _esc = function (v) {
+        if (v === null || v === undefined || v === '') return '';
+        return $('<i></i>').text(v).html();
+    };
+    var _cell = function (v) {
+        var s = _esc(v);
+        return s === '' ? '&mdash;' : s;
+    };
+
+    var _render = function (rows) {
+        var $host = $('#employmentHistoryTable');
+        var $wrap = $host.closest('.educationEmploymentTableWrap');
+
+        if (!rows || rows.length === 0) {
+            $host.empty();
+            $wrap.removeClass('has-rows').hide();
+            return;
+        }
+
+        var html = '<table class="apd-table">'
+            + '<thead><tr>'
+            + '<th>Organisation</th><th>Position</th><th>From</th>'
+            + '<th>To</th><th>Reference</th><th class="apd-table__act"></th>'
+            + '</tr></thead><tbody>';
+
+        $.each(rows, function (i, r) {
+            /* The endpoint already substitutes "Continue" for a job with no end
+               date; the design words it "Continuing". */
+            var to = String(r.continuing) === '1' ? 'Continuing' : _cell(r.end_date);
+
+            var acts = r.deleted_at
+                ? '<button type="button" data-id="' + _esc(r.id) + '" class="restore_btn apd-linkbtn">Restore</button>'
+                : '<button type="button" data-id="' + _esc(r.id) + '" data-tw-toggle="modal" data-tw-target="#editEmployementHistoryModal" class="edit_btn apd-linkbtn">Edit</button>'
+                  + ' <span class="apd-linkbtn__sep">&middot;</span> '
+                  + '<button type="button" data-id="' + _esc(r.id) + '" class="delete_btn apd-linkbtn apd-linkbtn--danger">Remove</button>';
+
+            html += '<tr>'
+                + '<td>' + _cell(r.company_name) + '</td>'
+                + '<td>' + _cell(r.position) + '</td>'
+                + '<td>' + _cell(r.start_date) + '</td>'
+                + '<td>' + to + '</td>'
+                + '<td>' + _cell(r.name) + '</td>'
+                + '<td class="apd-table__act">' + acts + '</td>'
+                + '</tr>';
+        });
+
+        $host.html(html + '</tbody></table>');
+        $wrap.addClass('has-rows').show();
+    };
+
     var _tableGen = function () {
-        // Setup Tabulator
-        let applicantId = $("#employmentHistoryTable").attr('data-applicant') != "" ? $("#employmentHistoryTable").attr('data-applicant') : "0";
-        let querystr = $("#query-EH").val() != "" ? $("#query-EH").val() : "";
-        let status = $("#status-EH").val() != "" ? $("#status-EH").val() : "";
+        var $host = $('#employmentHistoryTable');
+        if ($host.length === 0) return;
 
-        let tableContent = new Tabulator("#employmentHistoryTable", {
-            ajaxURL: route("agent.employment.list"),
-            ajaxParams: { applicantId: applicantId, querystr: querystr, status: status},
-            ajaxFiltering: true,
-            ajaxSorting: true,
-            printAsHtml: true,
-            printStyled: true,
-            pagination: "remote",
-            paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
-            layout: "fitColumns",
-            responsiveLayout: "collapse",
-            placeholder: "No matching records found",
-            columns: [
-                {
-                    title: "#SL",
-                    field: "sl",
-                    width: "80",
-                },
-                {
-                    title: "Organization",
-                    field: "company_name",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Phone",
-                    field: "company_phone",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Position",
-                    field: "position",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Start",
-                    field: "start_date",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "End",
-                    field: "end_date",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Address",
-                    field: "address",
-                    headerHozAlign: "left",
-                    width: "180",
-                    formatter(cell, formatterParams) {   
-                        return '<div class="whitespace-nowrap">'+cell.getData().address+'</div>';
-                    }
-                },
-                {
-                    title: "Contact Person",
-                    field: "name",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Position",
-                    field: "contact_position",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Phone",
-                    field: "contact_phone",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Actions",
-                    field: "id",
-                    headerSort: false,
-                    hozAlign: "right",
-                    headerHozAlign: "right",
-                    width: "120",
-                    download: false,
-                    formatter(cell, formatterParams) {                        
-                        var btns = "";
-                        if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editEmployementHistoryModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
-                        }
-                        
-                        return btns;
-                    },
-                },
-            ],
-            renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }
-            }
-        });
-
-        // Redraw table onresize
-        window.addEventListener("resize", () => {
-            tableContent.redraw();
-            createIcons({
-                icons,
-                "stroke-width": 1.5,
-                nameAttr: "data-lucide",
-            });
-        });
-
-        // Export
-        $("#tabulator-export-csv-EH").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
-        });
-
-        $("#tabulator-export-json-EH").on("click", function (event) {
-            tableContent.download("json", "data.json");
-        });
-
-        $("#tabulator-export-xlsx-EH").on("click", function (event) {
-            window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Applicant Details",
-            });
-        });
-
-        $("#tabulator-export-html-EH").on("click", function (event) {
-            tableContent.download("html", "data.html", {
-                style: true,
-            });
-        });
-
-        // Print
-        $("#tabulator-print-EH").on("click", function (event) {
-            tableContent.print();
+        $.ajax({
+            url: route('agent.employment.list'),
+            type: 'GET',
+            data: { applicantId: $host.attr('data-applicant') || '0', status: 1, size: true },
+            success: function (res) { _render(res && res.data ? res.data : []); },
+            error: function () { _render([]); },
         });
     };
+
     return {
         init: function () {
             _tableGen();
@@ -301,44 +174,11 @@ var employmentHistoryTable = (function () {
         if($('#educationQualTable').hasClass('activeTable')){
             educationQualTable.init();
         }
-        // Filter function
-        function filterHTMLFormEQ() {
-            educationQualTable.init();
-        }
-
-        // On click go button
-        $("#tabulator-html-filter-go-EQ").on("click", function (event) {
-            filterHTMLFormEQ();
-        });
-
-        // On reset filter form
-        $("#tabulator-html-filter-reset-EQ").on("click", function (event) {
-            $("#query-EQ").val("");
-            $("#status-EQ").val("1");
-            filterHTMLFormEQ();
-        });
     }
     if($('#employmentHistoryTable').length > 0){
         if($('#employmentHistoryTable').hasClass('activeTable')){
             employmentHistoryTable.init();
         }
-
-        // Filter function
-        function filterHTMLFormEH() {
-            employmentHistoryTable.init();
-        }
-
-        // On click go button
-        $("#tabulator-html-filter-go-EH").on("click", function (event) {
-            filterHTMLFormEH();
-        });
-
-        // On reset filter form
-        $("#tabulator-html-filter-reset-EH").on("click", function (event) {
-            $("#query-EH").val("");
-            $("#status-EH").val("1");
-            filterHTMLFormEH();
-        });
     }
 
 
@@ -347,12 +187,10 @@ var employmentHistoryTable = (function () {
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     const errorModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#errorModal"));
-    const addressModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addressModal"));
 
     const addEmployementHistoryModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addEmployementHistoryModal"));
     const editEmployementHistoryModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editEmployementHistoryModal"));
             
-    let confModalDelTitle = 'Are you sure?';
 
     const addQualificationModalEl = document.getElementById('addQualificationModal')
     addQualificationModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -389,12 +227,6 @@ var employmentHistoryTable = (function () {
         $('#editEmployementHistoryModal .modal-footer input[name="ref_id"]').val('0');
     });
 
-    const addressModalEl = document.getElementById('addressModal')
-    addressModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#addressModal .acc__input-error').html('');
-        $('#addressModal input').val('');
-    });
-
     let applicationDatepickerOpt = {
         autoApply: true,
         singleMode: true,
@@ -416,7 +248,103 @@ var employmentHistoryTable = (function () {
             element: this,
             ...applicationDatepickerOpt,
         });
-    })
+    });
+
+    /* Month-only Litepicker for the employment dates (MM-YYYY, which is what
+       the column holds). Litepicker has no month mode; as the attendance
+       report does, the day grid is hidden and a twelve-button month grid is
+       drawn in its place. The input keeps its 00-0000 mask, so typing still
+       works, and the picker re-reads the box each time it opens so a value
+       set by the edit flow is reflected. */
+    ;(function(){
+        var $fields = $('.applicationMonthpicker');
+        if(!$fields.length) return;
+
+        var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        var parse = function(v){
+            var m = String(v || '').trim().match(/^(\d{1,2})-(\d{4})$/);
+            if(!m) return null;
+            return {month: Math.min(Math.max(parseInt(m[1], 10), 1), 12) - 1, year: parseInt(m[2], 10)};
+        };
+        var fmt = function(p){ return String(p.month + 1).padStart(2, '0') + '-' + p.year; };
+
+        $fields.each(function(){
+            var input = this;
+            var noFuture = input.hasAttribute('data-no-future');
+            var today = new Date();
+
+            var draw = function(picker){
+                if(!picker.ui) return;
+                picker.ui.classList.add('attendance-month-litepicker', 'apd-month-litepicker');
+                var item = picker.ui.querySelector('.month-item');
+                if(!item) return;
+
+                var cal = picker.calendars && picker.calendars[0];
+                var year = cal ? cal.getFullYear() : today.getFullYear();
+                var sel = parse(input.value);
+
+                var grid = item.querySelector('.attendance-month-grid');
+                if(!grid){ grid = document.createElement('div'); grid.className = 'attendance-month-grid'; item.appendChild(grid); }
+                grid.innerHTML = '';
+
+                MONTHS.forEach(function(name, idx){
+                    var b = document.createElement('button');
+                    b.type = 'button'; b.className = 'attendance-month-option'; b.textContent = name;
+                    if(sel && sel.month === idx && sel.year === year) b.classList.add('is-active');
+                    var future = year > today.getFullYear() || (year === today.getFullYear() && idx > today.getMonth());
+                    if(noFuture && future){
+                        b.classList.add('is-disabled'); b.disabled = true;
+                    }else{
+                        b.addEventListener('click', function(){
+                            picker.setDate(new Date(year, idx, 1));
+                            input.value = fmt({month: idx, year: year});
+                            /* native event: the IMask on the field listens for it */
+                            input.dispatchEvent(new Event('input', {bubbles: true}));
+                            picker.hide();
+                        });
+                    }
+                    grid.appendChild(b);
+                });
+
+                var yearField = picker.ui.querySelector('.month-item-year');
+                if(yearField && !yearField.dataset.apdMonthBound){
+                    yearField.dataset.apdMonthBound = '1';
+                    yearField.addEventListener('change', function(){
+                        var y = parseInt(yearField.value, 10);
+                        if(!isNaN(y)){ picker.gotoDate(new Date(y, 0, 1)); draw(picker); }
+                    });
+                }
+            };
+
+            new Litepicker({
+                element: input,
+                autoApply: true,
+                singleMode: true,
+                numberOfColumns: 1,
+                numberOfMonths: 1,
+                showWeekNumbers: false,
+                format: 'MM-YYYY',
+                switchingMonths: 12,
+                maxDate: noFuture ? today : null,
+                dropdowns: { minYear: 1950, maxYear: today.getFullYear() + 5, months: false, years: true },
+                setup: function(picker){
+                    picker.on('show', function(){
+                        var sel = parse(input.value);
+                        if(sel){
+                            picker.setDate(new Date(sel.year, sel.month, 1));
+                            picker.gotoDate(new Date(sel.year, sel.month, 1));
+                        }else{
+                            picker.clearSelection();
+                            picker.gotoDate(today);
+                        }
+                        draw(picker);
+                    });
+                    picker.on('change:month', function(){ draw(picker); });
+                    picker.on('change:year', function(){ draw(picker); });
+                },
+            });
+        });
+    })();
 
     let tomOptions = {
         plugins: {
@@ -459,6 +387,31 @@ var employmentHistoryTable = (function () {
         }else{
             $('.form-wizard .wizard-fieldset.wizard-last-step .form-wizard-next-btn').attr('disabled', 'disabled');
         }
+    });
+
+    /* Clear a field's validation message the moment the applicant corrects it.
+       The error handler writes each message into `.error-<field>` and reddens
+       `.<field>`, both keyed off the input's name, so the same name is used to
+       clear them. Delegated, so it covers fields inside panels that are shown
+       later and rows added after load. `disability_id[]` reports as
+       `disability_id`, hence the trailing-brackets trim. */
+    const clearFieldValidation = function (el) {
+        const $el = $(el);
+        const $form = $el.closest('.wizard-step-form');
+        if (!$form.length) return;
+
+        let key = ($el.attr('name') || $el.attr('id') || '').replace(/\[\]$/, '');
+        if (!key) return;
+
+        $form.find('.error-' + key).html('');
+        $form.find('.' + key).removeClass('border-danger');
+        $el.removeClass('border-danger');
+        // Tom Select keeps the original <select>; the red class sits on its wrapper.
+        $el.closest('.ts-control').removeClass('border-danger');
+    };
+
+    $(document).on('input keyup change', '.wizard-step-form :input', function () {
+        clearFieldValidation(this);
     });
 
     $('.form-wizard-next-btn').on('click', function () {
@@ -542,6 +495,23 @@ var employmentHistoryTable = (function () {
                         $(`#${formID} .${key}`).addClass('border-danger');
                         $(`#${formID}  .error-${key}`).html(val);
                     }
+                    /* The messages sit by their fields, which may be well above the
+                       button that was pressed: bring the first one into view and put
+                       the cursor in its field. */
+                    const filled = $(`#${formID} .acc__input-error`).filter(function () { return $(this).text().trim() !== ''; });
+                    const firstError = filled.filter(function () { return this.offsetParent !== null; }).first();
+                    /* the field block (label, control, message) when the message is visible;
+                       an error inside a collapsed section goes to its nearest visible container */
+                    let target = firstError.length
+                        ? (firstError.closest('.apd-field').get(0) || firstError.parent().get(0))
+                        : filled.first().parents().filter(function () { return this.offsetParent !== null; }).first().get(0);
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        /* plain inputs get the cursor; Tom Selects are left alone, focusing one opens it */
+                        const key = ((firstError.attr('class') || '').match(/error-([\w-]+)/) || [])[1];
+                        const control = key ? (document.getElementById(key) || $(`#${formID} .${key}`).get(0)) : null;
+                        if (control && !control.tomselect && control.offsetParent !== null && /^(INPUT|TEXTAREA|SELECT)$/.test(control.tagName)) { try { control.focus({ preventScroll: true }); } catch (e) {} }
+                    }
                 }else{
                     console.log(textStatus+' => '+errorThrown);
                 }
@@ -582,8 +552,8 @@ var employmentHistoryTable = (function () {
                             if (response.status == 200) {
                                 $('.reviewLoader', $lastStep).fadeOut('fast', function(){
                                     $('.reviewContentWrap', $lastStep).fadeIn('fast', function(){
+                                        /* native <details> sections: no accordion script needed */
                                         $('.reviewContent', $lastStep).html(response.data.htmls);
-                                        const applicantReviewAccordion = tailwind.Accordion.getOrCreateInstance(document.querySelector("#applicantReviewAccordion"));
                                         createIcons({
                                             icons,
                                             "stroke-width": 1.5,
@@ -631,7 +601,16 @@ var employmentHistoryTable = (function () {
         $('.courseLoading').show();
         let SelectedValue = $(this).val();
         //woorking all here get the venues
+        const $opt = $(this).find('option[value="' + SelectedValue + '"]');
+        const optFees = parseFloat($opt.data('fees'));
+        const optStart = $opt.data('start');
+        if (SelectedValue !== "") {
+            $('.courseFee').text(!isNaN(optFees) && optFees > 0 ? '£' + optFees.toLocaleString('en-GB', {maximumFractionDigits: 0}) : '—');
+            $('.courseStart').text(optStart ? optStart : '—');
+            $('.apd-course-meta').css('display', 'grid');
+        }
         if(SelectedValue=="") {
+            $('.apd-course-meta').hide();
             $('#selectVenue').fadeOut('fast', function(){
                 $('.courseLoading').hide();
             })
@@ -664,7 +643,7 @@ var employmentHistoryTable = (function () {
                     
                     if(venues.length>0) {
                         
-                        $('#selectVenue').fadeIn('fast', function(){
+                        $('#selectVenue').removeClass('hidden').css('display', 'grid').hide().fadeIn('fast', function(){
                             $('.courseLoading').hide();
                         })
                     } else {
@@ -693,11 +672,13 @@ var employmentHistoryTable = (function () {
             }).then((response) => {
                 if (response.status == 200) {
                     if(response.data.weekends == 1){
-                        $('.eveningWeekendWrap').fadeIn('fast', function(){
+                        $('.ewHint').text('This campus runs both weekday and evening/weekend timetables.');
+                        $('.eveningWeekendWrap').css('display', 'grid').hide().fadeIn('fast', function(){
                             $('[name="full_time"]', this).prop('checked', false).removeClass('onlyWeekends');
                         })
                     }else if(response.data.weekends == 2){
-                        $('.eveningWeekendWrap').fadeIn('fast', function(){
+                        $('.ewHint').text('This campus runs evening/weekend classes only.');
+                        $('.eveningWeekendWrap').css('display', 'grid').hide().fadeIn('fast', function(){
                             $('[name="full_time"]', this).prop('checked', true).addClass('onlyWeekends');
                         })
                     }else{
@@ -726,36 +707,34 @@ var employmentHistoryTable = (function () {
         }
     })
 
-    $('#disability_status').on('change', function(){
+    $(document).on('change', 'input[name="disability_status"]', function(){
         if($('#disability_status').prop('checked')){
             $('.disabilityItems').fadeIn('fast', function(){
                 $('.disabilityItems input[type="checkbox"]').prop('checked', false);
                 $('.disabilityAllowance').fadeOut();
-                $('.disabilityAllowance input[type="checkbox"]').prop('checked', false);
+                $('.disabilityAllowance input[value="0"]').prop('checked', true);
             });
         }else{
             $('.disabilityItems').fadeOut('fast', function(){
                 $('.disabilityItems input[type="checkbox"]').prop('checked', false);
                 $('.disabilityAllowance').fadeOut();
-                $('.disabilityAllowance input[type="checkbox"]').prop('checked', false);
+                $('.disabilityAllowance input[value="0"]').prop('checked', true);
             });
         }
     });
 
-    $('.disabilityItems input[type="checkbox"]').on('change', function(){
+    $(document).on('change', '.disabilityItems input[type="checkbox"]', function(){
         if($('.disabilityItems input[type="checkbox"]:checked').length > 0){
-            $('.disabilityAllowance').fadeIn('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
-            });
+            $('.disabilityAllowance').fadeIn('fast');
         }else{
             $('.disabilityAllowance').fadeOut('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
+                $('input[value="0"]', this).prop('checked', true);
             });
         }
     });
 
-    $('#is_edication_qualification').on('change', function(){
-        if($(this).prop('checked')){
+    $(document).on('change', 'input[name="is_edication_qualification"]', function(){
+        if($('#is_edication_qualification').prop('checked')){
             $('.qualificationAdder').fadeIn('fast');
             $('.educationQualificationTableWrap').fadeIn('fast', function(){
                 educationQualTable.init();
@@ -763,8 +742,6 @@ var employmentHistoryTable = (function () {
         }else{
             $('.qualificationAdder').fadeOut('fast');
             $('.educationQualificationTableWrap').fadeOut('fast', function(){
-                $("#query-EQ").val("");
-                $("#status-EQ").val("1");
                 educationQualTable.init();
             });
         }
@@ -809,8 +786,8 @@ var employmentHistoryTable = (function () {
 
                 successModal.show();
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Congratulation!" );
-                    $("#successModal .successModalDesc").html('Eucation Qualification date successfully added.');
+                    $("#successModal .successModalTitle").html('Qualification added');
+                    $("#successModal .successModalDesc").html('It now appears in your qualifications list.');
                 });                
                     
             }
@@ -885,8 +862,8 @@ var employmentHistoryTable = (function () {
 
                 successModal.show();
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Congratulations!");
-                    $("#successModal .successModalDesc").html('Education Qualification data successfully updated.');
+                    $("#successModal .successModalTitle").html('Qualification updated');
+                    $("#successModal .successModalDesc").html('Your changes have been saved.');
                 });
             }
             educationQualTable.init();
@@ -922,8 +899,9 @@ var employmentHistoryTable = (function () {
 
         confirmModal.show();
         document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html(confModalDelTitle);
-            $('#confirmModal .confModDesc').html('Do you really want to delete these record? If yes then please click on the agree btn.');
+            $('#confirmModal .confModTitle').html('Remove this qualification?');
+            $('#confirmModal .confModDesc').html('This will delete it from your application. You can\u2019t undo this.');
+            $('#confirmModal .agreeWith').text('Yes, remove');
             $('#confirmModal .agreeWith').attr('data-id', rowID);
             $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
         });
@@ -936,8 +914,9 @@ var employmentHistoryTable = (function () {
 
         confirmModal.show();
         document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html(confModalDelTitle);
-            $('#confirmModal .confModDesc').html('Do you really want to restore these record? Click on agree to continue.');
+            $('#confirmModal .confModTitle').html('Restore this qualification?');
+            $('#confirmModal .confModDesc').html('It will be listed on your application again.');
+            $('#confirmModal .agreeWith').text('Yes, restore');
             $('#confirmModal .agreeWith').attr('data-id', courseID);
             $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
         });
@@ -962,8 +941,8 @@ var employmentHistoryTable = (function () {
 
                     successModal.show();
                     document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('WOW!');
-                        $('#successModal .successModalDesc').html('Record successfully deleted from DB row.');
+                        $('#successModal .successModalTitle').html('Removed');
+                        $('#successModal .successModalDesc').html('The record has been deleted from your application.');
                     });
                 }
                 educationQualTable.init();
@@ -982,8 +961,8 @@ var employmentHistoryTable = (function () {
 
                     successModal.show();
                     document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('WOW!');
-                        $('#successModal .successModalDesc').html('Record Successfully Restored!');
+                        $('#successModal .successModalTitle').html('Restored');
+                        $('#successModal .successModalDesc').html('The record is listed on your application again.');
                     });
                 }
                 educationQualTable.init();
@@ -1003,79 +982,6 @@ var employmentHistoryTable = (function () {
             employmentHistoryTable.init();
         }
     });
-
-    $('.addressPopupToggler').on('click', function(e){
-        e.preventDefault();
-        var $btn = $(this);
-        var wrapid = $btn.attr('data-address-wrap');
-        var prefix = $btn.attr('data-prefix');
-
-        $('#addressModal input[name="place"]').val(wrapid);
-        $('#addressModal input[name="prefix"]').val(prefix);
-        if($(wrapid).hasClass('active')){
-            $('#addressModal #student_address_address_line_1').val($(wrapid+' input[name="'+prefix+'_address_line_1"]').val());
-            $('#addressModal #student_address_address_line_2').val($(wrapid+' input[name="'+prefix+'_address_line_2"]').val());
-            $('#addressModal #student_address_city').val($(wrapid+' input[name="'+prefix+'_address_city"]').val());
-            $('#addressModal #student_address_state_province_region').val($(wrapid+' input[name="'+prefix+'_address_state"]').val());
-            $('#addressModal #student_address_postal_zip_code').val($(wrapid+' input[name="'+prefix+'_address_postal_zip_code"]').val());
-            $('#addressModal #student_address_country').val($(wrapid+' input[name="'+prefix+'_address_country"]').val());
-        }
-    });
-
-    $('#addressForm').on('submit', function(e){
-        e.preventDefault();
-        var $form = $(this);
-        var wrapid = $('input[name="place"]', $form).val();
-        var prefix = $('input[name="prefix"]', $form).val();
-
-        document.querySelector('#insertAddress').setAttribute('disabled', 'disabled');
-        document.querySelector('#insertAddress svg').style.cssText = 'display: inline-block;';
-
-        var err = 0;
-        $('input.required', $form).each(function(){
-            if($(this).val() == ''){
-                $(this).siblings('.acc__input-error').html('This field is required.');
-                err += 1;
-            }else{
-                $(this).siblings('.acc__input-error').html('');
-            }
-        });
-
-        if(err > 0){
-            document.querySelector('#insertAddress').removeAttribute('disabled');
-            document.querySelector('#insertAddress svg').style.cssText = 'display: none;';
-        }else{
-            document.querySelector('#insertAddress').removeAttribute('disabled');
-            document.querySelector('#insertAddress svg').style.cssText = 'display: none;';
-
-            var htmls = '';
-            htmls += '<span class="text-slate-600 font-medium">'+$('#student_address_address_line_1', $form).val()+'</span><br/>';
-            if($('#student_address_address_line_2', $form).val() != ''){
-                htmls += '<span class="text-slate-600 font-medium">'+$('#student_address_address_line_2', $form).val()+'</span><br/>';
-            }
-            htmls += '<span class="text-slate-600 font-medium">'+$('#student_address_city', $form).val()+'</span>, ';
-            if($('#student_address_state_province_region', $form).val() != ''){
-                htmls += '<span class="text-slate-600 font-medium">'+$('#student_address_state_province_region', $form).val()+'</span>, <br/>';
-            }else{
-                htmls += '<br/>';
-            }
-            htmls += '<span class="text-slate-600 font-medium">'+$('#student_address_postal_zip_code', $form).val()+'</span>,<br/>';
-            htmls += '<span class="text-slate-600 font-medium">'+$('#student_address_country', $form).val()+'</span><br/>';
-
-            htmls += '<input type="hidden" name="'+prefix+'_address" value="'+$('#student_address_address_line_1', $form).val()+'"/>';
-            htmls += '<input type="hidden" name="'+prefix+'_address_line_1" value="'+($('#student_address_address_line_1', $form).val() != '' ? $('#student_address_address_line_1', $form).val() : '')+'"/>';
-            htmls += '<input type="hidden" name="'+prefix+'_address_line_2" value="'+($('#student_address_address_line_2', $form).val() != '' ? $('#student_address_address_line_2', $form).val() : '')+'"/>';
-            htmls += '<input type="hidden" name="'+prefix+'_address_city" value="'+($('#student_address_city', $form).val() != '' ? $('#student_address_city', $form).val() : '')+'"/>';
-            htmls += '<input type="hidden" name="'+prefix+'_address_state" value="'+($('#student_address_state_province_region', $form).val() != '' ? $('#student_address_state_province_region', $form).val() : '')+'"/>';
-            htmls += '<input type="hidden" name="'+prefix+'_address_postal_zip_code" value="'+($('#student_address_postal_zip_code', $form).val() != '' ? $('#student_address_postal_zip_code', $form).val() : '')+'"/>';
-            htmls += '<input type="hidden" name="'+prefix+'_address_country" value="'+($('#student_address_country', $form).val() != '' ? $('#student_address_country', $form).val() : '')+'"/>';
-
-            addressModal.hide();
-            $(wrapid).fadeIn().html(htmls).addClass('active');
-            $('button[data-address-wrap="'+wrapid+'"] span').html('Update Address')
-        }
-    });
-
 
     $('#addEmployementHistoryForm input[name="continuing"]').on('change', function(){
         if($(this).prop('checked')){
@@ -1118,8 +1024,8 @@ var employmentHistoryTable = (function () {
 
                 successModal.show();
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Congratulation!" );
-                    $("#successModal .successModalDesc").html('Employment History date successfully added.');
+                    $("#successModal .successModalTitle").html('Employment added');
+                    $("#successModal .successModalDesc").html('It now appears in your employment history.');
                 });                
                     
             }
@@ -1166,35 +1072,14 @@ var employmentHistoryTable = (function () {
                     $('#editEmployementHistoryModal input[name="end_date"]').val(dataset.end_date ? dataset.end_date : '').removeAttr('disabled');
                 }
 
-                if(dataset.address_line_1 != '' || dataset.city != '' || dataset.post_code != '' || dataset.country != ''){
-                    var htmls = '';
-                    htmls += '<span class="text-slate-600 font-medium">'+dataset.address_line_1+'</span><br/>';
-                    if(dataset.address_line_2 != ''){
-                        htmls += '<span class="text-slate-600 font-medium">'+dataset.address_line_2+'</span><br/>';
-                    }
-                    htmls += '<span class="text-slate-600 font-medium">'+dataset.city+'</span>, ';
-                    if(dataset.state != ''){
-                        htmls += '<span class="text-slate-600 font-medium">'+dataset.state+'</span>, <br/>';
-                    }else{
-                        htmls += '<br/>';
-                    }
-                    htmls += '<span class="text-slate-600 font-medium">'+dataset.post_code+'</span>,<br/>';
-                    htmls += '<span class="text-slate-600 font-medium">'+dataset.country+'</span><br/>';
-
-                    htmls += '<input type="hidden" name="employment_address" value="'+dataset.address_line_1+'"/>';
-                    htmls += '<input type="hidden" name="employment_address_line_1" value="'+(dataset.address_line_1 != '' ? dataset.address_line_1 : '')+'"/>';
-                    htmls += '<input type="hidden" name="employment_address_line_2" value="'+(dataset.address_line_2 != '' ? dataset.address_line_2 : '')+'"/>';
-                    htmls += '<input type="hidden" name="employment_address_city" value="'+(dataset.city != '' ? dataset.city : '')+'"/>';
-                    htmls += '<input type="hidden" name="employment_address_state" value="'+(dataset.state != '' ? dataset.state : '')+'"/>';
-                    htmls += '<input type="hidden" name="employment_address_postal_zip_code" value="'+(dataset.post_code != '' ? dataset.post_code : '')+'"/>';
-                    htmls += '<input type="hidden" name="employment_address_country" value="'+(dataset.country != '' ? dataset.country : '')+'"/>';
-
-                    $('#editEmpHistoryAddress').fadeIn().html(htmls).addClass('active');
-                    $('#editEmployementHistoryModal .addressPopupToggler span').html('Update Address');
-                }else{
-                    $('#editEmpHistoryAddress').fadeOut().html('').removeClass('active');
-                    $('#editEmployementHistoryModal .addressPopupToggler span').html('Add Address');
-                }
+                /* The address is an inline, editable block now, so fill the real
+                   inputs rather than painting a read-only summary. */
+                $('#editEmployementHistoryModal input[name="employment_address_line_1"]').val(dataset.address_line_1 || '');
+                $('#editEmployementHistoryModal input[name="employment_address_line_2"]').val(dataset.address_line_2 || '');
+                $('#editEmployementHistoryModal input[name="employment_address_city"]').val(dataset.city || '');
+                $('#editEmployementHistoryModal input[name="employment_address_state"]').val(dataset.state || '');
+                $('#editEmployementHistoryModal input[name="employment_address_postal_zip_code"]').val(dataset.post_code || '');
+                $('#editEmployementHistoryModal input[name="employment_address_country"]').val(dataset.country || 'United Kingdom');
 
                 $('#editEmployementHistoryModal input[name="contact_name"]').val(dataset.reference[0].name ? dataset.reference[0].name : '');
                 $('#editEmployementHistoryModal input[name="contact_position"]').val(dataset.reference[0].position ? dataset.reference[0].position : '');
@@ -1234,8 +1119,8 @@ var employmentHistoryTable = (function () {
 
                 successModal.show();
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Congratulations!");
-                    $("#successModal .successModalDesc").html('Employment History data successfully updated.');
+                    $("#successModal .successModalTitle").html('Employment updated');
+                    $("#successModal .successModalDesc").html('Your changes have been saved.');
                 });
             }
             employmentHistoryTable.init();
@@ -1271,8 +1156,9 @@ var employmentHistoryTable = (function () {
 
         confirmModal.show();
         document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html(confModalDelTitle);
-            $('#confirmModal .confModDesc').html('Do you really want to delete these record? If yes then please click on the agree btn.');
+            $('#confirmModal .confModTitle').html('Remove this employment entry?');
+            $('#confirmModal .confModDesc').html('This will delete it from your application. You can\u2019t undo this.');
+            $('#confirmModal .agreeWith').text('Yes, remove');
             $('#confirmModal .agreeWith').attr('data-id', rowID);
             $('#confirmModal .agreeWith').attr('data-action', 'DELETEEH');
         });
@@ -1285,8 +1171,9 @@ var employmentHistoryTable = (function () {
 
         confirmModal.show();
         document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html(confModalDelTitle);
-            $('#confirmModal .confModDesc').html('Do you really want to restore these record? Click on agree to continue.');
+            $('#confirmModal .confModTitle').html('Restore this employment entry?');
+            $('#confirmModal .confModDesc').html('It will be listed on your application again.');
+            $('#confirmModal .agreeWith').text('Yes, restore');
             $('#confirmModal .agreeWith').attr('data-id', courseID);
             $('#confirmModal .agreeWith').attr('data-action', 'RESTOREEH');
         });
@@ -1311,8 +1198,8 @@ var employmentHistoryTable = (function () {
 
                     successModal.show();
                     document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('WOW!');
-                        $('#successModal .successModalDesc').html('Record successfully deleted from DB row.');
+                        $('#successModal .successModalTitle').html('Removed');
+                        $('#successModal .successModalDesc').html('The record has been deleted from your application.');
                     });
                 }
                 employmentHistoryTable.init();
@@ -1331,8 +1218,8 @@ var employmentHistoryTable = (function () {
 
                     successModal.show();
                     document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('WOW!');
-                        $('#successModal .successModalDesc').html('Record Successfully Restored!');
+                        $('#successModal .successModalTitle').html('Restored');
+                        $('#successModal .successModalDesc').html('The record is listed on your application again.');
                     });
                 }
                 employmentHistoryTable.init();
@@ -1340,141 +1227,145 @@ var employmentHistoryTable = (function () {
                 console.log(error)
             });
         }
-    })
-    
-
-    $('#referral_code').on('keyup paste', function(){
-        var $input = $(this);
-        var $btn = $(this).siblings('#varifiedReferral');
-        var $orgStatusInput = $(this).siblings('.is_referral_varified');
-
-        var orgCode = $input.attr('data-org');
-        var code = $input.val();
-        var orgStatus = $orgStatusInput.attr('data-org');
-        var status = $orgStatusInput.val();
-        if(code != orgCode){
-            $btn.css({'display': 'inline-flex'});
-            $input.css({'border-color': 'red'});
-            $input.closest('form').find('.form-wizard-next-btn').attr('disabled', 'disabled');
-            $orgStatusInput.val('0');
-            status = 0;
-        }else if(code == orgCode){
-            $btn.fadeOut();
-            $input.css({'border-color': 'rgba(226, 232, 240, 1)'});
-            $input.closest('form').find('.form-wizard-next-btn').removeAttr('disabled');
-            $orgStatusInput.val(orgStatus);
-            status = orgStatus;
-        }else{
-            $input.val(orgCode)
-            $btn.fadeOut();
-            $input.css({'border-color': 'rgba(226, 232, 240, 1)'});
-            $input.closest('form').find('.form-wizard-next-btn').removeAttr('disabled');
-            $orgStatusInput.val(orgStatus);
-            status = orgStatus;
-        }
     });
 
-    $('#varifiedReferral').on('click', function(e){
-        e.preventDefault();
-        var $btn = $(this);
-        var $input = $btn.siblings('#referral_code');
-        var $orgStatusInput = $btn.siblings('.is_referral_varified');
+    /* Referral code - the design's flow. One button reads "Verify code" until
+       the code checks out and "Change" afterwards; a notice under the field
+       carries the result; the box is locked while verified. The verify
+       endpoint is the only thing that writes the code (the step save never
+       touches the field), so "Change" clears it server-side too. The next
+       button is held while an unverified code sits in the box, because that
+       code would otherwise be lost silently on save. */
+    ;(function(){
+        var $input = $('#referral_code');
+        if(!$input.length) return;
+        var $btn = $input.siblings('#varifiedReferral');
+        var $flag = $input.siblings('.is_referral_varified');
+        var $notice = $input.closest('.apd-field').find('.apd-referral-notice');
+        var $next = $input.closest('form').find('.form-wizard-next-btn');
+                /* Resolved when clicked, not at load: a route missing from Ziggy's list
+           would otherwise throw here and unbind every handler below. */
+        var url = function(name){
+            try { return route(name); }
+            catch (err) { console.error('referral: route not available -', name, err); return null; }
+        };
+        var verifyRoute = 'agent.application.verify.referral.code';
+        var clearRoute = 'agent.application.clear.referral.code';
+        var csrf = {headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}};
 
-        if(!$btn.hasClass('verified')){
+        var isVerified = function(){ return $btn.hasClass('verified'); };
+
+        var notice = function(tone, html){
+            $notice.removeClass('apd-notice apd-notice--ok apd-notice--bad');
+            if(!tone){ $notice.html(''); return; }
+            $notice.addClass('apd-notice apd-notice--' + tone).html(html);
+        };
+
+        var render = function(){
+            var code = $.trim($input.val());
+            if(isVerified()){
+                $input.attr('readonly', 'readonly');
+                $btn.text('Change').removeAttr('disabled');
+                $next.removeAttr('disabled');
+            }else{
+                $input.removeAttr('readonly');
+                $btn.text('Verify code');
+                if(code === ''){ $btn.attr('disabled', 'disabled'); $next.removeAttr('disabled'); }
+                else { $btn.removeAttr('disabled'); $next.attr('disabled', 'disabled'); }
+            }
+        };
+
+        $input.on('input', function(){
+            if(isVerified()) return;
+            notice('');
+            render();
+        });
+
+        $btn.on('click', function(e){
+            e.preventDefault();
             var applicantId = $btn.attr('data-applicant-id');
-            var code = $btn.siblings('#referral_code').val();
             $btn.attr('disabled', 'disabled');
 
-            axios({
-                method: 'POST',
-                url: route('agent.application.verify.referral.code'),
-                data: {applicantId : applicantId, code : code},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                if (response.status == 200) {
-                    $input.closest('form').find('.form-wizard-next-btn').removeAttr('disabled');
-                    if(response.data.msg.suc == 1){
-                        $btn.removeAttr('disabled').html('<i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Verified').removeClass('btn-danger').addClass('btn-primary verified');
-                        $input.css({'border-color': 'rgba(226, 232, 240, 1)'}).attr('data-org', response.data.msg.code).attr('readonly', 'readonly');
-                        $orgStatusInput.val(response.data.msg.is_referral_varified).attr('data-org', response.data.msg.is_referral_varified);
-                        $input.parent('.validationGroup').siblings('.error-verificationError').html('');
+            if(isVerified()){
+                var clearUrl = url(clearRoute);
+                if(!clearUrl){ notice('bad', 'We could not reach the server just now. Please try again.'); render(); return; }
+                axios.post(clearUrl, {applicantId: applicantId}, csrf)
+                    .then(function(){
+                        $btn.removeClass('verified');
+                        $input.val('').attr('data-org', '');
+                        $flag.val('0').attr('data-org', '0');
+                        notice('');
+                        render();
+                        $input.trigger('focus');
+                    })
+                    .catch(function(err){
+                        console.error('referral: clear failed', err);
+                        notice('bad', 'We could not clear the code just now' + (err && err.response ? ' (' + err.response.status + ')' : '') + '. Please try again.');
+                        render();
+                    });
+                return;
+            }
 
-                        createIcons({
-                            icons,
-                            "stroke-width": 1.5,
-                            nameAttr: "data-lucide",
-                        });
+            var code = $.trim($input.val()).toUpperCase();
+            var verifyUrl = url(verifyRoute);
+            if(!verifyUrl){ notice('bad', 'We could not reach the server just now. Please try again.'); render(); return; }
+            axios.post(verifyUrl, {applicantId: applicantId, code: code}, csrf)
+                .then(function(response){
+                    var msg = (response.data && response.data.msg) || {};
+                    if(msg.suc == 1){
+                        $btn.addClass('verified');
+                        $input.val(msg.code).attr('data-org', msg.code);
+                        $flag.val('1').attr('data-org', '1');
+                        notice('ok', 'Verified &mdash; ' + $('<i></i>').text(msg.owner || msg.code).html() + '. Your application will be linked to this referrer.');
                     }else{
-                        $btn.fadeOut().removeAttr('disabled');
-                        $input.val('').css({'border-color': 'rgba(226, 232, 240, 1)'});
-                        $orgStatusInput.val('0');
-                        $input.parent('.validationGroup').siblings('.error-verificationError').html('Referral code does not match. Please insert a valid one.')
+                        notice('bad', 'We could not find that code. Check it with whoever gave it to you, or leave it blank.');
                     }
+                    render();
+                })
+                .catch(function(err){
+                    console.error('referral: verify failed', err);
+                    notice('bad', 'We could not check that code just now' + (err && err.response ? ' (' + err.response.status + ')' : '') + '. Please try again.');
+                    render();
+                });
+        });
 
-                    setTimeout(function(){
-                        $input.parent('.validationGroup').siblings('.error-verificationError').html('');
-                    }, 2000)
-                }
-            }).catch(error =>{
-                if (error.response){
-                    console.log(error)
-                }
-            });
-        }
-    })
+        render();
+    })();
 
     $('#student_loan').on('change', function(){
         var $this = $(this);
         if($this.val() == 'Others'){
-            $('.studentLoanEnglandFunding').fadeOut('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
-            })
-            $('.studentLoanFundReceipt').fadeOut('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
-            })
-            $('.studentLoanApplied').fadeOut('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
-            })
+            $('.studentLoanPanel').fadeOut('fast');
+            $('.studentLoanEnglandFunding, .studentLoanFundReceipt, .studentLoanApplied')
+                .hide().find('input[type="radio"]').prop('checked', false);
             $('.otherFundings').fadeIn('fast', function(){
                 $('input', this).val('');
             })
         }else if($this.val() == 'Student Loan'){
-            $('.studentLoanEnglandFunding').fadeIn('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
-            })
-            $('.studentLoanFundReceipt').fadeOut('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
-            })
-            $('.studentLoanApplied').fadeIn('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
-            })
+            $('.studentLoanPanel').css('display', 'grid').hide().fadeIn('fast');
+            $('.studentLoanEnglandFunding, .studentLoanApplied').css('display', 'grid')
+                .find('input[type="radio"]').prop('checked', false);
+            $('.studentLoanFundReceipt').hide().find('input[type="radio"]').prop('checked', false);
             $('.otherFundings').fadeOut('fast', function(){
                 $('input', this).val('');
             })
         }else{
-            $('.studentLoanEnglandFunding').fadeOut('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
-            })
-            $('.studentLoanFundReceipt').fadeOut('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
-            })
-            $('.studentLoanApplied').fadeOut('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
-            })
+            $('.studentLoanPanel').fadeOut('fast');
+            $('.studentLoanEnglandFunding, .studentLoanFundReceipt, .studentLoanApplied')
+                .hide().find('input[type="radio"]').prop('checked', false);
             $('.otherFundings').fadeOut('fast', function(){
                 $('input', this).val('');
             })
         }
     })
 
-    $('#student_finance_england').on('change', function(){
-        if($(this).prop('checked')){
-            $('.studentLoanFundReceipt').fadeIn('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
-            })
+    $(document).on('change', 'input[name="student_finance_england"]', function(){
+        if($('#student_finance_england').prop('checked')){
+            $('.studentLoanFundReceipt').css('display', 'grid').hide().fadeIn('fast')
+                .find('input[type="radio"]').prop('checked', false);
         }else{
             $('.studentLoanFundReceipt').fadeOut('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
+                $('input[type="radio"]', this).prop('checked', false);
             })
         }
     })

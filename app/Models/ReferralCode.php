@@ -43,4 +43,23 @@ class ReferralCode extends Model
     public function agentUser(){
         return $this->belongsTo(AgentUser::class, 'agent_user_id');
     }
+
+    /**
+     * Who the code belongs to, for the applicant's "Verified - ..." line.
+     * Agent codes almost all carry agent_user_id (the agency, named by its
+     * organisation); the two oldest carry a staff user_id instead. Student
+     * codes name the student.
+     */
+    public function getOwnerNameAttribute(){
+        if($this->agent_user_id && ($agent = optional($this->agentUser)->agent)){
+            return $agent->organization ?: trim($agent->first_name.' '.$agent->last_name);
+        }
+        if($this->student_id && $this->student){
+            return trim($this->student->first_name.' '.$this->student->last_name);
+        }
+        if($this->user_id && $this->user){
+            return $this->user->name;
+        }
+        return '';
+    }
 }

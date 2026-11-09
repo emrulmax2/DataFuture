@@ -5,441 +5,188 @@
 @endsection
 
 @section('subcontent')
-    <div id="agentDashboard" class="grid grid-cols-12 gap-6">
-        {{-- <div class="col-span-12 2xl:col-span-9">
-            <div class="grid grid-cols-12 gap-6 mt-3 2xl:mt-8">
-                <!-- BEGIN: General Report -->
-                <div class="col-span-12 lg:col-span-12 xl:col-span-8 mt-2">
-                    <div class="intro-y block sm:flex items-center h-10">
-                        <h2 class="text-lg font-medium truncate mr-5">Welcome <u> Agent Jhon Smith</u></h2>
-                    
-                    </div>
-                    <div class="report-box-2 intro-y mt-12 sm:mt-5">
-                        <div class="box sm:flex">
-                            <div class="px-8 py-12 flex flex-col justify-center flex-1">
-                                <div class="w-30 h-30 flex-none image-fit rounded-full overflow-hidden">
-                                    <img alt="Jhon Smith" class="rounded-full" src=" {{ asset('build/assets/images/avater.png') }}">
-                                </div>
-                                <div class="relative text-3xl font-medium mt-5">
-                                    Jhon Smith
-                                </div>
-                                <div class="mt-4 text-slate-500">
-                                    
-                                    House-223</span><br/>
-                                    Barclay Hall</span><br/>
-                                    London City</span>, 
-                                    London State</span>, 
-                                    Ey68G</span>,<br/>
-                                    United Kingdom</span><br/>
-                                        
-                                </div>
-                            </div>
-                            <div class="px-8 py-12 flex flex-col justify-center flex-1 border-t sm:border-t-0 sm:border-l border-slate-200 dark:border-darkmode-300 border-dashed">
-                                <div class="text-slate-500 text-xs">Email</div>
-                                <div class="mt-1.5 flex items-center">
-                                    <div class="text-base">
-                                        agent1email@xmail.com<br/>
-                                    </div>
-                                </div>
-                                <div class="text-slate-500 text-xs mt-5">Mobile</div>
-                                <div class="mt-1.5 flex items-center">
-                                    <div class="text-base">+898092222</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- END: General Report -->
-                <!-- BEGIN: Important Notes -->
-                <div class="col-span-12 sm:col-span-6 lg:col-span-4 xl:col-span-4 mt-2">
-                    <div class="intro-x flex items-center h-10">
-                        <h2 class="text-lg font-medium truncate mr-auto">Today's Application</h2>
-                        <div class="sm:ml-auto mt-3 sm:mt-0 relative text-slate-500">
-                            <i class="w-4 h-4 z-10 absolute my-auto inset-y-0 ml-3 left-0" data-lucide="calendar-days"></i>
-                            <input id="tutor-calendar-date" value="{{ date('d-m-Y') }}" type="text" class="form-control sm:w-56 box pl-10 " placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true">
-                            <input name="tutor_id" value="{{ $user->id }}" type="hidden" />
-                        </div>
-                        
-                    </div>  
-                    <div id="todays-application">
-                            <div class="mt-5 intro-x">
-                                <div class="box zoom-in">
-                                    <div class="pt-5 px-5 flex items-center">
-                                        <div class="ml-0 mr-auto">
-                                            <div class="text-base font-medium truncate w-full relative">Mr. Siman Tech</div>
-                                            <div class="text-slate-400 mt-1">HND IN BUSINESS</div>
-                                            <div class="text-slate-400 mt-1">2022-MAY</div>
-                                        </div>
-                                        <div class="rounded-full text-lg bg-success text-white cursor-pointer font-medium w-12 h-10 inline-flex justify-center items-center">1</div>
-                                        
-                                    </div>
-                                    <div class="mt-5 px-5 pb-5 flex font-medium justify-center">
-                                        <a data-tw-toggle="modal" data-id="" data-tw-target="#editApplicationDeteilsModal" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Start Apply</a>
-                                
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mt-5 intro-x">
-                                <div class="box zoom-in">
-                                    <div class="pt-5 px-5 flex items-center">
-                                        <div class="ml-0 mr-auto">
-                                            <div class="text-base font-medium truncate w-full relative">Ms. Jamon Park</div>
-                                            <div class="text-slate-400 mt-1">HND IN BUSINESS</div>
-                                            <div class="text-slate-400 mt-1">2022-MAY</div>
-                                        </div>
-                                        <div class="rounded-full text-lg bg-success text-white cursor-pointer font-medium w-12 h-10 inline-flex justify-center items-center">2</div>
-                                        
-                                    </div>
-                                    <div class="mt-5 px-5 pb-5 flex font-medium justify-center">
-                                        <a data-tw-toggle="modal" data-id="" data-tw-target="#editApplicationDeteilsModal" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Start Apply</a>
-                                   
-                                    </div>
-                                </div>
-                            </div>
-                    </div>
-                </div>
-                <!-- END: Important Notes -->
+    @php
+        $tone = function ($status) {
+            return match ($status) {
+                'In Progress' => 'amber',
+                'Awating Decision', 'Awaiting Decision', 'Offer Placed' => 'blue',
+                'Accepted', 'Offer Accepted' => 'green',
+                'Rejected', 'Offer Rejected', 'Canceled' => 'red',
+                default => 'muted',
+            };
+        };
+    @endphp
+
+    {{-- The pending verification records, for the side column. One renderer
+         (agent-dahsboard.js) draws them on load and after every add, verify,
+         resend and remove, from the list those endpoints return. --}}
+    @php
+        /* @json splits its argument on commas (the second part is the flags),
+           so the shape is built here and the directive gets one variable. */
+        $agpChecks = $recentData->map(fn($c) => ['id' => $c->id, 'first_name' => $c->first_name, 'last_name' => $c->last_name, 'email' => $c->email, 'mobile' => $c->mobile, 'email_verified_at' => $c->email_verified_at, 'mobile_verified_at' => $c->mobile_verified_at])->values();
+    @endphp
+    <script type="application/json" id="agpChecks">@json($agpChecks)</script>
+
+    @if(!$verified)
+        <div class="apd-notice apd-notice--warn">
+            <b>Verify your email address to add applicants</b>
+            <div>We sent a verification link to <b style="display:inline">{{ $user->email }}</b>. Check your Junk or Spam folder if you do not see it. Adding applicants and starting applications unlocks once the address is verified.</div>
+            <div class="apd-notice__actions">
+                <form id="resendverification" method="post" action="{{ route('agent.verification.send') }}">
+                    @csrf
+                    <button type="submit" class="apd-btn apd-btn--ghost apd-btn--sm">Resend verification email</button>
+                </form>
             </div>
-        </div> --}}
-        @if (\Session::has('errors'))
-        <div role="alert" class="alert relative border rounded-md px-5 py-4 bg-pending border-pending text-white dark:border-pending mb-2 flex items-center"><i data-tw-merge data-lucide="alert-triangle" class="stroke-1.5 w-5 h-5 mr-2 h-6 w-6 mr-2 h-6 w-6"></i>
-            {!! \Session::get('errors') !!}
-            <button data-tw-merge data-tw-dismiss="alert" type="button" aria-label="Close" type="button" aria-label="Close" class="text-slate-800 py-2 px-3 absolute right-0 my-auto mr-2 btn-close"><i data-tw-merge data-lucide="x" class="stroke-1.5 w-5 h-5 h-4 w-4 h-4 w-4"></i></button>
         </div>
-        @endif
-        <div class="col-span-12 xl:col-span-9 2xl:col-span-9 box p-10 my-10">
-            <div class="col-span-12 w-full flex">
-                <h2 class="text-lg font-medium mr-auto">My Applicants</h2>
-                @if ($user->email_verified_at != NULL)
-                <div id="term-dropdown" class="dropdown w-1/2 sm:w-auto ml-auto">
-                    {{-- <button id="selected-term" class="dropdown-toggle btn btn-primary text-white w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                        <i  data-lucide="file-text" class="w-4 h-4 mr-2 "></i> <i data-loading-icon="oval" class="w-4 h-4 mr-2 hidden"  data-color="white"></i> <span>2009 Sep HND</span> <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+    @endif
+
+    @if(session('verifymessage'))
+        <div class="apd-notice apd-notice--ok"><b>Email sent</b><div>{{ session('verifymessage') }}</div></div>
+    @endif
+    @if(session('verifySuccessMessage') || session('status'))
+        <div class="apd-notice apd-notice--ok"><div>{{ session('verifySuccessMessage') ?: session('status') }}</div></div>
+    @endif
+    @if(session('errors') && is_string(session('errors')))
+        <div class="apd-notice apd-notice--bad"><div>{{ session('errors') }}</div></div>
+    @endif
+
+    <section class="apd-hero" aria-label="Agent overview">
+        <div class="apd-hero__top">
+            <div style="display:grid;gap:8px">
+                <span class="apd-eyebrow" style="color:#9fb0ff">Agent dashboard</span>
+                <h1 class="apd-h1">My <em>applicants</em></h1>
+                <p class="apd-hero__sub">{{ $agentName }}@if($referralCode) &middot; referral code <span class="apd-mono" style="color:#fff">{{ $referralCode }}</span>@endif</p>
+            </div>
+            @if($verified)
+                <button type="button" class="apd-btn apd-btn--primary" data-tw-toggle="modal" data-tw-target="#addDeteilsModal">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                    Add new applicant
+                </button>
+            @else
+                <div class="apd-locked">
+                    <button type="button" class="apd-btn apd-btn--primary" disabled aria-disabled="true" title="Verify your email first">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
+                        Add new applicant
                     </button>
-                    <div class="dropdown-menu w-40">
-                        <ul class="dropdown-content">
-                            <li>
-                                <a  id="term-1" data-tutor_id=""  data-instance_term_id="" data-instance_term="" href="javascript:;" class="dropdown-item term-select  dropdown-active">
-                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> 2009 Sep HND
-                                </a>
-                            </li>
-                            
-                        </ul>
-                    </div> --}}
+                    <small>Verify your email address first &mdash; see the notice above.</small>
                 </div>
+            @endif
+        </div>
+        <div class="apd-hero__stats">
+            <div class="apd-hero__stat"><small>Submitted</small><b>{{ $stats['submitted'] }}</b></div>
+            <div class="apd-hero__stat"><small>Being processed</small><b>{{ $stats['processing'] }}</b></div>
+            <div class="apd-hero__stat"><small>Offers &amp; students</small><b>{{ $stats['offers'] }}</b></div>
+            <div class="apd-hero__stat"><small>Awaiting verification</small><b id="awaiting-count">{{ $stats['awaiting'] }}</b></div>
+            <div class="apd-hero__stat"><small>Total active applications</small><b>{{ $stats['active'] }}</b></div>
+        </div>
+    </section>
+
+    <div class="agp-cols">
+        <section class="agp-panel" style="min-width:0">
+            <div class="agp-panel__head">
+                <h3 class="apd-h3">My applicants</h3>
+                <button type="button" id="agpFilterToggle" class="apd-btn apd-btn--ghost apd-btn--sm" aria-expanded="false">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                    <span>Search &amp; filter</span>
+                </button>
+            </div>
+
+            {{-- Closed until asked for: the search box and the list both wait for the toggle / Search. --}}
+            <div id="agpSearchbox" class="agp-searchbox apd-form" style="display:none">
+                <div class="agp-grid-4">
+                    <div class="apd-field"><label for="application_no">Reference no</label><input id="application_no" type="text" class="apd-ctl" placeholder="e.g. 203412" autocomplete="off"></div>
+                    <div class="apd-field"><label for="query-CNTR">Name</label><input id="query-CNTR" type="text" class="apd-ctl" autocomplete="off"></div>
+                    <div class="apd-field"><label for="applicantEmail">Applicant email</label><input id="applicantEmail" type="text" class="apd-ctl" autocomplete="off"></div>
+                    <div class="apd-field"><label for="applicantPhone">Applicant phone</label><input id="applicantPhone" type="text" class="apd-ctl" autocomplete="off"></div>
+                    <div class="apd-field">
+                        <label for="semesters">Intake semester</label>
+                        <select id="semesters" class="lcc-tom-select agp-select" data-placeholder="All semesters">
+                            <option value="">All semesters</option>
+                            @foreach($semesters as $sem)<option value="{{ $sem->id }}">{{ $sem->name }}</option>@endforeach
+                        </select>
+                    </div>
+                    <div class="apd-field">
+                        <label for="courses">Course</label>
+                        <select id="courses" class="lcc-tom-select agp-select" data-placeholder="All courses">
+                            <option value="">All courses</option>
+                            @foreach($courses as $crs)<option value="{{ $crs->id }}">{{ $crs->name }}</option>@endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="apd-grid-2">
+                    <div class="apd-field">
+                        <label>Status</label>
+                        <div class="apd-opts" id="statusChips">
+                            @foreach($statuses as $st)<button type="button" class="agp-chip" data-value="{{ $st->id }}">{{ $st->name === 'Awating Decision' ? 'Awaiting Decision' : $st->name }}</button>@endforeach
+                        </div>
+                        <span class="apd-hint">By default, only submitted applications are listed. Pick Submitting to see drafts.</span>
+                    </div>
+                    <div class="apd-field">
+                        <label for="agents">Agent / sub-agents</label>
+                        <select id="agents" multiple class="lcc-tom-select agp-select agp-tags" data-placeholder="All agents and sub-agents">
+                            @foreach($agentOptions as $ag)<option value="{{ $ag['value'] }}">{{ $ag['label'] }}@if($ag['code']) [{{ $ag['code'] }}]@endif</option>@endforeach
+                        </select>
+                        <span class="apd-hint">Pick one or more. Leave empty for all of them.</span>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px">
+                    <button type="button" id="studentGroupSearchSubmitBtn" class="apd-btn apd-btn--primary apd-btn--sm">Search</button>
+                    <button type="button" id="agpResetBtn" class="apd-btn apd-btn--ghost apd-btn--sm">Reset</button>
+                </div>
+            </div>
+
+            <div id="agpListIntro" class="agp-empty agp-empty--small">
+                <span>Your applications are listed after a search. Open <b>Search &amp; filter</b>, set what you need and press <b>Search</b> &mdash; with nothing set, it lists every submitted application.</span>
+                <button type="button" id="agpIntroSearch" class="apd-btn apd-btn--ghost apd-btn--sm">Search &amp; filter</button>
+            </div>
+            <div class="agp-dtable" style="display:none">
+                <div id="applicantApplicantionList" class="agp-table"></div>
+            </div>
+        </section>
+
+        <aside class="agp-side-col">
+            <div class="agp-side-head">
+                <h3 class="apd-h3">New applicants</h3>
+                @if($verified)
+                    <button type="button" class="apd-btn apd-btn--primary apd-btn--sm" data-tw-toggle="modal" data-tw-target="#addDeteilsModal">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                        Add new account
+                    </button>
+                @else
+                    <button type="button" class="apd-btn apd-btn--primary apd-btn--sm" disabled aria-disabled="true" title="Verify your email first">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
+                        Add new account
+                    </button>
                 @endif
             </div>
-            @if (session('applicantSubmission'))
-                <div class="alert alert-success-soft alert-dismissible show flex items-center mb-2" role="alert">
-                    <i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> {{ Session::get('applicantSubmission') }}
-                    <button type="button" class="btn-close" data-tw-dismiss="alert" aria-label="Close">
-                        <i data-lucide="x" class="w-4 h-4"></i>
-                    </button>
-                </div>
-                @php session()->forget('applicantSubmission'); @endphp
+
+            <section class="agp-panel">
+                <p style="margin:0;font-size:13.5px">Verified applicants can be applied for now. Others need their SMS and email codes first.</p>
+                <input type="search" id="agpChecksSearch" class="apd-ctl agp-feed-search" placeholder="Search by name, phone or email" autocomplete="off" aria-label="Search new applicants">
+                <div id="applicant-list" class="agp-chk-list agp-chk-list--feed" data-apply-url="{{ route('agent.application', '__ID__') }}"></div>
+            </section>
+
+            @if($drafts->count())
+                <section class="agp-panel">
+                    <h3 class="apd-h3">Drafts in progress</h3>
+                    {{-- Five tall; the rest page in over AJAX as it is scrolled (agent-dahsboard.js). --}}
+                    <input type="search" id="agpDraftsSearch" class="apd-ctl agp-feed-search" placeholder="Search by name, phone or email" autocomplete="off" aria-label="Search drafts">
+                    <div id="agpDrafts" class="agp-chk-list agp-chk-list--feed" data-url="{{ route('agent.dashboard.drafts') }}" data-offset="{{ $draftsOffset }}" data-more="{{ $draftsMore ? 1 : 0 }}" data-continue-url="{{ route('agent.application', '__ID__') }}">
+                        @foreach($drafts as $d)
+                            <div class="agp-chk-card">
+                                <div style="display:grid;gap:4px"><b>{{ $d['name'] }}</b><span style="font-size:12.5px;color:var(--muted)">Not yet submitted</span></div>
+                                <a href="{{ route('agent.application', $d['check_id']) }}" class="apd-btn apd-btn--primary apd-btn--sm">Continue</a>
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
             @endif
-
-            <div id="studentSearchAccordionWrap" class="pt-4 mb-2">
-    
-                <div id="studentSearchAccordion" class="accordion accordion-boxed pt-2">
-                    <div class="accordion-item">
-                        <div id="studentSearchAccordion-1" class="accordion-header">
-                            <button  id="studentGroupSearchBtn" class="accordion-button collapsed relative w-full text-sm font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#studentSearchAccordion-collapse-1" aria-expanded="false" aria-controls="studentSearchAccordion-collapse-1">
-                                Search
-                                <span class="accordionCollaps" style="width: 18px; height: 16px;"></span>
-                            </button>
-                        </div>
-                        <div id="studentSearchAccordion-collapse-1" class="accordion-collapse collapse" aria-labelledby="studentSearchAccordion-1" data-tw-parent="#studentSearchAccordion">
-                            <div class="accordion-body">
-                                <div class="grid grid-cols-12 gap-0 gap-y-2 gap-x-4">
-                                    <div class="col-span-12 sm:col-span-3">
-                                        <label for="application_no" class="form-label">Referrence No</label>
-                                        <div class="autoCompleteField" data-table="students">
-                                            <input type="text" autocomplete="off" id="application_no" name="application_no" class="form-control registration_no" value="" placeholder=""/>
-                                            <ul class="autoFillDropdown"></ul>
-                                        </div>
-                                    </div>
-                                    <div class="col-span-12 sm:col-span-3">
-                                        <label class="form-label">Search By Name</label>
-                                        <div class="autoCompleteField" data-table="students">
-                                            <input id="query-CNTR" autocomplete="off" name="query" type="text" class="form-control"  placeholder="Search by Name">
-                                            <ul class="autoFillDropdown"></ul>
-                                        </div>
-                                        
-                                    </div>
-
-                                    <div class="col-span-12 sm:col-span-3">
-                                        <label for="applicantEmail" class="form-label">Applicant Email</label>
-                                        <div class="autoCompleteField" data-table="students">
-                                            <input type="text" autocomplete="off" id="applicantEmail" name="applicantEmail" class="form-control email" value="" placeholder=""/>
-                                            <ul class="autoFillDropdown"></ul>
-                                        </div>
-                                    </div>
-                                    <div class="col-span-12 sm:col-span-3">
-                                        <label for="phone" class="form-label">Applicant Phone</label>
-                                        <div class="autoCompleteField" data-table="students">
-                                            <input type="text" autocomplete="off" id="applicantPhone" name="applicantPhone" class="form-control phone" value="" placeholder=""/>
-                                            <ul class="autoFillDropdown"></ul>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="col-span-12 sm:col-span-3">
-                                        <label for="semesters" class="form-label">Intake Semester</label>
-                                        <select id="semesters" class="w-full tom-selects" name="semesters[]" multiple>
-                                            <option value="">Please Select</option>
-                                            @if(!empty($semesters))
-                                                @foreach($semesters as $sem)
-                                                    <option value="{{ $sem->id }}">{{ $sem->name }}</option>
-                                                @endforeach
-                                            @endif
-                                        </select>
-                                        <div class="acc__input-error error-semesters text-danger mt-2"></div>
-                                    </div>
-                                    <div class="col-span-12 sm:col-span-3">
-                                        <label for="courses" class="form-label">Course </label>
-                                        <select id="courses" class="w-full tom-selects" name="courses[]" multiple>
-                                            <option value="">Please Select</option>
-                                            @if(!empty($courses))
-                                                @foreach($courses as $crs)
-                                                    <option value="{{ $crs->id }}">{{ $crs->name }}</option>
-                                                @endforeach
-                                            @endif
-                                        </select>
-                                        <div class="acc__input-error error-course text-danger mt-2"></div>
-                                    </div>
-                                    <div class="col-span-12 sm:col-span-3">
-                                        <label for="statuses" class="form-label">Status</label>
-                                        <select id="statuses" class="w-full tom-selects" name="statuses[]" multiple>
-                                            <option value="">Please Select</option>
-                                            @if(!empty($statuses))
-                                            @foreach($statuses as $crs)
-                                                <option value="{{ $crs->id }}">{{ $crs->name }}</option>
-                                            @endforeach
-                                        @endif
-                                        </select>
-                                    </div>
-                                    
-                                    <div class="col-span-12 sm:col-span-3">
-                                        <label for="agents" class="form-label">Agent/SubAgents</label>
-                                        <select id="agents" class="w-full tom-selects" name="agents[]" multiple>
-                                            <option value="">Please Select</option>
-                                            @if(!empty($agents))
-                                            @foreach($agents as $crs)
-                                                <option value="{{ $crs->agent_user_id }}">{{ $crs->full_name }} [{{ $crs->code }}]</option>
-                                            @endforeach
-                                        @endif
-                                        </select>
-                                    </div>
-
-                                    
-                                    <div class="col-span-12 sm:col-span-6 pt-7">
-                                        <button id="studentGroupSearchSubmitBtn" type="button" class="btn btn-success text-white ml-2 w-auto"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search <i  data-loading-icon="oval" data-color="white" class="w-4 h-4 ml-2 searchLoading hidden" ></i></button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="overflow-x-auto scrollbar-hidden">
-                <div id="applicantApplicantionList" class="mt-5 table-report table-report--tabulator"></div>
-            </div>
-
-        </div>
-
-        
-        <div class="col-span-12 xl:col-span-3 2xl:col-span-3">
-            <div class="2xl:border-l -mb-10 pb-10">
-                <div class="2xl:pl-6 grid grid-cols-12 gap-x-6 2xl:gap-x-0 gap-y-6">
-                    <!-- BEGIN: Visitors -->
-                    <div class="col-span-12 md:col-span-6 xl:col-span-12 mt-3 2xl:mt-8">
-                        <div class="intro-y flex items-center h-10">
-                            <h2 class="text-lg font-medium truncate mr-5">New Student List  </h2>
-                            <div class=" sm:w-auto mt-4 sm:mt-0 ml-auto">
-                                <a id="currentTermId" data-tw-toggle="modal" data-id="" data-tw-target="#addDeteilsModal" href="#" class="star-verification btn btn-primary shadow-md mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New Account</a>
-                            </div>
-                        </div>
-                        <div id="TermBox">
-                            <div id="total-application">
-                                <div class="report-box-2 intro-y mt-5 mb-7">
-                                    <div class="box p-5">
-                                        <div class="flex items-center">
-                                            Total Active Application
-                                        </div>
-                                        <div class="text-2xl font-medium mt-2">{{ $totalRecentApplication }}</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div id="applicant-list">
-                                @foreach ($recentData as $recentapplicant)
-                                    @if($recentapplicant->mobile_verified_at && $recentapplicant->email_verified_at )
-                                        <div data-applicationid="{{ $recentapplicant->id }}" data-email-verified="{{($recentapplicant->email_verified_at ? 1:0)}}" data-email="{{ $recentapplicant->email }}" data-mobile="{{ $recentapplicant->mobile }}" data-mobile-verified="{{ ($recentapplicant->mobile_verified_at ? 1:0) }}"  class="newapplicant-modal" style="inline-block">
-                                    @else
-                                        <div data-tw-target="#confirmModal" data-tw-toggle="modal" data-applicationid="{{ $recentapplicant->id }}" data-email-verified="{{($recentapplicant->email_verified_at ? 1:0)}}" data-email="{{ $recentapplicant->email }}" data-mobile="{{ $recentapplicant->mobile }}" data-mobile-verified="{{ ($recentapplicant->mobile_verified_at ? 1:0) }}"  class="newapplicant-modal" style="inline-block">
-                                    @endif
-                                            <div  class="intro-y module-details_1 ">
-                                                
-                                                <div class="box px-4 py-4 mb-3 flex items-center zoom-in">
-                                                    <div data-tw-target="#confirmDeleteModal" data-tw-toggle="modal" data-id="{{ $recentapplicant->id }}" title="Do you want to remove this item?" class="tooltip w-5 h-5 flex items-center justify-center absolute rounded-full text-white bg-danger right-0 top-0 -mr-2 -mt-2 delete_btn">
-                                                        <i data-lucide="x" class="w-3 h-3"></i>
-                                                    </div>
-                                                    <div class="ml-4 mr-auto">
-                                                        <div class="font-medium">
-                                                            @if($recentapplicant->mobile_verified_at && $recentapplicant->email_verified_at )
-                                                            <a href="{{ route("agent.application",$recentapplicant->id) }}" style="inline-block">{{ $recentapplicant->full_name }}</a>
-                                                            @else
-                                                            {{ $recentapplicant->full_name }}
-                                                            @endif
-                                                        </div>
-                                                        <div class="text-slate-500 text-xs mt-0.5 ">
-                                                            @if($recentapplicant->email_verified_at)
-                                                                <i data-lucide="check-circle" class="w-4 h-4 mr-1 text-success inline-flex"></i> Email verified
-                                                            @else
-                                                                <i data-lucide="x-circle" class="w-4 h-4 mr-1 text-danger inline-flex"></i> Email not verified
-                                                            @endif
-                                                        </div>
-                                                        <div class="text-slate-500 text-xs mt-0.5 ">
-
-                                                            @if($recentapplicant->mobile_verified_at)
-                                                                <i data-lucide="check-circle" class="w-4 h-4 mr-1 text-success inline-flex"></i> Mobile verified
-                                                            @else
-                                                                <i data-lucide="x-circle" class="w-4 h-4 mr-1 text-danger inline-flex"></i> Mobile not verified
-                                                            @endif
-
-                                                        </div>
-                                                    </div>
-                                                    @if($recentapplicant->mobile_verified_at && $recentapplicant->email_verified_at )
-                                                        <a href="{{ route("agent.application",$recentapplicant->id) }}" class="btn btn-sm btn-success w-28 mr-2 mb-2 text-white">
-                                                            <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Apply Now
-                                                        </a>
-                                                    @else
-                                                        <div class="rounded-full text-lg bg-warning text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">
-                                                            <i data-lucide="alert-circle" class="w-4 h-4 m-auto text-white"></i>
-                                                        </div>
-                                                    @endif
-                                                    
-                                                </div>
-                                            </div>
-                                        </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-                    <!-- END: Visitors -->
-                </div>
-            </div>
-        </div>
-    </div>
-    
-  
- 
-
-
-    @if (session('verifymessage'))
-        <!-- BEGIN: Notification Content -->
-        <div id="success-notification-content" class="toastify-content hidden">
-            <i class="text-success" data-lucide="check-circle"></i>
-            <div class="ml-4 mr-4">
-                <div id="title-notification" class="font-medium"> @if(session('sessiontitle')) {{ session('sessiontitle') }} @else Email Sent! @endif </div>
-                <div id="title-context" class="text-slate-500 mt-1">{{ session('verifymessage') }}</div>
-            </div>
-        </div>
-        <!-- END: Notification Content -->
-        <!-- BEGIN: Notification Toggle -->
-        <button id="success-notification-toggle" class="btn hidden btn-primary">Show Notification</button>
-        <!-- END: Notification Toggle -->
-    @endif
-    @if ($user->email_verified_at == NULL)
-    
-    <div class="intro-y box p-5 mt-5">
-        <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                   
-            <form id="resendverification" method="post" action="{{ route('agent.verification.send') }}" class="xl:flex sm:mr-auto" >
-                @csrf
-                <div class="sm:flex items-center sm:mr-4">
-                    <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">A verification email has been sent to your inbox. Kindly go to your email address and click the verify button to confirm your email.
-
-                        <br/>In case you don't see the email in your inbox, please check your Junk/Spam folder. Thank you.</label>
-                </div>
-                <div class="flex justify-end mx-auto sm:mt-0">
-                    <button id="emailverification" type="submit" class="btn btn-dark w-1/2 sm:w-auto mr-2">
-                        <i data-lucide="send" class="w-4 h-4 mr-2"></i> Click Here to Resend Verification Email
-                    </button>
-                </div>
-            </form>
-        </div>
-
+        </aside>
     </div>
 
-    @endif
-
-    <!-- BEGIN: HTML Table Data -->
-
-        <!-- ALL APPLICANT BASE DATA WILL BE HERE -->
-  
-    <!-- End: HTML Table Data --> 
     @include('pages.agent.dashboard.modals')
-
 @endsection
 
-
 @section('script')
-    <script type="module">
-        (function () {
-            if($('#success-notification-toggle').length>0) {
-                $("#success-notification-toggle").trigger('click')
-            }
-        async function resetForm() {
-                // Reset state
-                $('#AgentChangePasswordModalForm').find('.login__input').removeClass('border-danger')
-                $('#AgentChangePasswordModalForm').find('.login__input-error').html('')
-            
-                // Post form
-                let myform = document.getElementById("AgentChangePasswordModalForm");
-                let formData = new FormData(myform);
-                // Loading state
-                $('#btn-changepassword').html('<i data-loading-icon="oval" data-color="white" class="w-5 h-5 mx-auto"></i>')
-                tailwind.svgLoader()
-                await helper.delay(500)
-
-                axios.post(route('agent.change.password.post'), formData).then(res => {
-                    
-                    // $("#title-notification").html("Password Changed!");
-                    // $("#title-context").html("Password Changed Successfully");
-
-                    // $("#success-notification-toggle").trigger('click')
-                    $('#btn-changepassword').html('Update Passwored')
-
-                }).catch(err => {
-                    $('#btn-changepassword').find('.login__input').removeClass('border-danger')
-                    $('#btn-changepassword').find('.login__input-error').html('')
-                    $('#btn-changepassword').html('Update Passwored')
-                    if (err.response.data.message != 'Password Could not Updated.') {
-                        for (const [key, val] of Object.entries(err.response.data.errors)) {
-                            $(`#${key}`).addClass('border-danger')
-                            $(`#error-${key}`).html(val)
-                        }
-                    } else {
-                        
-                        $(`#password`).addClass('border-danger')
-                        $(`#error-password`).html(err.response.data.message)
-                    }
-                })
-            }
-
-            $('#AgentChangePasswordModalForm').on('keyup', function(e) {
-                if (e.keyCode === 13) {
-                    e.preventDefault();
-                    resetForm()
-                }
-            })
-
-            $('#btn-changepassword').on('click', function() {
-                resetForm()
-            })
-
-            
-
-        })()
-    </script>
     @vite('resources/js/agent-dahsboard.js')
 @endsection

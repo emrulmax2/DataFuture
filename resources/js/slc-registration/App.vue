@@ -29,6 +29,7 @@
             <button type="button" class="btn-link" @click="store.flash = null">Dismiss</button>
         </div>
         <Dashboard v-if="store.module === 'dashboard'" />
+        <ClearDb v-else-if="clearing" :module="store.module" />
         <Attendance v-else-if="store.module === 'attendance'" :view="attView" :show="attShow" @go="attGo" @show="(s) => (attShow = s)" />
         <Payments v-else-if="store.module === 'payment'" :view="payView" :show="payShow" @go="payGo" />
         <Planned v-else-if="store.module !== 'registration'" :module="store.module" @open-actions="openActions" />
@@ -51,7 +52,7 @@
 </template>
 
 <script>
-import { computed, inject, ref } from "vue";
+import { computed, inject, toRefs } from "vue";
 import { MODULES } from "./helpers";
 import Ico from "./Ico.vue";
 import TopBar from "./TopBar.vue";
@@ -67,12 +68,16 @@ import Log from "./Log.vue";
 import Dashboard from "./Dashboard.vue";
 import Attendance from "./Attendance.vue";
 import Payments from "./Payments.vue";
+import ClearDb from "./ClearDb.vue";
 
 export default {
-    components: { Ico, TopBar, Overview, Identify, DataCheck, Actions, PreConfirm, Batches, Courses, Planned, Log, Dashboard, Attendance, Payments },
+    components: { Ico, TopBar, Overview, Identify, DataCheck, Actions, PreConfirm, Batches, Courses, Planned, Log, Dashboard, Attendance, Payments, ClearDb },
     setup() {
         const ctx = inject("slr");
         const { store, go, cocItems, contactItems, awaitingCount } = ctx;
+        // Clear DB (user, 6 Nov 2026): the last item of each module's sub-menu, for users 1 and 7 only
+        const CLEAR = () => (store.user.canClear ? [["clear", "Clear DB", null, null]] : []);
+        const clearing = computed(() => !!store.user.canClear && ((store.module === "registration" && store.view === "clear") || (store.module === "attendance" && store.attView === "clear") || (store.module === "payment" && store.payView === "clear")));
         const nav = computed(() => {
             const c = store.state.counts;
             return [
@@ -84,30 +89,29 @@ export default {
                 ["batches", "Batches", "5", awaitingCount.value],
                 ["courses", "Course mapping", null, null],
                 ["log", "Activity", null, null],
+                ...CLEAR(),
             ];
         });
         const setModule = (k) => { store.module = k; window.scrollTo(0, 0); };
-        // Bulk attendance: Overview (step 1, upload) and steps 2–7
-        const attView = ref("overview");
-        const attShow = ref("open");
+        // the attendance and payment steps live in the store, so the browser's history follows them too
+        const { attView, attShow, payView, payShow } = toRefs(store);
+        // Bulk attendance: Overview (step 1, upload) and steps 2–6 (Attendance and Codes are one step since 6 Nov 2026)
         const attNav = computed(() => {
             const c = store.state.attendance.counts;
             return [["overview", "Overview", null, null], ["match", "Match students", "2", c.unmatched], ["check", "Data check", "3", c.data],
-                ["register", "Attendance", "4", c.noAttendance], ["codes", "Codes", "5", c.codeReady], ["cocs", "CoCs", "6", c.cocToSubmit], ["batches", "Batches", "7", c.awaiting]];
+                ["codes", "Attendance & codes", "4", c.codeReady], ["cocs", "CoCs", "5", c.cocToSubmit], ["batches", "Batches", "6", c.awaiting], ...CLEAR()];
         });
         const attGo = (v, show) => { attView.value = v; if (show) attShow.value = show; window.scrollTo(0, 0); };
         window.addEventListener("slr-att-go", (e) => attGo(e.detail.view, e.detail.show)); // from the Dashboard card
         // Bulk payment upload: Overview (upload), Check & record, Uploads
-        const payView = ref("overview");
-        const payShow = ref("ready");
         const payNav = computed(() => {
             const c = store.state.payments.counts;
-            return [["overview", "Overview", null, null], ["check", "Check & record", "2", c.ready + c.look + c.error], ["uploads", "Uploads", null, null]];
+            return [["overview", "Overview", null, null], ["check", "Check & record", "2", c.ready + c.look + c.error], ["uploads", "Uploads", null, null], ...CLEAR()];
         });
         const payGo = (v, show) => { payView.value = v; if (show) payShow.value = show; window.scrollTo(0, 0); };
         window.addEventListener("slr-pay-go", (e) => payGo(e.detail.view, e.detail.show)); // from the Dashboard card
         const openActions = () => { store.module = "registration"; go("actions"); };
-        return { store, go, nav, MODULES, setModule, openActions, attView, attShow, attNav, attGo, payView, payShow, payNav, payGo };
+        return { store, go, nav, clearing, MODULES, setModule, openActions, attView, attShow, attNav, attGo, payView, payShow, payNav, payGo };
     },
 };
 </script>

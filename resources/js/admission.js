@@ -442,6 +442,28 @@ var admissionListTable = (function () {
     };
 })();
 
+/* The applicant-details grids show dates the way the design does:
+   "05 May 2026" for a full date, "Feb 2024" for a month. */
+function admissionFmtDate(value) {
+    const s = String(value == null ? "" : value).trim();
+    if (!s) return "—";
+    let m = s.match(/^(\d{2})-(\d{2})-(\d{4})/) || s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m) {
+        const dt = m[1].length === 4 ? new Date(+m[1], +m[2] - 1, +m[3]) : new Date(+m[3], +m[2] - 1, +m[1]);
+        return dt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    }
+    m = s.match(/^(\d{2})-(\d{4})$/);
+    if (m) return new Date(+m[2], +m[1] - 1, 1).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+    return admissionEscape(s);
+}
+
+function admissionRowLinks(row, editTarget) {
+    if (row.deleted_at == null) {
+        return '<span class="adp-row-links"><button type="button" data-id="' + row.id + '" data-tw-toggle="modal" data-tw-target="' + editTarget + '" class="edit_btn adp-btn-link">Edit</button><span class="adp-row-links__dot">·</span><button type="button" data-id="' + row.id + '" class="delete_btn adp-btn-link adp-btn-link--danger">Remove</button></span>';
+    }
+    return '<span class="adp-row-links"><button type="button" data-id="' + row.id + '" class="restore_btn adp-btn-link">Restore</button></span>';
+}
+
 var educationQualTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
@@ -459,67 +481,18 @@ var educationQualTable = (function () {
             pagination: "remote",
             paginationSize: 10,
             paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            langs: { default: { pagination: { page_size: "Rows", all: "All", prev: "Previous", next: "Next" } } },
             layout: "fitColumns",
-            responsiveLayout: "collapse",
-            placeholder: "No matching records found",
+            placeholder: "<b>No qualifications recorded.</b><span>Use Add qualification to record one.</span>",
             columns: [
-                {
-                    title: "#SL",
-                    field: "sl",
-                    width: "110",
-                },
-                {
-                    title: "Awarding Body",
-                    field: "awarding_body",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Highest Academic Qualification",
-                    field: "highest_academic",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Subjects",
-                    field: "subjects",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Result",
-                    field: "result",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Award Date",
-                    field: "degree_award_date",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Actions",
-                    field: "id",
-                    headerSort: false,
-                    hozAlign: "right",
-                    headerHozAlign: "right",
-                    width: "150",
-                    download: false,
-                    formatter(cell, formatterParams) {                        
-                        var btns = "";
-                        if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editQualificationModal" type="button" class="edit_btn adm-row-action adm-row-action--edit"><i data-lucide="Pencil" class="w-4 h-4"></i></button>';
-                            btns += '<button data-id="' +cell.getData().id +'" class="delete_btn adm-row-action adm-row-action--delete"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'" class="restore_btn adm-row-action adm-row-action--restore"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
-                        }
-                        
-                        return '<div class="adm-row-actions">' + btns + '</div>';
-                    },
-                },
+                { title: "Qualification", field: "highest_academic", headerSort: false, minWidth: 180, widthGrow: 2, cssClass: "adp-cell--wrap", formatter: (c) => admissionEscape(c.getValue() || "—") },
+                { title: "Awarding body", field: "awarding_body", headerSort: false, minWidth: 130, formatter: (c) => admissionEscape(c.getValue() || "—") },
+                { title: "Subjects", field: "subjects", headerSort: false, minWidth: 130, cssClass: "adp-cell--wrap", formatter: (c) => admissionEscape(c.getValue() || "—") },
+                { title: "Result", field: "result", headerSort: false, width: 120, formatter: (c) => admissionEscape(c.getValue() || "—") },
+                { title: "Awarded", field: "degree_award_date", headerSort: false, width: 130, formatter: (c) => admissionFmtDate(c.getValue()) },
+                { title: "", field: "id", headerSort: false, hozAlign: "right", width: 130, download: false, cssClass: "adp-cell--right", formatter: (c) => admissionRowLinks(c.getData(), "#editQualificationModal") },
             ],
             renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
                 const columnLists = this.getColumns();
                 if (columnLists.length > 0) {
                     const lastColumn = columnLists[columnLists.length - 1];
@@ -590,91 +563,31 @@ var employmentHistoryTable = (function () {
             pagination: "remote",
             paginationSize: 10,
             paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            langs: { default: { pagination: { page_size: "Rows", all: "All", prev: "Previous", next: "Next" } } },
             layout: "fitColumns",
-            responsiveLayout: "collapse",
-            placeholder: "No matching records found",
+            placeholder: "<b>No employment recorded.</b><span>Use Add employment to record one.</span>",
             columns: [
-                {
-                    title: "#SL",
-                    field: "sl",
-                    width: "80",
-                },
-                {
-                    title: "Organization",
-                    field: "company_name",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Phone",
-                    field: "company_phone",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Position",
-                    field: "position",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Start",
-                    field: "start_date",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "End",
-                    field: "end_date",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Address",
-                    field: "address",
-                    headerHozAlign: "left",
-                    width: "180",
-                    formatter(cell, formatterParams) {   
-                        return '<div class="whitespace-nowrap">'+cell.getData().address+'</div>';
-                    }
-                },
-                {
-                    title: "Contact Person",
-                    field: "name",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Position",
-                    field: "contact_position",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Phone",
-                    field: "contact_phone",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Actions",
-                    field: "id",
-                    headerSort: false,
-                    hozAlign: "right",
-                    headerHozAlign: "right",
-                    width: "150",
-                    download: false,
-                    formatter(cell, formatterParams) {                        
-                        var btns = "";
-                        if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editEmployementHistoryModal" type="button" class="edit_btn adm-row-action adm-row-action--edit"><i data-lucide="Pencil" class="w-4 h-4"></i></button>';
-                            btns += '<button data-id="' +cell.getData().id +'" class="delete_btn adm-row-action adm-row-action--delete"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'" class="restore_btn adm-row-action adm-row-action--restore"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
-                        }
-                        
-                        return '<div class="adm-row-actions">' + btns + '</div>';
-                    },
-                },
+                { title: "Organisation", field: "company_name", headerSort: false, minWidth: 170, widthGrow: 2, cssClass: "adp-cell--wrap", formatter: (c) => {
+                    const d = c.getData();
+                    /* the address arrives with <br/> separators */
+                    const address = String(d.address || "").replace(/<br\s*\/?>/gi, ", ").replace(/\s*,\s*,+/g, ",").replace(/^[\s,]+|[\s,]+$/g, "");
+                    const sub = [d.company_phone, address].filter(Boolean).map(admissionEscape).join(" · ");
+                    return '<div class="adp-cell"><b>' + admissionEscape(d.company_name || "—") + '</b>' + (sub ? '<span class="adp-sub-line">' + sub + '</span>' : '') + '</div>';
+                } },
+                { title: "Position", field: "position", headerSort: false, minWidth: 130, cssClass: "adp-cell--wrap", formatter: (c) => admissionEscape(c.getValue() || "—") },
+                { title: "From", field: "start_date", headerSort: false, width: 110, formatter: (c) => admissionFmtDate(c.getValue()) },
+                { title: "To", field: "end_date", headerSort: false, width: 110, formatter: (c) => {
+                    const d = c.getData();
+                    return (String(d.continuing) === "1" || /^continu/i.test(String(d.end_date || ""))) ? "Continuing" : admissionFmtDate(d.end_date);
+                } },
+                { title: "Reference", field: "name", headerSort: false, minWidth: 150, cssClass: "adp-cell--wrap", formatter: (c) => {
+                    const d = c.getData();
+                    const sub = [d.contact_position, d.contact_phone].filter(Boolean).map(admissionEscape).join(" · ");
+                    return '<div class="adp-cell"><span>' + admissionEscape(d.name || "—") + '</span>' + (sub ? '<span class="adp-sub-line">' + sub + '</span>' : '') + '</div>';
+                } },
+                { title: "", field: "id", headerSort: false, hozAlign: "right", width: 130, download: false, cssClass: "adp-cell--right", formatter: (c) => admissionRowLinks(c.getData(), "#editEmployementHistoryModal") },
             ],
             renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
                 const columnLists = this.getColumns();
                 if (columnLists.length > 0) {
                     const lastColumn = columnLists[columnLists.length - 1];
@@ -749,9 +662,13 @@ var employmentHistoryTable = (function () {
         if ($(this).data('litepicker-ready')) return;
         $(this).data('litepicker-ready', true);
 
+        // Dates of birth, awards and jobs stop at today; an ID expiry date (data-allow-future) does not.
+        const allowFuture = $(this).is('[data-allow-future]');
+        const year = new Date().getFullYear();
         new Litepicker({
             element: this,
             ...admissionDatepickerOpt,
+            ...(allowFuture ? { maxDate: null, dropdowns: { ...admissionDatepickerOpt.dropdowns, minYear: year - 30, maxYear: year + 30 } } : {}),
             format: $(this).data('format') || admissionDatepickerOpt.format,
         });
     })

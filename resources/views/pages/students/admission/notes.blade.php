@@ -5,267 +5,131 @@
 @endsection
 
 @section('subcontent')
-    <!-- BEGIN: Profile Info -->
+    {{--
+        Notes on the admission portal shell: an inline composer (rich text +
+        one attachment → admission.store.note), the notes timeline rendered
+        from admission.note.list, an Edit dialog (admission.get.note /
+        admission.update.note, attachment replaceable), delete and restore
+        (admission.destory.note / admission.resotore.note) and a Deleted notes
+        accordion. Behaviour lives in resources/js/admission-notes.js, whose
+        only markup is this page. Ids kept from the previous page:
+        #addNoteForm, #saveNote, input[name=id], #query-AN, #tabulator-html-filter-go-AN,
+        #tabulator-html-filter-reset-AN, #tabulator-print-AN,
+        #tabulator-export-csv-AN, #tabulator-export-xlsx-AN, .edit_btn,
+        .delete_btn, .restore_btn, .downloadDoc, #confirmModal (.agreeWith
+        data-recordid / data-status / data-applicant).
+    --}}
+    <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
 
-    @include('pages.students.admission.show-info')
+    @php
+        $adpStatusId = (int) ($applicant->status_id ?? 0);
+        $adpPriv = auth()->user()->priv();
+        $adpNext = \App\Support\AdmissionStatusFlow::next($applicant, $allStatuses, $adpPriv);
+        $adpStatusHelp = \App\Support\AdmissionStatusFlow::HELP;
+        $adpTab = 'notes';
 
-    <!-- END: Profile Info -->
-    <div class="adm-sections adm-comm adm-notes">
-    <div class="adm-section">
-        <div class="adm-section__head">
-            <div class="adm-section__title">Notes</div>
-            <div class="adm-tabletools__actions">
-                <button data-tw-toggle="modal" data-tw-target="#addNoteModal" type="button" class="adm-btn adm-btn--primary">
-                    <i data-lucide="sticky-note" class="w-4 h-4"></i>
-                    Add Notes
-                </button>
+        $adpPaths = [
+            'upload' => '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/>',
+            'file' => '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
+            'list' => '<path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/>',
+            'search' => '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+            'print' => '<path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6z"/>',
+            'export' => '<path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 21h14"/>',
+            'x' => '<path d="M18 6 6 18M6 6l12 12"/>',
+            'pencil' => '<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+            'download' => '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+        ];
+        $adpIcon = fn ($name, $size = 16) => '<svg width="'.$size.'" height="'.$size.'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'.$adpPaths[$name].'</svg>';
+        $adpSpin = '<svg class="adm-btn-loader adp-btn-spin" style="display: none;" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" aria-hidden="true"><g fill="none" fill-rule="evenodd"><g transform="translate(1 1)" stroke-width="4"><circle stroke-opacity=".4" cx="18" cy="18" r="18"></circle><path d="M36 18c0-9.94-8.06-18-18-18"><animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform></path></g></g></svg>';
+        $adpClose = '<button type="button" class="adp-btn adp-btn--ghost adp-btn--sm adp-modal__close" data-tw-dismiss="modal" aria-label="Close">✕</button>';
+        $adpCaret = '<span class="adp-acc-caret" aria-hidden="true">▾</span>';
+        $adpAccept = '.jpeg,.jpg,.png,.gif,.txt,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx';
+        // The design's small rich-text editor (bold / italic / underline / lists / clear).
+        $adpEditor = fn ($id, $placeholder) => '<div class="adp-editor" data-adp-editor><div class="adp-ed-bar" role="toolbar" aria-label="Formatting">'
+            .'<button type="button" data-cmd="bold" title="Bold" aria-label="Bold"><b>B</b></button>'
+            .'<button type="button" data-cmd="italic" title="Italic" aria-label="Italic"><i>I</i></button>'
+            .'<button type="button" data-cmd="underline" title="Underline" aria-label="Underline"><u>U</u></button>'
+            .'<span class="adp-ed-sep"></span>'
+            .'<button type="button" data-cmd="insertUnorderedList" title="Bulleted list" aria-label="Bulleted list">'.$adpIcon('list', 14).'</button>'
+            .'<button type="button" data-cmd="insertOrderedList" title="Numbered list" aria-label="Numbered list">1.</button>'
+            .'<span class="adp-ed-sep"></span>'
+            .'<button type="button" data-cmd="removeFormat" title="Clear formatting" aria-label="Clear formatting">Tx</button>'
+            .'</div><div id="'.$id.'" class="adp-ed-body" contenteditable="true" data-adp-ed-body data-placeholder="'.e($placeholder).'" aria-label="'.e($placeholder).'"></div></div>';
+        $adpDeleted = (int) ($deletedCount ?? 0);
+    @endphp
+
+    @include('pages.students.admission.partials.portal-record')
+
+    <section class="adp-panel adp-notes">
+        <div class="adp-panel__head adp-panel__head--top">
+            <div class="adp-proc__copy">
+                <h3 class="adp-h3">Notes</h3>
+                <p class="adp-proc__desc">Internal notes for the admissions team; the applicant never sees them.</p>
+            </div>
+            <div class="adp-tabletools__actions">
+                <button type="button" id="tabulator-print-AN" class="adp-btn adp-btn--ghost adp-btn--sm">{!! $adpIcon('print', 13) !!}Print</button>
+                <button type="button" id="tabulator-export-csv-AN" class="adp-btn adp-btn--ghost adp-btn--sm">{!! $adpIcon('export', 13) !!}Export CSV</button>
+                <button type="button" id="tabulator-export-xlsx-AN" class="adp-btn adp-btn--ghost adp-btn--sm">{!! $adpIcon('export', 13) !!}Export XLSX</button>
             </div>
         </div>
-        <div class="adm-sectionbody">
-            <div class="adm-tabletools">
-                <form id="tabulatorFilterForm-AN" class="adm-tabletools__filters">
-                    <span class="adm-filter-text">Query</span>
-                    <input id="query-AN" name="query" type="text" class="adm-input" placeholder="Search...">
-                    <span class="adm-filter-text">Status</span>
-                    <div class="adm-field adm-field--narrow">
-                        <select id="status-AN" name="status" class="adm-select">
-                            <option selected value="1">Active</option>
-                            <option value="2">Archived</option>
-                        </select>
-                        <svg class="adm-field__caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aa8b0" stroke-width="2.5"><path d="M6 9l6 6 6-6"></path></svg>
-                    </div>
-                    <button id="tabulator-html-filter-go-AN" type="button" class="adm-btn adm-btn--primary">Go</button>
-                    <button id="tabulator-html-filter-reset-AN" type="button" class="adm-btn adm-btn--soft">Reset</button>
-                </form>
-                <div class="adm-tabletools__actions">
-                    <button type="button" id="tabulator-print-AN" class="adm-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-3a2 2 0 012-2h16a2 2 0 012 2v3a2 2 0 01-2 2h-2M6 14h12v8H6z"></path></svg>Print</button>
-                    <div class="dropdown adm-dropdown">
-                        <button type="button" class="dropdown-toggle adm-btn" aria-expanded="false" data-tw-toggle="dropdown"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><path d="M14 2v6h6"></path></svg>Export<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aa8b0" stroke-width="2.5"><path d="M6 9l6 6 6-6"></path></svg></button>
-                        <div class="dropdown-menu">
-                            <ul class="dropdown-content">
-                                <li>
-                                    <a id="tabulator-export-csv-AN" href="javascript:;" class="dropdown-item">Export CSV</a>
-                                </li>
-                                {{-- <li>
-                                    <a id="tabulator-export-json-AN" href="javascript:;" class="dropdown-item">Export JSON</a>
-                                </li> --}}
-                                <li>
-                                    <a id="tabulator-export-xlsx-AN" href="javascript:;" class="dropdown-item">Export XLSX</a>
-                                </li>
-                                {{-- <li>
-                                    <a id="tabulator-export-html-AN" href="javascript:;" class="dropdown-item">Export HTML</a>
-                                </li> --}}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="adm-table-wrap">
-                <div id="applicantNotesListTable" data-applicant="{{ $applicant->id }}" class="table-report table-report--tabulator"></div>
-            </div>
-        </div>
-    </div>
-    </div>
 
-    <!-- BEGIN: View Modal -->
-    <div id="viewNoteModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="font-medium text-base mr-auto">Note</h2>
-                    <a data-tw-dismiss="modal" href="javascript:;">
-                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                    </a>
-                </div>
-                <div class="modal-body">
-                    <div class="adm-note-view" id="viewNoteContent"></div>
-                </div>
-                <div class="modal-footer">
-                    <div class="footerBtns adm-note-view__footer-left"></div>
-                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                </div>
+        {{-- Composer: adds a note, or edits one (Edit on the timeline loads it here). --}}
+        <form method="POST" action="#" id="addNoteForm" class="adp-note-composer" enctype="multipart/form-data" data-adp-mode="add">
+            <div class="adp-note-editing" data-adp-editing hidden>
+                {!! $adpIcon('pencil', 13) !!}<span>Editing the note by <b data-adp-editing-by></b> from <span data-adp-editing-when></span></span>
+                <button type="button" class="adp-btn-link" data-adp-edit-cancel>Cancel editing</button>
             </div>
-        </div>
-    </div>
-    <!-- END: View Modal -->
+            {!! $adpEditor('addEditor', 'Add a note for the admissions team…') !!}
+            <div class="adp-note-file" data-adp-edit-current hidden>
+                <span class="adp-dz-fico">{!! $adpIcon('file', 14) !!}</span>
+                <span class="adp-note-file__t"><b class="adp-trunc" data-adp-edit-current-name></b><small>Current attachment · a new file replaces it</small></span>
+                <button type="button" class="adp-iconbtn adp-iconbtn--xs downloadDoc" data-id="0" data-adp-edit-current-download title="Download" aria-label="Download current attachment">{!! $adpIcon('download', 13) !!}</button>
+            </div>
+            <div class="adp-note-tools">
+                <label for="addNoteDocument" class="adp-btn adp-btn--ghost adp-btn--sm" data-adp-attach-pick>{!! $adpIcon('upload', 13) !!}<span data-adp-attach-label>Attach a file</span></label>
+                <span class="adp-tag" data-adp-attach-tag hidden>{!! $adpIcon('file', 12) !!}<span data-adp-attach-name></span><small class="adp-mono" data-adp-attach-size></small><button type="button" class="adp-tag-x" data-adp-attach-clear aria-label="Remove attachment">{!! $adpIcon('x', 12) !!}</button></span>
+                <input type="file" id="addNoteDocument" name="document" class="adp-sr-only" accept="{{ $adpAccept }}">
+                <span class="adp-note-hint">One file per note · up to 5 MB</span>
+                <span class="adp-note-spacer"></span>
+                <button type="button" class="adp-btn adp-btn--ghost adp-btn--sm" data-adp-edit-cancel hidden>Cancel</button>
+                <button type="submit" id="saveNote" class="adp-btn adp-btn--primary adp-btn--sm" disabled><span data-adp-save-label>Add note</span> {!! $adpSpin !!}</button>
+            </div>
+            <div class="adp-err error-content" data-adp-note-error></div>
+            <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
+            <input type="hidden" name="id" value="0"/>
+        </form>
 
-    <!-- BEGIN: Edit Modal -->
-    <div id="editNoteModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <form method="POST" action="#" id="editNoteForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Edit Note</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
-                    </div>
-                    <div class="modal-body">
-                        <div>
-                            <div class="editor document-editor">
-                                <div class="document-editor__toolbar"></div>
-                                <div class="document-editor__editable-container">
-                                    <div class="document-editor__editable" id="editEditor"></div>
-                                </div>
-                            </div>
-                            <div class="acc__input-error error-content text-danger mt-2"></div>
-                        </div>
-                        <div class="adm-mail-upload adm-note-upload mt-3">
-                            <a href="#" download class="downloadExistAttachment adm-note-upload__existing" style="display: none;">
-                                <i data-lucide="download" class="w-4 h-4"></i>
-                                <span>Current Attachment</span>
-                            </a>
-                            <label for="editNoteDocument" class="adm-mail-upload__button">
-                                <i data-lucide="paperclip" class="w-4 h-4"></i>
-                                <span>Upload Attachment</span>
-                            </label>
-                            <span class="adm-mail-upload__hint">PDF, DOC, image, spreadsheet</span>
-                            <input type="file" accept=".jpeg,.jpg,.png,.gif,.txt,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx" name="document" class="absolute w-0 h-0 overflow-hidden opacity-0" id="editNoteDocument"/>
-                        </div>
-                        <div id="editNoteDocumentName" class="documentNoteName adm-mail-upload__files mt-3" style="display: none"></div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="UpdateNote" class="btn btn-primary w-auto">
-                            Update
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="adm-btn-loader w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                        </button>
-                        <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
-                        <input type="hidden" name="id" value="0"/>
-                    </div>
-                </div>
+        <div class="adp-tabletools adp-tabletools--notes">
+            <form id="tabulatorFilterForm-AN" class="adp-tabletools__filters">
+                <input id="query-AN" name="query" type="text" class="adp-ctl" placeholder="Search notes…" autocomplete="off">
+                <button id="tabulator-html-filter-go-AN" type="button" class="adp-btn adp-btn--primary adp-btn--sm">{!! $adpIcon('search', 13) !!}Go</button>
+                <button id="tabulator-html-filter-reset-AN" type="button" class="adp-btn adp-btn--ghost adp-btn--sm">Reset</button>
             </form>
+            <span class="adp-note-count" data-adp-note-count></span>
         </div>
-    </div>
-    <!-- END: Edit Modal -->
 
-    <!-- BEGIN: Add Modal -->
-    <div id="addNoteModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <form method="POST" action="#" id="addNoteForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Add Note</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
-                    </div>
-                    <div class="modal-body">
-                        <div>
-                            <div class="editor document-editor">
-                                <div class="document-editor__toolbar"></div>
-                                <div class="document-editor__editable-container">
-                                    <div class="document-editor__editable" id="addEditor"></div>
-                                </div>
-                            </div>
-                            <div class="acc__input-error error-content text-danger mt-2"></div>
-                        </div>
-                        <div class="adm-mail-upload adm-note-upload mt-3">
-                            <label for="addNoteDocument" class="adm-mail-upload__button">
-                                <i data-lucide="paperclip" class="w-4 h-4"></i>
-                                <span>Upload Attachment</span>
-                            </label>
-                            <span class="adm-mail-upload__hint">PDF, DOC, image, spreadsheet</span>
-                            <input type="file" accept=".jpeg,.jpg,.png,.gif,.txt,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx" name="document" class="absolute w-0 h-0 overflow-hidden opacity-0" id="addNoteDocument"/>
-                        </div>
-                        <div id="addNoteDocumentName" class="documentNoteName adm-mail-upload__files mt-3" style="display: none"></div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="saveNote" class="btn btn-primary w-auto">
-                            Save
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="adm-btn-loader w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                        </button>
-                        <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    <!-- END: Add Modal -->
+        <div class="adp-arch-loading" data-adp-notes-loading><span class="adp-spin"></span>Loading notes…</div>
+        <div class="adp-empty adp-empty--small" data-adp-notes-empty hidden><span>No notes yet.</span></div>
+        <div class="adp-timeline" data-adp-timeline data-applicant="{{ $applicant->id }}"></div>
+        <div class="adp-timeline__more" data-adp-notes-more hidden><button type="button" class="adp-btn adp-btn--ghost adp-btn--sm">Load more</button></div>
 
-    <!-- BEGIN: Success Modal Content -->
-    <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitle"></div>
-                        <div class="text-slate-500 mt-2 successModalDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-action="DISMISS" class="successCloser btn btn-primary w-24">Ok</button>
-                    </div>
-                </div>
+        {{-- Soft-deleted notes (admission.note.list with status 2); the rows load when opened. --}}
+        <details class="adp-accordion adp-accordion--deleted" data-adp-deleted {{ $adpDeleted > 0 ? '' : 'hidden' }}>
+            <summary><span>Deleted notes <span class="adp-cnt adp-cnt--muted" data-adp-deleted-count>{{ $adpDeleted }}</span></span>{!! $adpCaret !!}</summary>
+            <div class="adp-acc-body">
+                <div class="adp-arch-loading" data-adp-deleted-loading hidden><span class="adp-spin"></span>Loading deleted notes…</div>
+                <div class="adp-vrows" data-adp-deleted-rows></div>
             </div>
-        </div>
-    </div>
-    <!-- END: Success Modal Content -->
+        </details>
+    </section>
 
-    <!-- BEGIN: Warning Modal Content -->
-    <div id="warningModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="alert-octagon" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 warningModalTitle"></div>
-                        <div class="text-slate-500 mt-2 warningModalDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-action="DISMISS" class="warningCloser btn btn-primary w-24">Ok</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Warning Modal Content -->
-
-    <!-- BEGIN: Delete Confirm Modal Content -->
-    <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
-                        <div class="text-slate-500 mt-2 confModDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" class="disAgreeWith btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                        <button type="button" data-recordid="0" data-status="none" data-applicant="{{ $applicant->id }}" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Delete Confirm Modal Content -->
+    @include('pages.students.admission.partials.portal-record-modals')
+    @include('pages.students.admission.partials.portal-dialogs', ['adpConfirmAttrs' => 'data-recordid="0" data-status="none" data-applicant="'.$applicant->id.'"'])
 @endsection
 
 @section('script')
     @vite('resources/js/admission-notes.js')
+    {{-- The record header's Change status dialog (admission-show.js guards its other blocks). --}}
+    @vite('resources/js/admission-show.js')
     @vite('resources/js/admission-vue.js')
 @endsection

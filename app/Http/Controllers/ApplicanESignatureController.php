@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Enums\EsignEventType;
+use App\Jobs\StoreSignedApplicationDocuments;
 use App\Jobs\UserMailerJob;
 use App\Mail\CommunicationSendMail;
 use App\Models\AdminESignature;
 use App\Models\Applicant;
 use App\Models\ApplicantESignature;
 use App\Models\ApplicantESignatureEvent;
+use App\Models\Option;
 use App\Models\ComonSmtp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -47,21 +49,36 @@ class ApplicanESignatureController extends Controller
             );
         }
 
-        ApplicantESignatureEvent::firstOrCreate(
-            [
+        /* Every opening of the link is part of the evidence trail (when, from
+           where, through which link), not just the first. Refreshes from the
+           same IP and device within ten minutes collapse into one event. */
+        $browser = $this->getBrowser($request->header('User-Agent'));
+        $os = $this->getOS($request->header('User-Agent'));
+        $via = $firstOpenVia == 'e' ? 'email' : ($firstOpenVia == 's' ? 'sms' : null);
+        $lastView = ApplicantESignatureEvent::where('applicant_id', $applicant->id)
+            ->where('user_type', 'applicant')
+            ->where('event_type', EsignEventType::VIEWED->value)
+            ->orderBy('id', 'desc')
+            ->first();
+        $sameVisit = $lastView
+            && $lastView->created_at && $lastView->created_at->gt(now()->subMinutes(10))
+            && $lastView->ip_address === $request->ip()
+            && $lastView->browser === $browser
+            && $lastView->os === $os;
+        if (!$sameVisit) {
+            ApplicantESignatureEvent::create([
                 'applicant_id' => $applicant->id,
                 'user_type' => 'applicant',
                 'event_type' => EsignEventType::VIEWED->value,
-            ],
-            [
-                'event_description' => "{$applicant->users->email} viewed the document",
+                'event_description' => "{$applicant->users->email} viewed the document".($via ? " via the {$via} link" : ''),
                 'ip_address' => $request->ip(),
-                'browser' => $this->getBrowser($request->header('User-Agent')),
-                'os' => $this->getOS($request->header('User-Agent')),
+                'browser' => $browser,
+                'os' => $os,
                 'latitude' => $request->input('latitude'),
                 'longitude' => $request->input('longitude'),
-            ]
-        );
+                'extra_field' => ['via' => $via, 'repeat' => $lastView !== null],
+            ]);
+        }
 
 
 
@@ -96,11 +113,19 @@ class ApplicanESignatureController extends Controller
 
     public function store(Request $request)
     {
+        /* Location is part of the signature's audit trail and is required to
+           sign: the page only submits once the device has returned a fix, and
+           the server holds the same line. */
         $request->validate([
             'applicant_id' => 'required',
             'video_consent' => 'sometimes|accepted',
             'declaration' => 'accepted',
             'signature' => 'required',
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+        ], [
+            'latitude.required' => 'Your location is needed to sign. Please allow location access and try again.',
+            'longitude.required' => 'Your location is needed to sign. Please allow location access and try again.',
         ]);
 
 
@@ -202,17 +227,20 @@ class ApplicanESignatureController extends Controller
             'longitude' => $request->input('longitude')
         ]);
 
-        ApplicantESignatureEvent::create([
-            'applicant_id' => $applicant->id,
-            'user_type' => 'applicant',
-            'event_type' => EsignEventType::LOCATION_VERIFIED->value,
-            'event_description' => "{$applicant->users->email}'s location was verified",
-            'ip_address' => $request->ip(),
-            'browser' => $this->getBrowser($request->header('User-Agent')),
-            'os' => $this->getOS($request->header('User-Agent')),
-            'latitude' => $request->input('latitude'),
-            'longitude' => $request->input('longitude')
-        ]);
+        // Only a real fix is "verified"; without coordinates the request is refused above.
+        if ($request->filled('latitude') && $request->filled('longitude')) {
+            ApplicantESignatureEvent::create([
+                'applicant_id' => $applicant->id,
+                'user_type' => 'applicant',
+                'event_type' => EsignEventType::LOCATION_VERIFIED->value,
+                'event_description' => "{$applicant->users->email}'s location was verified",
+                'ip_address' => $request->ip(),
+                'browser' => $this->getBrowser($request->header('User-Agent')),
+                'os' => $this->getOS($request->header('User-Agent')),
+                'latitude' => $request->input('latitude'),
+                'longitude' => $request->input('longitude')
+            ]);
+        }
 
         ApplicantESignatureEvent::create([
             'applicant_id' => $applicant->id,
@@ -220,6 +248,9 @@ class ApplicanESignatureController extends Controller
             'event_type' => EsignEventType::FINALIZED->value,
             'event_description' => "{$applicant->users->email} finalized the sign request for the document",
         ]);
+
+        // The signed application form + audit trail PDFs go into the applicant's Uploads ("Other").
+        StoreSignedApplicationDocuments::dispatch((int) $applicant->id);
 
         return response()->json([
             'success' => true,
@@ -302,6 +333,101 @@ class ApplicanESignatureController extends Controller
         return $pngPath;
     }
 
+    /**
+     * The certificate's map tiles are grayscale (the design); a converted copy is
+     * cached under storage/app/public/esign-audit so it is made once per map.
+     */
+    private function greyscaleImage(?string $path): ?string
+    {
+        if (empty($path) || !is_file($path) || !function_exists('imagecreatefrompng')) {
+            return $path ?: null;
+        }
+        $dir = storage_path('app/public/esign-audit');
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0775, true);
+        }
+        $out = $dir.'/'.md5($path.'|'.filemtime($path)).'_grey.png';
+        if (is_file($out)) {
+            return $out;
+        }
+        $info = @getimagesize($path);
+        $im = match ($info[2] ?? null) {
+            IMAGETYPE_PNG => @imagecreatefrompng($path),
+            IMAGETYPE_JPEG => @imagecreatefromjpeg($path),
+            default => null,
+        };
+        if (!$im) {
+            return $path;
+        }
+        imagefilter($im, IMG_FILTER_GRAYSCALE);
+        imagefilter($im, IMG_FILTER_CONTRAST, -5);
+        imagesavealpha($im, true);
+        $ok = imagepng($im, $out);
+        imagedestroy($im);
+
+        return $ok ? $out : $path;
+    }
+
+    /**
+     * The crest alone, cut from the site logo (Site settings > logo), whose wordmark
+     * is white on transparent and would vanish on paper. The certificate sets the
+     * college name in type next to it, as the design does. Cached like the maps.
+     */
+    private function crestFromLogo(?string $path): ?string
+    {
+        if (empty($path) || !is_file($path) || !function_exists('imagecreatefrompng')) {
+            return $path ?: null;
+        }
+        $dir = storage_path('app/public/esign-audit');
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0775, true);
+        }
+        $out = $dir.'/'.md5($path.'|'.filemtime($path)).'_crest.png';
+        if (is_file($out)) {
+            return $out;
+        }
+        $im = @imagecreatefrompng($path);
+        if (!$im) {
+            return $path;
+        }
+        $w = imagesx($im);
+        $h = imagesy($im);
+        // Scan left to right for the first fully transparent gap after the crest.
+        $lastVisible = -1;
+        $gap = 0;
+        $cut = $w;
+        for ($x = 0; $x < $w; $x++) {
+            $visible = false;
+            for ($y = 0; $y < $h; $y += 2) {
+                if (((imagecolorat($im, $x, $y) >> 24) & 0x7F) < 120) { $visible = true; break; }
+            }
+            if ($visible) { $lastVisible = $x; $gap = 0; }
+            elseif ($lastVisible > $w * 0.1) { $gap++; if ($gap >= max(4, (int) ($w * 0.01))) { $cut = $lastVisible + 1; break; } }
+        }
+        $crest = imagecrop($im, ['x' => 0, 'y' => 0, 'width' => max(1, $cut), 'height' => $h]);
+        imagedestroy($im);
+        if (!$crest) {
+            return $path;
+        }
+        imagesavealpha($crest, true);
+        $ok = imagepng($crest, $out);
+        imagedestroy($crest);
+
+        return $ok ? $out : $path;
+    }
+
+    /** The logo uploaded in Site settings, or the bundled one. */
+    private function siteLogoPath(): ?string
+    {
+        $file = Option::where('category', 'SITE_SETTINGS')->where('name', 'site_logo')->value('value');
+        if ($file && Storage::disk('local')->exists('public/'.$file)) {
+            return storage_path('app/public/'.$file);
+        }
+        $bundled = public_path('build/assets/images/red_and_white_logo.png');
+
+        return is_file($bundled) ? $bundled : null;
+    }
+
     private function resolvePdfImagePath(?string $path): ?string
     {
         if (empty($path)) {
@@ -335,6 +461,17 @@ class ApplicanESignatureController extends Controller
 
     public function download($id)
     {
+        [$pdf, $fileName] = $this->auditPdf($id);
+
+        return $pdf->stream($fileName);
+    }
+
+    /**
+     * The e-signature audit trail PDF and its file name. Also stored in the applicant's
+     * Uploads once the applicant signs (App\Services\Admission\SignedApplicationDocuments).
+     */
+    public function auditPdf($id): array
+    {
 
         $applicant = Applicant::with('users')->findOrFail($id);
         $applicantEsign = ApplicantESignature::where('applicant_id', $applicant->id)->first();
@@ -356,6 +493,9 @@ class ApplicanESignatureController extends Controller
             $generatedApplicantMap = $this->getMapScreenshot($applicantEsign->latitude, $applicantEsign->longitude, $applicant->id);
             $applicantMap = $generatedApplicantMap && is_file($generatedApplicantMap) ? $generatedApplicantMap : $defaultMap;
         }
+        // The design prints the maps in grayscale.
+        $adminMap = $this->greyscaleImage($adminMap);
+        $applicantMap = $this->greyscaleImage($applicantMap);
 
         $applicantEmail = $applicant->users->email ?? 'N/A';
         $adminEmail = $adminEsign?->user?->email ?? 'N/A';
@@ -369,12 +509,35 @@ class ApplicanESignatureController extends Controller
             ? public_path('storage/applicants/' . $applicant->id . '/' . $applicant->photo)
             : null;
 
+        $isFinalised = !empty($applicantEsign?->signature) || $finalizedEvent !== null;
+        $initialisedAt = $adminEsign?->created_at ?? $applicantEsign?->created_at;
+        $signedAt = $finalizedEvent?->created_at ?? $applicantEsign?->signed_date;
+        // "4 minutes", "2 days" … between the request and the signature.
+        $duration = null;
+        if ($isFinalised && $initialisedAt && $signedAt) {
+            $duration = \Carbon\Carbon::parse($initialisedAt)->diffForHumans(\Carbon\Carbon::parse($signedAt), ['parts' => 1, 'syntax' => \Carbon\CarbonInterface::DIFF_ABSOLUTE]);
+        }
+        // Who raised the request: the staff button, or the application submission (applicant / agent).
+        $createdEvent = $applicantEsignEvents->first(fn ($e) => $e->event_type === EsignEventType::SIGN_REQUEST_CREATED->value);
+        $triggerInfo = is_array($createdEvent?->extra_field) ? $createdEvent->extra_field : [];
+        $trigger = !empty($triggerInfo['trigger'])
+            ? 'On the application submission'.(!empty($triggerInfo['by_type']) ? ' by the '.$triggerInfo['by_type'] : '').(!empty($triggerInfo['by_email']) ? ' ('.$triggerInfo['by_email'].')' : '')
+            : (($adminEsign?->device ?? null) === 'Task Automation' ? 'By task automation' : null);
+        $via = [];
+        if ((int) ($adminEsign?->via_email ?? 0) === 1) $via[] = 'email';
+        if ((int) ($adminEsign?->via_sms ?? 0) === 1) $via[] = 'SMS';
+        $consented = $applicantEsignEvents->contains(fn ($e) => $e->event_type === EsignEventType::CONSENTED_TO_ESIGN->value);
+
         $signers = [
             [
                 'name' => $adminName,
                 'email' => $adminEmail,
                 'label' => 'Signer #1',
                 'color' => '#0d7a76',
+                'status' => 'Signed',
+                'email_status' => 'Verified',
+                'consent' => 'Agreed to eSign',
+                'time_label' => 'Signed',
                 'ip_address' => $adminEsign?->ip_address,
                 'browser' => $adminEsign?->browser,
                 'os' => $adminEsign?->os,
@@ -389,17 +552,22 @@ class ApplicanESignatureController extends Controller
                 'email' => $applicantEmail,
                 'label' => 'Signer #2',
                 'color' => '#8E2A3C',
+                'status' => $isFinalised ? 'Signed' : 'Pending',
+                'email_status' => $isFinalised ? 'Verified' : ($applicantEsign ? 'Link opened' : 'Awaiting'),
+                'consent' => $isFinalised || $consented ? 'Agreed to eSign' : 'Not yet given',
+                'time_label' => $isFinalised ? 'Signed' : 'Last opened',
                 'ip_address' => $applicantEsign?->ip_address,
                 'browser' => $applicantEsign?->browser,
                 'os' => $applicantEsign?->os,
                 'latitude' => $applicantEsign?->latitude,
                 'longitude' => $applicantEsign?->longitude,
-                'signed_at' => $finalizedEvent?->created_at ?? $applicantEsign?->signed_date,
+                'signed_at' => $isFinalised ? ($finalizedEvent?->created_at ?? $applicantEsign?->signed_date) : $applicantEsign?->updated_at,
                 'map' => $applicantMap,
                 'photo' => $applicantPhoto,
             ],
         ];
 
+        $reference = $applicant->application_no ?? $applicant->id;
         $PDFHTML = view('pages.students.admission.pdf.e-signature-audit', [
             'applicant' => $applicant,
             'applicantEsign' => $applicantEsign,
@@ -408,9 +576,18 @@ class ApplicanESignatureController extends Controller
             'finalizedEvent' => $finalizedEvent,
             'signers' => $signers,
             'signatureImage' => $this->resolvePdfImagePath($applicantEsign?->signature),
-            'logoImage' => public_path('build/assets/images/logo_white.svg'),
+            'logoImage' => $this->crestFromLogo($this->siteLogoPath()),
             'documentImage' => public_path('build/assets/images/report_icons/document-image.jpg'),
-            'reference' => $applicant->application_no ?? $applicant->id,
+            'isFinalised' => $isFinalised,
+            'statusLabel' => $isFinalised ? 'Finalised' : 'Awaiting signature',
+            'initialisedAt' => $initialisedAt,
+            'signedAt' => $signedAt,
+            'duration' => $duration,
+            'trigger' => $trigger,
+            'requestVia' => implode(' + ', $via),
+            'documentName' => (int) $applicant->status_id >= 6 ? 'Offer Acceptance Form' : 'Signed Application Form',
+            'generatedAt' => now(),
+            'reference' => $reference,
             'signatureId' => $applicantEsign?->id ? 'ESIG-' . $applicant->id . '-' . $applicantEsign->id : 'ESIG-' . $applicant->id,
             'fromEmail' => $adminEsign?->smtp_email ?? 'N/A',
             'applicantEmail' => $applicantEmail,
@@ -423,7 +600,29 @@ class ApplicanESignatureController extends Controller
             ->setPaper('a4', 'portrait')
             ->setWarnings(false);
 
-        return $pdf->stream($fileName);
+        // Running footer on every page: "Audit of <ref> · London Churchill College" and "Page n of m".
+        $pdf->render();
+        $dompdf = $pdf->getDomPDF();
+        $canvas = $dompdf->getCanvas();
+        $metrics = $dompdf->getFontMetrics();
+        $font = $metrics->getFont('Hanken Grotesk', 'normal') ?: $metrics->getFont('DejaVu Sans', 'normal');
+        $bold = $metrics->getFont('Hanken Grotesk', 'bold') ?: $font;
+        $w = $canvas->get_width();
+        $h = $canvas->get_height();
+        $left = 14 * 72 / 25.4;
+        $right = $w - $left;
+        $y = $h - (9 * 72 / 25.4);
+        $grey = [0.48, 0.52, 0.5];
+        $canvas->line($left, $y - 9, $right, $y - 9, [0.85, 0.85, 0.83], 0.6);
+        $canvas->page_text($left, $y, 'Audit of ', $font, 7.5, $grey);
+        $refX = $left + $metrics->getTextWidth('Audit of ', $font, 7.5);
+        $canvas->page_text($refX, $y, (string) $reference, $bold, 7.5, [0.08, 0.13, 0.12]);
+        $canvas->page_text($refX + $metrics->getTextWidth((string) $reference, $bold, 7.5), $y, ' · London Churchill College', $font, 7.5, $grey);
+        $pageText = 'Page {PAGE_NUM} of {PAGE_COUNT}';
+        $canvas->page_text($right - $metrics->getTextWidth('Page 0 of 0', $font, 7.5), $y, $pageText, $font, 7.5, $grey);
+
+        // return $pdf->stream($fileName);
+        return [$pdf, $fileName];
     }
 
 

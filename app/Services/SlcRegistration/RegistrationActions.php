@@ -109,6 +109,8 @@ class RegistrationActions
 
             // the work done on earlier uploads comes across, line by line (SSN)
             $c = app(CarryOver::class)->apply($import, $this->state);
+            // a No action chosen before for the same difference (NoActionMemory)
+            $c['remembered'] = app(NoActionMemory::class)->apply($import, $this->state);
 
             return $import;
         });
@@ -116,9 +118,10 @@ class RegistrationActions
         $n = count($p['rows']);
         $matched = SlcBulkImportRow::where('slc_bulk_import_id', $import->id)->whereNotNull('student_id')->count();
         $carried = $c['lines'] ? ' Carried over from earlier uploads for '.Text::plural($c['lines'], 'student').': '.Text::plural($c['decisions'], 'decision').', '.Text::plural($c['fields'], 'field decision').($c['moved'] ? ', '.$c['moved'].' batch '.($c['moved'] === 1 ? 'confirmation' : 'confirmations').' moved to this file' : '').($c['history'] ? ', '.$c['history'].' kept as history (SLC\'s value changed or now matches)' : '').'.' : '';
-        $this->log('Uploaded '.$fileName.' – '.$n.' students, '.$matched.' matched by SSN, '.($n - $matched).' without SSN on our system.'.$carried, $import->id);
+        $remembered = $c['remembered'] ? ' '.Text::plural($c['remembered'], 'difference').' set to No action as chosen on an earlier upload.' : '';
+        $this->log('Uploaded '.$fileName.' – '.$n.' students, '.$matched.' matched by SSN, '.($n - $matched).' without SSN on our system.'.$carried.$remembered, $import->id);
 
-        return 'Uploaded '.$n.' students. '.$matched.' matched by SSN, '.($n - $matched).' need identifying.'.$carried;
+        return 'Uploaded '.$n.' students. '.$matched.' matched by SSN, '.($n - $matched).' need identifying.'.$carried.$remembered;
     }
 
     /* -------------------------------------------------------------- identify */
@@ -202,7 +205,7 @@ class RegistrationActions
 
         return array_values(array_map(fn ($s) => [
             'id' => $s['reg_no'], 'sid' => $s['id'], 'title' => $s['title'], 'first' => $s['first'], 'last' => $s['last'],
-            'dob' => $s['dob'], 'postcode' => $s['addresses'][0]['postcode'] ?? '', 'ssn' => $s['ssn'], 'url' => $s['url'],
+            'dob' => $s['dob'], 'postcode' => $s['addresses'][0]['postcode'] ?? '', 'ssn' => $s['ssn'], 'url' => $s['url'], 'status' => $s['status'] ?? null,
         ], array_filter(array_map(fn ($id) => $snap[$id] ?? null, $ids))));
     }
 
@@ -222,6 +225,9 @@ class RegistrationActions
         if ($row->decision) {
             $this->fail('A decision has already been made for this student.');
         }
+        if ($route !== 'accept' && $row->fields->firstWhere('field', $key)?->route === 'accept') {
+            NoActionMemory::forget((int) $row->student_id, $key, $this->user());
+        }
         if ($route === 'update') {
             return $this->applyUpdate($row, $info, $ch, $quiet);
         }
@@ -234,12 +240,82 @@ class RegistrationActions
                 $f->slc_coc_id = ($this->openCoc($info, $ch) ?? $this->createCoc($row, $info, $ch))->id;
             }
             $f->save();
+            if ($route === 'accept') {
+                NoActionMemory::remember($row, $ch, $this->user()); // later uploads with the same difference get No action
+            }
         });
         if (!$quiet) {
-            $this->log(($route === 'coc' ? 'CoC to issue ('.Checks::COC_TYPE[$key].')' : ($route === 'contact' ? 'Student to contact about '.strtolower(Checks::FIELD_LABEL[$key]) : 'No action needed on '.strtolower(Checks::FIELD_LABEL[$key]))).' – '.$name, $row->slc_bulk_import_id);
+            $this->log(($route === 'coc' ? 'CoC to issue ('.Checks::COC_TYPE[$key].')' : ($route === 'contact' ? 'Student to contact about '.strtolower(Checks::FIELD_LABEL[$key]) : 'No action needed on '.strtolower(Checks::FIELD_LABEL[$key]).' (remembered for later uploads)')).' – '.$name, $row->slc_bulk_import_id);
         }
 
-        return $route === 'coc' ? 'CoC to issue added for '.$name.'.' : ($route === 'contact' ? $name.' added to students to contact.' : 'No action needed on '.strtolower(Checks::FIELD_LABEL[$key]).' for '.$name.'.');
+        return $route === 'coc' ? 'CoC to issue added for '.$name.'.' : ($route === 'contact' ? $name.' added to students to contact.' : 'No action needed on '.strtolower(Checks::FIELD_LABEL[$key]).' for '.$name.'. Remembered for later uploads.');
+    }
+
+    /** The order a group's fields are decided in: an address update brings in SLC's postcode too, so address goes first. */
+    private const GROUP_ORDER = ['title', 'first', 'last', 'gender', 'dob', 'address', 'postcode', 'course', 'start', 'year', 'tfl'];
+
+    /**
+     * Data check › a merged row (Name: title, first and last name; Address: address and postcode;
+     * user, 5 Nov 2026): one decision for each of those fields still to
+     * decide, in GROUP_ORDER, all or none. A field that an earlier one has already put right (the
+     * postcode after the address update) is
+     * left alone.
+     */
+    public function setRoutes(int $rowId, array $keys, string $route): string
+    {
+        $keys = array_values(array_intersect(self::GROUP_ORDER, array_unique($keys)));
+        if (!$keys) {
+            $this->fail('Nothing to decide.');
+        }
+        foreach ($keys as $k) {
+            if (!in_array($route, Checks::FIELD_ROUTES[$k] ?? [], true)) {
+                $this->fail('That action is not available for '.strtolower(Checks::FIELD_LABEL[$k]).'. Decide each field separately.');
+            }
+        }
+        $done = [];
+        DB::transaction(function () use ($rowId, $keys, $route, &$done) {
+            foreach ($keys as $k) {
+                $row = $this->row($rowId);
+                $ch = collect($this->state->infoFor(collect([$row]))[$row->id]['checks'])->firstWhere('key', $k);
+                if (!$ch || $ch['ok'] || !empty($ch['route'])) {
+                    continue;
+                }
+                $this->setRoute($rowId, $k, $route, true);
+                $done[] = strtolower(Checks::FIELD_LABEL[$k]);
+            }
+        });
+        if (!$done) {
+            $this->fail('Those fields have nothing left to decide.');
+        }
+        $row = $this->row($rowId);
+        $who = $this->who($row);
+        $what = count($done) > 1 ? implode(', ', array_slice($done, 0, -1)).' and '.end($done) : $done[0];
+        $this->log(match ($route) {
+            'update' => 'Updated our record – '.$who.': '.$what,
+            'coc' => 'CoC to issue – '.$who.': '.$what,
+            'contact' => 'Student to contact about '.$what.' – '.$who,
+            default => 'No action needed on '.$what.' – '.$who.' (remembered for later uploads)',
+        }, $row->slc_bulk_import_id);
+
+        return match ($route) {
+            'update' => 'Updated '.$who.'’s '.$what.' from SLC.',
+            'coc' => 'CoC to issue added for '.$who.' ('.$what.').',
+            'contact' => $who.' added to students to contact ('.$what.').',
+            default => 'No action needed on '.$what.' for '.$who.'. Remembered for later uploads.',
+        };
+    }
+
+    /** A merged row's Change: every one of those fields is open to decide again. */
+    public function clearRoutes(int $rowId, array $keys): string
+    {
+        $keys = array_values(array_intersect(self::GROUP_ORDER, array_unique($keys)));
+        DB::transaction(function () use ($rowId, $keys) {
+            foreach ($keys as $k) {
+                $this->clearRoute($rowId, $k);
+            }
+        });
+
+        return 'Reopened '.implode(', ', array_map(fn ($k) => strtolower(Checks::FIELD_LABEL[$k]), $keys)).'.';
     }
 
     public function clearRoute(int $rowId, string $key): string
@@ -249,16 +325,20 @@ class RegistrationActions
             $this->fail('A decision has already been made for this student. Reopen it first.');
         }
         $f = $row->fields->firstWhere('field', $key);
+        $forgot = 0;
         if ($f) {
-            DB::transaction(function () use ($f) {
+            DB::transaction(function () use ($f, $row, $key, &$forgot) {
                 $this->dropCoc($f);
+                if ($f->route === 'accept' && $row->student_id) {
+                    $forgot = NoActionMemory::forget((int) $row->student_id, $key, $this->user()); // checked again on later uploads
+                }
                 $f->delete();
             });
         }
         $st = Student::find($row->student_id);
-        $this->log('Reopened '.strtolower(Checks::FIELD_LABEL[$key] ?? $key).' for '.trim(($st->first_name ?? '').' '.($st->last_name ?? '')), $row->slc_bulk_import_id);
+        $this->log('Reopened '.strtolower(Checks::FIELD_LABEL[$key] ?? $key).' for '.trim(($st->first_name ?? '').' '.($st->last_name ?? '')).($forgot ? ' – No action no longer remembered' : ''), $row->slc_bulk_import_id);
 
-        return 'Reopened '.strtolower(Checks::FIELD_LABEL[$key] ?? $key).'.';
+        return 'Reopened '.strtolower(Checks::FIELD_LABEL[$key] ?? $key).'.'.($forgot ? ' No action is no longer remembered for it.' : '');
     }
 
     /** Every suggested decision on those lines; with $key, only that field's (Data check grouped by issue). */
@@ -294,7 +374,8 @@ class RegistrationActions
         $st = Student::findOrFail($row->student_id);
         $s = $info['snapshot'];
 
-        DB::transaction(function () use ($row, $r, $key, $st, $s, $ch) {
+        $which = ''; // the address update: which of our addresses took SLC's
+        DB::transaction(function () use ($row, $r, $key, $st, $s, $ch, &$which) {
             switch ($key) {
                 case 'title':
                     $title = Title::whereNull('deleted_at')->get()->first(fn ($t) => Text::norm($t->name) === Text::norm($r['title']));
@@ -320,7 +401,13 @@ class RegistrationActions
                     $this->setStudent($st, 'date_of_birth', Text::slcToIso($r['dob']));
                     break;
                 case 'address':
-                    $this->newAddress($st, $s, self::addressParts($this->rawField($row, 14)), strtoupper($r['postcode']), true);
+                    $parts = self::addressParts($this->rawField($row, 14));
+                    // SLC sets the town apart with a run of spaces; without one there is no town to
+                    // save (addresses.city is NOT NULL), so say so instead of failing on the insert
+                    if ($parts['city'] === '') {
+                        $this->fail('SLC’s address “'.trim($r['address']).'” has no separate town, so it can’t be split into our address fields. Update the address on the student’s profile instead.');
+                    }
+                    $which = $this->newAddress($st, $s, $parts, strtoupper($r['postcode']), true);
                     break;
                 case 'postcode':
                     [$addr] = Checks::bestAddress($r['address'], $s['addresses']);
@@ -333,15 +420,16 @@ class RegistrationActions
                 default:
                     $this->fail('That field cannot be updated here.');
             }
-            SlcBulkUpdate::create(['slc_bulk_import_row_id' => $row->id, 'student_id' => $st->id, 'field' => Checks::FIELD_LABEL[$key], 'from_value' => $ch['ours'], 'to_value' => $ch['slc'], 'created_by' => $this->user()]);
+            SlcBulkUpdate::create(['slc_bulk_import_row_id' => $row->id, 'student_id' => $st->id, 'field' => Checks::FIELD_LABEL[$key].($which ? ' ('.$which.')' : ''), 'from_value' => $ch['ours'], 'to_value' => $ch['slc'], 'created_by' => $this->user()]);
         });
 
         $name = $s['first'].' '.$s['last'];
+        $what = $which ? $which.' address' : strtolower(Checks::FIELD_LABEL[$key]);
         if (!$quiet) {
-            $this->log('Updated our record '.$s['reg_no'].' '.$name.': '.strtolower(Checks::FIELD_LABEL[$key]).' “'.$ch['ours'].'” → “'.$ch['slc'].'”', $row->slc_bulk_import_id);
+            $this->log('Updated our record '.$s['reg_no'].' '.$name.': '.$what.' “'.$ch['ours'].'” → “'.$ch['slc'].'”', $row->slc_bulk_import_id);
         }
 
-        return 'Updated '.$name.'’s '.strtolower(Checks::FIELD_LABEL[$key]).' to '.$ch['slc'].'.';
+        return 'Updated '.$name.'’s '.$what.' to '.$ch['slc'].'.'.($which === 'term-time' ? ' Their permanent address is a different address, so it was kept.' : '');
     }
 
     private function setStudent(Student $st, string $field, $value): void
@@ -355,16 +443,18 @@ class RegistrationActions
 
     /**
      * A new address row for the student (rows can be shared, so none is edited), pointed to from the
-     * contact. Address update: becomes the permanent address, and the term-time one too when it was
-     * the same address. Postcode fix: replaces the address it corrects wherever the contact uses it.
+     * contact. Address update (user, 5 Nov 2026): becomes the term-time address, and the permanent one
+     * too only when the permanent and term-time addresses are the same address — otherwise the
+     * permanent address is kept. Postcode fix: replaces the address it corrects wherever the contact
+     * uses it. Returns which addresses changed ("term-time and permanent", "term-time", …).
      */
-    private function newAddress(Student $st, array $s, array $parts, string $postcode, bool $asPermanent, ?int $replaces = null): void
+    private function newAddress(Student $st, array $s, array $parts, string $postcode, bool $asTermTime, ?int $replaces = null): string
     {
         $contact = StudentContact::where('student_id', $st->id)->whereNull('deleted_at')->orderByDesc('id')->first();
         if (!$contact) {
             $this->fail('The student has no contact record to hold an address.');
         }
-        $basis = Address::find($replaces ?: ($contact->permanent_address_id ?: $contact->term_time_address_id));
+        $basis = Address::find($replaces ?: ($contact->term_time_address_id ?: $contact->permanent_address_id));
         $address = Address::create([
             'address_line_1' => strtoupper((string) $parts['line1']), 'address_line_2' => strtoupper((string) ($parts['line2'] ?? '')) ?: null,
             'city' => strtoupper((string) ($parts['city'] ?? '')) ?: null, 'post_code' => $postcode,
@@ -372,13 +462,13 @@ class RegistrationActions
             'active' => 1, 'created_by' => $this->user(),
         ]);
         $old = $contact->getAttributes();
-        if ($asPermanent) {
-            $sameTerm = !$contact->term_time_address_id || (int) $contact->term_time_address_id === (int) $contact->permanent_address_id;
-            $contact->permanent_address_id = $address->id;
-            $contact->permanent_post_code = $postcode;
-            if ($sameTerm) {
-                $contact->term_time_address_id = $address->id;
-                $contact->term_time_post_code = $postcode;
+        if ($asTermTime) {
+            $both = self::sameAddress($contact->permanent_address_id, $contact->term_time_address_id);
+            $contact->term_time_address_id = $address->id;
+            $contact->term_time_post_code = $postcode;
+            if ($both) {
+                $contact->permanent_address_id = $address->id;
+                $contact->permanent_post_code = $postcode;
             }
         } else {
             if ((int) $contact->permanent_address_id === (int) $replaces) {
@@ -398,6 +488,32 @@ class RegistrationActions
                 $this->archive($st->id, 'student_contacts', $field, $old[$field] ?? null, $value);
             }
         }
+
+        $term = array_key_exists('term_time_address_id', $changes);
+        $perm = array_key_exists('permanent_address_id', $changes);
+
+        return $term && $perm ? 'term-time and permanent' : ($term ? 'term-time' : ($perm ? 'permanent' : ''));
+    }
+
+    /**
+     * Are a student's permanent and term-time addresses the same address? The same row, or two rows
+     * with the same lines, town and postcode. Neither held counts as the same (both take SLC's).
+     */
+    private static function sameAddress($permanentId, $termTimeId): bool
+    {
+        if (!$permanentId && !$termTimeId) {
+            return true;
+        }
+        if (!$permanentId || !$termTimeId) {
+            return false;
+        }
+        if ((int) $permanentId === (int) $termTimeId) {
+            return true;
+        }
+        $key = fn (?Address $a) => $a ? Text::addrNorm(implode(' ', [$a->address_line_1, $a->address_line_2, $a->city])).'|'.Text::pcNorm($a->post_code) : null;
+        $p = $key(Address::find($permanentId));
+
+        return $p !== null && $p === $key(Address::find($termTimeId));
     }
 
     /** SLC's address field as sent: parts separated by runs of spaces, the last one the town. */
@@ -449,6 +565,37 @@ class RegistrationActions
         $this->log($text, $row->slc_bulk_import_id);
 
         return $text.'.';
+    }
+
+    /**
+     * Actions › Email / SMS (user, 6 Nov 2026), once the Communication tab's sender has taken the
+     * message: it goes into Activity, and when it was sent from a Contact student line (and did go
+     * out) that line can be marked contacted in the same step. A failure to mark it doesn't undo
+     * the message, so it is said rather than thrown.
+     */
+    public function messageSent(string $kind, int $studentId, string $subject, bool $delivered, ?int $rowId = null, ?string $key = null, bool $markContacted = false): string
+    {
+        $st = Student::find($studentId);
+        $name = trim(($st->first_name ?? '').' '.($st->last_name ?? ''));
+        $row = $rowId ? SlcBulkImportRow::find($rowId) : null;
+        if ($row && (int) $row->student_id !== $studentId) {
+            $row = null;
+        }
+        $what = $kind === 'email' ? 'Email' : 'SMS';
+        $this->log($delivered ? $what.' sent to '.$name.': '.$subject : $what.' saved for '.$name.' but not sent (no mobile number): '.$subject, $row?->slc_bulk_import_id);
+        $text = $delivered ? $what.' sent to '.$name.'. It is on their Communication tab.' : 'The SMS was saved on '.$name.'’s Communication tab but not sent: they have no mobile number.';
+        if ($delivered && $markContacted && $row && $key) {
+            $f = SlcBulkRowField::where('slc_bulk_import_row_id', $row->id)->where('field', $key)->first();
+            if ($f && $f->route === 'contact' && !$f->state) {
+                try {
+                    $text .= ' '.$this->markAction($row->id, $key, 'contacted');
+                } catch (SlcRegistrationException $e) {
+                    $text .= ' It was not marked contacted: '.$e->getMessage();
+                }
+            }
+        }
+
+        return $text;
     }
 
     /** The CoC on the student's SLC tab, waiting to be raised in SIS. */
@@ -705,7 +852,7 @@ class RegistrationActions
             [$reg, $agr] = $this->slcRecords($s, $yearId, $regYear);
             if ($reg || $agr) {
                 $out[] = [
-                    'rowId' => $row->id, 'name' => trim($s['first'].' '.$s['last']), 'sid' => $s['reg_no'], 'year' => $regYear,
+                    'rowId' => $row->id, 'name' => trim($s['first'].' '.$s['last']), 'sid' => $s['reg_no'], 'year' => $regYear, 'status' => $s['status'] ?? null,
                     'regDate' => $reg ? substr((string) $reg->getRawOriginal('confirmation_date'), 0, 10) : null,
                     'regBy' => $reg ? (RegistrationState::names([$reg->created_by])[$reg->created_by] ?? '') : '',
                     'agrDate' => $agr && $agr->getRawOriginal('date') ? substr((string) $agr->getRawOriginal('date'), 0, 10) : null,

@@ -41,6 +41,16 @@
         }
     </style>
 @endsection
+@section('styles')
+<style>
+    /* A report tile drawn in HTML, sized and shaped like the 500x500 picture tiles
+       (text scales with the tile through container units). */
+    .rpt-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7%; width: 100%; aspect-ratio: 1 / 1; padding: 8%; border-radius: 0.375rem; background: #7A4E6E; color: #fff; text-decoration: none; overflow: hidden; container-type: inline-size; }
+    .rpt-tile__badge { display: flex; align-items: center; justify-content: center; width: 36%; aspect-ratio: 1 / 1.1; border-radius: 50% 50% 8% 8% / 45% 45% 8% 8%; background: #EDE7E3; }
+    .rpt-tile__icon { width: 55%; height: 55%; color: #7A4E6E; }
+    .rpt-tile__label { font-family: "Arial Narrow", "Roboto Condensed", Arial, sans-serif; font-weight: 800; font-size: 9.5cqw; line-height: 1.1; letter-spacing: 0.01em; text-align: center; text-transform: uppercase; }
+</style>
+@endsection
 @section('subcontent')
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">All Reports</h2>
@@ -123,6 +133,14 @@
                     <img class="block w-full h-auto shadow-md zoom-in rounded" alt="HESA All Students Report" src="{{ asset('build/assets/images/report_icons/active_student_by_date.png') }}">
                 </a>
             </div>
+            {{-- Hidden for now (3 Nov 2026): the Non-Tutor Attendance Updates report is opened by its URL.
+            <div class="col-span-12 sm:col-span-3 xl:col-span-2 2xl:col-span-1">
+                <a href="{{ route('reports.non.tutor.attendance') }}" class="rpt-tile zoom-in shadow-md" title="Staff who changed attendance in classes where they are not the class tutor or personal tutor">
+                    <span class="rpt-tile__badge"><i data-lucide="user-cog" class="rpt-tile__icon"></i></span>
+                    <span class="rpt-tile__label">Non-Tutor Attendance Updates</span>
+                </a>
+            </div>
+            --}}
         </div>
     </div>
 

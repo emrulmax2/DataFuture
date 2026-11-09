@@ -1,0 +1,252 @@
+<!--
+  DocuSeal "signature request" email for the offer acceptance form (template 6568085).
+  This file is the master copy: paste it into DocuSeal (template › Settings › Email); the app
+  does not send it. {{template.name}}, {{submitter.link}} and {{submitter.slug}} are DocuSeal's.
+  The Decline Offer button opens https://sms.lcc.ac.uk/offer/decline/{{submitter.slug}}
+  (OfferDeclineController): a confirmation page; confirming sets Offer Rejected, withdraws the
+  DocuSeal form and emails admissions, the staff member who sent it, the applicant and their agent.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Document Signature Request - London Churchill College</title>
+</head>
+
+<body style="margin:0;padding:0;background-color:#f2f0ed;font-family:Arial,Helvetica,sans-serif;color:#303b49;">
+
+  <div style="display:none;font-size:1px;color:#f2f0ed;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
+    Action required: Please review and electronically sign your document from London Churchill College.
+  </div>
+
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f2f0ed;">
+    <tr>
+      <td align="center" style="padding:30px 14px 35px;">
+
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:600px;background-color:#ffffff;border-collapse:separate;border-radius:14px;">
+
+          <!-- HEADER -->
+          <tr>
+            <td align="center" bgcolor="#102d50" style="padding:30px 25px 26px;background-color:#102d50;border-radius:14px 14px 0 0;">
+
+              <img
+                src="https://sms.lcc.ac.uk/storage/company_logo.png"
+                alt="London Churchill College"
+                width="340"
+                style="display:block;width:100%;max-width:340px;height:auto;border:0;outline:none;text-decoration:none;"
+              >
+
+              <p style="margin:20px 0 0;color:#e4eaf2;font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;">
+                ADMISSIONS OFFICE
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- GOLD ACCENT -->
+          <tr>
+            <td height="4" bgcolor="#c9a257" style="height:4px;line-height:4px;font-size:0;background-color:#c9a257;">
+              &nbsp;
+            </td>
+          </tr>
+
+          <!-- MAIN CONTENT -->
+          <tr>
+            <td style="padding:38px 32px 25px;">
+
+              <p style="margin:0 0 12px;color:#98783e;font-size:11px;font-weight:bold;letter-spacing:1.5px;">
+                DOCUMENT SIGNATURE REQUEST
+              </p>
+
+              <h1 style="margin:0 0 25px;color:#102d50;font-size:27px;font-weight:bold;line-height:1.35;">
+                Your Signature Is Required
+              </h1>
+
+              <p style="margin:0 0 20px;font-size:15px;line-height:1.8;color:#303b49;">
+                Hi there,
+              </p>
+
+              <p style="margin:0 0 20px;font-size:15px;line-height:1.8;color:#475569;">
+                Thank you for your application to London Churchill College.
+              </p>
+
+              <p style="margin:0 0 25px;font-size:15px;line-height:1.8;color:#475569;">
+                As part of our admissions process, we kindly request that you review and electronically sign the document prepared for you.
+              </p>
+
+              <!-- DOCUMENT INFORMATION -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f5f7fa;border:1px solid #e3e8ef;border-radius:8px;">
+                <tr>
+                  <td style="padding:19px 20px;">
+
+                    <p style="margin:0 0 7px;font-size:11px;font-weight:bold;letter-spacing:1px;color:#6b7280;">
+                      DOCUMENT AWAITING SIGNATURE
+                    </p>
+
+                    <p style="margin:0;font-size:16px;font-weight:bold;color:#102d50;line-height:1.5;">
+                      {{template.name}}
+                    </p>
+
+                    <p style="margin:8px 0 0;font-size:12px;color:#64748b;">
+                      Secure electronic document signing
+                    </p>
+
+                  </td>
+                </tr>
+              </table>
+
+              <!-- ACTION BUTTON -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" style="padding:32px 0 12px;">
+
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td align="center" bgcolor="#123c70" style="border-radius:6px;background-color:#123c70;">
+
+                          <a
+                            href="{{submitter.link}}"
+                            target="_blank"
+                            style="display:inline-block;padding:17px 32px;border:1px solid #123c70;border-radius:6px;color:#ffffff;font-size:15px;font-weight:bold;text-decoration:none;line-height:20px;"
+                          >
+                            Review &amp; Sign Document
+                          </a>
+
+                        </td>
+                      </tr>
+                    </table>
+
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:5px 0 28px;text-align:center;color:#7c8796;font-size:12px;line-height:1.6;">
+                Secure online signing &bull; No printing or scanning required
+              </p>
+
+              <!-- DECLINE BUTTON (opens a confirmation page on our site; nothing changes until the applicant confirms there) -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#fbf8f1;border:1px solid #ecdfc3;border-radius:8px;">
+                <tr>
+                  <td align="center" style="padding:20px 20px 22px;">
+
+                    <p style="margin:0 0 4px;color:#102d50;font-size:14px;font-weight:bold;line-height:1.6;">
+                      Not taking up your place?
+                    </p>
+
+                    <p style="margin:0 0 14px;color:#475569;font-size:13px;line-height:1.6;">
+                      You can decline the offer instead. You will be asked to confirm on the next page.
+                    </p>
+
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td align="center" bgcolor="#ffffff" style="border-radius:6px;background-color:#ffffff;border:1px solid #a3242f;">
+
+                          <a
+                            href="https://sms.lcc.ac.uk/offer/decline/{{submitter.slug}}"
+                            target="_blank"
+                            style="display:inline-block;padding:12px 28px;border-radius:6px;color:#a3242f;font-size:14px;font-weight:bold;text-decoration:none;line-height:20px;"
+                          >
+                            Decline Offer
+                          </a>
+
+                        </td>
+                      </tr>
+                    </table>
+
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:28px 0 18px;color:#475569;font-size:14px;line-height:1.8;">
+                Please carefully review the document before signing. You can complete the process securely online using your computer, tablet or mobile phone.
+              </p>
+
+              <p style="margin:0 0 24px;color:#475569;font-size:14px;line-height:1.8;">
+                If you have any questions or need assistance, please contact our Admissions Team.
+              </p>
+
+              <!-- ALTERNATIVE LINK -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="border-top:1px solid #e5e7eb;padding:20px 0 0;">
+
+                    <p style="margin:0 0 10px;color:#64748b;font-size:12px;line-height:1.7;">
+                      If the button above does not work, please copy and paste the following link into your browser:
+                    </p>
+
+                    <p style="margin:0;font-size:12px;line-height:1.7;word-break:break-all;overflow-wrap:anywhere;">
+                      <a href="{{submitter.link}}" target="_blank" style="color:#1257a5;text-decoration:underline;">
+                        {{submitter.link}}
+                      </a>
+                    </p>
+
+                  </td>
+                </tr>
+              </table>
+
+              <!-- SIGNATURE -->
+              <p style="margin:30px 0 4px;color:#475569;font-size:14px;line-height:1.7;">
+                Kind regards,
+              </p>
+
+              <p style="margin:0 0 4px;color:#102d50;font-size:15px;font-weight:bold;line-height:1.6;">
+                Admissions Team
+              </p>
+
+              <p style="margin:0;color:#475569;font-size:14px;line-height:1.6;">
+                London Churchill College
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- CONFIDENTIALITY DISCLAIMER -->
+          <tr>
+            <td style="padding:15px 32px 18px;border-top:1px dotted #d8d8d8;">
+
+              <p style="margin:0;color:#777777;font-size:12px;line-height:1.55;text-align:justify;">
+                This e-mail and its attachments are intended for the above named only and may be confidential. If they have come to you in error you must take no action based on them, nor must you copy or show them to anyone; please reply to this e-mail and highlight the error. Although this email and any attachments are believed to be free of any virus or another defect which might affect any computer or IT system onto which it is received and opened, it is the responsibility of the recipient to ensure that it is virus free, and no responsibility is accepted by London Churchill College for any loss or damage arising from its use.
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- ADDRESS AND PHONE -->
+          <tr>
+            <td align="center" style="padding:16px 20px 20px;border-top:1px dotted #d8d8d8;border-radius:0 0 14px 14px;">
+
+              <p style="margin:0 0 5px;color:#737373;font-size:12px;line-height:1.6;">
+                Barclay Hall, 156B Green Street, London, E7 8JQ
+              </p>
+
+              <p style="margin:0;color:#1257a5;font-size:13px;line-height:1.6;">
+                <a href="tel:+442073771077" style="color:#1257a5;text-decoration:none;">
+                  +44 (0) 207 377 1077
+                </a>
+              </p>
+
+            </td>
+          </tr>
+
+        </table>
+
+        <!-- TEXT OUTSIDE MAIN EMAIL CONTAINER -->
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;">
+          <tr>
+            <td align="center" style="padding:17px 15px 0;">
+
+              <p style="margin:0;color:#7a7a7a;font-size:11px;line-height:1.6;text-align:center;">
+                Sent automatically when the applicant acted on the DocuSeal offer acceptance form.
+              </p>
+
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

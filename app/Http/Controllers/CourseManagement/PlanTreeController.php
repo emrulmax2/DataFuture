@@ -322,6 +322,11 @@ class PlanTreeController extends Controller
                             $html .= '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6M22 11h-6"></path></svg>';
                             $html .= 'Assign / Deassign Students';
                         $html .= '</a>';
+                        // The group's class routine PDF emailed to each of its students (30 Oct 2026; PlanTreeClassIcpController).
+                        $html .= '<button type="button" class="cm-btn cm-btn--pill cm-btn--icp sendClassIcp" data-yearid="'.$academicYearId.'" data-attendanceSemester="'.$termDeclaredData.'" data-courseid="'.$courseId.'" data-groupid="'.$group->id.'">';
+                            $html .= '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>';
+                            $html .= 'Send Class ICP';
+                        $html .= '</button>';
                     $html .= '</div>';
                 endif;
             $html .= '</div>';

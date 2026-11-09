@@ -1,1366 +1,717 @@
-import ClassicEditor from "@ckeditor/ckeditor5-build-decoupled-document";
 import xlsx from "xlsx";
-import { createIcons, icons } from "lucide";
-import Tabulator from "tabulator-tables";
-import TomSelect from "tom-select";
+import axios from "axios";
 
-("use strict");
+/*
+ * Communication (pages/students/admission/communication on the admission portal shell).
+ * Email / SMS / Letter tabs; each has a compose form and the list of what was sent.
+ * Same endpoints as before:
+ *
+ *  - admission.communication.mail.list / sms.list / letter.list   paged; status 1 = live, 2 = deleted
+ *  - admission.communication.send.mail   #sendEmailForm (+ body from the editor, documents[])
+ *  - admission.communication.send.sms    #smsSMSForm
+ *  - admission.communication.send.letter #addLetterForm (+ letter_body from the editor)
+ *  - admission.communication.get.mail.template / get.sms.template / get.letter.set
+ *  - admission.communication.mail.show / sms.show                 the View dialog
+ *  - admission.communication.{mail,sms,letter}.{destroy,restore}  via #confirmModal
+ *  - admission.document.download                                   .downloadDoc (attachments, letter PDFs)
+ *
+ * Print prints the sent list of the active channel; Export CSV / XLSX write it out.
+ */
+(function () {
+    "use strict";
 
-function commEscape(value) {
-    return String(value == null ? "" : value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-}
+    const root = document.querySelector("[data-adp-comms]");
+    if (!root) return;
 
-function commInitials(name) {
-    const initials = String(name || "")
-        .trim()
-        .split(/\s+/)
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((part) => part.charAt(0).toUpperCase())
-        .join("");
-
-    return initials || "?";
-}
-
-function commAvatarColor(seed) {
-    const palette = ["#0d7a76", "#6d4bb0", "#2f7d4f", "#c0562a", "#2f8f7d", "#3a6ea5"];
-    const text = String(seed || "");
-    let hash = 0;
-
-    for (let i = 0; i < text.length; i += 1) {
-        hash = (hash + text.charCodeAt(i) * (i + 1)) % palette.length;
-    }
-
-    return palette[hash];
-}
-
-function commFormatFileSize(bytes) {
-    const size = Number(bytes) || 0;
-    if (size < 1024) return size + " B";
-    if (size < 1024 * 1024) return (size / 1024).toFixed(size < 10240 ? 1 : 0) + " KB";
-    return (size / (1024 * 1024)).toFixed(1) + " MB";
-}
-
-function commIssuedByHtml(name, date, seed) {
-    const safeName = commEscape(name || "--");
-    const safeDate = commEscape(date || "");
-
-    return '<div class="adm-comm-by">' +
-        '<span class="adm-comm-by__avatar" style="background:' + commAvatarColor(seed || name) + ';">' + commInitials(name) + '</span>' +
-        '<span class="adm-comm-by__text">' +
-            '<span class="adm-comm-by__name">' + safeName + '</span>' +
-            '<span class="adm-comm-by__date">' + safeDate + '</span>' +
-        '</span>' +
-    '</div>';
-}
-
-function commActionButton(action) {
-    const tag = action.tag || "button";
-    const attrs = [
-        'data-id="' + commEscape(action.id) + '"',
-        'class="' + commEscape(action.className) + ' adm-row-action adm-row-action--' + commEscape(action.type) + '"',
-        'title="' + commEscape(action.title) + '"',
-        'aria-label="' + commEscape(action.title) + '"',
-    ];
-
-    if (tag === "button") attrs.push('type="button"');
-    if (tag === "a") attrs.push('href="javascript:void(0);"');
-    if (action.extra) attrs.push(action.extra);
-
-    return '<' + tag + ' ' + attrs.join(" ") + '>' +
-        '<i data-lucide="' + commEscape(action.icon) + '"></i>' +
-    '</' + tag + '>';
-}
-
-function commActions(actions) {
-    return '<div class="adm-row-actions">' +
-        actions.filter(Boolean).map(commActionButton).join("") +
-    '</div>';
-}
-
-function commRenderLucide() {
-    createIcons({
-        icons,
-        "stroke-width": 1.8,
-        nameAttr: "data-lucide",
-    });
-}
-
-function commPrepareButtonLoaders(scope = document) {
-    scope.querySelectorAll('.modal-footer button svg[viewBox="-2 -2 42 42"]').forEach((svg) => {
-        svg.classList.add("adm-btn-loader");
-    });
-}
-
-function commDecorateModalButtons(scope = document) {
-    commPrepareButtonLoaders(scope);
-
-    scope.querySelectorAll(".modal-footer .btn, .modal-body.p-0 .px-5.pb-8.text-center .btn").forEach((button) => {
-        if (button.querySelector(".adm-btn-icon")) return;
-
-        const text = button.textContent.trim().toLowerCase();
-        let icon = "check";
-
-        if (text.includes("cancel")) icon = "x";
-        else if (text.includes("delete")) icon = "trash-2";
-        else if (text.includes("send")) icon = "send";
-        else if (text.includes("agree") || text.includes("ok") || text.includes("save") || text.includes("update")) icon = "check";
-
-        const iconEl = document.createElement("i");
-        iconEl.setAttribute("data-lucide", icon);
-        iconEl.className = "adm-btn-icon";
-        button.prepend(iconEl);
-    });
-
-    commRenderLucide();
-}
-
-function commSetButtonBusy(selector, busy) {
-    const button = document.querySelector(selector);
-    if (!button) return;
-
-    button.toggleAttribute("disabled", busy);
-    button.classList.toggle("is-busy", busy);
-
-    const loader = button.querySelector(".adm-btn-loader");
-    if (loader) {
-        loader.style.display = busy ? "inline-block" : "none";
-    }
-}
-
-var applicantCommLetterListTable = (function () {
-    var _tableGen = function () {
-        // Setup Tabulator
-        let applicantId = $("#applicantCommLetterListTable").attr('data-applicant') != "" ? $("#applicantCommLetterListTable").attr('data-applicant') : "0";
-        let queryStrCML = $("#query-CML").val() != "" ? $("#query-CML").val() : "";
-        let statusCML = $("#status-CML").val() != "" ? $("#status-CML").val() : "1";
-
-        let tableContent = new Tabulator("#applicantCommLetterListTable", {
-            ajaxURL: route("admission.communication.letter.list"),
-            ajaxParams: { applicantId: applicantId, queryStrCML : queryStrCML, statusCML : statusCML},
-            ajaxFiltering: true,
-            ajaxSorting: true,
-            printAsHtml: true,
-            printStyled: true,
-            pagination: "remote",
-            paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
-            layout: "fitColumns",
-            responsiveLayout: "collapse",
-            placeholder: "No matching records found",
-            columns: [
-                {
-                    title: "#ID",
-                    field: "id",
-                    headerHozAlign: "left",
-                    width: "120",
-                },
-                {
-                    title: "Type",
-                    field: "letter_type",
-                    headerHozAlign: "left"
-                },
-                {
-                    title: "Subject",
-                    field: "letter_title",
-                    headerHozAlign: "left"
-                },
-                {
-                    title: "Signatory",
-                    field: "signatory_name",
-                    headerHozAlign: "left"
-                },
-                {
-                    title: "Issued By",
-                    field: "created_by",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams){
-                        return commIssuedByHtml(cell.getData().created_by, cell.getData().created_at, cell.getData().id);
-                    }
-                },
-                {
-                    title: "Actions",
-                    field: "id",
-                    headerSort: false,
-                    hozAlign: "right",
-                    headerHozAlign: "right",
-                    width: "130",
-                    download: false,
-                    formatter(cell, formatterParams) {                        
-                        return commActions([
-                            cell.getData().docurl > 0 ? {
-                                tag: "a",
-                                type: "download",
-                                className: "downloadDoc",
-                                icon: "download",
-                                id: cell.getData().docurl,
-                                title: "Download",
-                            } : null,
-                            cell.getData().deleted_at == null ? {
-                                type: "delete",
-                                className: "delete_btn",
-                                icon: "trash-2",
-                                id: cell.getData().id,
-                                title: "Delete",
-                            } : {
-                                type: "restore",
-                                className: "restore_btn",
-                                icon: "rotate-cw",
-                                id: cell.getData().id,
-                                title: "Restore",
-                            },
-                        ]);
-                    },
-                },
-            ],
-            renderComplete() {
-                commRenderLucide();
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }
-            }
-        });
-
-        // Redraw table onresize
-        window.addEventListener("resize", () => {
-            tableContent.redraw();
-            commRenderLucide();
-        });
-
-        // Export
-        $("#tabulator-export-csv-CML").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
-        });
-
-        $("#tabulator-export-json-CML").on("click", function (event) {
-            tableContent.download("json", "data.json");
-        });
-
-        $("#tabulator-export-xlsx-CML").on("click", function (event) {
-            window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Admission Communication Details",
-            });
-        });
-
-        $("#tabulator-export-html-CML").on("click", function (event) {
-            tableContent.download("html", "data.html", {
-                style: true,
-            });
-        });
-
-        // Print
-        $("#tabulator-print-CML").on("click", function (event) {
-            tableContent.print();
-        });
+    const csrf = { "X-CSRF-TOKEN": (document.querySelector('meta[name="csrf-token"]') || {}).content || "" };
+    const byId = (id) => document.getElementById(id);
+    const esc = (v) => String(v === null || v === undefined ? "" : v)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    const applicantId = root.getAttribute("data-applicant") || (document.querySelector('input[name="applicant_id"]') || {}).value || "";
+    const modalOf = (id) => {
+        const el = byId(id);
+        return el && window.tailwind && window.tailwind.Modal ? window.tailwind.Modal.getOrCreateInstance(el) : null;
     };
-    return {
-        init: function () {
-            _tableGen();
-        },
+    const successModal = modalOf("successModal"), warningModal = modalOf("warningModal"), confirmModal = modalOf("confirmModal"), viewModal = modalOf("viewCommunicationModal");
+    const svg = (paths, size) => `<svg width="${size || 16}" height="${size || 16}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+    const PATHS = {
+        file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
+        download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+        eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+        trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+        undo: '<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/>',
+        x: '<path d="M18 6 6 18M6 6l12 12"/>',
+        send: '<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',
     };
-})();
-var applicantCommEmailListTable = (function () {
-    var _tableGen = function () {
-        // Setup Tabulator
-        let applicantId = $("#applicantCommEmailListTable").attr('data-applicant') != "" ? $("#applicantCommEmailListTable").attr('data-applicant') : "0";
-        let queryStrCME = $("#query-CME").val() != "" ? $("#query-CME").val() : "";
-        let statusCME = $("#status-CME").val() != "" ? $("#status-CME").val() : "1";
-
-        let tableContent = new Tabulator("#applicantCommEmailListTable", {
-            ajaxURL: route("admission.communication.mail.list"),
-            ajaxParams: { applicantId: applicantId, queryStrCME : queryStrCME, statusCME : statusCME},
-            ajaxFiltering: true,
-            ajaxSorting: true,
-            printAsHtml: true,
-            printStyled: true,
-            pagination: "remote",
-            paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
-            layout: "fitColumns",
-            responsiveLayout: "collapse",
-            placeholder: "No matching records found",
-            columns: [
-                {
-                    title: "#ID",
-                    field: "id",
-                    headerHozAlign: "left",
-                    width: "120",
-                },
-                {
-                    title: "Subject",
-                    field: "subject",
-                    headerHozAlign: "left"
-                },
-                {
-                    title: "From",
-                    field: "smtp",
-                    headerHozAlign: "left"
-                },
-                {
-                    title: "Issued By",
-                    field: "created_by",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams){
-                        return commIssuedByHtml(cell.getData().created_by, cell.getData().created_at, cell.getData().id);
-                    }
-                },
-                {
-                    title: "Actions",
-                    field: "id",
-                    headerSort: false,
-                    hozAlign: "right",
-                    headerHozAlign: "right",
-                    width: "130",
-                    download: false,
-                    formatter(cell, formatterParams) {                        
-                        return commActions(
-                            cell.getData().deleted_at == null ? [
-                                {
-                                    type: "view",
-                                    className: "view_btn",
-                                    icon: "eye",
-                                    id: cell.getData().id,
-                                    title: "View",
-                                    extra: 'data-tw-toggle="modal" data-tw-target="#viewCommunicationModal"',
-                                },
-                                {
-                                    type: "delete",
-                                    className: "delete_btn",
-                                    icon: "trash-2",
-                                    id: cell.getData().id,
-                                    title: "Delete",
-                                },
-                            ] : [
-                                {
-                                    type: "restore",
-                                    className: "restore_btn",
-                                    icon: "rotate-cw",
-                                    id: cell.getData().id,
-                                    title: "Restore",
-                                },
-                            ]
-                        );
-                    },
-                },
-            ],
-            renderComplete() {
-                commRenderLucide();
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }
-            }
-        });
-
-        // Redraw table onresize
-        window.addEventListener("resize", () => {
-            tableContent.redraw();
-            commRenderLucide();
-        });
-
-        // Export
-        $("#tabulator-export-csv-CME").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
-        });
-
-        $("#tabulator-export-json-CME").on("click", function (event) {
-            tableContent.download("json", "data.json");
-        });
-
-        $("#tabulator-export-xlsx-CME").on("click", function (event) {
-            window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Applicant Email Details",
-            });
-        });
-
-        $("#tabulator-export-html-CME").on("click", function (event) {
-            tableContent.download("html", "data.html", {
-                style: true,
-            });
-        });
-
-        // Print
-        $("#tabulator-print-CME").on("click", function (event) {
-            tableContent.print();
-        });
+    const fmtSize = (n) => (n > 1024 * 1024 ? (n / 1024 / 1024).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB");
+    const busy = (btn, on) => {
+        if (!btn) return;
+        btn.toggleAttribute("disabled", on);
+        btn.querySelectorAll(".adm-btn-loader").forEach((l) => { l.style.display = on ? "inline-block" : "none"; });
     };
-    return {
-        init: function () {
-            _tableGen();
-        },
+    const setText = (scope, sel, text) => { const el = scope ? scope.querySelector(sel) : null; if (el) el.textContent = text; };
+    const selectedText = (sel) => (sel && sel.selectedIndex >= 0 ? (sel.options[sel.selectedIndex].text || "").trim() : "");
+
+    /* ---------- outcome dialogs -------------------------------------------- */
+    const successEl = byId("successModal"), warningEl = byId("warningModal");
+    const showSuccess = (title, text) => {
+        setText(successEl, ".successModalTitle", title);
+        setText(successEl, ".successModalDesc", text || "");
+        const closer = successEl && successEl.querySelector(".successCloser");
+        if (closer) closer.setAttribute("data-action", "DISMISS");
+        if (successModal) successModal.show();
+        window.setTimeout(() => { if (successModal) successModal.hide(); }, 2400);
     };
-})();
-
-var applicantCommSMSListTable = (function () {
-    var _tableGen = function () {
-        // Setup Tabulator
-        let applicantId = $("#applicantCommSMSListTable").attr('data-applicant') != "" ? $("#applicantCommSMSListTable").attr('data-applicant') : "0";
-        let queryStrCMS = $("#query-CMS").val() != "" ? $("#query-CMS").val() : "";
-        let statusCMS = $("#status-CMS").val() != "" ? $("#status-CMS").val() : "1";
-
-        let tableContent = new Tabulator("#applicantCommSMSListTable", {
-            ajaxURL: route("admission.communication.sms.list"),
-            ajaxParams: { applicantId: applicantId, queryStrCMS : queryStrCMS, statusCMS : statusCMS},
-            ajaxFiltering: true,
-            ajaxSorting: true,
-            printAsHtml: true,
-            printStyled: true,
-            pagination: "remote",
-            paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
-            layout: "fitColumns",
-            responsiveLayout: "collapse",
-            placeholder: "No matching records found",
-            columns: [
-                {
-                    title: "#ID",
-                    field: "id",
-                    headerHozAlign: "left",
-                    width: "120",
-                },
-                {
-                    title: "Subject",
-                    field: "subject",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams){
-                        var html = '';
-                        html += '<div>';
-                            html += cell.getData().subject;
-                        html += '</div>';
-
-                        return html;
-                    }
-                },
-                {
-                    title: "Template",
-                    field: "template",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams){
-                        var html = '';
-                        html += '<div>';
-                            html += cell.getData().template;
-                        html += '</div>';
-
-                        return html;
-                    }
-                },
-                {
-                    title: "Issued By",
-                    field: "created_by",
-                    headerHozAlign: "left",
-                    width: "180",
-                    formatter(cell, formatterParams){
-                        return commIssuedByHtml(cell.getData().created_by, cell.getData().created_at, cell.getData().id);
-                    }
-                },
-                {
-                    title: "Actions",
-                    field: "id",
-                    headerSort: false,
-                    hozAlign: "right",
-                    headerHozAlign: "right",
-                    width: "130",
-                    download: false,
-                    formatter(cell, formatterParams) {                        
-                        return commActions(
-                            cell.getData().deleted_at == null ? [
-                                {
-                                    type: "view",
-                                    className: "view_btn",
-                                    icon: "eye",
-                                    id: cell.getData().id,
-                                    title: "View",
-                                    extra: 'data-tw-toggle="modal" data-tw-target="#viewCommunicationModal"',
-                                },
-                                {
-                                    type: "delete",
-                                    className: "delete_btn",
-                                    icon: "trash-2",
-                                    id: cell.getData().id,
-                                    title: "Delete",
-                                },
-                            ] : [
-                                {
-                                    type: "restore",
-                                    className: "restore_btn",
-                                    icon: "rotate-cw",
-                                    id: cell.getData().id,
-                                    title: "Restore",
-                                },
-                            ]
-                        );
-                    },
-                },
-            ],
-            renderComplete() {
-                commRenderLucide();
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }
-            }
-        });
-
-        // Redraw table onresize
-        window.addEventListener("resize", () => {
-            tableContent.redraw();
-            commRenderLucide();
-        });
-
-        // Export
-        $("#tabulator-export-csv-CMS").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
-        });
-
-        $("#tabulator-export-json-CMS").on("click", function (event) {
-            tableContent.download("json", "data.json");
-        });
-
-        $("#tabulator-export-xlsx-CMS").on("click", function (event) {
-            window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Applicant SMS Details",
-            });
-        });
-
-        $("#tabulator-export-html-CMS").on("click", function (event) {
-            tableContent.download("html", "data.html", {
-                style: true,
-            });
-        });
-
-        // Print
-        $("#tabulator-print-CMS").on("click", function (event) {
-            tableContent.print();
-        });
+    const showWarning = (title, text) => {
+        setText(warningEl, ".warningModalTitle", title);
+        setText(warningEl, ".warningModalDesc", text || "");
+        const closer = warningEl && warningEl.querySelector(".warningCloser");
+        if (closer) closer.setAttribute("data-action", "NONE");
+        if (warningModal) warningModal.show();
     };
-    return {
-        init: function () {
-            _tableGen();
-        },
-    };
-})();
-
-(function(){
-    if ($("#applicantCommSMSListTable").length) {
-        // Init Table
-        applicantCommSMSListTable.init();
-
-        // Filter function
-        function filterHTMLFormCMS() {
-            applicantCommSMSListTable.init();
-        }
-
-
-        // On click go button
-        $("#tabulator-html-filter-go-CMS").on("click", function (event) {
-            filterHTMLFormCMS();
-        });
-
-        // On reset filter form
-        $("#tabulator-html-filter-reset-CMS").on("click", function (event) {
-            $("#query-CMS").val("");
-            $("#status-CMS").val("1");
-            filterHTMLFormCMS();
-        });
-
-    }
-
-    if ($("#applicantCommEmailListTable").length) {
-        // Init Table
-        applicantCommEmailListTable.init();
-
-        // Filter function
-        function filterHTMLFormCME() {
-            applicantCommEmailListTable.init();
-        }
-
-
-        // On click go button
-        $("#tabulator-html-filter-go-CME").on("click", function (event) {
-            filterHTMLFormCME();
-        });
-
-        // On reset filter form
-        $("#tabulator-html-filter-reset-CME").on("click", function (event) {
-            $("#query-CME").val("");
-            $("#status-CME").val("1");
-            filterHTMLFormCME();
-        });
-
-    }
-
-    if ($("#applicantCommLetterListTable").length) {
-        // Init Table
-        applicantCommLetterListTable.init();
-
-        // Filter function
-        function filterHTMLFormCML() {
-            applicantCommLetterListTable.init();
-        }
-
-
-        // On click go button
-        $("#tabulator-html-filter-go-CML").on("click", function (event) {
-            filterHTMLFormCML();
-        });
-
-        // On reset filter form
-        $("#tabulator-html-filter-reset-CML").on("click", function (event) {
-            $("#query-CML").val("");
-            $("#status-CML").val("1");
-            filterHTMLFormCML();
-        });
-
-    }
-
-    let letterEditor;
-    if($("#letterEditor").length > 0){
-        const el = document.getElementById('letterEditor');
-        ClassicEditor.create(el).then((editor) => {
-            letterEditor = editor;
-            $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
-        }).catch((error) => {
-            console.error(error);
-        });
-    }
-
-    let mailEditor;
-    if($("#mailEditor").length > 0){
-        const el = document.getElementById('mailEditor');
-        ClassicEditor.create(el).then((editor) => {
-            mailEditor = editor;
-            $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
-        }).catch((error) => {
-            console.error(error);
-        });
-    }
-
-    let tomOptions = {
-        plugins: {
-            dropdown_input: {}
-        },
-        placeholder: 'Search Here...',
-        dropdownParent: 'body',
-        dropdownClass: 'ts-dropdown lcc-tom-float',
-        //persist: false,
-        create: false,
-        allowEmptyOption: false,
-        onDelete: function (values) {
-            return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
-        },
-    };
-
-    let letter_set_id = new TomSelect('#letter_set_id', tomOptions);
-    let sms_template_id = new TomSelect('#sms_template_id', tomOptions);
-    let email_template_id = new TomSelect('#email_template_id', tomOptions);
-
-
-    const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-    const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
-    const addLetterModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addLetterModal"));
-    const sendEmailModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#sendEmailModal"));
-    const smsSMSModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#smsSMSModal"));
-    const viewCommunicationModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#viewCommunicationModal"));
-
-    commDecorateModalButtons();
-
-    const addLetterModalEl = document.getElementById('addLetterModal')
-    addLetterModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#addLetterModal .acc__input-error').html('');
-        $('#addLetterModal .modal-body input').val('');
-        $('#addLetterModal .modal-body select').val('');
-        $('#addLetterModal .modal-footer input#is_send_email').prop('checked', true);
-        $('#addLetterModal .letterEditorArea').fadeOut();
-        letterEditor.setData('');
-        letter_set_id.clear(true);
-    });
-
-    const sendEmailModalEl = document.getElementById('sendEmailModal')
-    sendEmailModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#sendEmailModal .acc__input-error').html('');
-        $('#sendEmailModal .modal-body input#sendMailsDocument').val('');
-        $('#sendEmailModal .modal-body input, #sendEmailModal .modal-body select').val('');
-        $('#sendEmailModal .sendMailsDocumentNames').html('').fadeOut();
-        mailEditor.setData('');
-        email_template_id.clear(true);
-    });
-
-    const smsSMSModalEl = document.getElementById('smsSMSModal')
-    smsSMSModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#smsSMSModal .acc__input-error').html('');
-        $('#smsSMSModal .modal-body input, #smsSMSModal .modal-body textarea').val('');
-        sms_template_id.clear(true);
-    });
-
-    const confirmModalEl = document.getElementById('confirmModal')
-    confirmModalEl.addEventListener('hide.tw.modal', function(event) {
-        $("#confirmModal .confModDesc").html('');
-        $("#confirmModal .agreeWith").attr('data-recordid', '0');
-        $("#confirmModal .agreeWith").attr('data-status', 'none');
-        $('#confirmModal button').removeAttr('disabled');
-    });
-
-    const viewCommunicationModalEl = document.getElementById('viewCommunicationModal')
-    viewCommunicationModalEl.addEventListener('hide.tw.modal', function(event) {
-        $("#viewCommunicationModal .modal-body").html('');
-        $('#viewCommunicationModal .modal-header h2').html('View Communication');
-    });
-
-    $('#successModal .successCloser').on('click', function(e){
+    [successEl, warningEl].forEach((el) => { if (el) el.addEventListener("click", (e) => {
+        if (!e.target.closest(".successCloser, .warningCloser")) return;
         e.preventDefault();
-        if($(this).attr('data-action') == 'RELOAD'){
-            successModal.hide();
-            window.location.reload();
-        }else{
-            successModal.hide();
+        const m = el === successEl ? successModal : warningModal;
+        if (m) m.hide();
+    }); });
+
+    /* ---------- form errors (server keys map to .error-{key} / .{key}) ------ */
+    const clearErrors = (form) => {
+        form.querySelectorAll(".acc__input-error").forEach((el) => { el.textContent = ""; });
+        form.querySelectorAll(".err").forEach((el) => el.classList.remove("err"));
+    };
+    const paintErrors = (form, errors) => {
+        let first = null;
+        Object.keys(errors || {}).forEach((key) => {
+            const text = [].concat(errors[key]).join(" ");
+            const slot = form.querySelector(`.error-${key}`);
+            if (slot) slot.textContent = text;
+            const ctl = form.querySelector(`[name="${key}"]`) || form.querySelector(`.${key}`) || (key === "body" || key === "letter_body" ? form.querySelector("[data-adp-editor]") : null);
+            if (ctl) { ctl.classList.add("err"); if (!first) first = ctl; }
+        });
+        if (first && typeof first.focus === "function") first.focus();
+    };
+
+    /* ---------- the design's small editor ----------------------------------- */
+    const makeEditor = (editorRoot) => {
+        const body = editorRoot.querySelector("[data-adp-ed-body]");
+        const bar = editorRoot.querySelector(".adp-ed-bar");
+        const api = {
+            root: editorRoot, body,
+            html: () => body.innerHTML,
+            text: () => body.textContent.replace(/ /g, " ").trim(),
+            isEmpty: () => api.text() === "" && !body.querySelector("img"),
+            set: (html) => { body.innerHTML = html || ""; },
+            clear: () => { body.innerHTML = ""; },
+            focus: () => body.focus(),
+            onChange: (fn) => body.addEventListener("input", fn),
+        };
+        if (bar) bar.addEventListener("mousedown", (e) => {
+            const btn = e.target.closest("[data-cmd]");
+            if (!btn) return;
+            e.preventDefault();
+            body.focus();
+            document.execCommand(btn.getAttribute("data-cmd"), false, null);
+            body.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+        /* paste as plain text so pasted formatting cannot break the layout */
+        body.addEventListener("paste", (e) => {
+            if (!e.clipboardData) return;
+            e.preventDefault();
+            document.execCommand("insertText", false, e.clipboardData.getData("text/plain"));
+        });
+        return api;
+    };
+    const editorOf = (bodyId) => { const body = byId(bodyId); return body ? makeEditor(body.closest("[data-adp-editor]")) : null; };
+
+    /* ---------- channels ---------------------------------------------------- */
+    const CH = {
+        email: { list: "admission.communication.mail.list", q: "queryStrCME", s: "statusCME", show: "admission.communication.mail.show", destroy: "admission.communication.mail.destroy", restore: "admission.communication.mail.restore", del: "DELETEMAIL", res: "RESTOREMAIL", noun: "Email", plural: "emails", title: "Sent emails", file: "applicant_emails" },
+        sms: { list: "admission.communication.sms.list", q: "queryStrCMS", s: "statusCMS", show: "admission.communication.sms.show", destroy: "admission.communication.sms.destroy", restore: "admission.communication.sms.restore", del: "DELETESMS", res: "RESTORESMS", noun: "SMS", plural: "messages", title: "Sent messages", file: "applicant_sms" },
+        letter: { list: "admission.communication.letter.list", q: "queryStrCML", s: "statusCML", show: null, destroy: "admission.communication.letter.destroy", restore: "admission.communication.letter.restore", del: "DELETELETTER", res: "RESTORELETTER", noun: "Letter", plural: "letters", title: "Sent letters", file: "applicant_letters" },
+    };
+    const ACTIONS = {};
+    Object.keys(CH).forEach((k) => { ACTIONS[CH[k].del] = { channel: k, method: "delete", name: CH[k].destroy, kind: "delete" }; ACTIONS[CH[k].res] = { channel: k, method: "post", name: CH[k].restore, kind: "restore" }; });
+    let active = "email";
+    let query = "";
+    let deletedCounts = { email: 0, sms: 0, letter: 0 };
+    try { deletedCounts = Object.assign(deletedCounts, JSON.parse(root.getAttribute("data-adp-deleted-counts") || "{}")); } catch (e) { /* defaults */ }
+    const state = { email: { page: 1, lastPage: 1, total: 0, rows: [] }, sms: { page: 1, lastPage: 1, total: 0, rows: [] }, letter: { page: 1, lastPage: 1, total: 0, rows: [] } };
+    const deletedLoaded = { email: false, sms: false, letter: false };
+    const subjectOf = (channel, r) => (channel === "letter" ? (r.letter_title || r.letter_type || "Letter") : (r.subject || "—"));
+
+    const fetchList = (channel, page, status, size) => {
+        const c = CH[channel];
+        const params = { applicantId, page, size: size || 10 };
+        params[c.q] = query;
+        params[c.s] = status;
+        return axios.get(route(c.list), { params, headers: csrf }).then((r) => r.data || {});
+    };
+
+    /* ---------- sent list ---------------------------------------------------- */
+    const sentRows = root.querySelector("[data-adp-sent-rows]");
+    const sentLoading = root.querySelector("[data-adp-sent-loading]");
+    const sentEmpty = root.querySelector("[data-adp-sent-empty]");
+    const sentMore = root.querySelector("[data-adp-sent-more]");
+    const sentTitle = root.querySelector("[data-adp-sent-title]");
+    const sentCount = root.querySelector("[data-adp-sent-count]");
+    const metaOf = (channel, r) => {
+        const bits = [r.created_at, r.created_by];
+        if (channel === "email") { if (r.smtp) bits.push(r.smtp); if (Number(r.attachments) > 0) bits.push(`${r.attachments} attachment${Number(r.attachments) > 1 ? "s" : ""}`); }
+        if (channel === "sms") { if (r.template) bits.push(r.template); if (Number(r.segments) > 1) bits.push(`${r.segments} segments`); }
+        if (channel === "letter") { if (r.issued_date) bits.push(`issued ${r.issued_date}`); if (r.signatory_name) bits.push(`signed by ${r.signatory_name}`); if (r.smtp) bits.push(r.smtp); }
+        return bits.filter(Boolean);
+    };
+    const rowHtml = (channel, r) => {
+        const subject = subjectOf(channel, r);
+        const acts = [];
+        if (channel === "letter" && Number(r.docurl) > 0) acts.push(`<button type="button" class="adp-iconbtn downloadDoc" data-id="${esc(r.docurl)}" title="Download PDF" aria-label="Download PDF">${svg(PATHS.download, 15)}</button>`);
+        acts.push(`<button type="button" class="adp-iconbtn view_btn" data-id="${esc(r.id)}" title="View" aria-label="View">${svg(PATHS.eye, 15)}</button>`);
+        acts.push(`<button type="button" class="adp-iconbtn adp-iconbtn--danger delete_btn" data-id="${esc(r.id)}" data-adp-subject="${esc(subject)}" title="Delete" aria-label="Delete">${svg(PATHS.trash, 15)}</button>`);
+        const sub = channel === "letter" && r.letter_type ? `<small class="adp-vrow__type">${esc(r.letter_type)}</small>` : "";
+        return `<div class="adp-vrow adp-vrow--comm" data-adp-comm="${esc(r.id)}"><div class="adp-vrow__main">${sub}<b class="adp-vrow__subject" title="${esc(subject)}">${esc(subject)}</b><span class="adp-vrow__meta">${metaOf(channel, r).map(esc).join(" · ")} · <span class="adp-pill adp-pill--green adp-pill--tight"><i></i>Sent</span></span></div><div class="adp-acts">${acts.join("")}</div></div>`;
+    };
+    const paintCount = () => {
+        if (!sentCount) return;
+        const st = state[active];
+        sentCount.textContent = st.total ? `${st.total} ${st.total === 1 ? CH[active].plural.replace(/s$/, "").replace(/^message$/, "message") : CH[active].plural}${query ? ` matching “${query}”` : ""}` : "";
+    };
+    const loadList = (reset) => {
+        const channel = active, st = state[channel];
+        if (reset) { st.page = 1; st.rows = []; if (sentRows) sentRows.innerHTML = ""; }
+        if (sentLoading) sentLoading.hidden = false;
+        if (sentEmpty) sentEmpty.hidden = true;
+        if (sentMore) sentMore.hidden = true;
+        return fetchList(channel, st.page, 1).then((res) => {
+            if (channel !== active) return;
+            const rows = Array.isArray(res.data) ? res.data : [];
+            st.lastPage = Number(res.last_page) || 1;
+            st.total = Number(res.total_rows) || rows.length;
+            st.rows = st.rows.concat(rows);
+            if (sentRows) sentRows.insertAdjacentHTML("beforeend", rows.map((r) => rowHtml(channel, r)).join(""));
+            if (sentLoading) sentLoading.hidden = true;
+            if (sentEmpty) sentEmpty.hidden = st.rows.length > 0;
+            if (sentMore) sentMore.hidden = !(st.page < st.lastPage);
+            paintCount();
+        }).catch(() => {
+            if (channel !== active) return;
+            if (sentLoading) sentLoading.hidden = true;
+            showWarning(`Could not load the ${CH[channel].plural}`, "Reload the page and try again.");
+        });
+    };
+    if (sentMore) sentMore.addEventListener("click", (e) => { if (!e.target.closest("button")) return; state[active].page += 1; loadList(false); });
+
+    /* search (the old per-table query filters, one box for the active channel) */
+    const queryInput = byId("query-CM");
+    const resetBtn = byId("tabulator-html-filter-reset-CM");
+    const search = () => { query = queryInput ? queryInput.value.trim() : ""; if (resetBtn) resetBtn.hidden = query === ""; loadList(true); };
+    const goBtn = byId("tabulator-html-filter-go-CM"), filterForm = byId("tabulatorFilterForm-CM");
+    if (goBtn) goBtn.addEventListener("click", (e) => { e.preventDefault(); search(); });
+    if (filterForm) filterForm.addEventListener("submit", (e) => { e.preventDefault(); search(); });
+    if (resetBtn) resetBtn.addEventListener("click", (e) => { e.preventDefault(); if (queryInput) queryInput.value = ""; search(); });
+
+    /* ---------- deleted ------------------------------------------------------ */
+    const deletedBox = root.querySelector("[data-adp-deleted]");
+    const deletedCountEl = root.querySelector("[data-adp-deleted-count]");
+    const deletedRows = root.querySelector("[data-adp-deleted-rows]");
+    const deletedLoading = root.querySelector("[data-adp-deleted-loading]");
+    const paintDeleted = () => {
+        const n = Number(deletedCounts[active]) || 0;
+        if (deletedCountEl) deletedCountEl.textContent = String(n);
+        if (deletedBox) { deletedBox.hidden = n === 0; if (n === 0) deletedBox.open = false; }
+    };
+    const loadDeleted = () => {
+        const channel = active;
+        if (!deletedRows) return Promise.resolve();
+        if (deletedLoading) deletedLoading.hidden = false;
+        return fetchList(channel, 1, 2, true).then((res) => {
+            if (channel !== active) return;
+            const rows = Array.isArray(res.data) ? res.data : [];
+            deletedCounts[channel] = Number(res.total_rows) || rows.length;
+            deletedLoaded[channel] = true;
+            deletedRows.innerHTML = rows.map((r) => {
+                const subject = subjectOf(channel, r);
+                return `<div class="adp-vrow adp-vrow--note"><span><span class="adp-vrow__text" title="${esc(subject)}">${esc(subject)}</span><span class="adp-vrow__meta">${esc(r.created_by || "")}${r.deleted_at ? ` · deleted ${esc(r.deleted_at)}` : ""}</span></span><button type="button" class="adp-btn adp-btn--ghost adp-btn--sm restore_btn" data-id="${esc(r.id)}" data-adp-subject="${esc(subject)}">${svg(PATHS.undo, 13)}Restore</button></div>`;
+            }).join("");
+            if (deletedLoading) deletedLoading.hidden = true;
+            paintDeleted();
+        }).catch(() => { if (deletedLoading) deletedLoading.hidden = true; });
+    };
+    if (deletedBox) deletedBox.addEventListener("toggle", () => { if (deletedBox.open && !deletedLoaded[active]) loadDeleted(); });
+
+    /* ---------- channel tabs ------------------------------------------------ */
+    const tabs = Array.from(root.querySelectorAll("[data-adp-channel]"));
+    const forms = { email: byId("sendEmailForm"), sms: byId("smsSMSForm"), letter: byId("addLetterForm") };
+    const setChannel = (channel, remember) => {
+        if (!CH[channel]) channel = "email";
+        active = channel;
+        tabs.forEach((b) => { const on = b.getAttribute("data-adp-channel") === channel; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on ? "true" : "false"); });
+        Object.keys(forms).forEach((k) => { if (forms[k]) forms[k].hidden = k !== channel; });
+        if (sentTitle) sentTitle.textContent = CH[channel].title;
+        if (queryInput) queryInput.placeholder = `Search sent ${CH[channel].plural}…`;
+        if (deletedRows) deletedRows.innerHTML = "";
+        deletedLoaded[channel] = false;
+        if (deletedBox) deletedBox.open = false;
+        paintDeleted();
+        if (typeof applyWide === "function") applyWide();
+        loadList(true);
+        if (remember && window.history && window.history.replaceState) window.history.replaceState(null, "", "#" + channel);
+    };
+    tabs.forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); setChannel(b.getAttribute("data-adp-channel"), true); }));
+
+    /* ---------- letter full width (the form takes the row; remembered per browser) --- */
+    const grid = root.querySelector(".adp-comms-grid");
+    const wideBtn = root.querySelector("[data-adp-wide-toggle]");
+    const WIDE_KEY = "adp.comm.letterWide";
+    let wide = false;
+    try { wide = window.localStorage.getItem(WIDE_KEY) === "1"; } catch (e) { wide = false; }
+    const applyWide = () => {
+        const on = wide && active === "letter";
+        if (grid) grid.classList.toggle("adp-comms-grid--wide", on);
+        if (wideBtn) {
+            wideBtn.setAttribute("aria-pressed", wide ? "true" : "false");
+            wideBtn.classList.toggle("on", wide);
+            setText(wideBtn, "[data-adp-wide-label]", wide ? "Two columns" : "Full width");
+            wideBtn.setAttribute("title", wide ? "Put the sent letters back beside the form" : "Give the letter the full width");
         }
-    })
+    };
+    if (wideBtn) wideBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        wide = !wide;
+        try { window.localStorage.setItem(WIDE_KEY, wide ? "1" : "0"); } catch (err) { /* per-browser convenience only */ }
+        applyWide();
+    });
 
-    $('#sendEmailForm #sendMailsDocument').on('change', function(){
-        var inputs = document.getElementById('sendMailsDocument');
-        var files = Array.prototype.slice.call(inputs.files || []);
+    /* ---------- email -------------------------------------------------------- */
+    const emailForm = forms.email;
+    const resetters = {};
+    if (emailForm) {
+        const ed = editorOf("mailEditor");
+        const subjectInput = byId("subject");
+        const smtpSel = byId("comon_smtp_id");
+        const templateSel = byId("email_template_id");
+        const sendBtn = byId("sendEmailBtn");
+        const input = byId("sendMailsDocument");
+        const fileList = emailForm.querySelector("[data-adp-files]");
+        const files = [];
+        const fill = (text) => String(text || "")
+            .replace(/\{name\}/g, emailForm.getAttribute("data-adp-fill-name") || "")
+            .replace(/\{ref\}/g, emailForm.getAttribute("data-adp-fill-ref") || "")
+            .replace(/\{course\}/g, emailForm.getAttribute("data-adp-fill-course") || "");
+        const paintFiles = () => {
+            if (!fileList) return;
+            fileList.innerHTML = files.map((f, i) => `<span class="adp-tag">${svg(PATHS.file, 12)}<span>${esc(f.name)}</span><small class="adp-mono">${esc(fmtSize(f.size))}</small><button type="button" class="adp-tag-x" data-adp-file-remove="${i}" aria-label="Remove ${esc(f.name)}">${svg(PATHS.x, 12)}</button></span>`).join("");
+            fileList.hidden = files.length === 0;
+        };
+        if (input) input.addEventListener("change", () => {
+            Array.from(input.files || []).forEach((f) => { if (files.length < 10) files.push(f); });
+            input.value = "";
+            paintFiles();
+        });
+        if (fileList) fileList.addEventListener("click", (e) => {
+            const b = e.target.closest("[data-adp-file-remove]");
+            if (!b) return;
+            files.splice(Number(b.getAttribute("data-adp-file-remove")), 1);
+            paintFiles();
+        });
+        const reset = () => {
+            clearErrors(emailForm);
+            if (subjectInput) subjectInput.value = "";
+            if (templateSel) templateSel.value = "";
+            if (smtpSel) smtpSel.selectedIndex = 0;
+            if (ed) ed.clear();
+            files.length = 0;
+            paintFiles();
+        };
+        resetters.email = reset;
+        if (templateSel) templateSel.addEventListener("change", () => {
+            clearErrors(emailForm);
+            const id = templateSel.value;
+            if (!id) { if (ed) ed.clear(); return; }
+            axios.post(route("admission.communication.get.mail.template"), { emailTemplateID: id }, { headers: csrf })
+                .then((res) => {
+                    const row = (res.data && res.data.row) || {};
+                    if (ed) ed.set(row.description ? fill(row.description) : "");
+                    if (subjectInput && !subjectInput.value.trim() && row.email_title) subjectInput.value = fill(row.email_title);
+                })
+                .catch(() => showWarning("Could not load the template", "Try again, or write the email by hand."));
+        });
+        if (ed) ed.onChange(() => { const slot = emailForm.querySelector(".error-body"); if (slot) slot.textContent = ""; ed.root.classList.remove("err"); });
+        emailForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            clearErrors(emailForm);
+            const errors = {};
+            if (!subjectInput || !subjectInput.value.trim()) errors.subject = "Subject is required.";
+            if (!ed || ed.isEmpty()) errors.body = "Write the email.";
+            if (Object.keys(errors).length) { paintErrors(emailForm, errors); return; }
+            busy(sendBtn, true);
+            const fd = new FormData(emailForm);
+            fd.delete("documents[]");
+            files.forEach((f) => fd.append("documents[]", f, f.name));
+            fd.set("body", ed.html());
+            const from = selectedText(smtpSel), to = emailForm.getAttribute("data-adp-to") || "the applicant";
+            axios.post(route("admission.communication.send.mail"), fd, { headers: csrf })
+                .then((res) => {
+                    busy(sendBtn, false);
+                    const n = Number(res.data && res.data.attachments) || 0;
+                    reset();
+                    showSuccess("Email sent", `From ${from} to ${to}${n ? ` with ${n} attachment${n > 1 ? "s" : ""}` : ""}.`);
+                    if (active === "email") loadList(true);
+                })
+                .catch((err) => {
+                    busy(sendBtn, false);
+                    const errors = err.response && err.response.status === 422 ? (err.response.data.errors || {}) : null;
+                    if (errors) paintErrors(emailForm, errors);
+                    else showWarning("Something went wrong", (err.response && err.response.data && err.response.data.message) || "The email could not be sent. Try again, or contact the administrator.");
+                });
+        });
+    }
 
-        if (!files.length) {
-            $('#sendEmailForm .sendMailsDocumentNames').html('').fadeOut();
+    /* ---------- SMS ---------------------------------------------------------- */
+    const smsForm = forms.sms;
+    if (smsForm) {
+        const ta = byId("smsTextArea");
+        const subjectInput = byId("sms_subject");
+        const templateSel = byId("sms_template_id");
+        const sendBtn = byId("sendSMSBtn");
+        const counter = smsForm.querySelector("[data-adp-sms-count]");
+        const hint = smsForm.querySelector("[data-adp-sms-hint]");
+        const segmentsOf = (text) => Math.max(1, Math.ceil(String(text || "").length / 160));
+        const paintCounter = () => {
+            if (!ta) return;
+            const chars = ta.value.length, segs = segmentsOf(ta.value);
+            if (counter) { counter.textContent = `${chars} / ${segs}`; counter.classList.toggle("many", chars > 160); }
+            if (hint) hint.textContent = `160 characters per segment; longer messages are billed as ${segs > 1 ? segs : "multiple"} segments.`;
+            const max = Number(ta.getAttribute("maxlength")) || 0;
+            const slot = smsForm.querySelector(".error-sms");
+            if (slot) slot.textContent = max > 0 && chars >= max ? "Maximum character limit reached. Make the text shorter or contact the administrator." : "";
+        };
+        if (ta) { ta.addEventListener("input", paintCounter); ta.addEventListener("keyup", paintCounter); }
+        const reset = () => {
+            clearErrors(smsForm);
+            if (subjectInput) subjectInput.value = "";
+            if (templateSel) templateSel.value = "";
+            if (ta) ta.value = "";
+            paintCounter();
+        };
+        resetters.sms = reset;
+        if (templateSel) templateSel.addEventListener("change", () => {
+            clearErrors(smsForm);
+            const id = templateSel.value;
+            if (!id) { if (ta) ta.value = ""; paintCounter(); return; }
+            axios.post(route("admission.communication.get.sms.template"), { smsTemplateId: id }, { headers: csrf })
+                .then((res) => {
+                    const row = (res.data && res.data.row) || {};
+                    if (ta) ta.value = row.description || "";
+                    if (subjectInput && !subjectInput.value.trim() && row.sms_title) subjectInput.value = row.sms_title;
+                    paintCounter();
+                })
+                .catch(() => showWarning("Could not load the template", "Try again, or write the message by hand."));
+        });
+        smsForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            clearErrors(smsForm);
+            const errors = {};
+            if (!subjectInput || !subjectInput.value.trim()) errors.subject = "Subject is required.";
+            if (!ta || !ta.value.trim()) errors.sms = "Write the message.";
+            if (Object.keys(errors).length) { paintErrors(smsForm, errors); return; }
+            busy(sendBtn, true);
+            const segs = segmentsOf(ta.value), to = smsForm.getAttribute("data-adp-to");
+            axios.post(route("admission.communication.send.sms"), new FormData(smsForm), { headers: csrf })
+                .then((res) => {
+                    busy(sendBtn, false);
+                    const msg = (res.data && res.data.message) || "";
+                    reset();
+                    if (/not sent/i.test(msg)) showWarning("SMS stored, not sent", msg);
+                    else showSuccess("SMS sent", to ? `To ${to} (${segs} segment${segs > 1 ? "s" : ""}).` : msg);
+                    if (active === "sms") loadList(true);
+                })
+                .catch((err) => {
+                    busy(sendBtn, false);
+                    const errors = err.response && err.response.status === 422 ? (err.response.data.errors || {}) : null;
+                    if (errors) paintErrors(smsForm, errors);
+                    else showWarning("Something went wrong", (err.response && err.response.data && err.response.data.message) || "The SMS could not be sent. Try again, or contact the administrator.");
+                });
+        });
+        paintCounter();
+    }
+
+    /* ---------- letter ------------------------------------------------------- */
+    const letterForm = forms.letter;
+    if (letterForm) {
+        const ed = editorOf("letterEditor");
+        const setSel = byId("letter_set_id");
+        const smtpSel = byId("letter_comon_smtp_id");
+        const signSel = byId("signatory_id");
+        const dateInput = byId("issued_date");
+        const sendBtn = byId("sendLetterBtn");
+        const area = letterForm.querySelector("[data-adp-letter-body]");
+        const tagsBtn = letterForm.querySelector("[data-adp-tags-toggle]");
+        const tagsPop = letterForm.querySelector("[data-adp-tags-pop]");
+        const closeTags = () => { if (tagsPop) tagsPop.hidden = true; if (tagsBtn) tagsBtn.setAttribute("aria-expanded", "false"); };
+        const reset = () => {
+            clearErrors(letterForm);
+            if (setSel) setSel.value = "";
+            if (signSel) signSel.value = "";
+            if (smtpSel) smtpSel.selectedIndex = 0;
+            if (dateInput) dateInput.value = letterForm.getAttribute("data-adp-today") || "";
+            if (ed) ed.clear();
+            if (area) area.hidden = true;
+            closeTags();
+        };
+        resetters.letter = reset;
+        if (setSel) setSel.addEventListener("change", () => {
+            clearErrors(letterForm);
+            const id = Number(setSel.value) || 0;
+            if (!id) { if (area) area.hidden = true; if (ed) ed.clear(); return; }
+            axios.post(route("admission.communication.get.letter.set"), { letterSetId: id }, { headers: csrf })
+                .then((res) => {
+                    const row = (res.data && res.data.res) || {};
+                    if (ed) ed.set(row.description || "");
+                    if (area) area.hidden = false;
+                })
+                .catch(() => showWarning("Could not load the letter set", "Try again, or contact the administrator."));
+        });
+        if (tagsBtn && tagsPop && ed) {
+            /* A tag goes in where the caret is. The caret's range is remembered whenever the
+               selection sits inside the editor, because opening the popover moves focus. */
+            let caret = null;
+            document.addEventListener("selectionchange", () => {
+                const sel = document.getSelection();
+                if (sel && sel.rangeCount && ed.body.contains(sel.anchorNode)) caret = sel.getRangeAt(0).cloneRange();
+            });
+            const insertTag = (tag) => {
+                ed.focus();
+                const sel = document.getSelection();
+                if (!sel) return;
+                sel.removeAllRanges();
+                if (caret && ed.body.contains(caret.startContainer)) sel.addRange(caret);
+                else { const end = document.createRange(); end.selectNodeContents(ed.body); end.collapse(false); sel.addRange(end); }
+                let done = false;
+                try { done = document.execCommand("insertText", false, tag); } catch (err) { done = false; }
+                if (!done && sel.rangeCount) {
+                    const range = sel.getRangeAt(0);
+                    range.deleteContents();
+                    const node = document.createTextNode(tag);
+                    range.insertNode(node);
+                    range.setStartAfter(node);
+                    range.collapse(true);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+                caret = sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null;
+                ed.body.dispatchEvent(new Event("input", { bubbles: true }));
+            };
+            /* keep the editor's focus and selection while the popover is used */
+            tagsBtn.addEventListener("mousedown", (e) => e.preventDefault());
+            tagsPop.addEventListener("mousedown", (e) => { if (e.target.closest("[data-adp-tag]")) e.preventDefault(); });
+            tagsBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                const open = tagsPop.hidden;
+                tagsPop.hidden = !open;
+                tagsBtn.setAttribute("aria-expanded", open ? "true" : "false");
+            });
+            tagsPop.addEventListener("click", (e) => {
+                const item = e.target.closest("[data-adp-tag]");
+                if (!item) return;
+                e.preventDefault();
+                insertTag(item.getAttribute("data-adp-tag"));
+                const label = tagsBtn.querySelector("[data-adp-tags-label]");
+                if (label) { label.textContent = "Inserted"; window.setTimeout(() => { label.textContent = "Tags"; }, 1200); }
+            });
+            document.addEventListener("mousedown", (e) => { if (!tagsPop.hidden && !e.target.closest("[data-adp-tags-pop], [data-adp-tags-toggle]")) closeTags(); });
+            document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeTags(); });
+        }
+        if (ed) ed.onChange(() => { const slot = letterForm.querySelector(".error-letter_body"); if (slot) slot.textContent = ""; ed.root.classList.remove("err"); });
+        letterForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            clearErrors(letterForm);
+            const errors = {};
+            if (!dateInput || !dateInput.value) errors.issued_date = "Issued date is required.";
+            if (!setSel || !setSel.value) errors.letter_set_id = "Choose a letter.";
+            else if (!ed || ed.isEmpty()) errors.letter_body = "The letter body cannot be empty.";
+            if (Object.keys(errors).length) { paintErrors(letterForm, errors); return; }
+            busy(sendBtn, true);
+            const fd = new FormData(letterForm);
+            fd.set("letter_body", ed.html());
+            const from = selectedText(smtpSel);
+            axios.post(route("admission.communication.send.letter"), fd, { headers: csrf })
+                .then(() => {
+                    busy(sendBtn, false);
+                    reset();
+                    showSuccess("Letter sent", `Generated as a PDF and emailed from ${from}.`);
+                    if (active === "letter") loadList(true);
+                })
+                .catch((err) => {
+                    busy(sendBtn, false);
+                    const errors = err.response && err.response.status === 422 ? (err.response.data.errors || {}) : null;
+                    if (errors) paintErrors(letterForm, errors);
+                    else showWarning("Something went wrong", (err.response && err.response.data && err.response.data.message) || "The letter could not be generated. Try again, or contact the administrator.");
+                });
+        });
+    }
+    root.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-adp-compose-reset]");
+        if (!btn) return;
+        e.preventDefault();
+        const form = btn.closest("form");
+        const key = form ? form.getAttribute("data-adp-compose") : "";
+        if (resetters[key]) resetters[key]();
+    });
+
+    /* ---------- view dialog -------------------------------------------------- */
+    const viewEl = byId("viewCommunicationModal");
+    const paintView = (channel, row, detail) => {
+        if (!viewEl) return;
+        const d = Object.assign({}, row || {}, detail || {});
+        setText(viewEl, "[data-adp-view-title]", subjectOf(channel, d));
+        const meta = [CH[channel].noun.toUpperCase()].concat(metaOf(channel, d));
+        if (channel === "email" && d.template) meta.push(`template ${d.template}`);
+        setText(viewEl, "[data-adp-view-meta]", meta.join(" · "));
+        const filesEl = viewEl.querySelector("[data-adp-view-files]");
+        let files = [];
+        if (channel === "email" && Array.isArray(d.attachments)) files = d.attachments;
+        if (channel === "letter" && Number(d.docurl) > 0) files = [{ id: d.docurl, name: d.document_name || "Letter PDF" }];
+        if (filesEl) {
+            filesEl.innerHTML = files.map((f) => `<button type="button" class="adp-tag adp-tag--btn downloadDoc" data-id="${esc(f.id)}" title="Download">${svg(PATHS.file, 12)}<span>${esc(f.name)}</span>${svg(PATHS.download, 12)}</button>`).join("");
+            filesEl.hidden = files.length === 0;
+        }
+        const bodyEl = viewEl.querySelector("[data-adp-view-body]");
+        if (bodyEl) {
+            bodyEl.classList.toggle("adp-view-comm__body--text", channel !== "email");
+            if (channel === "email") bodyEl.innerHTML = typeof d.body === "string" ? d.body : (d.excerpt ? esc(d.excerpt) : "");
+            else if (channel === "sms") bodyEl.textContent = typeof d.sms === "string" && d.sms.length > 43 ? d.sms : (d.sms || d.excerpt || "");
+            else bodyEl.textContent = "Letter PDF generated from the letter set and attached.";
+        }
+        const actsEl = viewEl.querySelector("[data-adp-view-actions]");
+        if (actsEl) actsEl.innerHTML = channel === "letter" && Number(d.docurl) > 0 ? `<button type="button" class="adp-btn adp-btn--primary downloadDoc" data-id="${esc(d.docurl)}">${svg(PATHS.download, 14)}Download PDF</button>` : "";
+    };
+    document.addEventListener("click", (e) => {
+        const btn = e.target.closest(".view_btn");
+        if (!btn) return;
+        e.preventDefault();
+        const channel = active, id = btn.getAttribute("data-id");
+        const row = state[channel].rows.find((r) => String(r.id) === String(id)) || { id };
+        paintView(channel, row, null);
+        if (viewModal) viewModal.show();
+        if (!CH[channel].show) return;
+        axios.post(route(CH[channel].show), { recordId: id }, { headers: csrf })
+            .then((res) => { if (active === channel) paintView(channel, row, (res.data && res.data.row) || null); })
+            .catch(() => {});
+    });
+    if (viewEl) viewEl.addEventListener("hide.tw.modal", () => {
+        setText(viewEl, "[data-adp-view-title]", "View communication");
+        setText(viewEl, "[data-adp-view-meta]", "");
+        const b = viewEl.querySelector("[data-adp-view-body]"); if (b) b.innerHTML = "";
+        const f = viewEl.querySelector("[data-adp-view-files]"); if (f) { f.innerHTML = ""; f.hidden = true; }
+        const a = viewEl.querySelector("[data-adp-view-actions]"); if (a) a.innerHTML = "";
+    });
+
+    /* ---------- delete / restore --------------------------------------------- */
+    const confirmEl = byId("confirmModal");
+    const confirmAction = ({ tone, icon, title, text, item, action, recordId, label }) => {
+        if (!confirmEl || !confirmModal) return;
+        const content = confirmEl.querySelector(".modal-content");
+        if (content) content.className = `modal-content adp-dialog adp-dialog--${tone}`;
+        const ico = confirmEl.querySelector(".adp-dialog__ico");
+        if (ico) ico.innerHTML = svg(icon, 30);
+        setText(confirmEl, ".confModTitle", title);
+        setText(confirmEl, ".confModDesc", text || "");
+        const itemEl = confirmEl.querySelector("[data-adp-confirm-item]");
+        if (itemEl) { itemEl.textContent = item || ""; itemEl.hidden = !item; }
+        const agree = confirmEl.querySelector(".agreeWith");
+        if (agree) {
+            agree.setAttribute("data-recordid", recordId);
+            agree.setAttribute("data-status", action);
+            agree.className = `agreeWith adp-btn ${tone === "danger" ? "adp-btn--danger" : "adp-btn--primary"}`;
+            agree.textContent = label || "Yes, I agree";
+            agree.removeAttribute("disabled");
+        }
+        confirmModal.show();
+    };
+    document.addEventListener("click", (e) => {
+        const del = e.target.closest(".delete_btn");
+        if (del) {
+            e.preventDefault();
+            confirmAction({ tone: "danger", icon: PATHS.trash, title: `Delete this ${CH[active].noun.toLowerCase()}?`, item: (del.getAttribute("data-adp-subject") || "").slice(0, 80), text: "Soft-deleted; you can restore it from the deleted list.", action: CH[active].del, recordId: del.getAttribute("data-id"), label: "Delete" });
             return;
         }
-
-        var html = files.map(function(file) {
-            return '<div class="adm-mail-upload__file">' +
-                '<span class="adm-mail-upload__file-icon"><i data-lucide="file"></i></span>' +
-                '<span class="adm-mail-upload__file-name">' + commEscape(file.name) + '</span>' +
-                '<span class="adm-mail-upload__file-size">' + commEscape(commFormatFileSize(file.size)) + '</span>' +
-            '</div>';
-        }).join('');
-
-        $('#sendEmailForm .sendMailsDocumentNames').fadeIn().html(html);
-        commRenderLucide();
-    });
-
-    $('#successModal .successCloser').on('click', function(e){
-        e.preventDefault();
-        if($(this).attr('data-action') == 'RELOAD'){
-            successModal.hide();
-            window.location.reload();
-        }else{
-            successModal.hide();
-        }
-    })
-    
-    $('#warningModal .warningCloser').on('click', function(e){
-        e.preventDefault();
-        if($(this).attr('data-action') == 'RELOAD'){
-            warningModal.hide();
-            window.location.reload();
-        }else{
-            warningModal.hide();
+        const res = e.target.closest(".restore_btn");
+        if (res) {
+            e.preventDefault();
+            confirmAction({ tone: "warn", icon: PATHS.undo, title: `Restore this ${CH[active].noun.toLowerCase()}?`, item: (res.getAttribute("data-adp-subject") || "").slice(0, 80), text: `It goes back to the sent ${CH[active].plural}.`, action: CH[active].res, recordId: res.getAttribute("data-id"), label: "Restore" });
         }
     });
-
-    $('#sendEmailForm [name="email_template_id"]').on('change', function(){
-        var emailTemplateID = $(this).val();
-        if(emailTemplateID != ''){
-            axios({
-                method: "post",
-                url: route('admission.communication.get.mail.template'),
-                data: {emailTemplateID : emailTemplateID},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                if (response.status == 200) {
-                    if(response.data.row.description){
-                        mailEditor.setData(response.data.row.description);
-                    }else{
-                        mailEditor.setData('');
+    if (confirmEl) {
+        confirmEl.addEventListener("click", (e) => {
+            const agree = e.target.closest(".agreeWith");
+            if (!agree) return;
+            e.preventDefault();
+            const spec = ACTIONS[agree.getAttribute("data-status")];
+            const recordid = agree.getAttribute("data-recordid");
+            const applicant = agree.getAttribute("data-applicant") || applicantId;
+            if (!spec) { confirmModal.hide(); return; }
+            confirmEl.querySelectorAll("button").forEach((b) => b.setAttribute("disabled", "disabled"));
+            axios({ method: spec.method, url: route(spec.name), data: { applicant, recordid }, headers: csrf })
+                .then(() => {
+                    confirmModal.hide();
+                    const c = CH[spec.channel];
+                    if (spec.kind === "delete") deletedCounts[spec.channel] = (Number(deletedCounts[spec.channel]) || 0) + 1;
+                    else deletedCounts[spec.channel] = Math.max(0, (Number(deletedCounts[spec.channel]) || 0) - 1);
+                    if (spec.channel === active) {
+                        paintDeleted();
+                        loadList(true);
+                        if (deletedLoaded[active] || (deletedBox && deletedBox.open)) loadDeleted();
                     }
-                }
-            }).catch(error => {
-                if (error.response) {
-                    console.log('error');
-                }
-            });
-        }else{
-            mailEditor.setData('');
-        }
-    })
-
-    $('#sendEmailForm').on('submit', function(e){
-        e.preventDefault();
-        const form = document.getElementById('sendEmailForm');
-    
-        commSetButtonBusy('#sendEmailBtn', true);
-
-        let form_data = new FormData(form);
-        form_data.append('file', $('#sendEmailForm input#sendMailsDocument')[0].files[0]); 
-        form_data.append('body', mailEditor.getData()); 
-        axios({
-            method: "post",
-            url: route('admission.communication.send.mail'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            commSetButtonBusy('#sendEmailBtn', false);
-            //console.log(response.data.message);
-            //return false;
-
-            if (response.status == 200) {
-                sendEmailModal.hide();
-
-                successModal.show(); 
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Congratulation!" );
-                    $("#successModal .successModalDesc").html('Mail successfully sent to applicant.');
-                    $("#successModal .successCloser").attr('data-action', 'NONE');
-                });  
-                
-                setTimeout(function(){
-                    successModal.hide();
-                }, 2000);
-            }
-            applicantCommEmailListTable.init();
-        }).catch(error => {
-            commSetButtonBusy('#sendEmailBtn', false);
-            if (error.response) {
-                if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#sendEmailForm .${key}`).addClass('border-danger');
-                        $(`#sendEmailForm  .error-${key}`).html(val);
-                    }
-                } else {
-                    console.log('error');
-                }
-            }
-        });
-    });
-
-    $('#applicantCommEmailListTable').on('click', '.delete_btn', function(e){
-        e.preventDefault();
-        var $btn = $(this);
-        var recordId = $btn.attr('data-id');
-
-        confirmModal.show();
-        document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
-            $("#confirmModal .confModTitle").html("Are you sure?" );
-            $("#confirmModal .confModDesc").html('Want to delete this Mail from applicant list? Please click on agree to continue.');
-            $("#confirmModal .agreeWith").attr('data-recordid', recordId);
-            $("#confirmModal .agreeWith").attr('data-status', 'DELETEMAIL');
-        });
-    });
-
-    $('#applicantCommEmailListTable').on('click', '.restore_btn', function(e){
-        e.preventDefault();
-        var $btn = $(this);
-        var recordId = $btn.attr('data-id');
-
-        confirmModal.show();
-        document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
-            $("#confirmModal .confModTitle").html("Are you sure?" );
-            $("#confirmModal .confModDesc").html('Want to restore this Mail from the trash? Please click on agree to continue.');
-            $("#confirmModal .agreeWith").attr('data-recordid', recordId);
-            $("#confirmModal .agreeWith").attr('data-status', 'RESTOREMAIL');
-        });
-    });
-
-    $('#applicantCommEmailListTable').on('click', '.view_btn', function(e){
-        e.preventDefault();
-        var $btn = $(this);
-        var recordId = $btn.attr('data-id');
-
-        viewCommunicationModal.show();
-        axios({
-            method: 'post',
-            url: route('admission.communication.mail.show'),
-            data: {recordId : recordId},
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            if (response.status == 200) {
-                $('#viewCommunicationModal .modal-header h2').html(response.data.heading);
-                $('#viewCommunicationModal .modal-body').html(response.data.html);
-
-                commRenderLucide();
-            }
-        }).catch(error =>{
-            console.log(error)
-        });
-    });
-
-    $('#smsTextArea').on('keyup', function(){
-        var maxlength = ($(this).attr('maxlength') > 0 && $(this).attr('maxlength') != '' ? $(this).attr('maxlength') : 0);
-        var chars = this.value.length,
-            messages = Math.ceil(chars / 160),
-            remaining = messages * 160 - (chars % (messages * 160) || messages * 160);
-        if(chars > 0){
-            if(chars >= maxlength && maxlength > 0){
-                $('#smsSMSModal .modal-content .smsWarning').remove();
-                $('#smsSMSModal .modal-content').prepend('<div class="alert smsWarning alert-danger-soft show flex items-center mb-0" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i>Opps! Your maximum character limit exceeded. Please make the text short or contact with administrator.</div>').fadeIn();
-            }else{
-                $('#smsSMSModal .modal-content .smsWarning').remove();
-            }
-            $('#smsSMSModal .sms_countr').html(remaining +' / '+messages);
-        }else{
-            $('#smsSMSModal .sms_countr').html('160 / 1');
-            $('#smsSMSModal .modal-content .smsWarning').remove();
-        }
-    });
-
-    $('#smsSMSForm [name="sms_template_id"]').on('change', function(){
-        var smsTemplateId = $(this).val();
-        if(smsTemplateId != ''){
-            axios({
-                method: "post",
-                url: route('admission.communication.get.sms.template'),
-                data: {smsTemplateId : smsTemplateId},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                $('#smsSMSForm #smsTextArea').val(response.data.row.description ? response.data.row.description : '').trigger('keyup');
-            }).catch(error => {
-                //console.log('error');
-            })
-        }else{
-            $('#smsSMSForm #smsTextArea').val('');
-            $('#smsSMSModal .sms_countr').html('160 / 1');
-        }
-    })
-
-    $('#smsSMSForm').on('submit', function(e){
-        e.preventDefault();
-        const form = document.getElementById('smsSMSForm');
-    
-        commSetButtonBusy('#sendSMSBtn', true);
-
-        let form_data = new FormData(form);
-        axios({
-            method: "post",
-            url: route('admission.communication.send.sms'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            commSetButtonBusy('#sendSMSBtn', false);
-
-            if (response.status == 200) {
-                //console.log(response.data);
-                smsSMSModal.hide();
-
-                successModal.show(); 
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Congratulation!" );
-                    $("#successModal .successModalDesc").html(response.data.message);
-                    $("#successModal .successCloser").attr('data-action', 'NONE');
-                });  
-                
-                setTimeout(function(){
-                    successModal.hide();
-                }, 2000);
-            }
-            applicantCommSMSListTable.init();
-        }).catch(error => {
-            commSetButtonBusy('#sendSMSBtn', false);
-            if (error.response) {
-                if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#smsSMSForm .${key}`).addClass('border-danger');
-                        $(`#smsSMSForm  .error-${key}`).html(val);
-                    }
-                } else {
-                    console.log('error');
-                }
-            }
-        });
-    });
-
-    $('#applicantCommSMSListTable').on('click', '.view_btn', function(e){
-        e.preventDefault();
-        var $btn = $(this);
-        var recordId = $btn.attr('data-id');
-
-        viewCommunicationModal.show();
-        axios({
-            method: 'post',
-            url: route('admission.communication.sms.show'),
-            data: {recordId : recordId},
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            if (response.status == 200) {
-                $('#viewCommunicationModal .modal-header h2').html(response.data.heading);
-                $('#viewCommunicationModal .modal-body').html(response.data.html);
-
-                commRenderLucide();
-            }
-        }).catch(error =>{
-            console.log(error)
-        });
-    });
-
-    $('#applicantCommSMSListTable').on('click', '.delete_btn', function(e){
-        e.preventDefault();
-        var $btn = $(this);
-        var recordId = $btn.attr('data-id');
-
-        confirmModal.show();
-        document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
-            $("#confirmModal .confModTitle").html("Are you sure?" );
-            $("#confirmModal .confModDesc").html('Want to delete this SMS from applicant list? Please click on agree to continue.');
-            $("#confirmModal .agreeWith").attr('data-recordid', recordId);
-            $("#confirmModal .agreeWith").attr('data-status', 'DELETESMS');
-        });
-    });
-
-    $('#applicantCommSMSListTable').on('click', '.restore_btn', function(e){
-        e.preventDefault();
-        var $btn = $(this);
-        var recordId = $btn.attr('data-id');
-
-        confirmModal.show();
-        document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
-            $("#confirmModal .confModTitle").html("Are you sure?" );
-            $("#confirmModal .confModDesc").html('Want to restore this SMS from the trash? Please click on agree to continue.');
-            $("#confirmModal .agreeWith").attr('data-recordid', recordId);
-            $("#confirmModal .agreeWith").attr('data-status', 'RESTORESMS');
-        });
-    });
-
-    $('#confirmModal .agreeWith').on('click', function(e){
-        e.preventDefault();
-        let $agreeBTN = $(this);
-        let recordid = $agreeBTN.attr('data-recordid');
-        let action = $agreeBTN.attr('data-status');
-        let applicant = $agreeBTN.attr('data-applicant');
-
-        $('#confirmModal button').attr('disabled', 'disabled');
-
-        if(action == 'DELETEMAIL'){
-            axios({
-                method: 'delete',
-                url: route('admission.communication.mail.destroy'),
-                data: {applicant : applicant, recordid : recordid},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
+                    showSuccess(spec.kind === "delete" ? `${c.noun} deleted` : `${c.noun} restored`, spec.kind === "delete" ? "It is in the deleted list and can be restored." : `It is back in the sent ${c.plural}.`);
+                })
+                .catch(() => {
+                    confirmEl.querySelectorAll("button").forEach((b) => b.removeAttribute("disabled"));
                     confirmModal.hide();
-                    applicantCommEmailListTable.init();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Done!');
-                        $('#successModal .successModalDesc').html('Applicant Communication Mail successfully deleted.');
-                        $('#successModal .successCloser').attr('data-action', 'NONE');
-                    });
-
-                    setTimeout(function(){
-                        successModal.hide();
-                    }, 2000);
-                }
-            }).catch(error =>{
-                console.log(error)
-            });
-        }else if(action == 'DELETESMS'){
-            axios({
-                method: 'delete',
-                url: route('admission.communication.sms.destroy'),
-                data: {applicant : applicant, recordid : recordid},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-                    applicantCommSMSListTable.init();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Done!');
-                        $('#successModal .successModalDesc').html('Applicant Communication SMS successfully deleted.');
-                        $('#successModal .successCloser').attr('data-action', 'NONE');
-                    });
-
-                    setTimeout(function(){
-                        successModal.hide();
-                    }, 2000);
-                }
-            }).catch(error =>{
-                console.log(error)
-            });
-        }else if(action == 'DELETELETTER'){
-            axios({
-                method: 'delete',
-                url: route('admission.communication.letter.destroy'),
-                data: {applicant : applicant, recordid : recordid},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-                    applicantCommLetterListTable.init();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Done!');
-                        $('#successModal .successModalDesc').html('Applicant Communication Letter successfully deleted.');
-                        $('#successModal .successCloser').attr('data-action', 'NONE');
-                    });
-
-                    setTimeout(function(){
-                        successModal.hide();
-                    }, 2000);
-                }
-            }).catch(error =>{
-                console.log(error)
-            });
-        }else if(action == 'RESTOREMAIL'){
-            axios({
-                method: 'post',
-                url: route('admission.communication.mail.restore'),
-                data: {applicant : applicant, recordid : recordid},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-                    applicantCommEmailListTable.init();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Done!');
-                        $('#successModal .successModalDesc').html('Applicant Communication Mail successfully resotred.');
-                        $('#successModal .successCloser').attr('data-action', 'NONE');
-                    });
-
-                    setTimeout(function(){
-                        successModal.hide();
-                    }, 2000);
-                }
-            }).catch(error =>{
-                console.log(error)
-            });
-        }else if(action == 'RESTORESMS'){
-            axios({
-                method: 'post',
-                url: route('admission.communication.sms.restore'),
-                data: {applicant : applicant, recordid : recordid},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-                    applicantCommSMSListTable.init();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Done!');
-                        $('#successModal .successModalDesc').html('Applicant Communication SMS successfully resotred.');
-                        $('#successModal .successCloser').attr('data-action', 'NONE');
-                    });
-
-                    setTimeout(function(){
-                        successModal.hide();
-                    }, 2000);
-                }
-            }).catch(error =>{
-                console.log(error)
-            });
-        }else if(action == 'RESTORELETTER'){
-            axios({
-                method: 'post',
-                url: route('admission.communication.letter.restore'),
-                data: {applicant : applicant, recordid : recordid},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-                    applicantCommLetterListTable.init();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Done!');
-                        $('#successModal .successModalDesc').html('Applicant Communication Letter successfully resotred.');
-                        $('#successModal .successCloser').attr('data-action', 'NONE');
-                    });
-
-                    setTimeout(function(){
-                        successModal.hide();
-                    }, 2000);
-                }
-            }).catch(error =>{
-                console.log(error)
-            });
-        }else{
-            confirmModal.hide();
-        }
-    });
-
-
-    /* Letter Area */
-    $('#addLetterModal #letter_set_id').on('change', function(){
-        var letterSetId = $(this).val();
-        if(letterSetId > 0){
-            axios({
-                method: 'post',
-                url: route('admission.communication.get.letter.set'),
-                data: {letterSetId : letterSetId},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                if (response.status == 200) {
-                    $('#addLetterModal .letterEditorArea').fadeIn('fast', function(){
-                        var description = response.data.res.description ? response.data.res.description : '';
-                        letterEditor.setData(description)
-                    })
-                }
-            }).catch(error =>{
-                console.log(error)
-            });
-        }else{
-            $('#addLetterModal .letterEditorArea').fadeOut('fast', function(){
-                letterEditor.setData('')
-            })
-        }
-    });
-
-    $('#addLetterForm').on('submit', function(e){
-        e.preventDefault();
-        const form = document.getElementById('addLetterForm');
-    
-        commSetButtonBusy('#sendLetterBtn', true);
-
-        let form_data = new FormData(form);
-        form_data.append('letter_body', letterEditor.getData()); 
-        axios({
-            method: "post",
-            url: route('admission.communication.send.letter'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            commSetButtonBusy('#sendLetterBtn', false);
-
-            if (response.status == 200) {
-                addLetterModal.hide();
-
-                successModal.show(); 
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Congratulation!" );
-                    $("#successModal .successModalDesc").html('Letter successfully generated and send.');
-                    $("#successModal .successCloser").attr('data-action', 'DISMISS');
-                });  
-                
-                setTimeout(function(){
-                    successModal.hide();
-                }, 2000);
-            }
-            applicantCommLetterListTable.init();
-        }).catch(error => {
-            commSetButtonBusy('#sendLetterBtn', false);
-            if (error.response) {
-                if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#addLetterForm .${key}`).addClass('border-danger');
-                        $(`#addLetterForm  .error-${key}`).html(val);
-                    }
-                } else {
-                    console.log('error');
-                }
-            }
+                    showWarning("Something went wrong", "The change could not be saved. Try again, or contact the administrator.");
+                });
         });
-    });
-
-    $('#applicantCommLetterListTable').on('click', '.delete_btn', function(e){
-        e.preventDefault();
-        var $btn = $(this);
-        var recordId = $btn.attr('data-id');
-
-        confirmModal.show();
-        document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
-            $("#confirmModal .confModTitle").html("Are you sure?" );
-            $("#confirmModal .confModDesc").html('Want to delete this Letter from applicant list? Please click on agree to continue.');
-            $("#confirmModal .agreeWith").attr('data-recordid', recordId);
-            $("#confirmModal .agreeWith").attr('data-status', 'DELETELETTER');
+        confirmEl.addEventListener("hide.tw.modal", () => {
+            setText(confirmEl, ".confModDesc", "");
+            const agree = confirmEl.querySelector(".agreeWith");
+            if (agree) { agree.setAttribute("data-recordid", "0"); agree.setAttribute("data-status", "none"); }
+            confirmEl.querySelectorAll("button").forEach((b) => b.removeAttribute("disabled"));
         });
-    });
+    }
 
-    $('#applicantCommLetterListTable').on('click', '.restore_btn', function(e){
+    /* ---------- downloads --------------------------------------------------- */
+    document.addEventListener("click", (e) => {
+        const link = e.target.closest(".downloadDoc");
+        if (!link) return;
         e.preventDefault();
-        var $btn = $(this);
-        var recordId = $btn.attr('data-id');
-
-        confirmModal.show();
-        document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
-            $("#confirmModal .confModTitle").html("Are you sure?" );
-            $("#confirmModal .confModDesc").html('Want to restore this LETTER from the trash? Please click on agree to continue.');
-            $("#confirmModal .agreeWith").attr('data-recordid', recordId);
-            $("#confirmModal .agreeWith").attr('data-status', 'RESTORELETTER');
-        });
+        if (link.hasAttribute("disabled")) return;
+        link.setAttribute("disabled", "disabled");
+        axios.post(route("admission.document.download"), { row_id: link.getAttribute("data-id") }, { headers: csrf })
+            .then((res) => { link.removeAttribute("disabled"); const url = res.data && res.data.res; if (url) window.open(url, "_blank"); })
+            .catch(() => { link.removeAttribute("disabled"); });
     });
 
-    $('#applicantCommLetterListTable').on('click', '.downloadDoc', function(e){
+    /* ---------- print / export ---------------------------------------------- */
+    const printBtn = byId("tabulator-print-CM");
+    if (printBtn) printBtn.addEventListener("click", (e) => { e.preventDefault(); window.print(); });
+    const exportRows = () => fetchList(active, 1, 1, true).then((res) => {
+        const rows = Array.isArray(res.data) ? res.data : [];
+        if (active === "email") return [["#", "Subject", "From", "Template", "Attachments", "Issued by", "When"]].concat(rows.map((r, i) => [i + 1, r.subject || "", r.smtp || "", r.template || "", r.attachments || 0, r.created_by || "", r.created_at || ""]));
+        if (active === "sms") return [["#", "Subject", "Template", "SMS", "Issued by", "When"]].concat(rows.map((r, i) => [i + 1, r.subject || "", r.template || "", r.excerpt || r.sms || "", r.created_by || "", r.created_at || ""]));
+        return [["#", "Type", "Subject", "Signatory", "Issued date", "Issued by", "When"]].concat(rows.map((r, i) => [i + 1, r.letter_type || "", r.letter_title || "", r.signatory_name || "", r.issued_date || "", r.created_by || "", r.created_at || ""]));
+    });
+    const download = (blob, name) => { const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); };
+    const csvBtn = byId("tabulator-export-csv-CM");
+    if (csvBtn) csvBtn.addEventListener("click", (e) => {
         e.preventDefault();
-        var $theLink = $(this);
-        var row_id = $theLink.attr('data-id');
-
-        $theLink.css({'opacity' : '.6', 'cursor' : 'not-allowed'});
-
-        axios({
-            method: "post",
-            url: route('admission.document.download'),
-            data: {row_id : row_id},
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            if (response.status == 200){
-                let res = response.data.res;
-                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
-
-                if(res != ''){
-                    window.open(res, '_blank');
-                }
-            } 
-        }).catch(error => {
-            if(error.response){
-                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
-                console.log('error');
-            }
-        });
+        exportRows().then((aoa) => download(new Blob([xlsx.utils.sheet_to_csv(xlsx.utils.aoa_to_sheet(aoa))], { type: "text/csv;charset=utf-8" }), `${CH[active].file}.csv`));
     });
-
-    $('#viewCommunicationModal').on('click', '.downloadDoc', function(e){
+    const xlsxBtn = byId("tabulator-export-xlsx-CM");
+    if (xlsxBtn) xlsxBtn.addEventListener("click", (e) => {
         e.preventDefault();
-        var $theLink = $(this);
-        var row_id = $theLink.attr('data-id');
-
-        $theLink.css({'opacity' : '.6', 'cursor' : 'not-allowed'});
-
-        axios({
-            method: "post",
-            url: route('admission.document.download'), 
-            data: {row_id : row_id},
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            if (response.status == 200){
-                let res = response.data.res;
-                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
-
-                if(res != ''){
-                    window.open(res, '_blank');
-                }
-            } 
-        }).catch(error => {
-            if(error.response){
-                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
-                console.log('error');
-            }
-        });
+        exportRows().then((aoa) => { const wb = xlsx.utils.book_new(); xlsx.utils.book_append_sheet(wb, xlsx.utils.aoa_to_sheet(aoa), `Applicant ${CH[active].noun}`); xlsx.writeFile(wb, `${CH[active].file}.xlsx`); });
     });
-    /* Letter Area */
 
+    setChannel((window.location.hash || "").replace("#", "") || "email", false);
 })();

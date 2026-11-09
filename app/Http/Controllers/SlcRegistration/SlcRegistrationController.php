@@ -3,14 +3,22 @@
 namespace App\Http\Controllers\SlcRegistration;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Student\EmailController;
+use App\Http\Controllers\Student\SmsController;
+use App\Http\Requests\SendEmailRequest;
+use App\Http\Requests\SendSmsRequest;
 use App\Models\Option;
+use App\Models\StudentContact;
 use App\Services\SlcRegistration\Checks;
+use App\Services\SlcRegistration\ModuleReset;
 use App\Services\SlcRegistration\RegistrationActions;
 use App\Services\SlcRegistration\RegistrationState;
 use App\Services\SlcRegistration\SlcRegistrationException;
+use App\Services\SlcRegistration\StudentComms;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * /slc-registration — SLC bulk registration confirmation (user's "SLC Registration Check"
@@ -111,6 +119,23 @@ class SlcRegistrationController extends Controller
         $request->validate(['row_id' => 'required|integer', 'key' => 'required|in:'.implode(',', array_keys(\App\Services\SlcRegistration\AttendanceChecks::FIELD_ROUTES)), 'route' => 'required|in:update,coc,contact,accept']);
 
         return $this->run(fn () => $this->attendance->setRoute((int) $request->row_id, $request->key, $request->route));
+    }
+
+    /** Data check › Name row: one action for the first and last name differences (all or none). */
+    public function attRoutes(Request $request)
+    {
+        $keys = implode(',', array_keys(\App\Services\SlcRegistration\AttendanceChecks::FIELD_ROUTES));
+        $request->validate(['row_id' => 'required|integer', 'keys' => 'required|array|min:1', 'keys.*' => 'in:'.$keys, 'route' => 'required|in:update,coc,contact,accept']);
+
+        return $this->run(fn () => $this->attendance->setRoutes((int) $request->row_id, $request->keys, $request->route));
+    }
+
+    public function attClearRoutes(Request $request)
+    {
+        $keys = implode(',', array_keys(\App\Services\SlcRegistration\AttendanceChecks::FIELD_ROUTES));
+        $request->validate(['row_id' => 'required|integer', 'keys' => 'required|array|min:1', 'keys.*' => 'in:'.$keys]);
+
+        return $this->run(fn () => $this->attendance->clearRoutes((int) $request->row_id, $request->keys));
     }
 
     public function attClearRoute(Request $request)
@@ -314,6 +339,21 @@ class SlcRegistrationController extends Controller
         return $this->run(fn () => $this->actions->setRoute((int) $request->row_id, $request->key, $request->route));
     }
 
+    /** Data check › a merged row (Name, Address, Course): one decision for several fields. */
+    public function setRoutes(Request $request)
+    {
+        $request->validate(['row_id' => 'required|integer', 'keys' => 'required|array|min:1', 'keys.*' => 'in:'.implode(',', array_keys(Checks::FIELD_ROUTES)), 'route' => 'required|in:update,coc,contact,accept']);
+
+        return $this->run(fn () => $this->actions->setRoutes((int) $request->row_id, $request->keys, $request->route));
+    }
+
+    public function clearRoutes(Request $request)
+    {
+        $request->validate(['row_id' => 'required|integer', 'keys' => 'required|array|min:1', 'keys.*' => 'in:'.implode(',', array_keys(Checks::FIELD_ROUTES))]);
+
+        return $this->run(fn () => $this->actions->clearRoutes((int) $request->row_id, $request->keys));
+    }
+
     public function clearRoute(Request $request)
     {
         $request->validate(['row_id' => 'required|integer', 'key' => 'required|string|max:20']);
@@ -426,6 +466,94 @@ class SlcRegistrationController extends Controller
     }
 
     /** {flash, state}: 200 when it worked, 422 with the reason when it was refused. */
+    /** Clear DB (user, 6 Nov 2026; users 1 and 7 only): what clearing a module would delete. */
+    public function clearCounts(Request $request)
+    {
+        abort_unless(ModuleReset::allowed(Auth::id()), 403);
+        $request->validate(['module' => 'required|in:'.implode(',', array_keys(ModuleReset::MODULES))]);
+
+        return response()->json(['counts' => app(ModuleReset::class)->counts((string) $request->query('module'))]);
+    }
+
+    /** Clear DB: empties the module's own tables (ModuleReset). Needs the word CLEAR typed. */
+    public function clearData(Request $request)
+    {
+        abort_unless(ModuleReset::allowed(Auth::id()), 403);
+        $request->validate(['module' => 'required|in:'.implode(',', array_keys(ModuleReset::MODULES)), 'confirm' => 'required|in:CLEAR']);
+
+        return $this->run(fn () => app(ModuleReset::class)->clear($request->module, (int) Auth::id()));
+    }
+
+    /** Actions › Email / SMS (user, 6 Nov 2026): who the dialog sends to, the SMTP accounts and the templates. */
+    public function comms(Request $request)
+    {
+        $request->validate(['student_id' => 'required|integer']);
+        try {
+            return response()->json(app(StudentComms::class)->options((int) $request->query('student_id')));
+        } catch (SlcRegistrationException $e) {
+            return response()->json(['message' => $e->getMessage()], 404);
+        }
+    }
+
+    /** The dialog's Template list: the template's text to fill the form with. */
+    public function commsTemplate(Request $request)
+    {
+        $request->validate(['type' => 'required|in:email,sms', 'id' => 'required|integer']);
+
+        return response()->json(app(StudentComms::class)->template((string) $request->query('type'), (int) $request->query('id')));
+    }
+
+    /**
+     * Actions › Email: sent by the Communication tab's own sender (Student\EmailController::store —
+     * the same SMTP, BCC, attachments, PDF copy and record on the student's Communication tab), then
+     * noted in Activity and, from a Contact student line, marked contacted when asked.
+     */
+    public function sendEmail(SendEmailRequest $request)
+    {
+        $request->validate($this->commsRules() + ['documents' => 'nullable|array', 'documents.*' => 'file']);
+        try {
+            $res = app(EmailController::class)->store($request);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json(['flash' => ['text' => 'The email could not be sent: '.Str::limit($e->getMessage(), 200), 'tone' => 'bad']], 500);
+        }
+        if ($res->getStatusCode() !== 200) {
+            return response()->json(['flash' => ['text' => $res->getData()->message ?? 'The email could not be sent. Please try again.', 'tone' => 'bad']], 422);
+        }
+
+        return $this->run(fn () => $this->actions->messageSent('email', (int) $request->input('student_id'), (string) $request->input('subject'), true, $request->input('row_id') ? (int) $request->input('row_id') : null, $request->input('key'), $request->boolean('mark_contacted')));
+    }
+
+    /** Actions › SMS: sent by the Communication tab's own sender (Student\SmsController::store), then as sendEmail. */
+    public function sendSms(SendSmsRequest $request)
+    {
+        $request->validate($this->commsRules());
+        $contact = StudentContact::where('student_id', $request->input('student_id'))->first();
+        if (!$contact) {
+            // the Communication tab's sender can't save an SMS without the student's contact record
+            return response()->json(['flash' => ['text' => 'The SMS was not sent: the student has no contact details (no mobile number) on record.', 'tone' => 'bad']], 422);
+        }
+        try {
+            $res = app(SmsController::class)->store($request);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json(['flash' => ['text' => 'The SMS could not be sent: '.Str::limit($e->getMessage(), 200), 'tone' => 'bad']], 500);
+        }
+        if ($res->getStatusCode() !== 200) {
+            return response()->json(['flash' => ['text' => $res->getData()->message ?? 'The SMS could not be sent. Please try again.', 'tone' => 'bad']], 422);
+        }
+
+        return $this->run(fn () => $this->actions->messageSent('sms', (int) $request->input('student_id'), (string) $request->input('subject'), !empty($contact->mobile), $request->input('row_id') ? (int) $request->input('row_id') : null, $request->input('key'), $request->boolean('mark_contacted')));
+    }
+
+    /** Email / SMS: the student, and the Contact student line it was sent from (if any). */
+    private function commsRules(): array
+    {
+        return ['student_id' => 'required|integer|exists:students,id', 'row_id' => 'nullable|integer', 'key' => 'nullable|string|max:20', 'mark_contacted' => 'nullable|boolean'];
+    }
+
     private function run(callable $fn)
     {
         try {
@@ -457,7 +585,8 @@ class SlcRegistrationController extends Controller
             'email' => (string) $user->email,
             'initials' => strtoupper(mb_substr($words[0] ?? 'L', 0, 1).mb_substr(count($words) > 1 ? end($words) : 'C', 0, 1)),
             'avatar' => $avatar,
-            'dashboard' => route('staff.dashboard'),
+            'dashboard' => route('dashboard'), // the site's home page (header Dashboard link)
+            'canClear' => ModuleReset::allowed($user->id), // Clear DB (users 1 and 7)
         ];
     }
 

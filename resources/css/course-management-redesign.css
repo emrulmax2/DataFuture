@@ -8192,3 +8192,307 @@ select.cm-classinput {
     background: rgba(179, 38, 30, .1);
     color: var(--cm-danger);
 }
+
+/* ------------------------------------------------------------------ *
+ * Plan tree › Send Class ICP (30 Oct 2026)
+ * The button sits beside Assign / Deassign Students in the teal the
+ * module keeps for "run this"; the dialog lists who gets which PDF,
+ * then each send's result.
+ * ------------------------------------------------------------------ */
+
+.cm-btn--icp {
+    background: var(--cm-teal);
+}
+
+.cm-btn--icp:hover {
+    background: var(--cm-teal-hover);
+    color: #fff;
+}
+
+.cm-modal__body.cm-icp {
+    display: block;
+}
+
+.cm-icp__lead {
+    color: var(--cm-ink-2);
+    font-size: 13px;
+    line-height: 1.55;
+    margin: 0 0 12px;
+}
+
+.cm-icp__note {
+    background: var(--cm-gold-tint);
+    border: 1px solid rgba(201, 162, 74, 0.35);
+    border-radius: 10px;
+    color: var(--cm-gold-ink);
+    font-size: 12.5px;
+    margin: 0 0 12px;
+    padding: 9px 12px;
+}
+
+.cm-icp__sets {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.cm-icp__set {
+    border: 1px solid var(--cm-line);
+    border-radius: 12px;
+    padding: 12px 14px;
+}
+
+.cm-icp__row {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+}
+
+.cm-icp__name {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.cm-icp__name strong {
+    color: var(--cm-navy);
+    font-size: 14px;
+}
+
+.cm-icp__name span {
+    color: var(--cm-faint);
+    font-size: 12px;
+}
+
+.cm-icp__count {
+    background: var(--cm-field-bg);
+    border: 1px solid var(--cm-line);
+    border-radius: 999px;
+    color: var(--cm-ink-2);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    white-space: nowrap;
+}
+
+.cm-icp__preview {
+    align-items: center;
+    border: 1px solid var(--cm-navy);
+    border-radius: 999px;
+    color: var(--cm-navy);
+    display: inline-flex;
+    font-size: 12px;
+    font-weight: 700;
+    gap: 6px;
+    padding: 5px 12px;
+    white-space: nowrap;
+}
+
+.cm-icp__preview:hover {
+    background: var(--cm-navy);
+    color: #fff;
+}
+
+.cm-icp__box {
+    accent-color: var(--cm-navy);
+    cursor: pointer;
+    flex-shrink: 0;
+    height: 15px;
+    width: 15px;
+}
+
+.cm-icp__variant {
+    color: var(--cm-gold-ink);
+    font-size: 12.5px;
+    margin: 8px 0 0 27px;
+}
+
+.cm-icp__warn {
+    color: #9a5b12;
+    font-size: 12.5px;
+    list-style: disc;
+    margin: 8px 0 0 27px;
+    padding-left: 16px;
+}
+
+.cm-icp__people {
+    margin: 10px 0 0 27px;
+}
+
+.cm-icp__people summary {
+    color: var(--cm-muted);
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 700;
+}
+
+.cm-icp__people ul {
+    display: grid;
+    gap: 4px 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+}
+
+.cm-icp__people label {
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    font-size: 12.5px;
+    gap: 8px;
+    min-width: 0;
+}
+
+.cm-icp__people b {
+    color: var(--cm-ink);
+    font-weight: 700;
+}
+
+.cm-icp__people span {
+    color: var(--cm-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cm-icp__skipped {
+    background: #fbe9e9;
+    border: 1px solid #f2d3d3;
+    border-radius: 10px;
+    color: #a93226;
+    font-size: 12.5px;
+    margin-top: 12px;
+    padding: 10px 12px;
+}
+
+.cm-icp__skipped ul {
+    list-style: disc;
+    margin: 6px 0 0;
+    padding-left: 18px;
+}
+
+.cm-icp__empty,
+.cm-icp__loading {
+    color: var(--cm-muted);
+    font-weight: 600;
+    padding: 8px 0;
+}
+
+.cm-icp__loading {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+}
+
+.cm-icp__spin {
+    animation: cm-icp-spin 0.8s linear infinite;
+    border: 2px solid var(--cm-line);
+    border-radius: 50%;
+    border-top-color: var(--cm-navy);
+    flex-shrink: 0;
+    height: 16px;
+    width: 16px;
+}
+
+@keyframes cm-icp-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.cm-icp__progress {
+    color: var(--cm-navy);
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+    font-weight: 700;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.cm-icp__meter {
+    background: var(--cm-line-3);
+    border-radius: 999px;
+    height: 6px;
+    overflow: hidden;
+}
+
+.cm-icp__meter span {
+    background: var(--cm-teal);
+    display: block;
+    height: 100%;
+    transition: width 0.2s ease;
+}
+
+.cm-icp__results {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.cm-icp__result {
+    align-items: flex-start;
+    border-bottom: 1px solid var(--cm-line-2);
+    display: flex;
+    font-size: 12.5px;
+    gap: 10px;
+    padding: 7px 2px;
+}
+
+.cm-icp__result em {
+    color: var(--cm-faint);
+    display: block;
+    font-style: normal;
+    margin-top: 2px;
+    word-break: break-word;
+}
+
+.cm-icp__mark {
+    align-items: center;
+    border-radius: 50%;
+    display: inline-flex;
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 800;
+    height: 18px;
+    justify-content: center;
+    width: 18px;
+}
+
+.cm-icp__result.is-ok .cm-icp__mark {
+    background: #e3f1ea;
+    color: var(--cm-teal);
+}
+
+.cm-icp__result.is-bad .cm-icp__mark {
+    background: #fbe9e9;
+    color: #c0392b;
+}
+
+.cm-icp__result.is-bad em {
+    color: #a93226;
+}
+
+#sendClassIcpBtn[disabled] {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+@media (max-width: 640px) {
+    .cm-icp__row {
+        flex-wrap: wrap;
+    }
+
+    .cm-icp__people ul {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

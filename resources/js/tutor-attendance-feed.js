@@ -1,4 +1,5 @@
 import { createIcons, icons } from "lucide";
+import { askCorrectionReason, showAttendanceNotice, needsReason, refusalMessage } from "./attendance-correction-reason";
 
 ("use strict");
 
@@ -27,7 +28,11 @@ import { createIcons, icons } from "lucide";
         let url = $("#"+formID+" input[name=url]").val();
         
         let form_data = new FormData(form);
-        console.log(form_data)
+        sendAttendance(url, form_data, parentForm, formID);
+    });
+
+    // Sent again with `change_reason` when a late correction needs a reason.
+    function sendAttendance(url, form_data, parentForm, formID) {
         $.ajax({
             method: 'POST',
             url: url,
@@ -61,6 +66,22 @@ import { createIcons, icons } from "lucide";
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 $('.acc__input-error').html('');
+                const data = jqXHR.responseJSON;
+
+                if (needsReason(jqXHR.status, data)) {
+                    askCorrectionReason(data.message, data.min_length).then((reason) => {
+                        if (reason) {
+                            form_data.set('change_reason', reason);
+                            sendAttendance(url, form_data, parentForm, formID);
+                        }
+                    });
+                    return;
+                }
+                const refusal = refusalMessage(jqXHR.status, data);
+                if (refusal) {
+                    showAttendanceNotice('Attendance not saved', refusal);
+                    return;
+                }
                 
                 if(jqXHR.status == 422){
                     for (const [key, val] of Object.entries(jqXHR.responseJSON.errors)) {
@@ -73,8 +94,7 @@ import { createIcons, icons } from "lucide";
                 
             }
         });
-        
-    });
+    }
 
     let classEnd = $("#dataclassend").data("classend") *1;
     if(classEnd == 0 ) {

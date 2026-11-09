@@ -55,9 +55,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .nav .step { font-size: 11px; font-weight: 700; color: var(--hdr-muted); }
 .nav .count { font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 999px; background: var(--hdr-line); color: var(--hdr-fg); }
 .modules { display: flex; flex-wrap: wrap; gap: 4px; flex: 1 1 auto; }
-.modules button { background: none; border: 0; color: var(--hdr-muted); padding: 0 12px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; display: inline-flex; gap: 8px; align-items: center; min-height: 40px; }
-.modules button:hover { color: var(--hdr-fg); }
-.modules button[aria-current="page"] { background: var(--hdr-line); color: var(--hdr-fg); }
+.modules button, .modules a { text-decoration: none; background: none; border: 0; color: var(--hdr-muted); padding: 0 12px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; display: inline-flex; gap: 8px; align-items: center; min-height: 40px; }
+.modules button:hover, .modules a:hover { color: var(--hdr-fg); }
+.modules button[aria-current="page"], .modules a[aria-current="page"] { background: var(--hdr-line); color: var(--hdr-fg); }
 .modules .soon { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 1px 6px; border-radius: 999px; border: 1px solid var(--hdr-line); color: var(--hdr-muted); }
 .subbar { background: color-mix(in srgb, var(--hdr-line) 55%, var(--hdr)); border-top: 1px solid var(--hdr-line); }
 .topbar .subbar .wrap { min-height: 46px; padding-block: 0; }
@@ -194,9 +194,7 @@ textarea.copybox { width: 100%; min-height: 110px; font-family: var(--font-mono)
 /* header: the system logo in place of the "LCC" mark */
 .brand { color: var(--hdr-fg); text-decoration: none; }
 .brand-logo { display: block; height: 38px; width: auto; max-width: none; }
-.brand-sep { width: 1px; height: 26px; background: var(--hdr-line); }
-.brand-name { font-weight: 600; letter-spacing: 0.02em; }
-/* header right: the signed-in user and Back to dashboard (in place of the prototype's "Signed in as" picker) */
+/* header right: the signed-in user (in place of the prototype's "Signed in as" picker) */
 .userbox { gap: 14px; margin-left: auto; }
 .user { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .avatar { flex: 0 0 auto; display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 999px; overflow: hidden; background: var(--hdr-line); color: var(--hdr-fg); font-size: 12px; font-weight: 700; letter-spacing: 0.02em; }
@@ -204,8 +202,6 @@ textarea.copybox { width: 100%; min-height: 110px; font-family: var(--font-mono)
 .user-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
 .user-name { color: var(--hdr-fg); font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
 .user-role { color: var(--hdr-muted); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
-.btn-back { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--hdr-line); background: transparent; color: var(--hdr-fg); font-size: 13px; font-weight: 600; text-decoration: none; white-space: nowrap; }
-.btn-back:hover { background: var(--hdr-line); }
 @media (max-width: 760px) { .user-text { display: none; } }
 /* a student’s name opens their profile (new tab) */
 a.plain { color: inherit; text-decoration: none; }
@@ -245,6 +241,10 @@ label.btn[aria-disabled="true"] { opacity: 0.45; pointer-events: none; }
 .fsum-bar { grid-column: 1 / -1; height: 4px; border-radius: 999px; background: var(--line-soft); overflow: hidden; }
 .fsum-bar > span { display: block; height: 100%; border-radius: inherit; background: var(--bad); }
 .fsum-m { grid-column: 1 / -1; font-size: 11px; color: var(--muted); }
+/* Bulk attendance › Attendance & codes: the attendance boxes in their KPI colours */
+.fsum.t-ok .fsum-n { color: var(--ok); } .fsum.t-ok .fsum-bar > span { background: var(--ok); }
+.fsum.t-warn .fsum-n { color: var(--warn); } .fsum.t-warn .fsum-bar > span { background: var(--warn); }
+.fsum.t-info .fsum-n { color: var(--accent); } .fsum.t-info .fsum-bar > span { background: var(--accent); }
 
 /* Pre-confirm: attended sessions split into physical (P), online (O) and other statuses that count */
 .att-split { display: flex; flex-direction: column; gap: 5px; margin-top: 6px; max-width: 260px; }
@@ -338,3 +338,97 @@ a.route { color: inherit; text-decoration: none; }
 .pay-hist td, .pay-hist tbody th { overflow-wrap: anywhere; }
 .pay-hist .pill { white-space: normal; }
 .pay-tbl .term-diff { color: var(--warn); font-weight: 700; }
+
+/* Duplicate agreements: the message after Reviewed & Hide / Unhide stays in view wherever the list is scrolled */
+.ma-toast { position: fixed; z-index: 60; left: 50%; bottom: 24px; transform: translateX(-50%); width: min(640px, calc(100vw - 32px)); box-shadow: 0 12px 32px rgba(14, 26, 43, 0.25); }
+
+/* Data check: the words (or day / month / year) that don't match in the error colour. A Name / Address / Course row
+   shows the whole value (BoxValue) and names what doesn't match; "each separately" lists the parts' own buttons */
+.diff { color: var(--bad); }
+.nm-full { display: inline-flex; flex-wrap: wrap; column-gap: 0.3em; }
+.box-stack { display: grid; gap: 2px; }
+.box-pre { font-weight: 400; margin-right: 0.4em; }
+.box-tail { font-weight: 400; }
+.nm-what { margin-top: 4px; color: var(--bad); font-weight: 600; }
+.grp-each { display: grid; gap: 10px; }
+.grp-each-row { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 8px; align-items: start; }
+.grp-each-l { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; padding-top: 8px; }
+
+/* Pre-confirm › View all fields (user, 5 Nov 2026): the student's row and its fields read as one block */
+.pc-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 14px; border-bottom: 1px solid var(--line); }
+.allf-toggle { display: inline-block; margin-top: 4px; font-size: 13px; }
+.tbl tr.has-allf > * { background: var(--surface-2); }
+.tbl tr.allf-row > td { background: var(--surface-2); border-top: 0; padding: 0 12px 14px; }
+.allf-route { margin-top: 3px; }
+
+/* Data check › address rows: the student's uploads (user, 6 Nov 2026) */
+.uploads-link { display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; color: var(--accent); font-weight: 600; text-decoration: none; }
+.uploads-link:hover { text-decoration: underline; }
+
+/* the student's status beside their name (user, 6 Nov 2026): button-like, see-through tint of its tone */
+.stag { --c: var(--muted); display: inline-flex; align-items: center; vertical-align: 1px; padding: 0 8px; min-height: 20px; border-radius: 6px; font-size: 11px; font-weight: 600; line-height: 1.2; letter-spacing: 0.01em; white-space: nowrap; color: var(--c); background: color-mix(in srgb, var(--c) 12%, transparent); border: 1px solid color-mix(in srgb, var(--c) 32%, transparent); }
+/* the space after the name (with this margin) stays on the name's line, so a wrapped tag starts flush left */
+.stag-gap { margin-right: 4px; }
+.stag.t-ok { --c: var(--ok); }
+.stag.t-info { --c: var(--accent); }
+.stag.t-warn { --c: var(--warn); }
+.stag.t-bad { --c: var(--bad); }
+
+/* Actions › Email / SMS (user, 6 Nov 2026): a student's buttons, and the dialog modelled on the Communication tab's modals */
+.cm-links { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 2px; }
+/* Actions › the student's mobile number (student_contacts.mobile) under their name (user, 6 Nov 2026) */
+.st-phone { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; margin-top: 3px; font-weight: 400; }
+.st-phone svg { color: var(--muted); flex: none; }
+/* in each table's last column, on a line under the row's buttons (user, 6 Nov 2026) */
+.tbl td .cm-links { margin-top: 6px; flex-wrap: nowrap; white-space: nowrap; }
+.tbl td > .cm-links:first-child { margin-top: 0; }
+.cm-links .btn-link { display: inline-flex; align-items: center; gap: 5px; min-height: 28px; padding: 4px 0; }
+.cm-box { max-width: 860px; display: flex; flex-direction: column; overflow: hidden; }
+.cm-box > form.mx-b, .cm-box > .cm-sent { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+.cm-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.cm-x { flex: 0 0 auto; display: grid; place-items: center; width: 36px; height: 36px; margin: -6px -8px 0 0; border: 0; border-radius: 8px; background: none; color: var(--muted); cursor: pointer; }
+.cm-x:hover { background: var(--surface-2); color: var(--fg); }
+.cm-to { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 10px 12px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line-soft); }
+.cm-to .mono { overflow-wrap: anywhere; }
+.cm-commlink { margin-left: auto; min-height: 24px; padding: 0; }
+.bad-text { color: var(--bad); font-weight: 600; font-size: 13px; }
+.cm-f { display: flex; flex-direction: column; gap: 6px; }
+.req { color: var(--bad); }
+.cm-err { color: var(--bad); font-size: 12px; font-weight: 600; }
+.input[aria-invalid="true"] { border-color: var(--bad); }
+.cm-textarea { min-height: 0; padding: 10px 12px; line-height: 1.5; resize: vertical; }
+.cm-lblrow { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.cm-count { font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--muted); }
+.cm-editor { position: relative; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.cm-editor.is-bad { border-color: var(--bad); }
+.cm-toolbar { border-bottom: 1px solid var(--line); border-radius: 8px 8px 0 0; background: var(--surface-2); }
+.cm-toolbar .ck.ck-toolbar { border: 0; background: transparent; }
+.cm-editable.ck.ck-editor__editable { min-height: 220px; max-height: 420px; overflow-y: auto; padding: 4px 14px; border: 0; box-shadow: none; border-radius: 0 0 8px 8px; color: var(--fg); background: var(--surface); }
+.cm-editable.ck.ck-editor__editable.ck-focused { outline: 2px solid var(--accent); outline-offset: -2px; border: 0; box-shadow: none; }
+.cm-editable ul, .cm-editable ol { padding-left: 24px; }
+.cm-editor-wait { position: absolute; left: 14px; top: 56px; }
+.cm-file { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+label.btn:has(+ .cm-file:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cm-files { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.cm-files li { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 2px 10px; border: 1px solid var(--line-soft); border-radius: 8px; background: var(--surface-2); }
+.cm-files li > span:first-of-type { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.cm-files .btn-link { min-height: 28px; padding: 2px 0; }
+.cm-mark { padding-top: 2px; }
+.mx-f .cm-news { margin-right: auto; align-self: center; }
+.cm-sent { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 32px 20px; }
+.cm-sent p { max-width: 520px; }
+.cm-tick { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--ok-bg); color: var(--ok); }
+.cm-tick svg { width: 24px; height: 24px; }
+/* the editor's own colours follow the page's (light and dark); on body so its pop-ups outside the dialog get them too */
+body {
+  --ck-color-base-background: var(--surface); --ck-color-base-foreground: var(--surface-2); --ck-color-base-border: var(--line); --ck-color-text: var(--fg);
+  --ck-color-toolbar-background: var(--surface-2); --ck-color-toolbar-border: var(--line);
+  --ck-color-button-default-hover-background: var(--line-soft); --ck-color-button-default-active-background: var(--line-soft);
+  --ck-color-button-on-background: var(--accent-soft); --ck-color-button-on-hover-background: var(--accent-soft); --ck-color-button-on-color: var(--accent);
+  --ck-color-dropdown-panel-background: var(--surface); --ck-color-dropdown-panel-border: var(--line);
+  --ck-color-panel-background: var(--surface); --ck-color-panel-border: var(--line);
+  --ck-color-list-background: var(--surface); --ck-color-list-button-hover-background: var(--line-soft);
+  --ck-color-list-button-on-background: var(--accent-soft); --ck-color-list-button-on-text: var(--accent);
+  --ck-color-input-background: var(--surface); --ck-color-input-border: var(--line); --ck-color-input-text: var(--fg);
+  --ck-color-labeled-field-label-background: var(--surface); --ck-color-focus-border: var(--accent);
+}

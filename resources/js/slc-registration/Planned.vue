@@ -15,14 +15,14 @@
             <div v-if="cocItems.length === 0" class="empty">No CoCs raised from registration yet.</div>
             <div v-else class="tablebox"><table class="tbl" style="min-width: 640px">
                 <thead><tr><th scope="col">Student</th><th scope="col">CoC type</th><th scope="col">Reason</th><th scope="col">Status</th></tr></thead>
-                <tbody><tr v-for="{ i, ch } in cocItems" :key="i.id + ch.key"><th scope="row">{{ i.s.first }} {{ i.s.last }}<div class="mono muted small" style="font-weight: 400">{{ i.r.ssn }}</div></th><td>{{ COC_TYPE[ch.key] }}</td><td>{{ ch.label }}: SLC {{ ch.slc }} · ours {{ ch.ours }}</td><td><span :class="'pill ' + (ch.state ? 'ok' : 'warn')">{{ ch.state ? 'Submitted in SIS' : 'To issue' }}</span></td></tr></tbody>
+                <tbody><tr v-for="{ i, ch } in cocItems" :key="i.id + ch.key"><th scope="row">{{ i.s.first }} {{ i.s.last }}<StatusTag :status="i.s.status" /><div class="mono muted small" style="font-weight: 400">{{ i.r.ssn }}</div></th><td>{{ COC_TYPE[ch.key] }}</td><td>{{ ch.label }}: SLC {{ ch.slc }} · ours {{ ch.ours }}</td><td><span :class="'pill ' + (ch.state ? 'ok' : 'warn')">{{ ch.state ? 'Submitted in SIS' : 'To issue' }}</span></td></tr></tbody>
             </table></div>
         </section>
         <section class="card"><div class="card-h"><h2>Already queued from bulk attendance</h2><button type="button" class="btn-link" @click="openAttCocs">Manage in attendance → CoCs</button></div>
             <div v-if="attCocs.length === 0" class="empty">No CoCs queued by attendance codes yet.</div>
             <div v-else class="tablebox"><table class="tbl" style="min-width: 640px">
                 <thead><tr><th scope="col">Student</th><th scope="col">CoC type</th><th scope="col">Code</th><th scope="col">Status</th></tr></thead>
-                <tbody><tr v-for="i in attCocs" :key="i.id"><th scope="row">{{ i.s.first }} {{ i.s.last }}<div class="mono muted small" style="font-weight: 400">{{ i.r.ssn }}</div></th><td>{{ i.coc.type }}</td><td><span class="mono">{{ i.confirm.code }}</span> · {{ i.code.reason }}</td><td><span :class="'pill ' + (i.coc.actioned ? 'ok' : 'warn')">{{ i.coc.actioned ? 'Done in SIS' : 'To submit' }}</span></td></tr></tbody>
+                <tbody><tr v-for="i in attCocs" :key="i.id"><th scope="row">{{ i.s.first }} {{ i.s.last }}<StatusTag :status="i.s.status" /><div class="mono muted small" style="font-weight: 400">{{ i.r.ssn }}</div></th><td>{{ i.coc.type }}</td><td><span class="mono">{{ i.confirm.code }}</span> · {{ i.code.reason }}</td><td><span :class="'pill ' + (i.coc.actioned ? 'ok' : 'warn')">{{ i.coc.actioned ? 'Done in SIS' : 'To submit' }}</span></td></tr></tbody>
             </table></div>
         </section>
         <section class="card"><div class="card-h"><h2>CoC types in the bulk CSV</h2><span class="muted small">Undergraduate only</span></div>
@@ -34,8 +34,10 @@
 <script>
 import { computed, inject } from "vue";
 import { ATT_CODES, COC_KINDS, COC_TYPE, PLANNED } from "./helpers";
+import StatusTag from "./StatusTag.vue";
 
 export default {
+    components: { StatusTag },
     props: { module: { type: String, required: true } },
     emits: ["open-actions"],
     setup(props) {

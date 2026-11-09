@@ -420,6 +420,9 @@ function rowActions(row) {
  */
 function statusButton(row) {
     if (config.flags.idCard) {
+        // A pending card goes through "Download & Mark as Complete", which also uploads it to the
+        // task; the one-off download only appears once the task has moved on (user, 28 Oct 2026).
+        if (row.task_status === "Pending") return "";
         return `<button type="button" class="tkm-icobtn tkm-icobtn--green" title="Download ID card" data-tkm-act="idcard"${rowAttrs(
             row
         )}>${ICONS.idcard}</button>`;
@@ -766,6 +769,349 @@ async function updateStatus({ ids, status, studentTaskId = 0, button }) {
     });
 }
 
+/* ------------------------------------------------------------------ */
+/* ID cards — "Download & Mark as Complete"                            */
+/* ------------------------------------------------------------------ */
+
+/** Hands a blob to the browser as a download. */
+function saveBlob(blob, filename) {
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(link.href), 4000);
+}
+
+/** Resolves once an image has loaded or failed, so html2canvas never draws a half-loaded card. */
+function preloadImage(src) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        const done = () => resolve();
+        img.onload = done;
+        img.onerror = done;
+        setTimeout(done, 10000);
+        img.src = src;
+    });
+}
+
+function cardImageUrls(card) {
+    return [card, ...$$("[style]", card)]
+        .map((node) => /url\((['"]?)(.*?)\1\)/.exec(node.style.backgroundImage || "")?.[2])
+        .filter(Boolean);
+}
+
+let idCardRun = false;
+
+/**
+ * Renders every selected student's card in the ID card dialog, one at a time,
+ * and captures it exactly as the single "Download card" button does. Then:
+ *
+ *   1. each card is uploaded to that student's task, through the same endpoint
+ *      as the Upload documents dialog (S3, a task document and a "Document"
+ *      task log line);
+ *   2. the uploaded cards go into one zip, which is downloaded;
+ *   3. those students are marked complete.
+ *
+ * The zip, the uploads and the completed students are always the same set: a
+ * student whose card could not be made or uploaded is left as they were.
+ * Closing the dialog while the cards are being made cancels everything.
+ */
+async function downloadIdCards() {
+    const rows = selectedRows();
+    if (!rows.length || idCardRun) return;
+    const el = openModal("idcard");
+    if (!el) return;
+
+    idCardRun = true;
+    const slot = $("[data-tkm-slot]", el);
+    const title = $(".tkm-modal__title", el);
+    const plainTitle = title.textContent;
+    title.textContent = "Preparing ID cards";
+    slot.innerHTML = '<div class="tkm-modal__loader"></div>';
+
+    const { default: html2canvas } = await import("html2canvas");
+    const { zipStore } = await import("./task-manager/zip-store.js");
+
+    const showProgress = (reg, step, i, total) => {
+        const bar = $(".tkm-idcard__bar", slot);
+        if (!bar) return;
+        const pct = Math.round(((i + 1) / total) * 100);
+        bar.innerHTML = `<span class="tkm-idcard__reg">${esc(reg)}</span><span class="tkm-idcard__progress">${step} ${
+            i + 1
+        } of ${total}</span><span class="tkm-idcard__meter" aria-hidden="true"><span style="width:${pct}%"></span></span>`;
+    };
+
+    /* 1 — make the cards (cancellable: nothing is saved yet) */
+    const cards = [];
+    const failed = [];
+    const names = new Set();
+    let cancelled = false;
+
+    for (let i = 0; i < rows.length; i++) {
+        if (el.hidden) {
+            cancelled = true;
+            break;
+        }
+        const row = rows[i];
+        const label = row.registration_no || row.ids;
+        // while the next card loads, the previous card's bar already shows where we are
+        showProgress(label, "Card", i, rows.length);
+        try {
+            const { ok, data } = await post(config.routes.idCard, { student_id: row.ids, task_id: config.taskId });
+            if (!ok || !data.res) throw new Error("not loaded");
+            if (el.hidden) {
+                cancelled = true;
+                break;
+            }
+
+            slot.innerHTML = data.res;
+            slot.scrollTop = 0;
+            const reg = String(data.id || label);
+            showProgress(reg, "Card", i, rows.length);
+
+            const card = $(".theIDCard", slot);
+            if (!card) throw new Error("no card");
+            await Promise.all(cardImageUrls(card).map(preloadImage));
+            await document.fonts?.ready;
+
+            const canvas = await html2canvas(card, { useCORS: true, allowTaint: true });
+            const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+            if (!blob) throw new Error("empty image");
+
+            let name = `${reg.replace(/[\\/:*?"<>|]+/g, "-")}.png`;
+            if (names.has(name)) name = name.replace(/\.png$/, `_${row.ids}.png`);
+            names.add(name);
+            cards.push({ row, reg, name, blob });
+        } catch (e) {
+            failed.push(label);
+        }
+    }
+
+    if (cancelled || el.hidden) {
+        title.textContent = plainTitle;
+        idCardRun = false;
+        closeModal(el);
+        return toast("Cancelled. No ID cards were downloaded or uploaded, and no task was changed.");
+    }
+
+    /* 2 — upload each card to the student's task, as the Upload documents dialog does */
+    title.textContent = "Saving ID cards to tasks";
+    const saved = [];
+    for (let i = 0; i < cards.length; i++) {
+        const item = cards[i];
+        showProgress(item.reg, "Uploading", i, cards.length);
+        const payload = new FormData();
+        payload.append("file", new File([item.blob], item.name, { type: "image/png" }));
+        payload.append("student_id", item.row.ids);
+        payload.append("task_id", config.taskId);
+        payload.append("phase", config.phase);
+        payload.append("display_file_name", "ID Card");
+        payload.append("hard_copy_check", "0");
+        const { ok } = await post(config.routes.uploadDoc, payload);
+        if (ok) saved.push(item);
+        else failed.push(item.reg);
+    }
+
+    title.textContent = plainTitle;
+    idCardRun = false;
+    closeModal(el);
+
+    if (!saved.length) {
+        return feedback({
+            title: "No ID cards could be saved",
+            copy: "Nothing was downloaded and no task was changed. Please try again.",
+            tone: "bad",
+        });
+    }
+
+    /* 3 — zip what was uploaded, then mark those students complete */
+    const files = [];
+    for (const item of saved) files.push({ name: item.name, data: new Uint8Array(await item.blob.arrayBuffer()) });
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    saveBlob(
+        zipStore(files, now),
+        `ID_Cards_${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}.zip`
+    );
+
+    const { ok } = await post(config.routes.updateStatus, {
+        student_ids: saved.map((item) => item.row.ids),
+        task_id: config.taskId,
+        status: "Completed",
+        phase: config.phase,
+        student_task_id: 0,
+    });
+    if (!ok) {
+        await load();
+        return feedback({
+            title: "Status not updated",
+            copy: `The ID cards were downloaded and added to each student's task uploads, but the students could not be marked complete. Please use <strong>Mark as completed</strong> for them.`,
+            tone: "warn",
+        });
+    }
+
+    state.selected.clear();
+    await load();
+
+    const count = saved.length;
+    const missed = failed.length
+        ? `<br><br>Could not finish ${failed.map(esc).join(", ")}. ${
+              failed.length === 1 ? "That student was" : "Those students were"
+          } left as they were and ${failed.length === 1 ? "is" : "are"} not in the zip.`
+        : "";
+    feedback({
+        title: "ID cards downloaded",
+        copy: `${count} ${count === 1 ? "ID card was" : "ID cards were"} zipped and downloaded, added to ${
+            count === 1 ? "the student's" : "each student's"
+        } task uploads, and ${count === 1 ? "the student has" : "those students have"} been marked complete.${missed}`,
+        tone: failed.length ? "warn" : "ok",
+        pill: "Completed",
+        dismissMs: failed.length ? 0 : 3600,
+    });
+}
+
+/* ------------------------------------------------------------------ */
+/* Class routines — "Send ICP & Mark as Complete"                      */
+/* ------------------------------------------------------------------ */
+
+let icpRun = false;
+let icpPlan = null;
+
+/**
+ * Send ICP & Mark as Complete (user, 30 Oct 2026). Step 1: the server sorts the selected
+ * students into the groups that share one class routine PDF (same class plans), and lists
+ * any it cannot send to; staff can open each group's PDF before anything goes. Step 2 (Send):
+ * each student in turn (one request each, so a long list never times out): the server files
+ * the group's PDF in their Uploads, issues their letter, emails and texts them, and completes
+ * the task. Closing the dialog stops after the student being sent; those sent stay sent.
+ */
+async function sendClassRoutines() {
+    const rows = selectedRows();
+    if (!rows.length || icpRun) return;
+    const el = openModal("icp");
+    if (!el) return;
+
+    const slot = $("[data-tkm-slot]", el);
+    const title = $("[data-tkm-icp-title]", el);
+    title.textContent = "Preparing class routines";
+    slot.innerHTML = '<div class="tkm-modal__loader"></div>';
+    icpPlan = null;
+
+    const { ok, data } = await post(config.routes.prepareIcp, { student_ids: rows.map((row) => row.ids), task_id: config.taskId });
+    if (el.hidden) return;
+    if (!ok) {
+        title.textContent = "Class routines";
+        slot.innerHTML = `<div class="tkm-empty"><div class="tkm-empty__title">${esc(data.message || "The students could not be prepared. Please try again.")}</div></div>`;
+        return;
+    }
+
+    const groups = data.groups || [];
+    const skipped = data.skipped || [];
+    const sending = groups.reduce((sum, group) => sum + group.students.length, 0);
+    icpPlan = { groups };
+    title.textContent = "Send class routines";
+
+    const groupHtml = groups
+        .map(
+            (group) => `<li class="tkm-icpsum__group">
+                <div class="tkm-icpsum__row">
+                    <span class="tkm-icpsum__name">${esc(group.name)}</span>
+                    <span class="tkm-icpsum__meta">${esc(group.course)} · ${esc(group.term)} · ${group.weeks} ${group.weeks === 1 ? "week" : "weeks"}</span>
+                    <span class="tkm-icpsum__count">${group.count} ${group.count === 1 ? "student" : "students"}</span>
+                    <a class="tkm-btn tkm-btn--sm" href="${esc(group.preview_url)}" target="_blank" rel="noopener">Preview PDF</a>
+                </div>
+                ${
+                    group.warnings && group.warnings.length
+                        ? `<ul class="tkm-icpsum__warn">${group.warnings.map((w) => `<li>${esc(w)}</li>`).join("")}</ul>`
+                        : ""
+                }
+            </li>`
+        )
+        .join("");
+    const skippedHtml = skipped.length
+        ? `<div class="tkm-icpsum__skipped"><strong>${skipped.length} ${skipped.length === 1 ? "student is" : "students are"} left out</strong><ul>${skipped
+              .map((s) => `<li><b>${esc(s.registration_no)}</b> ${esc(s.reason)}</li>`)
+              .join("")}</ul></div>`
+        : "";
+
+    slot.innerHTML = `<div class="tkm-icpsum">
+        <p class="tkm-icpsum__lead">${
+            sending
+                ? `${sending} ${sending === 1 ? "student" : "students"} in ${groups.length} ${groups.length === 1 ? "group" : "groups"}. Each group gets one PDF, made from its class plans; open it to check before sending.`
+                : "None of the selected students can be sent a class routine."
+        }</p>
+        ${groups.length ? `<ul class="tkm-icpsum__groups">${groupHtml}</ul>` : ""}
+        ${skippedHtml}
+        <div class="tkm-icpsum__foot">
+            <button type="button" class="tkm-btn" data-tkm-act="close">Cancel</button>
+            ${sending ? `<button type="button" class="tkm-btn tkm-btn--green" data-tkm-act="icp-send">Send to ${sending} ${sending === 1 ? "student" : "students"}</button>` : ""}
+        </div>
+    </div>`;
+}
+
+/** Step 2: send to every student of the prepared groups, one request each. */
+async function runClassRoutines() {
+    const el = modal("icp");
+    if (!el || !icpPlan || icpRun) return;
+    const queue = icpPlan.groups.flatMap((group) => group.students.map((student) => ({ ...student, group: group.name })));
+    if (!queue.length) return;
+
+    icpRun = true;
+    const slot = $("[data-tkm-slot]", el);
+    const title = $("[data-tkm-icp-title]", el);
+    title.textContent = "Sending class routines";
+    slot.innerHTML =
+        '<div class="tkm-icp"><div class="tkm-icp__bar"><span class="tkm-icp__progress" data-tkm-icp-progress></span><span class="tkm-idcard__meter" aria-hidden="true"><span data-tkm-icp-meter style="width:0%"></span></span></div><ul class="tkm-icp__list" data-tkm-icp-list></ul></div>';
+    const progress = $("[data-tkm-icp-progress]", slot);
+    const meter = $("[data-tkm-icp-meter]", slot);
+    const list = $("[data-tkm-icp-list]", slot);
+
+    const done = [];
+    const failed = [];
+    let stopped = false;
+
+    for (let i = 0; i < queue.length; i++) {
+        if (el.hidden) {
+            stopped = true;
+            break;
+        }
+        const student = queue[i];
+        const label = student.registration_no || student.id;
+        progress.textContent = `Sending ${i + 1} of ${queue.length} · ${label} · ${student.group}`;
+        meter.style.width = `${Math.round((i / queue.length) * 100)}%`;
+
+        const { ok, data } = await post(config.routes.sendIcp, { student_id: student.id, task_id: config.taskId });
+        const message = data.message || (ok ? "Sent." : "The routine could not be sent.");
+        (ok ? done : failed).push(student);
+        list.insertAdjacentHTML(
+            "beforeend",
+            `<li class="tkm-icp__item ${ok ? "is-ok" : "is-bad"}"><span class="tkm-icp__ico">${ok ? "✓" : "!"}</span><span><strong>${esc(
+                label
+            )}</strong> ${esc(message)}${data.status_note ? `<em>${esc(data.status_note)}</em>` : ""}</span></li>`
+        );
+        list.lastElementChild?.scrollIntoView({ block: "nearest" });
+    }
+
+    icpRun = false;
+    icpPlan = null;
+    meter.style.width = "100%";
+    const sentIds = new Set(done.map((student) => String(student.id)));
+    selectedRows()
+        .filter((row) => sentIds.has(String(row.ids)))
+        .forEach((row) => state.selected.delete(rowKey(row)));
+    const notSent = failed.length + (stopped ? queue.length - done.length - failed.length : 0);
+    title.textContent = done.length ? "Class routines sent" : "No class routines sent";
+    progress.textContent =
+        `${done.length} ${done.length === 1 ? "student" : "students"} sent and marked complete` +
+        (notSent ? ` · ${notSent} not sent${stopped ? " (stopped)" : ""}` : "");
+    await load();
+    if (el.hidden && (done.length || failed.length)) {
+        toast(progress.textContent, failed.length > 0);
+    }
+}
+
 async function loadSlot(name, url, payload, onLoaded) {
     const el = openModal(name);
     if (!el) return;
@@ -841,6 +1187,9 @@ const ACTIONS = {
 
     /* bulk */
     "bulk-complete": (button) => updateStatus({ ids: selectedIds(), status: "Completed", button }),
+    "bulk-idcards": () => downloadIdCards(),
+    "bulk-icp": () => sendClassRoutines(),
+    "icp-send": () => runClassRoutines(),
     "bulk-cancel": () => {
         if (!state.selected.size) return;
         const el = openModal("cancel");

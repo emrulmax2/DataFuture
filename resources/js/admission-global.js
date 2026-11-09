@@ -51,8 +51,11 @@ import Dropzone from "dropzone";
             dzErrors = true;
         });
 
+        let photoTaskNote = "";
         drzn1.on("success", function(file, response){
             //console.log(response);
+            /* the server also files the photo in the applicant's photo task (and completes it when open) */
+            photoTaskNote = response && response.task_note ? response.task_note : "";
             return file.previewElement.classList.add("dz-success");
         });
 
@@ -68,7 +71,10 @@ import Dropzone from "dropzone";
                 drzn1.removeAllFiles();
 
                 $('#addApplicantPhotoModal .modal-content .uploadError').remove();
-                $('#addApplicantPhotoModal .modal-content').prepend('<div class="alert uploadError alert-success-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> WOW! Student photo successfully uploaded.</div>');
+                // $('#addApplicantPhotoModal .modal-content').prepend('<div class="alert uploadError alert-success-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> WOW! Student photo successfully uploaded.</div>');
+                const okAlert = $('<div class="alert uploadError alert-success-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> <span></span></div>');
+                okAlert.find('span').text('WOW! Student photo successfully uploaded.' + (photoTaskNote ? ' ' + photoTaskNote : ''));
+                $('#addApplicantPhotoModal .modal-content').prepend(okAlert);
                 createIcons({
                     icons,
                     "stroke-width": 1.5,
@@ -78,7 +84,7 @@ import Dropzone from "dropzone";
                 setTimeout(function(){
                     $('#addApplicantPhotoModal .modal-content .uploadError').remove();
                     window.location.reload();
-                }, 2000);
+                }, photoTaskNote ? 3500 : 2000); // a little longer to read the task note
             }else{
                 $('#addApplicantPhotoModal .modal-content .uploadError').remove();
                 $('#addApplicantPhotoModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Something went wrong. Please try later.</div>');
@@ -370,7 +376,14 @@ import Dropzone from "dropzone";
                     if (error.response) {
                         if (error.response.status == 422) {
                             $('#statusConfirmModal .modal-content .validationErrors').remove();
+                            if (error.response.data && error.response.data.missing) {
+                                /* Accepted / Offer Placed refused: proof of ID or fee eligibility missing */
+                                const $alert = $('<div class="alert validationErrors alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> <span></span></div>');
+                                $alert.find('span').text(error.response.data.message);
+                                $('#statusConfirmModal .modal-content').prepend($alert);
+                            } else {
                             $('#statusConfirmModal .modal-content').prepend('<div class="alert validationErrors alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Something went wrong. Please try again later or contact with the administrator.</div>');
+                            }
                             
                             createIcons({
                                 icons,
@@ -378,9 +391,11 @@ import Dropzone from "dropzone";
                                 nameAttr: "data-lucide",
                             });
 
+                            if (!(error.response.data && error.response.data.missing)) {
                             setTimeout(function(){
                                 $('#statusConfirmModal .modal-content .validationErrors').remove();
                             }, 2000);
+                            }
                         } else {
                             console.log('error');
                         }
@@ -428,39 +443,85 @@ import Dropzone from "dropzone";
             });
         }
 
+        /* The sender's position goes on the request (signer #1's location). A desktop
+           often has permission but no fix (Wi-Fi off, no GPS): try a quick fix, then a
+           precise one, then watch for up to 45 s; only a refusal blocks the request,
+           "no position" sends it without coordinates, as the automatic path does. */
+        const geoDetail = (err) => {
+            const code = err && err.code;
+            const name = code === 1 ? 'PERMISSION_DENIED' : code === 2 ? 'POSITION_UNAVAILABLE' : code === 3 ? 'TIMEOUT' : 'UNSUPPORTED';
+            return 'Error ' + (code === undefined ? '?' : code) + ' · ' + name + (err && err.message ? ' · ' + err.message : '');
+        };
+        const setSendState = (label) => {
+            const btn = document.getElementById('sendOfferBtn');
+            if (!btn) return;
+            if (!btn.dataset.label) btn.dataset.label = btn.childNodes[0] ? btn.childNodes[0].textContent : 'Send request';
+            if (label) { btn.setAttribute('disabled', 'disabled'); btn.childNodes[0].textContent = label + ' '; }
+            else { btn.removeAttribute('disabled'); btn.childNodes[0].textContent = btn.dataset.label; }
+        };
+        const locateSender = (onOk, onErr) => {
+            if (!navigator.geolocation) { onErr({ code: 0, message: 'navigator.geolocation is not available' }); return; }
+            const fast = { enableHighAccuracy: false, timeout: 10000, maximumAge: 10 * 60 * 1000 };
+            const precise = { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 };
+            navigator.geolocation.getCurrentPosition(onOk, (err) => {
+                if (err && err.code === 1) { onErr(err); return; }
+                setSendState('Finding your location…');
+                navigator.geolocation.getCurrentPosition(onOk, (err2) => {
+                    if (err2 && err2.code === 1) { onErr(err2); return; }
+                    let settled = false;
+                    const stop = (id) => { settled = true; try { navigator.geolocation.clearWatch(id); } catch (e) { /* no watch */ } };
+                    const id = navigator.geolocation.watchPosition(
+                        (pos) => { if (settled) return; stop(id); onOk(pos); },
+                        (err3) => { if (!settled && err3 && err3.code === 1) { stop(id); onErr(err3); } },
+                        { enableHighAccuracy: true, timeout: 45000, maximumAge: 0 }
+                    );
+                    setTimeout(() => { if (settled) return; stop(id); onErr(err2 || { code: 3, message: 'timeout' }); }, 45000);
+                }, precise);
+            }, fast);
+        };
+
         sendOfferForm.addEventListener('submit', function(e){
             e.preventDefault();
+            setSendState('Checking location…');
 
-            navigator.geolocation.getCurrentPosition(
+            locateSender(
                 function (position) {
-                    submitOfferForm(position.coords.latitude, position.coords.longitude); 
+                    submitOfferForm(position.coords.latitude, position.coords.longitude, null);
                 },
                 function (error) {
-                    if (warningModal) {
-                        warningModal.show();
-                        warningModalEl.addEventListener("shown.tw.modal", function () {
-                            const title = warningModalEl.querySelector('.warningModalTitle');
-                            const desc = warningModalEl.querySelector('.warningModalDesc');
-                            if (title) title.innerHTML = "Location Required!";
-                            if (desc) desc.innerHTML = "Please enable location permission to continue.";
-                            if (warningCloser) warningCloser.setAttribute('data-action', 'NONE');
-                        });
+                    if (error && error.code === 1) {
+                        setSendState(null);
+                        if (warningModal) {
+                            warningModal.show();
+                            warningModalEl.addEventListener("shown.tw.modal", function () {
+                                const title = warningModalEl.querySelector('.warningModalTitle');
+                                const desc = warningModalEl.querySelector('.warningModalDesc');
+                                if (title) title.innerHTML = "Location permission required";
+                                if (desc) desc.innerHTML = "Allow location access for this site in your browser and try again. Your position is recorded on the request as the sender's location.<br><small style=\"opacity:.7\">" + geoDetail(error) + "</small>";
+                                if (warningCloser) warningCloser.setAttribute('data-action', 'NONE');
+                            }, { once: true });
+                        }
+                        return;
                     }
+                    /* allowed, but the device returned no position: send anyway, say so */
+                    submitOfferForm(null, null, geoDetail(error));
                 }
             );
         });
 
-        function submitOfferForm(latitude, longitude) {
+        function submitOfferForm(latitude, longitude, locationNote) {
             const sendOfferBtn = document.getElementById('sendOfferBtn');
+            setSendState('Sending…');
             if(sendOfferBtn){
-                sendOfferBtn.setAttribute('disabled', 'disabled');
                 const spinner = sendOfferBtn.querySelector('svg');
                 if(spinner) spinner.style.display = 'inline-block';
             }
 
             const formData = new FormData(sendOfferForm);
-            formData.append('latitude', latitude);
-            formData.append('longitude', longitude);
+            if (latitude !== null && latitude !== undefined && longitude !== null && longitude !== undefined) {
+                formData.append('latitude', latitude);
+                formData.append('longitude', longitude);
+            }
 
             axios({
                 method: "post",
@@ -468,8 +529,8 @@ import Dropzone from "dropzone";
                 data: formData,
                 headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
             }).then(response => {
+                setSendState(null);
                 if(sendOfferBtn){
-                    sendOfferBtn.removeAttribute('disabled');
                     const spinner = sendOfferBtn.querySelector('svg');
                     if(spinner) spinner.style.display = 'none';
                 }
@@ -480,15 +541,19 @@ import Dropzone from "dropzone";
                     successModalEl.addEventListener("shown.tw.modal", function(){
                         const title = successModalEl.querySelector('.successModalTitle');
                         const desc = successModalEl.querySelector('.successModalDesc');
-                        if(title) title.innerHTML = "Success!";
-                        if(desc) desc.innerHTML = response.data.message || 'Offer acceptance sent successfully.';
+                        if(title) title.innerHTML = "Request sent";
+                        let text = response.data.message || 'E-signature request sent.';
+                        if (locationNote) text += '<br><small style="opacity:.75">Your device returned no position, so the sender\'s location was not recorded (' + locationNote + ').</small>';
+                        if(desc) desc.innerHTML = text;
                         if(successCloser) successCloser.setAttribute('data-action', 'NONE');
-                    });
-                    setTimeout(() => successModal.hide(), 2000);
+                    }, { once: true });
+                    /* the e-signature overview shows the new request once reloaded */
+                    const reloads = !!document.querySelector('[data-adp-esign-reload]');
+                    setTimeout(() => { successModal.hide(); if (reloads) window.location.reload(); }, 2000);
                 
             }).catch(error => {
+                setSendState(null);
                 if(sendOfferBtn){
-                    sendOfferBtn.removeAttribute('disabled');
                     const spinner = sendOfferBtn.querySelector('svg');
                     if(spinner) spinner.style.display = 'none';
                 }

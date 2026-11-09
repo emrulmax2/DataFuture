@@ -24,6 +24,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use PDF;
 use App\Traits\SendSmsTrait;
+use App\Services\AttendanceIntegrity\AttendanceAudit;
+use App\Services\AttendanceIntegrity\AttendanceGuard;
 
 class AttendanceController extends Controller
 {
@@ -285,6 +287,13 @@ class AttendanceController extends Controller
         $planDateList = PlansDateList::find($plan_date_list_id);
         $attendance_date = (isset($planDateList->date) && !empty($planDateList->date) ? date('Y-m-d', strtotime($planDateList->date)) : date('Y-m-d'));
         $attendances = (isset($request->attendances) && !empty($request->attendances) ? $request->attendances : []);
+
+        /* Attendance Integrity: the checks the page used to make on its own. */
+        $refusal = $this->registerChecks($planDateList, $plan_id, $attendances, 'tutor_register', $request, true);
+        if($refusal):
+            return $refusal;
+        endif;
+
         if(!empty($attendances)):
             foreach($attendances as $planDateId => $atns):
                 foreach($atns as $atn):
@@ -307,11 +316,16 @@ class AttendanceController extends Controller
                     if(isset($existAttendance->id) && $existAttendance->id > 0):
                         $smsStatus = ($existAttendance->attendance_feed_status_id != 4 &&  $data['attendance_feed_status_id'] == 4 ? true : false);
                         $data['updated_by'] = Auth::user()->id;
-                        Attendance::where('id', $existAttendance->id)->update($data);
+                        // Same single update as before, now with the attendance history (same transaction).
+                        DB::transaction(function () use ($existAttendance, $data) {
+                            AttendanceAudit::updateRows(Attendance::where('id', $existAttendance->id), $data);
+                        });
                     else:
                         $smsStatus = ($attendance_feed_status_id == 4 ? true : false);
                         $data['created_by'] = Auth::user()->id;
-                        Attendance::create($data);
+                        DB::transaction(function () use ($data) {
+                            Attendance::create($data);
+                        });
                     endif;
 
                     if($smsStatus):
@@ -351,6 +365,12 @@ class AttendanceController extends Controller
         $tutor_id = (isset($request->tutor_id) && $request->tutor_id > 0 ? $request->tutor_id : 0);
         $planDateList = PlansDateList::find($plan_date_list_id);
         $attendance_date = (isset($planDateList->date) && !empty($planDateList->date) ? date('Y-m-d', strtotime($planDateList->date)) : date('Y-m-d'));
+
+        /* Attendance Integrity: the checks the page used to make on its own. */
+        $refusal = $this->registerChecks($planDateList, $plan_id, $attendances, 'office_register', $request, false);
+        if($refusal):
+            return $refusal;
+        endif;
 
         /* Insert or Update Attendance Informations Start */
         $attendanceInfoData = [];
@@ -413,10 +433,15 @@ class AttendanceController extends Controller
                     $existAttendance = Attendance::where('plans_date_list_id', $planDateId)->where('student_id', $student_id)->get()->first();
                     if(isset($existAttendance->id) && $existAttendance->id > 0):
                         $data['updated_by'] = Auth::user()->id;
-                        Attendance::where('id', $existAttendance->id)->update($data);
+                        // Same single update as before, now with the attendance history (same transaction).
+                        DB::transaction(function () use ($existAttendance, $data) {
+                            AttendanceAudit::updateRows(Attendance::where('id', $existAttendance->id), $data);
+                        });
                     else:
                         $data['created_by'] = Auth::user()->id;
-                        Attendance::create($data);
+                        DB::transaction(function () use ($data) {
+                            Attendance::create($data);
+                        });
                     endif;
 
                     if($notifySms):
@@ -503,7 +528,32 @@ class AttendanceController extends Controller
 
     public function updateAll(Request $request)
     {
-    
+        /* Attendance Integrity: the page checks this privilege; the save has to as well. */
+        if(!AttendanceGuard::priv(Auth::user(), 'attendance_edit')):
+            return AttendanceGuard::deny('You do not have permission to edit attendance.');
+        endif;
+
+        $ids = array_values(array_filter((array) $request->get('id', []), fn ($value) => isset($request->attendance_feed[$value])));
+        $rows = Attendance::whereIn('id', $ids)->get()->keyBy('id');
+        if(count($ids) !== $rows->count() || $rows->pluck('student_id')->unique()->count() > 1):
+            return AttendanceGuard::deny('These attendance records do not belong to one student.', 422);
+        endif;
+
+        $changes = [];
+        foreach($rows as $row):
+            $newStatus = (int) $request->attendance_feed[$row->id];
+            // Rows with a note (student visits) cannot be changed on the page; refuse here too.
+            if(!empty($row->note) && (int) $row->attendance_feed_status_id !== $newStatus):
+                return AttendanceGuard::deny('A record with a note (such as a student visit) cannot be changed here.', 422);
+            endif;
+            $changes[] = ['session_id' => (int) $row->plans_date_list_id, 'old' => (int) $row->attendance_feed_status_id, 'new' => $newStatus];
+        endforeach;
+
+        if($ask = AttendanceGuard::reasonResponse($request, AttendanceGuard::lateChanges($changes))):
+            return $ask;
+        endif;
+        AttendanceAudit::context('student_profile', AttendanceGuard::reason($request));
+
         foreach ( $request->get('id') as  $value) {
             if(isset($request->attendance_feed[$value])) {
                 $attendance = Attendance::find($value); 
@@ -514,7 +564,9 @@ class AttendanceController extends Controller
                 ];
 
                 $attendance->fill($data);
-                $attendance->save();
+                DB::transaction(function () use ($attendance) {
+                    $attendance->save();
+                });
             }
         }
         if(isset($attendance->id)) :
@@ -533,25 +585,120 @@ class AttendanceController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id) {
+    public function destroy(Request $request, $id) {
 
-        $studentVisit = StudentVisit::where('attendance_id', $id)->first();
+        /* Attendance Integrity: the delete privilege existed but nothing checked it. */
+        if(!AttendanceGuard::priv(Auth::user(), 'attendance_delete')):
+            return AttendanceGuard::deny('You do not have permission to delete attendance.');
+        endif;
 
-        if(isset($studentVisit) && !empty($studentVisit)){
+        $attendance = Attendance::find($id);
+        if(!$attendance):
+            return AttendanceGuard::deny('This attendance record was not found.', 404);
+        endif;
 
-            $studentVisit->attendance_deleted_by = Auth::user()->id;
-            $studentVisit->updated_by = Auth::user()->id;
-            $studentVisit->save();
-            $studentVisit->delete();
-        }
+        $late = AttendanceGuard::lateChanges([['session_id' => (int) $attendance->plans_date_list_id, 'old' => (int) $attendance->attendance_feed_status_id, 'new' => null]]);
+        if($ask = AttendanceGuard::reasonResponse($request, $late)):
+            return $ask;
+        endif;
+        AttendanceAudit::context('profile_delete', AttendanceGuard::reason($request));
 
-        $data = Attendance::find($id)->delete();
+        $data = DB::transaction(function () use ($id, $attendance) {
+            $studentVisit = StudentVisit::where('attendance_id', $id)->first();
+
+            if(isset($studentVisit) && !empty($studentVisit)){
+
+                $studentVisit->attendance_deleted_by = Auth::user()->id;
+                $studentVisit->updated_by = Auth::user()->id;
+                $studentVisit->save();
+                $studentVisit->delete();
+            }
+
+            return $attendance->delete();
+        });
+
         return response()->json($data);
     }
 
     public function restore($id) {
-        $data = Attendance::where('id', $id)->withTrashed()->restore();
+        /* Attendance Integrity: the route had no id and the method returned nothing. */
+        if(!AttendanceGuard::priv(Auth::user(), 'attendance_delete')):
+            return AttendanceGuard::deny('You do not have permission to restore attendance.');
+        endif;
 
-        response()->json($data);
+        $attendance = Attendance::withTrashed()->find($id);
+        if(!$attendance):
+            return AttendanceGuard::deny('This attendance record was not found.', 404);
+        endif;
+
+        AttendanceAudit::context('restore');
+        $data = DB::transaction(fn () => $attendance->trashed() ? $attendance->restore() : true);
+
+        return response()->json($data);
+    }
+
+    /**
+     * Attendance Integrity checks for saving a class register (tutor and office
+     * screens). Returns the refusal, or null when the save may go ahead, after
+     * setting the history context (screen and reason).
+     *
+     * - the class date belongs to the class and every row is for that date;
+     * - the user may record attendance for this class (Attendance Settings);
+     * - on the tutor screen, the register locks once the class has ended and was
+     *   fed, unless the user has Edit Attendance (as the page already showed);
+     * - every student is assigned to the class or already on this register;
+     * - a reason is given for late corrections (Attendance Settings).
+     */
+    private function registerChecks($planDateList, $planId, array $attendances, string $source, Request $request, bool $tutorScreen)
+    {
+        if(!$planDateList || (int) $planDateList->plan_id !== (int) $planId):
+            return AttendanceGuard::deny('This class date does not belong to the class.', 422);
+        endif;
+        $sessionId = (int) $planDateList->id;
+        foreach(array_keys($attendances) as $planDateId):
+            if((int) $planDateId !== $sessionId):
+                return AttendanceGuard::deny('These records are not for this class date.', 422);
+            endif;
+        endforeach;
+
+        $user = Auth::user();
+        if(!AttendanceGuard::canRecordFor($user, $sessionId)):
+            return AttendanceGuard::deny('Only the tutor, personal tutor or cover tutor of this class can save its register. Staff who need to save registers for other classes need the Module Contents > Edit Attendance privilege.');
+        endif;
+
+        if($tutorScreen):
+            $info = AttendanceInformation::where('plans_date_list_id', $sessionId)->get()->first();
+            $classEnded = isset($info->end_time) && $info->end_time != null;
+            $feedCount = Attendance::where('plans_date_list_id', $sessionId)->count();
+            $canEdit = !$classEnded || ((int) $planDateList->feed_given != 1 && $feedCount == 0) || AttendanceGuard::priv($user, 'edit_attendance');
+            if(!$canEdit):
+                return AttendanceGuard::deny('This register is locked: the class has ended and its attendance was already saved. Changing it needs the Module Contents > Edit Attendance privilege.');
+            endif;
+        endif;
+
+        $allowed = Assign::where('plan_id', $planId)->pluck('student_id')
+            ->merge(Attendance::where('plans_date_list_id', $sessionId)->pluck('student_id'))
+            ->map(fn ($id) => (int) $id)->flip();
+        $changes = [];
+        foreach($attendances as $atns):
+            foreach((array) $atns as $atn):
+                $studentId = (int) ($atn['student_id'] ?? 0);
+                if($studentId < 1 || !isset($allowed[$studentId])):
+                    return AttendanceGuard::deny('A student on this register is not assigned to this class.', 422);
+                endif;
+                $existing = $tutorScreen
+                    ? Attendance::where('plans_date_list_id', $sessionId)->where('plan_id', $planId)->where('student_id', $studentId)->get()->first()
+                    : Attendance::where('plans_date_list_id', $sessionId)->where('student_id', $studentId)->get()->first();
+                $newStatus = (isset($atn['attendance_feed_status_id']) && $atn['attendance_feed_status_id'] > 0 ? (int) $atn['attendance_feed_status_id'] : 4);
+                $changes[] = ['session_id' => $sessionId, 'old' => $existing ? (int) $existing->attendance_feed_status_id : null, 'new' => $newStatus];
+            endforeach;
+        endforeach;
+
+        if($ask = AttendanceGuard::reasonResponse($request, AttendanceGuard::lateChanges($changes))):
+            return $ask;
+        endif;
+        AttendanceAudit::context($source, AttendanceGuard::reason($request));
+
+        return null;
     }
 }

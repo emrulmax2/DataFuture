@@ -29,8 +29,9 @@ class StudentSnapshots
         $students = DB::table('students as s')
             ->leftJoin('titles as t', 't.id', '=', 's.title_id')
             ->leftJoin('sex_identifiers as x', 'x.id', '=', 's.sex_identifier_id')
+            ->leftJoin('statuses as st', 'st.id', '=', 's.status_id')
             ->whereIn('s.id', $ids)->whereNull('s.deleted_at')
-            ->get(['s.id', 's.registration_no', 's.title_id', 's.first_name', 's.last_name', 's.date_of_birth', 's.ssn_no', 's.sex_identifier_id', 't.name as title', 'x.name as sex']);
+            ->get(['s.id', 's.registration_no', 's.title_id', 's.first_name', 's.last_name', 's.date_of_birth', 's.ssn_no', 's.sex_identifier_id', 't.name as title', 'x.name as sex', 'st.name as status_name', 'st.active as status_active']);
         foreach ($students as $s) {
             $out[$s->id] = [
                 'id' => (int) $s->id,
@@ -42,8 +43,9 @@ class StudentSnapshots
                 'dob' => $s->date_of_birth ? substr((string) $s->date_of_birth, 0, 10) : '',
                 'ssn' => trim((string) $s->ssn_no) ?: null,
                 'url' => route('student.show', $s->id), // the student profile
-                'crel_id' => null, 'course_creation_id' => null, 'course_name' => '', 'intake' => '', 'awarding_body' => '', 'slc_code' => '',
-                'instance' => null, 'addresses' => [], 'contact_id' => null, 'abody' => null,
+                'status' => StudentStatus::of($s->status_name, $s->status_active), // shown beside the name
+                'crel_id' => null, 'course_creation_id' => null, 'course_name' => '', 'intake' => '', 'awarding_body' => '', 'slc_code' => '', 'venue' => '',
+                'instance' => null, 'addresses' => [], 'contact_id' => null, 'mobile' => '', 'abody' => null,
                 'att' => ['held' => 0, 'attended' => 0, 'last' => null, 'physical' => 0, 'online' => 0, 'other' => 0, 'otherNames' => ''], 'att_from' => null, 'registration' => null,
             ];
         }
@@ -52,12 +54,13 @@ class StudentSnapshots
             return [];
         }
 
-        // contact → permanent and term-time addresses (the newest contact row, as the profile shows)
-        $contacts = DB::table('student_contacts')->whereIn('student_id', $ids)->whereNull('deleted_at')->orderBy('id')->get(['id', 'student_id', 'permanent_address_id', 'term_time_address_id'])->keyBy('student_id');
+        // contact → permanent and term-time addresses and the mobile number (the newest contact row, as the profile shows)
+        $contacts = DB::table('student_contacts')->whereIn('student_id', $ids)->whereNull('deleted_at')->orderBy('id')->get(['id', 'student_id', 'permanent_address_id', 'term_time_address_id', 'mobile'])->keyBy('student_id');
         $addressIds = $contacts->flatMap(fn ($c) => [$c->permanent_address_id, $c->term_time_address_id])->filter()->unique()->all();
         $addresses = $addressIds ? DB::table('addresses')->whereIn('id', $addressIds)->get(['id', 'address_line_1', 'address_line_2', 'city', 'post_code'])->keyBy('id') : collect();
         foreach ($contacts as $sid => $c) {
             $out[$sid]['contact_id'] = (int) $c->id;
+            $out[$sid]['mobile'] = trim((string) $c->mobile);
             foreach (['permanent' => $c->permanent_address_id, 'term' => $c->term_time_address_id] as $type => $aid) {
                 $a = $aid ? $addresses->get($aid) : null;
                 if (!$a) {
@@ -89,6 +92,8 @@ class StudentSnapshots
         $proposed = $crelIds ? DB::table('student_proposed_courses')->whereIn('student_course_relation_id', $crelIds)->whereNull('deleted_at')->orderBy('id')->get(['student_course_relation_id', 'course_creation_id', 'venue_id'])->keyBy('student_course_relation_id') : collect();
         $creationIds = $crels->pluck('course_creation_id')->unique()->all();
         $venueCodes = $creationIds ? DB::table('course_creation_venue')->whereIn('course_creation_id', $creationIds)->whereNull('deleted_at')->get(['course_creation_id', 'venue_id', 'slc_code']) : collect();
+        $venueIds = $proposed->pluck('venue_id')->merge($venueCodes->pluck('venue_id'))->filter()->unique()->all();
+        $venueNames = $venueIds ? DB::table('venues')->whereIn('id', $venueIds)->pluck('name', 'id') : collect();
         $instances = $creationIds ? DB::table('course_creation_instances')->whereIn('course_creation_id', $creationIds)->whereNull('deleted_at')->orderBy('start_date')->orderBy('id')->get(['id', 'course_creation_id', 'academic_year_id', 'start_date', 'fees'])->groupBy('course_creation_id') : collect();
 
         foreach ($crels as $sid => $r) {
@@ -106,6 +111,7 @@ class StudentSnapshots
             $out[$sid]['intake'] = trim((string) $r->intake);
             $out[$sid]['awarding_body'] = trim((string) $r->awarding_body);
             $out[$sid]['slc_code'] = self::code($code->slc_code ?? '');
+            $out[$sid]['venue'] = trim((string) ($venueNames[$p->venue_id ?? $code->venue_id ?? 0] ?? '')); // the proposed course's venue, as Course Details shows it
             $list = $instances->get($r->course_creation_id, collect())->values();
             // the register counts from the start of the current year of study (the latest instance already started)
             $started = $list->filter(fn ($i) => substr((string) $i->start_date, 0, 10) <= now()->toDateString())->last() ?? $list->first();

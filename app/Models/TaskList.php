@@ -31,6 +31,7 @@ class TaskList extends Model
         'pearson_reg',
         'address_request',
         'hesa_status',
+        'class_routine',
         'created_by',
         'updated_by',
     ];

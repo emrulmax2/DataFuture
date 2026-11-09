@@ -3,7 +3,7 @@
     <template v-if="view === 'overview'">
         <div class="pagehead">
             <div><span class="eyebrow">Bulk attendance</span><h1>SLC attendance confirmation</h1>
-                <p>Upload the SIS Attendance Confirmation Report, match each student by SSN, check SLC’s data against ours, pull the register for the liability period, confirm each student’s code and download the SIS attendance import file.</p></div>
+                <p>Upload the SIS Attendance Confirmation Report, match each student by SSN, check SLC’s data against ours, check each student’s attendance in the liability period and confirm their code and download the SIS attendance import file.</p></div>
         </div>
 
         <section class="card" aria-labelledby="att-up">
@@ -35,10 +35,9 @@
             <li><button type="button" class="stage t-ok" @click="$emit('go', 'overview')"><span class="s-n">STEP 1</span><span class="s-l">Uploaded</span><span class="s-v">{{ counts.all }}</span><span class="s-m">{{ imp.termName }} {{ imp.year }} · report {{ fmtIso(imp.reportDate) }}</span></button></li>
             <li><button type="button" :class="'stage ' + (counts.unmatched ? 't-warn' : 't-ok')" @click="$emit('go', 'match', counts.unmatched ? 'open' : 'matched')"><span class="s-n">STEP 2</span><span class="s-l">Matched</span><span class="s-v">{{ counts.matched }}</span><span class="s-m">{{ counts.unmatched }} to match · {{ counts.ssn }} by SSN · {{ counts.linked }} matched here</span></button></li>
             <li><button type="button" :class="'stage ' + (counts.data ? 't-bad' : 't-ok')" @click="$emit('go', 'check')"><span class="s-n">STEP 3</span><span class="s-l">Data check</span><span class="s-v">{{ counts.data }}</span><span class="s-m">To sort · {{ counts.clean }} fully matched · {{ noReg }} with no SLC registration for {{ imp.year }}</span></button></li>
-            <li><button type="button" :class="'stage ' + (counts.noAttendance ? 't-bad' : 't-ok')" @click="$emit('go', 'register')"><span class="s-n">STEP 4</span><span class="s-l">No attendance</span><span class="s-v">{{ counts.noAttendance }}</span><span class="s-m">Nothing attended in the {{ imp.termName }} term · {{ counts.attending }} attending</span></button></li>
-            <li><button type="button" :class="'stage ' + (counts.codeReady ? 't-info' : 't-ok')" @click="$emit('go', 'codes')"><span class="s-n">STEP 5</span><span class="s-l">Codes</span><span class="s-v">{{ counts.codeReady }}</span><span class="s-m">Ready to confirm · {{ counts.codeNoReg }} with no SLC registration · {{ counts.confirmed }} confirmed</span></button></li>
-            <li><button type="button" :class="'stage ' + (counts.cocToSubmit ? 't-bad' : 't-ok')" @click="$emit('go', 'cocs')"><span class="s-n">STEP 6</span><span class="s-l">CoCs</span><span class="s-v">{{ counts.cocToSubmit }}</span><span class="s-m">To submit · {{ counts.cocQueued }} queued by codes</span></button></li>
-            <li><button type="button" :class="'stage ' + (counts.awaiting ? 't-warn' : 't-ok')" @click="$emit('go', 'batches')"><span class="s-n">STEP 7</span><span class="s-l">Batches</span><span class="s-v">{{ counts.awaiting }}</span><span class="s-m">Awaiting download · {{ batchCount }} {{ batchCount === 1 ? 'batch' : 'batches' }} in all</span></button></li>
+            <li><button type="button" :class="'stage ' + (counts.codeReady ? 't-info' : counts.noAttendance ? 't-bad' : 't-ok')" @click="$emit('go', 'codes')"><span class="s-n">STEP 4</span><span class="s-l">Attendance &amp; codes</span><span class="s-v">{{ counts.codeReady }}</span><span class="s-m">Ready to confirm · {{ counts.attending }} attending, {{ counts.noAttendance }} with no attendance in the {{ imp.termName }} term · {{ counts.codeNoReg }} with no SLC registration · {{ counts.confirmed }} confirmed</span></button></li>
+            <li><button type="button" :class="'stage ' + (counts.cocToSubmit ? 't-bad' : 't-ok')" @click="$emit('go', 'cocs')"><span class="s-n">STEP 5</span><span class="s-l">CoCs</span><span class="s-v">{{ counts.cocToSubmit }}</span><span class="s-m">To submit · {{ counts.cocQueued }} queued by codes</span></button></li>
+            <li><button type="button" :class="'stage ' + (counts.awaiting ? 't-warn' : 't-ok')" @click="$emit('go', 'batches')"><span class="s-n">STEP 6</span><span class="s-l">Batches</span><span class="s-v">{{ counts.awaiting }}</span><span class="s-m">Awaiting download · {{ batchCount }} {{ batchCount === 1 ? 'batch' : 'batches' }} in all</span></button></li>
         </ol>
 
         <section class="card"><div class="card-h"><h2>How it will work</h2></div>
@@ -50,9 +49,8 @@
         </section>
     </template>
 
-    <!-- Steps 3–7 -->
+    <!-- Steps 3–6 -->
     <AttCheck v-else-if="view === 'check'" />
-    <AttRegister v-else-if="view === 'register'" />
     <AttCodes v-else-if="view === 'codes'" @go="(v) => $emit('go', v)" />
     <AttCocs v-else-if="view === 'cocs'" />
     <AttBatches v-else-if="view === 'batches'" />
@@ -84,7 +82,7 @@
                                 <template v-if="i.cands.length">
                                     <div class="att-best">
                                         <span :class="'pill ' + (i.cands[0].pct >= 85 ? 'ok' : i.cands[0].pct >= 60 ? 'warn' : 'muted')">{{ i.cands[0].pct }}%</span>
-                                        <span><a class="plain" :href="i.cands[0].s.url" target="_blank" rel="noopener"><b>{{ i.cands[0].s.title }} {{ i.cands[0].s.first }} {{ i.cands[0].s.last }}</b></a> <span class="muted small">{{ i.cands[0].s.id }}</span></span>
+                                        <span><a class="plain" :href="i.cands[0].s.url" target="_blank" rel="noopener"><b>{{ i.cands[0].s.title }} {{ i.cands[0].s.first }} {{ i.cands[0].s.last }}</b></a><StatusTag :status="i.cands[0].s.status" /> <span class="muted small">{{ i.cands[0].s.id }}</span></span>
                                     </div>
                                     <div class="muted small">{{ i.cands[0].s.course || 'No active course' }}{{ i.cands[0].s.intake ? ' · ' + i.cands[0].s.intake : '' }} · DOB {{ fmtIso(i.cands[0].s.dob) }}</div>
                                     <ul class="chips" style="margin-top: 5px"><li v-for="ch in i.cands[0].chips" :key="ch.label" :class="'pill ' + (ch.st === 'ok' ? 'ok' : ch.st === 'part' ? 'warn' : 'bad')">{{ ch.st === 'ok' ? '✓' : ch.st === 'part' ? '~' : '✗' }} {{ ch.label }}</li></ul>
@@ -114,7 +112,7 @@
             <div class="tablebox"><table class="tbl" style="min-width: 1300px">
                 <thead><tr><th scope="col">Student</th><th scope="col">SSN</th><th scope="col">SLC course · year</th><th scope="col">Our course · year</th><th scope="col">SLC registration {{ imp.year }}</th><th scope="col" style="min-width: 240px">Attendance</th><th scope="col">Matched</th></tr></thead>
                 <tbody><tr v-for="i in matched" :key="i.id">
-                    <th scope="row"><a class="plain" :href="i.s.url" target="_blank" rel="noopener">{{ i.s.title }} {{ i.s.first }} {{ i.s.last }}</a><div class="muted small" style="font-weight: 400">{{ i.s.id }}</div></th>
+                    <th scope="row"><a class="plain" :href="i.s.url" target="_blank" rel="noopener">{{ i.s.title }} {{ i.s.first }} {{ i.s.last }}</a><StatusTag :status="i.s.status" /><div class="muted small" style="font-weight: 400">{{ i.s.id }}</div></th>
                     <td class="mono">{{ i.r.ssn }}</td>
                     <td>{{ i.r.slcCode }} · Year {{ i.r.year }}<div class="muted small">{{ i.r.courseName }}</div></td>
                     <td>{{ i.s.slcCode || 'No SLC code' }} · {{ i.s.year ? 'Year ' + i.s.year : 'no ' + imp.year + ' year' }}<div class="muted small">{{ i.s.course }}{{ i.s.intake ? ' · ' + i.s.intake : '' }}</div>
@@ -135,18 +133,18 @@ import Ico from "./Ico.vue";
 import AttFind from "./AttFind.vue";
 import AttCell from "./AttCell.vue";
 import AttCheck from "./AttCheck.vue";
-import AttRegister from "./AttRegister.vue";
 import AttCodes from "./AttCodes.vue";
 import AttCocs from "./AttCocs.vue";
 import AttBatches from "./AttBatches.vue";
+import StatusTag from "./StatusTag.vue";
 
 /*
  * Bulk attendance (user, 2 Nov 2026): the Overview with step 1 (upload the SIS Attendance
  * Confirmation Report, AttendanceActions::import) and one tile per step, and step 2 (match students
- * by SSN). Steps 3–7 are their own components.
+ * by SSN). Steps 3–6 are their own components (step 4, Attendance & codes, was two steps until 6 Nov 2026).
  */
 export default {
-    components: { Ico, AttFind, AttCell, AttCheck, AttRegister, AttCodes, AttCocs, AttBatches },
+    components: { StatusTag, Ico, AttFind, AttCell, AttCheck, AttCodes, AttCocs, AttBatches },
     props: { view: { type: String, default: "overview" }, show: { type: String, default: "open" } },
     emits: ["go", "show"],
     setup() {

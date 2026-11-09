@@ -186,6 +186,67 @@ class AttendanceActions
         return $route === 'coc' ? 'CoC to issue added for '.$name.'.' : ($route === 'contact' ? $name.' added to students to contact.' : 'No action needed on '.$label.' for '.$name.'.');
     }
 
+    /**
+     * The Data check's Name row (user, 6 Nov 2026: first and last name as one "Name"): one action for
+     * several differences of a line, all or none. Fields already matching or decided are skipped.
+     */
+    public function setRoutes(int $rowId, array $keys, string $route): string
+    {
+        $keys = array_values(array_intersect(array_keys(AttendanceChecks::FIELD_ROUTES), array_unique($keys)));
+        if (!$keys) {
+            $this->fail('Nothing to decide.');
+        }
+        foreach ($keys as $k) {
+            if (!in_array($route, AttendanceChecks::FIELD_ROUTES[$k], true)) {
+                $this->fail('That action is not available for '.strtolower(AttendanceChecks::FIELD_LABEL[$k]).'. Decide each field separately.');
+            }
+        }
+        $done = [];
+        DB::transaction(function () use ($rowId, $keys, $route, &$done) {
+            foreach ($keys as $k) {
+                $row = SlcAttendanceImportRow::with(['fields', 'import'])->find($rowId) ?? $this->fail('That line is no longer in the upload.');
+                [, $checks] = $this->rowInfo($row);
+                $ch = $checks->get($k);
+                if (!$ch || $ch['ok'] || $row->fields->firstWhere('field', $k)) {
+                    continue;
+                }
+                $this->setRoute($rowId, $k, $route, true);
+                $done[] = strtolower(AttendanceChecks::FIELD_LABEL[$k]);
+            }
+        });
+        if (!$done) {
+            $this->fail('Those fields have nothing left to decide.');
+        }
+        $who = $this->who(SlcAttendanceImportRow::find($rowId));
+        $what = count($done) > 1 ? implode(', ', array_slice($done, 0, -1)).' and '.end($done) : $done[0];
+        $this->log(match ($route) {
+            'update' => 'updated our record – '.$who.': '.$what,
+            'coc' => 'CoC to issue – '.$who.': '.$what,
+            'contact' => 'student to contact about '.$what.' – '.$who,
+            default => 'no action needed on '.$what.' – '.$who,
+        });
+
+        return match ($route) {
+            'update' => 'Updated '.$who.'’s '.$what.' from SLC.',
+            'coc' => 'CoC to issue added for '.$who.' ('.$what.').',
+            'contact' => $who.' added to students to contact ('.$what.').',
+            default => 'No action needed on '.$what.' for '.$who.'.',
+        };
+    }
+
+    /** The Name row's Change: each of those fields is open to decide again. */
+    public function clearRoutes(int $rowId, array $keys): string
+    {
+        $keys = array_values(array_intersect(array_keys(AttendanceChecks::FIELD_ROUTES), array_unique($keys)));
+        DB::transaction(function () use ($rowId, $keys) {
+            foreach ($keys as $k) {
+                $this->clearRoute($rowId, $k);
+            }
+        });
+
+        return 'Reopened '.implode(' and ', array_map(fn ($k) => strtolower(AttendanceChecks::FIELD_LABEL[$k]), $keys)).'.';
+    }
+
     public function clearRoute(int $rowId, string $key): string
     {
         $row = SlcAttendanceImportRow::with('fields')->find($rowId) ?? $this->fail('That line is no longer in the upload.');
@@ -269,7 +330,7 @@ class AttendanceActions
             ->where(fn ($q) => $q->where('reason', 'like', 'SLC attendance%')->orWhere('reason', 'like', 'SLC registration check%'))->latest('id')->first();
     }
 
-    /* ---------------------------------------------------- step 5: the code */
+    /* ---------------------------------------------------- step 4: the code */
 
     /** The code staff choose for a line (null = back to the suggestion). Any code can be chosen. */
     public function setCode(int $rowId, ?string $code): string
@@ -405,7 +466,7 @@ class AttendanceActions
         return 'Removed '.$this->who($row).' from batch '.($batch->code ?? '').'.';
     }
 
-    /* ------------------------------------------------------- step 6: CoCs */
+    /* ------------------------------------------------------- step 5: CoCs */
 
     /** A queued CoC is done in SIS (or back to queued): slc_cocs.actioned, as on the student's SLC tab. */
     public function cocDone(int $rowId, bool $done): string
@@ -421,7 +482,7 @@ class AttendanceActions
         return $done ? $coc->coc_type.' CoC marked done for '.$this->who($row).'.' : $coc->coc_type.' CoC reopened for '.$this->who($row).'.';
     }
 
-    /* ---------------------------------------------------- step 7: batches */
+    /* ---------------------------------------------------- step 6: batches */
 
     /** Generates the SIS attendance import file the first time (batch → downloaded); later calls return the same file. */
     public function download(string $code): array

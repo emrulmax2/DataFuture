@@ -93,6 +93,7 @@ class ApplicationController extends Controller
         
         return view('pages.applicant.application.index', [
             'title' => 'Application Form - London Churchill College',
+            'layout' => 'agent-portal',
             'breadcrumbs' => [
                 ['label' => 'Application Form', 'href' => 'javascript:void(0);']
             ],
@@ -544,13 +545,64 @@ class ApplicationController extends Controller
     }
 
     
-    public function show($id){
-        return view('pages.applicant.application.show', [
-            'title' => 'Application View - London Churchill College',
-            'breadcrumbs' => [
-                ['label' => 'Application View', 'href' => 'javascript:void(0);']
-            ],
-            'applicant' => Applicant::where('id', $id)->first(),
+    /**
+     * One application, read-only, for the agency that filed it. The id in the
+     * URL is not trusted: anything outside the signed-in agent's own user and
+     * sub-agents is a 404.
+     */
+    public function show($id)
+    {
+        $me = auth('agent')->user();
+        $agentUserList = \App\Models\AgentUser::where('id', $me->id)->orWhere('parent_id', $me->id)->pluck('id')->toArray();
+        /* Theirs if the application carries their agent id - or, when it carries
+           none (older submissions lost it to a referral code with no agent),
+           if it was filed through one of their verification records. An
+           application that belongs to another agency stays out of reach. */
+        $applicant = Applicant::with(['users', 'course.creation.course', 'course.semester', 'status', 'title', 'contact'])
+            ->where(function ($q) use ($agentUserList) {
+                $q->whereIn('agent_user_id', $agentUserList)
+                    ->orWhere(function ($orphan) use ($agentUserList) {
+                        $orphan->whereNull('agent_user_id')
+                            ->whereIn('id', AgentApplicationCheck::whereIn('agent_user_id', $agentUserList)->whereNotNull('applicant_id')->select('applicant_id'));
+                    });
+            })
+            ->findOrFail($id);
+
+        /* "Start a new application" is offered as the dashboard list offers it:
+           this is the applicant's latest application and it was rejected. */
+        $latest = Applicant::where('applicant_user_id', $applicant->applicant_user_id)->orderByDesc('id')->first();
+        $canRestart = (int) $applicant->status_id === 8 && $latest && (int) $latest->id === (int) $applicant->id;
+        $reason = $applicant->application_rejected_reason_id ? optional(\App\Models\ApplicationRejectedReason::find($applicant->application_rejected_reason_id))->name : null;
+
+        /* Messages the college sent: the emails and SMS logged against this
+           application, oldest first. */
+        $messages = collect()
+            ->concat(\App\Models\ApplicantEmail::where('applicant_id', $applicant->id)->get()
+                ->map(fn($e) => ['at' => $e->created_at, 'text' => 'Email · ' . ($e->subject ?: 'Message from admissions')]))
+            ->concat(\App\Models\ApplicantSms::where('applicant_id', $applicant->id)->get()
+                ->map(fn($s) => ['at' => $s->created_at, 'text' => 'SMS · ' . ($s->subject ?: \Illuminate\Support\Str::limit(trim(strip_tags((string) $s->sms)), 90))]))
+            ->sortBy('at')->values();
+
+        /* History: every status change recorded against the application. */
+        $statusNames = \App\Models\Status::where('type', 'Applicant')->pluck('name', 'id')->toArray();
+        $history = \App\Models\ApplicantArchive::where('applicant_id', $applicant->id)->where('field_name', 'status_id')->orderBy('id')->get()
+            ->map(fn($h) => ['at' => $h->created_at, 'from' => $statusNames[(int) $h->field_value] ?? null, 'to' => $statusNames[(int) $h->field_new_value] ?? null]);
+
+        $referralOwner = ($applicant->referral_code && (int) $applicant->is_referral_varified === 1)
+            ? optional(\App\Models\ReferralCode::where('code', $applicant->referral_code)->first())->owner_name
+            : null;
+
+        return view('pages.agent.application.show', [
+            'title' => 'Application ' . $applicant->application_no . ' - London Churchill College',
+            'layout' => 'agent-portal',
+            'breadcrumbs' => [],
+            'applicant' => $applicant,
+            'statusNames' => $statusNames,
+            'canRestart' => $canRestart,
+            'reason' => $reason,
+            'messages' => $messages,
+            'history' => $history,
+            'referralOwner' => $referralOwner,
         ]);
     }
 

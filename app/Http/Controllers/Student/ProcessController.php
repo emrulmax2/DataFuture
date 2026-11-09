@@ -71,6 +71,8 @@ class ProcessController extends Controller
                 $message = 'No new task selected. ';
                 $message .= ($numDelete > 0 ? ' Previously inserted '.$numDelete.' item deleted.' : '');
             endif;
+            // Task Automation "Change student status to SLC New": re-check once tasks were added or removed
+            \App\Services\TaskAssignment\StudentProcessWrapUp::checkMany($student_id);
             return response()->json(['message' => $message], 200);
         else:
             return response()->json(['message' => 'Something went wrong. Please try later or contact administrator.'], 422);
@@ -133,6 +135,8 @@ class ProcessController extends Controller
             'current_field_value' => 'Item Deleted',
             'created_by' => auth()->user()->id
         ]);
+        // a removed task no longer holds up "Change student status to SLC New"
+        \App\Services\TaskAssignment\StudentProcessWrapUp::checkMany($student);
         return response()->json(['message' => 'Data deleted'], 200);
     }
 
@@ -141,15 +145,49 @@ class ProcessController extends Controller
         $recordid = $request->recordid;
         $studentRow = Student::find($student);
 
+        // The "Change student status to SLC New" task (user, 29 Oct 2026). It should complete itself
+        // once every other task of its process is done, so by hand:
+        //  - nothing else open: it completes as the action does, status change included;
+        //  - tasks still open: staff confirm first (force), and the status is left alone.
+        $wrapUp = app(\App\Services\TaskAssignment\StudentProcessWrapUp::class);
+        $theTask = StudentTask::with('task.processlist')->where('id', $recordid)->where('student_id', $student)->first();
+        $manual = $theTask ? $wrapUp->manualCompletion($theTask) : null;
+        if ($manual) {
+            if (empty($manual['open'])) {
+                $result = $wrapUp->check((int) $student);
+                if (($result['status'] ?? null) === \App\Services\TaskAssignment\StudentProcessWrapUp::DONE) {
+                    return response()->json(['message' => $result['message'], 'wrap_up' => true], 200);
+                }
+
+                return response()->json(['message' => $result['message'] ?? 'The task could not be completed just now. Please try again.', 'wrap_up' => true], 422);
+            }
+            if (!$request->boolean('force')) {
+                return response()->json([
+                    'message' => count($manual['open']).' other '.$manual['process'].' '.(count($manual['open']) === 1 ? 'task is' : 'tasks are').' still open.',
+                    'wrap_up' => $manual,
+                ], 409);
+            }
+            StudentTaskLog::create([
+                'student_tasks_id' => $theTask->id,
+                'actions' => 'Completed by hand',
+                'field_name' => 'status_id',
+                'prev_field_value' => count($manual['open']).' other '.(count($manual['open']) === 1 ? 'task' : 'tasks').' open',
+                'current_field_value' => 'Student status not changed',
+                'created_by' => auth()->user()->id,
+            ]);
+        }
+
         $studentTask = StudentTask::where('id', $recordid)->where('student_id', $student)->update(['status' => 'Completed', 'updated_by' => auth()->user()->id]);
         $studentTaskLog = StudentTaskLog::create([
             'student_tasks_id' => $recordid,
             'actions' => 'Status Changed',
             'field_name' => 'status',
-            'prev_field_value' => 'Pending',
+            'prev_field_value' => ($theTask->status ?? null) ?: 'Pending',
             'current_field_value' => 'Completed',
             'created_by' => auth()->user()->id
         ]);
+        // Task Automation "Change student status to SLC New": the last open task of the process completes it
+        \App\Services\TaskAssignment\StudentProcessWrapUp::checkMany($student);
         return response()->json(['message' => 'Data deleted'], 200);
     }
 
@@ -586,6 +624,9 @@ class ProcessController extends Controller
         $excuseData['actioned_at'] = date('Y-m-d H:i:s');
         AttendanceExcuse::where('id', $attendance_excuse_id)->where('student_task_id', $student_task_id)->update($excuseData);
 
+        // Attendance Integrity: the status changes below go into the attendance history.
+        \App\Services\AttendanceIntegrity\AttendanceAudit::context('excuse_review', 'Excuse #'.$attendance_excuse_id.' '.($status == 2 ? 'approved' : ($status == 1 ? 'rejected' : 'reviewed')));
+
         if(!empty($days) && count($days) > 0 && $status == 2):
             AttendanceExcuseDay::whereIn('id', $days)->update(['active' => 1]);
 
@@ -594,16 +635,16 @@ class ProcessController extends Controller
             foreach($days as $day):
                 $excuseDay = AttendanceExcuseDay::find($day);
                 if(isset($excuseDay->id) && $excuseDay->id > 0):
-                    Attendance::where('plans_date_list_id', $excuseDay->plans_date_list_id)->where('plan_id', $excuseDay->plan_id)
-                        ->where('student_id', $student_id)->update(['attendance_feed_status_id' => $feedStatusId]);
+                    \App\Services\AttendanceIntegrity\AttendanceAudit::updateRows(Attendance::where('plans_date_list_id', $excuseDay->plans_date_list_id)->where('plan_id', $excuseDay->plan_id)
+                        ->where('student_id', $student_id), ['attendance_feed_status_id' => $feedStatusId]);
                 endif;
             endforeach;
         endif;
         if(!empty($deActiveDays) && count($deActiveDays) > 0 && $status == 2):
             foreach($deActiveDays as $exc_day):
                 $excDay = AttendanceExcuseDay::find($exc_day);
-                Attendance::where('plans_date_list_id', $excDay->plans_date_list_id)->where('plan_id', $excDay->plan_id)
-                        ->where('student_id', $student_id)->update(['attendance_feed_status_id' => 4]);
+                \App\Services\AttendanceIntegrity\AttendanceAudit::updateRows(Attendance::where('plans_date_list_id', $excDay->plans_date_list_id)->where('plan_id', $excDay->plan_id)
+                        ->where('student_id', $student_id), ['attendance_feed_status_id' => 4]);
             endforeach;
             AttendanceExcuseDay::whereIn('id', $deActiveDays)->update(['active' => 0]);
         endif;
@@ -611,14 +652,15 @@ class ProcessController extends Controller
             if(!empty($oldDays) && count($oldDays) > 0):
                 foreach($oldDays as $exc_day):
                     $excDay = AttendanceExcuseDay::find($exc_day);
-                    Attendance::where('plans_date_list_id', $excDay->plans_date_list_id)->where('plan_id', $excDay->plan_id)
-                            ->where('student_id', $student_id)->update(['attendance_feed_status_id' => 4]);
+                    \App\Services\AttendanceIntegrity\AttendanceAudit::updateRows(Attendance::where('plans_date_list_id', $excDay->plans_date_list_id)->where('plan_id', $excDay->plan_id)
+                            ->where('student_id', $student_id), ['attendance_feed_status_id' => 4]);
                 endforeach;
             endif;
             AttendanceExcuseDay::whereIn('id', $oldDays)->update(['active' => 0]);
         endif;
 
         StudentTask::where('id', $student_task_id)->where('student_id', $student_id)->update(['status' => 'Completed', 'updated_by' => auth()->user()->id]);
+        \App\Services\TaskAssignment\StudentProcessWrapUp::checkMany($student_id);
 
         return response()->json(['message' => 'Excuse successfully reviewd and updated.'], 200);
     }
@@ -797,6 +839,7 @@ class ProcessController extends Controller
             endif;
         endif;
 
+        \App\Services\TaskAssignment\StudentProcessWrapUp::checkMany($student_id);
         return response()->json(['message' => 'Student address update task status successfully updated.'], 200);
 
     }

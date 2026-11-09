@@ -18,6 +18,9 @@ use App\Models\User;
 use App\Http\Requests\ApplicationPersonalDetailsRequest;
 use App\Jobs\UserMailerJob;
 use App\Mail\CommunicationSendMail;
+use App\Mail\ApplicationReceivedMail;
+use App\Services\ESignature\ESignatureEmailCapture;
+use App\Services\ESignature\ESignatureRequestContext;
 use App\Models\Address;
 use App\Models\Agent;
 use App\Models\AgentApplicationCheck;
@@ -92,6 +95,7 @@ class ApplicationController extends Controller
 
         return view('pages.applicant.application.index', [
             'title' => 'Application Form - London Churchill College',
+            'layout' => 'applicant-portal',
             'breadcrumbs' => [
                 ['label' => 'Application Form', 'href' => 'javascript:void(0);']
             ],
@@ -692,6 +696,10 @@ class ApplicationController extends Controller
             elseif(empty($applicant->agent_user_id)):
                 $applicant->agent_user_id = $agentUserId;
             endif;
+            $referral = ReferralCode::where('code',$applicant->referral_code)->get()->first();
+            /* The application belongs to the agency behind the referral code;
+               without a usable code it stays with the agent who filed it. */
+            $applicant->agent_user_id = $referral ? $referral->agent_user_id : ($applicant->agent_user_id ?: $agentUserId);
             $applicant->updated_by = auth('agent')->user()->id;
             $applicant->save();
             if(isset($applicant->contact)) {
@@ -713,6 +721,36 @@ class ApplicationController extends Controller
                 $application->save();
             endif;
             //Auth::guard('applicant')->logout();
+            if($application) {
+                $application->applicant_id = $applicant_id;
+                $application->updated_by = auth('agent')->user()->id;
+                $application->save();
+            }
+            //Auth::guard('applicant')->logout();
+
+            FacadesDebugbar::info("Application updated with agent: ".$applicant->agent_user_id );
+        }
+
+        /* Task Automation: assign the admission tasks the rules call for.
+           Fired once the agent link above is settled, so the "submitted by an
+           agent" and referral facts are final. Synchronous and fail-safe -
+           see AssignTasksOnSubmission. */
+        /* The e-signature job the rules may fire would email the applicant
+           too; while the capture is open it hands its link back instead, and
+           the acknowledgement below carries it. */
+        /* The e-signature request the engine may raise is recorded as sent by
+           whoever is submitting - the agent, or the applicant - from this
+           request's IP, device, browser and OS, not as "Task Automation". */
+        $submitter = auth('agent')->user()
+            ? ['type' => 'agent', 'id' => auth('agent')->user()->id, 'name' => auth('agent')->user()->name ?? null, 'email' => auth('agent')->user()->email ?? null]
+            : ['type' => 'applicant', 'id' => Auth::guard('applicant')->user()->id ?? null, 'name' => trim((Applicant::find($applicant_id)?->first_name).' '.(Applicant::find($applicant_id)?->last_name)), 'email' => Auth::guard('applicant')->user()->email ?? null];
+        ESignatureRequestContext::set(ESignatureRequestContext::fromRequest($request, auth('agent')->user() ? 'agent_submission' : 'applicant_submission', $submitter));
+        ESignatureEmailCapture::start();
+        try {
+            event(new \App\Events\ApplicationSubmitted((int) $applicant_id));
+        } finally {
+            $esign = ESignatureEmailCapture::stop();
+            ESignatureRequestContext::clear();
         }
         session(['applicantSubmission' => 'Application successfully submitted.']);
 
@@ -722,7 +760,8 @@ class ApplicationController extends Controller
             $textlocal_api = Option::where('category', 'SMS')->where('name', 'textlocal_api')->pluck('value')->first();
             $smseagle_api = Option::where('category', 'SMS')->where('name', 'smseagle_api')->pluck('value')->first();
             $sms = 'Thank you for applying at '. $siteName.'. Please find your application reference number '.$theApplicant->application_no.' for all future correspondence.';
-            if(in_array(env('APP_ENV'), ['development', 'local'])) {
+            /* no real SMS from a dev box or a test run (the e-signature sender does the same) */
+            if(app()->environment(['development', 'local', 'testing'])) {
 
                     //\Log::info('SMS OTP: '.$sms.' sent to '.$theApplicant->contact->mobile);
                     //FacadesDebugbar::info('SMS OTP: '.$sms.' sent to '.$theApplicant->contact->mobile);
@@ -751,527 +790,54 @@ class ApplicationController extends Controller
         if(isset($commonSmtp->id) && $commonSmtp->id > 0):
             $theApplicantEmail = (isset($theApplicant->users->email) && !empty($theApplicant->users->email) ? $theApplicant->users->email : '');
             if(!empty($theApplicantEmail)):
-                $theSubject = 'Application confirmation email from ' . $siteName;
-                $message = '';
-                $message .= 'Dear '.$theApplicant->first_name.' '.$theApplicant->last_name.'<br /><br />';
-                $message .= 'Thank you for applying to study at '. $siteName .'. <br /><br />';
-                $message .= 'Please find your application reference number below. Please use this number for all future correspondence. <br /><br />';
-                $message .= '<span style="font-size: 40px;"><strong>'.$theApplicant->application_no.'</strong></span> <br /><br />';
-                $message .= 'Thank you, <br />'.$siteName;
-
-                UserMailerJob::dispatch($configuration, [$theApplicantEmail], new CommunicationSendMail($theSubject, $message, []));
+                /* One acknowledgement for both portals: the reference number and,
+                   when the task engine raised an e-signature request just now, the
+                   link to sign (emails/application-received). */
+                UserMailerJob::dispatch($configuration, [$theApplicantEmail], new ApplicationReceivedMail(
+                    trim($theApplicant->first_name.' '.$theApplicant->last_name),
+                    (string) $theApplicant->application_no,
+                    $siteName,
+                    $esign['url'] ?? null,
+                    $esign['tracking_url'] ?? null
+                ));
             endif;
         endif;
 
         return response()->json(['message' => 'Application successfully submitted.'], 200);
     }
 
+    /**
+     * Step 4: the application read back for review. The page fetches this
+     * when the step opens and injects `htmls`; the markup is the
+     * `components.applicant.review` partial, which replaced an accordion
+     * this method used to assemble as a 500-line string.
+     */
     public function review(Request $request){
-        $applicant_id = $request->applicant_id;
-        $applicant = Applicant::find($applicant_id);
+        $applicant = Applicant::with([
+            'title', 'sexid', 'nation', 'country', 'users',
+            'other.ethnicity', 'disability.disabilities',
+            'contact', 'kin.relation',
+            'course.creation.course', 'course.semester', 'course.venue',
+            'quals', 'employment',
+            'residency.residencyStatus', 'criminalConviction',
+        ])->find($request->applicant_id);
 
-        $html = '';
-        $html .= '<div id="applicantReviewAccordion" class="accordion">';
-            $html .= '<div class="accordion-item mb-1">';
-                $html .= '<div id="applicantReviewAccordion-c-1" class="accordion-header">';
-                    $html .= '<button class="accordion-button px-5 relative w-full btn-primary-soft text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#applicantReviewAccordion-col-1" aria-expanded="true" aria-controls="applicantReviewAccordion-col-1">';
-                        $html .= 'Personal Details';
-                        $html .= '<span class="accordionCollaps"></span>';
-                    $html .= '</button>';
-                $html .= '</div>';
-                $html .= '<div id="applicantReviewAccordion-col-1" class="accordion-collapse collapse show" aria-labelledby="applicantReviewAccordion-c-1" data-tw-parent="#applicantReviewAccordion">';
-                    $html .= '<div class="accordion-body px-5 pt-6">';
-                        $html .= '<div class="grid grid-cols-12 gap-4">'; 
+        if (!$applicant) {
+            return response()->json(['htmls' => ''], 200);
+        }
 
-                            $html .= '<div class="col-span-12 sm:col-span-3">';
-                                $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Name</div>';
-                                    $html .= '<div class="col-span-8 font-medium">'.$applicant->title->name.' '.$applicant->first_name.' '.$applicant->last_name.'</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                            $html .= '<div class="col-span-12 sm:col-span-3">';
-                                $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Date of Birth</div>';
-                                    $html .= '<div class="col-span-8 font-medium">'.$applicant->date_of_birth.'</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                            $html .= '<div class="col-span-12 sm:col-span-3">';
-                                $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Gender</div>';
-                                    $html .= '<div class="col-span-8 font-medium">'.$applicant->sexid->name.'</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                            $html .= '<div class="col-span-12 sm:col-span-3">';
-                                $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Nationality</div>';
-                                    $html .= '<div class="col-span-8 font-medium">'.$applicant->nation->name.'</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                            $html .= '<div class="col-span-12 sm:col-span-3">';
-                                $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Country of Birth</div>';
-                                    $html .= '<div class="col-span-8 font-medium">'.$applicant->country->name.'</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                            $html .= '<div class="col-span-12 sm:col-span-3">';
-                                $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Ethnicity</div>';
-                                    $html .= '<div class="col-span-8 font-medium">'.$applicant->other->ethnicity->name.'</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                            $html .= '<div class="col-span-12 sm:col-span-3">';
-                                $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Disability Status</div>';
-                                    $html .= '<div class="col-span-8 font-medium">';
-                                        $html .= (isset($applicant->other->disability_status) && $applicant->other->disability_status == 1 ? '<span class="btn btn-success px-2 py-0 text-white">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white">No</span>');
-                                    $html .='</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                            if(isset($applicant->other->disability_status) && $applicant->other->disability_status == 1):
-                                $html .= '<div class="col-span-12 sm:col-span-3">';
-                                    $html .= '<div class="grid grid-cols-12 gap-0">';
-                                        $html .= '<div class="col-span-4 text-slate-500 font-medium">Allowance Claimed?</div>';
-                                        $html .= '<div class="col-span-8 font-medium">';
-                                            $html .= (isset($applicant->other->disabilty_allowance) && $applicant->other->disabilty_allowance == 1 ? '<span class="btn btn-success px-2 py-0 text-white">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white">No</span>');
-                                        $html .='</div>';
-                                    $html .= '</div>';
-                                $html .= '</div>';
-                                $html .= '<div class="col-span-12 sm:col-span-3">';
-                                    $html .= '<div class="grid grid-cols-12 gap-0">';
-                                        $html .= '<div class="col-span-12 text-slate-500 font-medium">Disabilities</div>';
-                                        $html .= '<div class="col-span-12 font-medium">';
-                                            if(isset($applicant->disability) && !empty($applicant->disability)):
-                                                $html .= '<ul class="m-0 p-0">';
-                                                    foreach($applicant->disability as $dis):
-                                                        $html .= '<li class="text-left font-normal mb-1 flex pl-5 relative"><i data-lucide="check-circle" class="w-3 h-3 text-success absolute" style="left: 0; top: 4px;"></i>'.$dis->disabilities->name.'</li>';
-                                                    endforeach;
-                                                $html .'</ul>';
-                                            endif;
-                                        $html .='</div>';
-                                    $html .= '</div>';
-                                $html .= '</div>';
-                            endif;
-
-                        $html .= '</div>';
-                    $html .= '</div>';
-                $html .= '</div>';
-            $html .= '</div>';
-
-            $html .= '<div class="accordion-item mb-1">';
-                $html .= '<div id="applicantReviewAccordion-c-2" class="accordion-header">';
-                    $html .= '<button class="accordion-button collapsed px-5 relative w-full btn-primary-soft text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#applicantReviewAccordion-col-2" aria-expanded="false" aria-controls="applicantReviewAccordion-col-2">';
-                        $html .= 'Contact Details';
-                        $html .= '<span class="accordionCollaps"></span>';
-                    $html .= '</button>';
-                $html .= '</div>';
-                $html .= '<div id="applicantReviewAccordion-col-2" class="accordion-collapse collapse" aria-labelledby="applicantReviewAccordion-c-2" data-tw-parent="#applicantReviewAccordion">';
-                    $html .= '<div class="accordion-body px-5 pt-6">';
-                        $html .= '<div class="grid grid-cols-12 gap-4">'; 
-
-                            $html .= '<div class="col-span-12 sm:col-span-3">';
-                                $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Home Phone</div>';
-                                    $html .= '<div class="col-span-8 font-medium">'.$applicant->contact->home.'</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                            $html .= '<div class="col-span-12 sm:col-span-3">';
-                                $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Mobile</div>';
-                                    $html .= '<div class="col-span-8 font-medium">'.$applicant->contact->mobile.'</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                            $html .= '<div class="col-span-12 sm:col-span-6">';
-                                $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    $html .= '<div class="col-span-12 text-slate-500 font-medium">Address</div>';
-                                    $html .= '<div class="col-span-12 font-medium">';
-                                        if(isset($applicant->contact->address_line_1) && !empty($applicant->contact->address_line_1)):
-                                            $html .= '<span class="font-medium">'.$applicant->contact->address_line_1.'</span><br/>';
-                                        endif;
-                                        if(isset($applicant->contact->address_line_2) && !empty($applicant->contact->address_line_2)):
-                                            $html .= '<span class="font-medium">'.$applicant->contact->address_line_2.'</span><br/>';
-                                        endif;
-                                        if(isset($applicant->contact->city) && !empty($applicant->contact->city)):
-                                            $html .= '<span class="font-medium">'.$applicant->contact->city.'</span>, ';
-                                        endif;
-                                        if(isset($applicant->contact->state) && !empty($applicant->contact->state)):
-                                            $html .= '<span class="font-medium">'.$applicant->contact->state.'</span>, <br/>';
-                                        endif;
-                                        if(isset($applicant->contact->post_code) && !empty($applicant->contact->post_code)):
-                                            $html .= '<span class="font-medium">'.$applicant->contact->post_code.'</span>, ';
-                                        endif;
-                                        if(isset($applicant->contact->country) && !empty($applicant->contact->country)):
-                                            $html .= '<span class="font-medium">'.$applicant->contact->country.'</span><br/>';
-                                        endif;
-                                    $html .= '</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-
-                        $html .= '</div>';
-                    $html .= '</div>';
-                $html .= '</div>';
-            $html .= '</div>';
-
-            $html .= '<div class="accordion-item mb-1">';
-                $html .= '<div id="applicantReviewAccordion-c-3" class="accordion-header">';
-                    $html .= '<button class="accordion-button collapsed px-5 relative w-full btn-primary-soft text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#applicantReviewAccordion-col-3" aria-expanded="false" aria-controls="applicantReviewAccordion-col-3">';
-                        $html .= 'Next of Kin';
-                        $html .= '<span class="accordionCollaps"></span>';
-                    $html .= '</button>';
-                $html .= '</div>';
-                $html .= '<div id="applicantReviewAccordion-col-3" class="accordion-collapse collapse" aria-labelledby="applicantReviewAccordion-c-3" data-tw-parent="#applicantReviewAccordion">';
-                    $html .= '<div class="accordion-body px-5 pt-6">';
-                        $html .= '<div class="grid grid-cols-12 gap-4">'; 
-
-                            $html .= '<div class="col-span-12 sm:col-span-3">';
-                                $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Name</div>';
-                                    $html .= '<div class="col-span-8 font-medium">'.$applicant->kin->name.'</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                            $html .= '<div class="col-span-12 sm:col-span-3">';
-                                $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Relation</div>';
-                                    $html .= '<div class="col-span-8 font-medium">'.$applicant->kin->relation->name.'</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                            $html .= '<div class="col-span-12 sm:col-span-3">';
-                                $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Mobile</div>';
-                                    $html .= '<div class="col-span-8 font-medium">'.$applicant->kin->mobile.'</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                            $html .= '<div class="col-span-12 sm:col-span-3">';
-                                $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Email</div>';
-                                    $html .= '<div class="col-span-8 font-medium">'.(isset($applicant->kin->email) && !empty($applicant->kin->email) ? $applicant->kin->email : '---').'</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                            $html .= '<div class="col-span-12 sm:col-span-6">';
-                                $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    $html .= '<div class="col-span-12 text-slate-500 font-medium">Address</div>';
-                                    $html .= '<div class="col-span-12 font-medium">';
-                                        if(isset($applicant->kin->address_line_1) && !empty($applicant->kin->address_line_1)):
-                                            $html .= '<span class="font-medium">'.$applicant->kin->address_line_1.'</span><br/>';
-                                        endif;
-                                        if(isset($applicant->kin->address_line_2) && !empty($applicant->kin->address_line_2)):
-                                            $html .= '<span class="font-medium">'.$applicant->kin->address_line_2.'</span><br/>';
-                                        endif;
-                                        if(isset($applicant->kin->city) && !empty($applicant->kin->city)):
-                                            $html .= '<span class="font-medium">'.$applicant->kin->city.'</span>, ';
-                                        endif;
-                                        if(isset($applicant->kin->state) && !empty($applicant->kin->state)):
-                                            $html .= '<span class="font-medium">'.$applicant->kin->state.'</span>, <br/>';
-                                        endif;
-                                        if(isset($applicant->kin->post_code) && !empty($applicant->kin->post_code)):
-                                            $html .= '<span class="font-medium">'.$applicant->kin->post_code.'</span>, ';
-                                        endif;
-                                        if(isset($applicant->kin->country) && !empty($applicant->kin->country)):
-                                            $html .= '<span class="font-medium">'.$applicant->kin->country.'</span><br/>';
-                                        endif;
-                                    $html .='</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-
-                        $html .= '</div>';
-                    $html .= '</div>';
-                $html .= '</div>';
-            $html .= '</div>';
-
-            $html .= '<div class="accordion-item mb-1">';
-                $html .= '<div id="applicantReviewAccordion-c-4" class="accordion-header">';
-                    $html .= '<button class="accordion-button collapsed px-5 relative w-full btn-primary-soft text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#applicantReviewAccordion-col-4" aria-expanded="false" aria-controls="applicantReviewAccordion-col-4">';
-                        $html .= 'Proposed Course & Programme';
-                        $html .= '<span class="accordionCollaps"></span>';
-                    $html .= '</button>';
-                $html .= '</div>';
-                $html .= '<div id="applicantReviewAccordion-col-4" class="accordion-collapse collapse" aria-labelledby="applicantReviewAccordion-c-4" data-tw-parent="#applicantReviewAccordion">';
-                    $html .= '<div class="accordion-body px-5 pt-6">';
-                        $html .= '<div class="grid grid-cols-12 gap-4">'; 
-
-                            $html .= '<div class="col-span-12 sm:col-span-12">';
-                                $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Course & Semester</div>';
-                                    $html .= '<div class="col-span-8 font-medium">'.$applicant->course->creation->course->name.' - '.$applicant->course->semester->name.'</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                            $html .= '<div class="col-span-12 sm:col-span-12">';
-                                $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Venue</div>';
-                                    $html .= '<div class="col-span-8 font-medium">'.$applicant->course->venue->name.'</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                            $html .= '<div class="col-span-12 sm:col-span-12">';
-                                $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    $html .= '<div class="col-span-4 text-slate-500 font-medium">How are you funding your education at London Churchill College?</div>';
-                                    $html .= '<div class="col-span-8 font-medium">'.$applicant->course->student_loan.'</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                            if($applicant->course->student_loan == 'Student Loan'):
-                                $html .= '<div class="col-span-12 sm:col-span-12">';
-                                    $html .= '<div class="grid grid-cols-12 gap-0">';
-                                        $html .= '<div class="col-span-4 text-slate-500 font-medium">If your funding is through Student Finance England, please choose from the following. Have you applied for the proposed course?</div>';
-                                        $html .= '<div class="col-span-8 font-medium">'.(isset($applicant->course->student_finance_england) && $applicant->course->student_finance_england == 1 ? '<span class="btn btn-success px-2 py-0 text-white">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white">No</span>').'</div>';
-                                    $html .= '</div>';
-                                $html .= '</div>';
-                                if(isset($applicant->course->student_finance_england) && $applicant->course->student_finance_england == 1):
-                                    $html .= '<div class="col-span-12 sm:col-span-12">';
-                                        $html .= '<div class="grid grid-cols-12 gap-0">';
-                                            $html .= '<div class="col-span-4 text-slate-500 font-medium">Are you already in receipt of funds?</div>';
-                                            $html .= '<div class="col-span-8 font-medium">'.(isset($applicant->course->fund_receipt) && $applicant->course->fund_receipt == 1 ? '<span class="btn btn-success px-2 py-0 text-white">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white">No</span>').'</div>';
-                                        $html .= '</div>';
-                                    $html .= '</div>';
-                                endif;
-                                $html .= '<div class="col-span-12 sm:col-span-12">';
-                                    $html .= '<div class="grid grid-cols-12 gap-0">';
-                                        $html .= '<div class="col-span-4 text-slate-500 font-medium">Have you ever apply/Received any fund/Loan from SLC/government Loan for any other programme/institution?</div>';
-                                        $html .= '<div class="col-span-8 font-medium">'.(isset($applicant->course->applied_received_fund) && $applicant->course->applied_received_fund == 1 ? '<span class="btn btn-success px-2 py-0 text-white">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white">No</span>').'</div>';
-                                    $html .= '</div>';
-                                $html .= '</div>';
-                            elseif($applicant->course->student_loan == 'Others'):
-                                $html .= '<div class="col-span-12 sm:col-span-12">';
-                                    $html .= '<div class="grid grid-cols-12 gap-0">';
-                                        $html .= '<div class="col-span-4 text-slate-500 font-medium">Other Funding</div>';
-                                        $html .= '<div class="col-span-8 font-medium">'.(isset($applicant->course->other_funding) && $applicant->course->other_funding == '' ? $applicant->course->other_funding : '').'</div>';
-                                    $html .= '</div>';
-                                $html .= '</div>';
-                            endif;
-                            if(isset($applicant->course->creation->has_evening_and_weekend) && $applicant->course->creation->has_evening_and_weekend == 1):
-                            $html .= '<div class="col-span-12 sm:col-span-12">';
-                                $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Are you applying for evening and weekend classes (Full Time)</div>';
-                                    $html .= '<div class="col-span-8 font-medium">'.(isset($applicant->course->full_time) && $applicant->course->full_time == 1 ? '<span class="btn btn-success px-2 py-0 text-white">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white">No</span>').'</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                            endif;
-
-                        $html .= '</div>';
-                    $html .= '</div>';
-                $html .= '</div>';
-            $html .= '</div>';
-
-            $html .= '<div class="accordion-item mb-1">';
-                $html .= '<div id="applicantReviewAccordion-c-5" class="accordion-header">';
-                    $html .= '<button class="accordion-button collapsed px-5 relative w-full btn-primary-soft text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#applicantReviewAccordion-col-5" aria-expanded="false" aria-controls="applicantReviewAccordion-col-5">';
-                        $html .= 'Education Qualifications';
-                        $html .= '<span class="accordionCollaps"></span>';
-                    $html .= '</button>';
-                $html .= '</div>';
-                $html .= '<div id="applicantReviewAccordion-col-5" class="accordion-collapse collapse" aria-labelledby="applicantReviewAccordion-c-5" data-tw-parent="#applicantReviewAccordion">';
-                    $html .= '<div class="accordion-body px-5 pt-6">';
-                        $html .= '<div class="grid grid-cols-12 gap-4">'; 
-
-                            $html .= '<div class="col-span-12 sm:col-span-12">';
-                                $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Do you have any formal academic qualification? </div>';
-                                    $html .= '<div class="col-span-8 font-medium">'.(isset($applicant->other->is_edication_qualification) && $applicant->other->is_edication_qualification == 1 ? '<span class="btn btn-success px-2 py-0 text-white">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white">No</span>').'</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                            if(isset($applicant->other->is_edication_qualification) && $applicant->other->is_edication_qualification == 1):
-                                $html .= '<div class="col-span-12 sm:col-span-12">';
-                                    $html .= '<table class="table table-bordered">';
-                                        $html .= '<thead>';
-                                            $html .= '<tr>';
-                                                $html .= '<th class="whitespace-nowrap">#</th>';
-                                                $html .= '<th class="whitespace-nowrap">Awarding Body</th>';
-                                                $html .= '<th class="whitespace-nowrap">Highest Academic Qualification</th>';
-                                                $html .= '<th class="whitespace-nowrap">Subjects</th>';
-                                                $html .= '<th class="whitespace-nowrap">Result</th>';
-                                                $html .= '<th class="whitespace-nowrap">Award Date</th>';
-                                            $html .= '</tr>';
-                                        $html .= '</thead>';
-                                        $html .= '<tbody>';
-                                            if(!empty($applicant->quals)):
-                                                $i = 1;
-                                                foreach($applicant->quals as $qual):
-                                                    $html .= '<tr>'; 
-                                                        $html .= '<td>'.$i.'</td>';
-                                                        $html .= '<td>'.$qual->awarding_body.'</td>';
-                                                        $html .= '<td>'.$qual->highest_academic.'</td>';
-                                                        $html .= '<td>'.$qual->subjects.'</td>';
-                                                        $html .= '<td>'.$qual->result.'</td>';
-                                                        $html .= '<td>'.$qual->degree_award_date.'</td>';
-                                                    $html .= '</tr>';
-                                                    $i++;
-                                                endforeach;
-                                            else:
-                                                $html .= '<tr>'; 
-                                                    $html .= '<td colspan="6" class="text-center">No Record Found!</td>';
-                                                $html .= '</tr>';
-                                            endif;
-                                        $html .= '</tbody>';
-                                    $html .= '</table>';
-                                $html .= '</div>';
-                            endif;
-
-                        $html .= '</div>';
-                    $html .= '</div>';
-                $html .= '</div>';
-            $html .= '</div>';
-
-            $html .= '<div class="accordion-item mb-1">';
-                $html .= '<div id="applicantReviewAccordion-c-6" class="accordion-header">';
-                    $html .= '<button class="accordion-button collapsed px-5 relative w-full btn-primary-soft text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#applicantReviewAccordion-col-6" aria-expanded="false" aria-controls="applicantReviewAccordion-col-6">';
-                        $html .= 'Employment History';
-                        $html .= '<span class="accordionCollaps"></span>';
-                    $html .= '</button>';
-                $html .= '</div>';
-                $html .= '<div id="applicantReviewAccordion-col-6" class="accordion-collapse collapse" aria-labelledby="applicantReviewAccordion-c-6" data-tw-parent="#applicantReviewAccordion">';
-                    $html .= '<div class="accordion-body px-5 pt-6">';
-                        $html .= '<div class="grid grid-cols-12 gap-4">'; 
-
-                            $html .= '<div class="col-span-12 sm:col-span-12">';
-                                $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    $html .= '<div class="col-span-4 text-slate-500 font-medium">What is your current employment status?</div>';
-                                    $html .= '<div class="col-span-8 font-medium">'.$applicant->other->employment_status.'</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                            if(isset($applicant->other->employment_status) && ($applicant->other->employment_status != 'Unemployed' && $applicant->other->employment_status != 'Contractor' && $applicant->other->employment_status != 'Consultant' && $applicant->other->employment_status != 'Office Holder')):
-                                $html .= '<div class="col-span-12 sm:col-span-12">';
-                                    $html .= '<table class="table table-bordered">';
-                                        $html .= '<thead>';
-                                            $html .= '<tr>';
-                                                $html .= '<th class="whitespace-nowrap">#</th>';
-                                                $html .= '<th class="whitespace-nowrap">Company</th>';
-                                                $html .= '<th class="whitespace-nowrap">Phone</th>';
-                                                $html .= '<th class="whitespace-nowrap">Position</th>';
-                                                $html .= '<th class="whitespace-nowrap">Start</th>';
-                                                $html .= '<th class="whitespace-nowrap">End</th>';
-                                                $html .= '<th class="whitespace-nowrap">Address</th>';
-                                                $html .= '<th class="whitespace-nowrap">Contact Person</th>';
-                                                $html .= '<th class="whitespace-nowrap">Position</th>';
-                                                $html .= '<th class="whitespace-nowrap">Phone</th>';
-                                            $html .= '</tr>';
-                                        $html .= '</thead>';
-                                        $html .= '<tbody>';
-                                            if(!empty($applicant->employment)):
-                                                $i = 1;
-                                                foreach($applicant->employment as $emps):
-                                                    $continuing = (isset($emps->continuing) && $emps->continuing > 0 ? $emps->continuing : 0);
-                                                    $address = '';
-                                                    if(isset($emps->address_line_1) && !empty($emps->address_line_1)):
-                                                        $address .= '<span class="font-medium">'.$emps->address_line_1.'</span><br/>';
-                                                    endif;
-                                                    if(isset($emps->address_line_2) && !empty($emps->address_line_2)):
-                                                        $address .= '<span class="font-medium">'.$emps->address_line_2.'</span><br/>';
-                                                    endif;
-                                                    if(isset($emps->city) && !empty($emps->city)):
-                                                        $address .= '<span class="font-medium">'.$emps->city.'</span>, ';
-                                                    endif;
-                                                    if(isset($emps->state) && !empty($emps->state)):
-                                                        $address .= '<span class="font-medium">'.$emps->state.'</span>, <br/>';
-                                                    endif;
-                                                    if(isset($emps->post_code) && !empty($emps->post_code)):
-                                                        $address .= '<span class="font-medium">'.$emps->post_code.'</span>, ';
-                                                    endif;
-                                                    if(isset($emps->country) && !empty($emps->country)):
-                                                        $address .= '<span class="font-medium">'.$emps->country.'</span><br/>';
-                                                    endif;
-                                                    $html .= '<tr>'; 
-                                                        $html .= '<td>'.$i.'</td>';
-                                                        $html .= '<td>'.$emps->company_name.'</td>';
-                                                        $html .= '<td>'.$emps->company_phone.'</td>';
-                                                        $html .= '<td>'.$emps->position.'</td>';
-                                                        $html .= '<td>'.$emps->start_date.'</td>';
-                                                        $html .= '<td>'.($continuing == 1 ? 'Continue' : $emps->end_date).'</td>';
-                                                        $html .= '<td>'.$address.'</td>';
-                                                        $html .= '<td>'.$emps->reference[0]->name.'</td>';
-                                                        $html .= '<td>'.$emps->reference[0]->position.'</td>';
-                                                        $html .= '<td>'.$emps->reference[0]->phone.'</td>';
-                                                    $html .= '</tr>';
-                                                    $i++;
-                                                endforeach;
-                                            else:
-                                                $html .= '<tr>'; 
-                                                    $html .= '<td colspan="6" class="text-center">No Record Found!</td>';
-                                                $html .= '</tr>';
-                                            endif;
-                                        $html .= '</tbody>';
-                                    $html .= '</table>';
-                                $html .= '</div>';
-                            endif;
-
-                        $html .= '</div>';
-                    $html .= '</div>';
-                $html .= '</div>';
-            $html .= '</div>';
-            //implement residency status and criminal conviction sections below here
-                $residencyStatusName = (isset($applicant->residency->residencyStatus->name) ? $applicant->residency->residencyStatus->name : '---');
-                $criminalDeclarationHtml = (isset($applicant->criminalConviction->criminal_declaration) && (int) $applicant->criminalConviction->criminal_declaration === 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>');
-                $criminalConvictionHtml = (isset($applicant->criminalConviction->have_you_been_convicted) && (int) $applicant->criminalConviction->have_you_been_convicted === 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '---');
-                $criminalConvictionDetails = (isset($applicant->criminalConviction->criminal_conviction_details) && $applicant->criminalConviction->criminal_conviction_details != '' ? $applicant->criminalConviction->criminal_conviction_details : '---');
-
-                $html .= '<div class="accordion-item mb-1">';
-                    $html .= '<div id="applicantReviewAccordion-c-7" class="accordion-header">';
-                        $html .= '<button class="accordion-button collapsed px-5 relative w-full btn-primary-soft text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#applicantReviewAccordion-col-7" aria-expanded="false" aria-controls="applicantReviewAccordion-col-7">';
-                            $html .= 'Residency Status & Criminal Convictions';
-                            $html .= '<span class="accordionCollaps"></span>';
-                        $html .= '</button>';
-                    $html .= '</div>';
-                    $html .= '<div id="applicantReviewAccordion-col-7" class="accordion-collapse collapse" aria-labelledby="applicantReviewAccordion-c-7" data-tw-parent="#applicantReviewAccordion">';
-                        $html .= '<div class="accordion-body px-5 pt-6">';
-                            $html .= '<div class="grid grid-cols-12 gap-4">';
-                                $html .= '<div class="col-span-6">';
-                                    $html .= '<div class="col-span-12">';
-                                        $html .= '<div class="grid grid-cols-12 gap-0">';
-                                            $html .= '<div class="col-span-5 text-slate-500 font-medium">Residency Status</div>';
-                                            $html .= '<div class="col-span-7 font-medium">'.$residencyStatusName.'</div>';
-                                        $html .= '</div>';
-                                    $html .= '</div>';
-                                    // $html .= '<div class="col-span-12">';
-                                    //     $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    //         $html .= '<div class="col-span-5 text-slate-500 font-medium">Declaration Accepted</div>';
-                                    //         $html .= '<div class="col-span-7 font-medium">'.$criminalDeclarationHtml.'</div>';
-                                    //     $html .= '</div>';
-                                    // $html .= '</div>';
-                                $html .= '</div>';
-                                $html .= '<div class="col-span-6">';
-                                    $html .= '<div class="col-span-12">';
-                                        $html .= '<div class="grid grid-cols-12 gap-0">';
-                                            $html .= '<div class="col-span-5 text-slate-500 font-medium">Criminal Conviction</div>';
-                                            $html .= '<div class="col-span-7 font-medium">'.$criminalConvictionHtml.'</div>';
-                                        $html .= '</div>';
-                                    $html .= '</div>';
-                                    $html .= '<div class="col-span-12">';
-                                        $html .= '<div class="grid grid-cols-12 gap-0">';
-                                            $html .= '<div class="col-span-5 text-slate-500 font-medium">Conviction Details</div>';
-                                            $html .= '<div class="col-span-7 font-medium">'.$criminalConvictionDetails.'</div>';
-                                        $html .= '</div>';
-                                    $html .= '</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                        $html .= '</div>';
-                    $html .= '</div>';
-                $html .= '</div>';
-
-                $html .= '<div class="accordion-item mb-1">';
-                    $html .= '<div id="applicantReviewAccordion-c-8" class="accordion-header">';
-                        $html .= '<button class="accordion-button collapsed px-5 relative w-full btn-primary-soft text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#applicantReviewAccordion-col-8" aria-expanded="false" aria-controls="applicantReviewAccordion-col-8">';
-                            $html .= 'Others';
-                            $html .= '<span class="accordionCollaps"></span>';
-                        $html .= '</button>';
-                    $html .= '</div>';
-                    $html .= '<div id="applicantReviewAccordion-col-8" class="accordion-collapse collapse" aria-labelledby="applicantReviewAccordion-c-8" data-tw-parent="#applicantReviewAccordion">';
-                        $html .= '<div class="accordion-body px-5 pt-6">';
-                            $html .= '<div class="grid grid-cols-12 gap-4">';
-
-                                $html .= '<div class="col-span-12 sm:col-span-12">';
-                                    $html .= '<div class="grid grid-cols-12 gap-0">';
-                                        $html .= '<div class="col-span-4 text-slate-500 font-medium">If you referred by Somone/ Agent, Please enter the Referral Code.</div>';
-                                        $html .= '<div class="col-span-8 font-medium">'.($applicant->referral_code != '' ? $applicant->referral_code : '<span class="btn btn-danger px-2 py-0 text-white">No</span>').'</div>';
-                                    $html .= '</div>';
-                                $html .= '</div>';
-
-                            $html .= '</div>';
-                        $html .= '</div>';
-                    $html .= '</div>';
-                $html .= '</div>';
-
-        $html .= '</div>';
+        $html = view('components.applicant.review', ['applicant' => $applicant])->render();
 
         return response()->json(['htmls' => $html], 200);
     }
 
+    /**
+     * The applicant's own application, read back as the form's review step shows it
+     * (components.applicant.review), on the portal shell (user, 29 Oct 2026).
+     */
     public function show($id){
+        /* Previous version: redirect() was called without `return`, so the check did nothing and
+           any signed-in applicant could open any application by its id.
         $applicant = Applicant::where('id', $id)->first();
         if(\Auth::guard('applicant')->user()->id != $applicant->applicant_user_id):
             redirect('applicant.dashboard');
@@ -1282,6 +848,26 @@ class ApplicationController extends Controller
                 ['label' => 'Application View', 'href' => 'javascript:void(0);']
             ],
             'applicant' => $applicant
+        ]);
+        */
+        $applicant = Applicant::with([
+            'status', 'title', 'sexid', 'nation', 'country', 'users',
+            'other.ethnicity', 'disability.disabilities',
+            'contact', 'kin.relation',
+            'course.creation.course', 'course.semester', 'course.venue',
+            'quals', 'employment',
+            'residency.residencyStatus', 'criminalConviction',
+        ])
+            ->where('applicant_user_id', Auth::guard('applicant')->user()->id) // only their own
+            ->findOrFail($id);
+
+        return view('pages.applicant.application.show', [
+            'title' => 'Application '.($applicant->application_no ?: $applicant->id).' - London Churchill College',
+            'layout' => 'applicant-portal',
+            'breadcrumbs' => [
+                ['label' => 'Application', 'href' => 'javascript:void(0);']
+            ],
+            'applicant' => $applicant,
         ]);
     }
 
@@ -1301,13 +887,30 @@ class ApplicationController extends Controller
             $res['suc'] = 1;
             $res['code'] = $code;
             $res['is_referral_varified'] = 1;
+            $res['owner'] = $referralCodes->owner_name;
         }else{
             $res['suc'] = 2;
             $res['code'] = $applicant->referral_code;
             $res['is_referral_varified'] = $applicant->is_referral_varified;
+            $res['owner'] = '';
         }
 
         return response()->json(['msg' => $res], 200);
+    }
+
+    /**
+     * "Change" on a verified code. The verify endpoint above is the only thing
+     * that writes referral_code - the step save never touches the field - so
+     * clearing has to come through the server as well, or the application
+     * would keep a code the applicant no longer sees.
+     */
+    public function clearReferralCode(Request $request){
+        Applicant::where('id', $request->applicantId)->update([
+            'referral_code' => null,
+            'is_referral_varified' => 0
+        ]);
+
+        return response()->json(['msg' => ['suc' => 1]], 200);
     }
 
     public function getEveningWeekendStatus(Request $request){

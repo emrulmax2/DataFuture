@@ -163,6 +163,38 @@ class SlcAttendanceTest extends TestCase
         $this->assertSoftDeleted('slc_cocs', ['id' => $cocs[0]->id]);
     }
 
+    public function test_first_and_last_name_are_decided_together_as_one_name(): void
+    {
+        $c = $this->withSsn[2];
+        $lines = explode("\r\n", rtrim($this->text));
+        $f = explode('~', $lines[3]);
+        [$f[2], $f[3]] = ['ZZTESTSURNAME', 'IOUNT'];
+        $lines[3] = implode('~', $f);
+        $att = $this->upload(implode("\r\n", $lines)."\r\n")->assertOk()->json('state.attendance');
+        $id = $this->rowOf($att, $c['ssn'])['id'];
+        $route = fn ($att, $k) => collect($this->rowOf($att, $c['ssn'])['checks'])->firstWhere('key', $k);
+        $this->assertSame([false, false], [$route($att, 'first')['ok'], $route($att, 'last')['ok']]);
+
+        // one action for both
+        $res = $this->postJson(route('slc.registration.att.routes'), ['row_id' => $id, 'keys' => ['first', 'last'], 'route' => 'contact'])->assertOk();
+        $this->assertStringContainsString('(first name and last name)', $res->json('flash.text'));
+        $this->assertSame(['contact', 'contact'], [$route($res->json('state.attendance'), 'first')['route'], $route($res->json('state.attendance'), 'last')['route']]);
+        $this->assertTrue(\App\Models\SlcBulkActivity::where('text', 'like', 'Bulk attendance – student to contact about first name and last name – %')->exists());
+        $this->postJson(route('slc.registration.att.routes'), ['row_id' => $id, 'keys' => ['first', 'last'], 'route' => 'accept'])->assertStatus(422); // nothing left
+        // Change reopens both
+        $att = $this->postJson(route('slc.registration.att.routes.clear'), ['row_id' => $id, 'keys' => ['first', 'last']])->assertOk()->json('state.attendance');
+        $this->assertSame([null, null], [$route($att, 'first')['route'], $route($att, 'last')['route']]);
+        // an action one of them doesn't have: refused, nothing done
+        $this->postJson(route('slc.registration.att.routes'), ['row_id' => $id, 'keys' => ['first', 'ssn'], 'route' => 'update'])->assertStatus(422);
+        $this->assertSame($c['first'], Student::find($c['id'])->first_name);
+        // Update our record: both names from SLC, each archived
+        $att = $this->postJson(route('slc.registration.att.routes'), ['row_id' => $id, 'keys' => ['first', 'last'], 'route' => 'update'])->assertOk()->json('state.attendance');
+        $st = Student::find($c['id']);
+        $this->assertSame(['Iount', 'Zztestsurname'], [$st->first_name, $st->last_name]);
+        $this->assertSame(2, StudentArchive::where('student_id', $c['id'])->whereIn('field_name', ['first_name', 'last_name'])->where('created_at', '>=', now()->subMinute())->count());
+        $this->assertSame([true, true], [$route($att, 'first')['ok'], $route($att, 'last')['ok']]);
+    }
+
     private function yearId(): int
     {
         return (int) \App\Models\AcademicYear::where('from_date', '<=', now()->toDateString())->where('to_date', '>=', now()->toDateString())->value('id');
@@ -367,7 +399,7 @@ class SlcAttendanceTest extends TestCase
     public function test_a_file_that_is_not_the_report_is_refused_and_access_is_privileged(): void
     {
         $this->upload("not a report\r\n")->assertStatus(422)->assertJsonPath('flash.tone', 'bad');
-        $other = User::whereNotIn('id', User::bypassUserIds())->where('active', 1)->orderBy('id')->limit(50)->get()->first(fn ($u) => empty($u->priv()['slc_registration']));
+        $other = User::whereNotIn('id', User::bypassUserIds())->where('active', 1)->orderBy('id')->limit(200)->get()->first(fn ($u) => empty($u->priv()['slc_registration']) && empty($u->priv()['slc_records'])); // neither privilege opens the page
         $this->actingAs($other)->postJson(route('slc.registration.att.upload'))->assertForbidden();
     }
 

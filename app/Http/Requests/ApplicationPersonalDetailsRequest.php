@@ -36,33 +36,50 @@ class ApplicationPersonalDetailsRequest extends FormRequest
             'disability_id' => 'required_if:disability_status,1',
             
             'mobile' => 'required',
-            'applicant_address' => 'required',
+
+            /* The address is captured inline now, a field at a time, so it is
+               validated the same way: one message against the field that is
+               missing rather than a single "Address is required" for the set. */
+            'applicant_address_line_1' => 'required',
+            'applicant_address_city' => 'required',
+            'applicant_address_postal_zip_code' => 'required',
+            'applicant_address_country' => 'required',
 
             'name' => 'required',
             'kins_relation_id' => 'required',
             'kins_mobile' => 'required',
-            'kin_address' => 'required',
+
+            'kin_address_line_1' => 'required',
+            'kin_address_city' => 'required',
+            'kin_address_postal_zip_code' => 'required',
+            'kin_address_country' => 'required',
         ];
     }
 
     public function messages()
     {
         return [
-            'title_id.reuired' => 'The Title field is required.',
-            'first_name.reuired' => 'The First Name(s) field is required.',
-            'last_name.reuired' => 'The Last Name field is required.',
-            'date_of_birth.reuired' => 'The DOB field is required.',
-            'sex_identifier_id.reuired' => 'The Sex Id field is required.',
+            'title_id.required' => 'The Title field is required.',
+            'first_name.required' => 'The First Name(s) field is required.',
+            'last_name.required' => 'The Last Name field is required.',
+            'date_of_birth.required' => 'The DOB field is required.',
+            'sex_identifier_id.required' => 'The Sex Id field is required.',
             'nationality_id.required' => 'The Nationality field is required.',
             'country_id.required' => 'The Country of Birth field is required.',
             'ethnicity_id.required' => 'The Ethnicity field is required.',
             //'phone.required' => 'The Home Phone field is required.',
             'mobile.required' => 'The Mobile Phone field is required.',
-            'applicant_address.required' => 'Applicant Address is required.',
+            'applicant_address_line_1.required' => 'Enter the first line of your address.',
+            'applicant_address_city.required' => 'Enter your city or town.',
+            'applicant_address_postal_zip_code.required' => 'Enter your post code.',
+            'applicant_address_country.required' => 'Enter your country.',
             'name.required' => 'This field is required.',
             'kins_relation_id.required' => 'This field is required.',
             'kins_mobile.required' => 'This field is required.',
-            'kin_address.required' => 'Address is required.',
+            'kin_address_line_1.required' => 'Enter the first line of their address.',
+            'kin_address_city.required' => 'Enter their city or town.',
+            'kin_address_postal_zip_code.required' => 'Enter their post code.',
+            'kin_address_country.required' => 'Enter their country.',
             'disability_id.required_if' => 'You have to select at least one Disability while Disability Status is turned on.',
         ];
     }

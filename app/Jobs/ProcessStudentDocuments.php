@@ -45,12 +45,22 @@ class ProcessStudentDocuments implements ShouldQueue
     {
         $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
         $user = StudentUser::where(["email"=> $ApplicantUser->email])->get()->first();
-        $student = Student::where(["student_user_id"=> $user->id])->get()->first();
+        // $student = Student::where(["student_user_id"=> $user->id])->get()->first(); // the login's first student, not the one this conversion created
+        $student = \App\Services\Admission\StudentConversion::studentFor($this->applicant, $user);
         //--BEGIN: Student Document Sync
         $applicantTaskidList = [];
         $studentDocumentList = [];
     
+        // Email attachments are not student documents: Copy Emails turns the attachments of the
+        // emails it copies (live ones) into student_emails_documents rows, the student-side
+        // storage, so skip exactly those here.
+        $emailAttachmentDocIds = \App\Models\ApplicantEmailsAttachment::whereIn('applicant_email_id', \App\Models\ApplicantEmail::where('applicant_id', $this->applicant->id)->pluck('id'))
+            ->whereNotNull('applicant_document_id')->pluck('applicant_document_id')->map(fn ($id) => (int) $id)->all();
+
         foreach($this->applicant->docses as $applicantDoc):
+            if (in_array((int) $applicantDoc->id, $emailAttachmentDocIds, true)) {
+                continue;
+            }
             //Applicant Task wise Document capture
 
  

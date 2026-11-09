@@ -250,7 +250,7 @@
                                                                         @endif
                                                                         @if($task->task->address_request == 'No' && $task->task->attendance_excuses == 'No' && ($task->task->status == 'No' || ($task->task->status == 'Yes' && $task->task_status_id > 0)) && ($task->task->upload == 'No' || ($task->task->upload == 'Yes' && $task->documents->count() > 0)))
                                                                         <li>
-                                                                            <a data-recordid="{{ $task->id }}" href="javascript:void(0);" class="markAsCompleted dropdown-item">
+                                                                            <a data-recordid="{{ $task->id }}" @if(!empty($wrapUp) && $wrapUp['id'] == $task->id) data-wrapup="{{ json_encode($wrapUp) }}" @endif href="javascript:void(0);" class="markAsCompleted dropdown-item">
                                                                                 <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Mark as Complete
                                                                             </a>
                                                                         </li>
@@ -396,7 +396,7 @@
                                                                         @endif
                                                                         @if(($task->task->status == 'No' || ($task->task->status == 'Yes' && $task->task_status_id > 0)) && ($task->task->upload == 'No' || ($task->task->upload == 'Yes' && $task->documents->count() > 0)))
                                                                         <li>
-                                                                            <a data-recordid="{{ $task->id }}" href="javascript:void(0);" class="markAsCompleted dropdown-item">
+                                                                            <a data-recordid="{{ $task->id }}" @if(!empty($wrapUp) && $wrapUp['id'] == $task->id) data-wrapup="{{ json_encode($wrapUp) }}" @endif href="javascript:void(0);" class="markAsCompleted dropdown-item">
                                                                                 <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Mark as Complete
                                                                             </a>
                                                                         </li>

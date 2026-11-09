@@ -1,735 +1,410 @@
-import ClassicEditor from "@ckeditor/ckeditor5-build-decoupled-document";
 import xlsx from "xlsx";
-import { createIcons, icons } from "lucide";
-import Tabulator from "tabulator-tables";
-import TomSelect from "tom-select";
-import { each } from "jquery";
-import Dropzone from "dropzone";
+import axios from "axios";
 
-("use strict");
+/*
+ * Notes (pages/students/admission/notes on the admission portal shell).
+ * Same endpoints as before:
+ *
+ *  - admission.note.list           paged list; status 1 = live, 2 = deleted (renders the timeline)
+ *  - admission.store.note          composer (#addNoteForm: content + one attachment)
+ *  - admission.get.note / admission.update.note   editing, in the same composer
+ *  - admission.destory.note / admission.resotore.note   via #confirmModal
+ *  - admission.document.download   .downloadDoc
+ *
+ * Print prints the timeline; Export CSV / XLSX write every live note out.
+ */
+(function () {
+    "use strict";
 
-function noteEscape(value) {
-    return String(value == null ? "" : value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-}
+    const timeline = document.querySelector("[data-adp-timeline]");
+    if (!timeline) return;
 
-function noteInitials(name) {
-    const initials = String(name || "")
-        .trim()
-        .split(/\s+/)
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((part) => part.charAt(0).toUpperCase())
-        .join("");
-
-    return initials || "?";
-}
-
-function noteAvatarColor(seed) {
-    const palette = ["#0d7a76", "#6d4bb0", "#2f7d4f", "#c0562a", "#2f8f7d", "#3a6ea5"];
-    const text = String(seed || "");
-    let hash = 0;
-
-    for (let i = 0; i < text.length; i += 1) {
-        hash = (hash + text.charCodeAt(i) * (i + 1)) % palette.length;
-    }
-
-    return palette[hash];
-}
-
-function noteRenderLucide() {
-    createIcons({
-        icons,
-        "stroke-width": 1.8,
-        nameAttr: "data-lucide",
-    });
-}
-
-function noteFormatFileSize(bytes) {
-    const size = Number(bytes) || 0;
-    if (size < 1024) return size + " B";
-    if (size < 1024 * 1024) return (size / 1024).toFixed(size < 10240 ? 1 : 0) + " KB";
-    return (size / (1024 * 1024)).toFixed(1) + " MB";
-}
-
-function notePersonHtml(name, date, seed) {
-    const safeName = noteEscape(name || "Unknown");
-    const safeDate = noteEscape(date || "");
-
-    return '<div class="adm-comm-by">' +
-        '<span class="adm-comm-by__avatar" style="background:' + noteAvatarColor(seed || name) + ';">' + noteInitials(name) + '</span>' +
-        '<span class="adm-comm-by__text">' +
-            '<span class="adm-comm-by__name">' + safeName + '</span>' +
-            '<span class="adm-comm-by__date">' + safeDate + '</span>' +
-        '</span>' +
-    '</div>';
-}
-
-function notePreviewHtml(data) {
-    const note = noteEscape(data.note || "No note content found.");
-    const hasAttachment = Number(data.applicant_document_id) > 0;
-
-    return '<div class="adm-note-preview">' +
-        '<span class="adm-note-preview__icon"><i data-lucide="file-text"></i></span>' +
-        '<span class="adm-note-preview__text">' +
-            '<span class="adm-note-preview__title">' + note + '</span>' +
-            '<span class="adm-note-preview__meta">' +
-                '<i data-lucide="' + (hasAttachment ? "paperclip" : "minus") + '"></i>' +
-                (hasAttachment ? "Attachment included" : "No attachment") +
-            '</span>' +
-        '</span>' +
-    '</div>';
-}
-
-function noteActionButton(action) {
-    const tag = action.tag || "button";
-    const attrs = [
-        'data-id="' + noteEscape(action.id) + '"',
-        'class="' + noteEscape(action.className) + ' adm-row-action adm-row-action--' + noteEscape(action.type) + '"',
-        'title="' + noteEscape(action.title) + '"',
-        'aria-label="' + noteEscape(action.title) + '"',
-    ];
-
-    if (tag === "button") attrs.push('type="button"');
-    if (tag === "a") attrs.push('href="javascript:void(0);"');
-    if (action.extra) attrs.push(action.extra);
-
-    return '<' + tag + ' ' + attrs.join(" ") + '>' +
-        '<i data-lucide="' + noteEscape(action.icon) + '"></i>' +
-    '</' + tag + '>';
-}
-
-function noteActions(actions) {
-    return '<div class="adm-row-actions">' +
-        actions.filter(Boolean).map(noteActionButton).join("") +
-    '</div>';
-}
-
-function noteViewHtml(rawHtml) {
-    return '<div class="adm-note-view__hero">' +
-        '<span class="adm-note-view__icon"><i data-lucide="file-text"></i></span>' +
-        '<span class="adm-note-view__heading">' +
-            '<span class="adm-note-view__title">Applicant Note</span>' +
-            '<span class="adm-note-view__desc">Saved admission note details</span>' +
-        '</span>' +
-    '</div>' +
-    '<div class="adm-note-view__content">' + rawHtml + '</div>';
-}
-
-function noteSetButtonBusy(selector, busy) {
-    const button = document.querySelector(selector);
-    if (!button) return;
-
-    button.toggleAttribute("disabled", busy);
-    const loader = button.querySelector(".adm-btn-loader");
-    if (loader) {
-        loader.style.display = busy ? "inline-block" : "none";
-    }
-}
-
-function noteDecorateModalButtons(scope = document) {
-    scope.querySelectorAll(".modal-footer .btn, .modal-body.p-0 .px-5.pb-8.text-center .btn").forEach((button) => {
-        if (button.classList.contains("downloadDoc") || button.querySelector(".adm-btn-icon")) return;
-
-        const text = button.textContent.trim().toLowerCase();
-        let icon = "check";
-
-        if (text.includes("cancel") || text.includes("no,")) icon = "x";
-        else if (text.includes("save")) icon = "save";
-        else if (text.includes("update")) icon = "check";
-        else if (text.includes("upload")) icon = "upload-cloud";
-        else if (text === "ok") icon = "check";
-
-        const iconEl = document.createElement("i");
-        iconEl.setAttribute("data-lucide", icon);
-        iconEl.className = "adm-btn-icon";
-        button.prepend(iconEl);
-    });
-
-    noteRenderLucide();
-}
-
-var applicantNotesListTable = (function () {
-    var _tableGen = function () {
-        // Setup Tabulator
-        let applicantId = $("#applicantNotesListTable").attr('data-applicant') != "" ? $("#applicantNotesListTable").attr('data-applicant') : "0";
-        let queryStr = $("#query-AN").val() != "" ? $("#query-AN").val() : "";
-        let status = $("#status-AN").val() != "" ? $("#status-AN").val() : "1";
-
-        let tableContent = new Tabulator("#applicantNotesListTable", {
-            ajaxURL: route("admission.note.list"),
-            ajaxParams: { applicantId: applicantId, queryStr : queryStr, status : status},
-            ajaxFiltering: true,
-            ajaxSorting: true,
-            printAsHtml: true,
-            printStyled: true,
-            pagination: "remote",
-            paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
-            layout: "fitColumns",
-            responsiveLayout: "collapse",
-            placeholder: "No matching records found",
-            columns: [
-                {
-                    title: "#ID",
-                    field: "id",
-                    headerHozAlign: "left",
-                    width: "120",
-                },
-                {
-                    title: "Note",
-                    field: "note",
-                    headerHozAlign: "left",
-                    minWidth: 360,
-                    formatter(cell, formatterParams){
-                        return notePreviewHtml(cell.getData());
-                    }
-                },
-                {
-                    title: "Created By",
-                    field: "created_by",
-                    headerHozAlign: "left",
-                    minWidth: 220,
-                    formatter(cell, formatterParams){
-                        return notePersonHtml(cell.getData().created_by, cell.getData().created_at, cell.getData().id);
-                    }
-                },
-                {
-                    title: "Actions",
-                    field: "id",
-                    headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
-                    width: "170",
-                    download: false,
-                    formatter(cell, formatterParams) {
-                        const data = cell.getData();
-                        return noteActions([
-                            Number(data.applicant_document_id) > 0 ? {
-                                tag: "a",
-                                type: "download",
-                                className: "downloadDoc",
-                                icon: "download",
-                                id: data.applicant_document_id,
-                                title: "Download attachment",
-                            } : null,
-                            data.deleted_at == null ? {
-                                type: "view",
-                                className: "view_btn",
-                                icon: "eye",
-                                id: data.id,
-                                title: "View note",
-                                extra: 'data-tw-toggle="modal" data-tw-target="#viewNoteModal"',
-                            } : null,
-                            data.deleted_at == null ? {
-                                type: "edit",
-                                className: "edit_btn",
-                                icon: "pencil",
-                                id: data.id,
-                                title: "Edit note",
-                                extra: 'data-tw-toggle="modal" data-tw-target="#editNoteModal"',
-                            } : null,
-                            data.deleted_at == null ? {
-                                type: "delete",
-                                className: "delete_btn",
-                                icon: "trash-2",
-                                id: data.id,
-                                title: "Delete note",
-                            } : {
-                                type: "restore",
-                                className: "restore_btn",
-                                icon: "rotate-cw",
-                                id: data.id,
-                                title: "Restore note",
-                            },
-                        ]);
-                    },
-                },
-            ],
-            renderComplete() {
-                noteRenderLucide();
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }
-            }
-        });
-
-        // Redraw table onresize
-        window.addEventListener("resize", () => {
-            tableContent.redraw();
-            noteRenderLucide();
-        });
-
-        // Export
-        $("#tabulator-export-csv-AN").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
-        });
-
-        $("#tabulator-export-json-AN").on("click", function (event) {
-            tableContent.download("json", "data.json");
-        });
-
-        $("#tabulator-export-xlsx-AN").on("click", function (event) {
-            window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Applicant Notes Details",
-            });
-        });
-
-        $("#tabulator-export-html-AN").on("click", function (event) {
-            tableContent.download("html", "data.html", {
-                style: true,
-            });
-        });
-
-        // Print
-        $("#tabulator-print-AN").on("click", function (event) {
-            tableContent.print();
-        });
+    const csrf = { "X-CSRF-TOKEN": (document.querySelector('meta[name="csrf-token"]') || {}).content || "" };
+    const byId = (id) => document.getElementById(id);
+    const esc = (v) => String(v === null || v === undefined ? "" : v)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    const applicantId = timeline.getAttribute("data-applicant") || (document.querySelector('input[name="applicant_id"]') || {}).value || "";
+    const modalOf = (id) => {
+        const el = byId(id);
+        return el && window.tailwind && window.tailwind.Modal ? window.tailwind.Modal.getOrCreateInstance(el) : null;
     };
-    return {
-        init: function () {
-            _tableGen();
-        },
+    const successModal = modalOf("successModal"), warningModal = modalOf("warningModal"), confirmModal = modalOf("confirmModal"), editModal = modalOf("editNoteModal");
+    const svg = (paths, size) => `<svg width="${size || 16}" height="${size || 16}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+    const PATHS = {
+        file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
+        download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+        upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/>',
+        trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+        undo: '<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/>',
     };
-})();
+    const MAX_BYTES = 5 * 1024 * 1024;
+    const fmtSize = (n) => (n > 1024 * 1024 ? (n / 1024 / 1024).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB");
+    const busy = (btn, on) => {
+        if (!btn) return;
+        btn.toggleAttribute("disabled", on);
+        btn.querySelectorAll(".adm-btn-loader").forEach((l) => { l.style.display = on ? "inline-block" : "none"; });
+    };
+    const setText = (root, sel, text) => { const el = root ? root.querySelector(sel) : null; if (el) el.textContent = text; };
+    const inlineError = (el, text) => { if (!el) return; el.textContent = text || ""; el.hidden = !text; };
 
-(function(){
-    if ($("#applicantNotesListTable").length) {
-        // Init Table
-        applicantNotesListTable.init();
-
-        // Filter function
-        function filterHTMLFormAN() {
-            applicantNotesListTable.init();
-        }
-
-
-        // On click go button
-        $("#tabulator-html-filter-go-AN").on("click", function (event) {
-            filterHTMLFormAN();
-        });
-
-        // On reset filter form
-        $("#tabulator-html-filter-reset-AN").on("click", function (event) {
-            $("#query-AN").val("");
-            $("#status-AN").val("1");
-            filterHTMLFormAN();
-        });
-
-    }
-
-    const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-    const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
-    const addNoteModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addNoteModal"));
-    const viewNoteModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#viewNoteModal"));
-    const editNoteModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editNoteModal"));
-
-    noteDecorateModalButtons();
-
-    let addEditor;
-    if($("#addEditor").length > 0){
-        const el = document.getElementById('addEditor');
-        ClassicEditor.create(el).then((editor) => {
-            addEditor = editor;
-            $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
-        }).catch((error) => {
-            console.error(error);
-        });
-    }
-
-    let editEditor;
-    if($("#editEditor").length > 0){
-        const el = document.getElementById('editEditor');
-        ClassicEditor.create(el).then((editor) => {
-            editEditor = editor;
-            $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
-        }).catch((error) => {
-            console.error(error);
-        });
-    }
-
-    const addNoteModalEl = document.getElementById('addNoteModal')
-    addNoteModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#addNoteModal .acc__input-error').html('');
-        $('#addNoteModal input[name="document"]').val('');
-        $('#addNoteModal #addNoteDocumentName').html('').hide();
-        noteSetButtonBusy("#saveNote", false);
-        addEditor.setData('');
-    });
-
-    const editNoteModalEl = document.getElementById('editNoteModal')
-    editNoteModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#editNoteModal .acc__input-error').html('');
-        $('#editNoteModal input[name="document"]').val('');
-        $('#editNoteModal #editNoteDocumentName').html('').hide();
-        $('#editNoteModal input[name="id"]').val('0');
-        $('#editNoteModal .downloadExistAttachment').attr('href', '#').fadeOut();
-        noteSetButtonBusy("#UpdateNote", false);
-        editEditor.setData('');
-    });
-
-    const viewNoteModalEl = document.getElementById('viewNoteModal')
-    viewNoteModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#viewNoteModal #viewNoteContent').html('');
-        $('#viewNoteModal .modal-footer .footerBtns').html('');
-    });
-
-    const confirmModalEl = document.getElementById('confirmModal')
-    confirmModalEl.addEventListener('hide.tw.modal', function(event) {
-        $("#confirmModal .confModDesc").html('');
-        $("#confirmModal .agreeWith").attr('data-recordid', '0');
-        $("#confirmModal .agreeWith").attr('data-status', 'none');
-        $('#confirmModal button').removeAttr('disabled');
-    });
-
-    $('#successModal .successCloser').on('click', function(e){
+    /* ---------- outcome dialogs -------------------------------------------- */
+    const successEl = byId("successModal"), warningEl = byId("warningModal");
+    const showSuccess = (title, text) => {
+        setText(successEl, ".successModalTitle", title);
+        setText(successEl, ".successModalDesc", text || "");
+        const closer = successEl && successEl.querySelector(".successCloser");
+        if (closer) closer.setAttribute("data-action", "DISMISS");
+        if (successModal) successModal.show();
+        window.setTimeout(() => { if (successModal) successModal.hide(); }, 2200);
+    };
+    const showWarning = (title, text) => {
+        setText(warningEl, ".warningModalTitle", title);
+        setText(warningEl, ".warningModalDesc", text || "");
+        const closer = warningEl && warningEl.querySelector(".warningCloser");
+        if (closer) closer.setAttribute("data-action", "NONE");
+        if (warningModal) warningModal.show();
+    };
+    [successEl, warningEl].forEach((el) => { if (el) el.addEventListener("click", (e) => {
+        if (!e.target.closest(".successCloser, .warningCloser")) return;
         e.preventDefault();
-        if($(this).attr('data-action') == 'RELOAD'){
-            successModal.hide();
-            window.location.reload();
-        }else{
-            successModal.hide();
-        }
-    })
-    
-    $('#warningModal .warningCloser').on('click', function(e){
-        e.preventDefault();
-        if($(this).attr('data-action') == 'RELOAD'){
-            warningModal.hide();
-            window.location.reload();
-        }else{
-            warningModal.hide();
-        }
-    });
-    
-    $('#addNoteForm').on('change', '#addNoteDocument', function(){
-        showFileName('addNoteDocument', 'addNoteDocumentName');
-    });
-    
-    $('#editNoteForm').on('change', '#editNoteDocument', function(){
-        showFileName('editNoteDocument', 'editNoteDocumentName');
-    });
+        const m = el === successEl ? successModal : warningModal;
+        if (m) m.hide();
+    }); });
 
-    function showFileName(inputId, targetPreviewId) {
-        let fileInput = document.getElementById(inputId);
-        let namePreview = document.getElementById(targetPreviewId);
-        if (!fileInput || !namePreview || !fileInput.files || !fileInput.files.length) {
-            if (namePreview) {
-                namePreview.innerHTML = "";
-                namePreview.style.display = "none";
-            }
-            return false;
-        }
+    /* ---------- the design's small editor ----------------------------------- */
+    const makeEditor = (root) => {
+        const body = root.querySelector("[data-adp-ed-body]");
+        const bar = root.querySelector(".adp-ed-bar");
+        const api = {
+            root, body,
+            html: () => body.innerHTML,
+            text: () => body.textContent.replace(/ /g, " ").trim(),
+            isEmpty: () => api.text() === "" && !body.querySelector("img"),
+            set: (html) => { body.innerHTML = html || ""; },
+            clear: () => { body.innerHTML = ""; },
+            focus: () => body.focus(),
+            onChange: (fn) => body.addEventListener("input", fn),
+        };
+        if (bar) bar.addEventListener("mousedown", (e) => {
+            const btn = e.target.closest("[data-cmd]");
+            if (!btn) return;
+            e.preventDefault();
+            body.focus();
+            document.execCommand(btn.getAttribute("data-cmd"), false, null);
+            body.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+        /* paste as plain text so pasted formatting cannot break the layout */
+        body.addEventListener("paste", (e) => {
+            if (!e.clipboardData) return;
+            e.preventDefault();
+            document.execCommand("insertText", false, e.clipboardData.getData("text/plain"));
+        });
+        return api;
+    };
+    const editors = Array.from(document.querySelectorAll("[data-adp-editor]")).map(makeEditor);
+    const composerEditor = editors.find((ed) => ed.body.id === "addEditor");
 
-        const file = fileInput.files[0];
-        namePreview.innerHTML = '<div class="adm-mail-upload__file">' +
-            '<span class="adm-mail-upload__file-icon"><i data-lucide="file"></i></span>' +
-            '<span class="adm-mail-upload__file-name">' + noteEscape(file.name) + '</span>' +
-            '<span class="adm-mail-upload__file-size">' + noteFormatFileSize(file.size) + '</span>' +
-        '</div>';
-        namePreview.style.display = "grid";
-        noteRenderLucide();
-        return false;
+    /* ---------- single-attachment control (composer + edit dialog) ---------- */
+    const attachControl = (scope, onError) => {
+        const input = scope.querySelector('input[type="file"][name="document"]');
+        const tag = scope.querySelector("[data-adp-attach-tag]");
+        const pick = scope.querySelector("[data-adp-attach-pick]");
+        if (!input || !tag) return { clear: () => {}, file: () => null };
+        const paint = () => {
+            const f = input.files && input.files[0];
+            tag.hidden = !f;
+            if (pick) pick.hidden = !!f;
+            if (f) { setText(tag, "[data-adp-attach-name]", f.name); setText(tag, "[data-adp-attach-size]", fmtSize(f.size)); }
+        };
+        input.addEventListener("change", () => {
+            const f = input.files && input.files[0];
+            if (f && f.size > MAX_BYTES) { input.value = ""; if (onError) onError(`${f.name} is over 5 MB.`); }
+            else if (onError) onError("");
+            paint();
+        });
+        const clearBtn = tag.querySelector("[data-adp-attach-clear]");
+        if (clearBtn) clearBtn.addEventListener("click", () => { input.value = ""; paint(); if (onError) onError(""); });
+        return { clear: () => { input.value = ""; paint(); }, file: () => (input.files && input.files[0]) || null };
     };
 
-    $('#applicantNotesListTable').on('click', '.view_btn', function(e){
-        var $btn = $(this);
-        var noteId = $btn.attr('data-id');
-        axios({
-            method: "post",
-            url: route('admission.show.note'),
-            data: {noteId : noteId},
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            $('#viewNoteModal #viewNoteContent').html(noteViewHtml(response.data.message));
-            if(response.data.btns != ''){
-                $('#viewNoteModal .modal-footer .footerBtns').html(response.data.btns);
-            }
-            noteDecorateModalButtons(document.getElementById("viewNoteModal"));
-        }).catch(error => {
-            console.log('error');
+    /* ---------- timeline ---------------------------------------------------- */
+    const state = { page: 1, lastPage: 1, total: 0, query: "", rows: [] };
+    const loadingEl = document.querySelector("[data-adp-notes-loading]");
+    const emptyEl = document.querySelector("[data-adp-notes-empty]");
+    const moreEl = document.querySelector("[data-adp-notes-more]");
+    const countEl = document.querySelector("[data-adp-note-count]");
+    const rowHtml = (n) => {
+        const hasFile = Number(n.applicant_document_id) > 0;
+        const when = n.created_at + (n.updated_at ? ` · edited ${n.updated_at}` : "");
+        return `<div class="adp-tl" data-adp-note="${esc(n.id)}"><span class="adp-tl__dot"></span><div class="adp-tl__body">
+            <div class="adp-tl__h"><b>${esc(n.created_by || "Unknown")}</b><span class="adp-mono">${esc(when)}</span><span class="adp-tl__links"><button type="button" class="adp-btn-link edit_btn" data-id="${esc(n.id)}">Edit</button><button type="button" class="adp-btn-link adp-btn-link--danger delete_btn" data-id="${esc(n.id)}" data-adp-excerpt="${esc(n.excerpt || n.note || "")}">Delete</button></span></div>
+            <div class="adp-tl__text">${n.note_html || esc(n.note || "")}</div>
+            ${hasFile
+                ? `<div class="adp-note-file"><span class="adp-dz-fico">${svg(PATHS.file, 14)}</span><span class="adp-note-file__t"><b class="adp-trunc">${esc(n.document_name || "Attachment")}</b><small>Attachment</small></span><button type="button" class="adp-iconbtn adp-iconbtn--xs downloadDoc" data-id="${esc(n.applicant_document_id)}" title="Download" aria-label="Download attachment">${svg(PATHS.download, 13)}</button></div>`
+                : `<button type="button" class="adp-btn-link adp-note-attach-later edit_btn" data-id="${esc(n.id)}" data-adp-focus-file="1">${svg(PATHS.upload, 12)}Attach a file</button>`}
+        </div></div>`;
+    };
+    const paintCount = () => {
+        if (!countEl) return;
+        countEl.textContent = state.total ? `${state.total} note${state.total === 1 ? "" : "s"}${state.query ? ` matching “${state.query}”` : ""}` : "";
+    };
+    const fetchNotes = (page, status, size) => axios.get(route("admission.note.list"), { params: { applicantId, queryStr: state.query, status, page, size: size || 10 }, headers: csrf }).then((r) => r.data || {});
+    const loadNotes = (reset) => {
+        if (reset) { state.page = 1; state.rows = []; timeline.innerHTML = ""; }
+        if (loadingEl) loadingEl.hidden = false;
+        if (emptyEl) emptyEl.hidden = true;
+        if (moreEl) moreEl.hidden = true;
+        return fetchNotes(state.page, 1).then((res) => {
+            const rows = Array.isArray(res.data) ? res.data : [];
+            state.lastPage = Number(res.last_page) || 1;
+            state.total = Number(res.total_rows) || rows.length;
+            state.rows = state.rows.concat(rows);
+            timeline.insertAdjacentHTML("beforeend", rows.map(rowHtml).join(""));
+            if (loadingEl) loadingEl.hidden = true;
+            if (emptyEl) emptyEl.hidden = state.rows.length > 0;
+            if (moreEl) moreEl.hidden = !(state.page < state.lastPage);
+            paintCount();
+        }).catch(() => {
+            if (loadingEl) loadingEl.hidden = true;
+            showWarning("Could not load the notes", "Reload the page and try again.");
         });
-    })
+    };
+    if (moreEl) moreEl.addEventListener("click", (e) => { if (!e.target.closest("button")) return; state.page += 1; loadNotes(false); });
 
-    $('#addNoteForm').on('submit', function(e){
-        e.preventDefault();
-        const form = document.getElementById('addNoteForm');
-    
-        noteSetButtonBusy("#saveNote", true);
+    /* search */
+    const queryInput = byId("query-AN");
+    const search = () => { state.query = queryInput ? queryInput.value.trim() : ""; loadNotes(true); };
+    const goBtn = byId("tabulator-html-filter-go-AN"), resetBtn = byId("tabulator-html-filter-reset-AN"), filterForm = byId("tabulatorFilterForm-AN");
+    if (goBtn) goBtn.addEventListener("click", (e) => { e.preventDefault(); search(); });
+    if (filterForm) filterForm.addEventListener("submit", (e) => { e.preventDefault(); search(); });
+    if (resetBtn) resetBtn.addEventListener("click", (e) => { e.preventDefault(); if (queryInput) queryInput.value = ""; search(); });
 
-        let form_data = new FormData(form);
-        form_data.append('file', $('#addNoteForm input[name="document"]')[0].files[0]); 
-        form_data.append("content", addEditor.getData());
-        axios({
-            method: "post",
-            url: route('admission.store.note'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            noteSetButtonBusy("#saveNote", false);
-            //console.log(response.data.message);
-            //return false;
+    /* ---------- deleted notes ------------------------------------------------ */
+    const deletedBox = document.querySelector("[data-adp-deleted]");
+    const deletedCountEl = document.querySelector("[data-adp-deleted-count]");
+    const deletedRows = document.querySelector("[data-adp-deleted-rows]");
+    const deletedLoading = document.querySelector("[data-adp-deleted-loading]");
+    let deletedCount = Number(deletedCountEl ? deletedCountEl.textContent : 0) || 0, deletedLoaded = false;
+    const paintDeleted = () => {
+        if (deletedCountEl) deletedCountEl.textContent = String(deletedCount);
+        if (deletedBox) { deletedBox.hidden = deletedCount === 0; if (deletedCount === 0) deletedBox.open = false; }
+    };
+    const loadDeleted = () => {
+        if (!deletedRows) return Promise.resolve();
+        if (deletedLoading) deletedLoading.hidden = false;
+        return fetchNotes(1, 2, true).then((res) => {
+            const rows = Array.isArray(res.data) ? res.data : [];
+            deletedCount = Number(res.total_rows) || rows.length;
+            deletedLoaded = true;
+            deletedRows.innerHTML = rows.map((n) => `<div class="adp-vrow adp-vrow--note"><span><span class="adp-vrow__text" title="${esc(n.excerpt || n.note || "")}">${esc(n.excerpt || n.note || "—")}</span><span class="adp-vrow__meta">${esc(n.created_by || "")} · deleted ${esc(n.deleted_at || "")}</span></span><button type="button" class="adp-btn adp-btn--ghost adp-btn--sm restore_btn" data-id="${esc(n.id)}" data-adp-excerpt="${esc(n.excerpt || n.note || "")}">${svg(PATHS.undo, 13)}Restore</button></div>`).join("");
+            if (deletedLoading) deletedLoading.hidden = true;
+            paintDeleted();
+        }).catch(() => { if (deletedLoading) deletedLoading.hidden = true; });
+    };
+    if (deletedBox) deletedBox.addEventListener("toggle", () => { if (deletedBox.open && !deletedLoaded) loadDeleted(); });
 
-            if (response.status == 200) {
-                addNoteModal.hide();
-
-                successModal.show(); 
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Congratulation!" );
-                    $("#successModal .successModalDesc").html('Applicant Note successfully stored.');
-                    $("#successModal .successCloser").attr('data-action', 'NONE');
-                });  
-                
-                setTimeout(function(){
-                    successModal.hide();
-                }, 2000);
+    /* ---------- composer: add, or edit a note loaded into it ----------------- */
+    const addForm = byId("addNoteForm");
+    const editing = { id: 0 };
+    if (addForm && composerEditor) {
+        const errEl = addForm.querySelector("[data-adp-note-error]");
+        const saveBtn = byId("saveNote");
+        const saveLabel = addForm.querySelector("[data-adp-save-label]");
+        const banner = addForm.querySelector("[data-adp-editing]");
+        const current = addForm.querySelector("[data-adp-edit-current]");
+        const cancelBtns = Array.from(addForm.querySelectorAll("[data-adp-edit-cancel]"));
+        const idInput = addForm.querySelector('input[name="id"]');
+        const attach = attachControl(addForm, (t) => inlineError(errEl, t));
+        const paintSave = () => { if (saveBtn) saveBtn.toggleAttribute("disabled", composerEditor.isEmpty()); };
+        composerEditor.onChange(() => { inlineError(errEl, ""); paintSave(); });
+        const markRow = () => document.querySelectorAll(".adp-tl").forEach((row) => row.classList.toggle("adp-tl--editing", editing.id > 0 && row.getAttribute("data-adp-note") === String(editing.id)));
+        const toAddMode = () => {
+            editing.id = 0;
+            addForm.setAttribute("data-adp-mode", "add");
+            if (idInput) idInput.value = "0";
+            composerEditor.clear();
+            attach.clear();
+            if (banner) banner.hidden = true;
+            if (current) current.hidden = true;
+            setText(addForm, "[data-adp-attach-label]", "Attach a file");
+            if (saveLabel) saveLabel.textContent = "Add note";
+            cancelBtns.forEach((b) => { b.hidden = true; });
+            inlineError(errEl, "");
+            paintSave();
+            markRow();
+        };
+        const toEditMode = (id, focusFile) => {
+            const row = state.rows.find((n) => String(n.id) === String(id)) || {};
+            editing.id = Number(id) || 0;
+            addForm.setAttribute("data-adp-mode", "edit");
+            if (idInput) idInput.value = String(id);
+            composerEditor.set(row.note_html || "");
+            attach.clear();
+            if (banner) { banner.hidden = false; setText(banner, "[data-adp-editing-by]", row.created_by || "—"); setText(banner, "[data-adp-editing-when]", row.created_at || "—"); }
+            const hasFile = Number(row.applicant_document_id) > 0;
+            if (current) {
+                current.hidden = !hasFile;
+                setText(current, "[data-adp-edit-current-name]", row.document_name || "Attachment");
+                const dl = current.querySelector("[data-adp-edit-current-download]");
+                if (dl) dl.setAttribute("data-id", row.applicant_document_id || 0);
             }
-            applicantNotesListTable.init();
-        }).catch(error => {
-            noteSetButtonBusy("#saveNote", false);
-            if (error.response) {
-                if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#addNoteForm .${key}`).addClass('border-danger');
-                        $(`#addNoteForm  .error-${key}`).html(val);
-                    }
-                } else {
-                    console.log('error');
-                }
-            }
+            setText(addForm, "[data-adp-attach-label]", hasFile ? "Replace attachment" : "Attach a file");
+            if (saveLabel) saveLabel.textContent = "Save changes";
+            cancelBtns.forEach((b) => { b.hidden = false; });
+            inlineError(errEl, "");
+            paintSave();
+            markRow();
+            addForm.scrollIntoView({ behavior: "smooth", block: "start" });
+            /* the latest copy from the server, in case the timeline is stale */
+            axios.post(route("admission.get.note"), { noteId: id }, { headers: csrf })
+                .then((res) => {
+                    const d = (res.data && res.data.res) || {};
+                    if (editing.id !== Number(id)) return;
+                    if (typeof d.note === "string" && composerEditor.html() === (row.note_html || "")) composerEditor.set(d.note);
+                    if (current && d.document_name) setText(current, "[data-adp-edit-current-name]", d.document_name);
+                    paintSave();
+                })
+                .catch(() => {});
+            window.setTimeout(() => {
+                const pick = addForm.querySelector("[data-adp-attach-pick]");
+                if (focusFile && pick) pick.focus(); else composerEditor.focus();
+            }, 300);
+        };
+        cancelBtns.forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); toAddMode(); }));
+        document.addEventListener("click", (e) => {
+            const btn = e.target.closest(".edit_btn");
+            if (!btn) return;
+            e.preventDefault();
+            toEditMode(btn.getAttribute("data-id"), btn.hasAttribute("data-adp-focus-file"));
         });
-    });
-
-    $('#applicantNotesListTable').on('click', '.edit_btn', function(e){
-        var $btn = $(this);
-        var noteId = $btn.attr('data-id');
-        axios({
-            method: "post",
-            url: route('admission.get.note'),
-            data: {noteId : noteId},
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            let dataset = response.data.res;
-            editEditor.setData(dataset.note ? dataset.note : '');
-            $('#editNoteModal input[name="id"]').val(noteId);
-            if(dataset.docURL != ''){
-                $('#editNoteModal .downloadExistAttachment').attr('href', dataset.docURL).fadeIn();
-            }else{
-                $('#editNoteModal .downloadExistAttachment').attr('href', '#').fadeOut();
-            }
-        }).catch(error => {
-            console.log('error');
+        document.addEventListener("keydown", (e) => { if (e.key === "Escape" && editing.id > 0 && !document.querySelector(".modal.show")) toAddMode(); });
+        addForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            if (composerEditor.isEmpty()) { inlineError(errEl, editing.id > 0 ? "The note cannot be empty." : "Write something first."); composerEditor.focus(); return; }
+            const isEdit = editing.id > 0;
+            busy(saveBtn, true);
+            const fd = new FormData(addForm);
+            fd.set("content", composerEditor.html());
+            if (!isEdit) fd.delete("id");
+            axios.post(route(isEdit ? "admission.update.note" : "admission.store.note"), fd, { headers: csrf })
+                .then(() => {
+                    busy(saveBtn, false);
+                    toAddMode();
+                    showSuccess(isEdit ? "Note updated" : "Note added", isEdit ? "The changes are saved." : "It is at the top of the timeline.");
+                    loadNotes(true);
+                })
+                .catch((err) => {
+                    busy(saveBtn, false);
+                    paintSave();
+                    const errors = err.response && err.response.status === 422 ? (err.response.data.errors || {}) : null;
+                    if (errors) inlineError(errEl, Object.values(errors).flat().join(" "));
+                    else showWarning("Something went wrong", "The note could not be saved. Try again, or contact the administrator.");
+                });
         });
-    });
+        paintSave();
+    }
 
-    $('#editNoteForm').on('submit', function(e){
-        e.preventDefault();
-        const form = document.getElementById('editNoteForm');
-    
-        noteSetButtonBusy("#UpdateNote", true);
-
-        let form_data = new FormData(form);
-        form_data.append('file', $('#editNoteForm input[name="document"]')[0].files[0]); 
-        form_data.append("content", editEditor.getData());
-        axios({
-            method: "post",
-            url: route('admission.update.note'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            noteSetButtonBusy("#UpdateNote", false);
-            //console.log(response.data.message);
-            //return false;
-
-            if (response.status == 200) {
-                editNoteModal.hide();
-
-                successModal.show(); 
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Congratulation!" );
-                    $("#successModal .successModalDesc").html('Applicant Note successfully updated.');
-                    $("#successModal .successCloser").attr('data-action', 'NONE');
-                });  
-                
-                setTimeout(function(){
-                    successModal.hide();
-                }, 2000);
-            }
-            applicantNotesListTable.init();
-        }).catch(error => {
-            noteSetButtonBusy("#UpdateNote", false);
-            if (error.response) {
-                if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#editNoteForm .${key}`).addClass('border-danger');
-                        $(`#editNoteForm  .error-${key}`).html(val);
-                    }
-                } else {
-                    console.log('error');
-                }
-            }
-        });
-    });
-
-
-    $('#applicantNotesListTable').on('click', '.delete_btn', function(e){
-        e.preventDefault();
-        var $btn = $(this);
-        var noteId = $btn.attr('data-id');
-
+    /* ---------- delete / restore --------------------------------------------- */
+    const confirmEl = byId("confirmModal");
+    const confirmAction = ({ tone, icon, title, text, item, action, recordId, label }) => {
+        if (!confirmEl || !confirmModal) return;
+        const content = confirmEl.querySelector(".modal-content");
+        if (content) content.className = `modal-content adp-dialog adp-dialog--${tone}`;
+        const ico = confirmEl.querySelector(".adp-dialog__ico");
+        if (ico) ico.innerHTML = svg(icon, 30);
+        setText(confirmEl, ".confModTitle", title);
+        setText(confirmEl, ".confModDesc", text || "");
+        const itemEl = confirmEl.querySelector("[data-adp-confirm-item]");
+        if (itemEl) { itemEl.textContent = item || ""; itemEl.hidden = !item; }
+        const agree = confirmEl.querySelector(".agreeWith");
+        if (agree) {
+            agree.setAttribute("data-recordid", recordId);
+            agree.setAttribute("data-status", action);
+            agree.className = `agreeWith adp-btn ${tone === "danger" ? "adp-btn--danger" : "adp-btn--primary"}`;
+            agree.textContent = label || "Yes, I agree";
+            agree.removeAttribute("disabled");
+        }
         confirmModal.show();
-        document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
-            $("#confirmModal .confModTitle").html("Are you sure?" );
-            $("#confirmModal .confModDesc").html('Want to delete this Note from applicant list? Please click on agree to continue.');
-            $("#confirmModal .agreeWith").attr('data-recordid', noteId);
-            $("#confirmModal .agreeWith").attr('data-status', 'DELETENOT');
-        });
-    });
-
-    $('#applicantNotesListTable').on('click', '.restore_btn', function(e){
-        e.preventDefault();
-        var $btn = $(this);
-        var noteId = $btn.attr('data-id');
-
-        confirmModal.show();
-        document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
-            $("#confirmModal .confModTitle").html("Are you sure?" );
-            $("#confirmModal .confModDesc").html('Want to restore this Note from the trash? Please click on agree to continue.');
-            $("#confirmModal .agreeWith").attr('data-recordid', noteId);
-            $("#confirmModal .agreeWith").attr('data-status', 'RESTORENOT');
-        });
-    });
-
-    $('#confirmModal .agreeWith').on('click', function(e){
-        e.preventDefault();
-        let $agreeBTN = $(this);
-        let recordid = $agreeBTN.attr('data-recordid');
-        let action = $agreeBTN.attr('data-status');
-        let applicant = $agreeBTN.attr('data-applicant');
-
-        $('#confirmModal button').attr('disabled', 'disabled');
-
-        if(action == 'DELETENOT'){
-            axios({
-                method: 'delete',
-                url: route('admission.destory.note'),
-                data: {applicant : applicant, recordid : recordid},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-                    applicantNotesListTable.init();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Done!');
-                        $('#successModal .successModalDesc').html('Applicant note successfully deleted.');
-                        $('#successModal .successCloser').attr('data-action', 'NONE');
-                    });
-
-                    setTimeout(function(){
-                        successModal.hide();
-                    }, 2000);
-                }
-            }).catch(error =>{
-                console.log(error)
-            });
-        }else if(action == 'RESTORENOT'){
-            axios({
-                method: 'post',
-                url: route('admission.resotore.note'),
-                data: {applicant : applicant, recordid : recordid},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-                    applicantNotesListTable.init();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Done!');
-                        $('#successModal .successModalDesc').html('Applicant note successfully resotred.');
-                        $('#successModal .successCloser').attr('data-action', 'NONE');
-                    });
-
-                    setTimeout(function(){
-                        successModal.hide();
-                    }, 2000);
-                }
-            }).catch(error =>{
-                console.log(error)
-            });
-        }else{
-            confirmModal.hide();
+    };
+    document.addEventListener("click", (e) => {
+        const del = e.target.closest(".delete_btn");
+        if (del) {
+            e.preventDefault();
+            confirmAction({ tone: "danger", icon: PATHS.trash, title: "Delete this note?", item: (del.getAttribute("data-adp-excerpt") || "").slice(0, 80), text: "Soft-deleted; you can restore it from the deleted list.", action: "DELETENOT", recordId: del.getAttribute("data-id"), label: "Delete" });
+            return;
+        }
+        const res = e.target.closest(".restore_btn");
+        if (res) {
+            e.preventDefault();
+            confirmAction({ tone: "warn", icon: PATHS.undo, title: "Restore this note?", item: (res.getAttribute("data-adp-excerpt") || "").slice(0, 80), text: "It goes back to the timeline.", action: "RESTORENOT", recordId: res.getAttribute("data-id"), label: "Restore" });
         }
     });
-
-    $('#applicantNotesListTable').on('click', '.downloadDoc', function(e){
-        e.preventDefault();
-        var $theLink = $(this);
-        var row_id = $theLink.attr('data-id');
-
-        $theLink.css({'opacity' : '.6', 'cursor' : 'not-allowed'});
-
-        axios({
-            method: "post",
-            url: route('admission.document.download'), 
-            data: {row_id : row_id},
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            if (response.status == 200){
-                let res = response.data.res;
-                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
-
-                if(res != ''){
-                    window.open(res, '_blank');
-                }
-            } 
-        }).catch(error => {
-            if(error.response){
-                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
-                console.log('error');
-            }
+    if (confirmEl) {
+        confirmEl.addEventListener("click", (e) => {
+            const agree = e.target.closest(".agreeWith");
+            if (!agree) return;
+            e.preventDefault();
+            const action = agree.getAttribute("data-status");
+            const recordid = agree.getAttribute("data-recordid");
+            const applicant = agree.getAttribute("data-applicant") || applicantId;
+            const spec = action === "DELETENOT" ? { method: "delete", name: "admission.destory.note" } : (action === "RESTORENOT" ? { method: "post", name: "admission.resotore.note" } : null);
+            if (!spec) { confirmModal.hide(); return; }
+            confirmEl.querySelectorAll("button").forEach((b) => b.setAttribute("disabled", "disabled"));
+            axios({ method: spec.method, url: route(spec.name), data: { applicant, recordid }, headers: csrf })
+                .then(() => {
+                    confirmModal.hide();
+                    if (action === "DELETENOT") deletedCount += 1; else deletedCount = Math.max(0, deletedCount - 1);
+                    paintDeleted();
+                    loadNotes(true);
+                    if (deletedLoaded || (deletedBox && deletedBox.open)) loadDeleted();
+                    showSuccess(action === "DELETENOT" ? "Note deleted" : "Note restored", action === "DELETENOT" ? "It is in the deleted list and can be restored." : "It is back in the timeline.");
+                })
+                .catch(() => {
+                    confirmEl.querySelectorAll("button").forEach((b) => b.removeAttribute("disabled"));
+                    confirmModal.hide();
+                    showWarning("Something went wrong", "The change could not be saved. Try again, or contact the administrator.");
+                });
         });
+        confirmEl.addEventListener("hide.tw.modal", () => {
+            setText(confirmEl, ".confModDesc", "");
+            const agree = confirmEl.querySelector(".agreeWith");
+            if (agree) { agree.setAttribute("data-recordid", "0"); agree.setAttribute("data-status", "none"); }
+            confirmEl.querySelectorAll("button").forEach((b) => b.removeAttribute("disabled"));
+        });
+    }
+
+    /* ---------- downloads --------------------------------------------------- */
+    document.addEventListener("click", (e) => {
+        const link = e.target.closest(".downloadDoc");
+        if (!link) return;
+        e.preventDefault();
+        if (link.hasAttribute("disabled")) return;
+        link.setAttribute("disabled", "disabled");
+        axios.post(route("admission.document.download"), { row_id: link.getAttribute("data-id") }, { headers: csrf })
+            .then((res) => { link.removeAttribute("disabled"); const url = res.data && res.data.res; if (url) window.open(url, "_blank"); })
+            .catch(() => { link.removeAttribute("disabled"); });
     });
 
-    $('#viewNoteModal').on('click', '.downloadDoc', function(e){
+    /* ---------- print / export ---------------------------------------------- */
+    const printBtn = byId("tabulator-print-AN");
+    if (printBtn) printBtn.addEventListener("click", (e) => { e.preventDefault(); window.print(); });
+    const exportRows = () => fetchNotes(1, 1, true).then((res) => {
+        const rows = Array.isArray(res.data) ? res.data : [];
+        const strip = (h) => { const d = document.createElement("div"); d.innerHTML = h || ""; return d.textContent.replace(/\s+/g, " ").trim(); };
+        return [["#", "Note", "By", "When", "Attachment"]].concat(rows.map((n, i) => [i + 1, strip(n.note_html) || n.note || "", n.created_by || "", n.created_at || "", n.document_name || ""]));
+    });
+    const download = (blob, name) => { const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); };
+    const csvBtn = byId("tabulator-export-csv-AN");
+    if (csvBtn) csvBtn.addEventListener("click", (e) => {
         e.preventDefault();
-        var $theLink = $(this);
-        var row_id = $theLink.attr('data-id');
-
-        $theLink.css({'opacity' : '.6', 'cursor' : 'not-allowed'});
-
-        axios({
-            method: "post",
-            url: route('admission.document.download'), 
-            data: {row_id : row_id},
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            if (response.status == 200){
-                let res = response.data.res;
-                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
-
-                if(res != ''){
-                    window.open(res, '_blank');
-                }
-            } 
-        }).catch(error => {
-            if(error.response){
-                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
-                console.log('error');
-            }
-        });
+        exportRows().then((aoa) => download(new Blob([xlsx.utils.sheet_to_csv(xlsx.utils.aoa_to_sheet(aoa))], { type: "text/csv;charset=utf-8" }), "applicant_notes.csv"));
+    });
+    const xlsxBtn = byId("tabulator-export-xlsx-AN");
+    if (xlsxBtn) xlsxBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        exportRows().then((aoa) => { const wb = xlsx.utils.book_new(); xlsx.utils.book_append_sheet(wb, xlsx.utils.aoa_to_sheet(aoa), "Applicant Notes"); xlsx.writeFile(wb, "applicant_notes.xlsx"); });
     });
 
+    loadNotes(true);
+    paintDeleted();
 })();

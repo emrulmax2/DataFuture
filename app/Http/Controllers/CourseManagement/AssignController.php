@@ -775,7 +775,8 @@ class AssignController extends Controller
                                     $data = [];
                                     $data['plan_id'] = $newPlanId;
                                     $data['prev_plan_id'] = $atn->plan_id;
-                                    Attendance::where('id', $atn->id)->update($data);
+                                    \App\Services\AttendanceIntegrity\AttendanceAudit::context('group_reassign');
+                                    \App\Services\AttendanceIntegrity\AttendanceAudit::updateRows(Attendance::where('id', $atn->id), $data);
                                 endforeach;
                             endif;
                             $i++;

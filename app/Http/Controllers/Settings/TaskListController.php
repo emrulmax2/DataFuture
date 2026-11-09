@@ -116,6 +116,7 @@ class TaskListController extends Controller
                     'address_request' => $list->address_request,
                     'image_url' => $list->image_url,
                     'hesa_status' => $list->hesa_status ?? 'No',
+                    'class_routine' => $list->class_routine ?? 'No',
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -232,6 +233,7 @@ class TaskListController extends Controller
             'external_link' => (isset($request->external_link) ? $request->external_link : '0'),
             'external_link_ref' => (isset($request->external_link) && $request->external_link == 1 && !empty($request->external_link_ref) ? $request->external_link_ref : ''),
             'hesa_status'=> (isset($request->hesa_status) && !empty($request->hesa_status) ? $request->hesa_status : 'No'),
+            'class_routine'=> (isset($request->class_routine) && $request->class_routine === 'Yes' ? 'Yes' : 'No'),
             'updated_by' => auth()->user()->id
         ]);
 
