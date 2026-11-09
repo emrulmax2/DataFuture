@@ -23,6 +23,7 @@ class CourseCreation extends Model
         'university_commission',
         'is_workplacement',
         'has_evening_and_weekend',
+        'induction_booking_link',
         'created_by',
         'updated_by',
     ];

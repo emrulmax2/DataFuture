@@ -19,6 +19,9 @@ class ApplicantTask extends Model
         'status',
         'canceled_reason',
         'task_status_id',
+        /* set by the task engine; null on every hand-assigned row */
+        'assigned_via',
+        'rule_id',
         'created_by',
         'updated_by',
     ];

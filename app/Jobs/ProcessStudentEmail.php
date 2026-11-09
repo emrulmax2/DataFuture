@@ -21,6 +21,7 @@ use App\Models\StudentDocument;
 use App\Models\StudentEmail;
 use App\Models\StudentEmailsAttachment;
 use App\Models\StudentEmailsDocument;
+use Illuminate\Support\Facades\Storage;
 use App\Models\StudentUser;
 
 class ProcessStudentEmail implements ShouldQueue
@@ -47,9 +48,13 @@ class ProcessStudentEmail implements ShouldQueue
     {
         $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
         $user = StudentUser::where(["email"=> $ApplicantUser->email])->get()->first();
-        $student = Student::where(["student_user_id"=> $user->id])->get()->first(); 
+        // $student = Student::where(["student_user_id"=> $user->id])->get()->first(); // the login's first student, not the one this conversion created
+        $student = \App\Services\Admission\StudentConversion::studentFor($this->applicant, $user);
 
         //Applicant Email
+        // All or nothing: a failure part-way used to leave half the emails copied, so a
+        // retry of this step duplicated them.
+        \Illuminate\Support\Facades\DB::transaction(function () use ($student) {
         $applicantSetData= ApplicantEmail::where('applicant_id',$this->applicant->id)->get();
         foreach($applicantSetData as $applicantSet):
             
@@ -73,22 +78,48 @@ class ProcessStudentEmail implements ShouldQueue
                 if($applicantEmailAttachmentFile->applicant_document_id) { 
 
                     $applicantDocument = ApplicantDocument::where('id',$applicantEmailAttachmentFile->applicant_document_id)->withTrashed()->get()->first();
-                    $studentDocument = new StudentDocument();
+                    if (!$applicantDocument) {
+                        continue;
+                    }
 
-                    $applicantArray = [
+                    /* Students keep an email's attachments as student_emails_documents rows only
+                       (Student\EmailController::SendMail), never as student documents; the file is in
+                       public/students/{id}/, where Create Student Record copied the applicant's folder
+                       and where the student email screen downloads it from. Same row shape here. */
+                    $docDisk = \App\Support\ApplicantDocumentDisk::of($applicantDocument);
+                    StudentEmailsDocument::create([
                         'student_id' => $student->id,
+                        'student_email_id' => $dataEmail->id,
+                        'is_bulk' => 0,
                         'hard_copy_check' => ($applicantDocument->hard_copy_check > 0 ? $applicantDocument->hard_copy_check : 0),
                         'doc_type' => $applicantDocument->doc_type,
                         'disk_type' => $applicantDocument->disk_type,
-                        'path' => $applicantDocument->path,
-                        'display_file_name' =>	 $applicantDocument->display_file_name,
+                        'path' => Storage::disk($docDisk)->url('public/students/'.$student->id.'/'.$applicantDocument->current_file_name),
+                        'display_file_name' => $applicantDocument->display_file_name,
                         'current_file_name' => $applicantDocument->current_file_name,
-                        'created_by'=> ($applicantDocument->updated_by) ? $applicantDocument->updated_by : $applicantDocument->created_by,
-                        'deleted_at' => $applicantDocument->deleted_at!=null ? $applicantDocument->deleted_at : null,
+                        'created_by' => ($applicantDocument->updated_by) ? $applicantDocument->updated_by : $applicantDocument->created_by,
+                        'deleted_at' => $applicantDocument->deleted_at != null ? $applicantDocument->deleted_at : null,
+                    ]);
+
+                    /* Was: the attachment also became a student document (it then showed among the
+                       student's uploaded documents) before the email document was saved. Kept for
+                       reference, not run:
+                    $studentDocument = new StudentDocument();
+
+                    $applicantArray = [
+                    'student_id' => $student->id,
+                    'hard_copy_check' => ($applicantDocument->hard_copy_check > 0 ? $applicantDocument->hard_copy_check : 0),
+                    'doc_type' => $applicantDocument->doc_type,
+                    'disk_type' => $applicantDocument->disk_type,
+                    'path' => $applicantDocument->path,
+                    'display_file_name' =>	 $applicantDocument->display_file_name,
+                    'current_file_name' => $applicantDocument->current_file_name,
+                    'created_by'=> ($applicantDocument->updated_by) ? $applicantDocument->updated_by : $applicantDocument->created_by,
+                    'deleted_at' => $applicantDocument->deleted_at!=null ? $applicantDocument->deleted_at : null,
                     ];
 
                     if($applicantDocument->document_setting_id) {
-                        $applicantArray = array_merge($applicantArray,['document_setting_id' => $applicantDocument->document_setting_id]);
+                    $applicantArray = array_merge($applicantArray,['document_setting_id' => $applicantDocument->document_setting_id]);
                     }
 
                     $studentDocument->fill($applicantArray);
@@ -96,14 +127,19 @@ class ProcessStudentEmail implements ShouldQueue
                     $dataArray = array_merge($dataArray,['student_document_id' => $studentDocument->id]);
                     $studentDocument->fill($dataArray);
                     $studentDocument->save();
-            
-                    
+
+
                     $applicantArray = array_merge($applicantArray,['student_email_id' => $dataEmail->id]);
                     $studentEmailDocument = new StudentEmailsDocument();
                     $studentEmailDocument->fill($applicantArray);
                     $studentEmailDocument->save();
+                    */
 
-                    //add the attachments to Email Attachment
+                    /* The attachment is recorded above as a student_emails_documents row, which the
+                       student email screens read (StudentEmail::documents). The old link table,
+                       student_emails_attachments, no longer exists in the database (replaced by
+                       student_emails_documents in 2024), so writing to it stopped every conversion
+                       of an applicant who had been emailed an attachment. Kept for reference, not run:
                     $studentEmailAttachment = new StudentEmailsAttachment();
                     $emailAttachmentArray  = [
                         'student_email_id'=>$dataEmail->id, 
@@ -114,9 +150,11 @@ class ProcessStudentEmail implements ShouldQueue
 
                     $studentEmailAttachment->fill($emailAttachmentArray);
                     $studentEmailAttachment->save();
+                    */
                 
                 }
         endforeach;
+        });
 
 
     }

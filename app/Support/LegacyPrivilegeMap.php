@@ -173,6 +173,18 @@ class LegacyPrivilegeMap
         'module_contents.analytics' => 'module_content_analytics',
         'module_contents.edit_attendance' => 'module_content_edit_attendance',
 
+        // Attendance Integrity monitoring (/attendance-integrity). The parent switch plus
+        // one key per area; App\Services\AttendanceIntegrity\IntegrityAccess needs both.
+        'attendance_integrity.attendance_integrity' => 'attendance_integrity',
+        'attendance_integrity.ai_view_dashboard' => 'attendance_integrity_view_dashboard',
+        'attendance_integrity.ai_view_staff' => 'attendance_integrity_view_staff',
+        'attendance_integrity.ai_view_students' => 'attendance_integrity_view_students',
+        'attendance_integrity.ai_view_audit_logs' => 'attendance_integrity_view_audit_logs',
+        'attendance_integrity.ai_view_investigations' => 'attendance_integrity_view_investigations',
+        'attendance_integrity.ai_manage_investigations' => 'attendance_integrity_manage_investigations',
+        'attendance_integrity.ai_export' => 'attendance_integrity_export',
+        'attendance_integrity.ai_manage_settings' => 'attendance_integrity_manage_settings',
+
         // Library + results
         'library_management.library_management' => 'library_management',
         'result_management.result_management_staff' => 'result_staff_upload',

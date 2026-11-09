@@ -1399,4 +1399,252 @@ const TABLE_ID = "#classPlanTreeListTable";
                 }
             });
     });
+    /* ------------------------------------------------------------------ *
+     * Send Class ICP (30 Oct 2026)
+     *
+     * The group's class routine PDF emailed to each of its students, with no
+     * letter and no copy in their Uploads (PlanTreeClassIcpController):
+     *   1. prepare: who is in the group and which PDF each gets — classmates
+     *      share one; a student whose plans differ gets their own — with a
+     *      preview of each and a tick box per student;
+     *   2. send: one request per ticked student, each result listed as it
+     *      comes back. Closing the dialog or Stop ends the run after the
+     *      student in hand.
+     * ------------------------------------------------------------------ */
+
+    const icpModalEl = document.querySelector("#sendClassIcpModal");
+    const icp = { coords: null, running: false, stop: false };
+
+    const esc = (value) =>
+        String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+    const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+    const icpBody = () => icpModalEl.querySelector("[data-cm-icp-body]");
+    const icpSendBtn = () => icpModalEl.querySelector("#sendClassIcpBtn");
+    const icpCancelBtn = () => icpModalEl.querySelector("[data-cm-icp-cancel]");
+
+    function icpLabels({ title, cancel }) {
+        if (title) icpModalEl.querySelector("[data-cm-icp-title]").textContent = title;
+        if (cancel) icpModalEl.querySelector("[data-cm-icp-cancel-label]").textContent = cancel;
+    }
+
+    /** The ticked students, in the order they are listed. */
+    function icpPicked() {
+        return Array.from(icpModalEl.querySelectorAll("[data-cm-icp-student]:checked")).map((box) => ({
+            id: box.value,
+            registration_no: box.getAttribute("data-reg"),
+            name: box.getAttribute("data-name"),
+        }));
+    }
+
+    /** Keeps the Send button, each set's tick box and its "n of m" in step with the ticks. */
+    function icpSync() {
+        const picked = icpPicked().length;
+        const btn = icpSendBtn();
+        btn.hidden = icp.running || !icpModalEl.querySelector("[data-cm-icp-student]");
+        btn.disabled = picked === 0;
+        icpModalEl.querySelector("[data-cm-icp-send-label]").textContent = picked
+            ? `Send to ${plural(picked, "student", "students")}`
+            : "Select students to send to";
+
+        icpModalEl.querySelectorAll("[data-cm-icp-set]").forEach((set) => {
+            const boxes = set.querySelectorAll("[data-cm-icp-student]");
+            const ticked = set.querySelectorAll("[data-cm-icp-student]:checked").length;
+            const all = set.querySelector("[data-cm-icp-all]");
+            if (all) {
+                all.checked = ticked === boxes.length;
+                all.indeterminate = ticked > 0 && ticked < boxes.length;
+            }
+            const counter = set.querySelector("[data-cm-icp-picked]");
+            if (counter) counter.textContent = `${ticked} of ${boxes.length} selected`;
+        });
+    }
+
+    function icpSummary(data) {
+        const sets = data.groups || [];
+        const skipped = data.skipped || [];
+        const sending = sets.reduce((sum, set) => sum + set.students.length, 0);
+
+        const setHtml = sets
+            .map(
+                (set, i) => `<li class="cm-icp__set" data-cm-icp-set="${i}">
+                    <div class="cm-icp__row">
+                        <input type="checkbox" class="cm-icp__box" data-cm-icp-all="${i}" checked aria-label="Select every student in this set">
+                        <div class="cm-icp__name">
+                            <strong>${esc(set.name)}</strong>
+                            <span>${esc(set.course)} · ${esc(set.term)} · ${plural(set.weeks, "week", "weeks")}</span>
+                        </div>
+                        <span class="cm-icp__count">${plural(set.count, "student", "students")}</span>
+                        <a class="cm-icp__preview" href="${esc(set.preview_url)}" target="_blank" rel="noopener">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg>
+                            Preview PDF
+                        </a>
+                    </div>
+                    ${
+                        set.variant
+                            ? `<p class="cm-icp__variant">These students' class plans are not the same as the rest of the group's (a resit or an extra module, for example), so they get a PDF of their own.</p>`
+                            : ""
+                    }
+                    ${set.warnings && set.warnings.length ? `<ul class="cm-icp__warn">${set.warnings.map((w) => `<li>${esc(w)}</li>`).join("")}</ul>` : ""}
+                    <details class="cm-icp__people"${sets.length > 1 || set.count <= 12 ? " open" : ""}>
+                        <summary>Students · <span data-cm-icp-picked>${set.count} of ${set.count} selected</span></summary>
+                        <ul>${set.students
+                            .map(
+                                (st) => `<li><label>
+                                    <input type="checkbox" class="cm-icp__box" data-cm-icp-student value="${esc(st.id)}" data-reg="${esc(st.registration_no)}" data-name="${esc(st.name)}" checked>
+                                    <b>${esc(st.registration_no)}</b><span>${esc(st.name)}</span>
+                                </label></li>`
+                            )
+                            .join("")}</ul>
+                    </details>
+                </li>`
+            )
+            .join("");
+
+        const skippedHtml = skipped.length
+            ? `<div class="cm-icp__skipped"><strong>${plural(skipped.length, "student is", "students are")} left out</strong><ul>${skipped
+                  .map((st) => `<li><b>${esc(st.registration_no)}</b> ${esc(st.name)} — ${esc(st.reason)}</li>`)
+                  .join("")}</ul></div>`
+            : "";
+
+        icpBody().innerHTML = `
+            <p class="cm-icp__lead">${
+                sending
+                    ? `${plural(data.total, "student is", "students are")} assigned to this group's class plans. Everyone with the same class plans gets the same PDF, emailed to their institutional and personal addresses. No letter is made and nothing is added to their documents. Open the PDF to check it before you send.`
+                    : "None of this group's students can be sent a class routine."
+            }</p>
+            ${data.redirect_to ? `<div class="cm-icp__note">This is a test install: every email goes to <b>${esc(data.redirect_to)}</b>, not to the students.</div>` : ""}
+            ${sets.length ? `<ul class="cm-icp__sets">${setHtml}</ul>` : ""}
+            ${skippedHtml}`;
+        icpSync();
+    }
+
+    function icpMessage(text) {
+        icpBody().innerHTML = `<div class="cm-icp__empty">${esc(text)}</div>`;
+        icpSendBtn().hidden = true;
+    }
+
+    $(document).on("click", ".sendClassIcp", function (event) {
+        event.preventDefault();
+        if (!icpModalEl || icp.running) return;
+
+        icp.coords = leaderCoords(this);
+        icpModalEl.querySelector("[data-cm-icp-eyebrow]").textContent = "Group";
+        icpLabels({ title: "Send Class ICP", cancel: "Cancel" });
+        icpBody().innerHTML = '<div class="cm-icp__loading"><span class="cm-icp__spin"></span>Finding the group\'s students and their class routines…</div>';
+        icpSendBtn().hidden = true;
+        modal("sendClassIcpModal").show();
+
+        axios({ method: "post", url: route("plans.tree.class.icp.prepare"), data: icp.coords, headers: csrfHeaders() })
+            .then((response) => {
+                if (response.data.title) icpModalEl.querySelector("[data-cm-icp-eyebrow]").textContent = response.data.title;
+                icpSummary(response.data || {});
+            })
+            .catch((error) => {
+                const data = error.response ? error.response.data || {} : {};
+                if (data.title) icpModalEl.querySelector("[data-cm-icp-eyebrow]").textContent = data.title;
+                icpMessage(serverMessage(error, "The group's students could not be loaded. Please try again."));
+            });
+    });
+
+    if (icpModalEl) {
+        icpModalEl.addEventListener("change", (event) => {
+            const all = event.target.closest("[data-cm-icp-all]");
+            if (all) {
+                const set = all.closest("[data-cm-icp-set]");
+                set.querySelectorAll("[data-cm-icp-student]").forEach((box) => (box.checked = all.checked));
+            }
+            if (event.target.matches("[data-cm-icp-all], [data-cm-icp-student]")) icpSync();
+        });
+
+        // Stop (during a run) ends it after the student in hand and keeps the results on screen.
+        icpCancelBtn().addEventListener("click", () => {
+            if (!icp.running) return;
+            icp.stop = true;
+            icpLabels({ cancel: "Stopping…" });
+        });
+
+        // Native listener: the theme's event type has dots in it (see wireConfirmReset).
+        icpModalEl.addEventListener("hidden.tw.modal", () => {
+            if (icp.running) icp.stop = true;
+        });
+
+        icpSendBtn().addEventListener("click", () => icpRun());
+    }
+
+    async function icpRun() {
+        const queue = icpPicked();
+        if (!queue.length || icp.running) return;
+
+        icp.running = true;
+        icp.stop = false;
+        icpSendBtn().hidden = true;
+        icpCancelBtn().removeAttribute("data-tw-dismiss"); // Stop, not close
+        icpLabels({ title: "Sending Class ICP", cancel: "Stop" });
+        icpBody().innerHTML = `<div class="cm-icp__run">
+                <div class="cm-icp__progress"><span data-cm-icp-progress></span><span class="cm-icp__meter"><span data-cm-icp-meter style="width:0%"></span></span></div>
+                <ul class="cm-icp__results" data-cm-icp-results></ul>
+            </div>`;
+        const progress = icpBody().querySelector("[data-cm-icp-progress]");
+        const meter = icpBody().querySelector("[data-cm-icp-meter]");
+        const list = icpBody().querySelector("[data-cm-icp-results]");
+
+        let sent = 0;
+        let failed = 0;
+        let halted = "";
+
+        for (let i = 0; i < queue.length; i++) {
+            if (icp.stop) break;
+            const student = queue[i];
+            progress.textContent = `Sending ${i + 1} of ${queue.length} · ${student.registration_no}`;
+            meter.style.width = `${Math.round((i / queue.length) * 100)}%`;
+
+            let ok = false;
+            let text = "";
+            try {
+                const response = await axios({
+                    method: "post",
+                    url: route("plans.tree.class.icp.send"),
+                    data: { ...icp.coords, student_id: student.id },
+                    headers: csrfHeaders(),
+                });
+                ok = true;
+                const to = response.data && response.data.emailed_to;
+                text = to && to.length ? `Emailed to ${to.join(", ")}` : (response.data && response.data.message) || "Sent.";
+            } catch (error) {
+                const status = error.response ? error.response.status : 0;
+                text = serverMessage(error, status ? "The routine could not be sent." : "No answer from the server.");
+                // a lapsed session fails every request after it: stop rather than fail the rest one by one
+                if (status === 401 || status === 419) {
+                    halted = "Your session has expired. Reload the page, sign in and send to the students not sent yet.";
+                }
+            }
+
+            ok ? sent++ : failed++;
+            list.insertAdjacentHTML(
+                "beforeend",
+                `<li class="cm-icp__result ${ok ? "is-ok" : "is-bad"}"><span class="cm-icp__mark">${ok ? "✓" : "!"}</span><span><b>${esc(
+                    student.registration_no
+                )}</b> ${esc(student.name)}<em>${esc(text)}</em></span></li>`
+            );
+            list.lastElementChild.scrollIntoView({ block: "nearest" });
+            if (halted) break;
+        }
+
+        const notSent = queue.length - sent - failed;
+        meter.style.width = "100%";
+        progress.textContent =
+            `${plural(sent, "student", "students")} sent` +
+            (failed ? ` · ${failed} failed` : "") +
+            (notSent ? ` · ${notSent} not sent (stopped)` : "");
+        if (halted) list.insertAdjacentHTML("beforeend", `<li class="cm-icp__result is-bad"><span class="cm-icp__mark">!</span><span>${esc(halted)}</span></li>`);
+
+        icp.running = false;
+        icpCancelBtn().setAttribute("data-tw-dismiss", "modal");
+        icpLabels({ title: sent ? "Class ICP sent" : "No Class ICP sent", cancel: "Close" });
+
+        // closed part-way: say how far it got
+        if (!icpModalEl.classList.contains("show")) {
+            showSuccess(sent ? "Class ICP sent" : "No Class ICP sent", esc(progress.textContent), failed || notSent ? "warn" : "ok");
+        }
+    }
 })();

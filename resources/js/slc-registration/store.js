@@ -1,4 +1,4 @@
-import { reactive, computed } from "vue";
+import { reactive, computed, watch, nextTick } from "vue";
 import { derive } from "./helpers";
 
 /*
@@ -10,17 +10,86 @@ const csrf = () => document.querySelector('meta[name="csrf-token"]')?.getAttribu
 
 const MODULE_KEYS = ["dashboard", "registration", "attendance", "coc", "payment"];
 
+/*
+ * Every tab is a page in the browser's history (user, 5 Nov 2026: "on back load the last pages I
+ * browsed"): the header tabs, the registration stages and the attendance / payment steps each get
+ * their own address (?module=registration&view=data), so Back and Forward step through them and
+ * come back to where the page was scrolled. A reload or a shared link opens the same tab.
+ */
+const VIEWS = {
+    registration: ["dashboard", "identify", "data", "actions", "precheck", "batches", "courses", "log", "clear"],
+    attendance: ["overview", "match", "check", "codes", "cocs", "batches", "clear"],
+    payment: ["overview", "check", "uploads", "clear"],
+};
+const FIRST = { registration: "dashboard", attendance: "overview", payment: "overview" };
+const VIEW_KEY = { registration: "view", attendance: "attView", payment: "payView" };
+// steps that became part of another: Bulk attendance › Attendance is in Attendance & codes (6 Nov 2026)
+const MERGED = { attendance: { register: "codes" } };
+
+/** The tab an address asks for: the module, and its stage / step when it has them. */
+function fromUrl() {
+    const q = new URLSearchParams(window.location.search);
+    const module = MODULE_KEYS.includes(q.get("module")) ? q.get("module") : "dashboard";
+    const out = { module };
+    const view = (MERGED[module] || {})[q.get("view")] || q.get("view");
+    if (VIEWS[module]) out[VIEW_KEY[module]] = VIEWS[module].includes(view) ? view : FIRST[module];
+    if (module === "attendance") out.attShow = q.get("show") === "matched" ? "matched" : "open";
+    return out;
+}
+
+/** The address of a tab (the module's first stage and the default filter are left out). */
+function toUrl(n) {
+    const q = new URLSearchParams();
+    if (n.module !== "dashboard") q.set("module", n.module);
+    const v = VIEW_KEY[n.module] ? n[VIEW_KEY[n.module]] : null;
+    if (v && v !== FIRST[n.module]) q.set("view", v);
+    if (n.module === "attendance" && n.attView === "match" && n.attShow !== "open") q.set("show", n.attShow);
+    const qs = q.toString();
+    return window.location.pathname + (qs ? "?" + qs : "");
+}
+
 export function createStore(boot) {
-    const asked = new URLSearchParams(window.location.search).get("module");
     const store = reactive({
         state: boot.state,
         user: boot.user,
         logo: boot.logo,
-        module: MODULE_KEYS.includes(asked) ? asked : "dashboard",
-        view: "dashboard",
+        module: "dashboard",
+        view: "dashboard",            // Bulk registration stage
+        attView: "overview",          // Bulk attendance step
+        attShow: "open",              // … its To match / Matched list
+        payView: "overview",          // Bulk payment upload step
+        payShow: "ready",
         selected: null,
         flash: null,
         busy: false,
+        ...fromUrl(),
+    });
+    // Clear DB is only for users 1 and 7 (server: ModuleReset::USERS)
+    if (!(boot.user && boot.user.canClear)) Object.entries(VIEW_KEY).forEach(([m, k]) => { if (store[k] === "clear") store[k] = FIRST[m]; });
+
+    // the browser's history follows the tabs
+    const tab = () => ({ module: store.module, view: store.view, attView: store.attView, attShow: store.attShow, payView: store.payView, payShow: store.payShow });
+    const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+    let scrolled = window.scrollY; // where the page was before a tab's click scrolled it to the top
+    window.addEventListener("scroll", () => { scrolled = window.scrollY; }, { passive: true });
+    if ("scrollRestoration" in window.history) window.history.scrollRestoration = "manual";
+    window.history.replaceState({ ...(window.history.state || {}), slr: tab() }, "", toUrl(tab()));
+    watch(tab, (n) => {
+        const url = toUrl(n);
+        if (url === window.location.pathname + window.location.search) {
+            // Back / Forward put this tab back, or something outside the address changed
+            if (!same(window.history.state && window.history.state.slr, n)) window.history.replaceState({ ...(window.history.state || {}), slr: n }, "", url);
+            return;
+        }
+        window.history.replaceState({ ...(window.history.state || {}), scroll: scrolled }, "");
+        window.history.pushState({ slr: n, scroll: 0 }, "", url);
+    });
+    window.addEventListener("popstate", (e) => {
+        const st = e.state || {};
+        const back = st.slr ? { ...st.slr } : fromUrl();
+        if (back.attView === "register") back.attView = "codes"; // a history entry from before the steps were merged
+        Object.assign(store, back);
+        nextTick(() => window.scrollTo(0, st.scroll || 0));
     });
 
     const say = (text, tone) => { store.flash = { text, tone: tone || "ok", k: Date.now() }; };
@@ -67,6 +136,28 @@ export function createStore(boot) {
         }
     }
 
+    /**
+     * POST a dialog's form (Actions › Email / SMS): as post, but a 422's field errors go back to the
+     * dialog to show under each field instead of being flashed. Resolves to { ok, data, errors }.
+     */
+    async function send(name, body) {
+        if (store.busy) return { ok: false };
+        store.busy = true;
+        try {
+            const { res, data } = await request("POST", name, body);
+            if (data && data.state) store.state = data.state;
+            if (res.status === 422 && data && data.errors && !data.flash) return { ok: false, errors: data.errors };
+            if (data && data.flash) say(data.flash.text, data.flash.tone);
+            else if (!res.ok) say((data && data.message) || "Something went wrong. Please try again.", "bad");
+            return { ok: res.ok, data };
+        } catch (e) {
+            if (e.message !== "session" && e.message !== "forbidden") say("The server could not be reached. Please try again.", "bad");
+            return { ok: false };
+        } finally {
+            store.busy = false;
+        }
+    }
+
     async function get(name, params) {
         const { res, data } = await request("GET", name, null, params);
         return res.ok ? data : null;
@@ -85,5 +176,5 @@ export function createStore(boot) {
         window.scrollTo(0, 0);
     };
 
-    return { store, say, post, get, list, cocItems, contactItems, awaiting, awaitingList, awaitingCount, go };
+    return { store, say, post, send, get, list, cocItems, contactItems, awaiting, awaitingList, awaitingCount, go };
 }

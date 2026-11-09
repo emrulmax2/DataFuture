@@ -262,6 +262,10 @@ class LetterController extends Controller
         $row_id = $request->row_id;
 
         $studentLetterDoc = StudentLettersDocument::find($row_id);
+        if(($studentLetterDoc->disk_type ?? '') === 'local'):
+            // written locally (the automated welcome letter on a local install)
+            return response()->json(['res' => url(Storage::disk('local')->url('public/students/'.$studentLetterDoc->student_id.'/'.$studentLetterDoc->current_file_name))], 200);
+        endif;
         $tmpURL = Storage::disk('s3')->temporaryUrl('public/students/'.$studentLetterDoc->student_id.'/'.$studentLetterDoc->current_file_name, now()->addMinutes(5));
         return response()->json(['res' => $tmpURL], 200);
     }

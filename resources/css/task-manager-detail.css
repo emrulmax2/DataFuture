@@ -545,6 +545,8 @@ html:has(> body.tkm-body) { background: #F7F4ED; }
     display: none;
 }
 .tkm-pop.is-open .tkm-pop__panel { display: block; }
+/* room for "Download & Mark as Complete" on one line */
+.tkm-pop__panel--wide { width: 284px; }
 .tkm-pop__item {
     width: 100%;
     display: flex;
@@ -1109,6 +1111,42 @@ html:has(> body.tkm-body) { background: #F7F4ED; }
     font-variant-numeric: tabular-nums;
 }
 .tkm-idcard__bar .thePrintBtn { margin-left: auto; }
+/* "Download & Mark as Complete": while the cards are made, the bar shows
+   progress in place of the single-card download button. */
+.tkm-idcard__progress {
+    margin-left: auto;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--tkm-ink-muted);
+    font-variant-numeric: tabular-nums;
+}
+.tkm-idcard__meter {
+    width: 140px;
+    height: 6px;
+    flex: none;
+    border-radius: 999px;
+    background: var(--tkm-line-mid);
+    overflow: hidden;
+}
+/* "Send ICP & Mark as Complete": progress, then one line per student */
+.tkm-icp { padding: 4px 2px; }
+.tkm-icp__bar { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--tkm-line-mid); }
+.tkm-icp__progress { font-size: 13px; font-weight: 600; color: var(--tkm-ink-mid); font-variant-numeric: tabular-nums; }
+.tkm-icp__bar .tkm-idcard__meter { margin-left: auto; }
+.tkm-icp__list { list-style: none; margin: 0; padding: 0; max-height: 340px; overflow-y: auto; }
+.tkm-icp__item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--tkm-line-faint); font-size: 13px; color: var(--tkm-ink-soft); line-height: 1.45; }
+.tkm-icp__item strong { color: var(--tkm-ink); font-variant-numeric: tabular-nums; margin-right: 4px; }
+.tkm-icp__item em { display: block; font-style: normal; color: var(--tkm-green); font-weight: 600; }
+.tkm-icp__ico { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; }
+.tkm-icp__item.is-ok .tkm-icp__ico { background: var(--tkm-green-soft); color: var(--tkm-green); }
+.tkm-icp__item.is-bad .tkm-icp__ico { background: var(--tkm-red-soft); color: var(--tkm-red); }
+.tkm-idcard__meter > span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--tkm-gold);
+    transition: width .2s ease;
+}
 .tkm-idcard__stage { display: flex; justify-content: center; }
 
 [data-tkm-modal="idcard"] .theIDCard {
@@ -1192,3 +1230,18 @@ html:has(> body.tkm-body) { background: #F7F4ED; }
     .tkm-body { min-width: 0; background: #FFFFFF; }
     .tkm-main { padding: 0; }
 }
+
+/* Send ICP: the groups before sending (30 Oct 2026) */
+.tkm-icpsum__lead { margin: 0 0 14px; font-size: 13.5px; color: var(--tkm-ink-mid); line-height: 1.5; }
+.tkm-icpsum__groups { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; max-height: 330px; overflow-y: auto; }
+.tkm-icpsum__group { border: 1px solid var(--tkm-line); border-radius: 10px; background: var(--tkm-head); padding: 12px 14px; }
+.tkm-icpsum__row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.tkm-icpsum__name { font-size: 14px; font-weight: 700; color: var(--tkm-ink); font-variant-numeric: tabular-nums; }
+.tkm-icpsum__meta { font-size: 12.5px; color: var(--tkm-ink-muted); }
+.tkm-icpsum__count { margin-left: auto; font-size: 12.5px; font-weight: 700; color: var(--tkm-blue-ink); background: var(--tkm-blue-soft); border: 1px solid var(--tkm-blue-line); border-radius: 999px; padding: 3px 10px; }
+.tkm-btn--sm { height: 30px; padding: 0 12px; font-size: 12.5px; }
+.tkm-icpsum__warn { margin: 10px 0 0; padding: 8px 12px 8px 26px; border: 1px solid var(--tkm-gold-line); border-radius: 8px; background: var(--tkm-gold-wash); color: var(--tkm-gold-ink); font-size: 12.5px; line-height: 1.45; }
+.tkm-icpsum__skipped { margin-top: 12px; padding: 10px 14px; border: 1px solid var(--tkm-red-line); border-radius: 10px; background: var(--tkm-red-soft); font-size: 12.5px; color: var(--tkm-red-dark); }
+.tkm-icpsum__skipped ul { margin: 6px 0 0; padding-left: 18px; }
+.tkm-icpsum__skipped b { font-variant-numeric: tabular-nums; margin-right: 4px; }
+.tkm-icpsum__foot { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--tkm-line-mid); }

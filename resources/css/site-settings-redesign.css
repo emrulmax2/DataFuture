@@ -11013,3 +11013,115 @@
     font-size: 12.5px;
     color: #8a93a1;
 }
+
+/* ==========================================================================
+   Task Automation (Applicant Settings): assignment rules and the condition
+   builder. Borrows the condition-row idiom from the HR conditions page.
+   ========================================================================== */
+/* The rule dialog: wide enough for a condition row (field / comparison /
+   value / remove) to sit on one line. The theme sets .modal-dialog's width
+   with more specificity than a plain class, so this wins the same way the
+   task dialog does. */
+.site-settings-redesign-body .ss-modal .ss-settings-modal__dialog--rules {
+    width: 900px !important;
+    max-width: calc(100vw - 24px) !important;
+}
+.ss-settings-modal__dialog--rules .ss-settings-modal {
+    max-height: calc(100vh - 32px);
+    display: flex;
+    flex-direction: column;
+}
+.ss-settings-modal__dialog--rules .ss-settings-modal__body {
+    overflow-y: auto;
+}
+
+/* an info mark beside a field label; the text lives in data-ss-tooltip */
+.ss-field-info { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-left: 4px; vertical-align: -3px; border-radius: 50%; color: #64748b; cursor: help; outline: 0; }
+.ss-field-info svg { width: 15px; height: 15px; }
+.ss-field-info:hover, .ss-field-info:focus-visible { color: #1e3a8a; background: #eef2ff; }
+
+.ss-rules-help { display: flex; gap: 12px; align-items: flex-start; margin: 20px 26px 0; padding: 14px 16px; border-radius: 14px; background: #eef2ff; border: 1px solid #dbe3ff; color: #1e293b; font-size: 13.5px; line-height: 1.55; }
+.ss-rules-help i, .ss-rules-help svg { flex: none; width: 18px; height: 18px; margin-top: 2px; color: #3b5bdb; }
+.ss-rules-help p { margin: 0; }
+.ss-rules-help b { font-weight: 700; }
+
+.ss-rule-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.ss-rule-pill { display: inline-block; max-width: 100%; padding: 3px 9px; border-radius: 999px; background: #f1f5f9; border: 1px solid #e2e8f0; color: #334155; font-size: 12px; font-weight: 600; line-height: 1.4; white-space: normal; }
+.ss-rule-pill--always { background: #ecfdf5; border-color: #a7f3d0; color: #047857; }
+.ss-rule-group { display: inline-block; padding: 3px 9px; border-radius: 8px; background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+.ss-status-pill--on { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+.ss-status-pill--off { background: #f8fafc; color: #64748b; border-color: #e2e8f0; }
+
+.ss-rule-conditions-field label { display: block; }
+.ss-rule-conditions__head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
+.ss-rule-conditions__head label { margin: 0; }
+.ss-rule-conditions { display: grid; gap: 8px; }
+.ss-rule-conditions__empty { padding: 12px 14px; border: 1px dashed #cbd5e1; border-radius: 12px; color: #64748b; font-size: 13px; }
+
+.ss-rule-row { position: relative; display: grid; grid-template-columns: minmax(170px, 1.1fr) minmax(130px, .8fr) minmax(170px, 1.4fr) 36px; gap: 8px; align-items: start; padding: 10px; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; }
+.ss-rule-row__cell { min-width: 0; }
+.ss-rule-row select, .ss-rule-row input { width: 100%; min-height: 38px; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 9px; background: #fff; color: #0f172a; font-size: 13.5px; font-family: inherit; }
+.ss-rule-row select[multiple] { min-height: 118px; padding: 6px; }
+.ss-rule-row select[multiple] option { padding: 4px 6px; border-radius: 6px; }
+.ss-rule-row select:focus, .ss-rule-row input:focus { outline: 0; border-color: #3b5bdb; box-shadow: 0 0 0 3px rgba(59, 91, 219, .15); }
+.ss-rule-row__remove { width: 36px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; border-radius: 9px; background: #fff; color: #64748b; cursor: pointer; }
+.ss-rule-row__remove:hover { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+.ss-rule-row__remove svg { width: 16px; height: 16px; }
+.ss-rule-row__error { grid-column: 1 / -1; font-size: 12.5px; color: #b91c1c; }
+.ss-rule-row__error:empty { display: none; }
+
+@media (max-width: 720px) {
+    .ss-rule-row { grid-template-columns: 1fr 36px; }
+    .ss-rule-row__cell--operator, .ss-rule-row__cell--value { grid-column: 1 / 2; }
+    .ss-rule-row__remove { grid-column: 2; grid-row: 1; }
+}
+
+/* --- Task Automation: mode pill, preview, recent runs ---------------------- */
+.ss-rule-mode { display: inline-block; margin-left: 10px; padding: 3px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; vertical-align: middle; cursor: help; }
+.ss-rule-mode--live { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+.ss-rule-mode--shadow { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; }
+.ss-preview-card, .ss-runs-card { margin-top: 20px; }
+.ss-preview-form { display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; padding: 20px 26px 0; }
+.ss-preview-note { font-size: 12.5px; color: #64748b; }
+.ss-preview-result { padding: 18px 26px 24px; display: grid; gap: 14px; }
+.ss-preview-loading { color: #64748b; font-size: 13.5px; }
+.ss-preview-head { display: grid; gap: 8px; font-size: 14px; }
+.ss-preview-summary { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.ss-preview-summary > span:first-child { color: #64748b; font-size: 13px; }
+.ss-preview-facts summary { cursor: pointer; font-size: 13px; font-weight: 600; color: #334155; }
+.ss-preview-facts__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px 18px; padding: 10px 0 2px; }
+.ss-preview-fact { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; padding: 4px 0; border-bottom: 1px dashed #e2e8f0; }
+.ss-preview-fact span { color: #64748b; }
+.ss-preview-rules { display: grid; gap: 8px; }
+.ss-preview-rule { display: grid; grid-template-columns: minmax(200px, 1fr) minmax(220px, 1.6fr) 190px; gap: 12px; align-items: start; padding: 12px 14px; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; }
+.ss-preview-rule--ok { border-color: #a7f3d0; background: #f0fdf4; }
+.ss-preview-rule--warn { border-color: #fed7aa; background: #fffbeb; }
+.ss-preview-rule--muted { opacity: .8; }
+.ss-preview-rule__task { display: grid; gap: 3px; font-size: 13.5px; }
+.ss-preview-rule__outcome { font-size: 13px; font-weight: 700; color: #0f172a; text-align: right; }
+.ss-rule-pill--ok { background: #ecfdf5; border-color: #a7f3d0; color: #047857; }
+.ss-rule-pill--bad { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+.ss-preview-existing { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; }
+.ss-preview-existing > span:first-child { color: #64748b; }
+.ss-runs-table { padding: 0 0 8px; }
+.ss-runs-row { display: grid; grid-template-columns: 140px minmax(180px, 1.2fr) 100px 120px minmax(220px, 2fr); gap: 12px; align-items: center; padding: 11px 26px; border-top: 1px solid #f1f5f9; font-size: 13.5px; }
+.ss-runs-row--head { border-top: 0; padding-top: 14px; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #64748b; background: #faf8f3; }
+.ss-runs-table .ss-rule-conditions__empty { margin: 12px 26px; }
+@media (max-width: 900px) {
+    .ss-preview-rule { grid-template-columns: 1fr; }
+    .ss-preview-rule__outcome { text-align: left; }
+    .ss-runs-row { grid-template-columns: 1fr 1fr; }
+}
+
+.ss-rule-pill--job { background: #eef2ff; border-color: #c7d2fe; color: #3730a3; }
+
+/* Task Automation: Applicant | Student switch above the rules */
+.ss-rule-subjects { display: inline-flex; gap: 4px; padding: 4px; margin: 0 0 16px; border-radius: 14px; background: #eef2f7; border: 1px solid #e2e8f0; }
+.ss-rule-subjects__tab { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 10px; font-size: 13.5px; font-weight: 600; color: #475569; text-decoration: none; transition: background .12s, color .12s; }
+.ss-rule-subjects__tab svg { width: 15px; height: 15px; }
+.ss-rule-subjects__tab b { min-width: 22px; padding: 1px 7px; border-radius: 999px; background: #e2e8f0; color: #475569; font-size: 11.5px; text-align: center; }
+.ss-rule-subjects__tab:hover { color: #0f172a; background: rgba(255,255,255,.6); }
+.ss-rule-subjects__tab.is-active { background: #ffffff; color: #0f172a; box-shadow: 0 1px 2px rgba(15,23,42,.08), 0 2px 8px rgba(15,23,42,.06); }
+.ss-rule-subjects__tab.is-active b { background: #1e3a8a; color: #ffffff; }
+/* rules list: process · trigger on their own line under the task name */
+.site-settings-redesign-body .ss-rules-card .ss-cell-wrap > .ss-cell-muted { display: block; margin-top: 2px; font-size: 12.5px; font-weight: 600; }

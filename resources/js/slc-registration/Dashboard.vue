@@ -21,17 +21,17 @@
         </article>
 
         <article class="card dash-proc">
-            <div class="card-h"><h2>Bulk attendance</h2><span class="pill info">All 7 steps live</span></div>
+            <div class="card-h"><h2>Bulk attendance</h2><span class="pill info">All 6 steps live</span></div>
             <div class="card-b stack">
                 <div class="muted small">{{ att.import ? 'Current upload: ' + att.import.fileName + ' · ' + att.import.termName + ' ' + att.import.year + ' · ' + att.import.at + ' by ' + att.import.by : 'No SIS attendance file uploaded yet.' }}</div>
                 <ul v-if="att.import" class="dash-steps">
                     <li><button type="button" @click="openAttendance('overview')"><span class="dash-step-n">1</span><span class="dash-step-l">Uploaded</span><span class="dash-step-v num t-info">{{ att.counts.all }}</span></button></li>
                     <li><button type="button" @click="openAttendance('match', att.counts.unmatched ? 'open' : 'matched')"><span class="dash-step-n">2</span><span class="dash-step-l">Still to match</span><span :class="'dash-step-v num ' + (att.counts.unmatched ? 't-warn' : 't-ok')">{{ att.counts.unmatched }}</span></button></li>
                     <li><button type="button" @click="openAttendance('check')"><span class="dash-step-n">3</span><span class="dash-step-l">Data check – to sort</span><span :class="'dash-step-v num ' + (att.counts.data ? 't-bad' : 't-ok')">{{ att.counts.data }}</span></button></li>
-                    <li><button type="button" @click="openAttendance('register')"><span class="dash-step-n">4</span><span class="dash-step-l">No attendance in the term</span><span :class="'dash-step-v num ' + (att.counts.noAttendance ? 't-bad' : 't-ok')">{{ att.counts.noAttendance }}</span></button></li>
-                    <li><button type="button" @click="openAttendance('codes')"><span class="dash-step-n">5</span><span class="dash-step-l">Codes ready to confirm</span><span :class="'dash-step-v num ' + (att.counts.codeReady ? 't-info' : 't-ok')">{{ att.counts.codeReady }}</span></button></li>
-                    <li><button type="button" @click="openAttendance('cocs')"><span class="dash-step-n">6</span><span class="dash-step-l">CoCs to submit</span><span :class="'dash-step-v num ' + (att.counts.cocToSubmit ? 't-bad' : 't-ok')">{{ att.counts.cocToSubmit }}</span></button></li>
-                    <li><button type="button" @click="openAttendance('batches')"><span class="dash-step-n">7</span><span class="dash-step-l">Awaiting download</span><span :class="'dash-step-v num ' + (att.counts.awaiting ? 't-warn' : 't-ok')">{{ att.counts.awaiting }}</span></button></li>
+                    <!-- step 4 is Attendance & codes (one step since 6 Nov 2026): codes ready, with the students not attending -->
+                    <li><button type="button" @click="openAttendance('codes')"><span class="dash-step-n">4</span><span class="dash-step-l">Codes ready to confirm<span :class="att.counts.noAttendance ? 't-bad' : 'muted'"> · {{ att.counts.noAttendance }} with no attendance in the term</span></span><span :class="'dash-step-v num ' + (att.counts.codeReady ? 't-info' : 't-ok')">{{ att.counts.codeReady }}</span></button></li>
+                    <li><button type="button" @click="openAttendance('cocs')"><span class="dash-step-n">5</span><span class="dash-step-l">CoCs to submit</span><span :class="'dash-step-v num ' + (att.counts.cocToSubmit ? 't-bad' : 't-ok')">{{ att.counts.cocToSubmit }}</span></button></li>
+                    <li><button type="button" @click="openAttendance('batches')"><span class="dash-step-n">6</span><span class="dash-step-l">Awaiting download</span><span :class="'dash-step-v num ' + (att.counts.awaiting ? 't-warn' : 't-ok')">{{ att.counts.awaiting }}</span></button></li>
                 </ul>
                 <div class="dash-fig"><span class="dash-fig-v num">{{ slc.attendances }}</span><span class="dash-fig-l">SLC attendances confirmed in {{ yearName }} · {{ slc.attendanceCoc }} with a code that needs a CoC</span></div>
             </div>

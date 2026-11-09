@@ -16,5 +16,7 @@ class VerifyCsrfToken extends Middleware
            Authenticated by verifying the transmission signature instead
            (PayPalClient::verifyWebhook). */
         'paypal/webhook',
+        /* DocuSeal webhooks: secret header + an API re-check instead (DocusealWebhookController). */
+        'docuseal/webhook',
     ];
 }

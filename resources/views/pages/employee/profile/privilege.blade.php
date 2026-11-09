@@ -1093,6 +1093,60 @@
                 </div>
             </div>
         </div>
+        <!-- Attendance Integrity Privileges -->
+        <div class="intro-y box p-5 mt-5">
+            <div class="grid grid-cols-12 gap-0 items-center">
+                <div class="col-span-6">
+                    <div class="font-medium text-base">Attendance Integrity Privileges</div>
+                </div>
+                <div class="col-span-6 text-right relative">
+                    <button type="submit" class="btn btn-primary shadow-md mr-2"><i data-lucide="save-all" class="w-4 h-4 mr-2"></i>Save All</button>
+                </div>
+            </div>
+            <div class="intro-y mt-5">
+                <div class="grid grid-cols-12 gap-4 items-start">
+                    <div class="col-span-12 sm:col-span-6">
+                        <div class="form-check form-switch mb-3">
+                            <input {{ (isset($priv['attendance_integrity']['attendance_integrity']) && $priv['attendance_integrity']['attendance_integrity'] == 1 ? 'checked' : '') }} id="permission_attendance_integrity_1" class="form-check-input" type="checkbox" value="1" name="permission[attendance_integrity][attendance_integrity]">
+                            <label class="form-check-label ml-4" for="permission_attendance_integrity_1">Attendance Integrity</label>
+                        </div>
+                        <div class="form-check form-switch mb-3 pl-6">
+                            <input {{ (isset($priv['attendance_integrity']['ai_view_dashboard']) && $priv['attendance_integrity']['ai_view_dashboard'] == 1 ? 'checked' : '') }} id="permission_attendance_integrity_2" class="form-check-input" type="checkbox" value="1" name="permission[attendance_integrity][ai_view_dashboard]">
+                            <label class="form-check-label ml-4" for="permission_attendance_integrity_2">View dashboard</label>
+                        </div>
+                        <div class="form-check form-switch mb-3 pl-6">
+                            <input {{ (isset($priv['attendance_integrity']['ai_view_staff']) && $priv['attendance_integrity']['ai_view_staff'] == 1 ? 'checked' : '') }} id="permission_attendance_integrity_3" class="form-check-input" type="checkbox" value="1" name="permission[attendance_integrity][ai_view_staff]">
+                            <label class="form-check-label ml-4" for="permission_attendance_integrity_3">View staff analysis</label>
+                        </div>
+                        <div class="form-check form-switch mb-3 pl-6">
+                            <input {{ (isset($priv['attendance_integrity']['ai_view_students']) && $priv['attendance_integrity']['ai_view_students'] == 1 ? 'checked' : '') }} id="permission_attendance_integrity_4" class="form-check-input" type="checkbox" value="1" name="permission[attendance_integrity][ai_view_students]">
+                            <label class="form-check-label ml-4" for="permission_attendance_integrity_4">View student analysis</label>
+                        </div>
+                        <div class="form-check form-switch mb-3 pl-6">
+                            <input {{ (isset($priv['attendance_integrity']['ai_view_audit_logs']) && $priv['attendance_integrity']['ai_view_audit_logs'] == 1 ? 'checked' : '') }} id="permission_attendance_integrity_5" class="form-check-input" type="checkbox" value="1" name="permission[attendance_integrity][ai_view_audit_logs]">
+                            <label class="form-check-label ml-4" for="permission_attendance_integrity_5">View attendance history</label>
+                        </div>
+                        <div class="form-check form-switch mb-3 pl-6">
+                            <input {{ (isset($priv['attendance_integrity']['ai_view_investigations']) && $priv['attendance_integrity']['ai_view_investigations'] == 1 ? 'checked' : '') }} id="permission_attendance_integrity_6" class="form-check-input" type="checkbox" value="1" name="permission[attendance_integrity][ai_view_investigations]">
+                            <label class="form-check-label ml-4" for="permission_attendance_integrity_6">View investigations</label>
+                        </div>
+                        <div class="form-check form-switch mb-3 pl-6">
+                            <input {{ (isset($priv['attendance_integrity']['ai_manage_investigations']) && $priv['attendance_integrity']['ai_manage_investigations'] == 1 ? 'checked' : '') }} id="permission_attendance_integrity_7" class="form-check-input" type="checkbox" value="1" name="permission[attendance_integrity][ai_manage_investigations]">
+                            <label class="form-check-label ml-4" for="permission_attendance_integrity_7">Manage investigations</label>
+                        </div>
+                        <div class="form-check form-switch mb-3 pl-6">
+                            <input {{ (isset($priv['attendance_integrity']['ai_export']) && $priv['attendance_integrity']['ai_export'] == 1 ? 'checked' : '') }} id="permission_attendance_integrity_8" class="form-check-input" type="checkbox" value="1" name="permission[attendance_integrity][ai_export]">
+                            <label class="form-check-label ml-4" for="permission_attendance_integrity_8">Export</label>
+                        </div>
+                        <div class="form-check form-switch mb-3 pl-6">
+                            <input {{ (isset($priv['attendance_integrity']['ai_manage_settings']) && $priv['attendance_integrity']['ai_manage_settings'] == 1 ? 'checked' : '') }} id="permission_attendance_integrity_9" class="form-check-input" type="checkbox" value="1" name="permission[attendance_integrity][ai_manage_settings]">
+                            <label class="form-check-label ml-4" for="permission_attendance_integrity_9">Manage settings</label>
+                        </div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-6 text-slate-500 text-xs leading-relaxed">For senior management, compliance and named investigators only. Needs the Attendance Integrity switch plus each area.</div>
+                </div>
+            </div>
+        </div>
         <!-- Result Management Privileges -->
         <div class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">

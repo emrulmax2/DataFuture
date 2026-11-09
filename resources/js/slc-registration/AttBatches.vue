@@ -1,11 +1,11 @@
 <template>
     <div class="pagehead">
-        <div><span class="eyebrow">Step 7</span><h1>Attendance batches</h1>
+        <div><span class="eyebrow">Step 6</span><h1>Attendance batches</h1>
             <p>Confirmed codes collect in the batch awaiting download, one per term. Download it as the SIS attendance import file, upload it in SIS, then mark it uploaded.</p></div>
     </div>
     <section v-if="!awaiting.length" class="card">
         <div class="card-h"><h2>Awaiting download</h2></div>
-        <div class="empty">No codes waiting. Confirm codes on step 5 to start a batch.</div>
+        <div class="empty">No codes waiting. Confirm codes on step 4 to start a batch.</div>
     </section>
     <section v-for="aw in awaiting" :key="aw.id" class="card">
         <div class="card-h"><h2>Awaiting download · {{ aw.id }} <span class="muted small" style="font-weight: 400">· {{ termName(aw.term) }}</span></h2>
@@ -15,7 +15,7 @@
         <div class="tablebox"><table class="tbl" style="min-width: 720px">
             <thead><tr><th scope="col">Student</th><th scope="col">SSN</th><th scope="col">Code</th><th scope="col">Confirmed by</th><th scope="col"></th></tr></thead>
             <tbody><tr v-for="it in aw.items" :key="it.rowId">
-                <th scope="row"><a v-if="it.url" class="plain" :href="it.url" target="_blank" rel="noopener">{{ it.name }}</a><template v-else>{{ it.name }}</template><div class="muted small" style="font-weight: 400">{{ it.sid }}</div></th>
+                <th scope="row"><a v-if="it.url" class="plain" :href="it.url" target="_blank" rel="noopener">{{ it.name }}</a><template v-else>{{ it.name }}</template><StatusTag :status="it.status" /><div class="muted small" style="font-weight: 400">{{ it.sid }}</div></th>
                 <td class="mono">{{ it.ssn }}</td>
                 <td><span :class="'pill ' + tone(it.code)"><span class="mono">{{ it.code }}</span> {{ meaning(it.code) }}</span></td>
                 <td class="muted">{{ it.by }} · {{ it.at }}</td>
@@ -49,7 +49,7 @@
         <div class="tablebox"><table class="tbl" style="min-width: 760px">
             <thead><tr><th scope="col">Student</th><th scope="col">SSN</th><th scope="col">Code</th><th scope="col">Confirmed by</th><th scope="col"></th></tr></thead>
             <tbody><tr v-for="it in sb.items" :key="it.rowId">
-                <th scope="row"><a v-if="it.url" class="plain" :href="it.url" target="_blank" rel="noopener">{{ it.name }}</a><template v-else>{{ it.name }}</template><div class="muted small" style="font-weight: 400">{{ it.sid }}</div></th>
+                <th scope="row"><a v-if="it.url" class="plain" :href="it.url" target="_blank" rel="noopener">{{ it.name }}</a><template v-else>{{ it.name }}</template><StatusTag :status="it.status" /><div class="muted small" style="font-weight: 400">{{ it.sid }}</div></th>
                 <td class="mono">{{ it.ssn }}</td>
                 <td><span :class="'pill ' + tone(it.code)"><span class="mono">{{ it.code }}</span> {{ meaning(it.code) }}</span></td>
                 <td class="muted">{{ it.by }} · {{ it.at }}</td>
@@ -76,16 +76,17 @@
 <script>
 import { computed, inject, nextTick, reactive, ref, watch } from "vue";
 import Ico from "./Ico.vue";
+import StatusTag from "./StatusTag.vue";
 
 /*
- * Bulk attendance › step 7 (user, 2 Nov 2026): the batches of confirmed codes, downloaded as the SIS
+ * Bulk attendance › step 6 (step 7 until 6 Nov 2026; user, 2 Nov 2026): the batches of confirmed codes, downloaded as the SIS
  * attendance import file (AttendanceActions::download / fileText / markUploaded), as Bulk
  * registration's Batches.
  */
 const TERMS = { AUT: "Autumn", SPR: "Spring", SUM: "Summer" };
 
 export default {
-    components: { Ico },
+    components: { StatusTag, Ico },
     setup() {
         const { store, post, get } = inject("slr");
         const att = computed(() => store.state.attendance);

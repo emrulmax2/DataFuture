@@ -35,7 +35,7 @@ class AttendanceState
             $pool = StudentSnapshots::load($poolIds, $yearId);
         }
         $names = RegistrationState::names(array_merge($rows->pluck('linked_by')->all(), $rows->pluck('code_by')->all(), $rows->pluck('confirmed_by')->all(), [$import->created_by]));
-        // steps 4–6: the register in each student's liability period, their status, the batches and queued CoCs
+        // steps 4–5 (Attendance & codes, CoCs): the register in each student's liability period, their status, the batches and queued CoCs
         $liab = $this->liability($students, $rows);
         $statusOf = $rows->pluck('student_id')->filter()->isEmpty() ? collect() : DB::table('students as s')->leftJoin('statuses as st', 'st.id', '=', 's.status_id')
             ->whereIn('s.id', $rows->pluck('student_id')->filter())->pluck('st.name', 's.id');
@@ -70,7 +70,7 @@ class AttendanceState
                 }
             }
             $unrouted = count(array_filter($checks, fn ($c) => !$c['ok'] && !$c['route']));
-            // codes (step 5): a missing registration does not hold a code back; other open differences do
+            // codes (step 4): a missing registration does not hold a code back; other open differences do
             $dataOpen = count(array_filter($checks, fn ($c) => !$c['ok'] && !$c['route'] && $c['key'] !== 'registration'));
             $l = $s ? ($liab[$s['id']] ?? null) : null;
             $sugg = $s && $l ? AttendanceCodes::suggest((string) ($statusOf[$s['id']] ?? ''), $l, $checks) : null;
@@ -104,7 +104,7 @@ class AttendanceState
                     'batchId' => $batch?->code, 'batchStatus' => $batch?->status, 'earlier' => (bool) $row->earlier_batch_id,
                 ] : null,
                 'coc' => $coc && !$coc->deleted_at ? ['id' => (int) $coc->id, 'type' => $coc->coc_type, 'actioned' => $coc->actioned === 'Yes'] : null,
-                // step 5 (user, 2 Nov 2026: no SLC registration → the code can't be submitted): noreg = no SLC
+                // step 4 (user, 2 Nov 2026: no SLC registration → the code can't be submitted): noreg = no SLC
                 // registration recorded for the year; blocked = Data check differences to decide; ready = can be
                 // confirmed; confirmed = in a batch
                 'codeStage' => !$s ? null : ($row->confirmed_code ? 'confirmed' : (!$s['registration'] ? 'noreg' : ($dataOpen ? 'blocked' : ($final ? 'ready' : 'nocode')))),
@@ -149,7 +149,7 @@ class AttendanceState
     }
 
     /**
-     * Step 4: the liability period of each matched student — the term of the line (AUT…) on their course
+     * Step 4 (Attendance & codes): the liability period of each matched student — the term of the line (AUT…) on their course
      * instance for the year (instance_terms, typed by its term declaration), else that term among the
      * year's terms their class plans are in — and the register inside it, up to today.
      */
@@ -228,7 +228,7 @@ class AttendanceState
         return $out;
     }
 
-    /** Step 7: every attendance batch with its students (any upload). */
+    /** Step 6: every attendance batch with its students (any upload). */
     private function batches($batchById): array
     {
         if ($batchById->isEmpty()) {
@@ -237,6 +237,7 @@ class AttendanceState
         $items = SlcAttendanceImportRow::whereIn('slc_attendance_batch_id', $batchById->keys())->orderBy('confirmed_at')->orderBy('id')
             ->get(['id', 'slc_attendance_batch_id', 'ssn', 'student_id', 'confirmed_code', 'confirmed_by', 'confirmed_at', 'data']);
         $students = DB::table('students')->whereIn('id', $items->pluck('student_id')->filter())->get(['id', 'first_name', 'last_name', 'registration_no'])->keyBy('id');
+        $statuses = StudentStatus::forIds($items->pluck('student_id')->all());
         $names = RegistrationState::names(array_merge($items->pluck('confirmed_by')->all(), $batchById->flatMap(fn ($b) => [$b->created_by, $b->downloaded_by, $b->uploaded_by])->all()));
         $when = fn ($t) => $t ? \Carbon\Carbon::parse($t)->format('d/m H:i') : '';
 
@@ -246,7 +247,7 @@ class AttendanceState
                 'rowId' => $it->id, 'ssn' => $it->ssn, 'code' => $it->confirmed_code,
                 'name' => trim(($students[$it->student_id]->first_name ?? '').' '.($students[$it->student_id]->last_name ?? '')), 'sid' => $students[$it->student_id]->registration_no ?? '',
                 'url' => $it->student_id ? route('student.show', $it->student_id) : null, 'slcUrl' => $it->student_id ? route('student.slc.history', $it->student_id) : null,
-                'by' => $names[$it->confirmed_by] ?? '', 'at' => $when($it->confirmed_at),
+                'by' => $names[$it->confirmed_by] ?? '', 'at' => $when($it->confirmed_at), 'status' => $statuses[$it->student_id] ?? null,
             ])->all(),
             'file' => $b->path ? ['name' => $b->file_name] : null,
             'downloadedBy' => $b->downloaded_by ? ($names[$b->downloaded_by] ?? '') : null, 'downloadedAt' => $when($b->downloaded_at),
@@ -265,7 +266,7 @@ class AttendanceState
         return [
             'id' => $s['reg_no'], 'sid' => $s['id'], 'title' => $s['title'], 'first' => $s['first'], 'last' => $s['last'], 'dob' => $s['dob'], 'ssn' => $s['ssn'],
             'course' => $s['course_name'], 'intake' => $s['intake'], 'slcCode' => $s['slc_code'], 'year' => $s['instance']['rank'] ?? null,
-            'registration' => $s['registration'], 'url' => route('student.show', $s['id']),
+            'registration' => $s['registration'], 'url' => route('student.show', $s['id']), 'status' => $s['status'] ?? null,
             'address' => $s['addresses'][0]['text'] ?? '', 'postcode' => $s['addresses'][0]['postcode'] ?? '',
         ];
     }

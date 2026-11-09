@@ -58,23 +58,29 @@ class SlcRegistrationTest extends TestCase
         return $this->post(route('slc.registration.upload'), ['file' => new UploadedFile($path, $name, 'text/plain', null, true)], ['Accept' => 'application/json']);
     }
 
+    /** A staff user who can't open /slc-registration: neither "SLC Registration" nor "SLC Records" (config/privileges.php lets either in). */
+    private function userWithoutAccess(): ?User
+    {
+        return User::whereNotIn('id', User::bypassUserIds())->where('active', 1)->orderBy('id')->limit(200)->get()
+            ->first(fn ($u) => empty($u->priv()['slc_registration']) && empty($u->priv()['slc_records']));
+    }
+
     private function rowAt(array $state, int $line): array
     {
         return collect($state['rows'])->firstWhere('line', $line);
     }
 
-    public function test_the_page_has_the_logo_the_signed_in_user_and_back_to_dashboard_and_is_privileged(): void
+    public function test_the_page_has_the_logo_the_signed_in_user_and_the_dashboard_link_and_is_privileged(): void
     {
         $html = $this->get(route('slc.registration'))->assertOk()->getContent();
         $this->assertStringContainsString('id="slr-boot"', $html);
         $boot = json_decode(html_entity_decode(preg_replace('/^.*<script type="application\/json" id="slr-boot">(.*?)<\/script>.*$/s', '$1', $html)), true);
         $this->assertNotEmpty($boot['logo']);
-        $this->assertSame(route('staff.dashboard'), $boot['user']['dashboard']);
+        $this->assertSame(route('dashboard'), $boot['user']['dashboard']); // the header's Dashboard link: the site's home page
         $this->assertNotSame('', $boot['user']['name']);
 
-        // someone without the "SLC Registration" privilege
-        $other = User::whereNotIn('id', User::bypassUserIds())->where('active', 1)->orderBy('id')->limit(50)->get()
-            ->first(fn ($u) => empty($u->priv()['slc_registration']));
+        // someone with neither privilege that opens the page ("SLC Registration" or "SLC Records")
+        $other = $this->userWithoutAccess();
         $this->assertNotNull($other, 'needs a staff user without the privilege');
         $this->actingAs($other)->get(route('slc.registration'))->assertForbidden();
         $this->actingAs($other)->getJson(route('slc.registration.state'))->assertForbidden();
@@ -382,6 +388,266 @@ class SlcRegistrationTest extends TestCase
         $this->assertSame($cocsBefore, SlcCoc::count());
     }
 
+    public function test_no_action_is_remembered_for_later_uploads_of_the_same_difference(): void
+    {
+        $at = fn ($st, $line) => collect($st['rows'])->firstWhere('line', $line);
+        $title = fn ($st) => collect($at($st, 9)['checks'])->firstWhere('key', 'title');
+        $state = $this->upload()->assertOk()->json('state');
+        $sid = $at($state, 9)['s']['sid'];
+        $this->assertFalse($title($state)['ok']); // line 9: SLC sends another title
+
+        // No action: remembered for this student, title and both values
+        $res = $this->postJson(route('slc.registration.route'), ['row_id' => $at($state, 9)['id'], 'key' => 'title', 'route' => 'accept'])->assertOk();
+        $this->assertStringContainsString('Remembered for later uploads', $res->json('flash.text'));
+        $this->assertTrue($title($res->json('state'))['remembered']['here']);
+        $this->assertSame(1, \App\Models\SlcBulkNoAction::active()->where('student_id', $sid)->where('field', 'title')->count());
+
+        // an upload where SLC's title matches ours (nothing to carry), then the old title again: No action by itself
+        $lines = explode("\r\n", rtrim(file_get_contents($this->file)));
+        $f9 = explode('~', $lines[8]);
+        $slcTitle = $f9[2];
+        $f9[2] = $at($state, 9)['s']['title'];
+        $same = $lines;
+        $same[8] = implode('~', $f9);
+        $mid = $this->upload(implode("\r\n", $same)."\r\n", 'matches.txt')->assertOk()->json('state');
+        $this->assertTrue($title($mid)['ok']);
+        $res = $this->upload()->assertOk();
+        $this->assertStringContainsString('set to No action as chosen on an earlier upload', $res->json('flash.text'));
+        $back = $res->json('state');
+        $this->assertSame('accept', $title($back)['route']);
+        $this->assertFalse($title($back)['remembered']['here']);
+        $this->assertNotContains($title($back)['remembered']['by'], ['', 'System']); // who chose it
+        if (collect($at($back, 9)['checks'])->where('ok', false)->whereNull('route')->isEmpty()) {
+            $this->assertNotSame('data', $at($back, 9)['stage']); // nothing left to check: off the Data check's To sort list
+        }
+
+        // Change forgets it: the next upload asks again
+        $res = $this->postJson(route('slc.registration.route.clear'), ['row_id' => $at($back, 9)['id'], 'key' => 'title'])->assertOk();
+        $this->assertStringContainsString('no longer remembered', $res->json('flash.text'));
+        $this->assertSame(0, \App\Models\SlcBulkNoAction::active()->where('student_id', $sid)->where('field', 'title')->count());
+        $again = $this->upload()->assertOk()->json('state');
+        $this->assertNull($title($again)['route']);
+
+        // chosen again, then we change the title we hold to something else that still differs: checked again
+        $this->postJson(route('slc.registration.route'), ['row_id' => $at($again, 9)['id'], 'key' => 'title', 'route' => 'accept'])->assertOk();
+        $other = DB::table('titles')->whereNotIn('name', [$slcTitle, $at($again, 9)['s']['title']])->value('id');
+        DB::table('students')->where('id', $sid)->update(['title_id' => $other]);
+        $changed = $this->upload()->assertOk()->json('state');
+        $this->assertFalse($title($changed)['ok']);
+        $this->assertNull($title($changed)['route']);
+        $h = collect($at($changed, 9)['history'])->where('field', 'title')->last(); // the newest; the trail keeps the earlier ones
+        $this->assertSame(['accept', 'ours'], [$h['route'], $h['now']]);
+        $this->assertSame(DB::table('titles')->where('id', $other)->value('name'), $h['nowValue']);
+    }
+
+    public function test_an_address_update_changes_the_term_time_address_and_the_permanent_one_only_when_it_is_the_same(): void
+    {
+        $state = $this->upload()->json('state');
+        $contactOf = fn ($sid) => \App\Models\StudentContact::where('student_id', $sid)->whereNull('deleted_at')->orderByDesc('id')->first();
+        $picked = collect($state['rows'])->filter(fn ($i) => $i['s'] && collect($i['checks'])->firstWhere('key', 'address')['ok'] && $contactOf($i['s']['sid'])?->permanent_address_id)->take(3)->values();
+        if ($picked->count() < 3) {
+            $this->markTestSkipped('Too few students with a permanent address.');
+        }
+        [$diff, $copy, $none] = $picked->all();
+        $copyOf = function ($addressId, array $over = []) {
+            $a = \App\Models\Address::find($addressId);
+
+            return \App\Models\Address::create(array_merge(['address_line_1' => $a->address_line_1, 'address_line_2' => $a->address_line_2, 'city' => $a->city, 'post_code' => $a->post_code, 'state' => $a->state, 'country' => $a->country, 'active' => 1, 'created_by' => 7], $over))->id;
+        };
+        $before = [];
+        foreach (['diff' => $diff, 'copy' => $copy, 'none' => $none] as $k => $i) {
+            $c = $contactOf($i['s']['sid']);
+            $term = match ($k) {
+                'diff' => $copyOf($c->permanent_address_id, ['address_line_1' => '99', 'address_line_2' => 'OTHER STREET']), // another address
+                'copy' => $copyOf($c->permanent_address_id), // another row, the same address
+                'none' => null,                                // no term-time address
+            };
+            DB::table('student_contacts')->where('id', $c->id)->update(['term_time_address_id' => $term]);
+            $before[$k] = ['contact' => $c->id, 'perm' => (int) $c->permanent_address_id];
+        }
+        // SLC sends a new address for the three
+        $lines = explode("\r\n", rtrim(file_get_contents($this->file)));
+        foreach ($picked as $i) {
+            $f = explode('~', $lines[$i['line'] - 1]);
+            $f[14] = '1 NEW SLC ROAD   SOMEWHERE ';
+            $lines[$i['line'] - 1] = implode('~', $f);
+        }
+        $state = $this->upload(implode("\r\n", $lines)."\r\n")->assertOk()->json('state');
+        $rowOf = fn ($i) => collect($state['rows'])->firstWhere('line', $i['line']);
+        $update = fn ($i) => $this->postJson(route('slc.registration.route'), ['row_id' => $rowOf($i)['id'], 'key' => 'address', 'route' => 'update'])->assertOk()->json('flash.text');
+        $after = fn ($k) => DB::table('student_contacts')->where('id', $before[$k]['contact'])->first();
+
+        // a different permanent address: only the term-time address takes SLC's
+        $this->assertStringContainsString('term-time address', $text = $update($diff));
+        $this->assertStringContainsString('permanent address is a different address', $text);
+        $this->assertSame($before['diff']['perm'], (int) $after('diff')->permanent_address_id);
+        $this->assertSame('1', DB::table('addresses')->where('id', $after('diff')->term_time_address_id)->value('address_line_1'));
+        $this->assertSame('Address (term-time)', \App\Models\SlcBulkUpdate::where('student_id', $diff['s']['sid'])->latest('id')->value('field'));
+        // the same address on two rows: both take SLC's
+        $this->assertStringContainsString('term-time and permanent address', $update($copy));
+        $this->assertSame((int) $after('copy')->term_time_address_id, (int) $after('copy')->permanent_address_id);
+        $this->assertNotSame($before['copy']['perm'], (int) $after('copy')->permanent_address_id);
+        // no term-time address: SLC's becomes it, the permanent one stays
+        $update($none);
+        $this->assertSame($before['none']['perm'], (int) $after('none')->permanent_address_id);
+        $this->assertNotNull($after('none')->term_time_address_id);
+
+        // an SLC address with no gap before the town (as on a real file): refused with the reason, nothing saved
+        $f = explode('~', $lines[$diff['line'] - 1]);
+        $f[14] = 'FLAT 4, MORIAH COURT 8 PALMERSTON ROAD WEALDSTONE HARROW MIDDLESEX';
+        $lines[$diff['line'] - 1] = implode('~', $f);
+        $state = $this->upload(implode("\r\n", $lines)."\r\n")->assertOk()->json('state');
+        $held = (array) $after('diff');
+        $addresses = DB::table('addresses')->count();
+        $row = collect($state['rows'])->firstWhere('line', $diff['line']);
+        $this->assertFalse(collect($row['checks'])->firstWhere('key', 'address')['ok']);
+        $res = $this->postJson(route('slc.registration.route'), ['row_id' => $row['id'], 'key' => 'address', 'route' => 'update'])->assertStatus(422);
+        $this->assertStringContainsString('has no separate town', $res->json('flash.text'));
+        $this->assertSame($held, (array) $after('diff'));
+        $this->assertSame($addresses, DB::table('addresses')->count());
+    }
+
+    public function test_clear_db_empties_only_the_chosen_modules_own_tables_and_only_for_users_1_and_7(): void
+    {
+        $state = $this->upload()->assertOk()->json('state');
+        $r = collect($state['rows'])->first(fn ($i) => $i['s'] && collect($i['checks'])->firstWhere('key', 'title')['ok'] === false);
+        if ($r) {
+            $this->postJson(route('slc.registration.route'), ['row_id' => $r['id'], 'key' => 'title', 'route' => 'accept'])->assertOk(); // a decision and a remembered No action
+        }
+        $keep = [
+            'attendance uploads' => DB::table('slc_attendance_imports')->count(),
+            'attendance lines' => DB::table('slc_attendance_import_rows')->count(),
+            'payment uploads' => DB::table('slc_payment_uploads')->count(),
+            'attendance activity' => DB::table('slc_bulk_activities')->where('text', 'like', 'Bulk attendance – %')->count(),
+            'students' => DB::table('students')->count(),
+            'students with an SSN' => DB::table('students')->whereNotNull('ssn_no')->where('ssn_no', '!=', '')->count(),
+            'SLC registrations' => DB::table('slc_registrations')->count(),
+            'CoCs' => DB::table('slc_cocs')->count(),
+        ];
+
+        // the page lets user 7 clear
+        $html = $this->get(route('slc.registration'))->assertOk()->getContent();
+        $boot = json_decode(html_entity_decode(preg_replace('/^.*<script type="application\/json" id="slr-boot">(.*?)<\/script>.*$/s', '$1', $html)), true);
+        $this->assertTrue($boot['user']['canClear']);
+
+        $counts = collect($this->getJson(route('slc.registration.clear.counts', ['module' => 'registration']))->assertOk()->json('counts'))->keyBy('table');
+        $this->assertGreaterThan(0, $counts['slc_bulk_imports']['count']);
+        $this->assertGreaterThan(0, $counts['slc_bulk_import_rows']['count']);
+        $this->postJson(route('slc.registration.clear'), ['module' => 'registration', 'confirm' => 'clear'])->assertStatus(422); // the word must be typed exactly
+        $res = $this->postJson(route('slc.registration.clear'), ['module' => 'registration', 'confirm' => 'CLEAR'])->assertOk();
+        $this->assertStringContainsString('Cleared Bulk registration data', $res->json('flash.text'));
+        $this->assertNull($res->json('state.import'));
+        foreach (['slc_bulk_imports', 'slc_bulk_import_rows', 'slc_bulk_row_fields', 'slc_bulk_batches', 'slc_bulk_updates', 'slc_bulk_no_actions'] as $t) {
+            $this->assertSame(0, DB::table($t)->count(), $t);
+        }
+        $this->assertSame(1, DB::table('slc_bulk_activities')->where('text', 'like', 'Clear DB: %')->count()); // the trail stays
+        $this->assertSame(0, collect($this->getJson(route('slc.registration.clear.counts', ['module' => 'registration']))->json('counts'))->sum('count'));
+        // the other modules and the students' records are left alone
+        $this->assertSame($keep, [
+            'attendance uploads' => DB::table('slc_attendance_imports')->count(),
+            'attendance lines' => DB::table('slc_attendance_import_rows')->count(),
+            'payment uploads' => DB::table('slc_payment_uploads')->count(),
+            'attendance activity' => DB::table('slc_bulk_activities')->where('text', 'like', 'Bulk attendance – %')->count(),
+            'students' => DB::table('students')->count(),
+            'students with an SSN' => DB::table('students')->whereNotNull('ssn_no')->where('ssn_no', '!=', '')->count(),
+            'SLC registrations' => DB::table('slc_registrations')->count(),
+            'CoCs' => DB::table('slc_cocs')->count(),
+        ]);
+
+        // nobody else
+        $this->assertFalse(\App\Services\SlcRegistration\ModuleReset::allowed(8));
+        $other = User::whereNotIn('id', [1, 7])->where('active', 1)->orderBy('id')->first();
+        $this->actingAs($other);
+        $this->getJson(route('slc.registration.clear.counts', ['module' => 'payment']))->assertForbidden();
+        $this->postJson(route('slc.registration.clear'), ['module' => 'payment', 'confirm' => 'CLEAR'])->assertForbidden();
+    }
+
+    public function test_actions_email_and_sms_go_through_the_communication_tabs_senders_and_can_mark_contacted(): void
+    {
+        // nothing may leave: the mail job is faked, every HTTP call (the SMS gateway) is faked, files go to a fake S3
+        \Illuminate\Support\Facades\Bus::fake();
+        \Illuminate\Support\Facades\Http::preventStrayRequests();
+        \Illuminate\Support\Facades\Http::fake(['*' => \Illuminate\Support\Facades\Http::response(['ok' => true])]);
+        Storage::fake('s3');
+
+        $state = $this->upload()->json('state');
+        $r4 = $this->rowAt($state, 4);
+        $sid = $r4['s']['sid'];
+        $this->postJson(route('slc.registration.route'), ['row_id' => $r4['id'], 'key' => 'tfl', 'route' => 'contact'])->assertOk();
+        $contact = \App\Models\StudentContact::where('student_id', $sid)->first();
+        $this->assertNotNull($contact, 'the test student needs a contact record');
+        $contact->forceFill(['mobile' => '07000000000', 'personal_email' => 'slc-test@example.com'])->save();
+
+        // the dialog's data: who it goes to, the SMTPs and templates, the Communication tab link
+        $o = $this->getJson(route('slc.registration.comms', ['student_id' => $sid]))->assertOk()->json();
+        $this->assertContains('slc-test@example.com', $o['student']['emails']);
+        $this->assertSame('07000000000', $o['student']['mobile']);
+        $this->assertSame(route('student.communication', $sid), $o['student']['communicationUrl']);
+        $this->assertSame(\App\Models\ComonSmtp::count(), count($o['smtps']));
+        if ($o['emailTemplates']) {
+            $t = $this->getJson(route('slc.registration.comms.template', ['type' => 'email', 'id' => $o['emailTemplates'][0]['id']]))->assertOk()->json();
+            $this->assertSame(\App\Models\EmailTemplate::find($o['emailTemplates'][0]['id'])->email_title, $t['subject']);
+        }
+
+        // the Communication tab's own rules: no SMTP, no subject → field errors, nothing sent
+        $this->postJson(route('slc.registration.comms.email'), ['student_id' => $sid, 'body' => '<p>Hi</p>'])->assertStatus(422)->assertJsonValidationErrors(['comon_smtp_id', 'subject']);
+        $this->assertSame(0, \App\Models\StudentEmail::where('student_id', $sid)->where('subject', 'SLC test email')->count());
+
+        // Email from the Contact student line: saved on the Communication tab, queued, in Activity, line marked contacted
+        $smtp = \App\Models\ComonSmtp::first();
+        $res = $this->post(route('slc.registration.comms.email'), [
+            'student_id' => $sid, 'comon_smtp_id' => $smtp->id, 'subject' => 'SLC test email', 'body' => '<p>Please update your loan.</p>',
+            'documents' => [UploadedFile::fake()->create('letter.pdf', 10, 'application/pdf')],
+            'row_id' => $r4['id'], 'key' => 'tfl', 'mark_contacted' => '1',
+        ], ['Accept' => 'application/json'])->assertOk();
+        $this->assertStringContainsString('Email sent to', $res->json('flash.text'));
+        $mail = \App\Models\StudentEmail::where('student_id', $sid)->where('subject', 'SLC test email')->first();
+        $this->assertNotNull($mail);
+        $this->assertSame(1, \App\Models\StudentEmailsDocument::where('student_email_id', $mail->id)->count());
+        \Illuminate\Support\Facades\Bus::assertDispatched(\App\Jobs\UserMailerJob::class, fn ($job) => in_array('slc-test@example.com', $job->to, true));
+        $tfl = collect($this->rowAt($res->json('state'), 4)['checks'])->firstWhere('key', 'tfl');
+        $this->assertSame('contacted', $tfl['state']['state']);
+        $this->assertTrue(SlcBulkActivity::where('text', 'like', 'Email sent to %: SLC test email')->exists());
+        // Actions shows the student's mobile number (student_contacts, the newest row, as the profile shows)
+        $newest = \App\Models\StudentContact::where('student_id', $sid)->orderByDesc('id')->first();
+        $s4 = $this->rowAt($res->json('state'), 4)['s'];
+        $this->assertSame(trim((string) $newest->mobile), $s4['mobile']);
+
+        // SMS (from the CoC list, so no line): saved on the Communication tab, sent through the (faked) gateway, in Activity
+        $this->postJson(route('slc.registration.comms.sms'), ['student_id' => $sid, 'subject' => 'SLC test SMS'])->assertStatus(422)->assertJsonValidationErrors(['sms']);
+        $res = $this->postJson(route('slc.registration.comms.sms'), ['student_id' => $sid, 'subject' => 'SLC test SMS', 'sms' => 'Please update your loan.'])->assertOk();
+        $this->assertStringContainsString('SMS sent to', $res->json('flash.text'));
+        $this->assertTrue(\App\Models\StudentSms::where('student_id', $sid)->where('phone', '07000000000')->whereHas('sms', fn ($q) => $q->where('subject', 'SLC test SMS'))->exists());
+        $this->assertTrue(SlcBulkActivity::where('text', 'like', 'SMS sent to %: SLC test SMS')->exists());
+
+        // a student without contact details: refused before the sender is called
+        $bare = Student::whereNotIn('id', \App\Models\StudentContact::select('student_id'))->value('id');
+        if ($bare) {
+            $this->postJson(route('slc.registration.comms.sms'), ['student_id' => $bare, 'subject' => 'x', 'sms' => 'x'])->assertStatus(422)->assertJsonPath('flash.tone', 'bad');
+        }
+
+        // and only for users who can open the page
+        if ($other = $this->userWithoutAccess()) {
+            $this->actingAs($other)->getJson(route('slc.registration.comms', ['student_id' => $sid]))->assertForbidden();
+            $this->actingAs($other)->postJson(route('slc.registration.comms.sms'), ['student_id' => $sid, 'subject' => 'x', 'sms' => 'x'])->assertForbidden();
+        }
+    }
+
+    public function test_the_course_is_matched_on_the_slc_code_only_not_the_name(): void
+    {
+        $state = $this->upload()->json('state');
+        $ok = collect($state['rows'])->first(fn ($i) => $i['s'] && collect($i['checks'])->firstWhere('key', 'course')['ok']);
+        $this->assertNotNull($ok);
+        $lines = explode("\r\n", rtrim(file_get_contents($this->file)));
+        $f = explode('~', $lines[$ok['line'] - 1]);
+        $f[11] = 'SOMETHING ELSE ENTIRELY SEP I...ENG-NI-SCO'; // SLC's course name, same code
+        $lines[$ok['line'] - 1] = implode('~', $f);
+        $state = $this->upload(implode("\r\n", $lines)."\r\n")->assertOk()->json('state');
+        $checks = collect(collect($state['rows'])->firstWhere('line', $ok['line'])['checks']);
+        $this->assertNull($checks->firstWhere('key', 'courseName'));
+        $this->assertTrue($checks->firstWhere('key', 'course')['ok']);
+    }
+
     public function test_apply_suggested_for_one_field_only(): void
     {
         $state = $this->upload()->assertOk()->json('state');
@@ -427,8 +693,9 @@ class SlcRegistrationTest extends TestCase
         $this->assertSame(\App\Services\SlcRegistration\RegistrationState::duplicateAgreementGroups()->count(), $box['count']);
 
         // give a student a second agreement for a year (and course) they already have one for
-        $agr = SlcAgreement::whereNull('deleted_at')->whereNotNull('student_course_relation_id')
-            ->whereNotIn('student_id', \App\Services\SlcRegistration\RegistrationState::duplicateAgreementGroups()->pluck('student_id'))->latest('id')->first();
+        // a student with no duplicates at all, on the list or reviewed & hidden
+        $taken = \App\Services\SlcRegistration\RegistrationState::duplicateAgreementGroups()->pluck('student_id')->merge(\App\Services\SlcRegistration\RegistrationState::duplicateAgreementGroups(true)->pluck('student_id'));
+        $agr = SlcAgreement::whereNull('deleted_at')->whereNotNull('student_course_relation_id')->whereNotIn('student_id', $taken)->latest('id')->first();
         SlcAgreement::create(['student_id' => $agr->student_id, 'student_course_relation_id' => $agr->student_course_relation_id, 'course_creation_instance_id' => $agr->course_creation_instance_id, 'slc_coursecode' => $agr->slc_coursecode, 'is_self_funded' => 0, 'date' => now()->toDateString(), 'year' => $agr->year, 'fees' => 100, 'total' => 100, 'created_by' => 7]);
         $this->assertSame($box['count'] + 1, $this->getJson(route('slc.registration.state'))->json('dashboard.duplicates.count'));
 
@@ -442,7 +709,7 @@ class SlcRegistrationTest extends TestCase
         $this->assertSame(route('student.accounts', $agr->student_id), $rows[0]['url']);
         $this->assertCount(2, $rows[0]['agreements']);
 
-        $other = User::whereNotIn('id', User::bypassUserIds())->where('active', 1)->orderBy('id')->limit(50)->get()->first(fn ($u) => empty($u->priv()['slc_registration']));
+        $other = $this->userWithoutAccess();
         $this->actingAs($other)->get(route('slc.registration.multiple'))->assertForbidden();
     }
 
@@ -450,7 +717,7 @@ class SlcRegistrationTest extends TestCase
     {
         $groups = fn ($hidden = false) => \App\Services\SlcRegistration\RegistrationState::duplicateAgreementGroups($hidden);
         $before = $groups()->count();
-        $agr = SlcAgreement::whereNull('deleted_at')->whereNotNull('student_course_relation_id')->whereNotIn('student_id', $groups()->pluck('student_id'))->latest('id')->first();
+        $agr = SlcAgreement::whereNull('deleted_at')->whereNotNull('student_course_relation_id')->whereNotIn('student_id', $groups()->pluck('student_id')->merge($groups(true)->pluck('student_id')))->latest('id')->first();
         $make = fn () => SlcAgreement::create(['student_id' => $agr->student_id, 'student_course_relation_id' => $agr->student_course_relation_id, 'course_creation_instance_id' => $agr->course_creation_instance_id, 'slc_coursecode' => $agr->slc_coursecode, 'is_self_funded' => 0, 'date' => now()->toDateString(), 'year' => $agr->year, 'fees' => 100, 'total' => 100, 'created_by' => 7]);
         $second = $make();
         $row = collect(\App\Services\SlcRegistration\RegistrationState::duplicateAgreements())->first(fn ($r) => $r['studentId'] === (int) $agr->student_id && $r['year'] === (int) $agr->year);
@@ -480,6 +747,53 @@ class SlcRegistrationTest extends TestCase
         $res = $this->postJson(route('slc.registration.multiple.unhide'), array_diff_key($body, ['agreement_ids' => 1]))->assertOk();
         $this->assertTrue(collect($res->json('multiple.students'))->contains(fn ($r) => $r['studentId'] === (int) $agr->student_id && $r['year'] === (int) $agr->year));
         $this->assertSame($before + 1, $groups()->count());
+    }
+
+    public function test_a_merged_row_decides_its_fields_together_in_a_safe_order(): void
+    {
+        $text = file_get_contents($this->file);
+        $state = $this->upload()->json('state');
+        $err = fn ($state, $id) => collect(collect($state['rows'])->firstWhere('id', $id)['checks'])->filter(fn ($c) => !$c['ok'])->keyBy('key');
+        // a line with a first-name difference also gets a title difference; a line with a postcode difference also gets an address one
+        $first = collect($state['rows'])->first(fn ($i) => $i['s'] && $err($state, $i['id'])->has('first'));
+        $post = collect($state['rows'])->first(fn ($i) => $i['s'] && $err($state, $i['id'])->has('postcode') && !$err($state, $i['id'])->has('address'));
+        $this->assertNotNull($first);
+        $this->assertNotNull($post);
+        $lines = explode("\r\n", rtrim($text));
+        $f = explode('~', $lines[$first['line'] - 1]);
+        $f[2] = $first['s']['title'] === 'Dr' ? 'Mr' : 'Dr';
+        $lines[$first['line'] - 1] = implode('~', $f);
+        $g = explode('~', $lines[$post['line'] - 1]);
+        $g[14] = '1 NEW SLC ROAD   SOMEWHERE ';
+        $lines[$post['line'] - 1] = implode('~', $g);
+        $state = $this->upload(implode("\r\n", $lines)."\r\n")->assertOk()->json('state');
+        $a = collect($state['rows'])->firstWhere('line', $first['line']);
+        $b = collect($state['rows'])->firstWhere('line', $post['line']);
+        $this->assertTrue($err($state, $a['id'])->has('title') && $err($state, $a['id'])->has('first'));
+        $this->assertTrue($err($state, $b['id'])->has('address') && $err($state, $b['id'])->has('postcode'));
+
+        // an action one part doesn't allow is refused (postcode has no No action)
+        $this->postJson(route('slc.registration.routes'), ['row_id' => $b['id'], 'keys' => ['address', 'postcode'], 'route' => 'accept'])->assertStatus(422);
+        // Name: No action for title and first name together (user, 5 Nov 2026), remembered for both
+        $state = $this->postJson(route('slc.registration.routes'), ['row_id' => $a['id'], 'keys' => ['title', 'first'], 'route' => 'accept'])->assertOk()->json('state');
+        $this->assertSame(['accept', 'accept'], [$err($state, $a['id'])['title']['route'], $err($state, $a['id'])['first']['route']]);
+        $this->assertSame(2, \App\Models\SlcBulkNoAction::active()->where('student_id', $a['s']['sid'])->whereIn('field', ['title', 'first'])->count());
+        $state = $this->postJson(route('slc.registration.routes.clear'), ['row_id' => $a['id'], 'keys' => ['title', 'first']])->assertOk()->json('state');
+        $this->assertSame(0, \App\Models\SlcBulkNoAction::active()->where('student_id', $a['s']['sid'])->whereIn('field', ['title', 'first'])->count());
+        // Contact for both; Change reopens both
+        $state = $this->postJson(route('slc.registration.routes'), ['row_id' => $a['id'], 'keys' => ['title', 'first'], 'route' => 'contact'])->assertOk()->json('state');
+        $this->assertSame(['contact', 'contact'], [$err($state, $a['id'])['title']['route'], $err($state, $a['id'])['first']['route']]);
+        $state = $this->postJson(route('slc.registration.routes.clear'), ['row_id' => $a['id'], 'keys' => ['title', 'first']])->assertOk()->json('state');
+        $this->assertSame([null, null], [$err($state, $a['id'])['title']['route'], $err($state, $a['id'])['first']['route']]);
+        // Update our record for both: our record takes SLC's title and first name
+        $state = $this->postJson(route('slc.registration.routes'), ['row_id' => $a['id'], 'keys' => ['first', 'title'], 'route' => 'update'])->assertOk()->json('state');
+        $this->assertFalse($err($state, $a['id'])->has('title') || $err($state, $a['id'])->has('first'));
+
+        // Address + postcode: the address goes first and brings SLC's postcode, so one new address, not two
+        $before = DB::table('addresses')->count();
+        $state = $this->postJson(route('slc.registration.routes'), ['row_id' => $b['id'], 'keys' => ['postcode', 'address'], 'route' => 'update'])->assertOk()->json('state');
+        $this->assertSame($before + 1, DB::table('addresses')->count());
+        $this->assertFalse($err($state, $b['id'])->has('address') || $err($state, $b['id'])->has('postcode'));
     }
 
     public function test_sis_file_and_slc_address_parts(): void

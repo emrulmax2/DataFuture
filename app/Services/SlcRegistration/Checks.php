@@ -21,17 +21,15 @@ class Checks
     public const FIELD_LABEL = ['title' => 'Title', 'first' => 'First name', 'last' => 'Last name', 'gender' => 'Gender', 'dob' => 'Date of birth', 'course' => 'Course code', 'courseName' => 'Course name', 'year' => 'Year', 'start' => 'Start date', 'address' => 'Address', 'postcode' => 'Postcode', 'ssn' => 'SSN', 'tfl' => 'TFL amount'];
 
     public const FIELD_ROUTES = [
-        'title' => ['update', 'contact', 'accept'], 'first' => ['update', 'contact'], 'last' => ['update', 'contact'], 'gender' => ['update', 'contact'],
-        'dob' => ['update', 'contact'], 'course' => ['coc'], 'courseName' => ['coc', 'accept'], 'year' => ['coc', 'accept'], 'start' => ['coc'],
+        'title' => ['update', 'contact', 'accept'], 'first' => ['update', 'contact', 'accept'], 'last' => ['update', 'contact', 'accept'], 'gender' => ['update', 'contact'],
+        'dob' => ['update', 'contact'], 'course' => ['coc'], 'year' => ['coc', 'accept'], 'start' => ['coc'],
         'address' => ['update', 'contact', 'accept'], 'postcode' => ['update', 'contact'], 'tfl' => ['coc', 'contact'],
     ];
 
-    public const COC_TYPE = ['course' => 'Transfer – course', 'courseName' => 'Transfer – course', 'start' => 'Transfer – start date', 'year' => 'Transfer – course year', 'tfl' => 'Fee revision'];
+    public const COC_TYPE = ['course' => 'Transfer – course', 'start' => 'Transfer – start date', 'year' => 'Transfer – course year', 'tfl' => 'Fee revision'];
 
     /** slc_cocs.coc_type for each */
-    public const COC_ENUM = ['course' => 'Transfer', 'courseName' => 'Transfer', 'start' => 'Transfer', 'year' => 'Transfer', 'tfl' => 'Fee'];
-
-    private const NAME_STOPWORDS = ['HND', 'HNC', 'IN', 'AND', 'OF', 'THE', 'FOR', 'LEVEL', 'BTEC', 'PEARSON', 'RQF', 'DIPLOMA', 'CERTIFICATE', 'HIGHER', 'NATIONAL'];
+    public const COC_ENUM = ['course' => 'Transfer', 'start' => 'Transfer', 'year' => 'Transfer', 'tfl' => 'Fee'];
 
     /**
      * @param array $r   SLC's fields (SisFile::FIELDS)
@@ -53,16 +51,14 @@ class Checks
         $dIso = Text::slcToIso($r['dob']);
         $c('dob', Text::fmtSlc($r['dob']), Text::fmtIso($s['dob']), $dIso !== '' && $dIso === $s['dob'], Text::swapDM($dIso) === $s['dob'] && $s['dob'] !== '' ? 'Day and month look swapped' : 'Check ID documents');
 
+        // the course is matched on the SLC course code only; SLC's (truncated) course name is shown, not compared (user, 5 Nov 2026)
         $code = strtoupper($r['slcCode']);
         $mapped = self::mappedEntry($codeMap, $code, $s['course_creation_id']);
         $courseMismatch = !$mapped || $s['slc_code'] !== $code;
         $ourCourse = trim(($s['intake'] ?: '–').' · '.($s['course_name'] ?: 'No active course'));
         $c('course', $r['slcCode'].($mapped ? ' → '.$mapped['label'] : ' (not mapped)').' · '.$r['courseName'], $ourCourse, !$courseMismatch,
-            $mapped ? ($s['slc_code'] !== '' ? 'Different course – one CoC covers code and name' : 'No SLC code on the student’s course – add it in Course mapping') : 'Map this SLC code in Course mapping');
-        $tokens = self::nameTokens($s['course_name']);
-        $nameOk = !array_diff($tokens, explode(' ', Text::norm($r['courseName'])));
-        $c('courseName', $r['courseName'], $s['course_name'] ?: '–', $nameOk || $courseMismatch, $courseMismatch ? 'Covered by the course code CoC' : 'SLC truncates course names',
-            ['courseMismatch' => $courseMismatch, 'covered' => $courseMismatch && !$nameOk]);
+            $mapped ? ($s['slc_code'] !== '' ? 'Different course' : 'No SLC code on the student’s course – add it in Course mapping') : 'Map this SLC code in Course mapping',
+            ['map' => $mapped ? ['course' => $mapped['course'], 'intake' => $mapped['intake']] : null]); // the Data check's Course row (no venue: one code can sit on several)
 
         $inst = $s['instance'];
         $c('year', $r['year'], $inst ? 'Year '.$inst['rank'] : 'No '.($yearName ?: 'instance').' instance', $inst && (int) $r['year'] === $inst['rank']);
@@ -85,7 +81,6 @@ class Checks
     {
         return match ($ch['key']) {
             'tfl' => $ch['tflZero'] ? 'contact' : 'coc',
-            'courseName' => $ch['courseMismatch'] ? 'coc' : 'accept',
             'course', 'start', 'year' => 'coc',
             'dob' => null, // decided after an ID check
             default => 'update',
@@ -255,13 +250,5 @@ class Checks
         }
 
         return [$best, false];
-    }
-
-    /** The words of our course name SLC's (truncated) name must contain. */
-    private static function nameTokens(string $name): array
-    {
-        $main = trim(explode('(', $name)[0]);
-
-        return array_values(array_filter(explode(' ', Text::norm($main)), fn ($t) => $t !== '' && !in_array($t, self::NAME_STOPWORDS, true) && !ctype_digit($t)));
     }
 }

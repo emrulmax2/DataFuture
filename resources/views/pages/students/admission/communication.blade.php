@@ -5,491 +5,324 @@
 @endsection
 
 @section('subcontent')
-    <!-- BEGIN: Profile Info -->
+    {{--
+        Communication on the admission portal shell: Email / SMS / Letter tabs,
+        each with its compose form on the left and the sent list on the right
+        (deleted items in an accordion with Restore). Behaviour lives in
+        resources/js/admission-communication.js; the endpoints are the ones the
+        previous page used (admission.communication.*). Ids kept from the
+        previous page: #sendEmailForm (#comon_smtp_id, #subject,
+        #email_template_id, #mailEditor, #sendMailsDocument, #sendEmailBtn),
+        #smsSMSForm (#sms_template_id, #sms_subject, #smsTextArea, .sms_countr,
+        #sendSMSBtn), #addLetterForm (#issued_date, #letter_set_id,
+        .letterEditorArea, #letterEditor, #signatory_id, #sendLetterBtn),
+        #viewCommunicationModal, .view_btn / .delete_btn / .restore_btn /
+        .downloadDoc, #confirmModal (.agreeWith data-recordid / data-status /
+        data-applicant).
+    --}}
+    <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
 
-    @include('pages.students.admission.show-info')
-    
-    <!-- END: Profile Info -->
+    @php
+        $adpStatusId = (int) ($applicant->status_id ?? 0);
+        $adpPriv = auth()->user()->priv();
+        $adpNext = \App\Support\AdmissionStatusFlow::next($applicant, $allStatuses, $adpPriv);
+        $adpStatusHelp = \App\Support\AdmissionStatusFlow::HELP;
+        $adpTab = 'communication';
 
-    <div class="adm-sections adm-comm">
-    <!-- BEGIN: Letters -->
-    <div class="adm-section">
-        <div class="adm-section__head">
-            <div class="adm-section__title">Letters</div>
-            <div class="adm-tabletools__actions">
-                <button data-tw-toggle="modal" data-tw-target="#addLetterModal" type="button" class="adm-btn adm-btn--primary"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v8M8 12h8"></path></svg>Send New Letter</button>
+        $adpPaths = [
+            'send' => '<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',
+            'eye' => '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+            'trash' => '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+            'undo' => '<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/>',
+            'upload' => '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/>',
+            'file' => '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
+            'list' => '<path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/>',
+            'search' => '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+            'print' => '<path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6z"/>',
+            'export' => '<path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 21h14"/>',
+            'x' => '<path d="M18 6 6 18M6 6l12 12"/>',
+            'flag' => '<path d="M4 22V4a1 1 0 0 1 1-1h11l-1 4 1 4H5"/>',
+            'download' => '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+            'expand' => '<path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/>',
+        ];
+        $adpIcon = fn ($name, $size = 16) => '<svg width="'.$size.'" height="'.$size.'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'.$adpPaths[$name].'</svg>';
+        $adpSpin = '<svg class="adm-btn-loader adp-btn-spin" style="display: none;" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" aria-hidden="true"><g fill="none" fill-rule="evenodd"><g transform="translate(1 1)" stroke-width="4"><circle stroke-opacity=".4" cx="18" cy="18" r="18"></circle><path d="M36 18c0-9.94-8.06-18-18-18"><animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform></path></g></g></svg>';
+        $adpClose = '<button type="button" class="adp-btn adp-btn--ghost adp-btn--sm adp-modal__close" data-tw-dismiss="modal" aria-label="Close">✕</button>';
+        $adpCaret = '<span class="adp-acc-caret" aria-hidden="true">▾</span>';
+        $adpAccept = '.jpeg,.jpg,.png,.gif,.txt,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx';
+        // The design's small rich-text editor (bold / italic / underline / lists / clear); rows set the height.
+        $adpEditor = fn ($id, $placeholder, $rows = 8) => '<div class="adp-editor" data-adp-editor><div class="adp-ed-bar" role="toolbar" aria-label="Formatting">'
+            .'<button type="button" data-cmd="bold" title="Bold" aria-label="Bold"><b>B</b></button>'
+            .'<button type="button" data-cmd="italic" title="Italic" aria-label="Italic"><i>I</i></button>'
+            .'<button type="button" data-cmd="underline" title="Underline" aria-label="Underline"><u>U</u></button>'
+            .'<span class="adp-ed-sep"></span>'
+            .'<button type="button" data-cmd="insertUnorderedList" title="Bulleted list" aria-label="Bulleted list">'.$adpIcon('list', 14).'</button>'
+            .'<button type="button" data-cmd="insertOrderedList" title="Numbered list" aria-label="Numbered list">1.</button>'
+            .'<span class="adp-ed-sep"></span>'
+            .'<button type="button" data-cmd="removeFormat" title="Clear formatting" aria-label="Clear formatting">Tx</button>'
+            .'</div><div id="'.$id.'" class="adp-ed-body" contenteditable="true" data-adp-ed-body data-placeholder="'.e($placeholder).'" aria-label="'.e($placeholder).'" style="min-height: '.($rows * 22).'px;"></div></div>';
+
+        $adpEmail = $applicant->users->email ?? '';
+        $adpMobile = $applicant->contact->mobile ?? '';
+        $adpCourseName = $applicant->course->creation->course->name ?? '';
+        $adpDeleted = array_merge(['email' => 0, 'sms' => 0, 'letter' => 0], $deletedCounts ?? []);
+        $adpToday = date('Y-m-d');
+
+        // Merge tags the letter generator understands (GenerateApplicantLetterTrait), grouped as in
+        // pages/settings/letter/letter-tags; student tags apply to student letters and merge empty here.
+        $adpTagGroups = [
+            'Applicant tags' => ['[DATA=titles]name[/DATA]', '[DATA=applicants]full_name[/DATA]', '[DATA=applicants]first_name[/DATA]', '[DATA=applicants]last_name[/DATA]', '[DATA=applicants]application_no[/DATA]', '[DATA=applicants]date_of_birth[/DATA]', '[DATA=applicant_contacts]full_address[/DATA]', '[DATA=applicant_contacts]address_line_1[/DATA]', '[DATA=applicant_contacts]address_line_2[/DATA]', '[DATA=applicant_contacts]city[/DATA]', '[DATA=applicant_contacts]post_code[/DATA]', '[DATA=applicant_contacts]country[/DATA]', '[DATA=courses]name[/DATA]', '[DATA=courses]degree_offered[/DATA]', '[DATA=applicant_proposed_courses]full_time[/DATA]', '[DATA=applicant_proposed_courses]course_start_date[/DATA]', '[DATA=applicant_proposed_courses]course_end_date[/DATA]', '[DATA=applicant_proposed_courses]fees[/DATA]', '[DATA=applicant_proposed_courses]venue_name[/DATA]'],
+            'Common tags' => ['[DATA=signatories]sign_url[/DATA]', '[DATA=signatories]name[/DATA]', '[DATA=signatories]post[/DATA]', '[DATA=letter_issuing]issued_date[/DATA]', '[DATA=today_date]today_date[/DATA]', '[DATA=page_break]page_break[/DATA]'],
+            'Student tags' => ['[DATA=students]full_name[/DATA]', '[DATA=students]last_name[/DATA]', '[DATA=students]first_name[/DATA]', '[DATA=students]registration_no[/DATA]', '[DATA=students]date_of_birth[/DATA]', '[DATA=student_contacts]term_address[/DATA]', '[DATA=student_contacts]term_address_line_1[/DATA]', '[DATA=student_contacts]term_address_line_2[/DATA]', '[DATA=student_contacts]term_city[/DATA]', '[DATA=student_contacts]term_post_code[/DATA]', '[DATA=student_contacts]term_country[/DATA]', '[DATA=student_contacts]permanent_address[/DATA]', '[DATA=student_contacts]permanent_address_line_1[/DATA]', '[DATA=student_contacts]permanent_address_line_2[/DATA]', '[DATA=student_contacts]permanent_city[/DATA]', '[DATA=student_contacts]permanent_post_code[/DATA]', '[DATA=student_contacts]permanent_country[/DATA]', '[DATA=student_contacts]mobile[/DATA]', '[DATA=student_contacts]personal_email[/DATA]', '[DATA=student_kins]name[/DATA]', '[DATA=student_kins]mobile[/DATA]', '[DATA=semesters]name[/DATA]', '[DATA=student_proposed_courses]awarding_body[/DATA]', '[DATA=student_proposed_courses]evening_and_weekends[/DATA]', '[DATA=student_proposed_courses]class_startdate[/DATA]', '[DATA=student_proposed_courses]class_enddate[/DATA]', '[DATA=student_proposed_courses]fees[/DATA]', '[DATA=other_details]mode[/DATA]', '[DATA=result]W,P,M,D,R,C,U,A[/DATA]'],
+        ];
+    @endphp
+
+    @include('pages.students.admission.partials.portal-record')
+
+    <section class="adp-panel adp-comms" data-adp-comms data-applicant="{{ $applicant->id }}" data-adp-deleted-counts='@json($adpDeleted)'>
+        <div class="adp-panel__head adp-panel__head--top">
+            <div class="adp-proc__copy">
+                <h3 class="adp-h3">Communication</h3>
+                <p class="adp-proc__desc">Email, text or write to the applicant; everything sent is kept here, per channel.</p>
+            </div>
+            <div class="adp-tabletools__actions">
+                <button type="button" id="tabulator-print-CM" class="adp-btn adp-btn--ghost adp-btn--sm">{!! $adpIcon('print', 13) !!}Print</button>
+                <button type="button" id="tabulator-export-csv-CM" class="adp-btn adp-btn--ghost adp-btn--sm">{!! $adpIcon('export', 13) !!}Export CSV</button>
+                <button type="button" id="tabulator-export-xlsx-CM" class="adp-btn adp-btn--ghost adp-btn--sm">{!! $adpIcon('export', 13) !!}Export XLSX</button>
             </div>
         </div>
-        <div class="adm-sectionbody">
-            <div class="adm-tabletools">
-                <form id="tabulatorFilterForm-CML" class="adm-tabletools__filters">
-                    <span class="adm-filter-text">Query</span>
-                    <input id="query-CML" name="query" type="text" class="adm-input" placeholder="Search...">
-                    <span class="adm-filter-text">Status</span>
-                    <div class="adm-field adm-field--narrow">
-                        <select id="status-CML" name="status" class="adm-select">
-                            <option selected value="1">Active</option>
-                            <option value="2">Archived</option>
-                        </select>
-                        <svg class="adm-field__caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aa8b0" stroke-width="2.5"><path d="M6 9l6 6 6-6"></path></svg>
-                    </div>
-                    <button id="tabulator-html-filter-go-CML" type="button" class="adm-btn adm-btn--primary">Go</button>
-                    <button id="tabulator-html-filter-reset-CML" type="button" class="adm-btn adm-btn--soft">Reset</button>
-                </form>
-                <div class="adm-tabletools__actions">
-                    <button type="button" id="tabulator-print-CML" class="adm-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-3a2 2 0 012-2h16a2 2 0 012 2v3a2 2 0 01-2 2h-2M6 14h12v8H6z"></path></svg>Print</button>
-                    <div class="dropdown adm-dropdown">
-                        <button type="button" class="dropdown-toggle adm-btn" aria-expanded="false" data-tw-toggle="dropdown"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><path d="M14 2v6h6"></path></svg>Export<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aa8b0" stroke-width="2.5"><path d="M6 9l6 6 6-6"></path></svg></button>
-                        <div class="dropdown-menu">
-                            <ul class="dropdown-content">
-                                <li>
-                                    <a id="tabulator-export-csv-CML" href="javascript:;" class="dropdown-item">Export CSV</a>
-                                </li>
-                                <li>
-                                    <a id="tabulator-export-xlsx-CML" href="javascript:;" class="dropdown-item">Export XLSX</a>
-                                </li>
-                            </ul>
+
+        {{-- Channel tabs. aria-pressed, not role="tab": the theme's app.js binds every [role="tab"] and expects data-tw-target. --}}
+        <div class="adp-tabs adp-comms__tabs" data-adp-channels>
+            <button type="button" class="on" data-adp-channel="email" aria-pressed="true">Email</button>
+            <button type="button" data-adp-channel="sms" aria-pressed="false">SMS</button>
+            <button type="button" data-adp-channel="letter" aria-pressed="false">Letter</button>
+        </div>
+
+        <div class="adp-comms-grid">
+            <div class="adp-comms-compose">
+                {{-- Email: admission.communication.send.mail (comon_smtp_id, subject, email_template_id, body, documents[]) --}}
+                <form method="POST" action="#" id="sendEmailForm" class="adp-compose" enctype="multipart/form-data" data-adp-compose="email" data-adp-fill-name="{{ $applicant->first_name }}" data-adp-fill-ref="{{ $applicant->application_no }}" data-adp-fill-course="{{ $adpCourseName }}" data-adp-to="{{ $adpEmail }}">
+                    <h3 class="adp-h3">Send email</h3>
+                    <div class="adp-grid-2">
+                        <div class="adp-field">
+                            <label for="comon_smtp_id">SMTP <span class="adp-req">*</span></label>
+                            <select id="comon_smtp_id" name="comon_smtp_id" class="adp-ctl adp-select comon_smtp_id">
+                                @foreach($smtps as $sm)
+                                    <option value="{{ $sm->id }}">{{ $sm->smtp_user }}</option>
+                                @endforeach
+                            </select>
+                            <div class="adp-err acc__input-error error-comon_smtp_id"></div>
+                        </div>
+                        <div class="adp-field">
+                            <label for="subject">Subject <span class="adp-req">*</span></label>
+                            <input id="subject" type="text" name="subject" class="adp-ctl subject" autocomplete="off">
+                            <div class="adp-err acc__input-error error-subject"></div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="adm-table-wrap">
-                <div id="applicantCommLetterListTable" data-applicant="{{ $applicant->id }}" class="table-report table-report--tabulator"></div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Letters -->
-
-    <!-- BEGIN: Email -->
-    <div class="adm-section">
-        <div class="adm-section__head">
-            <div class="adm-section__title">Email</div>
-            <div class="adm-tabletools__actions">
-                <button data-tw-toggle="modal" data-tw-target="#sendEmailModal" type="button" class="adm-btn adm-btn--primary"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v8M8 12h8"></path></svg>Send Email</button>
-            </div>
-        </div>
-        <div class="adm-sectionbody">
-            <div class="adm-tabletools">
-                <form id="tabulatorFilterForm-CME" class="adm-tabletools__filters">
-                    <span class="adm-filter-text">Query</span>
-                    <input id="query-CME" name="query" type="text" class="adm-input" placeholder="Search...">
-                    <span class="adm-filter-text">Status</span>
-                    <div class="adm-field adm-field--narrow">
-                        <select id="status-CME" name="status" class="adm-select">
-                            <option selected value="1">Active</option>
-                            <option value="2">Archived</option>
+                    <div class="adp-field">
+                        <label for="email_template_id">Template</label>
+                        <select id="email_template_id" name="email_template_id" class="adp-ctl adp-select">
+                            <option value="">Blank email</option>
+                            @foreach($emailTemplates as $et)
+                                <option value="{{ $et->id }}">{{ $et->email_title }}</option>
+                            @endforeach
                         </select>
-                        <svg class="adm-field__caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aa8b0" stroke-width="2.5"><path d="M6 9l6 6 6-6"></path></svg>
+                        <span class="adp-hint">Placeholders {name}, {ref} and {course} are filled from the record.</span>
                     </div>
-                    <button id="tabulator-html-filter-go-CME" type="button" class="adm-btn adm-btn--primary">Go</button>
-                    <button id="tabulator-html-filter-reset-CME" type="button" class="adm-btn adm-btn--soft">Reset</button>
+                    <div class="adp-field">
+                        <label for="email_to">To</label>
+                        <input id="email_to" type="text" class="adp-ctl" value="{{ $adpEmail }}" readonly>
+                    </div>
+                    <div class="adp-field">
+                        <label for="mailEditor">Message <span class="adp-req">*</span></label>
+                        {!! $adpEditor('mailEditor', 'Write your message…', 8) !!}
+                        <div class="adp-err acc__input-error error-body"></div>
+                    </div>
+                    <div class="adp-attach-row">
+                        <label for="sendMailsDocument" class="adp-btn adp-btn--ghost adp-btn--sm">{!! $adpIcon('upload', 13) !!}Upload attachments</label>
+                        <input type="file" id="sendMailsDocument" name="documents[]" class="adp-sr-only" multiple accept="{{ $adpAccept }}">
+                        <span class="adp-hint">PDF, DOC, image, spreadsheet</span>
+                        <span class="adp-attach-list sendMailsDocumentNames" id="sendMailsDocumentNames" data-adp-files hidden></span>
+                        <div class="adp-err acc__input-error error-documents"></div>
+                    </div>
+                    <div class="adp-compose__foot">
+                        <button type="button" class="adp-btn adp-btn--ghost" data-adp-compose-reset>Cancel</button>
+                        <button type="submit" id="sendEmailBtn" class="adp-btn adp-btn--primary">{!! $adpIcon('send', 14) !!}Send mail {!! $adpSpin !!}</button>
+                    </div>
+                    <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
                 </form>
-                <div class="adm-tabletools__actions">
-                    <button type="button" id="tabulator-print-CME" class="adm-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-3a2 2 0 012-2h16a2 2 0 012 2v3a2 2 0 01-2 2h-2M6 14h12v8H6z"></path></svg>Print</button>
-                    <div class="dropdown adm-dropdown">
-                        <button type="button" class="dropdown-toggle adm-btn" aria-expanded="false" data-tw-toggle="dropdown"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><path d="M14 2v6h6"></path></svg>Export<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aa8b0" stroke-width="2.5"><path d="M6 9l6 6 6-6"></path></svg></button>
-                        <div class="dropdown-menu">
-                            <ul class="dropdown-content">
-                                <li>
-                                    <a id="tabulator-export-csv-CME" href="javascript:;" class="dropdown-item">Export CSV</a>
-                                </li>
-                                <li>
-                                    <a id="tabulator-export-xlsx-CME" href="javascript:;" class="dropdown-item">Export XLSX</a>
-                                </li>
-                            </ul>
+
+                {{-- SMS: admission.communication.send.sms (sms_template_id, subject, sms) --}}
+                <form method="POST" action="#" id="smsSMSForm" class="adp-compose" data-adp-compose="sms" data-adp-to="{{ $adpMobile }}" hidden>
+                    <h3 class="adp-h3">Send SMS</h3>
+                    <div class="adp-field">
+                        <label for="sms_template_id">Template</label>
+                        <select id="sms_template_id" name="sms_template_id" class="adp-ctl adp-select">
+                            <option value="">Blank message</option>
+                            @foreach($smsTemplates as $st)
+                                <option value="{{ $st->id }}">{{ $st->sms_title }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="adp-field">
+                        <label for="sms_subject">Subject <span class="adp-req">*</span></label>
+                        <input id="sms_subject" type="text" name="subject" class="adp-ctl subject" autocomplete="off">
+                        <span class="adp-hint">Internal label; not sent to the applicant.</span>
+                        <div class="adp-err acc__input-error error-subject"></div>
+                    </div>
+                    <div class="adp-field">
+                        <label for="sms_to">To</label>
+                        <input id="sms_to" type="text" class="adp-ctl" value="{{ $adpMobile }}" readonly>
+                        @if($adpMobile === '')
+                            <span class="adp-hint adp-hint--warn">No mobile number on the record: the SMS is stored but not sent.</span>
+                        @endif
+                    </div>
+                    <div class="adp-field">
+                        <div class="adp-lbl-row">
+                            <label for="smsTextArea">SMS <span class="adp-req">*</span></label>
+                            <span class="sms_countr adp-sms-count" data-adp-sms-count>0 / 1</span>
+                        </div>
+                        <textarea id="smsTextArea" name="sms" class="adp-ctl sms" rows="5"></textarea>
+                        <div class="adp-err acc__input-error error-sms"></div>
+                        <span class="adp-hint" data-adp-sms-hint>160 characters per segment; longer messages are billed as multiple segments.</span>
+                    </div>
+                    <div class="adp-compose__foot">
+                        <button type="button" class="adp-btn adp-btn--ghost" data-adp-compose-reset>Cancel</button>
+                        <button type="submit" id="sendSMSBtn" class="adp-btn adp-btn--primary">{!! $adpIcon('send', 14) !!}Send SMS {!! $adpSpin !!}</button>
+                    </div>
+                    <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
+                </form>
+
+                {{-- Letter: admission.communication.send.letter (issued_date, comon_smtp_id, letter_set_id, signatory_id, letter_body) --}}
+                <form method="POST" action="#" id="addLetterForm" class="adp-compose" data-adp-compose="letter" data-adp-today="{{ $adpToday }}" hidden>
+                    <div class="adp-compose__head">
+                        <h3 class="adp-h3">Send letter</h3>
+                        {{-- Full width: the form takes the whole row and the sent letters move below it (remembered per browser). --}}
+                        <button type="button" class="adp-btn adp-btn--ghost adp-btn--sm" data-adp-wide-toggle aria-pressed="false" title="Give the letter the full width">{!! $adpIcon('expand', 13) !!}<span data-adp-wide-label>Full width</span></button>
+                    </div>
+                    <div class="adp-grid-2">
+                        <div class="adp-field">
+                            <label for="issued_date">Issued date <span class="adp-req">*</span></label>
+                            <input id="issued_date" type="date" name="issued_date" class="adp-ctl issued_date" value="{{ $adpToday }}">
+                            <div class="adp-err acc__input-error error-issued_date"></div>
+                        </div>
+                        <div class="adp-field">
+                            <label for="letter_comon_smtp_id">SMTP <span class="adp-req">*</span></label>
+                            <select id="letter_comon_smtp_id" name="comon_smtp_id" class="adp-ctl adp-select comon_smtp_id">
+                                @foreach($smtps as $sm)
+                                    <option value="{{ $sm->id }}">{{ $sm->smtp_user }}</option>
+                                @endforeach
+                            </select>
+                            <div class="adp-err acc__input-error error-comon_smtp_id"></div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="adm-table-wrap">
-                <div id="applicantCommEmailListTable" data-applicant="{{ $applicant->id }}" class="table-report table-report--tabulator"></div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Email -->
-
-    <!-- BEGIN: SMS -->
-    <div class="adm-section">
-        <div class="adm-section__head">
-            <div class="adm-section__title">SMS</div>
-            <div class="adm-tabletools__actions">
-                <button data-tw-toggle="modal" data-tw-target="#smsSMSModal" type="button" class="adm-btn adm-btn--primary"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v8M8 12h8"></path></svg>Send SMS</button>
-            </div>
-        </div>
-        <div class="adm-sectionbody">
-            <div class="adm-tabletools">
-                <form id="tabulatorFilterForm-CMS" class="adm-tabletools__filters">
-                    <span class="adm-filter-text">Query</span>
-                    <input id="query-CMS" name="query" type="text" class="adm-input" placeholder="Search...">
-                    <span class="adm-filter-text">Status</span>
-                    <div class="adm-field adm-field--narrow">
-                        <select id="status-CMS" name="status" class="adm-select">
-                            <option selected value="1">Active</option>
-                            <option value="2">Archived</option>
+                    <div class="adp-field">
+                        <label for="letter_set_id">Letter <span class="adp-req">*</span></label>
+                        <select id="letter_set_id" name="letter_set_id" class="adp-ctl adp-select letter_set_id">
+                            <option value="">Choose a letter set</option>
+                            @foreach($letterSet as $ls)
+                                <option value="{{ $ls->id }}">{{ $ls->letter_type.' - '.$ls->letter_title }}</option>
+                            @endforeach
                         </select>
-                        <svg class="adm-field__caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aa8b0" stroke-width="2.5"><path d="M6 9l6 6 6-6"></path></svg>
+                        <div class="adp-err acc__input-error error-letter_set_id"></div>
                     </div>
-                    <button id="tabulator-html-filter-go-CMS" type="button" class="adm-btn adm-btn--primary">Go</button>
-                    <button id="tabulator-html-filter-reset-CMS" type="button" class="adm-btn adm-btn--soft">Reset</button>
-                </form>
-                <div class="adm-tabletools__actions">
-                    <button type="button" id="tabulator-print-CMS" class="adm-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-3a2 2 0 012-2h16a2 2 0 012 2v3a2 2 0 01-2 2h-2M6 14h12v8H6z"></path></svg>Print</button>
-                    <div class="dropdown adm-dropdown">
-                        <button type="button" class="dropdown-toggle adm-btn" aria-expanded="false" data-tw-toggle="dropdown"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><path d="M14 2v6h6"></path></svg>Export<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aa8b0" stroke-width="2.5"><path d="M6 9l6 6 6-6"></path></svg></button>
-                        <div class="dropdown-menu">
-                            <ul class="dropdown-content">
-                                <li>
-                                    <a id="tabulator-export-csv-CMS" href="javascript:;" class="dropdown-item">Export CSV</a>
-                                </li>
-                                <li>
-                                    <a id="tabulator-export-xlsx-CMS" href="javascript:;" class="dropdown-item">Export XLSX</a>
-                                </li>
-                            </ul>
-                        </div>
+                    <div class="adp-field">
+                        <label for="signatory_id">Signatory</label>
+                        <select id="signatory_id" name="signatory_id" class="adp-ctl adp-select">
+                            <option value="">Please select</option>
+                            @foreach($signatory as $sg)
+                                <option value="{{ $sg->id }}">{{ $sg->signatory_name }}{{ $sg->signatory_post ? ' · '.$sg->signatory_post : '' }}</option>
+                            @endforeach
+                        </select>
+                        <div class="adp-err acc__input-error error-signatory_id"></div>
                     </div>
-                </div>
-            </div>
-            <div class="adm-table-wrap">
-                <div id="applicantCommSMSListTable" data-applicant="{{ $applicant->id }}" class="table-report table-report--tabulator"></div>
-            </div>
-        </div>
-    </div>
-    <!-- END: SMS -->
-    </div>
-
-    <!-- BEGIN: Send Letter Modal -->
-    <div id="addLetterModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <form method="POST" action="#" id="addLetterForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Send Letter</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
-                    </div>
-                    <div class="modal-body">
-                        <div class="adm-comm-modal-grid adm-comm-modal-grid--half">
-                            <div>
-                                <label for="issued_date" class="form-label">Issued Date <span class="text-danger">*</span></label>
-                                <input id="issued_date" type="text" name="issued_date" class="datepicker form-control w-full" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY"  data-single-mode="true">
-                                <div class="acc__input-error error-issued_date text-danger mt-2"></div>
-                            </div>
-                            <div>
-                                <label for="comon_smtp_id" class="form-label">SMTP <span class="text-danger">*</span></label>
-                                <select id="comon_smtp_id" name="comon_smtp_id" class="form-control w-full">
-                                    <option value="">Please Select</option>
-                                    @if(!empty($smtps))
-                                        @foreach($smtps as $sm)
-                                            <option value="{{ $sm->id }}">{{ $sm->smtp_user }}</option>
+                    {{-- Shown once a letter set is chosen (admission.communication.get.letter.set fills the body). --}}
+                    <div class="adp-field letterEditorArea" data-adp-letter-body hidden>
+                        <div class="adp-lbl-row">
+                            <label for="letterEditor">Letter body <span class="adp-hint">— tags merge on send</span></label>
+                            <span class="adp-pop-wrap">
+                                <button type="button" class="adp-btn adp-btn--ghost adp-btn--sm" data-adp-tags-toggle aria-expanded="false">{!! $adpIcon('flag', 13) !!}<span data-adp-tags-label>Tags</span></button>
+                                <div class="adp-pop adp-pop--wide adp-pop--right" data-adp-tags-pop role="dialog" aria-label="Merge tags" hidden>
+                                    <div class="adp-pop-h"><b>Merge tags</b><span class="adp-hint">Click a tag to insert it at the cursor</span></div>
+                                    <div class="adp-tag-groups">
+                                        @foreach($adpTagGroups as $group => $tags)
+                                            <div>
+                                                <small>{{ $group }}</small>
+                                                @foreach($tags as $tag)
+                                                    <button type="button" class="adp-tag-item adp-mono" data-adp-tag="{{ $tag }}">{{ $tag }}</button>
+                                                @endforeach
+                                            </div>
                                         @endforeach
-                                    @endif
-                                </select>
-                                <div class="acc__input-error error-comon_smtp_id text-danger mt-2"></div>
-                            </div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="letter_set_id" class="form-label">Letter <span class="text-danger">*</span></label>
-                            <select id="letter_set_id" placeholder="Select Template" name="letter_set_id" class="w-full tom-selects">
-                                <option value="">Please Select</option>
-                                @if(!empty($letterSet))
-                                    @foreach($letterSet as $ls)
-                                        <option value="{{ $ls->id }}">{{ $ls->letter_type.' - '.$ls->letter_title }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <div class="acc__input-error error-letter_set_id text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3 letterEditorArea" style="display: none;">
-                            <div class="flex justify-between mb-2">
-                                <div class="ml-auto">@include('pages.settings.letter.letter-tags')</div>
-                            </div>
-                            <div class="editor document-editor">
-                                <div class="document-editor__toolbar"></div>
-                                <div class="document-editor__editable-container">
-                                    <div class="document-editor__editable" id="letterEditor"></div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="acc__input-error error-letter_body text-danger mt-2"></div>
+                            </span>
                         </div>
-                        <div class="mt-3">
-                            <label for="signatory_id" class="form-label">Signatory</label>
-                            <select id="signatory_id" name="signatory_id" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                @if(!empty($signatory))
-                                    @foreach($signatory as $sg)
-                                        <option value="{{ $sg->id }}">{{ $sg->signatory_name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <div class="acc__input-error error-signatory_id text-danger mt-2"></div>
-                        </div>
+                        {!! $adpEditor('letterEditor', 'The letter set fills this in…', 12) !!}
+                        <div class="adp-err acc__input-error error-letter_body"></div>
                     </div>
-                    <div class="modal-footer">
-                        {{--<div class="modal-footer-left pt-2" style="float: left;">
-                            <div class="flex flex-col sm:flex-row">
-                                <div class="form-check mr-5">
-                                    <input checked id="is_send_email" name="is_email_or_attachment" class="form-check-input" type="radio" value="1">
-                                    <label class="form-check-label" for="is_send_email">Send Email</label>
-                                </div>
-                                <div class="form-check mr-0">
-                                    <input id="is_send_attachment" name="is_email_or_attachment" class="form-check-input" type="radio" value="2">
-                                    <label class="form-check-label" for="is_send_attachment">Send Attachment</label>
-                                </div>
-                            </div>
-                        </div>--}}
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="sendLetterBtn" class="btn btn-primary w-auto">     
-                            Send Letter                      
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="adm-btn-loader w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                        </button>
-                        <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
+                    <div class="adp-compose__foot">
+                        <button type="button" class="adp-btn adp-btn--ghost" data-adp-compose-reset>Cancel</button>
+                        <button type="submit" id="sendLetterBtn" class="adp-btn adp-btn--primary">{!! $adpIcon('send', 14) !!}Send letter {!! $adpSpin !!}</button>
                     </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    <!-- END: Send Letter Modal -->
+                    <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
+                </form>
+            </div>
 
-    <!-- BEGIN: View Modal -->
-    <div id="viewCommunicationModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="font-medium text-base mr-auto">View Communication</h2>
-                    <a data-tw-dismiss="modal" href="javascript:;">
-                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                    </a>
+            {{-- Sent list of the active channel (admission.communication.{mail,sms,letter}.list). --}}
+            <div class="adp-comms-sent" data-adp-sent>
+                <div class="adp-comms-sent__head">
+                    <h3 class="adp-h3" data-adp-sent-title>Sent emails</h3>
+                    <form id="tabulatorFilterForm-CM" class="adp-comms-search">
+                        <input id="query-CM" name="query" type="text" class="adp-ctl" placeholder="Search sent emails…" autocomplete="off">
+                        <button id="tabulator-html-filter-go-CM" type="button" class="adp-btn adp-btn--primary adp-btn--sm" aria-label="Search">{!! $adpIcon('search', 13) !!}</button>
+                        <button id="tabulator-html-filter-reset-CM" type="button" class="adp-btn adp-btn--ghost adp-btn--sm" data-adp-search-reset hidden>Reset</button>
+                    </form>
                 </div>
+                <span class="adp-note-count" data-adp-sent-count></span>
+                <div class="adp-arch-loading" data-adp-sent-loading><span class="adp-spin"></span>Loading…</div>
+                <div class="adp-empty adp-empty--small" data-adp-sent-empty hidden><span>Nothing sent yet.</span></div>
+                <div class="adp-vrows" data-adp-sent-rows></div>
+                <div class="adp-timeline__more" data-adp-sent-more hidden><button type="button" class="adp-btn adp-btn--ghost adp-btn--sm">Load more</button></div>
+
+                <details class="adp-accordion adp-accordion--deleted" data-adp-deleted hidden>
+                    <summary><span>Deleted <span class="adp-cnt adp-cnt--muted" data-adp-deleted-count>0</span></span>{!! $adpCaret !!}</summary>
+                    <div class="adp-acc-body">
+                        <div class="adp-arch-loading" data-adp-deleted-loading hidden><span class="adp-spin"></span>Loading deleted items…</div>
+                        <div class="adp-vrows" data-adp-deleted-rows></div>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    {{-- View dialog: meta line, attachment tags, body. --}}
+    <div id="viewCommunicationModal" class="modal adp-modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h3 class="adp-trunc-title" data-adp-view-title>View communication</h3>{!! $adpClose !!}</div>
                 <div class="modal-body">
-                    
+                    <div class="adp-view-comm">
+                        <span class="adp-view-comm__meta" data-adp-view-meta></span>
+                        <div class="adp-attach-list" data-adp-view-files hidden></div>
+                        <div class="adp-view-comm__body mailContent" data-adp-view-body></div>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <div class="footerBtns" style="float: left"></div>
-                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    <div class="footerBtns adp-view-comm__acts" data-adp-view-actions></div>
+                    <button type="button" data-tw-dismiss="modal" class="adp-btn adp-btn--ghost">Close</button>
                 </div>
             </div>
         </div>
     </div>
-    <!-- END: View Modal -->
 
-    <!-- BEGIN: Add Modal -->
-    <div id="smsSMSModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <form method="POST" action="#" id="smsSMSForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Send SMS</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
-                    </div>
-                    <div class="modal-body">
-                        <div>
-                            <label for="sms_template_id" class="form-label">Template</label>
-                            <select id="sms_template_id" placeholder="Select Template" name="sms_template_id" class="w-full tom-selects">
-                                @if(!empty($smsTemplates))
-                                    @foreach($smsTemplates as $st)
-                                        <option value="{{ $st->id }}">{{ $st->sms_title }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                        </div>
-                        <div class="mt-3">
-                            <label for="sms_subject" class="form-label">Subject <span class="text-danger">*</span></label>
-                            <input id="sms_subject" type="text" name="subject" class="form-control w-full">
-                            <div class="acc__input-error error-subject text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <div class="flex justify-between items-center">
-                                <label for="smsTextArea" class="form-label">SMS <span class="text-danger">*</span></label>
-                                <span class="sms_countr font-bold">160 / 1</span>
-                            </div>
-                            <textarea maxlength rows="7" id="smsTextArea" name="sms" class="form-control w-full"></textarea>
-                            <div class="acc__input-error error-sms text-danger mt-2"></div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="sendSMSBtn" class="btn btn-primary w-auto">     
-                            Send SMS                      
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="adm-btn-loader w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                        </button>
-                        <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    <!-- END: Add Modal -->
-
-    <!-- BEGIN: Add Modal -->
-    <div id="sendEmailModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <form method="POST" action="#" id="sendEmailForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Send Email</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
-                    </div>
-                    <div class="modal-body">
-                        <div class="adm-comm-modal-grid adm-comm-modal-grid--half">
-                            <div>
-                                <label for="comon_smtp_id" class="form-label">SMTP <span class="text-danger">*</span></label>
-                                <select id="comon_smtp_id" name="comon_smtp_id" class="form-control w-full">
-                                    <option value="">Please Select</option>
-                                    @if(!empty($smtps))
-                                        @foreach($smtps as $sm)
-                                            <option value="{{ $sm->id }}">{{ $sm->smtp_user }}</option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                                <div class="acc__input-error error-comon_smtp_id text-danger mt-2"></div>
-                            </div>
-                            <div>
-                                <label for="subject" class="form-label">Subject <span class="text-danger">*</span></label>
-                                <input id="subject" type="text" name="subject" class="form-control w-full">
-                                <div class="acc__input-error error-subject text-danger mt-2"></div>
-                            </div>
-                        </div>
-                        <div class="mt-3 mb-4">
-                            <label for="email_template_id" class="form-label">Template</label>
-                            <select id="email_template_id" placeholder="Select Template" name="email_template_id" class="w-full tom-selects">
-                                @if(!empty($emailTemplates))
-                                    @foreach($emailTemplates as $et)
-                                        <option value="{{ $et->id }}">{{ $et->email_title }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                        </div>
-                        <div>
-                            <div class="editor document-editor">
-                                <div class="document-editor__toolbar"></div>
-                                <div class="document-editor__editable-container">
-                                    <div class="document-editor__editable" id="mailEditor"></div>
-                                </div>
-                            </div>
-                            <div class="acc__input-error error-body text-danger mt-2"></div>
-                        </div>
-                        <div class="adm-mail-upload mt-3">
-                            <label for="sendMailsDocument" class="adm-mail-upload__button">
-                                <i data-lucide="paperclip" class="w-4 h-4"></i>
-                                <span>Upload Attachments</span>
-                            </label>
-                            <span class="adm-mail-upload__hint">PDF, DOC, image, spreadsheet</span>
-                            <input type="file" accept=".jpeg,.jpg,.png,.gif,.txt,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx" multiple name="documents[]" class="absolute w-0 h-0 overflow-hidden opacity-0" id="sendMailsDocument"/>
-                        </div>
-                        <div id="sendMailsDocumentNames" class="sendMailsDocumentNames adm-mail-upload__files mt-3" style="display: none"></div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="sendEmailBtn" class="btn btn-primary w-auto">     
-                            Send Mail                      
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="adm-btn-loader w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                        </button>
-                        <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    <!-- END: Add Modal -->
-
-    <!-- BEGIN: Success Modal Content -->
-    <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitle"></div>
-                        <div class="text-slate-500 mt-2 successModalDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-action="DISMISS" class="successCloser btn btn-primary w-24">Ok</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Success Modal Content -->
-
-    <!-- BEGIN: Warning Modal Content -->
-    <div id="warningModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="alert-octagon" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 warningModalTitle"></div>
-                        <div class="text-slate-500 mt-2 warningModalDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-action="DISMISS" class="warningCloser btn btn-primary w-24">Ok</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Warning Modal Content -->
-
-    <!-- BEGIN: Delete Confirm Modal Content -->
-    <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
-                        <div class="text-slate-500 mt-2 confModDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                        <button type="button" data-recordid="0" data-status="none" data-applicant="{{ $applicant->id }}" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Delete Confirm Modal Content -->
+    @include('pages.students.admission.partials.portal-record-modals')
+    @include('pages.students.admission.partials.portal-dialogs', ['adpConfirmAttrs' => 'data-recordid="0" data-status="none" data-applicant="'.$applicant->id.'"'])
 @endsection
 
 @section('script')
     @vite('resources/js/admission-communication.js')
+    {{-- The record header's Change status dialog (admission-show.js guards its other blocks). --}}
+    @vite('resources/js/admission-show.js')
     @vite('resources/js/admission-vue.js')
 @endsection

@@ -43,6 +43,14 @@ class SlcRegistrationTestFile extends Command
             ->orderByDesc('s.id')->limit(400)->pluck('s.id')->all();
         $snap = array_values(array_filter(StudentSnapshots::load($ids, $year->id), fn ($s) => $s['slc_code'] !== '' && $s['instance'] && $s['addresses'] && $s['dob'] && $s['gender']));
         $snap = array_slice($snap, 0, (int) $this->option('count'));
+        // line 5 swaps day and month, so its student needs a day of 12 or less that isn't the month (03/03 would swap to itself)
+        $swappable = fn ($s) => ($d = (int) date('j', strtotime($s['dob']))) <= 12 && $d !== (int) date('n', strtotime($s['dob']));
+        for ($k = 3; $k < count($snap); $k++) {
+            if ($swappable($snap[$k])) {
+                [$snap[3], $snap[$k]] = [$snap[$k], $snap[3]];
+                break;
+            }
+        }
         if (count($snap) < 8) {
             $this->error('Not enough students with an SSN, an SLC course code and a '.$year->name.' instance.');
 

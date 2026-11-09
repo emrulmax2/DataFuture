@@ -121,7 +121,8 @@ class NoteController extends Controller
             /* Attendance Outstanding call from personal Tutor Dashboard */
             $attendance_ids = (isset($request->attendance_ids) && !empty($request->attendance_ids) ? explode(',', $request->attendance_ids) : []);
             if(!empty($attendance_ids)):
-                Attendance::whereIn('id', $attendance_ids)->where('student_id', $student_id)->update([
+                \App\Services\AttendanceIntegrity\AttendanceAudit::context('tutor_note');
+                \App\Services\AttendanceIntegrity\AttendanceAudit::updateRows(Attendance::whereIn('id', $attendance_ids)->where('student_id', $student_id), [
                     'tracking_status' => 1
                 ]);
             endif;

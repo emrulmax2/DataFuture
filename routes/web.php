@@ -62,7 +62,7 @@ use App\Http\Controllers\Settings\RoleController;
 use App\Http\Controllers\Settings\PermissionTemplateController;
 use App\Http\Controllers\Settings\ProcessListController;
 use App\Http\Controllers\Settings\TaskListController;
-// use App\Http\Controllers\Settings\TaskAssignmentRuleController;
+use App\Http\Controllers\Settings\TaskAssignmentRuleController;
 
 use App\Http\Controllers\InterviewListController;
 use App\Http\Controllers\ApplicantInterviewListController;
@@ -488,10 +488,10 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
         /* The applicant's own sign-in details. Password changes go through here,
            not the `change-password` route below, which `applicant.loggedin`
            keeps out of reach of a signed-in applicant. */
-        // Route::controller(\App\Http\Controllers\Applicant\AccountController::class)->group(function() {
-        //     Route::get('/account', 'index')->name('account');
-        //     Route::post('/account/password', 'updatePassword')->name('account.password');
-        // });
+        Route::controller(\App\Http\Controllers\Applicant\AccountController::class)->group(function() {
+            Route::get('/account', 'index')->name('account');
+            Route::post('/account/password', 'updatePassword')->name('account.password');
+        });
 
         Route::controller(ApplicantDashboard::class)->group(function() {
             Route::get('/dashboard', 'index')->name('dashboard');
@@ -510,7 +510,7 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
             Route::get('application/show/{id}', 'show')->name('application.show');
 
             Route::post('application/verify-referral-code', 'verifyReferralCode')->name('application.verify.referral.code');
-            // Route::post('application/clear-referral-code', 'clearReferralCode')->name('application.clear.referral.code');
+            Route::post('application/clear-referral-code', 'clearReferralCode')->name('application.clear.referral.code');
             Route::post('application/get-evening-weekend-status', 'getEveningWeekendStatus')->name('application.get.evening.weekend.status');
         });
 
@@ -539,10 +539,10 @@ Route::prefix('/agent')->name('agent.')->group(function() {
 
     /* lab404/laravel-impersonate: a staff member signed in as this agent
        goes back to their own account (the applicant group has the same). */
-    // Route::get('/impersonate/leave', function () {
-    //     auth('agent')->user()->leaveImpersonation();
-    //     return redirect()->route('dashboard');
-    // })->name('impersonate.leave');
+    Route::get('/impersonate/leave', function () {
+        auth('agent')->user()->leaveImpersonation();
+        return redirect()->route('dashboard');
+    })->name('impersonate.leave');
 
     Route::controller(AgentLoginController::class)->middleware('agent.loggedin')->group(function() {
 
@@ -588,7 +588,7 @@ Route::prefix('/agent')->name('agent.')->group(function() {
         Route::controller(AgentDashboardController::class)->group(function() {
             Route::get('/dashboard', 'index')->name('dashboard');
             Route::get('/dashboard/list', 'list')->name('dashboard.applications.list');
-            // Route::get('/dashboard/drafts', 'drafts')->name('dashboard.drafts');
+            Route::get('/dashboard/drafts', 'drafts')->name('dashboard.drafts');
         });
         Route::controller(ApplicationCheckController::class)->group(function() {
             Route::post('/store', 'store')->name('apply.check');
@@ -614,7 +614,7 @@ Route::prefix('/agent')->name('agent.')->group(function() {
             Route::get('agent-application/course-creation-edit/{id}', 'CourseCreationList')->name('application.course.creation.edit');
             Route::post('agent-application/review', 'review')->name('application.review');
             Route::post('agent-application/verify-referral-code', 'verifyReferralCode')->name('application.verify.referral.code');
-            // Route::post('agent-application/clear-referral-code', 'clearReferralCode')->name('application.clear.referral.code');
+            Route::post('agent-application/clear-referral-code', 'clearReferralCode')->name('application.clear.referral.code');
 
             Route::post('agent-application/get-evening-weekend-status', 'getEveningWeekendStatus')->name('application.get.evening.weekend.status');
         });
@@ -639,7 +639,7 @@ Route::prefix('/agent')->name('agent.')->group(function() {
 
         Route::controller(AgentMyAccountController::class)->group(function() {
             Route::get('my-account', 'index')->name('account');
-            // Route::post('my-account/password', 'updatePassword')->name('account.password');
+            Route::post('my-account/password', 'updatePassword')->name('account.password');
         });
 
      
@@ -1092,23 +1092,27 @@ Route::middleware('auth')->group(function() {
     });
 
     /* Plan tree › Send Class ICP: the group's class routine PDF emailed to each of its students (30 Oct 2026). */
-    // Route::controller(\App\Http\Controllers\CourseManagement\PlanTreeClassIcpController::class)->group(function() {
-    //     Route::post('course-management/plans/tree/class-icp/prepare', 'prepare')->name('plans.tree.class.icp.prepare');
-    //     Route::get('course-management/plans/tree/class-icp/preview', 'preview')->name('plans.tree.class.icp.preview');
-    //     Route::post('course-management/plans/tree/class-icp/send', 'send')->name('plans.tree.class.icp.send');
-    // });
+    Route::controller(\App\Http\Controllers\CourseManagement\PlanTreeClassIcpController::class)->group(function() {
+        Route::post('course-management/plans/tree/class-icp/prepare', 'prepare')->name('plans.tree.class.icp.prepare');
+        Route::get('course-management/plans/tree/class-icp/preview', 'preview')->name('plans.tree.class.icp.preview');
+        Route::post('course-management/plans/tree/class-icp/send', 'send')->name('plans.tree.class.icp.send');
+    });
 
     // SLC bulk registration (user, 2 Nov 2026). Privilege "SLC Registration", enforced (config/privileges.php).
     Route::controller(\App\Http\Controllers\SlcRegistration\SlcRegistrationController::class)->group(function() {
         Route::get('slc-registration', 'index')->name('slc.registration');
         Route::get('slc-registration/state', 'state')->name('slc.registration.state');
         Route::get('slc-registration/multiple-agreements', 'multipleAgreements')->name('slc.registration.multiple');
+        Route::post('slc-registration/multiple-agreements/review', 'duplicateReview')->name('slc.registration.multiple.review');
+        Route::post('slc-registration/multiple-agreements/unhide', 'duplicateUnhide')->name('slc.registration.multiple.unhide');
         Route::post('slc-registration/upload', 'upload')->name('slc.registration.upload');
         Route::get('slc-registration/students', 'students')->name('slc.registration.students');
         Route::post('slc-registration/link', 'link')->name('slc.registration.link');
         Route::post('slc-registration/unlink', 'unlink')->name('slc.registration.unlink');
         Route::post('slc-registration/route', 'setRoute')->name('slc.registration.route');
         Route::post('slc-registration/route/clear', 'clearRoute')->name('slc.registration.route.clear');
+        Route::post('slc-registration/routes', 'setRoutes')->name('slc.registration.routes');
+        Route::post('slc-registration/routes/clear', 'clearRoutes')->name('slc.registration.routes.clear');
         Route::post('slc-registration/suggested', 'suggested')->name('slc.registration.suggested');
         Route::post('slc-registration/action', 'action')->name('slc.registration.action');
         Route::post('slc-registration/decide', 'decide')->name('slc.registration.decide');
@@ -1120,12 +1124,20 @@ Route::middleware('auth')->group(function() {
         Route::post('slc-registration/batch/uploaded', 'uploaded')->name('slc.registration.batch.uploaded');
         Route::post('slc-registration/batch/register', 'bulkRegister')->name('slc.registration.batch.register');
         Route::post('slc-registration/course/map', 'mapCourse')->name('slc.registration.course.map');
+        Route::get('slc-registration/clear/counts', 'clearCounts')->name('slc.registration.clear.counts');
+        Route::post('slc-registration/clear', 'clearData')->name('slc.registration.clear');
+        Route::get('slc-registration/comms', 'comms')->name('slc.registration.comms');
+        Route::get('slc-registration/comms/template', 'commsTemplate')->name('slc.registration.comms.template');
+        Route::post('slc-registration/comms/email', 'sendEmail')->name('slc.registration.comms.email');
+        Route::post('slc-registration/comms/sms', 'sendSms')->name('slc.registration.comms.sms');
         // Bulk attendance (steps 1–2)
         Route::post('slc-registration/att/upload', 'attUpload')->name('slc.registration.att.upload');
         Route::post('slc-registration/att/link', 'attLink')->name('slc.registration.att.link');
         Route::post('slc-registration/att/unlink', 'attUnlink')->name('slc.registration.att.unlink');
         Route::post('slc-registration/att/route', 'attRoute')->name('slc.registration.att.route');
         Route::post('slc-registration/att/route/clear', 'attClearRoute')->name('slc.registration.att.route.clear');
+        Route::post('slc-registration/att/routes', 'attRoutes')->name('slc.registration.att.routes');
+        Route::post('slc-registration/att/routes/clear', 'attClearRoutes')->name('slc.registration.att.routes.clear');
         Route::post('slc-registration/att/suggested', 'attSuggested')->name('slc.registration.att.suggested');
         Route::post('slc-registration/att/code', 'attCode')->name('slc.registration.att.code');
         Route::post('slc-registration/att/confirm', 'attConfirm')->name('slc.registration.att.confirm');
@@ -1475,11 +1487,11 @@ Route::middleware('auth')->group(function() {
     });
 
     /* Staff presence on an applicant's record (applicant_view_sessions): start / heartbeat / end. */
-    // Route::controller(\App\Http\Controllers\AdmissionPresenceController::class)->group(function() {
-    //     Route::post('admission/presence/start', 'start')->name('admission.presence.start');
-    //     Route::post('admission/presence/beat', 'beat')->name('admission.presence.beat');
-    //     Route::post('admission/presence/end', 'end')->name('admission.presence.end');
-    // });
+    Route::controller(\App\Http\Controllers\AdmissionPresenceController::class)->group(function() {
+        Route::post('admission/presence/start', 'start')->name('admission.presence.start');
+        Route::post('admission/presence/beat', 'beat')->name('admission.presence.beat');
+        Route::post('admission/presence/end', 'end')->name('admission.presence.end');
+    });
 
     Route::controller(AdmissionController::class)->middleware('update.admission.status')->group(function() {
 
@@ -1496,7 +1508,7 @@ Route::middleware('auth')->group(function() {
         //Route::get('admission/employment-list', 'employmentList')->name('admission.employment.list');
 
         Route::post('admission/update-personal-details', 'updatePersonalDetails')->name('admission.update.personal.details');
-        // Route::post('admission/update-proof-of-id', 'updateProofOfId')->name('admission.update.proof.id');
+        Route::post('admission/update-proof-of-id', 'updateProofOfId')->name('admission.update.proof.id');
         Route::post('admission/update-contact-details', 'updateContactDetails')->name('admission.update.contact.details');
         Route::post('admission/update-kin-details', 'updateKinDetails')->name('admission.update.kin.details');
         Route::post('admission/update-course-details', 'updateCourseAndProgrammeDetails')->name('admission.update.course.details');
@@ -1564,7 +1576,7 @@ Route::middleware('auth')->group(function() {
 
         Route::get('admission/conversion-log/{applicantId}', 'admissionConversionLog')->name('admission.conversion.log');
         Route::get('admission/conversion-log-list', 'admissionConversionLogList')->name('admission.conversion.log.list');
-        // Route::get('admission/timeline/{applicantId}', 'admissionTimeline')->name('admission.timeline');
+        Route::get('admission/timeline/{applicantId}', 'admissionTimeline')->name('admission.timeline');
 
         //Route::get('admission/convertstudent','convertStudentDemo')->name('admission.convertstudent');
 
@@ -1579,7 +1591,7 @@ Route::middleware('auth')->group(function() {
         Route::post('admission/send-e-signature-request', 'sendApplicantESignatureRequest')->name('admission.send.e.signature.request');
 
         Route::get('admission/e-signature/{applicantId}', 'showEsignature')->name('admission.show.e.signature');
-        // Route::get('admission/e-signature/{applicantId}/request', 'showEsignatureRequest')->name('admission.show.e.signature.request');
+        Route::get('admission/e-signature/{applicantId}/request', 'showEsignatureRequest')->name('admission.show.e.signature.request');
         
     });
 
@@ -2063,8 +2075,7 @@ Route::middleware('auth')->group(function() {
         Route::get('hr/policy-assessments/policies/{policy}/questions', 'index')->name('policy.assessment.question');
         Route::get('hr/policy-assessments/policies/{policy}/questions/list', 'list')->name('policy.assessment.question.list');
         // [class, method] on purpose: a bare 'pdf' is taken for the global pdf() helper once a PDF has been rendered in-process.
-        Route::get('hr/policy-assessments/policies/{policy}/questions/pdf', 'pdf')->name('policy.assessment.question.pdf');
-        // Route::get('hr/policy-assessments/policies/{policy}/questions/pdf', [PolicyQuestionController::class, 'pdf'])->name('policy.assessment.question.pdf');
+        Route::get('hr/policy-assessments/policies/{policy}/questions/pdf', [PolicyQuestionController::class, 'pdf'])->name('policy.assessment.question.pdf');
         Route::post('hr/policy-assessments/policies/{policy}/questions/store', 'store')->name('policy.assessment.question.store');
         Route::post('hr/policy-assessments/policies/{policy}/questions/activate-all', 'activateAll')->name('policy.assessment.question.activate.all');
         Route::get('hr/policy-assessments/questions/edit/{question}', 'edit')->name('policy.assessment.question.edit');
@@ -2561,17 +2572,17 @@ Route::middleware('auth')->group(function() {
         Route::post('site-settings/tasklist/restore', 'getAssignedUserList')->name('tasklist.users');
     });
 
-    // Route::controller(TaskAssignmentRuleController::class)->group(function() {
-    //     Route::get('site-settings/task-automation', 'index')->name('taskrules');
-    //     Route::get('site-settings/task-automation/list', 'list')->name('taskrules.list');
-    //     Route::post('site-settings/task-automation/store', 'store')->name('taskrules.store');
-    //     Route::get('site-settings/task-automation/edit/{id}', 'edit')->name('taskrules.edit');
-    //     Route::post('site-settings/task-automation/update', 'update')->name('taskrules.update');
-    //     Route::delete('site-settings/task-automation/delete/{id}', 'destroy')->name('taskrules.destroy');
-    //     Route::post('site-settings/task-automation/restore/{id}', 'restore')->name('taskrules.restore');
-    //     Route::get('site-settings/task-automation/preview', 'preview')->name('taskrules.preview');
-    //     Route::get('site-settings/task-automation/runs', 'runs')->name('taskrules.runs');
-    // });
+    Route::controller(TaskAssignmentRuleController::class)->group(function() {
+        Route::get('site-settings/task-automation', 'index')->name('taskrules');
+        Route::get('site-settings/task-automation/list', 'list')->name('taskrules.list');
+        Route::post('site-settings/task-automation/store', 'store')->name('taskrules.store');
+        Route::get('site-settings/task-automation/edit/{id}', 'edit')->name('taskrules.edit');
+        Route::post('site-settings/task-automation/update', 'update')->name('taskrules.update');
+        Route::delete('site-settings/task-automation/delete/{id}', 'destroy')->name('taskrules.destroy');
+        Route::post('site-settings/task-automation/restore/{id}', 'restore')->name('taskrules.restore');
+        Route::get('site-settings/task-automation/preview', 'preview')->name('taskrules.preview');
+        Route::get('site-settings/task-automation/runs', 'runs')->name('taskrules.runs');
+    });
 
     Route::controller(SmsTemplateController::class)->group(function() {
         Route::get('site-settings/sms-template', 'index')->name('sms.template'); 
@@ -3175,8 +3186,7 @@ Route::middleware('auth')->group(function() {
         Route::post('attendance/create-and-store', 'createAndStore')->name('attendance.create.and.store'); 
         Route::post('attendance/update-all', 'updateAll')->name('attendance.update.all'); 
         Route::delete('attendance/delete/{id}', 'destroy')->name('attendance.destory');
-        Route::post('attendance/restore', 'restore')->name('attendance.restore');
-        // Route::post('attendance/restore/{id}', 'restore')->name('attendance.restore');
+        Route::post('attendance/restore/{id}', 'restore')->name('attendance.restore');
         Route::get('attendance/{data}', 'generatePDF')->name('attendance.print');
     });
 
@@ -3399,7 +3409,7 @@ Route::middleware('auth')->group(function() {
     });
 
     // Attendance Settings moved to Attendance Integrity > Settings (user, 3 Nov 2026); the old address redirects.
-    // Route::redirect('site-settings/attendance-settings', '/attendance-integrity/settings')->name('site.settings.attendance');
+    Route::redirect('site-settings/attendance-settings', '/attendance-integrity/settings')->name('site.settings.attendance');
 
     Route::controller(ResidencyStatusController::class)->group(function() {
         Route::get('site-settings/residency-status', 'index')->name('residency.status'); 
@@ -3496,11 +3506,10 @@ Route::middleware('auth')->group(function() {
 
         Route::get('task-manager/download-task-students-emails', 'downloadTaskStudentEmailListExcel')->name('task.manager.students.email.excel'); 
         Route::post('task-manager/complete-email-id-task', 'completeTaskStudentEmailTask')->name('task.manager.comlete.students.email.id.task'); 
-        Route::post('task-manager/download-id-cards', 'downloadIdCard')->name('task.manager.download.id.card'); 
-        // Route::post('task-manager/download-id-cards', 'downloadIdCard')->name('task.manager.download.id.card');
-        // Route::post('task-manager/send-class-routine', 'sendClassRoutine')->name('task.manager.send.class.routine');
-        // Route::post('task-manager/class-routine/prepare', 'prepareClassRoutine')->name('task.manager.class.routine.prepare');
-        // Route::get('task-manager/class-routine/preview', 'previewClassRoutine')->name('task.manager.class.routine.preview');
+        Route::post('task-manager/download-id-cards', 'downloadIdCard')->name('task.manager.download.id.card');
+        Route::post('task-manager/send-class-routine', 'sendClassRoutine')->name('task.manager.send.class.routine');
+        Route::post('task-manager/class-routine/prepare', 'prepareClassRoutine')->name('task.manager.class.routine.prepare');
+        Route::get('task-manager/class-routine/preview', 'previewClassRoutine')->name('task.manager.class.routine.preview');
 
         Route::post('task-manager/update-task-status', 'updateTaskStatus')->name('task.manager.update.task.status'); 
         Route::get('task-manager/download-task-students-list', 'downloadTaskStudentListExcel')->name('task.manager.students.list.excel'); 
@@ -3922,53 +3931,53 @@ Route::middleware('auth')->group(function() {
 
     // Attendance Integrity monitoring (/attendance-integrity). Every action checks its own
     // privilege (App\Services\AttendanceIntegrity\IntegrityAccess); see config/privileges.php.
-    // Route::prefix('attendance-integrity')->name('attendance.integrity')->group(function () {
-    //     $ai = 'App\\Http\\Controllers\\AttendanceIntegrity\\';
-    //     Route::get('/', [$ai.'DashboardController', 'home']);
-    //     Route::get('dashboard', [$ai.'DashboardController', 'index'])->name('.dashboard');
-    //     Route::get('records', [$ai.'DashboardController', 'records'])->name('.records');
-    //     Route::get('records/data', [$ai.'DashboardController', 'recordsData'])->name('.records.data');
-    //     Route::get('settings', [$ai.'DashboardController', 'settings'])->name('.settings');
-    //     Route::post('settings', [$ai.'DashboardController', 'saveSettings'])->name('.settings.save');
-    //     Route::post('settings/scan', [$ai.'DashboardController', 'queueScan'])->name('.settings.scan');
+    Route::prefix('attendance-integrity')->name('attendance.integrity')->group(function () {
+        $ai = 'App\\Http\\Controllers\\AttendanceIntegrity\\';
+        Route::get('/', [$ai.'DashboardController', 'home']);
+        Route::get('dashboard', [$ai.'DashboardController', 'index'])->name('.dashboard');
+        Route::get('records', [$ai.'DashboardController', 'records'])->name('.records');
+        Route::get('records/data', [$ai.'DashboardController', 'recordsData'])->name('.records.data');
+        Route::get('settings', [$ai.'DashboardController', 'settings'])->name('.settings');
+        Route::post('settings', [$ai.'DashboardController', 'saveSettings'])->name('.settings.save');
+        Route::post('settings/scan', [$ai.'DashboardController', 'queueScan'])->name('.settings.scan');
 
-    //     Route::get('staff', [$ai.'AnalysisController', 'staff'])->name('.staff');
-    //     Route::get('staff/data', [$ai.'AnalysisController', 'staffData'])->name('.staff.data');
-    //     Route::get('staff/{user}', [$ai.'AnalysisController', 'staffShow'])->whereNumber('user')->name('.staff.show');
-    //     Route::get('students', [$ai.'AnalysisController', 'students'])->name('.students');
-    //     Route::get('students/data', [$ai.'AnalysisController', 'studentsData'])->name('.students.data');
-    //     Route::get('students/{student}', [$ai.'AnalysisController', 'studentShow'])->whereNumber('student')->name('.students.show');
+        Route::get('staff', [$ai.'AnalysisController', 'staff'])->name('.staff');
+        Route::get('staff/data', [$ai.'AnalysisController', 'staffData'])->name('.staff.data');
+        Route::get('staff/{user}', [$ai.'AnalysisController', 'staffShow'])->whereNumber('user')->name('.staff.show');
+        Route::get('students', [$ai.'AnalysisController', 'students'])->name('.students');
+        Route::get('students/data', [$ai.'AnalysisController', 'studentsData'])->name('.students.data');
+        Route::get('students/{student}', [$ai.'AnalysisController', 'studentShow'])->whereNumber('student')->name('.students.show');
 
-    //     Route::get('retrospective', [$ai.'FindingController', 'page'])->defaults('page', 'retrospective')->name('.retrospective');
-    //     Route::get('bulk-entries', [$ai.'FindingController', 'page'])->defaults('page', 'bulk')->name('.bulk');
-    //     Route::get('staff-student-patterns', [$ai.'FindingController', 'page'])->defaults('page', 'patterns')->name('.patterns');
-    //     Route::get('timetable-conflicts', [$ai.'FindingController', 'page'])->defaults('page', 'timetable')->name('.timetable');
-    //     Route::get('findings', [$ai.'FindingController', 'page'])->defaults('page', 'findings')->name('.findings');
-    //     Route::get('findings/data', [$ai.'FindingController', 'data'])->name('.findings.data');
-    //     Route::post('findings/{finding}/dismiss', [$ai.'FindingController', 'dismiss'])->whereNumber('finding')->name('.findings.dismiss');
-    //     Route::post('findings/{finding}/reopen', [$ai.'FindingController', 'reopen'])->whereNumber('finding')->name('.findings.reopen');
-    //     Route::get('amendments', [$ai.'FindingController', 'amendments'])->name('.amendments');
-    //     Route::get('amendments/history', [$ai.'FindingController', 'history'])->name('.amendments.history');
+        Route::get('retrospective', [$ai.'FindingController', 'page'])->defaults('page', 'retrospective')->name('.retrospective');
+        Route::get('bulk-entries', [$ai.'FindingController', 'page'])->defaults('page', 'bulk')->name('.bulk');
+        Route::get('staff-student-patterns', [$ai.'FindingController', 'page'])->defaults('page', 'patterns')->name('.patterns');
+        Route::get('timetable-conflicts', [$ai.'FindingController', 'page'])->defaults('page', 'timetable')->name('.timetable');
+        Route::get('findings', [$ai.'FindingController', 'page'])->defaults('page', 'findings')->name('.findings');
+        Route::get('findings/data', [$ai.'FindingController', 'data'])->name('.findings.data');
+        Route::post('findings/{finding}/dismiss', [$ai.'FindingController', 'dismiss'])->whereNumber('finding')->name('.findings.dismiss');
+        Route::post('findings/{finding}/reopen', [$ai.'FindingController', 'reopen'])->whereNumber('finding')->name('.findings.reopen');
+        Route::get('amendments', [$ai.'FindingController', 'amendments'])->name('.amendments');
+        Route::get('amendments/history', [$ai.'FindingController', 'history'])->name('.amendments.history');
 
-    //     Route::get('investigations', [$ai.'CaseController', 'index'])->name('.cases');
-    //     Route::post('investigations', [$ai.'CaseController', 'store'])->name('.cases.store');
-    //     Route::get('investigations/open', [$ai.'CaseController', 'openCases'])->name('.cases.open');
-    //     Route::get('investigations/{case}', [$ai.'CaseController', 'show'])->whereNumber('case')->name('.cases.show');
-    //     Route::post('investigations/{case}/status', [$ai.'CaseController', 'status'])->whereNumber('case')->name('.cases.status');
-    //     Route::post('investigations/{case}/assign', [$ai.'CaseController', 'assign'])->whereNumber('case')->name('.cases.assign');
-    //     Route::post('investigations/{case}/note', [$ai.'CaseController', 'note'])->whereNumber('case')->name('.cases.note');
-    //     Route::post('investigations/{case}/outcome', [$ai.'CaseController', 'outcome'])->whereNumber('case')->name('.cases.outcome');
-    //     Route::post('investigations/{case}/evidence', [$ai.'CaseController', 'evidence'])->whereNumber('case')->name('.cases.evidence');
-    //     Route::get('investigations/{case}/evidence/{evidence}', [$ai.'CaseController', 'download'])->whereNumber(['case', 'evidence'])->name('.cases.evidence.download');
-    //     Route::post('investigations/{case}/findings', [$ai.'CaseController', 'addFindings'])->whereNumber('case')->name('.cases.findings');
+        Route::get('investigations', [$ai.'CaseController', 'index'])->name('.cases');
+        Route::post('investigations', [$ai.'CaseController', 'store'])->name('.cases.store');
+        Route::get('investigations/open', [$ai.'CaseController', 'openCases'])->name('.cases.open');
+        Route::get('investigations/{case}', [$ai.'CaseController', 'show'])->whereNumber('case')->name('.cases.show');
+        Route::post('investigations/{case}/status', [$ai.'CaseController', 'status'])->whereNumber('case')->name('.cases.status');
+        Route::post('investigations/{case}/assign', [$ai.'CaseController', 'assign'])->whereNumber('case')->name('.cases.assign');
+        Route::post('investigations/{case}/note', [$ai.'CaseController', 'note'])->whereNumber('case')->name('.cases.note');
+        Route::post('investigations/{case}/outcome', [$ai.'CaseController', 'outcome'])->whereNumber('case')->name('.cases.outcome');
+        Route::post('investigations/{case}/evidence', [$ai.'CaseController', 'evidence'])->whereNumber('case')->name('.cases.evidence');
+        Route::get('investigations/{case}/evidence/{evidence}', [$ai.'CaseController', 'download'])->whereNumber(['case', 'evidence'])->name('.cases.evidence.download');
+        Route::post('investigations/{case}/findings', [$ai.'CaseController', 'addFindings'])->whereNumber('case')->name('.cases.findings');
 
-    //     Route::get('reports', [$ai.'ReportController', 'index'])->name('.reports');
-    //     Route::get('reports/{report}/export', [$ai.'ReportController', 'export'])->name('.reports.export');
+        Route::get('reports', [$ai.'ReportController', 'index'])->name('.reports');
+        Route::get('reports/{report}/export', [$ai.'ReportController', 'export'])->name('.reports.export');
 
-    //     Route::get('guide', [$ai.'DashboardController', 'guide'])->name('.guide');
-    //     Route::get('lookup/{kind}', [$ai.'DashboardController', 'lookup'])->whereIn('kind', ['staff', 'students'])->name('.lookup');
-    //     Route::get('term-options', [$ai.'DashboardController', 'termOptions'])->name('.term.options');
-    // });
+        Route::get('guide', [$ai.'DashboardController', 'guide'])->name('.guide');
+        Route::get('lookup/{kind}', [$ai.'DashboardController', 'lookup'])->whereIn('kind', ['staff', 'students'])->name('.lookup');
+        Route::get('term-options', [$ai.'DashboardController', 'termOptions'])->name('.term.options');
+    });
 
     Route::controller(SystemReportController::class)->group(function(){
         Route::get('reports', 'index')->name('reports'); 
@@ -4671,8 +4680,7 @@ Route::controller(StudentOrderController::class)->group(function() {
 });
 
 // Staff-only screens (Live student > Visits); they were outside the login group.
-// Route::middleware('auth')->controller(StudentVisitController::class)->group(function() {
-Route::controller(StudentVisitController::class)->group(function() {
+Route::middleware('auth')->controller(StudentVisitController::class)->group(function() {
 
     Route::post('student-visits/store', 'store')->name('student.visits.store');
     Route::get('student-visits/list', 'list')->name('student.visits.list');
@@ -4703,26 +4711,26 @@ Route::post('paypal/webhook', [PayPalWebhookController::class, 'handle'])
 /* DocuSeal offer acceptance form events (console.docuseal.com/webhooks). Outside
    every auth group: the caller is DocuSeal. Checked by the secret header, and the
    queued job re-reads the submission from DocuSeal's API before acting. */
-// Route::post('docuseal/webhook', [\App\Http\Controllers\DocusealWebhookController::class, 'handle'])
-//     ->middleware('throttle:120,1')
-//     ->name('docuseal.webhook');
+Route::post('docuseal/webhook', [\App\Http\Controllers\DocusealWebhookController::class, 'handle'])
+    ->middleware('throttle:120,1')
+    ->name('docuseal.webhook');
 
 /* The Decline button in the DocuSeal offer acceptance email links here with
    {{submitter.slug}} (the applicant's signing key). Public: the applicant is not
    signed in. Opening it only shows a confirmation page; the POST declines. */
-// Route::get('offer/decline/{slug}', [\App\Http\Controllers\OfferDeclineController::class, 'show'])
-//     ->middleware('throttle:30,1')
-//     ->name('offer.decline');
-// Route::post('offer/decline/{slug}', [\App\Http\Controllers\OfferDeclineController::class, 'store'])
-//     ->middleware('throttle:10,1')
-//     ->name('offer.decline.store');
+Route::get('offer/decline/{slug}', [\App\Http\Controllers\OfferDeclineController::class, 'show'])
+    ->middleware('throttle:30,1')
+    ->name('offer.decline');
+Route::post('offer/decline/{slug}', [\App\Http\Controllers\OfferDeclineController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('offer.decline.store');
 
 /* The class routine (ICP) link in the student's email and text message. Public: the
    student is not signed in; the token is signed and expires (ClassRoutineLink). */
-// Route::get('class-routine/{token}', [\App\Http\Controllers\ClassRoutineDownloadController::class, 'show'])
-//     ->middleware('throttle:30,1')
-//     ->where('token', '[0-9a-z.]+')
-//     ->name('class.routine.download');
+Route::get('class-routine/{token}', [\App\Http\Controllers\ClassRoutineDownloadController::class, 'show'])
+    ->middleware('throttle:30,1')
+    ->where('token', '[0-9a-z.]+')
+    ->name('class.routine.download');
 
 /* Paying a library charge from the link the desk hands out.
    -------------------------------------------------------------------------

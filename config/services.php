@@ -99,6 +99,21 @@ return [
         'api_key' => env('DOCUSEAL_API_KEY'),
         'offer_acceptance_template_id' => env('OFFER_ACCEPTANCE_FORM_TEMPLATE_ID'),
         'test_email' => env('DOCUSEAL_TEST_EMAIL'),
+        'api_url' => env('DOCUSEAL_API_URL', 'https://api.docuseal.co'),
+        // Signed form → Offer Accepted + move to students + admin email. Off for now (user,
+        // 23 Oct 2026: check the DocuSeal part first); signed forms are still stored in the
+        // uploads and wait, unconverted, until this is switched on.
+        'auto_convert' => (bool) env('DOCUSEAL_AUTO_CONVERT', false),
+        // Who hears about signed / declined offer acceptance forms (comma-separated).
+        'notify_email' => env('DOCUSEAL_NOTIFY_EMAIL', 'admission@lcc.ac.uk'),
+        // The admissions address applicants and agents are told to contact (decline page + emails).
+        'contact_email' => env('DOCUSEAL_CONTACT_EMAIL', 'admission@lcc.ac.uk'),
+        // Webhook → Security in console.docuseal.com. Either check is enough:
+        //  - "Secret" tab: a custom header DocuSeal adds (key + value);
+        //  - "HMAC" tab: the whsec_… signing secret behind X-Docuseal-Signature.
+        'webhook_secret_key' => env('DOCUSEAL_WEBHOOK_SECRET_KEY'),
+        'webhook_secret' => env('DOCUSEAL_WEBHOOK_SECRET'),
+        'webhook_hmac_secret' => env('DOCUSEAL_WEBHOOK_HMAC_SECRET'),
     ],
 
     'library' => [

@@ -164,6 +164,7 @@
                                     <select id="process_list_id" placeholder="Select Process" name="process_list_id" class="ss-modal-input tom-selects">
                                         <option value="">Select Process</option>
                                     </select>
+                                    <small class="ss-modal-help">For students, the tasks given on a change to this status now come from <a href="{{ route('taskrules', ['subject' => 'student']) }}">Task Automation &rsaquo; Student</a> ("Student status changed" rules with the condition Status is &hellip;).</small>
                                 </div>
                                 <div class="ss-modal-field">
                                     <label for="letter_set_id">Letter Template</label>
@@ -277,6 +278,7 @@
                                     <select id="edit_process_list_id" placeholder="Select Process" name="process_list_id" class="ss-modal-input tom-selects">
                                         <option value="">Select Process</option>
                                     </select>
+                                    <small class="ss-modal-help">For students, the tasks given on a change to this status now come from <a href="{{ route('taskrules', ['subject' => 'student']) }}">Task Automation &rsaquo; Student</a> ("Student status changed" rules with the condition Status is &hellip;).</small>
                                 </div>
                                 <div class="ss-modal-field">
                                     <label for="edit_letter_set_id">Letter Template</label>

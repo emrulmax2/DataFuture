@@ -32,6 +32,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        // Student @lcc.ac.uk accounts in Google Workspace (Admin SDK); tests swap in a fake.
+        $this->app->bind(\App\Services\StudentEmail\WorkspaceDirectory::class, \App\Services\StudentEmail\GoogleWorkspaceDirectory::class);
+        $this->app->bind(\App\Services\ClassRoutine\ClassCalendar::class, \App\Services\ClassRoutine\GoogleClassCalendar::class);
+
         // Singleton so its per-request caches (venue IPs, per-user decision) are
         // actually reused. remote_access is an appended attribute, so it is read
         // on every User serialisation.
@@ -80,7 +84,11 @@ class AppServiceProvider extends ServiceProvider
         PlansDateList::observe(PlansDateListObserver::class);
         StudentAwardingBodyDetails::observe(StudentAwardingBodyDetailsObserver::class);
         StudentUser::observe(StudentUserObserver::class);
-        
+        // Task Automation "Change student status to SLC New" check (StudentProcessWrapUp)
+        \App\Models\StudentTask::observe(\App\Observers\StudentTaskObserver::class);
+        // Attendance Integrity: record every attendance change (AttendanceAudit)
+        \App\Models\Attendance::observe(\App\Observers\AttendanceObserver::class);
+
         Schema::defaultStringLength(191);
 
         /* Local and development run against a copy of the live database, so

@@ -339,8 +339,44 @@ var studentInterviewLogTable = (function () {
         $("#confirmModal .confModDesc").html('');
         $("#confirmModal .agreeWith").attr('data-recordid', '0');
         $("#confirmModal .agreeWith").attr('data-status', 'none');
+        $("#confirmModal .agreeWith").attr('data-force', '0');
         $('#confirmModal button').removeAttr('disabled');
     });
+
+    /*
+     * The "Change student status (SLC New)" task completes itself once every other task of its
+     * process is done (user, 29 Oct 2026). Completing it by hand with tasks still open asks first and
+     * names them; agreeing sends force=1 and the student status is left alone.
+     */
+    const escapeHtml = (value) => $('<div>').text(value == null ? '' : String(value)).html();
+    const wrapUpConfirm = (wrapUp) => {
+        const open = Array.isArray(wrapUp.open) ? wrapUp.open : [];
+        const process = escapeHtml(wrapUp.process || 'process');
+        const status = escapeHtml(wrapUp.status || 'SLC New');
+        if (!open.length) {
+            return {
+                title: 'Are you sure?',
+                desc: 'Every other ' + process + ' task is done. Completing this task changes the student status to <b>' + status + '</b>.',
+                force: '0',
+            };
+        }
+        const items = open.map((task) => '<li class="py-0.5">' + escapeHtml(task.name) + ' <span class="text-slate-400">&middot; ' + escapeHtml(task.status) + '</span></li>').join('');
+        return {
+            title: open.length + ' ' + (open.length === 1 ? 'task is' : 'tasks are') + ' still open',
+            desc: 'This task should be completed only after every other ' + process + ' task is done. Then it completes itself and changes the student status to <b>' + status + '</b>.'
+                + '<ul class="list-disc text-left inline-block pl-5 my-3 text-slate-600">' + items + '</ul>'
+                + '<div>Complete it anyway? The student status will <b>not</b> be changed.</div>',
+            force: '1',
+        };
+    };
+    const showWrapUpConfirm = (recordid, wrapUp) => {
+        const text = wrapUpConfirm(wrapUp);
+        $("#confirmModal .confModTitle").html(text.title);
+        $("#confirmModal .confModDesc").html(text.desc);
+        $("#confirmModal .agreeWith").attr('data-recordid', recordid);
+        $("#confirmModal .agreeWith").attr('data-status', 'COMPLETEDTASK');
+        $("#confirmModal .agreeWith").attr('data-force', text.force);
+    };
 
     const viewAttendanceExcuseModalEl = document.getElementById('viewAttendanceExcuseModal')
     viewAttendanceExcuseModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -639,14 +675,26 @@ var studentInterviewLogTable = (function () {
         e.preventDefault();
         var $btn = $(this);
         let recordid = $btn.attr('data-recordid');
-        
+        let wrapUp = null;
+        try {
+            wrapUp = $btn.attr('data-wrapup') ? JSON.parse($btn.attr('data-wrapup')) : null;
+        } catch (err) {
+            wrapUp = null;
+        }
+
         confirmModal.show();
+        // once, and added last so it runs after the listeners earlier clicks left behind
         document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
+            if (wrapUp) {
+                showWrapUpConfirm(recordid, wrapUp);
+                return;
+            }
             $("#confirmModal .confModTitle").html("Are you sure?" );
             $("#confirmModal .confModDesc").html('Want to mark this task as Completed? Please click on agree to continue.');
             $("#confirmModal .agreeWith").attr('data-recordid', recordid);
             $("#confirmModal .agreeWith").attr('data-status', 'COMPLETEDTASK');
-        });
+            $("#confirmModal .agreeWith").attr('data-force', '0');
+        }, { once: true });
     });
 
     $('.markAsPending').on('click', function(e){
@@ -699,22 +747,24 @@ var studentInterviewLogTable = (function () {
                 console.log(error)
             });
         }else if(action == 'COMPLETEDTASK'){
+            let force = $agreeBTN.attr('data-force') == '1' ? 1 : 0;
             axios({
                 method: 'post',
                 url: route('student.completed.task'),
-                data: {student : student, recordid : recordid},
+                data: {student : student, recordid : recordid, force : force},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 if (response.status == 200) {
                     $('#confirmModal button').removeAttr('disabled');
                     confirmModal.hide();
 
+                    let doneText = (response.data && response.data.wrap_up && response.data.message) ? escapeHtml(response.data.message) : 'student task status successfully changed to "COMPLETED".';
                     successModal.show();
                     document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                         $('#successModal .successModalTitle').html('Done!');
-                        $('#successModal .successModalDesc').html('student task status successfully changed to "COMPLETED".');
+                        $('#successModal .successModalDesc').html(doneText);
                         $('#successModal .successCloser').attr('data-action', 'RELOAD');
-                    });
+                    }, { once: true });
 
                     setTimeout(function(){
                         successModal.hide();
@@ -722,7 +772,22 @@ var studentInterviewLogTable = (function () {
                     }, 2000);
                 }
             }).catch(error =>{
-                console.log(error)
+                $('#confirmModal button').removeAttr('disabled');
+                let res = error.response || {};
+                if (res.status == 409 && res.data && res.data.wrap_up) {
+                    // the page was out of date: other tasks are open now, so ask with the current list
+                    showWrapUpConfirm(recordid, res.data.wrap_up);
+                } else if (res.status == 422 && res.data && res.data.message) {
+                    confirmModal.hide();
+                    warningModal.show();
+                    document.getElementById('warningModal').addEventListener('shown.tw.modal', function(event){
+                        $('#warningModal .warningModalTitle').html('Not completed');
+                        $('#warningModal .warningModalDesc').html(escapeHtml(res.data.message));
+                        $('#warningModal .warningCloser').attr('data-action', 'RELOAD');
+                    }, { once: true });
+                } else {
+                    console.log(error);
+                }
             });
         }else if(action == 'PENDINGTASK'){
             axios({

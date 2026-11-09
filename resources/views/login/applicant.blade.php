@@ -5,43 +5,39 @@
 @endsection
 
 @section('content')
-    <x-login-shell
+    <x-applicant-auth-shell
         :opt="$opt"
         title="Applicant sign in"
         subtitle="Sign in to continue your application, or register to get started."
-        brand-eyebrow="Admissions Portal"
-        brand-headline="Your application,<br>all in one <em>place</em>."
-        brand-subhead="Complete your details, upload documents and track your application status with London Churchill College."
-        :brand-features="[
-            ['icon' => 'lock', 'text' => 'Sign in with the email you registered with'],
-            ['icon' => 'shield', 'text' => 'Your personal details are kept secure and private'],
-        ]"
+        eyebrow="Admissions portal"
+        headline="Your application, all in one <em>place</em>."
+        subhead="Complete your details, upload documents and track your application status with London Churchill College."
     >
-        <form id="login-form" class="lcc-form lcc-form--top" onsubmit="return false;">
-            <div class="lcc-field">
-                <label class="lcc-label" for="email">Email address</label>
-                <input id="email" type="email" class="lcc-input login__input" placeholder="you@example.com" autocomplete="username">
-                <div id="error-email" class="lcc-error login__input-error"></div>
+        <form id="login-form" style="display:grid;gap:16px" onsubmit="return false;" novalidate>
+            <div class="field">
+                <label for="email">Email address</label>
+                <input id="email" type="email" class="ctl login__input" placeholder="you@example.com" autocomplete="username">
+                <div id="error-email" class="err-msg login__input-error"></div>
             </div>
-            <div class="lcc-field">
-                <div class="lcc-field__row">
-                    <label class="lcc-label" for="password">Password</label>
-                    <a href="{{ route('applicant.forget.password.get') }}" class="lcc-link lcc-link--right">Forgot password?</a>
+            <div class="field">
+                <div class="lbl-row">
+                    <label for="password">Password</label>
+                    <a href="{{ route('applicant.forget.password.get') }}" class="btn-link">Forgot password?</a>
                 </div>
-                <input id="password" type="password" class="lcc-input login__input" placeholder="••••••••" autocomplete="current-password">
-                <div id="error-password" class="lcc-error login__input-error"></div>
+                <input id="password" type="password" class="ctl login__input" placeholder="••••••••" autocomplete="current-password">
+                <div id="error-password" class="err-msg login__input-error"></div>
             </div>
-            <label class="lcc-check">
+            <label class="chk" for="remember-me">
                 <input id="remember-me" type="checkbox"> Remember me
             </label>
-            <button id="btn-login" type="submit" class="lcc-btn">Sign in</button>
-            <a href="{{ route('applicant.register') }}" class="lcc-btn-ghost">Create an applicant account</a>
+            <button id="btn-login" type="submit" class="btn btn-dark">Sign in</button>
+            <a href="{{ route('applicant.register') }}" class="btn btn-outline">Create an applicant account</a>
         </form>
 
-        <x-slot:footer>
-            Need help with your application? Contact <a href="mailto:admissions@londonchurchillcollege.ac.uk">admissions@londonchurchillcollege.ac.uk</a>
-        </x-slot>
-    </x-login-shell>
+        <p style="font-size:12.5px;color:#6b6a63;margin:0;text-align:center">
+            Applying through an education agent? Your agent creates the application for you; admissions can send you a sign-in link later.
+        </p>
+    </x-applicant-auth-shell>
 
     @if (session('verifymessage'))
         <div id="verify-notification-content" class="toastify-content hidden flex">
@@ -70,7 +66,7 @@
     <script type="module">
         (function () {
             async function login() {
-                $('#login-form').find('.login__input').removeClass('border-danger')
+                $('#login-form').find('.login__input').removeClass('err')
                 $('#login-form').find('.login__input-error').html('')
 
                 let email = $('#email').val()
@@ -86,11 +82,11 @@
                     $('#btn-login').html('Sign in')
                     if (err.response.data.message != 'Wrong email or password.') {
                         for (const [key, val] of Object.entries(err.response.data.errors)) {
-                            $(`#${key}`).addClass('border-danger')
+                            $(`#${key}`).addClass('err')
                             $(`#error-${key}`).html(val)
                         }
                     } else {
-                        $(`#password`).addClass('border-danger')
+                        $(`#password`).addClass('err')
                         $(`#error-password`).html(err.response.data.message)
                     }
                 })

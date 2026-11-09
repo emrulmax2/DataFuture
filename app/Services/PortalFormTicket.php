@@ -187,74 +187,9 @@ abstract class PortalFormTicket
         ]);
     }
 
-    /**
-     * The logo from Site Settings, embedded in the receipt.
-     *
-     * The uploaded file is a print-sized PNG — around 400KB — and attaching
-     * that to every receipt is wasteful enough that some clients will refuse to
-     * show it. A 420px copy is made once and reused; if the original is ever
-     * replaced in Site Settings the copy is rebuilt, because it is older.
-     */
+    /** The logo from Site Settings, sized for email; shared with the other emails that carry it. */
     protected function logoPath(): ?string
     {
-        $file = cache('site_logo') ?: optional(
-            \App\Models\Option::where('name', 'site_logo')->first()
-        )->value;
-
-        if (! $file):
-            return null;
-        endif;
-
-        $source = storage_path('app/public/'.$file);
-
-        if (! is_file($source)):
-            return null;
-        endif;
-
-        $small = storage_path('app/public/email/logo-email.png');
-
-        if (is_file($small) && filemtime($small) >= filemtime($source)):
-            return $small;
-        endif;
-
-        return $this->shrink($source, $small) ?: $source;
-    }
-
-    /** A width-constrained PNG copy, or null if GD could not make one. */
-    protected function shrink(string $source, string $target, int $width = 420): ?string
-    {
-        if (! function_exists('imagecreatefrompng')):
-            return null;
-        endif;
-
-        try {
-            $image = @imagecreatefrompng($source);
-
-            if (! $image):
-                return null;
-            endif;
-
-            $height = (int) round(imagesy($image) * ($width / imagesx($image)));
-            $small = imagecreatetruecolor($width, $height);
-
-            /* The crest sits on a dark header, so transparency has to survive. */
-            imagealphablending($small, false);
-            imagesavealpha($small, true);
-            imagecopyresampled($small, $image, 0, 0, 0, 0, $width, $height, imagesx($image), imagesy($image));
-
-            if (! is_dir(dirname($target))):
-                mkdir(dirname($target), 0775, true);
-            endif;
-
-            imagepng($small, $target, 9);
-            imagedestroy($image);
-            imagedestroy($small);
-        } catch (\Throwable $e) {
-            Log::warning('[Portal form] Logo could not be resized for email.', ['error' => $e->getMessage()]);
-
-            return null;
-        }
-
-        return is_file($target) ? $target : null;
+        return \App\Support\EmailLogo::path();
     }
 }

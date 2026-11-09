@@ -24,479 +24,635 @@ class ApplicantProfilePrintController extends Controller
 {
     public function generatePDF($applicantId)
     {
-        $applicant = Applicant::find($applicantId);
-        $applicantPendingTask = ApplicantTask::where('applicant_id', $applicantId)->where('status', 'Pending')->get();
-        $applicantCompletedTask = ApplicantTask::where('applicant_id', $applicantId)->where('status', 'Completed')->get();
-        $applicant->load(['title', 'notes', 'quals', 'employment', 'emails', 'sms', 'residency.residencyStatus', 'criminalConviction']);
+        [$pdf, $fileName] = $this->buildPdf($applicantId);
+
+        return $pdf->download($fileName);
+    }
+
+    /**
+     * The application form PDF and its download name. Also stored in the applicant's
+     * Uploads once the applicant e-signs it (App\Services\Admission\SignedApplicationDocuments).
+     */
+    public function buildPdf($applicantId): array
+    {
+        // New design (user, 27 Oct 2026): resources/views/pages/students/admission/pdf/application-form.blade.php.
+        // The previous HTML builder is kept below, commented out.
+        $applicant = Applicant::with([
+            'title', 'sexid', 'nation', 'country', 'other.ethnicity', 'other.leaver', 'disability.disabilities',
+            'users', 'contact', 'kin.relation', 'course.semester', 'course.creation.course', 'course.venue',
+            'feeeligibility.elegibility', 'quals', 'employment.reference', 'residency.residencyStatus', 'criminalConviction',
+        ])->findOrFail($applicantId);
         $applicantEsign = ApplicantESignature::where('applicant_id', $applicantId)->first();
         $finalizedEvent = ApplicantESignatureEvent::where('applicant_id', $applicantId)->where('event_type', EsignEventType::FINALIZED->value)->where('user_type', 'applicant')->first();
 
-        $PDFHTML = '';
-        $PDFHTML .= '<html>';
-            $PDFHTML .= '<head>';
-                $PDFHTML .= '<title>Application of '.$applicant->first_name.' '.$applicant->last_name.'</title>';
-                $PDFHTML .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
-                $PDFHTML .= '<style>
-                                body{font-family: Tahoma, sans-serif; font-size: 13px; line-height: normal; color: rgb(30, 41, 59);}
-                                table{margin-left: 0px; border-collapse: collapse; width: 100%;}
-                                figure{margin: 0;}
-                                @page{margin-top: 115px;margin-left: 30px;margin-right: 30px;margin-bottom: 30px;}
-                                header{position: fixed;left: 0px;right: 0px;height: 90px;margin-top: -90px;}
-                                
-                                .regInfoRow td{border-top: 1px solid gray;}
-                                .text-center{text-align: center;}
-                                .text-left{text-align: left;}
-                                .text-right{text-align: right;}
-                                .btn{display: inline-block; font-size: 10px; line-height: normal; font-weight: bold; color: #FFF; background: rgb(22 78 99); padding: 2px 5px; text-align: center;}
-                                .btn-success{background: rgb(13 148 13);}
-                                .btn-danger{background: rgb(185 28 28);}
+        $date = function ($value, string $format) {
+            if (empty($value)) return '';
+            try { return \Carbon\Carbon::parse($value)->format($format); } catch (\Throwable $e) { return ''; }
+        };
+        // addresses are stored in capitals; the design prints them in title case (the post code stays as it is)
+        $words = fn ($text) => ($text = trim((string) $text)) !== '' && mb_strtoupper($text) === $text ? mb_convert_case(mb_strtolower($text), MB_CASE_TITLE) : $text;
+        $address = function ($row) use ($words) {
+            if (!$row) return '';
+            $line1 = $words($row->address_line_1);
+            $line2 = $words($row->address_line_2);
+            // "189" + "Lodge Road" reads "189 Lodge Road"
+            $street = ctype_digit(str_replace(' ', '', $line1)) && $line2 !== '' ? [$line1.' '.$line2] : [$line1, $line2];
+            $parts = array_merge($street, [$words($row->city), $words($row->state), trim((string) $row->post_code), $words($row->country)]);
 
-                                .bodyContainer{font-size: 13px; line-height: normal; padding: 0 30px;}
-                                .tableTitle{font-size: 22px; font-weight: bold; color: #000; line-height: 22px; margin: 0;}
-                                .employeeInfo{line-height: normal;}
-                                .mb-30{margin-bottom: 30px;}
-                                .mb-20{margin-bottom: 20px;}
-                                .mb-15{margin-bottom: 15px;}
-                                .mb-10{margin-bottom: 10px;}
-                                .text-justify{text-align: justify;}
-                            
-                                .table {width: 100%; text-align: left; text-indent: 0; border-color: inherit; border-collapse: collapse;}
-                                .table th {border-style: solid;border-color: #e5e7eb;border-bottom-width: 2px;padding-left: 1.25rem;padding-right: 1.25rem;padding-top: 0.75rem;padding-bottom: 0.75rem;font-weight: 500;}
-                                .table td {border-style: solid;border-color: #e5e7eb; border-bottom-width: 1px;padding-left: 1.25rem;padding-right: 1.25rem;padding-top: 0.75rem;padding-bottom: 0.75rem;}
+            return implode(', ', array_filter($parts, fn ($part) => $part !== ''));
+        };
+        // UK numbers as "07000 000000"
+        $phone = function ($number) {
+            $digits = preg_replace('/\D+/', '', (string) $number);
+            return strlen($digits) === 11 && $digits[0] === '0' ? substr($digits, 0, 5).' '.substr($digits, 5) : trim((string) $number);
+        };
+        // null = not answered (shown as a dash); the old form printed every other value as Yes / No
+        $flag = fn ($value) => $value === null || $value === '' ? null : (int) $value === 1;
+        $yesNo = fn ($value) => (int) $value === 1;
 
-                                .table.table-bordered th, .table.table-bordered td {border-left-width: 1px;border-right-width: 1px;border-top-width: 1px;}
+        $other = $applicant->other;
+        $course = $applicant->course;
+        $fullName = trim(implode(' ', array_filter([$applicant->title->name ?? '', $applicant->first_name, $applicant->last_name])));
+        $courseName = $course->creation->course->name ?? '';
+        $semester = $course->semester->name ?? '';
+        $submitted = $date($applicant->submission_date, 'j M Y');
+        $employmentStatus = $other->employment_status ?? '';
+        // as on the old form, jobs are listed unless unemployed, a contractor, a consultant or an office holder
+        $showJobs = $employmentStatus !== '' && !in_array($employmentStatus, ['Unemployed', 'Contractor', 'Consultant', 'Office Holder'], true);
+        $conviction = $applicant->criminalConviction;
+        $signature = !empty($applicantEsign->signature) && is_file(public_path($applicantEsign->signature)) ? public_path($applicantEsign->signature) : null;
+        $photo = !empty($applicant->photo) && Storage::disk('local')->exists('public/applicants/'.$applicant->id.'/'.$applicant->photo)
+            ? public_path('storage/applicants/'.$applicant->id.'/'.$applicant->photo) : null;
+        $logo = resource_path('images/pdf/lcc-crest.png');
 
-                                .table.table-sm th {padding-left: 1rem;padding-right: 1rem;padding-top: 0.5rem;padding-bottom: 0.5rem;}
-                                .table.table-sm td {padding-left: 1rem;padding-right: 1rem;padding-top: 0.5rem;padding-bottom: 0.5rem;}
+        $html = view('pages.students.admission.pdf.application-form', [
+            'formTitle' => 'UK/EU Student Application',
+            'ref' => $applicant->application_no ?: $applicant->id,
+            'status' => '',
+            'fullName' => $fullName,
+            'headline' => implode(' · ', array_filter([$courseName, $semester, $submitted !== '' ? 'submitted '.$submitted : ''])),
+            'generated' => now()->format('d/m/Y, H:i:s'),
+            'logo' => is_file($logo) ? $logo : null,
+            'photo' => $photo,
+            'personal' => [
+                'dob' => $date($applicant->getRawOriginal('date_of_birth'), 'j F Y'),
+                'gender' => $applicant->sexid->name ?? '',
+                'nationality' => $applicant->nation->name ?? '',
+                'country_of_birth' => $applicant->country->name ?? '',
+                'ethnicity' => $other->ethnicity->name ?? '',
+                'care_leaver' => $other->leaver->name ?? '',
+                'disability' => (int) ($other->disability_status ?? 0) === 1,
+                'allowance' => $yesNo($other->disabilty_allowance ?? 0),
+                'disabilities' => $applicant->disability ? $applicant->disability->map(fn ($d) => $d->disabilities->name ?? null)->filter()->implode(', ') : '',
+            ],
+            'contact' => [
+                'email' => $applicant->users->email ?? '',
+                'home' => $phone($applicant->contact->home ?? ''),
+                'mobile' => $phone($applicant->contact->mobile ?? ''),
+                'address' => $address($applicant->contact),
+            ],
+            'kin' => [
+                'name' => $applicant->kin->name ?? '',
+                'relation' => $applicant->kin->relation->name ?? '',
+                'mobile' => $phone($applicant->kin->mobile ?? ''),
+                'email' => $applicant->kin->email ?? '',
+                'address' => $address($applicant->kin),
+            ],
+            'course' => [
+                'start' => $semester,
+                'course' => $courseName,
+                'venue' => $course->venue->name ?? '',
+                'funding' => $course->student_loan ?? '',
+                'other_funding' => $course->other_funding ?? '',
+                'sfe_applied' => $yesNo($course->student_finance_england ?? 0),
+                'fund_receipt' => $yesNo($course->fund_receipt ?? 0),
+                'applied_received_fund' => $yesNo($course->applied_received_fund ?? 0),
+                'evening_weekend' => (int) ($course->creation->has_evening_and_weekend ?? 0) === 1,
+                'full_time' => $yesNo($course->full_time ?? 0),
+                'fee_eligibility' => isset($applicant->feeeligibility->elegibility->name) && (int) ($applicant->feeeligibility->fee_eligibility_id ?? 0) > 0 ? $applicant->feeeligibility->elegibility->name : '',
+            ],
+            'hasQualification' => (int) ($other->is_edication_qualification ?? 0) === 1,
+            'qualifications' => ($applicant->quals ?? collect())->map(fn ($q) => [
+                'qualification' => $q->highest_academic,
+                'awarding_body' => $q->awarding_body,
+                'subjects' => $q->subjects,
+                'result' => $q->result,
+                'awarded' => $date($q->getRawOriginal('degree_award_date'), 'F Y'),
+            ])->all(),
+            'employmentStatus' => $employmentStatus,
+            'employments' => $showJobs ? ($applicant->employment ?? collect())->map(function ($job) use ($date, $address, $phone) {
+                $start = !empty($job->start_date) ? $date('01-'.$job->start_date, 'F Y') : '';
+                $end = !empty($job->end_date) ? $date('01-'.$job->end_date, 'F Y') : '';
+                $ref = $job->reference->first();
 
-                                .barTitle{padding: 5px 10px; background: rgb(226, 232, 240); font-size: 14px; font-weight: bold; line-height: normal;}
-                                .spacer{padding: 5px 0 6px;}
-                                .theLabel{vertical-align: top; padding: 0 10px 15px; width: 20%; font-weight: medium; font-size: 13px; color: rgb(100, 116, 139); line-height: normal;}
-                                .theValue{vertical-align: top; padding: 0 10px 15px; width: 30%; font-weight: medium; font-size: 13px; color: rgb(30, 41, 59); line-height: normal;}
-                                .theValue.tv-large{width: 80%;}
-
-                                .pdfList{margin: 0; padding: 0 0 0 10px; }
-                                .pdfList li{margin: 0 0 3px; font-size: 12px; line-height: normal; color: rgb(100, 116, 139);}
-                            </style>';
-            $PDFHTML .= '</head>';
-            $PDFHTML .= '<body>';
-
-            $PDFHTML .= '<header>';
-                $PDFHTML .= '<table>';
-                    $PDFHTML .= '<tr>';
-                        $PDFHTML .= '<td>';
-                            $PDFHTML .= '<img style="height: 60px; width: auto;" src="'.asset("build/assets/images/L1_logo.svg").'"/>';
-                        $PDFHTML .= '</td>';
-                        $PDFHTML .= '<td class="text-right">';//'https://datafuture2.lcc.ac.uk/limon/avatar.png'
-                            $PDFHTML .= '<img style="height: 60px; width: auto;" alt="'.$applicant->title->name.' '.$applicant->first_name.' '.$applicant->last_name.'" src="'.(isset($applicant->photo) && !empty($applicant->photo) && Storage::disk('local')->exists('public/applicants/'.$applicant->id.'/'.$applicant->photo) ? public_path('storage/applicants/'.$applicant->id.'/'.$applicant->photo) : asset('build/assets/images/placeholders/200x200.jpg')).'">';
-                            $PDFHTML .= '<span style="font-size: 10px; padding: 3px 0 0; font-weight: 700; display: block;">'.(!empty($applicant->application_no) ? $applicant->application_no : '').'</span>';
-                        $PDFHTML .= '</td>';
-                    $PDFHTML .= '</tr>';
-                $PDFHTML .= '</table>';
-            $PDFHTML .= '</header>';
-
-            /*PDF Body Start Here*/
-            $PDFHTML .= '<table class="mb-10">';
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="barTitle text-center">UK/EU Student Application</td>';
-                $PDFHTML .= '</tr>';
-            $PDFHTML .= '</table>';
-
-            $PDFHTML .= '<table class="mb-10">';
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td colspan="4" class="barTitle text-left">Personal Details</td>';
-                $PDFHTML .= '</tr>';
-                $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="theLabel">Name</td>';
-                    $PDFHTML .= '<td class="theValue">'.$applicant->title->name.' '.$applicant->first_name.' '.$applicant->last_name.'</td>';
-                
-                    $PDFHTML .= '<td class="theLabel">Date of Birth</td>';
-                    $PDFHTML .= '<td class="theValue">'.date('jS F, Y', strtotime($applicant->date_of_birth)).'</td>';
-                $PDFHTML .= '</tr>';
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="theLabel">Gender</td>';
-                    $PDFHTML .= '<td class="theValue">'.(isset($applicant->sexid->name) && !empty($applicant->sexid->name) ? $applicant->sexid->name : '').'</td>';
-                    $PDFHTML .= '<td class="theLabel">Nationality</td>';
-                    $PDFHTML .= '<td class="theValue">'.$applicant->nation->name.'</td>';
-                $PDFHTML .= '</tr>';
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="theLabel">Country of Birth</td>';
-                    $PDFHTML .= '<td class="theValue">'.$applicant->country->name.'</td>';
-                    $PDFHTML .= '<td class="theLabel">Ethnicity</td>';
-                    $PDFHTML .= '<td class="theValue">'.$applicant->other->ethnicity->name.'</td>';
-                $PDFHTML .= '</tr>';
-
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="theLabel">Care Leaver</td>';
-                    $PDFHTML .= '<td class="theValue">'.(isset($applicant->other->leaver->name) && !empty($applicant->other->leaver->name) ? $applicant->other->leaver->name : '---').'</td>';
-                    $PDFHTML .= '<td class="theLabel">Disability Status</td>';
-                    $PDFHTML .= '<td class="theValue">'.(isset($applicant->other->disability_status) && $applicant->other->disability_status == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
-                $PDFHTML .= '</tr>';
-
-                // $PDFHTML .= '<tr>';
-                //     $PDFHTML .= '<td class="theLabel">Disability Status</td>';
-                //     $PDFHTML .= '<td class="theValue">'.(isset($applicant->other->disability_status) && $applicant->other->disability_status == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
-                //     if(isset($applicant->other->disability_status) && $applicant->other->disability_status == 1):
-                //         $PDFHTML .= '<td class="theLabel">Allowance Claimed?</td>';
-                //         $PDFHTML .= '<td class="theValue">'.(isset($applicant->other->disabilty_allowance) && $applicant->other->disabilty_allowance == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
-                //     endif;
-                // $PDFHTML .= '</tr>';
-                if(isset($applicant->other->disability_status) && $applicant->other->disability_status == 1):
-                    $PDFHTML .= '<tr>';
-                        if(isset($applicant->other->disability_status) && $applicant->other->disability_status == 1):
-                            $PDFHTML .= '<td class="theLabel">Allowance Claimed?</td>';
-                            $PDFHTML .= '<td class="theValue">'.(isset($applicant->other->disabilty_allowance) && $applicant->other->disabilty_allowance == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
-                        endif;
-                        $PDFHTML .= '<td class="theLabel">Disabilities</td>';
-                        $PDFHTML .= '<td class="theValue tv-large" colspan="3">';
-                            if(isset($applicant->disability) && !empty($applicant->disability)):
-                                $PDFHTML .= '<ul class="pdfList">';
-                                    foreach($applicant->disability as $dis):
-                                        $PDFHTML .= '<li><span></span>'.$dis->disabilities->name.'</li>';
-                                    endforeach;
-                                $PDFHTML .= '</ul>';
-                            endif;
-                        $PDFHTML .= '</td>';
-                    $PDFHTML .= '</tr>';
-                endif;
-
-                /* Contact Details */
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td colspan="4" class="barTitle text-left">Contact Details</td>';
-                $PDFHTML .= '</tr>';
-                $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="theLabel">Email</td>';
-                    $PDFHTML .= '<td class="theValue">'.$applicant->users->email.'</td>';
-                    $PDFHTML .= '<td class="theLabel">Home Phone</td>';
-                    $PDFHTML .= '<td class="theValue">'.$applicant->contact->home.'</td>';
-                $PDFHTML .= '</tr>';
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="theLabel">Mobile</td>';
-                    $PDFHTML .= '<td class="theValue">'.$applicant->contact->mobile.'</td>';
-                    $PDFHTML .= '<td class="theLabel">Address</td>';
-                    $PDFHTML .= '<td class="theValue">';
-                        if(isset($applicant->contact->address_line_1) && !empty($applicant->contact->address_line_1)):
-                            $PDFHTML .= $applicant->contact->address_line_1.'<br/>';
-                        endif;
-                        if(isset($applicant->contact->address_line_2) && !empty($applicant->contact->address_line_2)):
-                            $PDFHTML .= $applicant->contact->address_line_2.'<br/>';
-                        endif;
-                        if(isset($applicant->contact->city) && !empty($applicant->contact->city)):
-                            $PDFHTML .= $applicant->contact->city.', ';
-                        endif;
-                        if(isset($applicant->contact->state) && !empty($applicant->contact->state)):
-                            $PDFHTML .= $applicant->contact->state.', <br/>';
-                        endif;
-                        if(isset($applicant->contact->post_code) && !empty($applicant->contact->post_code)):
-                            $PDFHTML .= $applicant->contact->post_code.',';
-                        endif;
-                        if(isset($applicant->contact->country) && !empty($applicant->contact->country)):
-                            $PDFHTML .= $applicant->contact->country;
-                        endif;
-                    $PDFHTML .= '</td>';
-                $PDFHTML .= '</tr>';
-
-                /* Next of Kin */
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td colspan="4" class="barTitle text-left">Next of Kin</td>';
-                $PDFHTML .= '</tr>';
-                $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="theLabel">Name</td>';
-                    $PDFHTML .= '<td class="theValue">'.$applicant->kin->name.'</td>';
-                    $PDFHTML .= '<td class="theLabel">Relation</td>';
-                    $PDFHTML .= '<td class="theValue">'.(isset($applicant->kin->relation->name) ? $applicant->kin->relation->name : '').'</td>';
-                $PDFHTML .= '</tr>';
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="theLabel">Mobile</td>';
-                    $PDFHTML .= '<td class="theValue">'.$applicant->kin->mobile.'</td>';
-                    $PDFHTML .= '<td class="theLabel">Email</td>';
-                    $PDFHTML .= '<td class="theValue">'.(isset($applicant->kin->email) && !empty($applicant->kin->email) ? $applicant->kin->email : '---').'</td>';
-                $PDFHTML .= '</tr>';
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="theLabel">Address</td>';
-                    $PDFHTML .= '<td class="theValue">';
-                        if(isset($applicant->kin->address_line_1) && !empty($applicant->kin->address_line_1)):
-                            $PDFHTML .= $applicant->kin->address_line_1.'<br/>';
-                        endif;
-                        if(isset($applicant->kin->address_line_2) && !empty($applicant->kin->address_line_2)):
-                            $PDFHTML .= $applicant->kin->address_line_2.'<br/>';
-                        endif;
-                        if(isset($applicant->kin->city) && !empty($applicant->kin->city)):
-                            $PDFHTML .= $applicant->kin->city.', ';
-                        endif;
-                        if(isset($applicant->kin->state) && !empty($applicant->kin->state)):
-                            $PDFHTML .= $applicant->kin->state.', <br/>';
-                        endif;
-                        if(isset($applicant->kin->post_code) && !empty($applicant->kin->post_code)):
-                            $PDFHTML .= $applicant->kin->post_code.',';
-                        endif;
-                        if(isset($applicant->kin->country) && !empty($applicant->kin->country)):
-                            $PDFHTML .= $applicant->kin->country;
-                        endif;
-                    $PDFHTML .= '</td>';
-                    $PDFHTML .= '<td class="theLabel"></td>';
-                    $PDFHTML .= '<td class="theValue"></td>';
-                $PDFHTML .= '</tr>';
-
-                /* Proposed Course */
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td colspan="4" class="barTitle text-left">Proposed Course</td>';
-                $PDFHTML .= '</tr>';
-                $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">When would you like to start your course?</td>';
-                    $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.$applicant->course->semester->name.'</td>';
-                $PDFHTML .= '</tr>';
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Which course do you propose to take?</td>';
-                    $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.$applicant->course->creation->course->name.'</td>';
-                $PDFHTML .= '</tr>';
-                if(isset($applicant->course->venue) && !empty($applicant->course->venue)):
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Which venue do you want to study?</td>';
-                    $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'. $applicant->course->venue->name.'</td>';
-                $PDFHTML .= '</tr>';
-                endif;
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">How are you funding your education at London Churchill College?</td>';
-                    $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.$applicant->course->student_loan.'</td>';
-                $PDFHTML .= '</tr>';
-                if($applicant->course->student_loan == 'Student Loan'):
-                    $PDFHTML .= '<tr>';
-                        $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">If your funding is through Student Finance England, please choose from the following. Have you applied for the proposed course?</td>';
-                        $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->course->student_finance_england) && $applicant->course->student_finance_england == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
-                    $PDFHTML .= '</tr>';
-                    if(isset($applicant->course->student_finance_england) && $applicant->course->student_finance_england == 1):
-                        $PDFHTML .= '<tr>';
-                            $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Are you already in receipt of funds?</td>';
-                            $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->course->fund_receipt) && $applicant->course->fund_receipt == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
-                        $PDFHTML .= '</tr>';
-                    endif;
-                    $PDFHTML .= '<tr>';
-                        $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Have you ever apply/Received any fund/Loan from SLC/government Loan for any other programme/institution?</td>';
-                        $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->course->applied_received_fund) && $applicant->course->applied_received_fund == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
-                    $PDFHTML .= '</tr>';
-                elseif($applicant->course->student_loan == 'Others'):
-                    $PDFHTML .= '<tr>';
-                        $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Other Funding</td>';
-                        $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->course->other_funding) && $applicant->course->other_funding != '' ? $applicant->course->other_funding : '').'</td>';
-                    $PDFHTML .= '</tr>';
-                endif;
-                if(isset($applicant->course->creation->has_evening_and_weekend) && $applicant->course->creation->has_evening_and_weekend == 1):
-                    $PDFHTML .= '<tr>';
-                        $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Are you applying for evening and weekend classes (Full Time)</td>';
-                        $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->course->full_time) && $applicant->course->full_time == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
-                    $PDFHTML .= '</tr>';
-                endif;
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Fee Eligibility</td>';
-                    $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->feeeligibility->elegibility->name) && isset($applicant->feeeligibility->fee_eligibility_id) && $applicant->feeeligibility->fee_eligibility_id > 0 ? $applicant->feeeligibility->elegibility->name : '---').'</td>';
-                $PDFHTML .= '</tr>';
-
-                /* Educational Qualification */
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td colspan="4" class="barTitle text-left">Educational Qualification</td>';
-                $PDFHTML .= '</tr>';
-                $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Do you have any formal academic qualification?</td>';
-                    $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->other->is_edication_qualification) && $applicant->other->is_edication_qualification == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
-                $PDFHTML .= '</tr>';
-                if(isset($applicant->other->is_edication_qualification) && $applicant->other->is_edication_qualification == 1):
-                    $PDFHTML .= '<tr>';
-                        $PDFHTML .= '<td colspan="4" style="padding: 3px 0 0;">';
-                            $PDFHTML .= '<table class="table table-bordered table-sm mb-15">';
-                                $PDFHTML .= '<thead>';
-                                    $PDFHTML .= '<tr>';
-                                        $PDFHTML .= '<th>Awarding Body</th>';
-                                        $PDFHTML .= '<th>Highest Academic Qualification</th>';
-                                        $PDFHTML .= '<th>Subjects</th>';
-                                        $PDFHTML .= '<th>Result</th>';
-                                        $PDFHTML .= '<th>Award Date</th>';
-                                    $PDFHTML .= '</tr>';
-                                $PDFHTML .= '</thead>';
-                                $PDFHTML .= '<tbody>';
-                                    if(isset($applicant->quals) && $applicant->quals->count() > 0):
-                                        foreach($applicant->quals as $qual):
-                                            $PDFHTML .= '<tr>';
-                                                $PDFHTML .= '<td>'.$qual->awarding_body.'</td>';
-                                                $PDFHTML .= '<td>'.$qual->highest_academic.'</td>';
-                                                $PDFHTML .= '<td>'.$qual->subjects.'</td>';
-                                                $PDFHTML .= '<td>'.$qual->result.'</td>';
-                                                $PDFHTML .= '<td>'.date('F, Y', strtotime($qual->degree_award_date)).'</td>';
-                                            $PDFHTML .= '</tr>';
-                                        endforeach;
-                                    else:
-                                        $PDFHTML .= '<tr><td colspan="5" class="text-center">No data found!</td></tr>';
-                                    endif;
-                                $PDFHTML .= '</tbody>';
-                            $PDFHTML .= '</table>';
-                        $PDFHTML .= '</td>';
-                    $PDFHTML .= '</tr>';
-                endif;
-
-                /* Employment History */
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td colspan="4" class="barTitle text-left">Employment History</td>';
-                $PDFHTML .= '</tr>';
-                $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">What is your current employment status?</td>';
-                    $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->other->employment_status) && $applicant->other->employment_status != '' ? $applicant->other->employment_status : '---').'</td>';
-                $PDFHTML .= '</tr>';
-                if(!isset($applicant->other->employment_status) || ($applicant->other->employment_status == 'Unemployed' || $applicant->other->employment_status == 'Contractor' || $applicant->other->employment_status == 'Consultant' || $applicant->other->employment_status == 'Office Holder')):
-                    $emptStatus = false;
-                else:
-                    $emptStatus = true;
-                endif;
-                if($emptStatus):
-                    $PDFHTML .= '<tr>';
-                        $PDFHTML .= '<td colspan="4" style="padding: 3px 0 5px;">';
-                            if(isset($applicant->employment) && $applicant->employment->count() > 0):
-                                foreach($applicant->employment as $empt):
-                                    $address = '';
-                                    $address .= $empt->address_line_1.'<br/>';
-                                    $address .= ($empt->address_line_2 != '' ? $empt->address_line_2.'<br/>' : '');
-                                    $address .= ($empt->city != '' ? $empt->city.', ' : '');
-                                    $address .= ($empt->state != '' ? $empt->state.', ' : '');
-                                    $address .= ($empt->post_code != '' ? $empt->post_code.', ' : '');
-                                    $address .= ($empt->country != '' ? '<br/>'.$empt->country : '');
-
-                                    $PDFHTML .= '<div style="border: 1px solid rgb(226, 232, 240); padding: 15px 0 0; display: block;" class="mb-10">';
-                                        $PDFHTML .= '<table>';
-                                            $PDFHTML .= '<tr>';
-                                                $PDFHTML .= '<td class="theLabel">Organization</td>';
-                                                $PDFHTML .= '<td class="theValue">'.$empt->company_name.'</td>';
-                                                $PDFHTML .= '<td class="theLabel">Phone</td>';
-                                                $PDFHTML .= '<td class="theValue">'.$empt->company_phone.'</td>';
-                                            $PDFHTML .= '</tr>';
-                                            $PDFHTML .= '<tr>';
-                                                $PDFHTML .= '<td class="theLabel">Position</td>';
-                                                $PDFHTML .= '<td class="theValue">'.$empt->position.'</td>';
-                                                $PDFHTML .= '<td class="theLabel">Start</td>';
-                                                $PDFHTML .= '<td class="theValue">'.(!empty($empt->start_date) ? date('F, Y', strtotime('01-'.$empt->start_date)) : '').'</td>';
-                                            $PDFHTML .= '</tr>';
-                                            $PDFHTML .= '<tr>';
-                                                $PDFHTML .= '<td class="theLabel">End</td>';
-                                                $PDFHTML .= '<td class="theValue">'.(!empty($empt->end_date) ? date('F, Y', strtotime('01-'.$empt->end_date)) : '').'</td>';
-                                                $PDFHTML .= '<td class="theLabel">Address</td>';
-                                                $PDFHTML .= '<td class="theValue">'.$address.'</td>';
-                                            $PDFHTML .= '</tr>';
-                                            $PDFHTML .= '<tr>';
-                                                $PDFHTML .= '<td class="theLabel">Contact Person</td>';
-                                                $PDFHTML .= '<td class="theValue">'.$empt->reference[0]->name.'</td>';
-                                                $PDFHTML .= '<td class="theLabel">Position</td>';
-                                                $PDFHTML .= '<td class="theValue">'.$empt->reference[0]->position.'</td>';
-                                            $PDFHTML .= '</tr>';
-                                            $PDFHTML .= '<tr>';
-                                                $PDFHTML .= '<td class="theLabel">Phone</td>';
-                                                $PDFHTML .= '<td class="theValue">'.$empt->reference[0]->phone.'</td>';
-                                                $PDFHTML .= '<td class="theLabel"></td>';
-                                                $PDFHTML .= '<td class="theValue"></td>';
-                                            $PDFHTML .= '</tr>';
-                                        $PDFHTML .= '</table>';
-                                    $PDFHTML .= '</div>';
-                                endforeach;
-                            endif;
-                        $PDFHTML .= '</td>';
-                    $PDFHTML .= '</tr>';
-                endif;
-                /* Residency Status and Criminal Conviction */
-                $residencyStatusName = (isset($applicant->residency->residencyStatus->name) ? $applicant->residency->residencyStatus->name : '---');
-                $criminalDeclarationHtml = (isset($applicant->criminalConviction->criminal_declaration) && (int) $applicant->criminalConviction->criminal_declaration === 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>');
-                $criminalConvictionHtml = (isset($applicant->criminalConviction->have_you_been_convicted) && (int) $applicant->criminalConviction->have_you_been_convicted === 1 ? '<span class="btn btn-success">Yes</span>' : (isset($applicant->criminalConviction->have_you_been_convicted) ? '<span class="btn btn-danger">No</span>' : '---'));
-                $criminalConvictionDetails = (isset($applicant->criminalConviction->criminal_conviction_details) && $applicant->criminalConviction->criminal_conviction_details != '' ? $applicant->criminalConviction->criminal_conviction_details : 'N/A');
-
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td colspan="4" class="barTitle text-left">Residency Status and Criminal Convictions</td>';
-                $PDFHTML .= '</tr>';
-                $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="theLabel">Residency Status</td>';
-                    $PDFHTML .= '<td class="theValue">'.$residencyStatusName.'</td>';
-                    $PDFHTML .= '<td class="theLabel"></td>';
-                    $PDFHTML .= '<td class="theValue"></td>';
-                $PDFHTML .= '</tr>';
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="theLabel">Have you been convicted?</td>';
-                    $PDFHTML .= '<td class="theValue">'.$criminalConvictionHtml.'</td>';
-                    if(isset($applicant->criminalConviction->have_you_been_convicted) && (int) $applicant->criminalConviction->have_you_been_convicted === 1):
-                        $PDFHTML .= '<td class="theLabel">Criminal Declaration</td>';
-                        $PDFHTML .= '<td class="theValue">'.$criminalDeclarationHtml.'</td>';
-                    else:
-                        $PDFHTML .= '<td class="theLabel"></td>';
-                        $PDFHTML .= '<td class="theValue"></td>';
-                    endif;
-                $PDFHTML .= '</tr>';
-
-
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td colspan="4" class="barTitle text-left">Others</td>';
-                $PDFHTML .= '</tr>';
-                $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
-                if(isset($applicant->referral_code) && $applicant->referral_code != ''):
-                    $PDFHTML .= '<tr>';
-                        $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">If you referred by Somone/ Agent, Please enter the Referral Code.</td>';
-                        $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->referral_code) && $applicant->referral_code != '' ? $applicant->referral_code : '').'</td>';
-                    $PDFHTML .= '</tr>';
-                endif;
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="theLabel" style="width: 20%;">Video Consent:</td>';
-                    $PDFHTML .= '<td class="theValue" style="width: 80%;" colspan="3">';
-                        $PDFHTML .= '<div style="font-size: 13px; line-height: normal; position: relative; padding: 0 0 0 35px;">';
-                            $PDFHTML .= '<span style="position: absolute; left: 0; top: 3px; width:20px; height: 20px; background: transparent; border: 1px solid #d2d4d6; font-size: 20px; text-align: center; color: #FFF; font-family: DejaVu Sans, sans-serif;"></span>';
-                            $PDFHTML .= 'I hereby authorize the filming and utilization of recordings featuring my person, conducted by members or staff of
-                                         London Churchill College, exclusively for admission purposes.';
-                        $PDFHTML .= '</div>';
-                    $PDFHTML .= '</td>';
-                $PDFHTML .= '</tr>';
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="theLabel" style="width: 20%;">Declaration:</td>';
-                    $PDFHTML .= '<td class="theValue" style="width: 80%;" colspan="3">';
-                        $PDFHTML .= '<div style="font-size: 13px; line-height: normal; position: relative; padding: 0 0 0 35px;">';
-                            $PDFHTML .= '<span style="position: absolute; left: 0; top: 3px; width:20px; height: 20px; background: rgb(22, 78, 99); font-size: 20px; text-align: center; color: #FFF; font-family: DejaVu Sans, sans-serif;"><i style="position: relative; top: -8px;">&check;</i></span>';
-                            $PDFHTML .= 'I hereby verify the accuracy and truthfulness of the information provided in this form to the best 
-                                        of my knowledge. It is my responsibility to stay informed about the terms and conditions as well as 
-                                        the policies of the college, and I commit to comply with them. I have thoroughly reviewed the 
-                                        college\'s terms and conditions and student privacy policy and pledge to adhere to them throughout 
-                                        my entire course of study.';
-                        $PDFHTML .= '</div>';
-                    $PDFHTML .= '</td>';
-                $PDFHTML .= '</tr>';
-
-                /* Signature Area */
-                $PDFHTML .= '<tr><td style="width: 100%; padding: 30px 0 0;" colspan="4"></td></tr>';
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td colspan="2" style="width: 50%;">'; 
-                        $PDFHTML .= '<span style="font-weight: bold; font-size: 12px; line-height: normal; margin: 0 0 5px; display: block;">Student\'s Signature:</span>';
-                        if(isset($applicantEsign->signature) && !empty($applicantEsign->signature)):
-                            $PDFHTML .= '<span style="height:40px; width:200px; display: inline-block;">';
-                                $PDFHTML .= '<img src="'. (isset($applicantEsign->signature) && !empty($applicantEsign->signature) ? $applicantEsign->signature : '') . '" style="width: 100%; height: auto; display:inline-block;" />';
-                            $PDFHTML .= '</span>';
-                        endif;
-                    $PDFHTML .= '</td>';
-                    $PDFHTML .= '<td colspan="2" style="width: 50%;" class="text-right">'; 
-                        $PDFHTML .= '<span style="text-align: right; font-weight: bold; font-size: 12px; line-height: normal; margin: 0 0 5px; display: block;">Date:</span>';
-                        $PDFHTML .= '<span style="height:40px; width:200px; display: inline-block;">';
-                            $PDFHTML .= (isset($finalizedEvent->created_at) && !empty($finalizedEvent->created_at) ? date('d-m-Y', strtotime($finalizedEvent->created_at)) : '');
-                        $PDFHTML .= '</span>';
-                    $PDFHTML .= '</td>';
-                $PDFHTML .= '</tr>';
-
-            $PDFHTML .= '</table>';
-            /*PDF Body End Here*/
-
-            $PDFHTML .= '</body>';
-        $PDFHTML .= '</html>';
+                return [
+                    'org' => $job->company_name,
+                    'when' => $start.($end !== '' ? ' – '.$end : ((int) $job->continuing === 1 && $start !== '' ? ' – present' : '')),
+                    'position' => $job->position,
+                    'phone' => $phone($job->company_phone),
+                    'ref_name' => $ref->name ?? '',
+                    'ref_position' => $ref->position ?? '',
+                    'ref_phone' => $phone($ref->phone ?? ''),
+                    'address' => $address($job),
+                ];
+            })->all() : [],
+            'residency' => [
+                'status' => $applicant->residency->residencyStatus->name ?? '',
+                'convicted' => $flag($conviction->have_you_been_convicted ?? null),
+                'declaration' => $yesNo($conviction->criminal_declaration ?? 0),
+                'details' => $conviction->criminal_conviction_details ?? '',
+            ],
+            'referralCode' => $applicant->referral_code ?? '',
+            'collegeIntroduction' => $other->college_introduction ?? '',
+            'videoConsent' => (bool) ($applicantEsign->video_consent ?? false),
+            // the e-signature records the declaration; before that, submitting the application declared it
+            'declared' => $applicantEsign && $applicantEsign->status === 'accepted' ? (bool) $applicantEsign->declaration : !empty($applicant->submission_date),
+            'signature' => $signature,
+            'signedOn' => $date($finalizedEvent->created_at ?? null, 'd-m-Y'),
+        ])->render();
 
         $fileName = 'Application_of_'.$applicant->first_name.'_'.$applicant->last_name.'.pdf';
-        $pdf = PDF::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true])
+        $pdf = PDF::loadHTML($html)
+            ->setOption(['isRemoteEnabled' => true, 'isHtml5ParserEnabled' => true])
             ->setPaper('a4', 'portrait')
             ->setWarnings(false);
-        return $pdf->download($fileName);
- 
+
+        return [$pdf, $fileName];
+
+//         $applicant = Applicant::find($applicantId);
+//         $applicantPendingTask = ApplicantTask::where('applicant_id', $applicantId)->where('status', 'Pending')->get();
+//         $applicantCompletedTask = ApplicantTask::where('applicant_id', $applicantId)->where('status', 'Completed')->get();
+//         $applicant->load(['title', 'notes', 'quals', 'employment', 'emails', 'sms', 'residency.residencyStatus', 'criminalConviction']);
+//         $applicantEsign = ApplicantESignature::where('applicant_id', $applicantId)->first();
+//         $finalizedEvent = ApplicantESignatureEvent::where('applicant_id', $applicantId)->where('event_type', EsignEventType::FINALIZED->value)->where('user_type', 'applicant')->first();
+// 
+//         $PDFHTML = '';
+//         $PDFHTML .= '<html>';
+//             $PDFHTML .= '<head>';
+//                 $PDFHTML .= '<title>Application of '.$applicant->first_name.' '.$applicant->last_name.'</title>';
+//                 $PDFHTML .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
+//                 $PDFHTML .= '<style>
+//                                 body{font-family: Tahoma, sans-serif; font-size: 13px; line-height: normal; color: rgb(30, 41, 59);}
+//                                 table{margin-left: 0px; border-collapse: collapse; width: 100%;}
+//                                 figure{margin: 0;}
+//                                 @page{margin-top: 115px;margin-left: 30px;margin-right: 30px;margin-bottom: 30px;}
+//                                 header{position: fixed;left: 0px;right: 0px;height: 90px;margin-top: -90px;}
+//                                 
+//                                 .regInfoRow td{border-top: 1px solid gray;}
+//                                 .text-center{text-align: center;}
+//                                 .text-left{text-align: left;}
+//                                 .text-right{text-align: right;}
+//                                 .btn{display: inline-block; font-size: 10px; line-height: normal; font-weight: bold; color: #FFF; background: rgb(22 78 99); padding: 2px 5px; text-align: center;}
+//                                 .btn-success{background: rgb(13 148 13);}
+//                                 .btn-danger{background: rgb(185 28 28);}
+// 
+//                                 .bodyContainer{font-size: 13px; line-height: normal; padding: 0 30px;}
+//                                 .tableTitle{font-size: 22px; font-weight: bold; color: #000; line-height: 22px; margin: 0;}
+//                                 .employeeInfo{line-height: normal;}
+//                                 .mb-30{margin-bottom: 30px;}
+//                                 .mb-20{margin-bottom: 20px;}
+//                                 .mb-15{margin-bottom: 15px;}
+//                                 .mb-10{margin-bottom: 10px;}
+//                                 .text-justify{text-align: justify;}
+//                             
+//                                 .table {width: 100%; text-align: left; text-indent: 0; border-color: inherit; border-collapse: collapse;}
+//                                 .table th {border-style: solid;border-color: #e5e7eb;border-bottom-width: 2px;padding-left: 1.25rem;padding-right: 1.25rem;padding-top: 0.75rem;padding-bottom: 0.75rem;font-weight: 500;}
+//                                 .table td {border-style: solid;border-color: #e5e7eb; border-bottom-width: 1px;padding-left: 1.25rem;padding-right: 1.25rem;padding-top: 0.75rem;padding-bottom: 0.75rem;}
+// 
+//                                 .table.table-bordered th, .table.table-bordered td {border-left-width: 1px;border-right-width: 1px;border-top-width: 1px;}
+// 
+//                                 .table.table-sm th {padding-left: 1rem;padding-right: 1rem;padding-top: 0.5rem;padding-bottom: 0.5rem;}
+//                                 .table.table-sm td {padding-left: 1rem;padding-right: 1rem;padding-top: 0.5rem;padding-bottom: 0.5rem;}
+// 
+//                                 .barTitle{padding: 5px 10px; background: rgb(226, 232, 240); font-size: 14px; font-weight: bold; line-height: normal;}
+//                                 .spacer{padding: 5px 0 6px;}
+//                                 .theLabel{vertical-align: top; padding: 0 10px 15px; width: 20%; font-weight: medium; font-size: 13px; color: rgb(100, 116, 139); line-height: normal;}
+//                                 .theValue{vertical-align: top; padding: 0 10px 15px; width: 30%; font-weight: medium; font-size: 13px; color: rgb(30, 41, 59); line-height: normal;}
+//                                 .theValue.tv-large{width: 80%;}
+// 
+//                                 .pdfList{margin: 0; padding: 0 0 0 10px; }
+//                                 .pdfList li{margin: 0 0 3px; font-size: 12px; line-height: normal; color: rgb(100, 116, 139);}
+//                             </style>';
+//             $PDFHTML .= '</head>';
+//             $PDFHTML .= '<body>';
+// 
+//             $PDFHTML .= '<header>';
+//                 $PDFHTML .= '<table>';
+//                     $PDFHTML .= '<tr>';
+//                         $PDFHTML .= '<td>';
+//                             $PDFHTML .= '<img style="height: 60px; width: auto;" src="'.asset("build/assets/images/L1_logo.svg").'"/>';
+//                         $PDFHTML .= '</td>';
+//                         $PDFHTML .= '<td class="text-right">';//'https://datafuture2.lcc.ac.uk/limon/avatar.png'
+//                             $PDFHTML .= '<img style="height: 60px; width: auto;" alt="'.$applicant->title->name.' '.$applicant->first_name.' '.$applicant->last_name.'" src="'.(isset($applicant->photo) && !empty($applicant->photo) && Storage::disk('local')->exists('public/applicants/'.$applicant->id.'/'.$applicant->photo) ? public_path('storage/applicants/'.$applicant->id.'/'.$applicant->photo) : asset('build/assets/images/placeholders/200x200.jpg')).'">';
+//                             $PDFHTML .= '<span style="font-size: 10px; padding: 3px 0 0; font-weight: 700; display: block;">'.(!empty($applicant->application_no) ? $applicant->application_no : '').'</span>';
+//                         $PDFHTML .= '</td>';
+//                     $PDFHTML .= '</tr>';
+//                 $PDFHTML .= '</table>';
+//             $PDFHTML .= '</header>';
+// 
+//             /*PDF Body Start Here*/
+//             $PDFHTML .= '<table class="mb-10">';
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td class="barTitle text-center">UK/EU Student Application</td>';
+//                 $PDFHTML .= '</tr>';
+//             $PDFHTML .= '</table>';
+// 
+//             $PDFHTML .= '<table class="mb-10">';
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td colspan="4" class="barTitle text-left">Personal Details</td>';
+//                 $PDFHTML .= '</tr>';
+//                 $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td class="theLabel">Name</td>';
+//                     $PDFHTML .= '<td class="theValue">'.$applicant->title->name.' '.$applicant->first_name.' '.$applicant->last_name.'</td>';
+//                 
+//                     $PDFHTML .= '<td class="theLabel">Date of Birth</td>';
+//                     $PDFHTML .= '<td class="theValue">'.date('jS F, Y', strtotime($applicant->date_of_birth)).'</td>';
+//                 $PDFHTML .= '</tr>';
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td class="theLabel">Gender</td>';
+//                     $PDFHTML .= '<td class="theValue">'.(isset($applicant->sexid->name) && !empty($applicant->sexid->name) ? $applicant->sexid->name : '').'</td>';
+//                     $PDFHTML .= '<td class="theLabel">Nationality</td>';
+//                     $PDFHTML .= '<td class="theValue">'.$applicant->nation->name.'</td>';
+//                 $PDFHTML .= '</tr>';
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td class="theLabel">Country of Birth</td>';
+//                     $PDFHTML .= '<td class="theValue">'.$applicant->country->name.'</td>';
+//                     $PDFHTML .= '<td class="theLabel">Ethnicity</td>';
+//                     $PDFHTML .= '<td class="theValue">'.$applicant->other->ethnicity->name.'</td>';
+//                 $PDFHTML .= '</tr>';
+// 
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td class="theLabel">Care Leaver</td>';
+//                     $PDFHTML .= '<td class="theValue">'.(isset($applicant->other->leaver->name) && !empty($applicant->other->leaver->name) ? $applicant->other->leaver->name : '---').'</td>';
+//                     $PDFHTML .= '<td class="theLabel">Disability Status</td>';
+//                     $PDFHTML .= '<td class="theValue">'.(isset($applicant->other->disability_status) && $applicant->other->disability_status == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
+//                 $PDFHTML .= '</tr>';
+// 
+//                 // $PDFHTML .= '<tr>';
+//                 //     $PDFHTML .= '<td class="theLabel">Disability Status</td>';
+//                 //     $PDFHTML .= '<td class="theValue">'.(isset($applicant->other->disability_status) && $applicant->other->disability_status == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
+//                 //     if(isset($applicant->other->disability_status) && $applicant->other->disability_status == 1):
+//                 //         $PDFHTML .= '<td class="theLabel">Allowance Claimed?</td>';
+//                 //         $PDFHTML .= '<td class="theValue">'.(isset($applicant->other->disabilty_allowance) && $applicant->other->disabilty_allowance == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
+//                 //     endif;
+//                 // $PDFHTML .= '</tr>';
+//                 if(isset($applicant->other->disability_status) && $applicant->other->disability_status == 1):
+//                     $PDFHTML .= '<tr>';
+//                         if(isset($applicant->other->disability_status) && $applicant->other->disability_status == 1):
+//                             $PDFHTML .= '<td class="theLabel">Allowance Claimed?</td>';
+//                             $PDFHTML .= '<td class="theValue">'.(isset($applicant->other->disabilty_allowance) && $applicant->other->disabilty_allowance == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
+//                         endif;
+//                         $PDFHTML .= '<td class="theLabel">Disabilities</td>';
+//                         $PDFHTML .= '<td class="theValue tv-large" colspan="3">';
+//                             if(isset($applicant->disability) && !empty($applicant->disability)):
+//                                 $PDFHTML .= '<ul class="pdfList">';
+//                                     foreach($applicant->disability as $dis):
+//                                         $PDFHTML .= '<li><span></span>'.$dis->disabilities->name.'</li>';
+//                                     endforeach;
+//                                 $PDFHTML .= '</ul>';
+//                             endif;
+//                         $PDFHTML .= '</td>';
+//                     $PDFHTML .= '</tr>';
+//                 endif;
+// 
+//                 /* Contact Details */
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td colspan="4" class="barTitle text-left">Contact Details</td>';
+//                 $PDFHTML .= '</tr>';
+//                 $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td class="theLabel">Email</td>';
+//                     $PDFHTML .= '<td class="theValue">'.$applicant->users->email.'</td>';
+//                     $PDFHTML .= '<td class="theLabel">Home Phone</td>';
+//                     $PDFHTML .= '<td class="theValue">'.$applicant->contact->home.'</td>';
+//                 $PDFHTML .= '</tr>';
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td class="theLabel">Mobile</td>';
+//                     $PDFHTML .= '<td class="theValue">'.$applicant->contact->mobile.'</td>';
+//                     $PDFHTML .= '<td class="theLabel">Address</td>';
+//                     $PDFHTML .= '<td class="theValue">';
+//                         if(isset($applicant->contact->address_line_1) && !empty($applicant->contact->address_line_1)):
+//                             $PDFHTML .= $applicant->contact->address_line_1.'<br/>';
+//                         endif;
+//                         if(isset($applicant->contact->address_line_2) && !empty($applicant->contact->address_line_2)):
+//                             $PDFHTML .= $applicant->contact->address_line_2.'<br/>';
+//                         endif;
+//                         if(isset($applicant->contact->city) && !empty($applicant->contact->city)):
+//                             $PDFHTML .= $applicant->contact->city.', ';
+//                         endif;
+//                         if(isset($applicant->contact->state) && !empty($applicant->contact->state)):
+//                             $PDFHTML .= $applicant->contact->state.', <br/>';
+//                         endif;
+//                         if(isset($applicant->contact->post_code) && !empty($applicant->contact->post_code)):
+//                             $PDFHTML .= $applicant->contact->post_code.',';
+//                         endif;
+//                         if(isset($applicant->contact->country) && !empty($applicant->contact->country)):
+//                             $PDFHTML .= $applicant->contact->country;
+//                         endif;
+//                     $PDFHTML .= '</td>';
+//                 $PDFHTML .= '</tr>';
+// 
+//                 /* Next of Kin */
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td colspan="4" class="barTitle text-left">Next of Kin</td>';
+//                 $PDFHTML .= '</tr>';
+//                 $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td class="theLabel">Name</td>';
+//                     $PDFHTML .= '<td class="theValue">'.$applicant->kin->name.'</td>';
+//                     $PDFHTML .= '<td class="theLabel">Relation</td>';
+//                     $PDFHTML .= '<td class="theValue">'.(isset($applicant->kin->relation->name) ? $applicant->kin->relation->name : '').'</td>';
+//                 $PDFHTML .= '</tr>';
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td class="theLabel">Mobile</td>';
+//                     $PDFHTML .= '<td class="theValue">'.$applicant->kin->mobile.'</td>';
+//                     $PDFHTML .= '<td class="theLabel">Email</td>';
+//                     $PDFHTML .= '<td class="theValue">'.(isset($applicant->kin->email) && !empty($applicant->kin->email) ? $applicant->kin->email : '---').'</td>';
+//                 $PDFHTML .= '</tr>';
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td class="theLabel">Address</td>';
+//                     $PDFHTML .= '<td class="theValue">';
+//                         if(isset($applicant->kin->address_line_1) && !empty($applicant->kin->address_line_1)):
+//                             $PDFHTML .= $applicant->kin->address_line_1.'<br/>';
+//                         endif;
+//                         if(isset($applicant->kin->address_line_2) && !empty($applicant->kin->address_line_2)):
+//                             $PDFHTML .= $applicant->kin->address_line_2.'<br/>';
+//                         endif;
+//                         if(isset($applicant->kin->city) && !empty($applicant->kin->city)):
+//                             $PDFHTML .= $applicant->kin->city.', ';
+//                         endif;
+//                         if(isset($applicant->kin->state) && !empty($applicant->kin->state)):
+//                             $PDFHTML .= $applicant->kin->state.', <br/>';
+//                         endif;
+//                         if(isset($applicant->kin->post_code) && !empty($applicant->kin->post_code)):
+//                             $PDFHTML .= $applicant->kin->post_code.',';
+//                         endif;
+//                         if(isset($applicant->kin->country) && !empty($applicant->kin->country)):
+//                             $PDFHTML .= $applicant->kin->country;
+//                         endif;
+//                     $PDFHTML .= '</td>';
+//                     $PDFHTML .= '<td class="theLabel"></td>';
+//                     $PDFHTML .= '<td class="theValue"></td>';
+//                 $PDFHTML .= '</tr>';
+// 
+//                 /* Proposed Course */
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td colspan="4" class="barTitle text-left">Proposed Course</td>';
+//                 $PDFHTML .= '</tr>';
+//                 $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">When would you like to start your course?</td>';
+//                     $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.$applicant->course->semester->name.'</td>';
+//                 $PDFHTML .= '</tr>';
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Which course do you propose to take?</td>';
+//                     $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.$applicant->course->creation->course->name.'</td>';
+//                 $PDFHTML .= '</tr>';
+//                 if(isset($applicant->course->venue) && !empty($applicant->course->venue)):
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Which venue do you want to study?</td>';
+//                     $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'. $applicant->course->venue->name.'</td>';
+//                 $PDFHTML .= '</tr>';
+//                 endif;
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">How are you funding your education at London Churchill College?</td>';
+//                     $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.$applicant->course->student_loan.'</td>';
+//                 $PDFHTML .= '</tr>';
+//                 if($applicant->course->student_loan == 'Student Loan'):
+//                     $PDFHTML .= '<tr>';
+//                         $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">If your funding is through Student Finance England, please choose from the following. Have you applied for the proposed course?</td>';
+//                         $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->course->student_finance_england) && $applicant->course->student_finance_england == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
+//                     $PDFHTML .= '</tr>';
+//                     if(isset($applicant->course->student_finance_england) && $applicant->course->student_finance_england == 1):
+//                         $PDFHTML .= '<tr>';
+//                             $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Are you already in receipt of funds?</td>';
+//                             $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->course->fund_receipt) && $applicant->course->fund_receipt == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
+//                         $PDFHTML .= '</tr>';
+//                     endif;
+//                     $PDFHTML .= '<tr>';
+//                         $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Have you ever apply/Received any fund/Loan from SLC/government Loan for any other programme/institution?</td>';
+//                         $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->course->applied_received_fund) && $applicant->course->applied_received_fund == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
+//                     $PDFHTML .= '</tr>';
+//                 elseif($applicant->course->student_loan == 'Others'):
+//                     $PDFHTML .= '<tr>';
+//                         $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Other Funding</td>';
+//                         $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->course->other_funding) && $applicant->course->other_funding != '' ? $applicant->course->other_funding : '').'</td>';
+//                     $PDFHTML .= '</tr>';
+//                 endif;
+//                 if(isset($applicant->course->creation->has_evening_and_weekend) && $applicant->course->creation->has_evening_and_weekend == 1):
+//                     $PDFHTML .= '<tr>';
+//                         $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Are you applying for evening and weekend classes (Full Time)</td>';
+//                         $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->course->full_time) && $applicant->course->full_time == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
+//                     $PDFHTML .= '</tr>';
+//                 endif;
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Fee Eligibility</td>';
+//                     $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->feeeligibility->elegibility->name) && isset($applicant->feeeligibility->fee_eligibility_id) && $applicant->feeeligibility->fee_eligibility_id > 0 ? $applicant->feeeligibility->elegibility->name : '---').'</td>';
+//                 $PDFHTML .= '</tr>';
+// 
+//                 /* Educational Qualification */
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td colspan="4" class="barTitle text-left">Educational Qualification</td>';
+//                 $PDFHTML .= '</tr>';
+//                 $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Do you have any formal academic qualification?</td>';
+//                     $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->other->is_edication_qualification) && $applicant->other->is_edication_qualification == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
+//                 $PDFHTML .= '</tr>';
+//                 if(isset($applicant->other->is_edication_qualification) && $applicant->other->is_edication_qualification == 1):
+//                     $PDFHTML .= '<tr>';
+//                         $PDFHTML .= '<td colspan="4" style="padding: 3px 0 0;">';
+//                             $PDFHTML .= '<table class="table table-bordered table-sm mb-15">';
+//                                 $PDFHTML .= '<thead>';
+//                                     $PDFHTML .= '<tr>';
+//                                         $PDFHTML .= '<th>Awarding Body</th>';
+//                                         $PDFHTML .= '<th>Highest Academic Qualification</th>';
+//                                         $PDFHTML .= '<th>Subjects</th>';
+//                                         $PDFHTML .= '<th>Result</th>';
+//                                         $PDFHTML .= '<th>Award Date</th>';
+//                                     $PDFHTML .= '</tr>';
+//                                 $PDFHTML .= '</thead>';
+//                                 $PDFHTML .= '<tbody>';
+//                                     if(isset($applicant->quals) && $applicant->quals->count() > 0):
+//                                         foreach($applicant->quals as $qual):
+//                                             $PDFHTML .= '<tr>';
+//                                                 $PDFHTML .= '<td>'.$qual->awarding_body.'</td>';
+//                                                 $PDFHTML .= '<td>'.$qual->highest_academic.'</td>';
+//                                                 $PDFHTML .= '<td>'.$qual->subjects.'</td>';
+//                                                 $PDFHTML .= '<td>'.$qual->result.'</td>';
+//                                                 $PDFHTML .= '<td>'.date('F, Y', strtotime($qual->degree_award_date)).'</td>';
+//                                             $PDFHTML .= '</tr>';
+//                                         endforeach;
+//                                     else:
+//                                         $PDFHTML .= '<tr><td colspan="5" class="text-center">No data found!</td></tr>';
+//                                     endif;
+//                                 $PDFHTML .= '</tbody>';
+//                             $PDFHTML .= '</table>';
+//                         $PDFHTML .= '</td>';
+//                     $PDFHTML .= '</tr>';
+//                 endif;
+// 
+//                 /* Employment History */
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td colspan="4" class="barTitle text-left">Employment History</td>';
+//                 $PDFHTML .= '</tr>';
+//                 $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">What is your current employment status?</td>';
+//                     $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->other->employment_status) && $applicant->other->employment_status != '' ? $applicant->other->employment_status : '---').'</td>';
+//                 $PDFHTML .= '</tr>';
+//                 if(!isset($applicant->other->employment_status) || ($applicant->other->employment_status == 'Unemployed' || $applicant->other->employment_status == 'Contractor' || $applicant->other->employment_status == 'Consultant' || $applicant->other->employment_status == 'Office Holder')):
+//                     $emptStatus = false;
+//                 else:
+//                     $emptStatus = true;
+//                 endif;
+//                 if($emptStatus):
+//                     $PDFHTML .= '<tr>';
+//                         $PDFHTML .= '<td colspan="4" style="padding: 3px 0 5px;">';
+//                             if(isset($applicant->employment) && $applicant->employment->count() > 0):
+//                                 foreach($applicant->employment as $empt):
+//                                     $address = '';
+//                                     $address .= $empt->address_line_1.'<br/>';
+//                                     $address .= ($empt->address_line_2 != '' ? $empt->address_line_2.'<br/>' : '');
+//                                     $address .= ($empt->city != '' ? $empt->city.', ' : '');
+//                                     $address .= ($empt->state != '' ? $empt->state.', ' : '');
+//                                     $address .= ($empt->post_code != '' ? $empt->post_code.', ' : '');
+//                                     $address .= ($empt->country != '' ? '<br/>'.$empt->country : '');
+// 
+//                                     $PDFHTML .= '<div style="border: 1px solid rgb(226, 232, 240); padding: 15px 0 0; display: block;" class="mb-10">';
+//                                         $PDFHTML .= '<table>';
+//                                             $PDFHTML .= '<tr>';
+//                                                 $PDFHTML .= '<td class="theLabel">Organization</td>';
+//                                                 $PDFHTML .= '<td class="theValue">'.$empt->company_name.'</td>';
+//                                                 $PDFHTML .= '<td class="theLabel">Phone</td>';
+//                                                 $PDFHTML .= '<td class="theValue">'.$empt->company_phone.'</td>';
+//                                             $PDFHTML .= '</tr>';
+//                                             $PDFHTML .= '<tr>';
+//                                                 $PDFHTML .= '<td class="theLabel">Position</td>';
+//                                                 $PDFHTML .= '<td class="theValue">'.$empt->position.'</td>';
+//                                                 $PDFHTML .= '<td class="theLabel">Start</td>';
+//                                                 $PDFHTML .= '<td class="theValue">'.(!empty($empt->start_date) ? date('F, Y', strtotime('01-'.$empt->start_date)) : '').'</td>';
+//                                             $PDFHTML .= '</tr>';
+//                                             $PDFHTML .= '<tr>';
+//                                                 $PDFHTML .= '<td class="theLabel">End</td>';
+//                                                 $PDFHTML .= '<td class="theValue">'.(!empty($empt->end_date) ? date('F, Y', strtotime('01-'.$empt->end_date)) : '').'</td>';
+//                                                 $PDFHTML .= '<td class="theLabel">Address</td>';
+//                                                 $PDFHTML .= '<td class="theValue">'.$address.'</td>';
+//                                             $PDFHTML .= '</tr>';
+//                                             $PDFHTML .= '<tr>';
+//                                                 $PDFHTML .= '<td class="theLabel">Contact Person</td>';
+//                                                 $PDFHTML .= '<td class="theValue">'.$empt->reference[0]->name.'</td>';
+//                                                 $PDFHTML .= '<td class="theLabel">Position</td>';
+//                                                 $PDFHTML .= '<td class="theValue">'.$empt->reference[0]->position.'</td>';
+//                                             $PDFHTML .= '</tr>';
+//                                             $PDFHTML .= '<tr>';
+//                                                 $PDFHTML .= '<td class="theLabel">Phone</td>';
+//                                                 $PDFHTML .= '<td class="theValue">'.$empt->reference[0]->phone.'</td>';
+//                                                 $PDFHTML .= '<td class="theLabel"></td>';
+//                                                 $PDFHTML .= '<td class="theValue"></td>';
+//                                             $PDFHTML .= '</tr>';
+//                                         $PDFHTML .= '</table>';
+//                                     $PDFHTML .= '</div>';
+//                                 endforeach;
+//                             endif;
+//                         $PDFHTML .= '</td>';
+//                     $PDFHTML .= '</tr>';
+//                 endif;
+//                 /* Residency Status and Criminal Conviction */
+//                 $residencyStatusName = (isset($applicant->residency->residencyStatus->name) ? $applicant->residency->residencyStatus->name : '---');
+//                 $criminalDeclarationHtml = (isset($applicant->criminalConviction->criminal_declaration) && (int) $applicant->criminalConviction->criminal_declaration === 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>');
+//                 $criminalConvictionHtml = (isset($applicant->criminalConviction->have_you_been_convicted) && (int) $applicant->criminalConviction->have_you_been_convicted === 1 ? '<span class="btn btn-success">Yes</span>' : (isset($applicant->criminalConviction->have_you_been_convicted) ? '<span class="btn btn-danger">No</span>' : '---'));
+//                 $criminalConvictionDetails = (isset($applicant->criminalConviction->criminal_conviction_details) && $applicant->criminalConviction->criminal_conviction_details != '' ? $applicant->criminalConviction->criminal_conviction_details : 'N/A');
+// 
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td colspan="4" class="barTitle text-left">Residency Status and Criminal Convictions</td>';
+//                 $PDFHTML .= '</tr>';
+//                 $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td class="theLabel">Residency Status</td>';
+//                     $PDFHTML .= '<td class="theValue">'.$residencyStatusName.'</td>';
+//                     $PDFHTML .= '<td class="theLabel"></td>';
+//                     $PDFHTML .= '<td class="theValue"></td>';
+//                 $PDFHTML .= '</tr>';
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td class="theLabel">Have you been convicted?</td>';
+//                     $PDFHTML .= '<td class="theValue">'.$criminalConvictionHtml.'</td>';
+//                     if(isset($applicant->criminalConviction->have_you_been_convicted) && (int) $applicant->criminalConviction->have_you_been_convicted === 1):
+//                         $PDFHTML .= '<td class="theLabel">Criminal Declaration</td>';
+//                         $PDFHTML .= '<td class="theValue">'.$criminalDeclarationHtml.'</td>';
+//                     else:
+//                         $PDFHTML .= '<td class="theLabel"></td>';
+//                         $PDFHTML .= '<td class="theValue"></td>';
+//                     endif;
+//                 $PDFHTML .= '</tr>';
+// 
+// 
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td colspan="4" class="barTitle text-left">Others</td>';
+//                 $PDFHTML .= '</tr>';
+//                 $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
+//                 if(isset($applicant->referral_code) && $applicant->referral_code != ''):
+//                     $PDFHTML .= '<tr>';
+//                         $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">If you referred by Somone/ Agent, Please enter the Referral Code.</td>';
+//                         $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->referral_code) && $applicant->referral_code != '' ? $applicant->referral_code : '').'</td>';
+//                     $PDFHTML .= '</tr>';
+//                 endif;
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td class="theLabel" style="width: 20%;">Video Consent:</td>';
+//                     $PDFHTML .= '<td class="theValue" style="width: 80%;" colspan="3">';
+//                         $PDFHTML .= '<div style="font-size: 13px; line-height: normal; position: relative; padding: 0 0 0 35px;">';
+//                             $PDFHTML .= '<span style="position: absolute; left: 0; top: 3px; width:20px; height: 20px; background: transparent; border: 1px solid #d2d4d6; font-size: 20px; text-align: center; color: #FFF; font-family: DejaVu Sans, sans-serif;"></span>';
+//                             $PDFHTML .= 'I hereby authorize the filming and utilization of recordings featuring my person, conducted by members or staff of
+//                                          London Churchill College, exclusively for admission purposes.';
+//                         $PDFHTML .= '</div>';
+//                     $PDFHTML .= '</td>';
+//                 $PDFHTML .= '</tr>';
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td class="theLabel" style="width: 20%;">Declaration:</td>';
+//                     $PDFHTML .= '<td class="theValue" style="width: 80%;" colspan="3">';
+//                         $PDFHTML .= '<div style="font-size: 13px; line-height: normal; position: relative; padding: 0 0 0 35px;">';
+//                             $PDFHTML .= '<span style="position: absolute; left: 0; top: 3px; width:20px; height: 20px; background: rgb(22, 78, 99); font-size: 20px; text-align: center; color: #FFF; font-family: DejaVu Sans, sans-serif;"><i style="position: relative; top: -8px;">&check;</i></span>';
+//                             $PDFHTML .= 'I hereby verify the accuracy and truthfulness of the information provided in this form to the best 
+//                                         of my knowledge. It is my responsibility to stay informed about the terms and conditions as well as 
+//                                         the policies of the college, and I commit to comply with them. I have thoroughly reviewed the 
+//                                         college\'s terms and conditions and student privacy policy and pledge to adhere to them throughout 
+//                                         my entire course of study.';
+//                         $PDFHTML .= '</div>';
+//                     $PDFHTML .= '</td>';
+//                 $PDFHTML .= '</tr>';
+// 
+//                 /* Signature Area */
+//                 $PDFHTML .= '<tr><td style="width: 100%; padding: 30px 0 0;" colspan="4"></td></tr>';
+//                 $PDFHTML .= '<tr>';
+//                     $PDFHTML .= '<td colspan="2" style="width: 50%;">'; 
+//                         $PDFHTML .= '<span style="font-weight: bold; font-size: 12px; line-height: normal; margin: 0 0 5px; display: block;">Student\'s Signature:</span>';
+//                         if(isset($applicantEsign->signature) && !empty($applicantEsign->signature)):
+//                             $PDFHTML .= '<span style="height:40px; width:200px; display: inline-block;">';
+//                                 $PDFHTML .= '<img src="'. (isset($applicantEsign->signature) && !empty($applicantEsign->signature) ? $applicantEsign->signature : '') . '" style="width: 100%; height: auto; display:inline-block;" />';
+//                             $PDFHTML .= '</span>';
+//                         endif;
+//                     $PDFHTML .= '</td>';
+//                     $PDFHTML .= '<td colspan="2" style="width: 50%;" class="text-right">'; 
+//                         $PDFHTML .= '<span style="text-align: right; font-weight: bold; font-size: 12px; line-height: normal; margin: 0 0 5px; display: block;">Date:</span>';
+//                         $PDFHTML .= '<span style="height:40px; width:200px; display: inline-block;">';
+//                             $PDFHTML .= (isset($finalizedEvent->created_at) && !empty($finalizedEvent->created_at) ? date('d-m-Y', strtotime($finalizedEvent->created_at)) : '');
+//                         $PDFHTML .= '</span>';
+//                     $PDFHTML .= '</td>';
+//                 $PDFHTML .= '</tr>';
+// 
+//             $PDFHTML .= '</table>';
+//             /*PDF Body End Here*/
+// 
+//             $PDFHTML .= '</body>';
+//         $PDFHTML .= '</html>';
+// 
+//         $fileName = 'Application_of_'.$applicant->first_name.'_'.$applicant->last_name.'.pdf';
+//         $pdf = PDF::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true])
+//             ->setPaper('a4', 'portrait')
+//             ->setWarnings(false);
+//         // return $pdf->download($fileName);
+//         return [$pdf, $fileName];
+
     }
 }

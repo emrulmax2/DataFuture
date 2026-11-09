@@ -1,157 +1,122 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Agent Profile - London Churchill College</title>
+    <title>{{ $title }}</title>
 @endsection
 
 @section('subcontent')
-    <div class="intro-y flex items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Profile Layout</h2>
-    </div>
-    <div class="grid grid-cols-12 gap-6 mt-5">
-        <!-- BEGIN: Profile Menu -->
-        <div class="col-span-12 lg:col-span-4 2xl:col-span-3 flex lg:block flex-col-reverse">
-            <div class="intro-y box mt-5 lg:mt-0">
-                <div class="relative flex items-center p-5">
-                    <div class="w-12 h-12 image-fit">
-                        <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
-                    </div>
-                    <div class="ml-4 mr-auto">
-                        <div class="font-medium text-base">{{ $userData->full_name }}</div>
-                        <div class="text-slate-500">{{ $userData->AgentUser->email }}</div>
-                    </div>
-                    {{-- <div class="dropdown">
-                        <a class="dropdown-toggle w-5 h-5 block" href="javascript:;" aria-expanded="false" data-tw-toggle="dropdown">
-                            <i data-lucide="more-horizontal" class="w-5 h-5 text-slate-500"></i>
-                        </a>
-                        <div class="dropdown-menu w-56">
-                            <ul class="dropdown-content">
-                                <li>
-                                    <h6 class="dropdown-header">Export Options</h6>
-                                </li>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                                <li>
-                                    <a href="" class="dropdown-item">
-                                        <i data-lucide="activity" class="w-4 h-4 mr-2"></i> English
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="" class="dropdown-item">
-                                        <i data-lucide="box" class="w-4 h-4 mr-2"></i>
-                                        Indonesia
-                                        <div class="text-xs text-white px-1 rounded-full bg-danger ml-auto">10</div>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="" class="dropdown-item">
-                                        <i data-lucide="layout" class="w-4 h-4 mr-2"></i> English
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="" class="dropdown-item">
-                                        <i data-lucide="sidebar" class="w-4 h-4 mr-2"></i> Indonesia
-                                    </a>
-                                </li>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                                <li>
-                                    <div class="flex p-1">
-                                        <button type="button" class="btn btn-primary py-1 px-2">Settings</button>
-                                        <button type="button" class="btn btn-secondary py-1 px-2 ml-auto">View Profile</button>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                    </div> --}}
-                </div>
-                <div class="p-5 border-t border-slate-200/60 dark:border-darkmode-400">
-                    {{-- <a class="flex items-center text-primary font-medium" href="">
-                        <i data-lucide="activity" class="w-4 h-4 mr-2"></i> Personal Information
-                    </a> --}}
-                    {{-- <a class="flex items-center mt-5" href="">
-                        <i data-lucide="box" class="w-4 h-4 mr-2"></i> Account Settings
-                    </a> --}}
-                    <a class="flex items-center mt-5" href="">
-                        <i data-lucide="lock" class="w-4 h-4 mr-2"></i> Change Password
-                    </a>
-                    {{-- <a class="flex items-center mt-5" href="">
-                        <i data-lucide="settings" class="w-4 h-4 mr-2"></i> User Settings
-                    </a> --}}
-                </div>
-                {{-- <div class="p-5 border-t border-slate-200/60 dark:border-darkmode-400">
-                    <a class="flex items-center" href="">
-                        <i data-lucide="activity" class="w-4 h-4 mr-2"></i> Email Settings
-                    </a>
-                    <a class="flex items-center mt-5" href="">
-                        <i data-lucide="box" class="w-4 h-4 mr-2"></i> Saved Credit Cards
-                    </a>
-                    <a class="flex items-center mt-5" href="">
-                        <i data-lucide="lock" class="w-4 h-4 mr-2"></i> Social Networks
-                    </a>
-                    <a class="flex items-center mt-5" href="">
-                        <i data-lucide="settings" class="w-4 h-4 mr-2"></i> Tax Information
-                    </a>
-                </div> --}}
-                {{-- <div class="p-5 border-t border-slate-200/60 dark:border-darkmode-400 flex">
-                    <button type="button" class="btn btn-primary py-1 px-2">New Group</button>
-                    <button type="button" class="btn btn-outline-secondary py-1 px-2 ml-auto">New Quick Link</button>
-                </div> --}}
-            </div>
-            <div class="intro-y box p-5 bg-primary text-white mt-5">
-                <div class="flex items-center">
-                    <div class="font-medium text-lg">Important Update</div>
-                    <div class="text-xs bg-white dark:bg-primary dark:text-white text-slate-700 px-1 rounded-md ml-auto">New</div>
-                </div>
-                <div class="mt-4">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.</div>
-                <div class="font-medium flex mt-5">
-                    <button type="button" class="btn py-1 px-2 border-white text-white dark:text-slate-300 dark:bg-darkmode-400 dark:border-darkmode-400">Take Action</button>
-                    <button type="button" class="btn py-1 px-2 border-transparent text-white dark:border-transparent ml-auto">Dismiss</button>
-                </div>
-            </div>
+    <div style="display:grid;gap:20px;max-width:760px">
+        <div style="display:grid;gap:6px">
+            <span class="apd-eyebrow">My account</span>
+            <h1 class="apd-h1">Agent <em style="font-style:normal;color:var(--steel)">profile</em></h1>
         </div>
-        <!-- END: Profile Menu -->
-        <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
-            <div class="grid grid-cols-12 gap-6">
-                <!-- BEGIN: Daily Sales -->
-                <div class="intro-y box col-span-12 2xl:col-span-6">
-                    <div class="flex items-center px-5 py-5 sm:py-3 border-b border-slate-200/60 dark:border-darkmode-400">
-                        <h2 class="font-medium text-base mr-auto">Change Password</h2>
-                        <div class="dropdown ml-auto sm:hidden">
-                            <a class="dropdown-toggle w-5 h-5 block" href="javascript:;" aria-expanded="false" data-tw-toggle="dropdown">
-                                <i data-lucide="more-horizontal" class="w-5 h-5 text-slate-500"></i>
-                            </a>
-                            <div class="dropdown-menu w-40">
-                                <ul class="dropdown-content">
-                                    <li>
-                                        <a href="javascript:;" class="dropdown-item">
-                                            <i data-lucide="pencil" class="w-4 h-4 mr-2"></i> Edit
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <button class="btn btn-outline-secondary hidden sm:flex">
-                            <i data-lucide="pencil" class="w-4 h-4 mr-2"></i> Edit
-                        </button>
-                    </div>
-                    <div class="p-5">
-                        <div class="relative flex items-center">
-                            <div class="w-12 h-12 flex-none image-fit">
-                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
-                            </div>
-                            <div class="ml-4 mr-auto">
-                                <a href="" class="font-medium">{{ $fakers[0]['users'][0]['name'] }}</a>
-                                <div class="text-slate-500 mr-5 sm:mr-5">Bootstrap 4 HTML Admin Template</div>
-                            </div>
-                            <div class="font-medium text-slate-600 dark:text-slate-500">+$19</div>
-                        </div>
-                    </div>
+
+        @if(!$verified)
+            <div class="apd-notice apd-notice--warn">
+                <b>Verify your email address to add applicants</b>
+                <div>We sent a verification link to <b style="display:inline">{{ $user->email }}</b>. Check your Junk or Spam folder if you do not see it. Adding applicants and starting applications unlocks once the address is verified.</div>
+                <div class="apd-notice__actions">
+                    <form method="post" action="{{ route('agent.verification.send') }}">
+                        @csrf
+                        <button type="submit" class="apd-btn apd-btn--ghost apd-btn--sm">Resend verification email</button>
+                    </form>
                 </div>
-                <!-- END: Daily Sales -->
             </div>
+        @endif
+
+        @if(session('verifymessage'))
+            <div class="apd-notice apd-notice--ok"><b>Email sent</b><div>{{ session('verifymessage') }}</div></div>
+        @endif
+        @if(session('account_status'))
+            <div class="apd-notice apd-notice--ok">{{ session('account_status') }}</div>
+        @endif
+
+        <div class="apd-panel">
+            <h3>Profile</h3>
+            <dl class="apd-kv">
+                <dt>Company</dt>
+                <dd>{{ $company ?: 'Added by admissions after registration' }}</dd>
+
+                <dt>Email</dt>
+                <dd>
+                    {{ $user->email }}
+                    @if($verified)
+                        <span class="apd-pill apd-pill--green" style="margin-left:6px"><i></i>Verified</span>
+                    @else
+                        <span class="apd-pill apd-pill--amber" style="margin-left:6px"><i></i>Not verified</span>
+                    @endif
+                </dd>
+
+                <dt>Referral code</dt>
+                <dd>
+                    @if($code)
+                        <span style="display:inline-flex;gap:8px;align-items:center">
+                            <b class="apd-mono" id="agpReferralCode">{{ $code }}</b>
+                            <button type="button" class="agp-iconbtn" id="agpCopyCode" data-code="{{ $code }}" title="Copy referral code" aria-label="Copy referral code">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 012-2h9"/></svg>
+                            </button>
+                            <span class="apd-hint" id="agpCopied" role="status" hidden>Copied</span>
+                        </span>
+                    @else
+                        Issued by admissions
+                    @endif
+                </dd>
+
+                @if($subs->count())
+                    <dt>Sub-agents</dt>
+                    <dd>
+                        @foreach($subs as $sub)
+                            <div>{{ $sub['name'] }} @if($sub['code'])<span class="apd-mono" style="color:var(--muted)">[{{ $sub['code'] }}]</span>@endif</div>
+                        @endforeach
+                    </dd>
+                @endif
+            </dl>
+            <p style="font-size:13px;color:var(--muted);margin:0">Company details, bank details, documents and commission are managed by LCC admissions. Contact them to change any of these.</p>
+        </div>
+
+        <div class="apd-panel">
+            <h3>Change password</h3>
+
+            @if($errors->any())
+                <div class="apd-notice apd-notice--bad">{{ $errors->first() }}</div>
+            @endif
+
+            <form method="post" action="{{ route('agent.account.password') }}" class="apd-form" style="display:grid;gap:12px">
+                @csrf
+                <div class="apd-field">
+                    <label for="current_password">Current password</label>
+                    <input id="current_password" name="current_password" type="password" autocomplete="current-password"
+                           class="apd-ctl {{ $errors->has('current_password') ? 'err' : '' }}">
+                </div>
+                <div class="apd-field">
+                    <label for="password">New password</label>
+                    <input id="password" name="password" type="password" autocomplete="new-password"
+                           class="apd-ctl {{ $errors->has('password') ? 'err' : '' }}">
+                    <span class="apd-hint">At least 8 characters.</span>
+                </div>
+                <div class="apd-field">
+                    <label for="password_confirmation">Confirm new password</label>
+                    <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" class="apd-ctl">
+                </div>
+                <div>
+                    <button type="submit" class="apd-btn apd-btn--primary">Update password</button>
+                </div>
+            </form>
         </div>
     </div>
+@endsection
+
+@section('script')
+    <script>
+        /* Copy the referral code; where the clipboard is unavailable, select it instead. */
+        (function () {
+            var btn = document.getElementById('agpCopyCode'), done = document.getElementById('agpCopied'), code = document.getElementById('agpReferralCode');
+            if (!btn) return;
+            var say = function (text) { done.textContent = text; done.hidden = false; clearTimeout(say.t); say.t = setTimeout(function () { done.hidden = true; }, 1800); };
+            var select = function () { try { var r = document.createRange(); r.selectNodeContents(code); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); } catch (e) {} say('Select the code and copy it.'); };
+            btn.addEventListener('click', function () {
+                if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(btn.getAttribute('data-code')).then(function () { say('Copied'); }, select); } else { select(); }
+            });
+        })();
+    </script>
 @endsection

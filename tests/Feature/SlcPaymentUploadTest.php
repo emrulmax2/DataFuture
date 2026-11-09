@@ -310,7 +310,7 @@ class SlcPaymentUploadTest extends TestCase
         $this->upload($this->file(), 'remittance.pdf')->assertStatus(422);
         $pay = $this->upload()->json('state.payments');
         $this->get(route('slc.registration.pay.file', ['id' => $pay['upload']['id']]))->assertOk()->assertDownload('LCHC_2026_FT_T_29112026_remittance.csv');
-        $other = User::whereNotIn('id', User::bypassUserIds())->where('active', 1)->orderBy('id')->limit(50)->get()->first(fn ($u) => empty($u->priv()['slc_registration']));
+        $other = User::whereNotIn('id', User::bypassUserIds())->where('active', 1)->orderBy('id')->limit(200)->get()->first(fn ($u) => empty($u->priv()['slc_registration']) && empty($u->priv()['slc_records'])); // neither privilege opens the page
         $this->actingAs($other)->postJson(route('slc.registration.pay.record'), ['row_ids' => [1]])->assertForbidden();
     }
 

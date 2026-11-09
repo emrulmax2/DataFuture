@@ -19,6 +19,8 @@
     $hasUpload   = $task->upload == 'Yes' && !$hasInterview;
     $hasOutcome  = $task->status == 'Yes' && !$hasInterview;
     $hasIdCard   = $task->id_card == 'Yes';
+    // "Class Routine (ICP)" on the task list: Send ICP & Mark as Complete (student tasks only)
+    $hasClassRoutine = ($task->class_routine ?? 'No') == 'Yes' && !$isApplicant;
     $hasOrgEmail = $task->org_email == 'Yes';
     $hasPearson  = $task->pearson_reg == 'Yes';
     $hasExcuse   = $task->attendance_excuses == 'Yes';
@@ -157,7 +159,21 @@
                                     Update Task Status
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
                                 </button>
-                                <div class="tkm-pop__panel">
+                                <div class="tkm-pop__panel{{ ($hasIdCard && !$isApplicant) || $hasClassRoutine ? ' tkm-pop__panel--wide' : '' }}">
+                                    @if($hasClassRoutine)
+                                        {{-- ICP tasks: class routine PDF to Uploads, email + text message, then the task completed --}}
+                                        <button type="button" class="tkm-pop__item" data-tkm-act="bulk-icp">
+                                            <span class="tkm-pop__ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2"></rect><path d="M3.5 9.5h17M8 3v4M16 3v4M8 13.5h3M8 16.5h6"></path></svg></span>
+                                            Send ICP &amp; Mark as Complete
+                                        </button>
+                                    @endif
+                                    @if($hasIdCard && !$isApplicant)
+                                        {{-- ID card tasks: zip every selected student's card as PNG, then mark them complete --}}
+                                        <button type="button" class="tkm-pop__item" data-tkm-act="bulk-idcards">
+                                            <span class="tkm-pop__ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M4 20h16"></path></svg></span>
+                                            Download &amp; Mark as Complete
+                                        </button>
+                                    @endif
                                     <button type="button" class="tkm-pop__item tkm-pop__item--green" data-tkm-act="bulk-complete">
                                         <span class="tkm-pop__ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle><path d="m8.5 12.2 2.4 2.4 4.6-5"></path></svg></span>
                                         Mark as completed
@@ -436,6 +452,21 @@
     </div>
 @endif
 
+@if($hasClassRoutine)
+    {{-- Send ICP & Mark as Complete: progress and the result for each student --}}
+    <div class="tkm-modal" data-tkm-modal="icp" hidden>
+        <div class="tkm-modal__box tkm-modal__box--lg">
+            <div class="tkm-modal__head">
+                <h2 class="tkm-modal__title" data-tkm-icp-title>Sending class routines</h2>
+                <button type="button" class="tkm-icobtn tkm-icobtn--sm tkm-modal__x" data-tkm-act="close" aria-label="Close">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+                </button>
+            </div>
+            <div class="tkm-modal__body" data-tkm-slot></div>
+        </div>
+    </div>
+@endif
+
 @if($hasIdCard)
     {{-- ID card preview (body markup comes from task.manager.download.id.card) --}}
     <div class="tkm-modal" data-tkm-modal="idcard" hidden>
@@ -709,6 +740,7 @@
         'outcome' => $hasOutcome,
         'interview' => $hasInterview,
         'idCard' => $hasIdCard,
+        'classRoutine' => $hasClassRoutine,
         'orgEmail' => $hasOrgEmail,
         'pearson' => $hasPearson,
         'excuse' => $hasExcuse,
@@ -729,6 +761,8 @@
         'exportPearson' => route('task.manager.pearson.registration.excel'),
         'uploadPearson' => route('student.process.upload.registration.confirmations'),
         'idCard' => route('task.manager.download.id.card'),
+        'sendIcp' => route('task.manager.send.class.routine'),
+        'prepareIcp' => route('task.manager.class.routine.prepare'),
         'docRequestUpdate' => route('task.manager.document_request.update'),
         'letterStatus' => route('task.manager.document_request.letter.update'),
         'getLetterSet' => route('student.get.letter.set'),

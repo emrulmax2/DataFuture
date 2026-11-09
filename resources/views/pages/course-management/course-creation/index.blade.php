@@ -198,6 +198,13 @@
                             <div class="cm-field--span3">
                                 @include('pages.course-management.partials.venue-repeater', ['venuesSeeded' => $ccIsAdd])
                             </div>
+
+                            {{-- where this course's students book their induction (user, 30 Oct 2026) --}}
+                            <div class="cm-field cm-field--span3">
+                                <label for="{{ $ccPrefix }}_induction_booking_link">Induction Booking Link</label>
+                                <input id="{{ $ccPrefix }}_induction_booking_link" type="url" maxlength="500" name="induction_booking_link" class="cm-input induction_booking_link" placeholder="https://">
+                                <div class="acc__input-error error-induction_booking_link"></div>
+                            </div>
                         </div>
 
                         <div class="cm-modal__foot">

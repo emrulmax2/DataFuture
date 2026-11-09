@@ -47,7 +47,8 @@ class ProcessStudentTask implements ShouldQueue
     {
         $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
         $user = StudentUser::where(["email"=> $ApplicantUser->email])->get()->first();
-        $student = Student::where(["student_user_id"=> $user->id])->get()->first();       
+        // $student = Student::where(["student_user_id"=> $user->id])->get()->first(); // the login's first student, not the one this conversion created
+        $student = \App\Services\Admission\StudentConversion::studentFor($this->applicant, $user);
         //ApplicantTask
         $applicantTaskList = ApplicantTask::where('applicant_id',$this->applicant->id)->get();
         foreach($applicantTaskList as $applicantTaskData):
@@ -67,6 +68,10 @@ class ProcessStudentTask implements ShouldQueue
             $dataTask->save();
         endforeach;  
 
+        /* Replaced by Task Automation: the "Auto feed" process became "Student created"
+           rules (migration 2026_10_23_210000), applied by the last conversion job,
+           ProcessStudentTaskRules, once every detail has been copied. Kept for
+           reference, not run:
         $autoProcess = ProcessList::where('auto_feed', 'Yes')->where('phase','Live')->orderBy('id', 'DESC')->get()->first();
         if(isset($autoProcess->id) && $autoProcess->id > 0):
             $newStudentTasks = TaskList::where('process_list_id', $autoProcess->id)->orderBy('id', 'ASC')->get();
@@ -83,6 +88,7 @@ class ProcessStudentTask implements ShouldQueue
                 endforeach;
             endif;
         endif;
+        */
 
         unset ($applicantTaskArray);
 

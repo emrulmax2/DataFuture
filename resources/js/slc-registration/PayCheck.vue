@@ -64,7 +64,7 @@
                         <td><input v-model="picked" class="pick" type="checkbox" :value="i.id" :disabled="!canRecord(i)" :aria-label="'Select payment line ' + i.line"></td>
                         <th scope="row">
                             <template v-if="i.s">
-                                <a class="plain" :href="i.s.accountsUrl" target="_blank" rel="noopener">{{ i.s.title }} {{ i.s.first }} {{ i.s.last }}</a>
+                                <a class="plain" :href="i.s.accountsUrl" target="_blank" rel="noopener">{{ i.s.title }} {{ i.s.first }} {{ i.s.last }}</a><StatusTag :status="i.s.status" />
                                 <div class="muted small" style="font-weight: 400">{{ i.s.id }} · <span class="mono">{{ i.r.ssn }}</span></div>
                                 <div v-if="i.link.method === 'linked'" class="muted small" style="font-weight: 400">Matched here by {{ i.link.by }}<template v-if="!i.receipt"> · <button type="button" class="btn-link small" :disabled="store.busy" @click="post('slc.registration.pay.unlink', { row_id: i.id })">Unmatch</button></template></div>
                             </template>
@@ -92,7 +92,7 @@
                             <span :class="'pill ' + PAY_STATUS[i.status][0]">{{ PAY_STATUS[i.status][1] }}</span>
                             <ul v-if="i.status === 'look' && i.issues.length" class="pay-issues small"><li v-for="x in i.issues" :key="x.key">{{ x.text }}</li></ul>
                             <div v-if="i.status === 'error'" class="small" style="color: var(--bad); margin-top: 4px">{{ i.error }}</div>
-                            <div v-if="i.status === 'error' && i.holder" class="small" style="margin-top: 4px"><a class="plain" :href="i.holder.url" target="_blank" rel="noopener">{{ i.holder.id }} {{ i.holder.name }} ↗</a> · DOB {{ fmtIso(i.holder.dob) }}</div>
+                            <div v-if="i.status === 'error' && i.holder" class="small" style="margin-top: 4px"><a class="plain" :href="i.holder.url" target="_blank" rel="noopener">{{ i.holder.id }} {{ i.holder.name }} ↗</a><StatusTag :status="i.holder.status" /> · DOB {{ fmtIso(i.holder.dob) }}</div>
                             <div v-if="confirming === i.id" class="confirmrow" style="margin-top: 8px">
                                 <span style="flex: 1 1 200px">Confirm <b>{{ i.holder.id }} {{ i.holder.name }}</b> is the student? Their date of birth stays as it is; the difference is kept on the payment.</span>
                                 <button type="button" class="btn btn-primary btn-sm" :disabled="store.busy" @click="confirmHolder(i)">Confirm</button>
@@ -149,6 +149,7 @@
 import { computed, inject, nextTick, onBeforeUnmount, ref, watch } from "vue";
 import { PAY_STATUS, fmtIso, money, plural, titleCase } from "./helpers";
 import PayFind from "./PayFind.vue";
+import StatusTag from "./StatusTag.vue";
 
 /*
  * Bulk payment upload › Check & record (user, 2 Nov 2026): every payment line as PaymentState
@@ -162,7 +163,7 @@ const ERROR = { nostudent: "Student not found", dob: "Date of birth differs", co
 const ERROR_NOTE = { nostudent: "No student has the SSN", dob: "SSN matches, date of birth doesn’t", course: "Not the student’s active course", agreement: "For the year, on the active course", inst: "The agreement has no instalments" };
 
 export default {
-    components: { PayFind },
+    components: { StatusTag, PayFind },
     props: { initial: { type: String, default: "ready" } },
     emits: ["go"],
     setup(props) {

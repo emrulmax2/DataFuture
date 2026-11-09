@@ -15,6 +15,8 @@ use App\Models\Student;
 use App\Models\TermDeclaration;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Services\AttendanceIntegrity\AttendanceAudit;
+use App\Services\AttendanceIntegrity\AttendanceGuard;
 
 class StudentVisitController extends Controller
 {
@@ -113,6 +115,12 @@ class StudentVisitController extends Controller
      */
     public function store(StoreStudentVisitRequest $request)
     {
+        // The Add button needs this privilege; the save has to as well.
+        if(!AttendanceGuard::priv(auth()->user(), 'visit_add')):
+            return AttendanceGuard::deny('You do not have permission to add visits.');
+        endif;
+        AttendanceAudit::context('student_visit');
+
         $request->merge([
             'created_by' => auth()->user()->id,
         ]);
@@ -192,6 +200,9 @@ class StudentVisitController extends Controller
      */
     public function update(UpdateStudentVisitRequest $request, StudentVisit $studentVisit)
     {
+        if(!AttendanceGuard::priv(auth()->user(), 'visit_edit')):
+            return AttendanceGuard::deny('You do not have permission to edit visits.');
+        endif;
         
         
         $studentVisit->update($request->all());
@@ -206,6 +217,11 @@ class StudentVisitController extends Controller
      */
     public function destroy(StudentVisit $studentVisit)
     {
+        if(!AttendanceGuard::priv(auth()->user(), 'visit_delete')):
+            return AttendanceGuard::deny('You do not have permission to delete visits.');
+        endif;
+        AttendanceAudit::context('student_visit');
+
         if($studentVisit->attendance_id):
             $attendance = Attendance::find($studentVisit->attendance_id);
             if($attendance):
@@ -222,6 +238,11 @@ class StudentVisitController extends Controller
 
     public function restore($id)
     {
+        if(!AttendanceGuard::priv(auth()->user(), 'visit_delete')):
+            return AttendanceGuard::deny('You do not have permission to restore visits.');
+        endif;
+        AttendanceAudit::context('student_visit');
+
         $studentVisit = StudentVisit::withTrashed()->findOrFail($id);
         $studentVisit->restore();
 

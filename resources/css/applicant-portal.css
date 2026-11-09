@@ -1,0 +1,865 @@
+/* =============================================================================
+ | Applicant portal — the signed-in shell and dashboard.
+ |
+ | Scoped to `body.applicant-portal-body` and owning the `apd-` namespace, the
+ | same way the student portal owns `spf-`/`sfm-`. The namespace matters here:
+ | datafuture.css pins the brand teal onto `.btn-primary` with `!important`, and
+ | Midone claims `.card`, `.nav` and `.side` globally, so the dashboard keeps its
+ | own class names rather than fighting those rules.
+ |
+ | Declarations are taken verbatim from the approved applicant-portal design, so
+ | a future design pass can be diffed against it rule by rule.
+ ============================================================================= */
+
+body.applicant-portal-body {
+    --paper: #eef1f7;
+    --paper-2: #e6ebf4;
+    --card: #ffffff;
+    --ink: #0d1a30;
+    --ink-2: #3b4a64;
+    --muted: #667590;
+    --rule: #e1e7f0;
+    --rule-2: #c9d3e2;
+    --btn: #2f4fe8;
+    --btn-h: #243fc9;
+    --glow: rgba(47, 79, 232, .16);
+    --red: #d2203f;
+    --red-soft: #fdeaee;
+    --steel: #2f4fe8;
+    --steel-soft: #e8edff;
+    --sage: #1f8a5f;
+    --sage-soft: #def4ea;
+    --ochre: #b06a0b;
+    --ochre-soft: #fdf0d9;
+    --plum: #6a3fc4;
+    --plum-soft: #efe8fc;
+    --side: #0b1228;
+    --side-2: #141d3d;
+    --on-side: #e9eefb;
+    --on-side-2: #9eabc9;
+    --shadow: 0 1px 2px rgba(13, 26, 48, .05), 0 10px 28px -14px rgba(13, 26, 48, .14);
+    --display: "Bricolage Grotesque", "Hanken Grotesk", system-ui, sans-serif;
+    --sans: "Hanken Grotesk", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+
+    margin: 0;
+    padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    color-scheme: light;
+}
+body.applicant-portal-body * { box-sizing: border-box; }
+body.applicant-portal-body [hidden] { display: none !important; }
+
+/* ---------- shell ---------------------------------------------------------- */
+.apd-shell { display: grid; grid-template-columns: 260px minmax(0, 1fr); min-height: 100vh; }
+.apd-main-col { min-width: 0; }
+.apd-main { max-width: 1060px; margin: 0 auto; padding-block: 36px 110px; display: grid; gap: 24px; }
+.apd-gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+.apd-side {
+    position: sticky; top: 0; height: 100vh;
+    background: linear-gradient(180deg, var(--side) 0%, var(--side-2) 100%);
+    color: var(--on-side);
+    padding: 22px 16px max(18px, env(safe-area-inset-bottom, 0px));
+    display: grid; grid-template-rows: auto 1fr auto; gap: 28px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+}
+
+/* The brand is the site logo alone — the lockup already carries the college
+   name, so nothing is set beside or beneath it. */
+.apd-brand { display: flex; align-items: center; color: var(--on-side); text-decoration: none; }
+.apd-brand__logo { height: 50px; width: auto; max-width: 100%; flex: none; filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .35)); }
+
+.apd-nav { display: grid; gap: 4px; align-content: start; }
+.apd-nav__label { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--on-side-2); font-weight: 700; padding: 0 12px 6px; }
+.apd-nav a { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; color: var(--on-side-2); font-weight: 600; padding: 11px 12px; border-radius: 11px; background: none; border: 0; cursor: pointer; font-size: 14px; text-decoration: none; transition: background .12s, color .12s; }
+.apd-nav a svg { flex: none; opacity: .85; }
+.apd-nav a:hover { background: rgba(255, 255, 255, .06); color: #fff; }
+.apd-nav a.on { background: rgba(255, 255, 255, .1); color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08); }
+.apd-nav a:focus-visible { outline: 0; box-shadow: 0 0 0 4px var(--glow), 0 0 0 1.5px var(--steel); }
+
+.apd-me { display: grid; gap: 12px; padding: 14px; border-radius: 14px; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .08); font-size: 13px; min-width: 0; }
+.apd-me__em { overflow-wrap: anywhere; color: var(--on-side); font-weight: 600; line-height: 1.3; }
+.apd-me__vf { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--on-side-2); }
+.apd-me__vf i { width: 8px; height: 8px; border-radius: 50%; background: #4fd0a0; box-shadow: 0 0 0 3px rgba(79, 208, 160, .2); }
+.apd-me__vf.no i { background: #f2b45e; box-shadow: 0 0 0 3px rgba(242, 180, 94, .2); }
+.apd-me a { background: none; border: 0; color: var(--on-side-2); text-align: left; cursor: pointer; padding: 0; font-size: 13px; font-weight: 600; text-decoration: none; }
+.apd-me a:hover { color: #fff; }
+
+.apd-imp { background: #a4600a; color: #fff; font-size: 13px; font-weight: 650; }
+.apd-imp a { color: #fff; }
+/* the same notice inside the sidebar's account block (agent portal) */
+.apd-me__imp { display: grid; gap: 4px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, .1); font-size: 12px; color: #f2b45e; }
+.apd-me__imp a { color: #f2b45e; text-decoration: underline; text-underline-offset: 3px; }
+.apd-me__imp a:hover { color: #fff; }
+
+/* ---------- primitives ----------------------------------------------------- */
+.apd-eyebrow { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--steel); font-weight: 700; }
+.apd-lede { color: var(--ink-2); font-size: 15.5px; max-width: 58ch; }
+.apd-rule { height: 1px; background: var(--rule); border: 0; margin: 0; }
+.apd-mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.apd-h1 { font-family: var(--display); font-weight: 650; font-size: clamp(28px, 3.4vw, 40px); line-height: 1.06; letter-spacing: -.025em; margin: 0; text-wrap: balance; }
+.apd-h3 { font-family: var(--sans); font-weight: 700; font-size: 12px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); margin: 0; }
+
+/* padding/min-height are the design's trimmed control size, not the 10px/44px
+   the base button starts at. */
+.apd-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 10px; padding: 8px 18px; font-weight: 650; font-size: 14px; border: 1px solid transparent; cursor: pointer; min-height: 40px; white-space: nowrap; text-decoration: none; transition: background .12s, color .12s, border-color .12s, box-shadow .12s; }
+.apd-btn:focus-visible { outline: 0; box-shadow: 0 0 0 4px var(--glow), 0 0 0 1.5px var(--steel); }
+.apd-btn--primary { background: var(--btn); color: #fff; box-shadow: 0 6px 16px -8px var(--btn); }
+.apd-btn--primary:hover { background: var(--btn-h); color: #fff; }
+.apd-btn--ghost { background: var(--card); color: var(--ink); border-color: var(--rule-2); }
+.apd-btn--ghost:hover { background: var(--paper-2); color: var(--ink); }
+.apd-btn--danger { background: var(--card); color: var(--red); border-color: var(--rule-2); }
+.apd-btn--danger:hover { background: var(--red-soft); border-color: var(--red); }
+/* the solid destructive action, for a confirm dialog's Yes */
+.apd-btn--red { background: var(--red); color: #fff; box-shadow: 0 6px 16px -8px var(--red); }
+.apd-btn--red:hover { filter: brightness(.92); color: #fff; }
+/* the solid affirmative, for a success dialog's Done */
+.apd-btn--green { background: var(--sage); color: #fff; box-shadow: 0 6px 16px -8px var(--sage); }
+.apd-btn--green:hover { filter: brightness(.92); color: #fff; }
+.apd-btn--sm { padding: 6px 14px; min-height: 34px; font-size: 13px; border-radius: 9px; }
+.apd-btn[disabled], .apd-btn.is-disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
+
+.apd-card { background: var(--card); border: 1px solid var(--rule); border-radius: 18px; box-shadow: var(--shadow); }
+
+.apd-pill { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 650; padding: 4px 11px 4px 9px; border-radius: 999px; background: var(--paper-2); color: var(--ink-2); white-space: nowrap; }
+.apd-pill i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; display: inline-block; }
+.apd-pill--muted { background: var(--paper-2); color: var(--muted); }
+.apd-pill--amber { background: var(--ochre-soft); color: var(--ochre); }
+.apd-pill--blue { background: var(--steel-soft); color: var(--steel); }
+.apd-pill--green { background: var(--sage-soft); color: var(--sage); }
+.apd-pill--red { background: var(--red-soft); color: var(--red); }
+.apd-pill--violet { background: var(--plum-soft); color: var(--plum); }
+
+.apd-stamp { display: inline-flex; flex-direction: column; gap: 3px; padding: 9px 14px; border-radius: 12px; background: var(--paper-2); border: 1px solid var(--rule); }
+.apd-stamp small { font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.apd-stamp b { font-family: var(--mono); font-size: 17px; letter-spacing: .06em; font-weight: 600; line-height: 1.1; color: var(--ink); }
+
+.apd-kv { display: grid; grid-template-columns: minmax(120px, 170px) 1fr; gap: 9px 18px; font-size: 14px; margin: 0; }
+.apd-kv dt { color: var(--muted); }
+.apd-kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+
+.apd-notice { --n: var(--steel); --ns: var(--steel-soft); position: relative; background: var(--ns); border: 1px solid color-mix(in srgb, var(--n) 25%, transparent); padding: 14px 16px 14px 52px; border-radius: 14px; font-size: 14px; color: var(--ink); }
+.apd-notice::before { content: "i"; position: absolute; left: 16px; top: 14px; width: 24px; height: 24px; border-radius: 50%; background: var(--n); color: var(--card); display: grid; place-items: center; font: 700 13px/1 var(--display); }
+.apd-notice b { color: var(--ink); display: block; margin-bottom: 2px; }
+.apd-notice--warn { --n: var(--ochre); --ns: var(--ochre-soft); }
+.apd-notice--warn::before { content: "!"; }
+.apd-notice--ok { --n: var(--sage); --ns: var(--sage-soft); }
+.apd-notice--ok::before { content: "\2713"; }
+.apd-notice--bad { --n: var(--red); --ns: var(--red-soft); }
+.apd-notice--bad::before { content: "!"; }
+.apd-notice__actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
+
+/* ---------- form controls (My account) ------------------------------------ */
+.apd-field { display: grid; gap: 5px; min-width: 0; }
+.apd-field label { font-size: 12.5px; font-weight: 650; color: var(--ink); }
+.apd-field .apd-hint { font-size: 12.5px; color: var(--muted); }
+.apd-ctl { width: 100%; border: 1px solid var(--rule-2); border-radius: 9px; padding: 6px 11px; font-size: 14px; background: var(--card); color: var(--ink); min-height: 36px; transition: border-color .12s, box-shadow .12s; }
+.apd-ctl:hover { border-color: var(--muted); }
+.apd-ctl:focus { outline: 0; border-color: var(--steel); box-shadow: 0 0 0 4px var(--glow); }
+.apd-ctl.err { border-color: var(--red); background: var(--red-soft); }
+.apd-err { font-size: 12.5px; color: var(--red); font-weight: 500; }
+
+/* ---------- hero ----------------------------------------------------------- */
+.apd-hero {
+    position: relative; overflow: hidden; border-radius: 22px; padding: 30px 32px; color: var(--on-side);
+    background: radial-gradient(900px 340px at 100% -20%, rgba(74, 103, 255, .55), transparent 60%),
+                radial-gradient(500px 260px at 0% 120%, rgba(210, 32, 63, .35), transparent 60%),
+                linear-gradient(135deg, #0b1228, #16224a);
+    display: grid; gap: 26px;
+}
+.apd-hero::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(255, 255, 255, .14) 1px, transparent 1px); background-size: 22px 22px; -webkit-mask-image: linear-gradient(90deg, transparent 40%, #000); mask-image: linear-gradient(90deg, transparent 40%, #000); pointer-events: none; }
+.apd-hero > * { position: relative; }
+.apd-hero .apd-h1 { color: #fff; }
+.apd-hero .apd-h1 em { font-style: normal; color: #9fb0ff; }
+.apd-hero .apd-eyebrow { color: #9fb0ff; }
+.apd-hero__sub { color: var(--on-side-2); font-size: 14px; margin: 0; }
+.apd-hero__top { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
+.apd-hero__stats { display: flex; gap: 10px; flex-wrap: wrap; }
+.apd-hero__stat { padding: 11px 16px; border-radius: 14px; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .1); min-width: 120px; }
+.apd-hero__stat small { display: block; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--on-side-2); font-weight: 700; }
+.apd-hero__stat b { font-family: var(--display); font-size: 22px; font-weight: 650; color: #fff; letter-spacing: -.01em; }
+.apd-hero__stat b.apd-mono { font-family: var(--mono); font-size: 16px; font-weight: 600; letter-spacing: .05em; }
+.apd-hero .apd-btn--primary { background: #fff; color: #0b1228; box-shadow: none; }
+.apd-hero .apd-btn--primary:hover { background: #e8edff; color: #0b1228; }
+.apd-hero .apd-btn--primary.is-disabled { background: rgba(255, 255, 255, .14); color: rgba(255, 255, 255, .7); opacity: 1; }
+.apd-hero .apd-locked small { color: var(--on-side-2); }
+
+.apd-locked { display: grid; gap: 6px; justify-items: end; text-align: right; }
+.apd-locked small { font-size: 12.5px; color: var(--muted); max-width: 34ch; }
+
+/* ---------- empty state ---------------------------------------------------- */
+.apd-checklist { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.apd-checklist div { padding: 14px 16px; border: 1px solid var(--rule); border-radius: 14px; background: var(--paper); font-size: 13.5px; display: grid; gap: 6px; }
+.apd-checklist div b { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; color: var(--steel); }
+
+/* ---------- application card ----------------------------------------------- */
+.apd-dossier { display: block; background: var(--card); border: 1px solid var(--rule); border-radius: 18px; box-shadow: var(--shadow); overflow: hidden; transition: box-shadow .15s, border-color .15s; }
+.apd-dossier:hover { border-color: var(--rule-2); }
+.apd-dossier__in { padding: 22px 24px 24px; display: grid; gap: 22px; }
+.apd-dossier__head { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+.apd-dossier__id { display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap; }
+.apd-dossier__title { font-family: var(--display); font-weight: 650; font-size: 20px; line-height: 1.2; letter-spacing: -.015em; }
+.apd-dossier__title span { color: var(--muted); }
+.apd-dossier__meta { font-size: 12.5px; color: var(--muted); }
+.apd-dossier__actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- journey -------------------------------------------------------- */
+.apd-journey { display: grid; grid-template-columns: repeat(7, 1fr); position: relative; }
+.apd-journey__node { display: grid; justify-items: center; gap: 9px; text-align: center; position: relative; min-width: 0; }
+.apd-journey__node::before { content: ""; position: absolute; top: 13px; left: 0; right: 0; height: 3px; border-radius: 2px; background: var(--rule); }
+.apd-journey__node:first-child::before { left: 50%; }
+.apd-journey__node:last-child::before { right: 50%; }
+.apd-journey__node.done::before { background: var(--btn); }
+.apd-journey__dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--rule-2); background: var(--card); position: relative; z-index: 1; display: grid; place-items: center; font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--muted); }
+.apd-journey__node.done .apd-journey__dot { background: var(--btn); border-color: var(--btn); color: #fff; }
+.apd-journey__node.now .apd-journey__dot { border-color: var(--btn); color: var(--btn); box-shadow: 0 0 0 5px var(--glow); }
+.apd-journey__node.now.done .apd-journey__dot { background: var(--sage); border-color: var(--sage); color: #fff; box-shadow: 0 0 0 5px var(--sage-soft); }
+.apd-journey__node.branch .apd-journey__dot { background: var(--red); border-color: var(--red); color: #fff; box-shadow: 0 0 0 5px var(--red-soft); }
+.apd-journey__node span { font-size: 12px; line-height: 1.2; color: var(--muted); }
+.apd-journey__node.now span { color: var(--ink); font-weight: 650; }
+
+.apd-only-m { display: none; }
+
+@media (max-width: 900px) {
+    .apd-shell { grid-template-columns: 1fr; }
+    .apd-side { position: sticky; height: auto; grid-template-rows: none; grid-template-columns: 1fr; gap: 10px; padding: 12px max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px)); z-index: 20; }
+    .apd-side .apd-me { display: none; }
+    .apd-nav { display: flex; gap: 4px; overflow: auto; }
+    .apd-nav__label { display: none; }
+    .apd-nav a { width: auto; white-space: nowrap; padding: 9px 12px; }
+    .apd-main { padding-block: 22px 110px; }
+    .apd-journey { grid-template-columns: repeat(4, 1fr); row-gap: 20px; }
+    .apd-journey__node:nth-child(4)::before { right: 50%; }
+    .apd-journey__node:nth-child(5)::before { left: 50%; }
+    .apd-only-m { display: flex !important; }
+}
+
+@media (max-width: 600px) {
+    .apd-kv { grid-template-columns: 1fr; }
+    .apd-kv dt { margin-top: 6px; }
+    .apd-locked { justify-items: start; text-align: left; }
+    .apd-hero { padding: 24px 20px; }
+    .apd-dossier__in { padding: 18px 16px; }
+}
+
+/* =============================================================================
+ | Application form (the 4-step wizard).
+ |
+ | Same `apd-` namespace and the same rule-by-rule correspondence with the
+ | approved design. The sheet's own controls (`apd-ctl`, `apd-field`) are
+ | declared with the account form above.
+ ============================================================================= */
+
+/* ---------- wizard layout -------------------------------------------------- */
+.apd-wiz { display: grid; grid-template-columns: 288px 1fr; gap: 24px; align-items: start; }
+
+.apd-rail { position: sticky; top: 20px; display: grid; gap: 18px; background: var(--card); border: 1px solid var(--rule); border-radius: 18px; padding: 20px; box-shadow: var(--shadow); }
+.apd-rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.apd-rail li { display: grid; grid-template-columns: 30px 1fr; gap: 12px; padding: 10px; border-radius: 12px; cursor: default; }
+.apd-rail li .n { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--rule-2); display: grid; place-items: center; font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--muted); }
+.apd-rail li.done .n { background: var(--btn); border-color: var(--btn); color: #fff; }
+.apd-rail li.done { cursor: pointer; }
+.apd-rail li.done:hover { background: var(--paper-2); }
+.apd-rail li.active { background: var(--steel-soft); }
+.apd-rail li.active .n { border-color: var(--btn); color: var(--btn); background: var(--card); }
+.apd-rail li b { display: block; font-weight: 650; font-size: 13.5px; line-height: 1.25; color: var(--ink); }
+.apd-rail li:not(.active):not(.done) b { color: var(--ink-2); }
+.apd-rail li small { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+.apd-rail li:focus-visible { outline: 0; box-shadow: 0 0 0 4px var(--glow), 0 0 0 1.5px var(--steel); }
+
+.apd-sheet { background: var(--card); border: 1px solid var(--rule); border-radius: 18px; padding: 30px; box-shadow: var(--shadow); }
+.apd-sheet section { display: grid; gap: 14px; }
+.apd-sheet section + section { margin-top: 30px; padding-top: 26px; border-top: 1px solid var(--rule); }
+.apd-grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px 14px; align-items: start; }
+.apd-sub { display: grid; gap: 12px; padding: 16px 18px; background: var(--paper); border-radius: 14px; border: 1px solid var(--rule); }
+
+/* ---------- plain table (qualifications, employment) ----------------------- */
+.apd-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.apd-table th { text-align: left; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--rule); }
+.apd-table td { padding: 11px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; color: var(--ink); }
+.apd-table tr:last-child td { border-bottom: 0; }
+.apd-link { background: none; border: 0; color: var(--steel); text-decoration: underline; text-underline-offset: 3px; padding: 0; min-height: 0; font-weight: 600; cursor: pointer; font-size: inherit; }
+.apd-link--danger { color: var(--red); }
+
+/* ---------- checkbox / radio (lucide check + x) ---------------------------- */
+.apd-opt { position: relative; display: flex; align-items: flex-start; gap: 10px; font-size: 14px; cursor: pointer; color: var(--ink); line-height: 1.4; }
+.apd-opt .sr { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
+.apd-opt svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.apd-opt.chk { padding: 8px 11px; border: 1px solid var(--rule-2); border-radius: 10px; background: var(--card); transition: background .12s, border-color .12s; }
+.apd-opt.chk:hover { border-color: var(--muted); }
+.apd-opt.chk .box { flex: none; width: 20px; height: 20px; margin-top: 1px; border-radius: 6px; border: 1.5px solid var(--rule-2); display: grid; place-items: center; color: #fff; background: var(--card); transition: background .12s, border-color .12s; }
+.apd-opt.chk .box svg { opacity: 0; transform: scale(.5); transition: opacity .12s, transform .12s; }
+.apd-opt.chk:has(input:checked) { border-color: var(--btn); background: var(--steel-soft); }
+.apd-opt.chk input:checked + .box { background: var(--btn); border-color: var(--btn); }
+.apd-opt.chk input:checked + .box svg { opacity: 1; transform: none; }
+.apd-opt.chk input:focus-visible + .box, .apd-opt.rad input:focus-visible + .dot2 { box-shadow: 0 0 0 4px var(--glow); }
+.apd-opts { display: flex; gap: 8px; flex-wrap: wrap; }
+.apd-opt.rad { align-items: center; gap: 9px; padding: 6px 14px 6px 7px; border: 1px solid var(--rule-2); border-radius: 999px; background: var(--card); font-weight: 600; min-height: 36px; transition: background .12s, border-color .12s; }
+.apd-opt.rad:hover { border-color: var(--muted); }
+.apd-opt.rad .dot2 { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--rule-2); display: grid; place-items: center; color: #fff; background: var(--card); }
+.apd-opt.rad .dot2 svg { opacity: 0; width: 13px; height: 13px; }
+.apd-opt.rad:has(input:checked) { border-color: var(--btn); background: var(--steel-soft); }
+.apd-opt.rad input:checked + .dot2 { background: var(--btn); border-color: var(--btn); }
+.apd-opt.rad input:checked + .dot2 svg { opacity: 1; }
+.apd-opt.rad.neg:has(input:checked) { border-color: var(--ink-2); background: var(--paper-2); }
+.apd-opt.rad.neg input:checked + .dot2 { background: var(--ink-2); border-color: var(--ink-2); }
+
+/* ---------- modal ---------------------------------------------------------- */
+.apd-overlay { position: fixed; inset: 0; background: rgba(5, 10, 24, .6); backdrop-filter: blur(3px); display: grid; place-items: center; padding: 16px; z-index: 50; }
+.apd-modal { background: var(--card); color: var(--ink); border: 1px solid var(--rule); border-radius: 20px; width: min(680px, 100%); max-height: 92vh; overflow: auto; box-shadow: 0 30px 80px rgba(0, 0, 0, .4); }
+.apd-modal--wide { width: min(860px, 100%); }
+.apd-modal > header { padding: 18px 22px; border-bottom: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center; }
+.apd-modal > header h3 { text-transform: none; letter-spacing: -.01em; font-family: var(--display); font-size: 20px; font-weight: 650; color: var(--ink); margin: 0; }
+.apd-modal > .body { padding: 22px; }
+.apd-modal > footer { padding: 14px 22px; border-top: 1px solid var(--rule); display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- review accordion ----------------------------------------------- */
+.apd-accordion { background: var(--paper); border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; }
+.apd-accordion summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; font-weight: 650; padding: 12px 16px; border-bottom: 0; font-size: 14px; background: var(--paper-2); color: var(--ink); }
+.apd-accordion summary::-webkit-details-marker { display: none; }
+.apd-accordion[open] summary { border-bottom: 1px solid var(--rule); }
+.apd-accordion .body { padding: 6px 16px 10px; }
+.apd-accordion .apd-kv { row-gap: 0; font-size: 14px; }
+.apd-accordion .apd-kv dt, .apd-accordion .apd-kv dd { padding: 9px 0; border-bottom: 1px solid var(--rule); }
+.apd-accordion .apd-kv dt { color: var(--ink-2); font-weight: 600; font-size: 13px; }
+.apd-accordion .apd-kv dd { color: var(--ink); font-weight: 500; }
+.apd-accordion .apd-kv dt:nth-last-child(2), .apd-accordion .apd-kv dd:last-child { border-bottom: 0; }
+
+@media (max-width: 980px) {
+    .apd-wiz { grid-template-columns: 1fr; }
+    .apd-rail { position: static; }
+    .apd-rail ol { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+    .apd-sheet { padding: 20px 16px 24px; }
+    .apd-rail ol { grid-template-columns: 1fr; }
+    .apd-accordion .apd-kv dt { border-bottom: 0; padding-bottom: 0; }
+    .apd-accordion .apd-kv dd { padding-top: 2px; }
+}
+
+
+/* The agent shell does not carry the portal body, so the form restates the
+   tokens it needs. Values are identical to the portal's. */
+.apd-form {
+    --paper: #eef1f7; --paper-2: #e6ebf4; --card: #ffffff; --ink: #0d1a30; --ink-2: #3b4a64; --muted: #667590;
+    --rule: #e1e7f0; --rule-2: #c9d3e2; --btn: #2f4fe8; --btn-h: #243fc9; --glow: rgba(47, 79, 232, .16);
+    --red: #d2203f; --red-soft: #fdeaee; --steel: #2f4fe8; --steel-soft: #e8edff;
+    --sage: #1f8a5f; --sage-soft: #def4ea; --ochre: #b06a0b; --ochre-soft: #fdf0d9;
+    --shadow: 0 1px 2px rgba(13, 26, 48, .05), 0 10px 28px -14px rgba(13, 26, 48, .14);
+    --display: "Bricolage Grotesque", "Hanken Grotesk", system-ui, sans-serif;
+    --sans: "Hanken Grotesk", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    font-family: var(--sans); color: var(--ink);
+}
+.apd-form *, .apd-form *::before, .apd-form *::after { box-sizing: border-box; }
+.apd-span-all { grid-column: 1 / -1; }
+/* =============================================================================
+ | Midone bridge for the application form.
+ |
+ | The wizard's JavaScript (1,477 lines) binds to the template's own class and
+ | id hooks - `.wizard-fieldset`, `.form-wizard-step-item`, `.form-control`,
+ | `.acc__input-error`, the Tom Select controls and the Midone modals - and it
+ | picks the endpoint for each step from `parentFieldset.index()`. So the markup
+ | keeps those hooks and its sibling order, and the design is applied to them
+ | here instead. Scoped to `.apd-form`, not to the portal body, because agents
+ | render this same view inside their own shell.
+ ============================================================================= */
+
+/* ---------- wizard shell: header becomes the sticky rail ------------------- */
+.apd-form .form-wizard { display: grid; grid-template-columns: 288px 1fr; gap: 24px; align-items: start; }
+.apd-form .form-wizard-header { grid-column: 1; grid-row: 1 / -1; position: sticky; top: 20px; display: grid; gap: 18px; background: var(--card); border: 1px solid var(--rule); border-radius: 18px; padding: 20px; box-shadow: var(--shadow); }
+/* The fieldset is the step's column, not the card: it holds the heading, the
+   white sheet and the Back / Save row, which sit on the page background. */
+.apd-form .wizard-fieldset { grid-column: 2; grid-row: 1; background: transparent; border: 0; padding: 0; box-shadow: none; margin: 0; display: grid; gap: 16px; align-content: start; }
+.apd-form .wizard-step-form { display: grid; gap: 16px; }
+.apd-form .apd-step-head { display: grid; gap: 4px; }
+.apd-form .apd-eyebrow { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--steel); font-weight: 700; }
+.apd-form .apd-step-title { font-family: var(--display); font-weight: 650; font-size: clamp(28px, 3.4vw, 38px); line-height: 1.06; letter-spacing: -.025em; color: var(--ink); margin: 0; text-wrap: balance; }
+.apd-form .apd-sheet { background: var(--card); border: 1px solid var(--rule); border-radius: 18px; padding: 30px; box-shadow: var(--shadow); }
+.apd-form .apd-nav-row { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin: 0; padding: 0; border: 0; }
+/* section headings need air before the first field under them */
+.apd-form .apd-h3 { font-family: var(--sans); font-weight: 700; font-size: 12px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+.apd-form .wizard-fieldset:not(.show) { display: none; }
+.apd-form .wizard-fieldset.show { display: block; }
+
+/* the step list */
+.apd-form .form-wizard-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.apd-form .form-wizard-steps::before { display: none !important; content: none !important; }
+.apd-form .form-wizard-step-item { display: grid; grid-template-columns: 30px 1fr; gap: 12px; padding: 10px; border-radius: 12px; cursor: default; margin: 0; }
+.apd-form .form-wizard-step-item .n { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--rule-2); display: grid; place-items: center; font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--muted); background: var(--card); }
+.apd-form .form-wizard-step-item.activated .n { background: var(--btn); border-color: var(--btn); color: #fff; }
+.apd-form .form-wizard-step-item.active { background: var(--steel-soft); }
+.apd-form .form-wizard-step-item.active .n { border-color: var(--btn); color: var(--btn); background: var(--card); }
+.apd-form .form-wizard-step-item b { display: block; font-weight: 650; font-size: 13.5px; line-height: 1.25; color: var(--ink); }
+.apd-form .form-wizard-step-item:not(.active):not(.activated) b { color: var(--ink-2); }
+.apd-form .form-wizard-step-item small { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* ---------- sections inside a step ----------------------------------------- */
+.apd-form .wizard-fieldset .apd-sec { display: grid; gap: 14px; }
+.apd-form .wizard-fieldset .apd-sec + .apd-sec { margin-top: 30px; padding-top: 26px; border-top: 1px solid var(--rule); }
+
+/* ---------- form controls --------------------------------------------------- */
+.apd-form .form-label { font-size: 12.5px; font-weight: 650; color: var(--ink); display: block; margin-bottom: 5px; }
+.apd-form .form-label .text-danger { color: var(--red); }
+.apd-form .form-control,
+.apd-form textarea.form-control {
+    width: 100%; border: 1px solid var(--rule-2); border-radius: 9px; padding: 6px 11px;
+    font-family: var(--sans); font-size: 14px; line-height: 1.45;
+    background: var(--card); color: var(--ink); min-height: 36px; box-shadow: none;
+    transition: border-color .12s, box-shadow .12s;
+}
+.apd-form .form-control::placeholder { color: var(--muted); }
+.apd-form textarea.form-control { min-height: 84px; }
+.apd-form .form-control:hover { border-color: var(--muted); }
+.apd-form .form-control:focus { outline: 0; border-color: var(--steel); box-shadow: 0 0 0 4px var(--glow); }
+/* A failed field is reported by its message alone - no red fill, no red
+   outline - so every field in the form behaves the same way. */
+.apd-form .form-control.border-danger { border-color: var(--rule-2); background: var(--card); }
+.apd-form .acc__input-error { font-size: 12.5px; color: var(--red); font-weight: 500; margin-top: 4px; }
+.apd-form .acc__input-error:empty { display: none; }
+
+/* Tom Select 1.7.8 DOM: the WRAPPER is `.ts-control` (its `wrapperClass`) and
+   the visible box is `.ts-input`. There is no `.ts-wrapper` in this version -
+   writing one matches nothing and leaves the template's own
+   `.lcc-tom-select .ts-input` rules (40px tall, .25rem corners) in charge.
+   The wrapper is stripped bare; `.ts-input` is given the text input's exact
+   appearance, with !important because the legacy rules tie on specificity. */
+.apd-form .ts-control {
+    border: 0 !important; background: transparent !important; padding: 0 !important;
+    box-shadow: none !important; min-height: 0 !important; border-radius: 0 !important;
+}
+.apd-form .ts-control .ts-input,
+.apd-form .ts-input {
+    display: flex !important; align-items: center; flex-wrap: wrap;
+    width: 100%;
+    border: 1px solid var(--rule-2) !important;
+    border-radius: 9px !important;
+    padding: 6px 30px 6px 11px !important;
+    min-height: 36px !important;
+    font-family: var(--sans) !important;
+    font-size: 14px !important;
+    line-height: 1.45 !important;
+    color: var(--ink) !important;
+    background-color: var(--card) !important;
+    box-shadow: none !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23667590' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 10px center !important;
+    transition: border-color .12s, box-shadow .12s;
+}
+.apd-form .ts-input:hover { border-color: var(--muted) !important; }
+.apd-form .ts-input.focus,
+.apd-form .ts-input.dropdown-active,
+.apd-form .ts-control.focus .ts-input {
+    border-color: var(--steel) !important;
+    box-shadow: 0 0 0 4px var(--glow) !important;
+}
+/* the chosen value, the placeholder and the typed search all read as the input does */
+.apd-form .ts-input .item { line-height: 1.45 !important; color: var(--ink) !important; font-size: 14px !important; }
+.apd-form .ts-input > input,
+.apd-form .ts-input input {
+    font-family: var(--sans) !important; font-size: 14px !important; line-height: 1.45 !important;
+    color: var(--ink) !important; height: auto !important; min-height: 0 !important; margin: 0 !important;
+}
+.apd-form .ts-input > input::placeholder { color: var(--muted) !important; }
+.apd-form .ts-control[class~="border-danger"] .ts-input,
+.apd-form .ts-input.border-danger { border-color: var(--rule-2) !important; background-color: var(--card) !important; }
+.apd-form .ts-control.disabled .ts-input,
+.apd-form .ts-input.disabled { background-color: var(--paper-2) !important; opacity: .7; }
+
+/* The open menu. The template's own rules paint the highlighted option in the
+   brand primary with white text and square its corners, and they outrank a
+   plainly scoped override, so the design's panel is pinned over them:
+   `.option.active` is the keyboard/hover highlight (soft grey), `.selected` is
+   the chosen value (cobalt). */
+.apd-form .ts-dropdown {
+    margin-top: 6px !important;
+    z-index: 40;
+    max-height: 260px;
+    overflow-y: auto;
+    background: var(--card) !important;
+    border: 1px solid var(--rule-2) !important;
+    border-top: 1px solid var(--rule-2) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 14px 34px rgba(10, 20, 45, .16), 0 2px 6px rgba(10, 20, 45, .08) !important;
+    padding: 5px !important;
+}
+.apd-form .ts-dropdown .ts-dropdown-content { padding: 0; }
+.apd-form .ts-dropdown .option {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 9px 11px !important;
+    border-radius: 8px !important;
+    cursor: pointer;
+    font-size: 14.5px !important;
+    line-height: 1.4;
+    color: var(--ink) !important;
+    background: transparent !important;
+}
+.apd-form .ts-dropdown .option.active,
+.apd-form .ts-dropdown .option:hover,
+.apd-form .ts-dropdown .option:hover:not(.active) {
+    background-color: var(--paper-2) !important;
+    color: var(--ink) !important;
+}
+.apd-form .ts-dropdown .option.selected,
+.apd-form .ts-dropdown .option[aria-selected="true"] {
+    color: var(--btn) !important;
+    font-weight: 600 !important;
+}
+.apd-form .ts-dropdown .option.selected.active { background-color: var(--paper-2) !important; color: var(--btn) !important; }
+/* the search match inside an option: a tint, not the danger colour */
+.apd-form .ts-dropdown .option .highlight {
+    background-color: var(--steel-soft) !important;
+    color: inherit !important;
+    border-radius: 3px;
+}
+.apd-form .ts-dropdown .no-results,
+.apd-form .ts-dropdown .optgroup-header {
+    padding: 12px !important;
+    color: var(--muted) !important;
+    font-size: 13.5px !important;
+    background: transparent !important;
+}
+.apd-form .ts-dropdown .no-results { text-align: center; }
+.apd-form .ts-dropdown .optgroup-header { font-weight: 700; letter-spacing: .04em; text-transform: uppercase; font-size: 11px !important; padding: 10px 11px 4px !important; }
+.apd-form .ts-dropdown .optgroup + .optgroup { border-top: 1px solid var(--rule); margin-top: 4px; }
+
+/* checkbox / switch */
+.apd-form .form-check { display: flex; align-items: center; gap: 9px; }
+.apd-form .form-check-label { font-size: 14px; color: var(--ink); margin: 0; }
+.apd-form .form-check-input[type="checkbox"]:not(.form-check-switch) { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--rule-2); accent-color: var(--btn); }
+.apd-form .form-check-input:checked { background-color: var(--btn); border-color: var(--btn); }
+.apd-form .form-check-input:focus { box-shadow: 0 0 0 4px var(--glow); }
+
+/* ---------- buttons inside the form ---------------------------------------- */
+.apd-form .wizard-fieldset .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 10px;
+    padding: 8px 18px; font-weight: 650; font-size: 14px; border: 1px solid transparent; min-height: 40px;
+    box-shadow: none;
+}
+.apd-form .wizard-fieldset .btn-primary { background: var(--btn) !important; border-color: var(--btn) !important; color: #fff !important; }
+.apd-form .wizard-fieldset .btn-primary:hover { background: var(--btn-h) !important; border-color: var(--btn-h) !important; }
+.apd-form .wizard-fieldset .btn-secondary { background: var(--card) !important; color: var(--ink) !important; border-color: var(--rule-2) !important; }
+.apd-form .wizard-fieldset .btn-secondary:hover { background: var(--paper-2) !important; }
+.apd-form .wizard-fieldset .btn[disabled] { opacity: .5; cursor: not-allowed; }
+
+/* ---------- the design's dialog -------------------------------------------
+   tw-starter's modal.js moves a modal to <body> when it opens, so none of
+   this can hang off `.apd-form`: the page scope is gone by the time the
+   dialog is visible. The skin rides on the modal element instead. */
+/* A modal is reparented to <body>, so it leaves `.apd-form` behind - and on
+   the agent side the body has no `applicant-portal-body` class either. It
+   therefore carries its own copy of the tokens, or it would render with every
+   custom property unresolved. Values identical to the portal's. */
+.apd-modal-skin {
+    --paper: #eef1f7; --paper-2: #e6ebf4; --card: #ffffff; --ink: #0d1a30; --ink-2: #3b4a64; --muted: #667590;
+    --rule: #e1e7f0; --rule-2: #c9d3e2; --btn: #2f4fe8; --btn-h: #243fc9; --glow: rgba(47, 79, 232, .16);
+    --red: #d2203f; --red-soft: #fdeaee; --steel: #2f4fe8; --steel-soft: #e8edff;
+    --sage: #1f8a5f; --sage-soft: #def4ea; --ochre: #b06a0b; --ochre-soft: #fdf0d9;
+    --shadow: 0 1px 2px rgba(13, 26, 48, .05), 0 10px 28px -14px rgba(13, 26, 48, .14);
+    --display: "Bricolage Grotesque", "Hanken Grotesk", system-ui, sans-serif;
+    --sans: "Hanken Grotesk", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    font-family: var(--sans); color: var(--ink);
+}
+.apd-modal-skin .modal-dialog { width: min(680px, 100%); margin: 0 auto; }
+.apd-modal-skin .modal-content { background: var(--card); color: var(--ink); border: 1px solid var(--rule); border-radius: 20px; box-shadow: 0 30px 80px rgba(0, 0, 0, .4); }
+.apd-modal-skin .modal-header { padding: 18px 22px; border-bottom: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.apd-modal-skin .apd-modal__title { margin: 0; font-family: var(--display); font-size: 20px; font-weight: 650; letter-spacing: -.01em; text-transform: none; color: var(--ink); }
+.apd-modal-skin .modal-body { padding: 22px; }
+.apd-modal-skin .modal-footer { padding: 14px 22px; border-top: 1px solid var(--rule); display: flex; justify-content: flex-end; align-items: center; gap: 8px; flex-wrap: wrap; }
+.apd-modal-skin .apd-modal__grid { display: grid; gap: 12px; }
+/* the wide dialog: the design's three-up field grid falls out of auto-fit at
+   this width, the same way `.grid-2` does in the design itself. */
+.apd-modal-skin--wide .modal-dialog { width: min(860px, 100%); }
+.apd-modal-skin .apd-modal__stack { display: grid; gap: 14px; }
+.apd-modal-skin .apd-grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px 14px; align-items: start; }
+.apd-modal-skin .apd-field--bottom { align-self: end; }
+.apd-modal-skin .apd-modal__sub { margin: 4px 0 0; font-family: var(--sans); font-weight: 700; font-size: 12px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+.apd-modal-skin .apd-address { display: grid; gap: 12px; }
+.apd-modal-skin .apd-modal__copy { margin: 0; font-size: 14px; color: var(--ink); }
+.apd-modal-skin .apd-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; }
+@media (max-width: 600px) { .apd-modal-skin .apd-grid-2 { grid-template-columns: 1fr; } }
+/* the close control: a quiet square, not a bare glyph */
+.apd-modal-skin .apd-modal__x {
+    flex: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; padding: 0; border-radius: 10px;
+    background: var(--card); border: 1px solid var(--rule-2); color: var(--ink-2); cursor: pointer;
+    transition: background .12s, border-color .12s, color .12s;
+}
+.apd-modal-skin .apd-modal__x:hover { background: var(--paper-2); border-color: var(--muted); color: var(--ink); }
+.apd-modal-skin .apd-modal__x svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+/* the error line only takes room once the validator fills it */
+.apd-modal-skin .apd-err:empty { display: none; }
+.apd-modal-skin .apd-ctl.border-danger { border-color: var(--red) !important; }
+
+/* ---------- the centred dialog (confirm / success / error) ----------------
+   No header and no close cross: the actions are the only way out, which is
+   what a confirm should be. */
+.apd-modal-skin--center .modal-dialog { width: min(440px, 100%); }
+.apd-dlg { display: grid; justify-items: center; text-align: center; gap: 10px; padding: 28px 26px 24px; }
+.apd-dlg__icon { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; margin-bottom: 4px; }
+.apd-dlg__icon svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.apd-dlg__icon--red { background: var(--red-soft); color: var(--red); }
+.apd-dlg__icon--green { background: var(--sage-soft); color: var(--sage); }
+.apd-dlg__title { margin: 0; font-family: var(--display); font-size: 22px; font-weight: 700; letter-spacing: -.01em; text-transform: none; color: var(--ink); }
+.apd-dlg__copy { margin: 0; font-size: 14px; line-height: 1.5; color: var(--muted); max-width: 42ch; }
+.apd-dlg__copy:empty { display: none; }
+.apd-dlg__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; margin-top: 12px; }
+/* a lone action is not edge to edge: one centred column, a sensible width */
+.apd-dlg__actions--one { grid-template-columns: minmax(160px, 220px); justify-content: center; }
+.apd-dlg__actions .apd-btn { width: 100%; min-height: 48px; border-radius: 12px; }
+
+/* ---------- Tabulator tables (qualifications, employment) ------------------ */
+.apd-form .tabulator { background: transparent; border: 0; font-size: 13.5px; }
+.apd-form .tabulator .tabulator-header { background: transparent; border-bottom: 1px solid var(--rule); color: var(--muted); }
+.apd-form .tabulator .tabulator-header .tabulator-col { background: transparent; border-right: 0; }
+.apd-form .tabulator .tabulator-header .tabulator-col-title { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.apd-form .tabulator .tabulator-row { background: transparent; border-bottom: 1px solid var(--rule); }
+.apd-form .tabulator .tabulator-row:hover { background: var(--paper); }
+.apd-form .tabulator .tabulator-row .tabulator-cell { border-right: 0; padding: 11px 10px; color: var(--ink); }
+
+@media (max-width: 980px) {
+    .apd-form .form-wizard { grid-template-columns: 1fr; }
+    .apd-form .form-wizard-header { grid-column: 1; grid-row: auto; position: static; }
+    .apd-form .wizard-fieldset { grid-column: 1; grid-row: auto; }
+    .apd-form .form-wizard-steps { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+    .apd-form .apd-sheet { padding: 20px 16px 24px; }
+    .apd-form .form-wizard-steps { grid-template-columns: 1fr; }
+}
+
+/* ---------- review step (accordion built in PHP by @review) ---------------- */
+.apd-form .accordion { display: grid; gap: 10px; }
+.apd-form .accordion-item { background: var(--paper); border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; margin: 0; }
+.apd-form .accordion-button { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 12px 16px; font-weight: 650; font-size: 14px; background: var(--paper-2); color: var(--ink); border: 0; cursor: pointer; text-align: left; }
+.apd-form .accordion-button:not(.collapsed) { border-bottom: 1px solid var(--rule); background: var(--paper-2); color: var(--ink); box-shadow: none; }
+.apd-form .accordion-button::after { display: none; }
+.apd-form .accordion-body { padding: 6px 16px 10px; background: var(--paper); }
+.apd-form .accordion-body table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.apd-form .accordion-body td, .apd-form .accordion-body th { padding: 9px 0; border-bottom: 1px solid var(--rule); vertical-align: top; text-align: left; }
+.apd-form .accordion-body tr:last-child td, .apd-form .accordion-body tr:last-child th { border-bottom: 0; }
+.apd-form .accordion-body th { color: var(--ink-2); font-weight: 600; font-size: 13px; width: 38%; }
+.apd-form .accordion-body td { color: var(--ink); font-weight: 500; }
+.apd-form .reviewLoader { color: var(--muted); }
+
+/* The disability list: two columns of boxed checkboxes, as in the design. */
+.apd-form .apd-opt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 6px; }
+.apd-form .apd-field { display: grid; gap: 5px; min-width: 0; }
+.apd-form .apd-hint { font-size: 12.5px; color: var(--muted); }
+.apd-form .apd-sub { display: grid; gap: 12px; padding: 16px 18px; background: var(--paper); border-radius: 14px; border: 1px solid var(--rule); }
+
+/* Inline address block (replaces the old Add Address modal). */
+.apd-form .apd-address { display: grid; gap: 12px; margin-top: 2px; }
+.apd-form .apd-address .apd-grid-2 { gap: 12px 14px; }
+
+/* Step 2: course meta line, and the panels that hold the conditional answers. */
+.apd-form .apd-course-meta { font-size: 13.5px; }
+.apd-form .apd-course-meta dt { color: var(--muted); }
+.apd-form .apd-sub .apd-field { gap: 7px; }
+.apd-form .apd-sub .apd-opt.chk { background: var(--card); }
+.apd-form #selectVenue.hidden { display: none !important; }
+
+/* --- step 2 corrections ---------------------------------------------------- */
+/* A long course name must not grow the control: one line, ellipsed, like the design. */
+.apd-form .ts-input { flex-wrap: nowrap !important; overflow: hidden; }
+.apd-form .ts-input .item {
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; display: block; max-width: 100%;
+}
+/* the course meta line sits apart from the field above it */
+/* panels stay inside the sheet */
+.apd-form .apd-sub { max-width: 100%; min-width: 0; }
+.apd-form .apd-sheet, .apd-form .wizard-step-form { min-width: 0; }
+.apd-form .apd-grid-2 > * { min-width: 0; }
+/* the "Add …" buttons sit under their question */
+.apd-form .employmentHistoryAdder { margin-top: 10px; }
+/* Employment history is still a Tabulator grid; its query/export toolbar is
+   not part of this design. The qualification equivalents went with the grid. */
+.apd-form #tabulatorFilterForm-EH { display: none !important; }
+.apd-form .educationEmploymentTableWrap .flex.mt-5,
+.apd-form .educationEmploymentTableWrap .flex.sm\:mt-0 { display: none !important; }
+
+/* --- academic qualifications: the design's plain table --------------------- */
+.apd-form .apd-tablewrap { overflow-x: auto; }
+/* Only spaced off the table when there is a table above it. */
+.apd-form .educationQualificationTableWrap.has-rows + .apd-qual-actions,
+.apd-form .educationEmploymentTableWrap.has-rows + .apd-qual-actions { margin-top: 10px; }
+.apd-form .apd-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.apd-form .apd-table th { text-align: left; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 700; padding: 8px 10px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+.apd-form .apd-table td { padding: 11px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; color: var(--ink); }
+.apd-form .apd-table tbody tr:last-child td { border-bottom: 0; }
+.apd-form .apd-table .apd-table__act { text-align: right; white-space: nowrap; }
+/* The design's text actions, not the theme's round icon buttons. */
+.apd-form .apd-linkbtn {
+    background: none !important; border: 0 !important; box-shadow: none !important;
+    color: var(--steel) !important; text-decoration: underline; text-underline-offset: 3px;
+    padding: 0 !important; margin: 0 !important; min-height: 0 !important; width: auto !important;
+    font-family: var(--sans); font-size: 13.5px; font-weight: 600; cursor: pointer;
+}
+.apd-form .apd-linkbtn--danger { color: var(--red) !important; }
+.apd-form .apd-linkbtn__sep { color: var(--muted); margin: 0 2px; }
+
+/* --- step 2: course row, overflow and section rhythm ----------------------- */
+/* Two real halves: the course keeps its column before a venue is offered. */
+.apd-form .apd-grid-2--fixed { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 760px) { .apd-form .apd-grid-2--fixed { grid-template-columns: 1fr; } }
+
+/* A Tom Select wrapper is sized by its content unless it is told otherwise,
+   which is what pushed the course control over the next column. */
+.apd-form .ts-control { display: block !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
+.apd-form .apd-field { min-width: 0; }
+/* Tom Select copies the original select's classes onto its wrapper, so the
+   whole chain has to be pinned, not just the wrapper: a long venue name would
+   otherwise set the width of the track and push past the column. */
+.apd-form .ts-input { max-width: 100% !important; min-width: 0 !important; }
+.apd-form .apd-grid-2 > *, .apd-form .apd-grid-2--fixed > * { min-width: 0; max-width: 100%; }
+
+/* The design spaces a step with one container gap - `.sheet section{gap:16px}` -
+   not with margins between particular pairs. This form has no <section>
+   wrappers, so the gap goes on the sheet itself. It is also the only rhythm
+   rule that holds for the conditional fields: those are toggled with inline
+   `display`, and a hidden grid child contributes no gap, so a panel that
+   appears mid-step is spaced correctly without extra selectors or any JS. */
+.apd-form .apd-sheet { display: grid; gap: 16px; align-content: start; }
+.apd-form .apd-sheet > * { min-width: 0; }
+
+/* --- referral: the code beside its Verify button -------------------------
+   The design: `minmax(200px,420px) max-content`, aligned to the bottom so the
+   button sits level with the input. The button is hidden until the code
+   changes and shown by the script; its look is `apd-btn--ghost` until it
+   verifies, then `apd-btn--primary` - the legacy `.btn-*` toggles are gone. */
+.apd-form .apd-referral { display: grid; grid-template-columns: minmax(200px, 420px) max-content; gap: 8px; align-items: end; }
+.apd-form .apd-referral .apd-btn { white-space: nowrap; }
+.apd-form .apd-referral .apd-btn svg { width: 16px; height: 16px; }
+@media (max-width: 600px) { .apd-form .apd-referral { grid-template-columns: 1fr; } }
+/* a verified code is locked: tinted, not greyed out */
+.apd-form .apd-referral .apd-ctl[readonly] { background: var(--paper-2); color: var(--ink-2); border-color: var(--rule-2); cursor: default; }
+.apd-form .apd-referral .apd-ctl[readonly]:focus { box-shadow: none; border-color: var(--rule-2); }
+/* the result notice only takes room once it says something */
+.apd-form .apd-referral-notice:empty { display: none; }
+.apd-form .apd-referral-notice:not(:empty) { margin-top: 6px; }
+
+/* ---------- month-only Litepicker (employment dates) -----------------------
+   The attendance report's `attendance-month-litepicker` supplies the
+   structure - day grid hidden, a twelve-button month grid in its place - and
+   this repaints it in the portal's cobalt. The popup is appended to <body>,
+   so it is not under `.apd-form`, and on the agent side the body carries no
+   tokens either: the colours are literal. */
+.litepicker.apd-month-litepicker .attendance-month-option { border-color: #c9d3e2; color: #3b4a64; font-family: "Hanken Grotesk", system-ui, sans-serif; font-weight: 600; }
+.litepicker.apd-month-litepicker .attendance-month-option:hover { background: #eef1f7; color: #0d1a30; }
+.litepicker.apd-month-litepicker .attendance-month-option.is-active,
+.litepicker.apd-month-litepicker .attendance-month-option.is-active:hover { background: #2f4fe8; border-color: #2f4fe8; color: #fff; }
+.litepicker.apd-month-litepicker .attendance-month-option.is-disabled,
+.litepicker.apd-month-litepicker .attendance-month-option.is-disabled:hover { background: transparent; color: #a7b2c6; border-color: #e1e7f0; cursor: not-allowed; }
+.litepicker.apd-month-litepicker .month-item-year { font-family: "Hanken Grotesk", system-ui, sans-serif; }
+/* an empty message holder takes no room in a field's grid */
+.apd-form .apd-err:empty { display: none; }
+
+/* --- step 3: declaration prose --------------------------------------------
+   The College's own copy, set as body text rather than as form chrome: a
+   measure for reading, the list on the same rhythm, the panel title in the
+   display face so it reads as a heading inside the paper panel. */
+/* Typography is the design's own declaration block (step 4): the eyebrow
+   heading the sections use, over a plain 14px paragraph in full ink. */
+.apd-form .apd-prose { margin: 0; font-size: 14px; line-height: 1.55; color: var(--ink); }
+/* icon rows, not bullets: Lucide check-circle in sage, text in ink */
+.apd-form .apd-list { margin: 0; padding: 0; list-style: none; font-size: 14px; line-height: 1.55; color: var(--ink); display: grid; gap: 6px; }
+.apd-form .apd-list li { display: flex; align-items: flex-start; gap: 9px; }
+.apd-form .apd-list__icon { flex: none; width: 14px; height: 14px; margin-top: 4px; color: var(--sage); }
+.apd-form .apd-sub__title { margin: 0; font-family: var(--sans); font-weight: 700; font-size: 12px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+.apd-form .apd-declaration { padding: 18px; border-radius: 12px; gap: 10px; }
+.apd-form .apd-declaration .apd-opt.chk { background: var(--card); align-items: flex-start; }
+.apd-form .apd-declaration .apd-opt.chk > span:last-child { font-size: 14px; line-height: 1.45; }
+
+/* --- step 4: review & apply ------------------------------------------------
+   The read-back is a stack of native <details> sections in the design's
+   accordion skin (ported above as `.apd-accordion`); this adds only what the
+   step itself needs. */
+.apd-form .apd-review__loader { display: grid; justify-items: center; gap: 10px; padding: 28px 0; color: var(--muted); font-size: 13.5px; }
+.apd-form .apd-review__wrap { display: grid; gap: 14px; }
+.apd-form .apd-review { display: grid; gap: 10px; }
+.apd-form .apd-accordion__caret { font-size: 12px; color: var(--muted); transition: transform .12s; }
+.apd-form .apd-accordion[open] .apd-accordion__caret { transform: rotate(180deg); }
+.apd-form .apd-accordion .apd-kv dd { min-width: 0; overflow-wrap: anywhere; }
+.apd-form .apd-kv__sub { display: block; color: var(--muted); font-size: 13px; font-weight: 400; margin-top: 2px; }
+.apd-form .apd-accordion .apd-table td { color: var(--ink); }
+.apd-form .apd-accordion .apd-tablewrap { padding: 6px 0 4px; }
+.apd-form .apd-review__table { margin-top: 8px; }
+.apd-form .apd-note { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+.apd-form .apd-review__wrap .apd-notice b { display: inline; margin: 0; }
+.apd-form .apd-sheet > .apd-h3 { margin: 0; }
+/* A heading that opens a new section carries the divider. The 16px gap above
+   it plus this 14px gives the design's 30px to the rule, then 26px to text. */
+.apd-form .apd-sheet > .apd-h3:not(:first-child) { margin-top: 14px; padding-top: 26px; border-top: 1px solid var(--rule); }
+/* The design sets this down as a bare definition list at 13.5px - no panel,
+   no border, no fill. It is the `.kv` list, not a card. */
+.apd-form .apd-course-meta { margin: 0; padding: 0; background: none; border: 0; border-radius: 0; }
+/* A media query adds no specificity, so the narrow-screen gap has to come
+   after the rule above or the 16px would win at every width. */
+@media (max-width: 600px) { .apd-form .apd-sheet { gap: 14px; } }
+
+/* --- application view: back link, head, tabs, panels, message rows ---------
+   The read-only view of one application (agent portal now; the applicant's
+   own view can share it). Declarations follow the approved design. */
+.apd-view { display: grid; gap: 18px; }
+.apd-backlink { display: inline-block; background: none; border: 0; color: var(--steel); text-decoration: underline; text-underline-offset: 3px; padding: 0; font-weight: 600; font-size: 14px; cursor: pointer; }
+.apd-backlink:hover { color: var(--btn); }
+.apd-view__head { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
+.apd-view__who { display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; }
+.apd-view__meta { color: var(--muted); font-size: 14px; margin: 0; }
+.apd-tabs { display: flex; gap: 6px; padding: 5px; border-radius: 14px; background: var(--paper-2); width: fit-content; max-width: 100%; overflow: auto; }
+.apd-tabs button { background: none; border: 0; cursor: pointer; padding: 9px 16px; font: inherit; font-weight: 650; font-size: 14px; color: var(--muted); border-radius: 10px; white-space: nowrap; }
+.apd-tabs button.on { color: var(--ink); background: var(--card); box-shadow: 0 1px 3px rgba(13, 26, 48, .12); }
+.apd-tabs button:focus-visible { outline: 0; box-shadow: 0 0 0 4px var(--glow); }
+.apd-tabpanel { display: grid; gap: 14px; }
+.apd-tabpanel[hidden] { display: none !important; }
+.apd-panel { background: var(--card); border: 1px solid var(--rule); border-radius: 16px; padding: 18px 20px; display: grid; gap: 12px; box-shadow: var(--shadow); }
+.apd-panel h3 { margin: 0; font-size: 12.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink); font-weight: 700; }
+.apd-panel p { margin: 0; color: var(--ink-2); font-size: 14px; }
+.apd-panel p b, .apd-panel b { color: var(--ink); font-weight: 650; }
+.apd-panel__fine { color: var(--muted) !important; margin-top: 6px !important; font-size: 13.5px !important; line-height: 1.55; }
+.apd-msgs { width: 100%; border-collapse: separate; border-spacing: 0 8px; margin: -8px 0; font-size: 14px; }
+.apd-msgs td { padding: 11px 14px; background: var(--paper); border: 0; vertical-align: middle; font-size: 14px; color: var(--ink); }
+.apd-msgs td:first-child { border-radius: 10px 0 0 10px; width: 1%; white-space: nowrap; font-size: 12.5px; color: var(--ink-2); font-weight: 600; }
+.apd-msgs td:last-child { border-radius: 0 10px 10px 0; }
+.apd-msgs__sub { color: var(--muted); font-size: 12.5px; margin-left: 6px; }
+/* the answers tab: white accordion bodies, a gap between the sections */
+.apd-view .apd-review { display: grid; gap: 10px; }
+.apd-view .apd-accordion { background: var(--card); }
+.apd-view .apd-accordion summary { background: var(--paper-2); }
+
+/* --- Yes/No switch ---------------------------------------------------------
+   components/applicant/switch: a hidden 0, a checkbox (1), a dot and a text
+   that reads Yes/No from the state. On, it is the form's chosen pill (cobalt
+   dot with a tick, soft cobalt pill); off, a cross in disabled colours. */
+.apd-switch { position: relative; display: inline-flex; align-items: center; gap: 10px; width: fit-content; min-width: 85px; justify-self: start; min-height: 38px; padding: 7px 20px 7px 8px; border: 1px solid var(--rule); border-radius: 999px; background: var(--paper-2); color: var(--muted); font-size: 14px; font-weight: 600; line-height: 1.3; cursor: pointer; user-select: none; box-shadow: 0 1px 2px rgba(13, 26, 48, .06); transition: background .12s, border-color .12s, color .12s, box-shadow .12s; }
+.apd-switch .sr { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
+.apd-switch:hover { border-color: var(--rule-2); }
+.apd-switch__dot { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--rule-2); background: var(--card); display: grid; place-items: center; color: var(--muted); transition: background .12s, border-color .12s; }
+.apd-switch__dot svg { grid-area: 1 / 1; width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.apd-switch__on { display: none; }
+.apd-switch:has(input:checked) { border-color: var(--btn); background: var(--steel-soft); color: var(--ink); box-shadow: 0 2px 8px rgba(47, 79, 232, .18), 0 1px 2px rgba(13, 26, 48, .06); }
+.apd-switch input:checked ~ .apd-switch__dot { background: var(--btn); border-color: var(--btn); color: #fff; }
+.apd-switch input:checked ~ .apd-switch__dot .apd-switch__on { display: block; }
+.apd-switch input:checked ~ .apd-switch__dot .apd-switch__off { display: none; }
+.apd-switch input:focus-visible ~ .apd-switch__dot { box-shadow: 0 0 0 4px var(--glow); }
+.apd-switch__text::after { content: attr(data-off); }
+.apd-switch input:checked ~ .apd-switch__text::after { content: attr(data-on); }
+
+/* --- the applicant's own application, read back (application/show) ---------
+   The form's "Review & apply" step on its own: step head, sheet, the review
+   sections and the declaration, in one column without the step rail. */
+.apd-appview { display: grid; gap: 16px; max-width: 940px; }
+.apd-appview__meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 6px; color: var(--muted); font-size: 14px; }
+.apd-appview .apd-notice a { color: var(--steel); font-weight: 600; text-underline-offset: 3px; }
+.apd-appview .apd-notice b { display: inline; margin: 0 4px 0 0; }
+.apd-appview .apd-notice__actions .apd-btn { color: #fff; }
+.apd-appview__agreed { cursor: default; }
+.apd-appview__agreed input:disabled + .box { opacity: 1; }

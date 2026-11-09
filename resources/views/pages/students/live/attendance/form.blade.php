@@ -98,7 +98,10 @@
                                                             @endif
                                                         @endforeach
                                                         <td class="atn-edit-action">
+                                                            {{-- Deleting needs Live Student > Attendance Delete (checked on the server too). --}}
+                                                            @if(isset(auth()->user()->priv()['attendance_delete']) && auth()->user()->priv()['attendance_delete'] == 1)
                                                             <span data-tw-target="#confirmModal" data-tw-toggle="modal" data-id="{{ $planDateList["attendance"]->id}}" class="delete_btn"><i data-lucide="trash-2" class="w-4 h-4"></i>Delete</span>
+                                                            @endif
                                                         </td>
                                                     </tr>
                                                 @endif

@@ -29,9 +29,18 @@ class CourseCreationsRequest extends FormRequest
             'course_creation_qualification_id' => 'required',
             'duration' => 'required',
             'unit_length' => 'required',
+            'induction_booking_link' => 'nullable|url|max:500',
 
             //'is_workplacement' => 'sometimes',
             //'required_hours' => 'required_if:is_workplacement,1'
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'induction_booking_link.url' => 'Please enter the full link, starting with https://',
+            'induction_booking_link.max' => 'The link can be up to 500 characters.',
         ];
     }
 }

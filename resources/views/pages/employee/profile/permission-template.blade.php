@@ -632,6 +632,63 @@
     </div>
 </div>
 
+<!-- Attendance Integrity Privileges -->
+<div class="intro-y box p-5 mt-5">
+    <div class="grid grid-cols-12 gap-0 items-center">
+        <div class="col-span-6">
+            <div class="font-medium text-base">Attendance Integrity Privileges</div>
+        </div>
+        <div class="col-span-6 text-right relative">
+            <button type="submit" class="btn btn-primary shadow-md mr-2"><i data-lucide="save-all" class="w-4 h-4 mr-2"></i>Save All</button>
+        </div>
+    </div>
+    <div class="intro-y mt-5">
+        <div class="grid grid-cols-12 gap-4 items-start">
+            <div class="col-span-12 sm:col-span-6">
+                <div class="form-check form-switch">
+                    <input {{ $on('attendance_integrity') }} id="attendance-integrity-{{ $d }}" class="form-check-input parentPermissionItem" type="checkbox" value="1" name="permissions[{{ $d }}][attendance_integrity]">
+                    <label class="form-check-label ml-4" for="attendance-integrity-{{ $d }}">Attendance Integrity</label>
+                </div>
+                <div class="childrenPermissionWrap pt-4 pl-12">
+                    <div class="form-check form-switch mb-4">
+                        <input {{ $on('attendance_integrity_view_dashboard') }} {{ $off('attendance_integrity') }} id="attendance-integrity-view-dashboard-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][attendance_integrity_view_dashboard]">
+                        <label class="form-check-label ml-4" for="attendance-integrity-view-dashboard-{{ $d }}">View dashboard</label>
+                    </div>
+                    <div class="form-check form-switch mb-4">
+                        <input {{ $on('attendance_integrity_view_staff') }} {{ $off('attendance_integrity') }} id="attendance-integrity-view-staff-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][attendance_integrity_view_staff]">
+                        <label class="form-check-label ml-4" for="attendance-integrity-view-staff-{{ $d }}">View staff analysis</label>
+                    </div>
+                    <div class="form-check form-switch mb-4">
+                        <input {{ $on('attendance_integrity_view_students') }} {{ $off('attendance_integrity') }} id="attendance-integrity-view-students-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][attendance_integrity_view_students]">
+                        <label class="form-check-label ml-4" for="attendance-integrity-view-students-{{ $d }}">View student analysis</label>
+                    </div>
+                    <div class="form-check form-switch mb-4">
+                        <input {{ $on('attendance_integrity_view_audit_logs') }} {{ $off('attendance_integrity') }} id="attendance-integrity-view-audit-logs-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][attendance_integrity_view_audit_logs]">
+                        <label class="form-check-label ml-4" for="attendance-integrity-view-audit-logs-{{ $d }}">View attendance history</label>
+                    </div>
+                    <div class="form-check form-switch mb-4">
+                        <input {{ $on('attendance_integrity_view_investigations') }} {{ $off('attendance_integrity') }} id="attendance-integrity-view-investigations-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][attendance_integrity_view_investigations]">
+                        <label class="form-check-label ml-4" for="attendance-integrity-view-investigations-{{ $d }}">View investigations</label>
+                    </div>
+                    <div class="form-check form-switch mb-4">
+                        <input {{ $on('attendance_integrity_manage_investigations') }} {{ $off('attendance_integrity') }} id="attendance-integrity-manage-investigations-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][attendance_integrity_manage_investigations]">
+                        <label class="form-check-label ml-4" for="attendance-integrity-manage-investigations-{{ $d }}">Manage investigations</label>
+                    </div>
+                    <div class="form-check form-switch mb-4">
+                        <input {{ $on('attendance_integrity_export') }} {{ $off('attendance_integrity') }} id="attendance-integrity-export-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][attendance_integrity_export]">
+                        <label class="form-check-label ml-4" for="attendance-integrity-export-{{ $d }}">Export</label>
+                    </div>
+                    <div class="form-check form-switch mb-4">
+                        <input {{ $on('attendance_integrity_manage_settings') }} {{ $off('attendance_integrity') }} id="attendance-integrity-manage-settings-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][attendance_integrity_manage_settings]">
+                        <label class="form-check-label ml-4" for="attendance-integrity-manage-settings-{{ $d }}">Manage settings</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-span-12 sm:col-span-6 text-slate-500 text-xs leading-relaxed">For senior management, compliance and named investigators only. Needs the Attendance Integrity switch plus each area.</div>
+        </div>
+    </div>
+</div>
+
 <!-- Result Management Privileges -->
 <div class="intro-y box p-5 mt-5">
     <div class="grid grid-cols-12 gap-0 items-center">

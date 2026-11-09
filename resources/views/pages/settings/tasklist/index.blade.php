@@ -22,6 +22,7 @@
             ['name' => 'pearson_reg', 'label' => 'Pearson Registration'],
             ['name' => 'address_request', 'label' => 'Address Update Request'],
             ['name' => 'hesa_status', 'label' => 'Student Hesa Status'],
+            ['name' => 'class_routine', 'label' => 'Class Routine (ICP)'],
             ['name' => 'status', 'label' => 'Status', 'required' => true],
         ];
     @endphp

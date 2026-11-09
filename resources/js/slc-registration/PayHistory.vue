@@ -55,7 +55,7 @@
                 <colgroup><col style="width: 22%"><col style="width: 12%"><col style="width: 10%"><col style="width: 15%"><col style="width: 14%"><col style="width: 15%"><col></colgroup>
                 <thead><tr><th scope="col">Student</th><th scope="col">Invoice</th><th scope="col">Amount</th><th scope="col">Agreement</th><th scope="col">Instalment</th><th scope="col">Entered</th><th scope="col">Checks</th></tr></thead>
                 <tbody><tr v-for="m in dayShown" :key="m.id">
-                    <th scope="row"><template v-if="m.s"><a class="plain" :href="m.s.accountsUrl" target="_blank" rel="noopener">{{ m.s.name }}</a><div class="muted small" style="font-weight: 400">{{ m.s.id }} · <span class="mono">{{ m.s.ssn || '–' }}</span></div></template><span v-else class="muted">Student not found</span></th>
+                    <th scope="row"><template v-if="m.s"><a class="plain" :href="m.s.accountsUrl" target="_blank" rel="noopener">{{ m.s.name }}</a><StatusTag :status="m.s.status" /><div class="muted small" style="font-weight: 400">{{ m.s.id }} · <span class="mono">{{ m.s.ssn || '–' }}</span></div></template><span v-else class="muted">Student not found</span></th>
                     <td class="mono">{{ m.invoice }}</td>
                     <td class="num"><b>{{ money(m.amount) }}</b><div v-if="m.refund"><span class="pill warn">Refund</span></div></td>
                     <td class="small">{{ m.agreement ? '#' + m.agreement.id + ' · Year ' + (m.agreement.year ?? '–') + ' · ' + (m.agreement.code || '–') : '–' }}</td>
@@ -79,6 +79,7 @@
 import { computed, inject, nextTick, onMounted, ref, watch } from "vue";
 import { fmtIso, money, plural } from "./helpers";
 import Ico from "./Ico.vue";
+import StatusTag from "./StatusTag.vue";
 
 /*
  * Bulk payment upload › Uploads › "All payment uploads" (user, 2 Nov 2026: show old data too): every
@@ -88,7 +89,7 @@ import Ico from "./Ico.vue";
 const DAY_FILTERS = [["all", "All"], ["double", "Possible doubles"], ["noinst", "No instalment"], ["amount", "Instalment amount differs"], ["forced", "Forced"], ["refund", "Refunds"]];
 
 export default {
-    components: { Ico },
+    components: { StatusTag, Ico },
     props: { legacyUrl: { type: String, default: "" } },
     setup() {
         const { get } = inject("slr");

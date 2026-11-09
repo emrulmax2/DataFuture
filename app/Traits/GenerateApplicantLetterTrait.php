@@ -168,9 +168,11 @@ trait GenerateApplicantLetterTrait{
             ->setPaper('a4', 'portrait')
             ->setWarnings(false);
         $content = $pdf->output();
-        Storage::disk('s3')->put('public/applicants/'.$applicant_id.'/'.$fileName, $content );
+        // Local disk on a local install, S3 elsewhere; callers record the disk on the document row.
+        $disk = \App\Support\ApplicantDocumentDisk::name();
+        Storage::disk($disk)->put('public/applicants/'.$applicant_id.'/'.$fileName, $content );
 
-        return ['path' => Storage::disk('s3')->url('public/applicants/'.$applicant_id.'/'.$fileName), 'filename' => $fileName];
+        return ['path' => Storage::disk($disk)->url('public/applicants/'.$applicant_id.'/'.$fileName), 'filename' => $fileName, 'disk' => $disk];
     }
     
     public function perseLetterData($content){

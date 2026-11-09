@@ -735,6 +735,7 @@ class PendingTaskManagerController extends Controller
                         'current_field_value' => 'Completed',
                         'created_by' => auth()->user()->id
                     ]);
+                    \App\Services\TaskAssignment\StudentProcessWrapUp::checkMany($student->id);
 
                     if(isset($letterSet->id) && $letterSet->id > 0 && !empty($letterSet->description)):
                         //$subject = 'Welcome to London Churchill College';
@@ -889,6 +890,65 @@ class PendingTaskManagerController extends Controller
         return response()->json(['id' => $student->registration_no, 'res' => $PDFHTML], 200);
     }
 
+    /**
+     * "Send ICP & Mark as Complete", one student per request (the page sends the selected students
+     * in turn): class routine PDF into Uploads, letter + email, text message, task completed
+     * (App\Services\ClassRoutine\ClassRoutineSender). Only on a task with "Class Routine (ICP)" = Yes.
+     */
+    /**
+     * Send ICP, step 1 (user, 30 Oct 2026): the selected students sorted into the groups that share
+     * one class routine PDF, and those that cannot get one, before anything is sent.
+     */
+    public function prepareClassRoutine(Request $request){
+        $taskList = TaskList::find((int) $request->task_id);
+        if(!$taskList || $taskList->class_routine !== 'Yes'):
+            return response()->json(['message' => 'This task does not send class routines.'], 422);
+        endif;
+        $ids = array_values(array_filter(array_map('intval', (array) $request->input('student_ids', []))));
+        if(!$ids):
+            return response()->json(['message' => 'Select the students to send the class routine to.'], 422);
+        endif;
+
+        $sorted = app(\App\Services\ClassRoutine\ClassRoutineGroupPdf::class)->groups($ids);
+        foreach($sorted['groups'] as &$group):
+            $group['count'] = count($group['students']);
+            $group['preview_url'] = route('task.manager.class.routine.preview', ['student_id' => $group['sample_student_id']]);
+        endforeach;
+        unset($group);
+
+        return response()->json($sorted + ['total' => count($ids)]);
+    }
+
+    /** The class routine PDF a student's group shares, to look at before sending (nothing is sent). */
+    public function previewClassRoutine(Request $request){
+        $student = Student::find((int) $request->student_id);
+        $routine = $student ? app(\App\Services\ClassRoutine\ClassRoutineBuilder::class)->forStudent((int) $student->id) : null;
+        abort_unless($routine, 404, 'No class routine for this student.');
+
+        $pdf = app(\App\Services\ClassRoutine\ClassRoutineGroupPdf::class)->bytes($routine);
+        $name = 'Class_Routine_'.preg_replace('/[^A-Za-z0-9_-]+/', '-', $routine['group']['name'] ?: 'Term').'.pdf';
+
+        return response($pdf, 200, ['Content-Type' => 'application/pdf', 'Content-Disposition' => 'inline; filename="'.$name.'"']);
+    }
+
+    public function sendClassRoutine(Request $request){
+        $studentId = (int) $request->student_id;
+        $taskList = TaskList::find((int) $request->task_id);
+        if(!$taskList || $taskList->class_routine !== 'Yes'):
+            return response()->json(['status' => 'failed', 'message' => 'This task does not send class routines.'], 422);
+        endif;
+        $student = Student::find($studentId);
+        if(!$student):
+            return response()->json(['status' => 'failed', 'message' => 'Student not found.'], 404);
+        endif;
+
+        $task = StudentTask::where('student_id', $studentId)->where('task_list_id', $taskList->id)->whereIn('status', ['Pending', 'In Progress'])->orderByDesc('id')->first()
+            ?: StudentTask::where('student_id', $studentId)->where('task_list_id', $taskList->id)->orderByDesc('id')->first();
+        $result = app(\App\Services\ClassRoutine\ClassRoutineSender::class)->send($student, $task, (int) auth()->user()->id);
+
+        return response()->json($result, $result['status'] === \App\Services\ClassRoutine\ClassRoutineSender::DONE ? 200 : 422);
+    }
+
     public function updateTaskStatus(Request $request){
         $student_ids = $request->student_ids;
         $task_id = $request->task_id;
@@ -911,28 +971,37 @@ class PendingTaskManagerController extends Controller
                         'created_by' => auth()->user()->id
                     ]);
                     
-                    $applicantRow = Applicant::find($student_id);
-                    $pendingTask = ApplicantTask::where('applicant_id', $student_id)->whereIn('status', ['Pending', 'In Progress'])->get();
-                    if($pendingTask->count() == 0 && $applicantRow->status_id < 4):
-                        $applicantData['status_id'] = 4;
-                        Applicant::where('id', $student_id)->update($applicantData);
-                        $statusRow = Status::find(4);
-                        if(isset($statusRow->letter_set_id) && $statusRow->letter_set_id > 0):
-                            $this->sendLetterOnStatusChanged($student_id, 4);
-                        elseif(isset($statusRow->email_template_id) && $statusRow->email_template_id > 0):
-                            $this->sendEmailOnStatusChanged($student_id, 4);
-                        endif;
-            
-                        $data = [];
-                        $data['applicant_id'] = $student_id;
-                        $data['table'] = 'applicants';
-                        $data['field_name'] = 'status_id';
-                        $data['field_value'] = $applicantRow->status_id;
-                        $data['field_new_value'] = '4';
-                        $data['created_by'] = auth()->user()->id;
-            
-                        ApplicantArchive::create($data);
+                    // Task Automation actions that run on completion (e.g. "Update student photo"), as on the process board.
+                    if($status == 'Completed'):
+                        app(\App\Services\TaskAssignment\TaskCompletionActions::class)->applicantTaskCompleted((int) $taskOldRow->id);
                     endif;
+                    // Same rule as the admission process board: first completed task → In Progress,
+                    // nothing left open → Awaiting Decision (ApplicantTaskStatus).
+                    \App\Support\ApplicantTaskStatus::sync((int) $student_id);
+                    /* Previous rule:
+                    // $applicantRow = Applicant::find($student_id);
+                    // $pendingTask = ApplicantTask::where('applicant_id', $student_id)->whereIn('status', ['Pending', 'In Progress'])->get();
+                    // if($pendingTask->count() == 0 && $applicantRow->status_id < 4):
+                    //     $applicantData['status_id'] = 4;
+                    //     Applicant::where('id', $student_id)->update($applicantData);
+                    //     $statusRow = Status::find(4);
+                    //     if(isset($statusRow->letter_set_id) && $statusRow->letter_set_id > 0):
+                    //         $this->sendLetterOnStatusChanged($student_id, 4);
+                    //     elseif(isset($statusRow->email_template_id) && $statusRow->email_template_id > 0):
+                    //         $this->sendEmailOnStatusChanged($student_id, 4);
+                    //     endif;
+            
+                    //     $data = [];
+                    //     $data['applicant_id'] = $student_id;
+                    //     $data['table'] = 'applicants';
+                    //     $data['field_name'] = 'status_id';
+                    //     $data['field_value'] = $applicantRow->status_id;
+                    //     $data['field_new_value'] = '4';
+                    //     $data['created_by'] = auth()->user()->id;
+            
+                    //     ApplicantArchive::create($data);
+                    // endif;
+                    */
                 endif;
             else:
 
@@ -981,6 +1050,11 @@ class PendingTaskManagerController extends Controller
             endif;
         endforeach;
 
+        // Task Automation "Change student status to SLC New": the last open task of the process completes it
+        if($phase != 'Applicant'):
+            \App\Services\TaskAssignment\StudentProcessWrapUp::checkMany($student_ids);
+        endif;
+
         return response()->json(['res' => 'Selected student task status successfully updated.'], 200);
     }
 
@@ -1018,10 +1092,14 @@ class PendingTaskManagerController extends Controller
                     ]);
                 endif;
             endforeach;
+            // a cancelled task no longer holds up "Change student status to SLC New"
+            if($phase != 'Applicant'):
+                \App\Services\TaskAssignment\StudentProcessWrapUp::checkMany($ids);
+            endif;
         endif;
 
         return response()->json(['res' => 'Selected student task status successfully updated.'], 200);
-        
+
     }
 
     public function downloadTaskStudentListExcel(Request $request){
@@ -1383,6 +1461,7 @@ class PendingTaskManagerController extends Controller
                                             endif;
 
                                             $studentTask = StudentTask::where('student_id', $student->id)->where('task_list_id', $task_list_id)->update(['status' => 'Completed', 'updated_by' => auth()->user()->id]);
+                                            \App\Services\TaskAssignment\StudentProcessWrapUp::checkMany($student->id);
                                             $successCount += 1;
                                         else:
                                             $errorCount += 1;

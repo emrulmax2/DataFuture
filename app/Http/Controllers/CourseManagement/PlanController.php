@@ -704,6 +704,7 @@ class PlanController extends Controller
     
             // Delete related attendances
             if (isset($plan->attendances)) {
+                \App\Services\AttendanceIntegrity\AttendanceAudit::context('plan_delete');
                 foreach ($plan->attendances as $attendance) {
                     $attendance->delete();
                 }

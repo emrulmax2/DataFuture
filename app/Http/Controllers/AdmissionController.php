@@ -21,6 +21,8 @@ use App\Models\ApplicantDisability;
 use App\Models\Course;
 use App\Models\CourseCreation;
 use App\Models\Semester;
+use App\Support\IntakeTabs;
+use App\Support\ApplicantDocumentDisk;
 use App\Models\Status;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -94,6 +96,7 @@ use App\Jobs\ProcessStudentEmail;
 use App\Mail\ResetPasswordLink;
 use App\Models\AcademicYear;
 use App\Models\AdminESignature;
+use App\Services\ESignature\ESignatureRequestSender;
 use App\Models\Agent;
 use App\Models\ApplicantESignatureEvent;
 use App\Models\ApplicantInterview;
@@ -180,11 +183,59 @@ class AdmissionController extends Controller
         });
         
         
+        // Hero figures: submitted applications counted by intake, stage and
+        // course in one query. The page embeds these rows, so the intake
+        // tabs, the stage tiles and the "by course" breakdown switch without
+        // a round trip. The list hides status 1 (Submitting) and anything
+        // without a submission date, so the counts do too.
+        $heroCells = DB::table('applicants')
+            ->leftJoin('applicant_proposed_courses as apc', function ($join) {
+                $join->on('apc.applicant_id', '=', 'applicants.id')->whereNull('apc.deleted_at');
+            })
+            ->leftJoin('course_creations as cc', 'cc.id', '=', 'apc.course_creation_id')
+            ->leftJoin('courses', 'courses.id', '=', 'cc.course_id')
+            ->whereNull('applicants.deleted_at')
+            ->whereNotNull('applicants.submission_date')
+            ->where('applicants.status_id', '>', 1)
+            ->groupBy('apc.semester_id', 'applicants.status_id', 'cc.course_id', 'courses.name')
+            ->orderByDesc('n')
+            ->get(['apc.semester_id', 'applicants.status_id', 'cc.course_id', 'courses.name AS course', DB::raw('COUNT(*) AS n')])
+            ->map(fn ($row) => [
+                'semester_id' => $row->semester_id !== null ? (int) $row->semester_id : null,
+                'status_id' => (int) $row->status_id,
+                'course_id' => $row->course_id !== null ? (int) $row->course_id : null,
+                'course' => $row->course ?: 'Unknown course',
+                'n' => (int) $row->n,
+            ])->values();
+
+        // Intake tabs: the two semesters nearest to today (by the month in
+        // the semester's name), newest first, then "All intakes". Other
+        // intakes stay reachable through the Semester filter.
+        $heroIntakes = IntakeTabs::pick($semesters, Carbon::today(), 2)
+            ->map(fn ($semester) => [
+                'id' => $semester['id'],
+                'name' => $semester['name'],
+                'n' => (int) $heroCells->where('semester_id', $semester['id'])->sum('n'),
+            ])->values();
+
+        $heroDefault = $heroIntakes->isNotEmpty() ? $heroIntakes->first()['id'] : null;
+        $heroDefaultCells = $heroCells->filter(fn ($cell) => $heroDefault === null || $cell['semester_id'] === $heroDefault);
+        $hero = [
+            'cells' => $heroCells,
+            'intakes' => $heroIntakes,
+            'default' => $heroDefault,
+            'submitted' => (int) $heroDefaultCells->sum('n'),
+            'all' => (int) $heroCells->sum('n'),
+            'counts' => $heroDefaultCells->groupBy('status_id')->map(fn ($group) => (int) $group->sum('n')),
+        ];
+
         return view('pages.students.admission.index', [
             'title' => 'Recruitment - London Churchill College',
-            // The redesigned admission shell. No applicant in scope here, so
-            // CourseTheme falls back to the default LCC Teal palette.
-            'layout' => 'admission-top-menu',
+            // The admission portal shell (layout/admission-portal). The other
+            // admission screens still render on admission-top-menu until they
+            // are moved over.
+            'layout' => 'admission-portal',
+            'hero' => $hero,
             'breadcrumbs' => [
                 ['label' => 'Students Admission', 'href' => 'javascript:void(0);']
             ],
@@ -201,6 +252,8 @@ class AdmissionController extends Controller
         $courses = (isset($request->courses) && !empty($request->courses) ? $request->courses : []);
         $statuses = (isset($request->statuses) && !empty($request->statuses) ? $request->statuses : []);
         $agents = (isset($request->agents) && !empty($request->agents) ? $request->agents : []);
+        // The intake tab on the admission list hero; a single semester id.
+        $intake = (isset($request->intake) && !empty($request->intake) ? (int) $request->intake : 0);
         $refno = (isset($request->refno) && !empty($request->refno) ? $request->refno : '');
         $firstname = (isset($request->firstname) && !empty($request->firstname) ? $request->firstname : '');
         $lastname = (isset($request->lastname) && !empty($request->lastname) ? $request->lastname : '');
@@ -242,9 +295,10 @@ class AdmissionController extends Controller
 
         if(!empty($dob)): $query->where('date_of_birth', $dob); endif;
         if(!empty($statuses)): $query->whereIn('status_id', $statuses); else: $query->where('status_id', '>', 1); endif;
-        if(!empty($semesters) || !empty($courseCreationId)):
-            $query->whereHas('course', function($qs) use($semesters, $courses, $courseCreationId){
+        if(!empty($semesters) || !empty($courseCreationId) || !empty($intake)):
+            $query->whereHas('course', function($qs) use($semesters, $courses, $courseCreationId, $intake){
                 if(!empty($semesters)): $qs->whereIn('semester_id', $semesters); endif;
+                if(!empty($intake)): $qs->where('semester_id', $intake); endif;
                 if(!empty($courses) && !empty($courseCreationId)): $qs->whereIn('course_creation_id', $courseCreationId); endif;
             });
         endif;
@@ -258,6 +312,12 @@ class AdmissionController extends Controller
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
+        // Everything the row shows beyond the applicant itself, loaded in one
+        // go rather than per row. Task counts leave out archived (soft-deleted)
+        // tasks, as the process board does.
+        $query->with(['title', 'status', 'users', 'sexid', 'reason', 'course.semester', 'course.creation.course'])
+              ->withCount(['allTasks as tasks_total', 'completedTasks as tasks_done']);
+
         $Query = $query->skip($offset)
                ->take($limit)
                ->get();
@@ -267,6 +327,7 @@ class AdmissionController extends Controller
         if($Query->isNotEmpty()):
             $i = 1;
             foreach($Query as $list):
+                $photoUrl = $list->photo_url;
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -283,9 +344,19 @@ class AdmissionController extends Controller
                     'status_id'=> (isset($list->status->name) ? $list->status->name : ''),
                     'url' => route('admission.show', $list->id),
                     'ccid' => implode(',', $courses).' - '.implode(',', $courseCreationId),
-                    'photo_url' => $list->photo_url,
+                    'photo_url' => $photoUrl,
                     'create_account' => false,
                     'apply_ready' => false,
+                    'title' => (isset($list->title->name) ? $list->title->name : ''),
+                    'email' => (isset($list->users->email) ? $list->users->email : ''),
+                    'submission_date' => $list->submission_date,
+                    'status' => (int) $list->status_id,
+                    'reason' => (isset($list->reason->name) ? $list->reason->name : ''),
+                    'tasks_total' => (int) $list->tasks_total,
+                    'tasks_done' => (int) $list->tasks_done,
+                    'process_url' => route('admission.process', $list->id),
+                    'has_photo' => !\App\Support\Avatar::isGenerated($photoUrl),
+                    'initials' => \App\Support\Avatar::initialsOnly($list->first_name.' '.$list->last_name),
                 ];
                 $i++;
             endforeach;
@@ -323,6 +394,18 @@ class AdmissionController extends Controller
                         'photo_url' => $list->photo_url,
                         'create_account' => $createPermissionStatus,
                         'apply_ready' => isset($applicantFound) ? $applicantFound->id : false,
+                        'title' => (isset($list->title->name) ? $list->title->name : ''),
+                        'email' => $personalEmail,
+                        'submission_date' => '',
+                        // A student status id is not an applicant status id;
+                        // 0 makes the pill fall back to matching on the name.
+                        'status' => 0,
+                        'reason' => '',
+                        'tasks_total' => 0,
+                        'tasks_done' => 0,
+                        'process_url' => '',
+                        'has_photo' => !\App\Support\Avatar::isGenerated($list->photo_url),
+                        'initials' => \App\Support\Avatar::initialsOnly($list->first_name.' '.$list->last_name),
                     ];
                 endif;
             endif;
@@ -339,6 +422,8 @@ class AdmissionController extends Controller
         $courses = (isset($request->courses) && !empty($request->courses) ? $request->courses : []);
         $statuses = (isset($request->statuses) && !empty($request->statuses) ? $request->statuses : []);
         $agents = (isset($request->agents) && !empty($request->agents) ? $request->agents : []);
+        // The intake tab on the admission list hero; a single semester id.
+        $intake = (isset($request->intake) && !empty($request->intake) ? (int) $request->intake : 0);
         $refno = (isset($request->refno) && !empty($request->refno) ? $request->refno : '');
         $firstname = (isset($request->firstname) && !empty($request->firstname) ? $request->firstname : '');
         $lastname = (isset($request->lastname) && !empty($request->lastname) ? $request->lastname : '');
@@ -381,9 +466,10 @@ class AdmissionController extends Controller
 
         if(!empty($dob)): $query->where('date_of_birth', $dob); endif;
         if(!empty($statuses)): $query->whereIn('status_id', $statuses); else: $query->where('status_id', '>', 1); endif;
-        if(!empty($semesters) || !empty($courseCreationId)):
-            $query->whereHas('course', function($qs) use($semesters, $courses, $courseCreationId){
+        if(!empty($semesters) || !empty($courseCreationId) || !empty($intake)):
+            $query->whereHas('course', function($qs) use($semesters, $courses, $courseCreationId, $intake){
                 if(!empty($semesters)): $qs->whereIn('semester_id', $semesters); endif;
+                if(!empty($intake)): $qs->where('semester_id', $intake); endif;
                 if(!empty($courses) && !empty($courseCreationId)): $qs->whereIn('course_creation_id', $courseCreationId); endif;
             });
         endif;
@@ -489,7 +575,9 @@ class AdmissionController extends Controller
                 $row++;
             endforeach;
         endif;
-        return Excel::download(new ArrayCollectionExport($theCollection), str_replace(' ', '_', $dataSetArrray[0]->semester).'_excel.xlsx');
+        // An empty result set still downloads a (header-only) sheet.
+        $fileName = (!empty($dataSetArrray) && !empty($dataSetArrray[0]->semester) ? str_replace(' ', '_', $dataSetArrray[0]->semester) : 'admission');
+        return Excel::download(new ArrayCollectionExport($theCollection), $fileName.'_excel.xlsx');
     }
 
     public function show($applicantId){
@@ -497,13 +585,11 @@ class AdmissionController extends Controller
 
         return view('pages.students.admission.show', [
             'title' => 'Recruitment - London Churchill College',
-            // Redesigned admission shell; the palette follows the applicant's
-            // proposed course (Applicant->course->creation->course->color_theme).
-            'layout' => 'admission-top-menu',
-            'admissionThemeApplicant' => $applicant,
+            // Admission portal shell (layout/admission-portal), like the list.
+            'layout' => 'admission-portal',
             'breadcrumbs' => [
-                ['label' => 'Students Admission', 'href' => route('admission')],
-                ['label' => 'Student Details', 'href' => 'javascript:void(0);'],
+                ['label' => 'Students admission', 'href' => route('admission')],
+                ['label' => 'Student details', 'href' => 'javascript:void(0);'],
             ],
             'applicant' => $applicant,
             'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
@@ -723,6 +809,52 @@ class AdmissionController extends Controller
 
 
         return response()->json(['msg' => 'Personal Data Successfully Updated.'], 200);
+    }
+
+    /**
+     * Proof of ID on its own (the details page edits it in a dedicated dialog
+     * rather than inside the personal-details form). Same row and same
+     * save as updatePersonalDetails() used to do for these fields.
+     */
+    public function updateProofOfId(Request $request){
+        $request->validate([
+            'applicant_id' => 'required|integer|exists:applicants,id',
+            'proof_type' => 'nullable|string|max:50',
+            'proof_id' => 'nullable|string|max:191',
+            'proof_expiredate' => 'nullable|date_format:d-m-Y',
+            'fee_eligibility_id' => 'nullable|integer|exists:fee_eligibilities,id',
+        ]);
+
+        $applicant_id = (int) $request->applicant_id;
+        $proof_type = (isset($request->proof_type) && !empty($request->proof_type) ? $request->proof_type : '');
+        $proof_id = (isset($request->proof_id) && !empty($request->proof_id) ? $request->proof_id : '');
+        $proof_expiredate = (isset($request->proof_expiredate) && !empty($request->proof_expiredate) ? $request->proof_expiredate : '');
+        $applicant_proof_of_id = (isset($request->applicant_proof_of_id) && $request->applicant_proof_of_id > 0 ? (int) $request->applicant_proof_of_id : 0);
+
+        if(!empty($proof_type) || !empty($proof_id) || !empty($proof_expiredate) || $applicant_proof_of_id > 0):
+            ApplicantProofOfId::updateOrCreate([ 'applicant_id' => $applicant_id, 'id' => $applicant_proof_of_id ], [
+                'applicant_id' => $applicant_id,
+                'proof_type' => $proof_type,
+                'proof_id' => $proof_id,
+                'proof_expiredate' => $proof_expiredate,
+                'created_by' => auth()->user()->id,
+                'updated_by' => auth()->user()->id,
+            ]);
+        endif;
+
+        // Fee eligibility sits in the same dialog (needed before Accepted / Offer Placed).
+        if($request->filled('fee_eligibility_id')):
+            $fee = ApplicantFeeEligibility::where('applicant_id', $applicant_id)->orderByDesc('id')->first();
+            if($fee):
+                if((int) $fee->fee_eligibility_id !== (int) $request->fee_eligibility_id):
+                    $fee->update(['fee_eligibility_id' => (int) $request->fee_eligibility_id, 'updated_by' => auth()->user()->id]);
+                endif;
+            else:
+                ApplicantFeeEligibility::create(['applicant_id' => $applicant_id, 'fee_eligibility_id' => (int) $request->fee_eligibility_id, 'created_by' => auth()->user()->id, 'updated_by' => auth()->user()->id]);
+            endif;
+        endif;
+
+        return response()->json(['message' => 'Proof of ID updated.']);
     }
 
     public function updateContactDetails(AdmissionContactDetailsRequest $request){
@@ -966,50 +1098,54 @@ class AdmissionController extends Controller
     }
 
     public function admissionProcess($applicantId){
-        $processGroup = [];
+        $applicant = Applicant::find($applicantId);
+
+        // One board per Applicant-phase process. Live tasks come grouped by
+        // status with everything the cards show eager-loaded; archived
+        // (soft-deleted) tasks are only counted here and listed on demand
+        // (admissionArchivedProcessList).
+        $tasks = ApplicantTask::with(['task.users.user.employee.employment.employeeJobTitle', 'task.statuses', 'applicatnTaskStatus', 'documents.user.employee', 'updatedBy.employee'])
+            ->where('applicant_id', $applicantId)->orderBy('id', 'ASC')->get();
+        $archived = ApplicantTask::onlyTrashed()->where('applicant_id', $applicantId)->get();
+        $interviews = ApplicantInterview::where('applicant_id', $applicantId)->orderBy('id', 'DESC')->get()->groupBy('applicant_task_id');
+        // Outcome notes live in the task log (actions = Note); the latest shows on the card.
+        $taskNotes = ApplicantTaskLog::where('actions', 'Note')->whereIn('applicant_tasks_id', $tasks->pluck('id'))->orderBy('id', 'DESC')->get()->groupBy('applicant_tasks_id');
+
         $processList = ProcessList::where('phase', 'Applicant')->orderBy('id', 'ASC')->get();
-        if(!empty($processList)):
-            $i = 1;
-            foreach($processList as $prl):
-                $taskIds = [];
-                foreach($prl->tasks as $tsk):
-                    $taskIds[] = $tsk->id;
-                endforeach;
-                if(!empty($taskIds)):
-                    $pendingTask = ApplicantTask::where('applicant_id', $applicantId)->whereIn('task_list_id', $taskIds)->where('status', 'Pending')->get();
-                    $inProgressTask = ApplicantTask::where('applicant_id', $applicantId)->whereIn('task_list_id', $taskIds)->where('status', 'In Progress')->get();
-                    $completedTask = ApplicantTask::where('applicant_id', $applicantId)->whereIn('task_list_id', $taskIds)->where('status', 'Completed')->get();
-
-
-                    $processGroup[$i]['name'] = $prl->name;
-                    $processGroup[$i]['id'] = $prl->id;
-                    $processGroup[$i]['pendingTask'] = $pendingTask;
-                    $processGroup[$i]['inProgressTask'] = $inProgressTask;
-                    $processGroup[$i]['completedTask'] = $completedTask;
-                endif;
-                $i++;
-            endforeach;
-        endif;
+        $processGroup = [];
+        foreach($processList as $prl):
+            $taskIds = $prl->tasks->pluck('id')->all();
+            if(empty($taskIds)): continue; endif;
+            $own = $tasks->whereIn('task_list_id', $taskIds);
+            $processGroup[] = [
+                'id' => $prl->id,
+                'name' => $prl->name,
+                'phase' => $prl->phase,
+                'auto' => ($prl->auto_feed ?? 'No') == 'Yes',
+                'pendingTask' => $own->where('status', 'Pending')->values(),
+                'inProgressTask' => $own->where('status', 'In Progress')->values(),
+                'completedTask' => $own->where('status', 'Completed')->values(),
+                'archivedCount' => $archived->whereIn('task_list_id', $taskIds)->count(),
+            ];
+        endforeach;
 
         return view('pages.students.admission.process', [
             'title' => 'Recruitment - London Churchill College',
-            'layout' => 'admission-top-menu',
-            'admissionThemeApplicant' => Applicant::find($applicantId),
+            // Admission portal shell (layout/admission-portal), like the list and details pages.
+            'layout' => 'admission-portal',
             'breadcrumbs' => [
-                ['label' => 'Students Admission', 'href' => route('admission')],
-                ['label' => 'Student Details', 'href' => route('admission.show', $applicantId)],
-                ['label' => 'Process', 'href' => 'javascript:void(0);'],
+                ['label' => 'Students admission', 'href' => route('admission')],
+                ['label' => 'Student details', 'href' => route('admission.show', $applicantId)],
+                ['label' => 'Processes', 'href' => 'javascript:void(0);'],
             ],
-            'applicant' => Applicant::find($applicantId),
+            'applicant' => $applicant,
             'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
-            'process' => ProcessList::where('phase', 'Applicant')->orderBy('id', 'ASC')->get(),
-            'existingTask' => ApplicantTask::where('applicant_id', $applicantId)->pluck('task_list_id')->toArray(),
-            'applicantPendingTask' => ApplicantTask::where('applicant_id', $applicantId)->where('status', 'Pending')->get(),
-            'applicantCompletedTask' => ApplicantTask::where('applicant_id', $applicantId)->where('status', 'Completed')->get(),
-            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'process' => $processList,
+            'existingTask' => $tasks->pluck('task_list_id')->toArray(),
             'feeelegibility' => FeeEligibility::all(),
-
             'processGroup' => $processGroup,
+            'interviews' => $interviews,
+            'taskNotes' => $taskNotes,
             'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
             'esignature' => ApplicantESignature::where('applicant_id', $applicantId)->latest('id')->first()
         ]);
@@ -1092,15 +1228,18 @@ class AdmissionController extends Controller
         $display_file_name = (isset($request->display_file_name) && !empty($request->display_file_name) ? $request->display_file_name : '');
         $taskName = (!empty($display_file_name) ? (!empty($taskName) ? $taskName.' - '.$display_file_name : $display_file_name) : $taskName);
 
+        // Local disk on a local install, S3 on the servers (App\Support\ApplicantDocumentDisk).
+        $disk = ApplicantDocumentDisk::name();
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/applicants/'.$applicant_id, $imageName, 's3');
+        $path = $document->storeAs('public/applicants/'.$applicant_id, $imageName, $disk);
 
         $data = [];
         $data['applicant_id'] = $applicant_id;
         $data['hard_copy_check'] = $request->hard_copy_check;
         $data['doc_type'] = $document->getClientOriginalExtension();
-        $data['path'] = Storage::disk('s3')->url($path);
+        $data['disk_type'] = $disk;
+        $data['path'] = Storage::disk($disk)->url($path);
         $data['display_file_name'] = (!empty($taskName) ? $taskName : $imageName);
         $data['current_file_name'] = $imageName;
         $data['created_by'] = auth()->user()->id;
@@ -1139,7 +1278,8 @@ class AdmissionController extends Controller
 
         endif;
 
-        return response()->json(['message' => 'Document successfully uploaded.'], 200);
+        [$taskStatus, $hint] = $this->syncApplicantTaskProgress($applicant_task_id);
+        return response()->json(['message' => 'Document successfully uploaded.', 'status' => $taskStatus, 'hint' => $hint], 200);
     }
 
     public function admissionDeleteTask(Request $request){
@@ -1157,30 +1297,34 @@ class AdmissionController extends Controller
             'created_by' => auth()->user()->id
         ]);
 
-        $applicantRow = Applicant::find($applicant);
-        $pendingTask = ApplicantTask::where('applicant_id', $applicant)->whereIn('status', ['Pending', 'In Progress'])->get();
-        if($pendingTask->count() == 0 && $applicantRow->status_id < 4):
-            $applicantData['status_id'] = 4;
-            Applicant::where('id', $applicant)->update($applicantData);
-            $statusRow = Status::find(4);
-            if(isset($statusRow->letter_set_id) && $statusRow->letter_set_id > 0):
-                $this->sendLetterOnStatusChanged($applicant, 4);
-            elseif(isset($statusRow->email_template_id) && $statusRow->email_template_id > 0):
-                $this->sendEmailOnStatusChanged($applicant, 4);
-            endif;
+        // Archiving the last open task leaves only completed ones → Awaiting Decision (ApplicantTaskStatus).
+        $movedTo = \App\Support\ApplicantTaskStatus::sync((int) $applicant);
+        /* Previous rule:
+        // $applicantRow = Applicant::find($applicant);
+        // $pendingTask = ApplicantTask::where('applicant_id', $applicant)->whereIn('status', ['Pending', 'In Progress'])->get();
+        // if($pendingTask->count() == 0 && $applicantRow->status_id < 4):
+        //     $applicantData['status_id'] = 4;
+        //     Applicant::where('id', $applicant)->update($applicantData);
+        //     $statusRow = Status::find(4);
+        //     if(isset($statusRow->letter_set_id) && $statusRow->letter_set_id > 0):
+        //         $this->sendLetterOnStatusChanged($applicant, 4);
+        //     elseif(isset($statusRow->email_template_id) && $statusRow->email_template_id > 0):
+        //         $this->sendEmailOnStatusChanged($applicant, 4);
+        //     endif;
 
-            $data = [];
-            $data['applicant_id'] = $applicant;
-            $data['table'] = 'applicants';
-            $data['field_name'] = 'status_id';
-            $data['field_value'] = $applicantRow->status_id;
-            $data['field_new_value'] = '4';
-            $data['created_by'] = auth()->user()->id;
+        //     $data = [];
+        //     $data['applicant_id'] = $applicant;
+        //     $data['table'] = 'applicants';
+        //     $data['field_name'] = 'status_id';
+        //     $data['field_value'] = $applicantRow->status_id;
+        //     $data['field_new_value'] = '4';
+        //     $data['created_by'] = auth()->user()->id;
 
-            ApplicantArchive::create($data);
-        endif;
+        //     ApplicantArchive::create($data);
+        // endif;
+        */
 
-        return response()->json(['message' => 'Data deleted'], 200);
+        return response()->json(['message' => 'Data deleted', 'applicant_status' => \App\Support\ApplicantTaskStatus::name($movedTo)], 200);
     }
 
     public function admissionCompletedTask(Request $request){
@@ -1188,38 +1332,46 @@ class AdmissionController extends Controller
         $applicant = $request->applicant;
         $recordid = $request->recordid;
         $applicantRow = Applicant::find($applicant);
+        $previousTaskStatus = ApplicantTask::where('id', $recordid)->where('applicant_id', $applicant)->value('status') ?: 'Pending';
 
         $applicantTask = ApplicantTask::where('id', $recordid)->where('applicant_id', $applicant)->update(['status' => 'Completed', 'updated_by' => auth()->user()->id]);
         $applicantTaskLog = ApplicantTaskLog::create([
             'applicant_tasks_id' => $recordid,
             'actions' => 'Status Changed',
             'field_name' => 'status',
-            'prev_field_value' => 'Pending',
+            'prev_field_value' => $previousTaskStatus, // was always 'Pending', even from In Progress
             'current_field_value' => 'Completed',
             'created_by' => auth()->user()->id
         ]);
-        $pendingTask = ApplicantTask::where('applicant_id', $applicant)->whereIn('status', ['Pending', 'In Progress'])->get();
-        if($pendingTask->count() == 0 && $applicantRow->status_id < 4):
-            $applicantData['status_id'] = 4;
-            Applicant::where('id', $applicant)->update($applicantData);
-            $statusRow = Status::find(4);
-            if(isset($statusRow->letter_set_id) && $statusRow->letter_set_id > 0):
-                $this->sendLetterOnStatusChanged($applicant, 4);
-            elseif(isset($statusRow->email_template_id) && $statusRow->email_template_id > 0):
-                $this->sendEmailOnStatusChanged($applicant, 4);
-            endif;
+        // Task Automation actions that run on completion (e.g. "Update student photo").
+        $actionNotes = app(\App\Services\TaskAssignment\TaskCompletionActions::class)->applicantTaskCompleted((int) $recordid);
+        // First completed task → In Progress; nothing left open → Awaiting Decision (ApplicantTaskStatus).
+        $movedTo = \App\Support\ApplicantTaskStatus::sync((int) $applicant);
+        /* Previous rule (Awaiting Decision only, when nothing was left open):
+        // $pendingTask = ApplicantTask::where('applicant_id', $applicant)->whereIn('status', ['Pending', 'In Progress'])->get();
+        // if($pendingTask->count() == 0 && $applicantRow->status_id < 4):
+        //     $applicantData['status_id'] = 4;
+        //     Applicant::where('id', $applicant)->update($applicantData);
+        //     $statusRow = Status::find(4);
+        //     if(isset($statusRow->letter_set_id) && $statusRow->letter_set_id > 0):
+        //         $this->sendLetterOnStatusChanged($applicant, 4);
+        //     elseif(isset($statusRow->email_template_id) && $statusRow->email_template_id > 0):
+        //         $this->sendEmailOnStatusChanged($applicant, 4);
+        //     endif;
 
-            $data = [];
-            $data['applicant_id'] = $applicant;
-            $data['table'] = 'applicants';
-            $data['field_name'] = 'status_id';
-            $data['field_value'] = $applicantRow->status_id;
-            $data['field_new_value'] = '4';
-            $data['created_by'] = auth()->user()->id;
+        //     $data = [];
+        //     $data['applicant_id'] = $applicant;
+        //     $data['table'] = 'applicants';
+        //     $data['field_name'] = 'status_id';
+        //     $data['field_value'] = $applicantRow->status_id;
+        //     $data['field_new_value'] = '4';
+        //     $data['created_by'] = auth()->user()->id;
 
-            ApplicantArchive::create($data);
-        endif;
-        return response()->json(['message' => 'Data deleted'], 200);
+        //     ApplicantArchive::create($data);
+        // endif;
+        */
+        // return response()->json(['message' => 'Data deleted', 'applicant_status' => \App\Support\ApplicantTaskStatus::name($movedTo)], 200);
+        return response()->json(['message' => 'Data deleted', 'applicant_status' => \App\Support\ApplicantTaskStatus::name($movedTo), 'action_notes' => $actionNotes], 200);
     }
 
     public function admissionPendingTask(Request $request){
@@ -1258,7 +1410,8 @@ class AdmissionController extends Controller
 
             ApplicantArchive::create($data);
         endif;
-        return response()->json(['message' => 'Data updated'], 200);
+        [$taskStatus, $hint] = $this->syncApplicantTaskProgress($recordid);
+        return response()->json(['message' => 'Data updated', 'status' => $taskStatus, 'hint' => $hint], 200);
     }
 
     public function admissionArchivedProcessList(Request $request) {
@@ -1308,12 +1461,16 @@ class AdmissionController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
+                // The soft-deleted row keeps its status, and the Delete log row says who archived it.
+                $deleteLog = ApplicantTaskLog::where('applicant_tasks_id', $list->id)->where('actions', 'Delete')->orderBy('id', 'DESC')->first();
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
-                    'name' => $list->task->name,
+                    'name' => $list->task->name ?? 'Task',
                     'desc' => isset($list->task->short_description) && !empty($list->task->short_description) ? $list->task->short_description : '',
-                    'deleted_at' => (!empty($list->deleted_at) ? date('d-m-Y H:i:s', strtotime($list->deleted_at)) : '')
+                    'status' => $list->status,
+                    'archived_by' => ($deleteLog && $deleteLog->created_by > 0 ? (User::find($deleteLog->created_by)->name ?? '') : ''),
+                    'deleted_at' => (!empty($list->deleted_at) ? date('d M Y, H:i', strtotime($list->deleted_at)) : '')
                 ];
                 $i++;
             endforeach;
@@ -1334,32 +1491,103 @@ class AdmissionController extends Controller
             'current_field_value' => 'Item Restored',
             'created_by' => auth()->user()->id
         ]);
-        return response()->json(['message' => 'Data Restored'], 200);
+        [$taskStatus, $hint] = $this->syncApplicantTaskProgress($recordid);
+        return response()->json(['message' => 'Data Restored', 'status' => $taskStatus, 'hint' => $hint], 200);
     }
 
     public function admissionShowTaskStatuses(Request $request){
         $applicantTaskId = $request->taskId;
         $applicantTask = ApplicantTask::find($applicantTaskId);
         $taskStatuses = $applicantTask->task->statuses;
+        // The admission portal (resources/js/admission-process.js) asks for
+        // its own markup — outcome chips plus a note; the legacy form markup
+        // stays for anything else that posts here.
+        $portal = !empty($request->portal);
 
         $statusOpt = [];
-        if(!empty($taskStatuses)):
-            $html = '<label for="upload" class="form-label">Task Result <span class="text-danger">*</span></label>';
-            foreach($taskStatuses as $ts):
-                $taskStatus = TaskStatus::find($ts->task_status_id);
-                $html .= '<div class="form-check mt-2">';
-                    $html .= '<input '.($applicantTask->task_status_id == $taskStatus->id ? 'Checked' : '').' id="outc_task-status-'.$taskStatus->id.'" class="form-check-input resultStatus" type="radio" name="result_statuses" value="'.$taskStatus->id.'">';
-                    $html .= '<label class="form-check-label" for="outc_task-status-'.$taskStatus->id.'">'.$taskStatus->name.'</label>';
-                $html .= '</div>';
-            endforeach;
+        if(!empty($taskStatuses) && $taskStatuses->count() > 0):
+            if($portal):
+                $check = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+                $cross = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+                $hints = [];
+                $html = '<div class="adp-field"><label>Outcome <span class="adp-req">*</span></label><div class="adp-outcomes" data-adp-outcomes>';
+                foreach($taskStatuses as $ts):
+                    $taskStatus = TaskStatus::find($ts->task_status_id);
+                    if(!$taskStatus): continue; endif;
+                    // "Not Required(Kindly include a note explaining the reason.)" → chip + hint
+                    $short = trim(preg_replace('/\s*\(.*$/s', '', $taskStatus->name));
+                    $hint = preg_match('/\((.*)\)/s', $taskStatus->name, $m) ? trim($m[1]) : '';
+                    if($hint !== ''): $hints[] = $short.': '.$hint; endif;
+                    $tone = strtolower($short) === 'pass' ? 'pass' : (strtolower($short) === 'fail' ? 'fail' : 'not-required');
+                    $html .= '<label class="adp-outcome adp-outcome--'.$tone.'" for="outc_task-status-'.$taskStatus->id.'"'.($hint !== '' ? ' data-requires-note="1"' : '').'>';
+                    $html .= '<input '.($applicantTask->task_status_id == $taskStatus->id ? 'checked ' : '').'id="outc_task-status-'.$taskStatus->id.'" class="adp-opt__input resultStatus" type="radio" name="result_statuses" value="'.$taskStatus->id.'">';
+                    $html .= '<span class="adp-outcome__dot">'.($tone === 'fail' ? $cross : $check).'</span>'.e($short).'</label>';
+                endforeach;
+                $html .= '</div><div class="adp-err" data-adp-outcome-error></div></div>';
+                $html .= '<div class="adp-field"><label for="outcome_note">Note</label><textarea id="outcome_note" name="note" class="adp-ctl" rows="3"></textarea>';
+                $html .= '<span class="adp-opt__hint">'.(!empty($hints) ? e(implode(' ', $hints)).' ' : '').'Notes are kept in the task log.</span><div class="adp-err" data-adp-note-error></div></div>';
+            else:
+                $html = '<label for="upload" class="form-label">Task Result <span class="text-danger">*</span></label>';
+                foreach($taskStatuses as $ts):
+                    $taskStatus = TaskStatus::find($ts->task_status_id);
+                    $html .= '<div class="form-check mt-2">';
+                        $html .= '<input '.($applicantTask->task_status_id == $taskStatus->id ? 'Checked' : '').' id="outc_task-status-'.$taskStatus->id.'" class="form-check-input resultStatus" type="radio" name="result_statuses" value="'.$taskStatus->id.'">';
+                        $html .= '<label class="form-check-label" for="outc_task-status-'.$taskStatus->id.'">'.$taskStatus->name.'</label>';
+                    $html .= '</div>';
+                endforeach;
+            endif;
             $statusOpt['suc'] = 1;
             $statusOpt['res'] = $html;
         else:
             $statusOpt['suc'] = 2;
-            $statusOpt['res'] = '<div class="alert alert-pending-soft show flex items-start mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> <strong>Oops!</strong> No status found for this task.</div>';
+            $statusOpt['res'] = $portal
+                ? '<div class="adp-notice adp-notice--warn"><b>No outcomes defined</b><div>This task has no outcome statuses in Process settings, so there is nothing to record.</div></div>'
+                : '<div class="alert alert-pending-soft show flex items-start mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> <strong>Oops!</strong> No status found for this task.</div>';
         endif;
 
         return response()->json(['message' => $statusOpt], 200);
+    }
+
+    /**
+     * Pending → In Progress by requirement. A task that needs an outcome
+     * and/or an upload moves to In Progress once everything it needs is in
+     * (that is where "Mark as complete" lives); one that needs neither stays
+     * Pending until it is marked complete. Called after an outcome is
+     * recorded, a document is uploaded, and when a task is reopened or
+     * restored. Returns [status, hint] for the response.
+     */
+    private function syncApplicantTaskProgress($applicantTaskId){
+        $applicantTask = ApplicantTask::with(['task', 'documents'])->find($applicantTaskId);
+        if(!$applicantTask): return ['', '']; endif;
+        if($applicantTask->status == 'Completed'): return [$applicantTask->status, '']; endif;
+
+        $needsOutcome = ($applicantTask->task->status ?? 'No') == 'Yes';
+        $needsUpload = ($applicantTask->task->upload ?? 'No') == 'Yes';
+        if(!$needsOutcome && !$needsUpload):
+            return [$applicantTask->status, 'This task needs no outcome or upload, so it can be marked complete from Pending.'];
+        endif;
+
+        $missing = [];
+        if($needsOutcome && !($applicantTask->task_status_id > 0)): $missing[] = 'outcome'; endif;
+        if($needsUpload && $applicantTask->documents->count() == 0): $missing[] = 'upload'; endif;
+        $target = empty($missing) ? 'In Progress' : 'Pending';
+
+        if($applicantTask->status != $target):
+            ApplicantTask::where('id', $applicantTask->id)->update(['status' => $target, 'updated_by' => auth()->user()->id]);
+            ApplicantTaskLog::create([
+                'applicant_tasks_id' => $applicantTask->id,
+                'actions' => 'Status Changed',
+                'field_name' => 'status',
+                'prev_field_value' => $applicantTask->status,
+                'current_field_value' => $target,
+                'created_by' => auth()->user()->id
+            ]);
+        endif;
+
+        $hint = empty($missing)
+            ? 'The task is now In Progress. Mark it complete when you are ready.'
+            : 'It stays Pending until its '.implode(' and ', $missing).' '.(count($missing) > 1 ? 'are' : 'is').' in.';
+        return [$target, $hint];
     }
 
     public function admissionTaskResultUpdate(Request $request){
@@ -1383,7 +1611,20 @@ class AdmissionController extends Controller
                 'current_field_value' => $result_statuses,
                 'created_by' => auth()->user()->id
             ]);
-            return response()->json(['message' => 'Result successfully updated.'], 200);
+            // The note from the outcome dialog is kept as a log entry (the card shows the latest one).
+            $note = trim((string) $request->note);
+            if($note !== ''):
+                ApplicantTaskLog::create([
+                    'applicant_tasks_id' => $applicant_task_id,
+                    'actions' => 'Note',
+                    'field_name' => 'note',
+                    'prev_field_value' => '',
+                    'current_field_value' => $note,
+                    'created_by' => auth()->user()->id
+                ]);
+            endif;
+            [$taskStatus, $hint] = $this->syncApplicantTaskProgress($applicant_task_id);
+            return response()->json(['message' => 'Result successfully updated.', 'status' => $taskStatus, 'hint' => $hint], 200);
         else: 
             return response()->json(['message' => 'Error found!'], 422);
         endif;
@@ -1468,6 +1709,31 @@ class AdmissionController extends Controller
         $task_id = $request->task_id;
         $task = TaskList::find($task_id);
 
+        // The admission portal (resources/js/admission-process.js) asks for its own row markup.
+        if(!empty($request->portal)):
+            $html = '';
+            if(isset($task->users) && $task->users->count() > 0):
+                foreach($task->users as $tusr):
+                    $employee = $tusr->user->employee ?? null;
+                    $name = $employee->full_name ?? ($tusr->user->name ?? 'Unknown employee');
+                    $photo = $employee ? (string) $employee->photo_url : '';
+                    $avatar = ($photo !== '' && !\App\Support\Avatar::isGenerated($photo)) ? '<img src="'.e($photo).'" alt="">' : e(\App\Support\Avatar::initialsOnly($name));
+                    $job = $employee->employment->employeeJobTitle->name ?? '';
+                    $status = (int) ($employee->status ?? 0);
+                    $html .= '<tr>';
+                    $html .= '<td><div class="adp-namecell"><span class="adp-avatar adp-avatar--sm">'.$avatar.'</span><div class="adp-cell"><b>'.e($name).'</b>'.($job !== '' ? '<span class="adp-sub-line">'.e($job).'</span>' : '').'</div></div></td>';
+                    $html .= '<td>'.e($employee->employment->department->name ?? '—').'</td>';
+                    $html .= '<td>'.e($employee->employment->employeeWorkType->name ?? '—').'</td>';
+                    $html .= '<td class="adp-mono">'.e($employee->employment->works_number ?? '—').'</td>';
+                    $html .= '<td>'.($status === 1 ? '<span class="adp-pill adp-pill--green"><i></i>Active</span>' : ($status === 2 ? '<span class="adp-pill adp-pill--red"><i></i>Inactive</span>' : '<span class="adp-pill adp-pill--muted"><i></i>Unknown</span>')).'</td>';
+                    $html .= '</tr>';
+                endforeach;
+            else:
+                $html .= '<tr><td colspan="5"><div class="adp-empty adp-empty--small"><span>Nobody is assigned to this task.</span></div></td></tr>';
+            endif;
+            return response()->json(['res' => $html], 200);
+        endif;
+
         $html = '';
         if(isset($task->users) && $task->users->count() > 0):
             foreach($task->users as $tusr):
@@ -1511,19 +1777,28 @@ class AdmissionController extends Controller
     }
 
     public function admissionUploads($applicantId){
+        $applicant = Applicant::find($applicantId);
+        // Per-type counts for the summary chips and the type picker; task
+        // uploads have no document setting and are counted separately.
+        $active = ApplicantDocument::where('applicant_id', $applicantId)->get(['document_setting_id']);
+        $docCounts = $active->filter(fn ($d) => $d->document_setting_id > 0)->countBy('document_setting_id')->all();
+        $taskDocCount = $active->filter(fn ($d) => !($d->document_setting_id > 0))->count();
+
         return view('pages.students.admission.uploads', [
             'title' => 'Recruitment - London Churchill College',
-            'layout' => 'admission-top-menu',
-            'admissionThemeApplicant' => Applicant::find($applicantId),
+            // Admission portal shell (layout/admission-portal), like the other admission pages.
+            'layout' => 'admission-portal',
             'breadcrumbs' => [
-                ['label' => 'Students Admission', 'href' => route('admission')],
-                ['label' => 'Student Details', 'href' => route('admission.show', $applicantId)],
-                ['label' => 'Uploads', 'href' => 'javascript:void(0);'],
+                ['label' => 'Students admission', 'href' => route('admission')],
+                ['label' => 'Student details', 'href' => route('admission.show', $applicantId)],
+                ['label' => 'Uploaded files', 'href' => 'javascript:void(0);'],
             ],
-            'applicant' => Applicant::find($applicantId),
+            'applicant' => $applicant,
             'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
-            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'docSettings' => DocumentSettings::where('admission', '1')->get(),
+            'docCounts' => $docCounts,
+            'taskDocCount' => $taskDocCount,
+            'deletedCount' => ApplicantDocument::onlyTrashed()->where('applicant_id', $applicantId)->count(),
             'feeelegibility' => FeeEligibility::all(),
             'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
             'esignature' => ApplicantESignature::where('applicant_id', $applicantId)->latest('id')->first()
@@ -1568,9 +1843,11 @@ class AdmissionController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = ApplicantDocument::orderByRaw(implode(',', $sorts))->where('applicant_id', $applicantId);
+        $query = ApplicantDocument::with(['user', 'documentSetting'])->orderByRaw(implode(',', $sorts))->where('applicant_id', $applicantId);
         if(!empty($queryStr)):
-            $query->where('display_file_name','LIKE','%'.$queryStr.'%');
+            $query->where(function($q) use($queryStr){
+                $q->where('display_file_name','LIKE','%'.$queryStr.'%')->orWhere('current_file_name','LIKE','%'.$queryStr.'%');
+            });
         endif;
         if($status == 2):
             $query->onlyTrashed();
@@ -1600,10 +1877,12 @@ class AdmissionController extends Controller
                     'hard_copy_check' => $list->hard_copy_check,
                     'doc_type' => strtoupper($list->doc_type),
                     'current_file_name'=> $list->current_file_name,
-                    //'url' => ($list->path) ?? Storage::disk('s3')->url('public/applicants/'.$list->applicant_id.'/'.$list->current_file_name),
+                    // The document type (Document settings); task uploads have none.
+                    'document_setting_id' => (int) $list->document_setting_id,
+                    'document_type' => $list->documentSetting->name ?? '',
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
-                    'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
-                    'deleted_at' => $list->deleted_at
+                    'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('d M Y, H:i', strtotime($list->created_at)) : ''),
+                    'deleted_at' => (!empty($list->deleted_at) ? date('d M Y, H:i', strtotime($list->deleted_at)) : null)
                 ];
                 $i++;
             endforeach;
@@ -1623,22 +1902,22 @@ class AdmissionController extends Controller
         $recordid = $request->recordid;
         $data = ApplicantDocument::where('id', $recordid)->withTrashed()->restore();
 
-        response()->json($data);
+        return response()->json(['restored' => (bool) $data], 200);
     }
 
     public function admissionNotes($applicantId){
         return view('pages.students.admission.notes', [
             'title' => 'Recruitment - London Churchill College',
-            'layout' => 'admission-top-menu',
-            'admissionThemeApplicant' => Applicant::find($applicantId),
+            // Admission portal shell (layout/admission-portal), like the other admission pages.
+            'layout' => 'admission-portal',
             'breadcrumbs' => [
-                ['label' => 'Students Admission', 'href' => route('admission')],
-                ['label' => 'Student Details', 'href' => route('admission.show', $applicantId)],
+                ['label' => 'Students admission', 'href' => route('admission')],
+                ['label' => 'Student details', 'href' => route('admission.show', $applicantId)],
                 ['label' => 'Notes', 'href' => 'javascript:void(0);'],
             ],
             'applicant' => Applicant::find($applicantId),
             'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
-            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'deletedCount' => ApplicantNote::onlyTrashed()->where('applicant_id', $applicantId)->count(),
             'feeelegibility' => FeeEligibility::all(),
             'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
             'esignature' => ApplicantESignature::where('applicant_id', $applicantId)->latest('id')->first()
@@ -1655,15 +1934,17 @@ class AdmissionController extends Controller
         ]);
         if($note):
             if($request->hasFile('document')):
+                $disk = ApplicantDocumentDisk::name();
                 $document = $request->file('document');
                 $documentName = time().'_'.$document->getClientOriginalName();
-                $path = $document->storeAs('public/applicants/'.$applicant_id, $documentName, 's3');
+                $path = $document->storeAs('public/applicants/'.$applicant_id, $documentName, $disk);
 
                 $data = [];
                 $data['applicant_id'] = $applicant_id;
                 $data['hard_copy_check'] = 0;
                 $data['doc_type'] = $document->getClientOriginalExtension();
-                $data['path'] = Storage::disk('s3')->url($path);
+                $data['disk_type'] = $disk;
+                $data['path'] = Storage::disk($disk)->url($path);
                 $data['display_file_name'] = $documentName;
                 $data['current_file_name'] = $documentName;
                 $data['created_by'] = auth()->user()->id;
@@ -1675,7 +1956,7 @@ class AdmissionController extends Controller
                     ]);
                 endif;
             endif;
-            return response()->json(['message' => 'Applicant Note successfully created'], 200);
+            return response()->json(['message' => 'Applicant Note successfully created', 'id' => $note->id], 200);
         else:
             return response()->json(['message' => 'Something went wrong. Please try later.'], 422);
         endif;
@@ -1692,7 +1973,7 @@ class AdmissionController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = ApplicantNote::orderByRaw(implode(',', $sorts))->where('applicant_id', $applicantId);
+        $query = ApplicantNote::with(['user', 'document'])->orderByRaw(implode(',', $sorts))->where('applicant_id', $applicantId);
         if(!empty($queryStr)):
             $query->where('note','LIKE','%'.$queryStr.'%');
         endif;
@@ -1721,19 +2002,25 @@ class AdmissionController extends Controller
                 /*if(isset($list->applicant_document_id) && isset($list->document)):
                     $docURL = (isset($list->document->current_file_name) && !empty($list->document->current_file_name)  && Storage::diske('s3')->exists('public/applicants/'.$list->applicant_id.'/'.$list->document->current_file_name) ? Storage::disk('s3')->url('public/applicants/'.$list->applicant_id.'/'.$list->document->current_file_name) : '');
                 endif;*/
+                $plain = trim(preg_replace('/\s+/', ' ', strip_tags((string) $list->note)));
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
-                    'note' => (strlen(strip_tags($list->note)) > 40 ? substr(strip_tags($list->note), 0, 40).'...' : strip_tags($list->note)),
+                    'note' => (strlen($plain) > 40 ? substr($plain, 0, 40).'...' : $plain),
+                    // The admission portal renders the timeline from these.
+                    'excerpt' => (strlen($plain) > 120 ? substr($plain, 0, 120).'…' : $plain),
+                    'note_html' => (string) $list->note,
                     'applicant_document_id' => (isset($list->applicant_document_id) && $list->applicant_document_id ? $list->applicant_document_id : 0),
+                    'document_name' => (isset($list->document) ? (string) ($list->document->display_file_name ?: $list->document->current_file_name) : ''),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
-                    'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
-                    'deleted_at' => $list->deleted_at
+                    'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('d M Y, H:i', strtotime($list->created_at)) : ''),
+                    'updated_at'=> (!empty($list->updated_at) && $list->updated_at != $list->created_at ? date('d M Y, H:i', strtotime($list->updated_at)) : ''),
+                    'deleted_at' => (!empty($list->deleted_at) ? date('d M Y, H:i', strtotime($list->deleted_at)) : null)
                 ];
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'total_rows' => $total_rows, 'data' => $data]);
     }
 
     public function admissionShowNote(Request $request){
@@ -1763,9 +2050,10 @@ class AdmissionController extends Controller
         $theNote = ApplicantNote::find($noteId);
         $docURL = '';
         if(isset($theNote->applicant_document_id) && isset($theNote->document)):
-            $docURL = (isset($theNote->document->current_file_name) && !empty($theNote->document->current_file_name) && Storage::disk('s3')->exists('public/applicants/'.$theNote->applicant_id.'/'.$theNote->document->current_file_name) ? Storage::disk('s3')->url('public/applicants/'.$theNote->applicant_id.'/'.$theNote->document->current_file_name) : '');
+            try { $docURL = ApplicantDocumentDisk::url($theNote->document, 30); } catch (\Throwable $e) { $docURL = ''; }
         endif;
         $theNote['docURL'] = $docURL;
+        $theNote['document_name'] = isset($theNote->document) ? (string) ($theNote->document->display_file_name ?: $theNote->document->current_file_name) : '';
 
         return response()->json(['res' => $theNote], 200);
     }
@@ -1784,22 +2072,28 @@ class AdmissionController extends Controller
         ]);
         if($request->hasFile('document')):
             if($applicantDocumentId > 0 && isset($oleNote->document->current_file_name) && !empty($oleNote->document->current_file_name)):
-                if (Storage::disk('s3')->exists('public/applicants/'.$applicant_id.'/'.$oleNote->document->current_file_name)):
-                    Storage::disk('s3')->delete('public/applicants/'.$applicant_id.'/'.$oleNote->document->current_file_name);
-                endif;
+                $oldDisk = ApplicantDocumentDisk::of($oleNote->document);
+                $oldPath = ApplicantDocumentDisk::path($applicant_id, $oleNote->document->current_file_name);
+                try {
+                    if (Storage::disk($oldDisk)->exists($oldPath)):
+                        Storage::disk($oldDisk)->delete($oldPath);
+                    endif;
+                } catch (\Throwable $e) { /* the file is gone or the disk is unreachable; the row still goes */ }
 
                 $ad = ApplicantDocument::where('id', $applicantDocumentId)->forceDelete();
             endif;
 
+            $disk = ApplicantDocumentDisk::name();
             $document = $request->file('document');
             $documentName = time().'_'.$document->getClientOriginalName();
-            $path = $document->storeAs('public/applicants/'.$applicant_id, $documentName, 's3');
+            $path = $document->storeAs('public/applicants/'.$applicant_id, $documentName, $disk);
 
             $data = [];
             $data['applicant_id'] = $applicant_id;
             $data['hard_copy_check'] = 0;
             $data['doc_type'] = $document->getClientOriginalExtension();
-            $data['path'] = Storage::disk('s3')->url($path);
+            $data['disk_type'] = $disk;
+            $data['path'] = Storage::disk($disk)->url($path);
             $data['display_file_name'] = $documentName;
             $data['current_file_name'] = $documentName;
             $data['created_by'] = auth()->user()->id;
@@ -1875,32 +2169,55 @@ class AdmissionController extends Controller
             endforeach;
         endif;
 
-        return response()->json(['message' => 'Photo successfully change & updated'], 200);
+        // The photo task (the one whose rule runs "Update student photo"): this photo goes into its
+        // uploads, and an open task is completed (ApplicantPhotoTask). The photo itself is saved above either way.
+        $taskNote = null;
+        try {
+            $photoTask = app(\App\Services\Admission\ApplicantPhotoTask::class)->attach($applicant->fresh(), (string) $document->getClientOriginalName(), (int) auth()->user()->id);
+            if ($photoTask):
+                $taskNote = $photoTask['completed_now']
+                    ? 'The "'.$photoTask['task'].'" task is now complete, with this photo in its uploads.'
+                    : 'The photo was also added to the uploads of the "'.$photoTask['task'].'" task.';
+            endif;
+        } catch (\Throwable $e) {
+            Log::error('Applicant photo not added to the photo task', ['applicant_id' => $applicant_id, 'error' => $e->getMessage()]);
+        }
+
+        // return response()->json(['message' => 'Photo successfully change & updated'], 200);
+        return response()->json(['message' => 'Photo successfully change & updated', 'task_note' => $taskNote], 200);
     }
 
     public function admissionCommunication($applicantId){
+        $applicant = Applicant::find($applicantId);
+
         return view('pages.students.admission.communication', [
             'title' => 'Recruitment - London Churchill College',
-            'layout' => 'admission-top-menu',
-            'admissionThemeApplicant' => Applicant::find($applicantId),
+            // Admission portal shell (layout/admission-portal), like the other admission pages.
+            'layout' => 'admission-portal',
+            'admissionThemeApplicant' => $applicant,
             'breadcrumbs' => [
-                ['label' => 'Students Admission', 'href' => route('admission')],
-                ['label' => 'Student Details', 'href' => route('admission.show', $applicantId)],
+                ['label' => 'Students admission', 'href' => route('admission')],
+                ['label' => 'Student details', 'href' => route('admission.show', $applicantId)],
                 ['label' => 'Communication', 'href' => 'javascript:void(0);'],
             ],
-            'applicant' => Applicant::find($applicantId),
+            'applicant' => $applicant,
             'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
             'smtps' => ComonSmtp::all(),
             'letterSet' => LetterSet::where('admission', 1)->where('status', 1)->orderBy('letter_title', 'ASC')->get(),
             'signatory' => Signatory::all(),
             'smsTemplates' => SmsTemplate::where('admission', 1)->where('status', 1)->orderBy('sms_title', 'ASC')->get(),
             'emailTemplates' => EmailTemplate::where('admission', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
+            // Soft-deleted items per channel, for the "Deleted (n)" accordions.
+            'deletedCounts' => [
+                'email' => ApplicantEmail::onlyTrashed()->where('applicant_id', $applicantId)->count(),
+                'sms' => ApplicantSms::onlyTrashed()->where('applicant_id', $applicantId)->count(),
+                'letter' => ApplicantLetter::onlyTrashed()->where('applicant_id', $applicantId)->count(),
+            ],
             'feeelegibility' => FeeEligibility::all(),
             'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
             'esignature' => ApplicantESignature::where('applicant_id', $applicantId)->latest('id')->first()
         ]);
     }
-
     public function admissionGetLetterSet(Request $request){
         $letterSetId = $request->letterSetId;
         $letterSet = LetterSet::find($letterSetId);
@@ -1946,7 +2263,8 @@ class AdmissionController extends Controller
             $data['applicant_id'] = $applicant_id;
             $data['hard_copy_check'] = 0;
             $data['doc_type'] = 'pdf';
-            $data['path'] = Storage::disk('s3')->url('public/applicants/'.$applicant_id.'/'.$generatedLetter['filename']);
+            $data['path'] = Storage::disk($generatedLetter['disk'] ?? 's3')->url('public/applicants/'.$applicant_id.'/'.$generatedLetter['filename']);
+            $data['disk_type'] = $generatedLetter['disk'] ?? 's3';
             $data['display_file_name'] = $letter_title;
             $data['current_file_name'] = $generatedLetter['filename'];
             $data['created_by'] = auth()->user()->id;
@@ -1986,7 +2304,7 @@ class AdmissionController extends Controller
                 "pathinfo" => 'public/applicants/'.$applicant_id.'/'.$generatedLetter['filename'],
                 "nameinfo" => $generatedLetter['filename'],
                 "mimeinfo" => 'application/pdf',
-                'disk'     => 's3'
+                'disk'     => $generatedLetter['disk'] ?? 's3'
             ];
 
             $configuration = [
@@ -2019,17 +2337,21 @@ class AdmissionController extends Controller
         endforeach;
 
         $query = DB::table('applicant_letters as al')
-                        ->select('al.*', 'ls.letter_type', 'ls.letter_title', 'sg.signatory_name', 'sg.signatory_post', 'ur.name as created_bys', 'adc.current_file_name')
+                        ->select('al.*', 'ls.letter_type', 'ls.letter_title', 'sg.signatory_name', 'sg.signatory_post', 'ur.name as created_bys', 'adc.current_file_name', 'adc.display_file_name', 'cs.smtp_user')
                         ->leftJoin('letter_sets as ls', 'al.letter_set_id', '=', 'ls.id')
                         ->leftJoin('signatories as sg', 'al.signatory_id', '=', 'sg.id')
                         ->leftJoin('users as ur', 'al.issued_by', '=', 'ur.id')
                         ->leftJoin('applicant_documents as adc', 'al.applicant_document_id', '=', 'adc.id')
+                        ->leftJoin('comon_smtps as cs', 'al.comon_smtp_id', '=', 'cs.id')
                         ->where('al.applicant_id', '=', $applicantId);
         if(!empty($queryStr)):
-            $query->where('ls.letter_type','LIKE','%'.$queryStr.'%');
-            $query->orWhere('ls.letter_title','LIKE','%'.$queryStr.'%');
-            $query->orWhere('sg.signatory_name','LIKE','%'.$queryStr.'%');
-            $query->orWhere('sg.signatory_post','LIKE','%'.$queryStr.'%');
+            // Grouped, so the search stays within this applicant's letters.
+            $query->where(function($q) use ($queryStr){
+                $q->where('ls.letter_type','LIKE','%'.$queryStr.'%')
+                  ->orWhere('ls.letter_title','LIKE','%'.$queryStr.'%')
+                  ->orWhere('sg.signatory_name','LIKE','%'.$queryStr.'%')
+                  ->orWhere('sg.signatory_post','LIKE','%'.$queryStr.'%');
+            });
         endif;
         if($status == 2):
             $query->whereNotNull('al.deleted_at');
@@ -2040,9 +2362,9 @@ class AdmissionController extends Controller
 
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        $perpage = (isset($request->size) && $request->size == 'true' ? max($total_rows, 1) : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
-        
+
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
@@ -2055,27 +2377,26 @@ class AdmissionController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
-                $docURL = '';
-                /*if(isset($list->applicant_document_id) && $list->applicant_document_id > 0 && isset($list->current_file_name)):
-                    $docURL = (!empty($list->current_file_name) ? Storage::disk('s3')->url('public/applicants/'.$list->applicant_id.'/'.$list->current_file_name) : '');
-                endif;*/
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
                     'letter_type' => $list->letter_type,
                     'letter_title' => $list->letter_title,
                     'signatory_name' => (isset($list->signatory_name) && !empty($list->signatory_name) ? $list->signatory_name : ''),
+                    'signatory_post' => (isset($list->signatory_post) && !empty($list->signatory_post) ? $list->signatory_post : ''),
+                    'smtp' => (isset($list->smtp_user) && !empty($list->smtp_user) ? $list->smtp_user : ''),
                     'docurl' => (isset($list->applicant_document_id) && $list->applicant_document_id > 0 ? $list->applicant_document_id : 0),
+                    'document_name' => (!empty($list->display_file_name) ? $list->display_file_name : (!empty($list->current_file_name) ? $list->current_file_name : '')),
+                    'issued_date' => (!empty($list->issued_date) ? date('d M Y', strtotime($list->issued_date)) : ''),
                     'created_by'=> (isset($list->created_bys) ? $list->created_bys : 'Unknown'),
-                    'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
-                    'deleted_at' => $list->deleted_at
+                    'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('d M Y, H:i', strtotime($list->created_at)) : ''),
+                    'deleted_at' => (!empty($list->deleted_at) ? date('d M Y, H:i', strtotime($list->deleted_at)) : null)
                 ];
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'total_rows' => $total_rows, 'data' => $data]);
     }
-
     public function admissionDestroyLetter(Request $request){
         $applicant = $request->applicant;
         $recordid = $request->recordid;
@@ -2144,21 +2465,23 @@ class AdmissionController extends Controller
                 $MAILHTML .= '</div>';
             endif;*/
 
+            // Attachments go to the local disk on a local install and to S3 elsewhere (ApplicantDocumentDisk).
+            $disk = ApplicantDocumentDisk::name();
+            $attachmentInfo = [];
             if($request->hasFile('documents')):
                 $documents = $request->file('documents');
-                $docCounter = 1;
-                $attachmentInfo = [];
                 foreach($documents as $document):
                     $documentName = time().'_'.$document->getClientOriginalName();
-                    $path = $document->storeAs('public/applicants/'.$applicantID, $documentName, 's3');
+                    $path = $document->storeAs('public/applicants/'.$applicantID, $documentName, $disk);
 
                     $data = [];
                     $data['applicant_id'] = $applicantID;
                     $data['hard_copy_check'] = 0;
                     $data['doc_type'] = $document->getClientOriginalExtension();
-                    $data['path'] = Storage::disk('s3')->url($path);
+                    $data['path'] = Storage::disk($disk)->url($path);
                     $data['display_file_name'] = $documentName;
                     $data['current_file_name'] = $documentName;
+                    $data['disk_type'] = $disk;
                     $data['created_by'] = auth()->user()->id;
                     $applicantDocument = ApplicantDocument::create($data);
 
@@ -2169,25 +2492,22 @@ class AdmissionController extends Controller
                             'created_by' => auth()->user()->id
                         ]);
 
-                        $attachmentInfo[$docCounter++] = [
+                        $attachmentInfo[] = [
                             "pathinfo" => $path,
                             "nameinfo" => $document->getClientOriginalName(),
                             "mimeinfo" => $document->getMimeType(),
-                            'disk'     => 's3'
+                            'disk'     => $disk
                         ];
-                        $docCounter++;
                     endif;
                 endforeach;
-                UserMailerJob::dispatch($configuration,[$Applicant->users->email], new CommunicationSendMail($request->subject, $MAILHTML, $attachmentInfo));
-            else:
-                UserMailerJob::dispatch($configuration, [$Applicant->users->email], new CommunicationSendMail($request->subject, $MAILHTML, []));
             endif;
-            return response()->json(['message' => 'Email successfully sent to Applicant'], 200);
+            UserMailerJob::dispatch($configuration, [$Applicant->users->email], new CommunicationSendMail($request->subject, $MAILHTML, $attachmentInfo));
+
+            return response()->json(['message' => 'Email successfully sent to Applicant', 'id' => $applicantEmail->id, 'attachments' => count($attachmentInfo)], 200);
         else:
             return response()->json(['message' => 'Something went wrong. Please try later'], 422);
         endif;
     }
-
     public function admissionCommunicationMailList(Request $request){
         $applicantId = (isset($request->applicantId) && !empty($request->applicantId) ? $request->applicantId : 0);
         $queryStr = (isset($request->queryStrCME) && $request->queryStrCME != '' ? $request->queryStrCME : '');
@@ -2199,10 +2519,12 @@ class AdmissionController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = ApplicantEmail::orderByRaw(implode(',', $sorts))->where('applicant_id', $applicantId);
+        $query = ApplicantEmail::with(['smtp', 'user', 'template'])->orderByRaw(implode(',', $sorts))->where('applicant_id', $applicantId);
         if(!empty($queryStr)):
-            $query->where('subject','LIKE','%'.$queryStr.'%');
-            $query->orWhere('body','LIKE','%'.$queryStr.'%');
+            // Grouped, so the search stays within this applicant's mail.
+            $query->where(function($q) use ($queryStr){
+                $q->where('subject','LIKE','%'.$queryStr.'%')->orWhere('body','LIKE','%'.$queryStr.'%');
+            });
         endif;
         if($status == 2):
             $query->onlyTrashed();
@@ -2210,9 +2532,9 @@ class AdmissionController extends Controller
 
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        $perpage = (isset($request->size) && $request->size == 'true' ? max($total_rows, 1) : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
-        
+
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
@@ -2230,16 +2552,19 @@ class AdmissionController extends Controller
                     'sl' => $i,
                     'subject' => $list->subject,
                     'smtp' => (isset($list->smtp->smtp_user) && !empty($list->smtp->smtp_user) ? $list->smtp->smtp_user : ''),
+                    'template' => (isset($list->template->email_title) && !empty($list->template->email_title) ? $list->template->email_title : ''),
+                    // Pivot rows, so a deleted mail (whose documents are soft-deleted too) keeps its count.
+                    'attachments' => ApplicantEmailsAttachment::where('applicant_email_id', $list->id)->count(),
+                    'excerpt' => Str::limit(trim(preg_replace('/\s+/', ' ', strip_tags((string) $list->body))), 140),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
-                    'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
-                    'deleted_at' => $list->deleted_at
+                    'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('d M Y, H:i', strtotime($list->created_at)) : ''),
+                    'deleted_at' => (!empty($list->deleted_at) ? date('d M Y, H:i', strtotime($list->deleted_at)) : null)
                 ];
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'total_rows' => $total_rows, 'data' => $data]);
     }
-
     public function admissionCommunicationSendSms(SendSmsRequest $request){
         $applicantID = $request->applicant_id;
         $smsTemplateID = (isset($request->sms_template_id) && $request->sms_template_id > 0 ? $request->sms_template_id : NULL);
@@ -2258,7 +2583,7 @@ class AdmissionController extends Controller
                 $textlocal_api = Option::where('category', 'SMS')->where('name', 'textlocal_api')->pluck('value')->first();
                 $smseagle_api = Option::where('category', 'SMS')->where('name', 'smseagle_api')->pluck('value')->first();
                 
-                if(in_array(env('APP_ENV'), ['development', 'local'])) {
+                if(app()->environment(['development', 'local', 'testing'])) {
                         \Log::info('SMS: '.$request->sms.' sent to '.$applicantContact->mobile);
                         FacadesDebugbar::info('SMS: '.$request->sms.' sent to '.$applicantContact->mobile);
 
@@ -2303,10 +2628,12 @@ class AdmissionController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = ApplicantSms::orderByRaw(implode(',', $sorts))->where('applicant_id', $applicantId);
+        $query = ApplicantSms::with(['user', 'template'])->orderByRaw(implode(',', $sorts))->where('applicant_id', $applicantId);
         if(!empty($queryStr)):
-            $query->where('subject','LIKE','%'.$queryStr.'%');
-            $query->orWhere('sms','LIKE','%'.$queryStr.'%');
+            // Grouped, so the search stays within this applicant's messages.
+            $query->where(function($q) use ($queryStr){
+                $q->where('subject','LIKE','%'.$queryStr.'%')->orWhere('sms','LIKE','%'.$queryStr.'%');
+            });
         endif;
         if($status == 2):
             $query->onlyTrashed();
@@ -2314,9 +2641,9 @@ class AdmissionController extends Controller
 
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        $perpage = (isset($request->size) && $request->size == 'true' ? max($total_rows, 1) : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
-        
+
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
@@ -2329,22 +2656,24 @@ class AdmissionController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
+                $text = trim(preg_replace('/\s+/', ' ', strip_tags((string) $list->sms)));
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
                     'template' => isset($list->template->sms_title) && !empty($list->template->sms_title) ? $list->template->sms_title : '',
                     'subject' => $list->subject,
-                    'sms' => (strlen(strip_tags($list->sms)) > 40 ? substr(strip_tags($list->sms), 0, 40).'...' : strip_tags($list->sms)),
+                    'sms' => (strlen($text) > 40 ? substr($text, 0, 40).'...' : $text),
+                    'excerpt' => Str::limit($text, 140),
+                    'segments' => max(1, (int) ceil(mb_strlen((string) $list->sms) / 160)),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
-                    'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
-                    'deleted_at' => $list->deleted_at
+                    'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('d M Y, H:i', strtotime($list->created_at)) : ''),
+                    'deleted_at' => (!empty($list->deleted_at) ? date('d M Y, H:i', strtotime($list->deleted_at)) : null)
                 ];
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'total_rows' => $total_rows, 'data' => $data]);
     }
-
     public function admissionDestroyMail(Request $request){
         $applicant = $request->applicant;
         $recordid = $request->recordid;
@@ -2352,7 +2681,7 @@ class AdmissionController extends Controller
         $applicantMailAttachments = ApplicantEmailsAttachment::where('applicant_email_id', $recordid)->get();
         if(!empty($applicantMailAttachments)):
             foreach($applicantMailAttachments as $attachment):
-                $applicantDoc = ApplicantDocument::find($attachment->applicant_document_id)->delete();
+                ApplicantDocument::where('id', $attachment->applicant_document_id)->delete();
             endforeach;
         endif;
         ApplicantEmail::find($recordid)->delete();
@@ -2383,7 +2712,19 @@ class AdmissionController extends Controller
 
     public function admissionCommunicationMailShow(Request $request){
         $mailId = $request->recordId;
-        $mail = ApplicantEmail::find($mailId);
+        $mail = ApplicantEmail::withTrashed()->with(['user', 'smtp', 'template'])->find($mailId);
+        if(!$mail):
+            return response()->json(['message' => 'Mail not found'], 404);
+        endif;
+        // Attachments by pivot, including soft-deleted documents of a deleted mail.
+        $attachments = [];
+        foreach(ApplicantEmailsAttachment::where('applicant_email_id', $mail->id)->get() as $pivot):
+            $doc = ApplicantDocument::withTrashed()->find($pivot->applicant_document_id);
+            if($doc):
+                $attachments[] = ['id' => $doc->id, 'name' => (!empty($doc->display_file_name) ? $doc->display_file_name : $doc->current_file_name)];
+            endif;
+        endforeach;
+
         $heading = 'Mail Subject: <u>'.$mail->subject.'</u>';
         $html = '';
         $html .= '<div class="grid grid-cols-12 gap-4">';
@@ -2399,13 +2740,13 @@ class AdmissionController extends Controller
             $html .= '<div class="col-span-9">';
                 $html .= '<div>'.(isset($mail->user->name) ? $mail->user->name : 'Unknown').'</div>';
             $html .= '</div>';
-            if(isset($mail->documents) && !empty($mail->documents)):
+            if(!empty($attachments)):
                 $html .= '<div class="col-span-3">';
                     $html .= '<div class="text-slate-500 font-medium">Attachments</div>';
                 $html .= '</div>';
                 $html .= '<div class="col-span-9">';
-                    foreach($mail->documents as $doc):
-                        $html .= '<a target="_blank" class="mb-1 text-primary font-medium flex justify-start items-center downloadDoc" data-id="'.$doc->id.'" href="javascript:void(0);" download><i data-lucide="disc" class="w-3 h3 mr-2"></i>'.$doc->current_file_name.'</a>';
+                    foreach($attachments as $doc):
+                        $html .= '<a target="_blank" class="mb-1 text-primary font-medium flex justify-start items-center downloadDoc" data-id="'.$doc['id'].'" href="javascript:void(0);" download><i data-lucide="disc" class="w-3 h3 mr-2"></i>'.$doc['name'].'</a>';
                     endforeach;
                 $html .= '</div>';
             endif;
@@ -2417,9 +2758,21 @@ class AdmissionController extends Controller
             $html .= '</div>';
         $html .= '</div>';
 
-        return response()->json(['heading' => $heading, 'html' => $html], 200);
-    }
+        // The portal page renders from `row`; `heading` / `html` stay for the previous markup.
+        $row = [
+            'id' => $mail->id,
+            'subject' => $mail->subject,
+            'body' => $mail->body,
+            'smtp' => (isset($mail->smtp->smtp_user) ? $mail->smtp->smtp_user : ''),
+            'template' => (isset($mail->template->email_title) ? $mail->template->email_title : ''),
+            'attachments' => $attachments,
+            'created_by' => (isset($mail->user->name) ? $mail->user->name : 'Unknown'),
+            'created_at' => (!empty($mail->created_at) ? date('d M Y, H:i', strtotime($mail->created_at)) : ''),
+            'deleted_at' => (!empty($mail->deleted_at) ? date('d M Y, H:i', strtotime($mail->deleted_at)) : null),
+        ];
 
+        return response()->json(['heading' => $heading, 'html' => $html, 'row' => $row], 200);
+    }
     public function admissionDestroySms(Request $request){
         $applicant = $request->applicant;
         $recordid = $request->recordid;
@@ -2445,7 +2798,10 @@ class AdmissionController extends Controller
 
     public function admissionCommunicationSmsShow(Request $request){
         $mailId = $request->recordId;
-        $sms = ApplicantSms::find($mailId);
+        $sms = ApplicantSms::withTrashed()->with(['user', 'template'])->find($mailId);
+        if(!$sms):
+            return response()->json(['message' => 'SMS not found'], 404);
+        endif;
         $heading = 'Mail Subject: <u>'.$sms->subject.'</u>';
         $html = '';
         $html .= '<div class="grid grid-cols-12 gap-4">';
@@ -2477,9 +2833,20 @@ class AdmissionController extends Controller
             $html .= '</div>';
         $html .= '</div>';
 
-        return response()->json(['heading' => $heading, 'html' => $html], 200);
-    }
+        // The portal page renders from `row`; `heading` / `html` stay for the previous markup.
+        $row = [
+            'id' => $sms->id,
+            'subject' => $sms->subject,
+            'sms' => $sms->sms,
+            'segments' => max(1, (int) ceil(mb_strlen((string) $sms->sms) / 160)),
+            'template' => (isset($sms->template->sms_title) ? $sms->template->sms_title : ''),
+            'created_by' => (isset($sms->user->name) ? $sms->user->name : 'Unknown'),
+            'created_at' => (!empty($sms->created_at) ? date('d M Y, H:i', strtotime($sms->created_at)) : ''),
+            'deleted_at' => (!empty($sms->deleted_at) ? date('d M Y, H:i', strtotime($sms->deleted_at)) : null),
+        ];
 
+        return response()->json(['heading' => $heading, 'html' => $html, 'row' => $row], 200);
+    }
     public function admissionStudentStatusValidation(Request $request){
         $applicantID = $request->applicantID;
         $Proof = ApplicantProofOfId::where('applicant_id', $applicantID)->latest()->first();
@@ -2504,6 +2871,20 @@ class AdmissionController extends Controller
         $rejectedReason = ((isset($request->rejectedReason) && $request->rejectedReason > 0) ? $request->rejectedReason : null);
 
         $applicant =  $applicantOldRow = Applicant::find($applicant_id);
+
+        // Accepted places the offer and Offer Placed sends the DocuSeal form: both need the proof of ID and
+        // fee eligibility the conversion will use, checked before anything changes (user, 26 Oct 2026).
+        if($applicant && in_array((int) $statusidID, \App\Support\AdmissionStatusFlow::NEEDS_PROOF, true)):
+            $missing = \App\Support\AdmissionStatusFlow::missingForOffer($applicant);
+            if(!empty($missing)):
+                return response()->json([
+                    'message' => 'Add the proof of ID and fee eligibility first. Missing: '.implode(', ', $missing).'.',
+                    'missing' => $missing,
+                ], 422);
+            endif;
+        endif;
+        // $applicantOldRow is the same object, so it reads the new values after save(); keep the originals.
+        $original = $applicant->getAttributes();
        
         $applicant->status_id = $statusidID;
         $applicant->application_rejected_reason_id = $rejectedReason;
@@ -2512,87 +2893,25 @@ class AdmissionController extends Controller
 
         if($applicant->wasChanged() && !empty($changes)):
             if($statusidID == 7):
-                $existingProofId = (isset($applicantOldRow->proof->id) && $applicantOldRow->proof->id > 0 ? $applicantOldRow->proof->id : 0);
-                $existingElegbId = (isset($applicantOldRow->feeeligibility->id) && $applicantOldRow->feeeligibility->id > 0 ? $applicantOldRow->feeeligibility->id : 0);
-
-                $applicantProof = ApplicantProofOfId::updateOrCreate([ 'applicant_id' => $applicant_id, 'id' => $existingProofId ], [
-                    'applicant_id' => $applicant_id,
+                /* Student Process: proof of ID + fee eligibility from the dialog, then the
+                   21 conversion jobs as one chained batch (App\Services\Admission\StudentConversion,
+                   shared with the DocuSeal signing workflow). */
+                $chainedBatch = app(\App\Services\Admission\StudentConversion::class)->start($applicant, (int) auth()->user()->id, [
                     'proof_type' => $request->proof_type,
                     'proof_id' => $request->proof_id,
                     'proof_expiredate' => $request->proof_expiredate,
-                    'created_by' => auth()->user()->id,
-                    'updated_by' => auth()->user()->id,
-                ]);
-                $applicantEligibility = ApplicantFeeEligibility::updateOrCreate([ 'applicant_id' => $applicant_id, 'id' => $existingElegbId ], [
-                    'applicant_id' => $applicant_id,
                     'fee_eligibility_id' => $request->fee_eligibility_id,
-                    'created_by' => auth()->user()->id,
-                    'updated_by' => auth()->user()->id,
                 ]);
-
-                $academicYear = AcademicYear::orderBy('id', 'desc')->where('from_date', '<=', Carbon::now())->where('to_date', '>=', Carbon::now())->first();
-                if(isset($academicYear->id) && $academicYear->id > 0):
-                    $applicantPropCourse = ApplicantProposedCourse::where('applicant_id', $applicant_id)->update([
-                        'academic_year_id' => $academicYear->id,
-                        'updated_by' => auth()->user()->id,
-                    ]);
-                endif;
-
-                /* Student Process Start */
-                /**
-                 * These jobs have a strict dependency order and MUST run sequentially:
-                 *  - ProcessNewStudentToUser creates the StudentUser (needed by every job below).
-                 *  - ProcessStudents creates the Student record (needed by every job below).
-                 *  - ProcessStudentTaskDocument depends on the StudentTasks created by ProcessStudentTask.
-                 *
-                 * Bus::batch() dispatches all jobs concurrently, so on the redis queue (multiple
-                 * workers) the dependent jobs frequently executed BEFORE their prerequisites,
-                 * dereferencing null and failing with "Attempt to read property ... on null".
-                 * (It only appeared to work on the local `sync` queue, which happens to run batch
-                 * jobs in array order.)
-                 *
-                 * A plain Bus::chain() runs them strictly in order, but its dispatch() returns a
-                 * PendingDispatch (not a Batch), so $chainedBatch->id blew up with
-                 * "Attempt to read property 'id' on string" and the progress poller
-                 * (progressForStudentStoreProcess) had no job_batches row to read.
-                 *
-                 * Wrapping the jobs as a *chain within a batch* (a nested array inside Bus::batch())
-                 * keeps the strict sequential ordering AND yields a real Batch, so we still get a
-                 * batch id to track progress. On failure the chain halts so a retry resumes it
-                 * instead of leaving a half-migrated student.
-                 */
-                $chainedBatch = Bus::batch([
-                    [
-                        new ProcessNewStudentToUser($applicant),
-                        new ProcessStudents($applicant),
-                        new ProcessStudentNoteDetails($applicant),
-                        new ProcessStudentTask($applicant),
-                        new ProcessStudentTaskDocument($applicant),
-                        new ProcessStudentQualification($applicant),
-                        new ProcessStudentContact($applicant),
-                        new ProcessStudentDisability($applicant),
-                        new ProcessStudentEmployement($applicant),
-                        new ProcessStudentProposedCourse($applicant),
-                        new ProcessStudentKinDetail($applicant),
-                        new ProcessStudentOtherDetails($applicant),
-                        new ProcessStudentResidencyAndCriminalConviction($applicant),
-                        new ProcessStudentProofOfId($applicant),
-                        new ProcessStudentFeeEligibility($applicant),
-                        new ProcessStudentSms($applicant),
-                        new ProcessStudentLetter($applicant),
-                        new ProcessStudentInterview($applicant),
-                        new ProcessStudentEmail($applicant),
-                        new ProcessStudentConsent($applicant),
-                        new ProcessStudentDocuments($applicant),
-                    ],
-                ])->dispatch();
 
                 session()->put("lastBatchId", $chainedBatch->id);
-                $this->seedStudentConversionLogs($applicant_id, $chainedBatch->id);
                 /* Student Process END */
             elseif($statusidID == 6):
-                $this->sendDocusealForm($applicant_id);
-                Log::info('DocuSeal form sent to applicant #'.$applicant_id.' by user #'.auth()->user()->id.'.');
+                $docuseal = $this->sendDocusealForm($applicant_id);
+                if($docuseal):
+                    Log::info('DocuSeal form sent to applicant #'.$applicant_id.' by user #'.auth()->user()->id.'.', $docuseal);
+                else:
+                    Log::warning('DocuSeal form NOT sent to applicant #'.$applicant_id.' by user #'.auth()->user()->id.' (see the preceding DocuSeal log entry).');
+                endif;
             endif;
 
             $statusRow = Status::find($statusidID);
@@ -2607,16 +2926,58 @@ class AdmissionController extends Controller
                 $data['applicant_id'] = $applicant_id;
                 $data['table'] = 'applicants';
                 $data['field_name'] = $field;
-                $data['field_value'] = $applicantOldRow->$field;
+                // $data['field_value'] = $applicantOldRow->$field; // always the new value: every row read "6 → 6"
+                $data['field_value'] = $original[$field] ?? null;
                 $data['field_new_value'] = $value;
                 $data['created_by'] = auth()->user()->id;
 
                 ApplicantArchive::create($data);
             endforeach;
 
+            // Accepted moves straight on to Offer Placed (user, 23 Oct 2026): Accepted keeps its own
+            // history row and offer letter, then the Offer Placed row and the DocuSeal form follow.
+            if($statusidID == 5):
+                $this->placeOfferAfterAccept($applicant);
+                return response()->json(['message' => 'Accepted, and the offer placed: the offer acceptance form was sent.', 'status' => 'Offer Placed'], 200);
+            endif;
+
             return response()->json(['message' => 'Student status successfully updated'], 200);
         else:
             return response()->json(['message' => 'Something went wrong. Please try later.'], 422);
+        endif;
+    }
+
+    /**
+     * Accepted → Offer Placed in the same request: what a manual change to
+     * Offer Placed does (status, history row, the DocuSeal offer acceptance
+     * form, the status's own letter / email if one is set).
+     */
+    private function placeOfferAfterAccept(Applicant $applicant){
+        $from = (int) $applicant->status_id;
+        $applicant->status_id = 6;
+        $applicant->save();
+
+        ApplicantArchive::create([
+            'applicant_id' => $applicant->id,
+            'table' => 'applicants',
+            'field_name' => 'status_id',
+            'field_value' => $from,
+            'field_new_value' => 6,
+            'created_by' => auth()->user()->id,
+        ]);
+
+        $docuseal = $this->sendDocusealForm($applicant->id);
+        if($docuseal):
+            Log::info('DocuSeal form sent to applicant #'.$applicant->id.' on Accepted by user #'.auth()->user()->id.'.', $docuseal);
+        else:
+            Log::warning('DocuSeal form NOT sent to applicant #'.$applicant->id.' on Accepted by user #'.auth()->user()->id.' (see the preceding DocuSeal log entry).');
+        endif;
+
+        $statusRow = Status::find(6);
+        if(isset($statusRow->letter_set_id) && $statusRow->letter_set_id > 0):
+            $this->sendLetterOnStatusChanged($applicant->id, 6);
+        elseif(isset($statusRow->email_template_id) && $statusRow->email_template_id > 0):
+            $this->sendEmailOnStatusChanged($applicant->id, 6);
         endif;
     }
 
@@ -2628,41 +2989,97 @@ class AdmissionController extends Controller
      * has already created the rows, so firstOrCreate must not reset them.
      */
     private function seedStudentConversionLogs($applicant_id, $batchId){
-        foreach(StudentConversionLog::JOB_SEQUENCE as $jobClass):
-            $log = StudentConversionLog::firstOrCreate([
-                'batch_id' => $batchId,
-                'job_class' => $jobClass,
-            ], [
-                'applicant_id' => $applicant_id,
-                'job_name' => StudentConversionLog::jobLabel($jobClass),
-                'status' => StudentConversionLog::STATUS_QUEUED,
-                'created_by' => auth()->user()->id,
-            ]);
-            if(empty($log->created_by)):
-                $log->update(['created_by' => auth()->user()->id]);
-            endif;
-        endforeach;
-
-        Log::channel('student_conversion')->info('['.$batchId.'] Conversion batch dispatched for applicant #'.$applicant_id.' ('.count(StudentConversionLog::JOB_SEQUENCE).' jobs) by user #'.auth()->user()->id.'.');
+        app(\App\Services\Admission\StudentConversion::class)->seedLogs((int) $applicant_id, (string) $batchId, (int) auth()->user()->id);
     }
 
     public function admissionConversionLog($applicantId){
+        $applicant = Applicant::find($applicantId);
         return view('pages.students.admission.conversion-log', [
             'title' => 'Recruitment - London Churchill College',
-            'layout' => 'admission-top-menu',
-            'admissionThemeApplicant' => Applicant::find($applicantId),
+            // Admission portal shell (layout/admission-portal), like the other record pages.
+            'layout' => 'admission-portal',
+            'admissionThemeApplicant' => $applicant,
             'breadcrumbs' => [
                 ['label' => 'Students Admission', 'href' => route('admission')],
                 ['label' => 'Student Details', 'href' => route('admission.show', $applicantId)],
                 ['label' => 'Conversion Log', 'href' => 'javascript:void(0);'],
             ],
-            'applicant' => Applicant::find($applicantId),
+            'applicant' => $applicant,
             'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'feeelegibility' => FeeEligibility::all(),
             'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
-            'esignature' => ApplicantESignature::where('applicant_id', $applicantId)->latest('id')->first()
+            'esignature' => ApplicantESignature::where('applicant_id', $applicantId)->latest('id')->first(),
+            'batches' => $this->conversionBatches($applicantId),
         ]);
+    }
+
+    /**
+     * Time line tab: everything that happened on the application, oldest
+     * first (App\Services\Admission\ApplicantTimeline reads it back from the
+     * tables the other screens write).
+     */
+    public function admissionTimeline($applicantId){
+        $applicant = Applicant::findOrFail($applicantId);
+        return view('pages.students.admission.timeline', [
+            'title' => 'Time Line - '.($applicant->application_no ?: 'Applicant').' - London Churchill College',
+            'layout' => 'admission-portal',
+            'admissionThemeApplicant' => $applicant,
+            'breadcrumbs' => [
+                ['label' => 'Students Admission', 'href' => route('admission')],
+                ['label' => 'Student Details', 'href' => route('admission.show', $applicantId)],
+                ['label' => 'Time Line', 'href' => 'javascript:void(0);'],
+            ],
+            'applicant' => $applicant,
+            'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'feeelegibility' => FeeEligibility::all(),
+            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
+            'esignature' => ApplicantESignature::where('applicant_id', $applicantId)->latest('id')->first(),
+            'timeline' => \App\Services\Admission\ApplicantTimeline::for($applicant),
+        ]);
+    }
+
+    /**
+     * The applicant's conversion runs, newest first: one entry per batch with
+     * its rows in chain order (StudentConversionLog::JOB_SEQUENCE) and the
+     * totals the Conversion log page summarises. The run state is derived from
+     * the rows: running while anything is queued / processing, failed when a
+     * job failed (the rest were cancelled), completed when every job completed.
+     *
+     * @return array<int, array{id:string,ref:string,rows:\Illuminate\Support\Collection,total:int,counts:array,pending:int,state:string,started_at:?string,finished_at:?string,student_id:?int,run_by:?string,created_at:string}>
+     */
+    private function conversionBatches($applicantId){
+        $order = array_flip(StudentConversionLog::JOB_SEQUENCE);
+        $logs = StudentConversionLog::with('user')->where('applicant_id', $applicantId)->orderBy('id')->get();
+        $batches = [];
+        foreach($logs->groupBy('batch_id') as $batchId => $rows):
+            $rows = $rows->sortBy(fn ($row) => sprintf('%03d-%010d', $order[$row->job_class] ?? 999, $row->id))->values();
+            $counts = ['queued' => 0, 'processing' => 0, 'completed' => 0, 'failed' => 0, 'cancelled' => 0];
+            foreach($rows as $row):
+                $counts[$row->status] = ($counts[$row->status] ?? 0) + 1;
+            endforeach;
+            $pending = $counts['queued'] + $counts['processing'];
+            $started = $rows->pluck('started_at')->filter()->min() ?: (string) $rows->min('created_at');
+            $finished = $rows->pluck('finished_at')->filter()->max() ?: null;
+            $batches[] = [
+                'id' => (string) $batchId,
+                'ref' => substr((string) $batchId, -8),
+                'rows' => $rows,
+                'total' => $rows->count(),
+                'counts' => $counts,
+                'pending' => $pending,
+                'state' => $pending > 0 ? 'running' : ($counts['failed'] > 0 ? 'failed' : ($counts['completed'] === $rows->count() ? 'completed' : 'cancelled')),
+                'started_at' => $started ?: null,
+                'finished_at' => $finished,
+                'student_id' => $rows->max('student_id') ?: null,
+                'run_by' => optional($rows->first()->user)->name,
+                'created_at' => (string) $rows->min('created_at'),
+            ];
+        endforeach;
+        usort($batches, fn ($a, $b) => strcmp($b['created_at'], $a['created_at']));
+
+        return $batches;
     }
 
     public function admissionConversionLogList(Request $request){
@@ -2763,8 +3180,8 @@ class AdmissionController extends Controller
                     'result' => $list->interview_result,
                     'status' => $list->interview_status,
                     'interviewer' => (isset($list->user->name) ? $list->user->name : ''),
-                    'file' => ($list->document) ? Storage::disk('s3')->temporaryUrl('public/applicants/'.$applicantId."/".$list->document->current_file_name, now()->addMinutes(120)) : '',
-                    'doc_id' => $list->document->id,
+                    'file' => ($list->document) ? ApplicantDocumentDisk::url($list->document, 120) : '',
+                    'doc_id' => ($list->document) ? $list->document->id : 0,
                     'current_file_name' =>($list->document) ? $list->document->current_file_name : "",
                         
                 ];
@@ -2854,7 +3271,7 @@ class AdmissionController extends Controller
             $smseagle_api = Option::where('category', 'SMS')->where('name', 'smseagle_api')->pluck('value')->first();
             $message = 'London Churchill College requested you to verify your mobile number. Please use your verification code '.$verificationCode.' to verify.  Thank you.';
 
-            if(in_array(env('APP_ENV'), ['development', 'local'])) {
+            if(app()->environment(['development', 'local', 'testing'])) {
                 \Log::info('SMS: '.$message.' sent to '.$mobileNo);
                 FacadesDebugbar::info('SMS: '.$message.' sent to '.$mobileNo);
             } else {
@@ -2905,7 +3322,8 @@ class AdmissionController extends Controller
         $row_id = $request->row_id;
 
         $applicantDoc = ApplicantDocument::where('id',$row_id)->withTrashed()->get()->first();
-        $tmpURL = Storage::disk('s3')->temporaryUrl('public/applicants/'.$applicantDoc->applicant_id.'/'.$applicantDoc->current_file_name, now()->addMinutes(5));
+        // Served from the disk the row was written to: a signed S3 URL, or /storage on a local install.
+        $tmpURL = $applicantDoc ? ApplicantDocumentDisk::url($applicantDoc, 5) : '';
         return response()->json(['res' => $tmpURL], 200);
     }
 
@@ -2950,7 +3368,8 @@ class AdmissionController extends Controller
                 $data['applicant_id'] = $applicant_id;
                 $data['hard_copy_check'] = 0;
                 $data['doc_type'] = 'pdf';
-                $data['path'] = Storage::disk('s3')->url('public/applicants/'.$applicant_id.'/'.$generatedLetter['filename']);
+                $data['path'] = Storage::disk($generatedLetter['disk'] ?? 's3')->url('public/applicants/'.$applicant_id.'/'.$generatedLetter['filename']);
+                $data['disk_type'] = $generatedLetter['disk'] ?? 's3';
                 $data['display_file_name'] = $letter_title;
                 $data['current_file_name'] = $generatedLetter['filename'];
                 $data['created_by'] = auth()->user()->id;
@@ -2989,7 +3408,7 @@ class AdmissionController extends Controller
                     "pathinfo" => 'public/applicants/'.$applicant_id.'/'.$generatedLetter['filename'],
                     "nameinfo" => $generatedLetter['filename'],
                     "mimeinfo" => 'application/pdf',
-                    'disk'     => 's3'
+                    'disk'     => $generatedLetter['disk'] ?? 's3'
                 ];
                 if($status_id == 5):
                     $attachmentFiles[] = [
@@ -3097,7 +3516,7 @@ class AdmissionController extends Controller
                 'order' => 'preserved',
                 'submitters' => [[
                         'role' => 'London Churchill College',
-                        'email' => 'admission@lcc.ac.uk',//limon@lcc.ac.uk
+                        'email' => 'limon@lcc.ac.uk',//admission@lcc.ac.uk
                         'completed' => true,
                         'send_email' => true,
                         'fields' => [[
@@ -3156,19 +3575,55 @@ class AdmissionController extends Controller
                     ]
                 ]
             ];
-            $client = new Client();
-            $res = $client->request('POST', 'https://api.docuseal.co/submissions', 
-                [
-                    'headers' => [
+            /**
+             * The status is already saved by the time we get here, so a DocuSeal
+             * failure must not turn the status change into a 500: log it and
+             * return false. On success the submission id, the address DocuSeal
+             * emailed and the applicant's signing link are returned (and logged by
+             * the caller) so a local test does not depend on that mailbox —
+             * locally the applicant copy goes to DOCUSEAL_TEST_EMAIL, never to the
+             * applicant.
+             */
+            try {
+                // Laravel's HTTP client (Guzzle underneath) so tests can fake DocuSeal.
+                $res = Http::withHeaders([
                         "X-Auth-Token" => $DOCUSEALAPI,
-                        "content-type" => "application/json",
                         "Accept" => "application/json"
-                    ],
-                    'body' => json_encode($postArray)
-                ]
-            );
-            $statusCode = $res->getStatusCode();
-            return $statusCode;
+                    ])
+                    ->timeout(30)
+                    ->withBody(json_encode($postArray), 'application/json')
+                    ->post(rtrim((string) config('services.docuseal.api_url', 'https://api.docuseal.co'), '/').'/submissions');
+            } catch (\Throwable $e) {
+                Log::error('DocuSeal Offer Acceptance form not sent: '.$e->getMessage(), ['applicant_id' => $applicant_id]);
+                return false;
+            }
+            $statusCode = $res->status();
+            $body = $res->json();
+            if($statusCode < 200 || $statusCode >= 300):
+                Log::error('DocuSeal Offer Acceptance form not sent: HTTP '.$statusCode, ['applicant_id' => $applicant_id, 'response' => mb_substr($res->body(), 0, 1000)]);
+                return false;
+            endif;
+            // The API answers with the submitters (one element per role).
+            $submitters = isset($body[0]) ? $body : ($body['submitters'] ?? []);
+            $applicantSubmitter = collect($submitters)->first(fn ($sub) => ($sub['role'] ?? '') === 'Applicant') ?? [];
+            $sent = [
+                'template_id' => (int) $OFFER_ACCEPTANCE_TEMPLATE_ID,
+                'submission_id' => $applicantSubmitter['submission_id'] ?? ($submitters[0]['submission_id'] ?? null),
+                'applicant_email' => $applicantSubmitter['email'] ?? null,
+                'applicant_signing_url' => $applicantSubmitter['embed_src'] ?? null,
+                // the email's Decline button on this install (the DocuSeal template links to the live site)
+                'applicant_decline_url' => ($slug = $applicantSubmitter['slug'] ?? basename((string) parse_url((string) ($applicantSubmitter['embed_src'] ?? ''), PHP_URL_PATH))) ? route('offer.decline', $slug) : null,
+                'test_email' => app()->environment(['local', 'development']),
+                'http_status' => $statusCode,
+            ];
+            // Remember the submission so the signed form + audit log can be fetched into
+            // the uploads once both parties are done (docuseal:collect-signed-offers).
+            try {
+                app(\App\Services\DocuSeal\OfferAcceptanceDocuments::class)->record((int) $applicant_id, $sent, auth()->id());
+            } catch (\Throwable $e) {
+                Log::error('DocuSeal submission '.($sent['submission_id'] ?? '?').' not recorded for applicant #'.$applicant_id.': '.$e->getMessage());
+            }
+            return $sent;
         else:
             Log::warning('DocuSeal Offer Acceptance form not sent: DOCUSEAL_API_KEY or OFFER_ACCEPTANCE_FORM_TEMPLATE_ID is not configured.', ['applicant_id' => $applicant_id]);
             return false;
@@ -3216,21 +3671,24 @@ class AdmissionController extends Controller
     }
 
 
-    public function sendApplicantESignatureRequest(Request $request)
+    /**
+     * "Send Request" on the admission process page. The sending itself lives
+     * in ESignatureRequestSender, shared with the task engine; this keeps
+     * what only a browser can supply - the signed-in user, IP, user agent
+     * and the staff member's geolocation.
+     */
+    public function sendApplicantESignatureRequest(Request $request, ESignatureRequestSender $sender)
     {
         $applicantId = $request->input('applicant_id');
         $applicant = Applicant::with('contact')->find($applicantId);
-
         if (!$applicant) {
             return response()->json([
                 'success' => false,
                 'message' => 'Applicant not found'
             ], 404);
         }
-
         $contactEmail = $request->input('contact_email') ? true : false;
         $contactPhone = $request->input('contact_phone') ? true : false;
-
         if(!$contactEmail && !$contactPhone) {
             return response()->json([
                 'success' => false,
@@ -3238,104 +3696,15 @@ class AdmissionController extends Controller
             ], 400);
         }
 
-        $applicant_id = urlencode(base64_encode($applicant->id));
-        $commonSmtp = ComonSmtp::where('is_default', 1)->first();
-
-        ApplicantESignatureEvent::create([
-            'applicant_id' => $applicant->id,
-            'user_type' => 'user',
-            'event_type' => EsignEventType::SIGN_REQUEST_CREATED->value,
-            'event_description' => "London Churchill College ({$commonSmtp->smtp_user}) initialized a sign request with the document",
-            'ip_address' => $request->ip(),
-            'browser' => $this->getBrowser($request->header('User-Agent')),
-            'os' => $this->getOS($request->header('User-Agent')),
+        $sender->send($applicant, $contactEmail, $contactPhone, [
+            'user_id'   => Auth::user()->id ?? config('tasks.esignature_user_id', 1),
+            'ip'        => $request->ip(),
+            'device'    => $request->header('User-Agent'),
+            'browser'   => $this->getBrowser($request->header('User-Agent')),
+            'os'        => $this->getOS($request->header('User-Agent')),
+            'latitude'  => $request->input('latitude'),
+            'longitude' => $request->input('longitude'),
         ]);
-
-        if($contactEmail) {
-            $esignEvent = ApplicantESignatureEvent::create([
-                'applicant_id' => $applicant->id,
-                'user_type' => 'applicant',
-                'event_type' => EsignEventType::EMAIL_SENT->value,
-                'event_description' => "{$applicant->users->email} was notified by email",
-                'extra_field' => ['opened' => false],
-            ]);
-            $configuration = [
-                'smtp_host'    => $commonSmtp->smtp_host,
-                'smtp_port'    => $commonSmtp->smtp_port,
-                'smtp_username'  => $commonSmtp->smtp_user,
-                'smtp_password'  => $commonSmtp->smtp_pass,
-                'smtp_encryption'  => $commonSmtp->smtp_encryption,
-                'from_email'    => $commonSmtp->smtp_user,
-                'from_name'    => strtok($commonSmtp->smtp_user, '@'),
-            ];
-
-           $esignUrl = route('applicant.e.signature', ['hashedId' => $applicant_id.'e']);
-           $trackingUrl = route('tracking.email.open', $esignEvent->id);
-
-           
-           
-           $MAILHTML = '<p>Dear ' . $applicant->first_name . ' ' . $applicant->last_name . ',</p>';
-           $MAILHTML .= '<p>Please click the button below to complete your e-signature:</p>';
-           $MAILHTML .= '<img src="' . $trackingUrl . '" width="1" height="1" style="display:none;" alt="" />';
-           $MAILHTML .= '<table align="center" cellspacing="0" cellpadding="0" border="0">';
-                    $MAILHTML .= '<tr>';
-                        $MAILHTML .= '<td align="center" bgcolor="#1a73e8" style="border-radius:5px;">';
-                            $MAILHTML .= '<a href="' . $esignUrl . '" target="_blank" style="display:inline-block; padding:12px 24px; color:#ffffff; text-decoration:none; font-weight:bold; background-color: #164e63;">Complete E-Signature</a>';
-                        $MAILHTML .= '</td>';
-                    $MAILHTML .= '</tr>';
-                $MAILHTML .=  '</table>';
-            $MAILHTML .= '<p style="text-align:center;">If the button above does not work, please copy and paste the following link into your browser:</p>';
-            $MAILHTML .= '<p style="text-align:center;">' . $esignUrl . '</p>';
-
-            UserMailerJob::dispatch($configuration, [$applicant->users->email], new CommunicationSendMail('E-Signature Form', $MAILHTML, []));
-        }
-
-        if($contactPhone):
-            $messages = 'Dear '.$applicant->first_name.' '.$applicant->last_name.', Please visit the following link to submit your e-signature: '.route('applicant.e.signature', ['hashedId' => $applicant_id.'s']);
-            if(in_array(env('APP_ENV'), ['development', 'local'])) {
-                \Log::info('SMS OTP: '.$messages.' sent to '.$applicant->contact->mobile);
-                Debugbar::info('SMS OTP: '.$messages.' sent to '.$applicant->contact->mobile);
-            } else {
-                $active_api = Option::where('category', 'SMS')->where('name', 'active_api')->pluck('value')->first();
-                $textlocal_api = Option::where('category', 'SMS')->where('name', 'textlocal_api')->pluck('value')->first();
-                $smseagle_api = Option::where('category', 'SMS')->where('name', 'smseagle_api')->pluck('value')->first();
-
-                if($active_api == 1 && !empty($textlocal_api)):
-                    $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
-                        'apikey' => $textlocal_api, 
-                        'message' => $messages, 
-                        'sender' => 'London Churchill College', 
-                        'numbers' => $applicant->contact->mobile
-                    ]);
-                elseif($active_api == 2 && !empty($smseagle_api)):
-                    $response = Http::withHeaders([
-                            'access-token' => $smseagle_api,
-                            'Content-Type' => 'application/json',
-                        ])->withoutVerifying()->withOptions([
-                            "verify" => false
-                        ])->post('https://79.171.153.104/api/v2/messages/sms', [
-                            'to' => [$applicant->contact->mobile],
-                            'text' => $messages
-                        ]);
-                endif;
-            }
-        endif;
-
-        AdminESignature::create([
-            'user_id'     => Auth::user()->id,
-            'applicant_id'=> $applicant->id,
-            'smtp_email'  => $commonSmtp->smtp_user,
-            'ip_address'  => $request->ip(),
-            'device'      => $request->header('User-Agent'),
-            'browser'     => $this->getBrowser($request->header('User-Agent')),
-            'os'          => $this->getOS($request->header('User-Agent')),
-            'latitude'    => $request->input('latitude'),
-            'longitude'   => $request->input('longitude'),
-            'via_email'   => $contactEmail ? 1 : 0,
-            'via_sms'     => $contactPhone ? 1 : 0,
-        ]);
-
-
 
         return response()->json([
             'success' => true,
@@ -3416,13 +3785,78 @@ class AdmissionController extends Controller
         return $pngPath;
     }
 
+    /**
+     * E-signature overview (the E-signature tab): the request summary, or the
+     * empty state with Send request. Shared bits for both e-signature pages.
+     */
+    private function esignatureContext(Applicant $applicant): array
+    {
+        $applicantEsign = ApplicantESignature::where('applicant_id', $applicant->id)->latest('id')->first();
+        // The first request is the sign request itself; later rows are resends.
+        $adminEsign = AdminESignature::with('user')->where('applicant_id', $applicant->id)->orderBy('id', 'asc')->first();
+        $latestAdminEsign = AdminESignature::where('applicant_id', $applicant->id)->orderBy('id', 'desc')->first();
+        $finalizedEvent = ApplicantESignatureEvent::where('applicant_id', $applicant->id)->where('event_type', EsignEventType::FINALIZED->value)->where('user_type', 'applicant')->first();
+        $signed = isset($applicantEsign->signature) && !empty($applicantEsign->signature);
+        $via = [];
+        if ($latestAdminEsign) {
+            if ((int) $latestAdminEsign->via_email === 1) $via[] = 'email';
+            if ((int) $latestAdminEsign->via_sms === 1) $via[] = 'SMS';
+        }
+
+        return [
+            'applicantEsign' => $applicantEsign,
+            'adminEsign' => $adminEsign,
+            'latestAdminEsign' => $latestAdminEsign,
+            'finalizedEvent' => $finalizedEvent,
+            'esignRequested' => $adminEsign !== null || $applicantEsign !== null,
+            'esignSigned' => $signed,
+            'esignVia' => implode(' + ', $via),
+            'esignDoc' => (int) $applicant->status_id >= 6 ? 'Offer Acceptance Form' : 'Signed Application Form',
+            // The reference the signed PDF prints (ApplicanESignatureController@download).
+            'esignRef' => $applicantEsign?->id ? 'ESIG-'.$applicant->id.'-'.$applicantEsign->id : 'ESIG-'.$applicant->id,
+            'esignResends' => max(0, AdminESignature::where('applicant_id', $applicant->id)->count() - 1),
+            // How many times the applicant opened the link (one "viewed" event per visit).
+            'esignViews' => ApplicantESignatureEvent::where('applicant_id', $applicant->id)->where('user_type', 'applicant')->where('event_type', EsignEventType::VIEWED->value)->count(),
+        ];
+    }
+
     public function showEsignature(Request $request, $applicantId)
     {
         $applicant = Applicant::findOrFail($applicantId);
-        $applicantEsign = ApplicantESignature::where('applicant_id', $applicant->id)->first();
-        $adminEsign = AdminESignature::with('user')->where('applicant_id', $applicant->id)->first();
+
+        return view('pages.students.admission.e-signature-overview', array_merge([
+            'title' => 'E-Signature - London Churchill College',
+            // Admission portal shell (layout/admission-portal), like the other admission pages.
+            'layout' => 'admission-portal',
+            'admissionThemeApplicant' => $applicant,
+            'breadcrumbs' => [
+                ['label' => 'Students admission', 'href' => route('admission')],
+                ['label' => 'Student details', 'href' => route('admission.show', $applicant->id)],
+                ['label' => 'E-signature', 'href' => 'javascript:void(0);'],
+            ],
+            'applicant' => $applicant,
+            'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
+            'feeelegibility' => FeeEligibility::all(),
+            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
+            'esignature' => ApplicantESignature::where('applicant_id', $applicantId)->latest('id')->first(),
+        ], $this->esignatureContext($applicant)));
+    }
+
+    /**
+     * The sign request itself ("View request"): signature, signers, document
+     * details, signing order and the audit trail. Opening it is a staff view
+     * of the document, recorded once in the audit trail.
+     */
+    public function showEsignatureRequest(Request $request, $applicantId)
+    {
+        $applicant = Applicant::findOrFail($applicantId);
+        $context = $this->esignatureContext($applicant);
+        if (!$context['esignRequested']) {
+            return redirect()->route('admission.show.e.signature', $applicant->id);
+        }
+        $applicantEsign = $context['applicantEsign'];
+        $adminEsign = $context['adminEsign'];
         $applicantEsignEvents = ApplicantESignatureEvent::where('applicant_id', $applicant->id)->orderBy('id', 'asc')->get();
-        $finalizedEvent = ApplicantESignatureEvent::where('applicant_id', $applicant->id)->where('event_type', EsignEventType::FINALIZED->value)->where('user_type', 'applicant')->first();
 
         $adminMap = null;
         $applicantMap = null;
@@ -3431,19 +3865,12 @@ class AdmissionController extends Controller
 
         if ($adminEsign && $adminEsign->latitude && $adminEsign->longitude) {
             $adminMap = $this->getMapScreenshot($adminEsign->latitude, $adminEsign->longitude, $applicant->id);
+            $adminDMS = $this->convertToDMS($adminEsign->latitude, true) . ' ' . $this->convertToDMS($adminEsign->longitude, false);
         }
 
         if ($applicantEsign && $applicantEsign->latitude && $applicantEsign->longitude) {
             $applicantMap = $this->getMapScreenshot($applicantEsign->latitude, $applicantEsign->longitude, $applicant->id);
-        }
-
-
-        if($adminEsign && $adminEsign->latitude && $adminEsign->longitude){
-           $adminDMS = $this->convertToDMS($adminEsign?->latitude, true) . ' ' . $this->convertToDMS($adminEsign?->longitude, false);
-        }
-
-        if($applicantEsign && $applicantEsign->latitude && $applicantEsign->longitude){
-           $applicantDMS = $this->convertToDMS($applicantEsign?->latitude, true) . ' ' . $this->convertToDMS($applicantEsign?->longitude, false);
+            $applicantDMS = $this->convertToDMS($applicantEsign->latitude, true) . ' ' . $this->convertToDMS($applicantEsign->longitude, false);
         }
 
         ApplicantESignatureEvent::firstOrCreate(
@@ -3460,48 +3887,27 @@ class AdmissionController extends Controller
                 ]
             );
 
-        return view('pages.students.admission.e-signature-view', [
+        return view('pages.students.admission.e-signature-view', array_merge([
             'title' => 'E-Signature - London Churchill College',
-            // Shares the applicant hero/tab strip with the other admission
-            // screens, so it needs the same shell and palette.
-            'layout' => 'admission-top-menu',
+            'layout' => 'admission-portal',
             'admissionThemeApplicant' => $applicant,
             'breadcrumbs' => [
-                ['label' => 'Students Admission', 'href' => route('admission')],
-                ['label' => 'Student Details', 'href' => route('admission.show', $applicant->id)],
-                ['label' => 'E-Signature', 'href' => 'javascript:void(0);'],
+                ['label' => 'Students admission', 'href' => route('admission')],
+                ['label' => 'Student details', 'href' => route('admission.show', $applicant->id)],
+                ['label' => 'E-signature', 'href' => route('admission.show.e.signature', $applicant->id)],
+                ['label' => 'Sign request', 'href' => 'javascript:void(0);'],
             ],
             'applicant' => $applicant,
-            'applicantEsign' => $applicantEsign,
-            'adminEsign' => $adminEsign,
             'applicantEsignEvents' => $applicantEsignEvents,
-            'adminMap' => $adminMap ? asset('storage/applicants/' . $applicant->id . '/' . basename($adminMap)) : asset('build/assets/images/report_icons/google-map.jpg'),
-            'applicantMap' => $applicantMap ? asset('storage/applicants/' . $applicant->id . '/' . basename($applicantMap)) : asset('build/assets/images/report_icons/google-map.jpg'),
+            'adminMap' => $adminMap ? asset('storage/applicants/' . $applicant->id . '/' . basename($adminMap)) : null,
+            'applicantMap' => $applicantMap ? asset('storage/applicants/' . $applicant->id . '/' . basename($applicantMap)) : null,
             'adminDMS' => $adminDMS,
             'applicantDMS' => $applicantDMS,
-            'finalizedEvent' => $finalizedEvent,
             'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
-            'titles' => Title::all(),
-            'country' => Country::all(),
-            'ethnicity' => Ethnicity::all(),
-            'disability' => Disability::all(),
-            'relations' => KinsRelation::all(),
-            'bodies' => AwardingBody::all(),
-            'sexid' => SexIdentifier::all(),
-            'venues' => Venue::all(),
-            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
-            'instance' => CourseCreationInstance::all()->sortByDesc('id'),
-            'courseCreationAvailibility' => CourseCreationAvailability::all()->filter(function($item) {
-                if (Carbon::now()->between($item->admission_date, $item->admission_end_date)) {
-                  return $item;
-                }
-            }),
-            'tempEmail' => ApplicantTemporaryEmail::where('applicant_id', $applicantId)->orderBy('id', 'desc')->first(),
-            'documents' => DocumentSettings::where('admission', '1')->orderBy('id', 'ASC')->get(),
             'feeelegibility' => FeeEligibility::all(),
             'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
-            'esignature' => ApplicantESignature::where('applicant_id', $applicantId)->latest('id')->first()
-        ]);
+            'esignature' => $applicantEsign,
+        ], $context));
     }
 
 

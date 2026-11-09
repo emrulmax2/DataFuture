@@ -5,7 +5,7 @@ namespace App\Services\SlcRegistration;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Bulk attendance, steps 4–6 (user, 2 Nov 2026): the register in the liability period, the code it
+ * Bulk attendance, steps 4–5 (user, 2 Nov 2026; Attendance and Codes one step since 6 Nov 2026): the register in the liability period, the code it
  * suggests, and which codes need a CoC (attendance_codes.coc_required).
  *
  * Suggestion, first rule that applies:

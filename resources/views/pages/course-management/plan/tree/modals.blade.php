@@ -420,3 +420,36 @@
         </div>
     </div>
 </div>
+
+{{-- ---------------------------------------------------------------- --}}
+{{-- Send Class ICP (30 Oct 2026)                                      --}}
+{{-- The group's class routine PDF emailed to each of its students. The --}}
+{{-- body is filled by course-plan-tree.js: first who gets which PDF   --}}
+{{-- (PlanTreeClassIcpController@prepare), then each send's result.    --}}
+{{-- ---------------------------------------------------------------- --}}
+<div id="sendClassIcpModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog cm-modal__dialog cm-modal__dialog--md">
+        <div class="modal-content cm-modal">
+            <div class="cm-modal__head">
+                <div>
+                    <div class="cm-modal__eyebrow"><span data-cm-icp-eyebrow>Group</span></div>
+                    <h2 class="cm-modal__title cm-serif" data-cm-icp-title>Send Class ICP</h2>
+                </div>
+                <button type="button" data-tw-dismiss="modal" class="cm-modal__close" aria-label="Close">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="cm-modal__body cm-modal__body--scroll cm-icp" data-cm-icp-body></div>
+            <div class="cm-modal__foot">
+                <button type="button" data-tw-dismiss="modal" class="cm-btn cm-btn--cancel" data-cm-icp-cancel>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                    <span data-cm-icp-cancel-label>Cancel</span>
+                </button>
+                <button type="button" id="sendClassIcpBtn" class="cm-btn cm-btn--go" hidden>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
+                    <span data-cm-icp-send-label>Send</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

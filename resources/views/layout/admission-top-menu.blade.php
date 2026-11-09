@@ -42,6 +42,12 @@
         @vite('resources/js/admission-redesign.js')
         <!-- END: JS Assets-->
 
+        @php $adpPresenceApplicant = $applicant ?? $admissionThemeApplicant ?? null; @endphp
+        @if(auth()->check() && $adpPresenceApplicant && isset($adpPresenceApplicant->id))
+            {{-- staff time on this applicant's record → applicant_view_sessions (admission-presence.js) --}}
+            <div data-adp-presence hidden data-applicant="{{ $adpPresenceApplicant->id }}" data-route="{{ Route::currentRouteName() }}" data-section="{{ \App\Models\ApplicantViewSession::sectionFor(Route::currentRouteName()) }}" data-start-url="{{ route('admission.presence.start') }}" data-beat-url="{{ route('admission.presence.beat') }}" data-end-url="{{ route('admission.presence.end') }}"></div>
+            @vite('resources/js/admission-presence.js')
+        @endif
         @yield('script')
     </body>
 @endsection

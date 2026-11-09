@@ -109,6 +109,7 @@ class PaymentState
         $sids = $rows->pluck('student_id')->filter()->unique()->values()->all();
         $students = $sids ? DB::table('students as s')->leftJoin('titles as t', 't.id', '=', 's.title_id')->whereIn('s.id', $sids)
             ->get(['s.id', 's.registration_no', 's.first_name', 's.last_name', 's.date_of_birth', 's.ssn_no', 't.name as title'])->keyBy('id') : collect();
+        $statuses = StudentStatus::forIds($sids);
         $agreements = $sids ? DB::table('slc_agreements')->whereIn('student_id', $sids)->whereNull('deleted_at')
             ->get(['id', 'student_id', 'student_course_relation_id', 'course_creation_instance_id', 'year', 'slc_coursecode', 'date', 'fees', 'total'])->groupBy('student_id') : collect();
         $chosenIds = $rows->pluck('chosen_agreement_id')->filter()->unique()->all();
@@ -164,7 +165,7 @@ class PaymentState
             $s = $st ? [
                 'sid' => (int) $st->id, 'id' => $st->registration_no, 'title' => (string) $st->title, 'first' => trim((string) $st->first_name), 'last' => trim((string) $st->last_name),
                 'dob' => substr((string) $st->date_of_birth, 0, 10), 'ssn' => (string) $st->ssn_no,
-                'url' => route('student.show', $st->id), 'accountsUrl' => route('student.accounts', $st->id),
+                'url' => route('student.show', $st->id), 'accountsUrl' => route('student.accounts', $st->id), 'status' => $statuses[$st->id] ?? null,
             ] : null;
             $issues = [];
             $agr = null;
@@ -283,7 +284,7 @@ class PaymentState
             } elseif ($status !== 'error' && $issues) {
                 $status = 'look';
             }
-            $holderOut = $holder ? ['sid' => (int) $holder->id, 'id' => $holder->registration_no, 'name' => trim($holder->first_name.' '.$holder->last_name), 'dob' => substr((string) $holder->date_of_birth, 0, 10), 'url' => route('student.show', $holder->id)] : null;
+            $holderOut = $holder ? ['sid' => (int) $holder->id, 'id' => $holder->registration_no, 'name' => trim($holder->first_name.' '.$holder->last_name), 'dob' => substr((string) $holder->date_of_birth, 0, 10), 'url' => route('student.show', $holder->id), 'status' => $statuses[$holder->id] ?? null] : null;
 
             $out[] = [
                 'id' => $row->id, 'line' => $row->line_no, 'r' => ['date' => $rowDate] + $r + ['amount' => $amount, 'type' => $type, 'termName' => PaymentFile::termName($r['term'])],
@@ -349,6 +350,7 @@ class PaymentState
         $dupKey = fn ($m) => $m->student_id.'|'.$m->amount.'|'.$m->payment_type;
         $dup = $rows->groupBy($dupKey)->map->count();
         $names = RegistrationState::names($rows->pluck('created_by')->all());
+        $statuses = StudentStatus::forIds($rows->pluck('student_id')->all());
         $waiting = DB::table('slc_payment_histories')->where('transaction_date', $date)->where(fn ($q) => $q->whereNull('status')->orWhere('status', '!=', 1))
             ->get(['id', 'student_id', 'ssn', 'first_name', 'last_name', 'course_code', 'year', 'amount', 'errors']);
 
@@ -356,7 +358,7 @@ class PaymentState
             'date' => $date,
             'receipts' => $rows->map(fn ($m) => [
                 'id' => (int) $m->id, 'invoice' => $m->invoice_no, 'amount' => (float) $m->amount, 'refund' => $m->payment_type === 'Refund',
-                's' => $m->student_id ? ['sid' => (int) $m->student_id, 'id' => $m->registration_no, 'name' => implode(' ', array_filter(array_map(fn ($v) => trim((string) $v), [$m->title, $m->first_name, $m->last_name]))), 'ssn' => (string) $m->ssn_no, 'accountsUrl' => route('student.accounts', $m->student_id)] : null,
+                's' => $m->student_id ? ['sid' => (int) $m->student_id, 'id' => $m->registration_no, 'name' => implode(' ', array_filter(array_map(fn ($v) => trim((string) $v), [$m->title, $m->first_name, $m->last_name]))), 'ssn' => (string) $m->ssn_no, 'accountsUrl' => route('student.accounts', $m->student_id), 'status' => $statuses[$m->student_id] ?? null] : null,
                 'agreement' => $m->slc_agreement_id ? ['id' => (int) $m->slc_agreement_id, 'year' => $m->agr_year, 'code' => $m->agr_code ?: $m->slc_coursecode] : null,
                 'inst' => isset($inst[$m->id]) ? ['date' => substr((string) $inst[$m->id]->installment_date, 0, 10), 'amount' => (float) $inst[$m->id]->amount] : null,
                 'forced' => (bool) $m->force_entry, 'double' => ($dup[$dupKey($m)] ?? 1) > 1 ? $dup[$dupKey($m)] : 0,

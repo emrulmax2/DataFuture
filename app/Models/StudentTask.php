@@ -18,6 +18,8 @@ class StudentTask extends Model
         'assign_user',
         'external_link_ref',
         'status',
+        'assigned_via',
+        'rule_id',
         'canceled_reason',
         'task_status_id',
         'created_by',

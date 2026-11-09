@@ -184,7 +184,7 @@
                                                 <strong>No</strong>
                                             </label>
                                         </div>
-                                        <small class="ss-modal-help">Available when the phase is Live.</small>
+                                        <small class="ss-modal-help">Available when the phase is Live. New students no longer get these tasks from this switch: they come from <a href="{{ route('taskrules', ['subject' => 'student']) }}">Task Automation &rsaquo; Student</a> ("Student created" rules).</small>
                                     </div>
                                 </div>
                             </div>
@@ -272,7 +272,7 @@
                                                 <strong>No</strong>
                                             </label>
                                         </div>
-                                        <small class="ss-modal-help">Available when the phase is Live.</small>
+                                        <small class="ss-modal-help">Available when the phase is Live. New students no longer get these tasks from this switch: they come from <a href="{{ route('taskrules', ['subject' => 'student']) }}">Task Automation &rsaquo; Student</a> ("Student created" rules).</small>
                                     </div>
                                     <input type="hidden" name="id" value="0">
                                 </div>

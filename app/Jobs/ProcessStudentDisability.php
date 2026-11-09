@@ -41,7 +41,8 @@ class ProcessStudentDisability implements ShouldQueue
     {
         $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
         $user = StudentUser::where(["email"=> $ApplicantUser->email])->get()->first();
-        $student = Student::where(["student_user_id"=> $user->id])->get()->first();  
+        // $student = Student::where(["student_user_id"=> $user->id])->get()->first(); // the login's first student, not the one this conversion created
+        $student = \App\Services\Admission\StudentConversion::studentFor($this->applicant, $user);
         
         //StudentDisabilities
         $applicantDisabilityData= ApplicantDisability::where('applicant_id',$this->applicant->id)->get();

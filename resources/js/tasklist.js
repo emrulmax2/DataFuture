@@ -236,6 +236,17 @@ var taskListTable = (function () {
                     },
                 },
                 {
+                    title: "Class Routine",
+                    field: "class_routine",
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    width: 104,
+                    minWidth: 96,
+                    formatter(cell) {
+                        return yesNoPill(cell.getValue());
+                    },
+                },
+                {
                     title: "Assigned",
                     field: "user",
                     headerHozAlign: "left",
@@ -685,6 +696,7 @@ var taskListTable = (function () {
                         "pearson_reg",
                         "address_request",
                         "hesa_status",
+                        "class_routine",
                         "status",
                     ].forEach((fieldName) => {
                         setRadioValue($form, fieldName, dataset[fieldName]);

@@ -41,6 +41,8 @@
             <li class="dropdown-item adm-tags__item">[DATA=student_proposed_courses]class_startdate[/DATA]</li>
             <li class="dropdown-item adm-tags__item">[DATA=student_proposed_courses]class_enddate[/DATA]</li>
             <li class="dropdown-item adm-tags__item">[DATA=student_proposed_courses]fees[/DATA]</li>
+            <li class="dropdown-item adm-tags__item">[DATA=course_creations]induction_booking_button[/DATA]</li>
+            <li class="dropdown-item adm-tags__item">[DATA=course_creations]induction_booking_link[/DATA]</li>
             <li class="dropdown-item adm-tags__item">[DATA=other_details]mode[/DATA]</li>
             <li class="dropdown-item adm-tags__item">[DATA=result]W,P,M,D,R,C,U,A[/DATA]</li>
 

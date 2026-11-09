@@ -14,7 +14,7 @@
         </div>
         <div class="tablebox"><table class="tbl" style="min-width: 640px">
             <thead><tr><th scope="col">Student</th><th scope="col">SSN</th><th scope="col">Confirmed by</th><th scope="col"></th></tr></thead>
-            <tbody><tr v-for="it in aw.items" :key="it.rowId"><th scope="row">{{ it.name }}<div class="muted small" style="font-weight: 400">{{ it.sid }}</div></th><td class="mono">{{ it.r.ssn }}</td><td class="muted">{{ it.by }} · {{ it.at }}</td><td><button type="button" class="btn-link small" :disabled="store.busy" @click="post('slc.registration.undo', { row_id: it.rowId })">Remove</button></td></tr></tbody>
+            <tbody><tr v-for="it in aw.items" :key="it.rowId"><th scope="row">{{ it.name }}<StatusTag :status="it.status" /><div class="muted small" style="font-weight: 400">{{ it.sid }}</div></th><td class="mono">{{ it.r.ssn }}</td><td class="muted">{{ it.by }} · {{ it.at }}</td><td><button type="button" class="btn-link small" :disabled="store.busy" @click="post('slc.registration.undo', { row_id: it.rowId })">Remove</button></td></tr></tbody>
         </table></div>
     </section>
 
@@ -58,7 +58,7 @@
             </tr></thead>
             <tbody><tr v-for="it in sb.items" :key="it.rowId" :class="picked.includes(it.rowId) ? 'is-picked' : ''">
                 <td><input v-model="picked" class="pick" type="checkbox" :value="it.rowId" :disabled="!canPick || !isPickable(it)" :aria-label="'Select ' + it.name"></td>
-                <th scope="row"><a v-if="it.url" class="plain" :href="it.url" target="_blank" rel="noopener">{{ it.name }}</a><template v-else>{{ it.name }}</template><div class="muted small" style="font-weight: 400">{{ it.sid }}</div></th>
+                <th scope="row"><a v-if="it.url" class="plain" :href="it.url" target="_blank" rel="noopener">{{ it.name }}</a><template v-else>{{ it.name }}</template><StatusTag :status="it.status" /><div class="muted small" style="font-weight: 400">{{ it.sid }}</div></th>
                 <td class="mono">{{ it.r.ssn }}</td>
                 <td>{{ it.course }}</td>
                 <td class="muted">{{ it.by }} · {{ it.at }}</td>
@@ -82,7 +82,7 @@
                     </tr></thead>
                     <tbody><tr v-for="e in modal.existing" :key="e.rowId" :class="allowed.includes(e.rowId) ? 'is-picked' : ''">
                         <td><input v-model="allowed" class="pick" type="checkbox" :value="e.rowId" :aria-label="'Create new records for ' + e.name"></td>
-                        <th scope="row">{{ e.name }}<div class="muted small" style="font-weight: 400">{{ e.sid }}</div></th>
+                        <th scope="row">{{ e.name }}<StatusTag :status="e.status" /><div class="muted small" style="font-weight: 400">{{ e.sid }}</div></th>
                         <td>Year {{ e.year }}</td>
                         <td>{{ e.regDate ? fmtIso(e.regDate) : '–' }}<div v-if="e.regBy" class="muted small">{{ e.regBy }}</div></td>
                         <td>{{ e.agrDate ? fmtIso(e.agrDate) : '–' }}</td>
@@ -116,9 +116,10 @@
 import { computed, inject, nextTick, onBeforeUnmount, reactive, ref, watch } from "vue";
 import { fmtIso, plural } from "./helpers";
 import Ico from "./Ico.vue";
+import StatusTag from "./StatusTag.vue";
 
 export default {
-    components: { Ico },
+    components: { StatusTag, Ico },
     setup() {
         const { store, post, get, awaitingList } = inject("slr");
         const msg = ref("");

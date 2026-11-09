@@ -7,7 +7,7 @@
         </div>
         <div v-for="s in results" :key="s.sid" class="stack" style="gap: 8px; padding-top: 8px; border-top: 1px solid var(--line-soft)">
             <div class="row" style="justify-content: space-between">
-                <span><b><a class="plain" :href="s.url" target="_blank" rel="noopener">{{ s.title }} {{ s.first }} {{ s.last }}</a></b> <span class="muted">· {{ s.id }} · DOB {{ fmtIso(s.dob) }} · {{ s.postcode || '–' }}</span></span>
+                <span><b><a class="plain" :href="s.url" target="_blank" rel="noopener">{{ s.title }} {{ s.first }} {{ s.last }}</a></b><StatusTag :status="s.status" /> <span class="muted">· {{ s.id }} · DOB {{ fmtIso(s.dob) }} · {{ s.postcode || '–' }}</span></span>
                 <span v-if="s.ssn && s.ssn.toUpperCase() !== i.r.ssn" class="pill muted">Has SSN <span class="mono">{{ s.ssn }}</span></span>
                 <button v-else type="button" class="btn btn-sm" @click="pending = s.sid">This is the student</button>
             </div>
@@ -24,9 +24,11 @@
 <script>
 import { inject, ref, watch } from "vue";
 import { fmtIso, titleCase } from "./helpers";
+import StatusTag from "./StatusTag.vue";
 
 /* Bulk payment upload: a payment whose SSN is on no student — search all students, match (PaymentActions::link). */
 export default {
+    components: { StatusTag },
     props: { i: { type: Object, required: true } },
     emits: ["done"],
     setup(props, { emit }) {

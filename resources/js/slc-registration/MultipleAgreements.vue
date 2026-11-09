@@ -9,7 +9,7 @@
             </div>
         </div>
 
-        <div v-if="flash" :key="flash.k" :class="'notice ' + (flash.tone === 'bad' ? 'bad' : 'ok')" role="status">
+        <div v-if="flash" :key="flash.k" :class="'notice ma-toast ' + (flash.tone === 'bad' ? 'bad' : 'ok')" role="status">
             <span style="flex: 1">{{ flash.text }}</span>
             <button type="button" class="btn-link" @click="flash = null">Dismiss</button>
         </div>
@@ -37,7 +37,7 @@
             <div v-else class="tablebox"><table class="tbl" style="min-width: 980px">
                 <thead><tr><th scope="col">Student</th><th scope="col">Course</th><th scope="col">Year</th><th scope="col">Agreements</th><th scope="col"></th></tr></thead>
                 <tbody><tr v-for="s in shown" :key="s.studentId + '-' + s.year + '-' + s.crelId">
-                    <th scope="row"><a class="plain" :href="s.url" target="_blank" rel="noopener">{{ s.name }}</a><div class="muted small" style="font-weight: 400">{{ s.regNo }}</div></th>
+                    <th scope="row"><a class="plain" :href="s.url" target="_blank" rel="noopener">{{ s.name }}</a><StatusTag :status="s.status" /><div class="muted small" style="font-weight: 400">{{ s.regNo }}</div></th>
                     <td>{{ s.course || '–' }}<div class="muted small">{{ s.intake }}</div></td>
                     <td>Year {{ s.year }}</td>
                     <td>
@@ -53,10 +53,10 @@
                     </td>
                     <td><div class="acts">
                         <a class="btn btn-sm" :href="s.url" target="_blank" rel="noopener">Accounts tab</a>
-                        <button v-if="view === 'open'" type="button" class="btn btn-sm btn-primary" :disabled="busy" @click="review(s)">Reviewed &amp; Hide</button>
+                        <button v-if="view === 'open'" type="button" class="btn btn-sm btn-primary" :disabled="busy" @click="review(s)">{{ busy === keyOf(s) ? 'Hiding…' : 'Reviewed & Hide' }}</button>
                         <template v-else>
                             <span class="muted small">Reviewed by {{ s.review.by }} · {{ s.review.at }}</span>
-                            <button type="button" class="btn-link small" :disabled="busy" @click="unhide(s)">Unhide</button>
+                            <button type="button" class="btn-link small" :disabled="busy" @click="unhide(s)">{{ busy === keyOf(s) ? 'Unhiding…' : 'Unhide' }}</button>
                         </template>
                     </div></td>
                 </tr></tbody>
@@ -70,6 +70,7 @@
 import { computed, ref, watch } from "vue";
 import { fmtIso, money, norm } from "./helpers";
 import TopBar from "./TopBar.vue";
+import StatusTag from "./StatusTag.vue";
 
 /*
  * /slc-registration/multiple-agreements — opened from the Dashboard's "Duplicate agreements" box
@@ -79,7 +80,7 @@ import TopBar from "./TopBar.vue";
  * the list and the count while its agreements stay the same; Unhide brings it back.
  */
 export default {
-    components: { TopBar },
+    components: { StatusTag, TopBar },
     props: { boot: { type: Object, required: true } },
     setup(props) {
         const rows = ref(props.boot.multiple.students || []);
@@ -103,30 +104,45 @@ export default {
         });
 
         // Reviewed & Hide / Unhide (RegistrationActions::reviewDuplicate / unhideDuplicate): both lists come back fresh
-        const busy = ref(false);
+        const busy = ref(null); // the row being sent
         const flash = ref(null);
-        async function send(name, body) {
+        let flashTimer = null;
+        const say = (text, tone) => {
+            flash.value = { text, tone, k: Date.now() };
+            clearTimeout(flashTimer);
+            if (tone !== "bad") flashTimer = setTimeout(() => { flash.value = null; }, 6000);
+        };
+        const keyOf = (s) => s.studentId + "-" + s.year + "-" + s.crelId;
+        async function send(name, body, s) {
             if (busy.value) return;
-            busy.value = true;
+            let url;
             try {
-                const res = await fetch(route(name), {
+                url = route(name);
+            } catch (e) {
+                // the page is newer than the server's routes (routes/web.php not deployed)
+                say("This button isn’t set up on the server yet: the route " + name + " is missing. Deploy routes/web.php, then reload.", "bad");
+                return;
+            }
+            busy.value = keyOf(s);
+            try {
+                const res = await fetch(url, {
                     method: "POST", credentials: "same-origin",
                     headers: { "Content-Type": "application/json", Accept: "application/json", "X-Requested-With": "XMLHttpRequest", "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "" },
                     body: JSON.stringify(body),
                 });
                 const data = await res.json().catch(() => null);
                 if (data && data.multiple) { rows.value = data.multiple.students; hidden.value = data.multiple.hidden; }
-                flash.value = { text: (data && (data.flash ? data.flash.text : data.message)) || (res.status === 419 ? "Your session has expired. Reload the page." : "Something went wrong. Please try again."), tone: data && data.flash ? data.flash.tone : "bad", k: Date.now() };
+                say((data && (data.flash ? data.flash.text : data.message)) || (res.status === 419 ? "Your session has expired. Reload the page." : res.status === 403 ? "You don’t have access to SLC Registration." : "Something went wrong (" + res.status + "). Please try again."), data && data.flash ? data.flash.tone : "bad");
             } catch (e) {
-                flash.value = { text: "The server could not be reached. Please try again.", tone: "bad", k: Date.now() };
+                say("The server could not be reached. Please try again.", "bad");
             } finally {
-                busy.value = false;
+                busy.value = null;
             }
         }
-        const review = (s) => send("slc.registration.multiple.review", { student_id: s.studentId, crel_id: s.crelId, year: s.year, agreement_ids: s.agreementIds });
-        const unhide = (s) => send("slc.registration.multiple.unhide", { student_id: s.studentId, crel_id: s.crelId, year: s.year });
+        const review = (s) => send("slc.registration.multiple.review", { student_id: s.studentId, crel_id: s.crelId, year: s.year, agreement_ids: s.agreementIds }, s);
+        const unhide = (s) => send("slc.registration.multiple.unhide", { student_id: s.studentId, crel_id: s.crelId, year: s.year }, s);
 
-        return { rows, hidden, view, list, q, limit, filtered, shown, agreementCount, unlinked, yearSplit, dashboardUrl, busy, flash, review, unhide, fmtIso, money };
+        return { rows, hidden, view, list, q, limit, filtered, shown, agreementCount, unlinked, yearSplit, dashboardUrl, busy, flash, keyOf, review, unhide, fmtIso, money };
     },
 };
 </script>

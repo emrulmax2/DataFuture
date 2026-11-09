@@ -50,6 +50,7 @@ const FIELDS = [
     "reg_fees",
     "university_commission",
     "required_hours",
+    "induction_booking_link",
 ];
 
 /*

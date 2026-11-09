@@ -1,6 +1,6 @@
 <template>
     <div class="pagehead">
-        <div><span class="eyebrow">Step 6</span><h1>CoCs queued by attendance codes</h1>
+        <div><span class="eyebrow">Step 5</span><h1>CoCs queued by attendance codes</h1>
             <p>A confirmed code that needs a CoC ({{ cocCodes }} under the attendance code settings) queues one on the student’s SLC tab, linked to their {{ yearName }} SLC registration, for Bulk CoC to pick up. Until Bulk CoC is live, submit each one in SIS and mark it done here.</p></div>
     </div>
 
@@ -20,11 +20,11 @@
 
     <div v-if="!imp" class="card empty">Upload the SIS Attendance Confirmation Report on the Overview first.</div>
     <section v-else class="card">
-        <div v-if="!items.length" class="empty">{{ all.length ? 'No CoCs here.' : 'No CoCs queued yet. Confirming a code that needs one (step 5) queues it here.' }}</div>
+        <div v-if="!items.length" class="empty">{{ all.length ? 'No CoCs here.' : 'No CoCs queued yet. Confirming a code that needs one (step 4) queues it here.' }}</div>
         <div v-else class="tablebox"><table class="tbl" style="min-width: 1080px">
             <thead><tr><th scope="col">Student</th><th scope="col">Code</th><th scope="col">CoC type</th><th scope="col">Liability period</th><th scope="col">Confirmed</th><th scope="col">State</th><th scope="col"></th></tr></thead>
             <tbody><tr v-for="i in items" :key="i.id">
-                <th scope="row"><a class="plain" :href="i.s.url" target="_blank" rel="noopener">{{ i.s.title }} {{ i.s.first }} {{ i.s.last }}</a>
+                <th scope="row"><a class="plain" :href="i.s.url" target="_blank" rel="noopener">{{ i.s.title }} {{ i.s.first }} {{ i.s.last }}</a><StatusTag :status="i.s.status" />
                     <div class="muted small" style="font-weight: 400">{{ i.s.id }} · <span class="mono">{{ i.r.ssn }}</span></div></th>
                 <td><span class="pill bad"><span class="mono">{{ i.confirm.code }}</span></span><div class="muted small" style="margin-top: 3px">{{ meaning(i.confirm.code) }}</div></td>
                 <td>{{ i.coc.type }}</td>
@@ -44,12 +44,14 @@
 <script>
 import { computed, inject, ref } from "vue";
 import { fmtIso } from "./helpers";
+import StatusTag from "./StatusTag.vue";
 
 /*
- * Bulk attendance › step 6 (user, 2 Nov 2026): the CoCs that confirmed codes queued on the students'
+ * Bulk attendance › step 5 (step 6 until 6 Nov 2026; user, 2 Nov 2026): the CoCs that confirmed codes queued on the students'
  * SLC tab (AttendanceActions::confirm), and "Mark done in SIS" (slc_cocs.actioned, ::cocDone).
  */
 export default {
+    components: { StatusTag },
     setup() {
         const { store, post } = inject("slr");
         const att = computed(() => store.state.attendance);

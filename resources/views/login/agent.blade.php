@@ -5,42 +5,49 @@
 @endsection
 
 @section('content')
-    <x-login-shell
+    {{-- The agent sign-in on the applicant auth shell: same layout and palette,
+         the agent portal's copy, a briefcase badge and its own three facts. --}}
+    <x-applicant-auth-shell
         :opt="$opt"
         title="Agent sign in"
-        subtitle="Sign in to manage referrals, applications and commissions."
-        brand-eyebrow="Agent Portal"
-        brand-headline="Manage your referrals<br>with <em>confidence</em>."
-        brand-subhead="Submit applications, track student progress and view commissions with London Churchill College."
-        :brand-features="[
-            ['icon' => 'lock', 'text' => 'Sign in with your registered agent email'],
-            ['icon' => 'shield', 'text' => 'Applicant data is handled securely and confidentially'],
-        ]"
+        subtitle="Sign in to manage your applicants, or register your agency to get started."
+        eyebrow="Agent portal"
+        headline="Apply for your students, <em>step by step</em>."
+        subhead="Add an applicant, verify their phone and email, complete the four-step application with them and track every status and decision in one list."
+        help-email="agents@londonchurchillcollege.ac.uk"
+        footer-lead="Agent support & partnerships"
     >
-        <form id="login-form" class="lcc-form lcc-form--top" onsubmit="return false;">
-            <div class="lcc-field">
-                <label class="lcc-label" for="email">Email address</label>
-                <input id="email" type="email" class="lcc-input login__input" placeholder="you@agency.com" autocomplete="username">
-                <div id="error-email" class="lcc-error login__input-error"></div>
+        <x-slot:meta>
+            <span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Referral code linked</span>
+            <span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M1 21c0-4 3.6-6 8-6"/><circle cx="17" cy="11" r="3"/><path d="M13 21c0-3 1.8-4.5 4-4.5s4 1.5 4 4.5"/></svg>Sub-agents supported</span>
+            <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v6c0 4.4 3 7.6 7 9 4-1.4 7-4.6 7-9V6l-7-3Z"/></svg>UK GDPR</span>
+        </x-slot>
+
+        <x-slot:badge>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7h-4V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z"/><path d="M10 7V5h4v2"/><path d="M2 13h20"/></svg>
+        </x-slot>
+
+        <form id="login-form" style="display:grid;gap:16px" onsubmit="return false;" novalidate>
+            <div class="field">
+                <label for="email">Email address</label>
+                <input id="email" type="email" class="ctl login__input" placeholder="you@agency.com" autocomplete="username">
+                <div id="error-email" class="err-msg login__input-error"></div>
             </div>
-            <div class="lcc-field">
-                <div class="lcc-field__row">
-                    <label class="lcc-label" for="password">Password</label>
-                    <a href="{{ route('agent.forget.password.get') }}" class="lcc-link lcc-link--right">Forgot password?</a>
+            <div class="field">
+                <div class="lbl-row">
+                    <label for="password">Password</label>
+                    <a href="{{ route('agent.forget.password.get') }}" class="btn-link">Forgot password?</a>
                 </div>
-                <input id="password" type="password" class="lcc-input login__input" placeholder="••••••••" autocomplete="current-password">
-                <div id="error-password" class="lcc-error login__input-error"></div>
+                <input id="password" type="password" class="ctl login__input" placeholder="••••••••" autocomplete="current-password">
+                <div id="error-password" class="err-msg login__input-error"></div>
             </div>
-            <label class="lcc-check">
+            <label class="chk" for="remember-me">
                 <input id="remember-me" type="checkbox"> Remember me
             </label>
-            <button id="btn-login" type="submit" class="lcc-btn">Sign in</button>
+            <button id="btn-login" type="submit" class="btn btn-dark">Sign in</button>
+            <a href="{{ route('agent.register') }}" class="btn btn-outline">Create an agent account</a>
         </form>
-
-        <x-slot:footer>
-            Need an agent account or help signing in? Contact <a href="mailto:agents@londonchurchillcollege.ac.uk">agents@londonchurchillcollege.ac.uk</a>
-        </x-slot>
-    </x-login-shell>
+    </x-applicant-auth-shell>
 
     @if (session('verifymessage'))
         <div id="verify-notification-content" class="toastify-content hidden flex">
@@ -69,7 +76,7 @@
     <script type="module">
         (function () {
             async function login() {
-                $('#login-form').find('.login__input').removeClass('border-danger')
+                $('#login-form').find('.login__input').removeClass('err')
                 $('#login-form').find('.login__input-error').html('')
 
                 let email = $('#email').val()
@@ -85,11 +92,11 @@
                     $('#btn-login').html('Sign in')
                     if (err.response.data.message != 'Wrong email or password.') {
                         for (const [key, val] of Object.entries(err.response.data.errors)) {
-                            $(`#${key}`).addClass('border-danger')
+                            $(`#${key}`).addClass('err')
                             $(`#error-${key}`).html(val)
                         }
                     } else {
-                        $(`#password`).addClass('border-danger')
+                        $(`#password`).addClass('err')
                         $(`#error-password`).html(err.response.data.message)
                     }
                 })

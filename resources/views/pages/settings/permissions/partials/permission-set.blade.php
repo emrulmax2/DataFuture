@@ -905,6 +905,72 @@
             </div>
         </div>
     </div>
+    <!-- Attendance Integrity Privileges -->
+    <div class="accordion-item bg-gray-100 rounded-lg my-2 p-4">
+        <div id="nestedAccordionHeader-{{ $uid }}-attendance-integrity" class="accordion-header flex justify-between">
+            <button class="accordion-button collapsed relative w-full font-semibold"
+                type="button"
+                data-target="#nestedAccordionCollapse-{{ $uid }}-attendance-integrity"
+                aria-expanded="false"
+                aria-controls="nestedAccordionCollapse-{{ $uid }}-attendance-integrity">
+                <div class="flex items-center">
+                    <i data-lucide="plus" class="w-6 h-6 mr-2 accordion-icon-plus"></i>
+                    <i data-lucide="minus" class="w-6 h-6 mr-2 accordion-icon-minus hidden"></i>
+                    Attendance Integrity Privileges
+                </div>
+            </button>
+        </div>
+        <div id="nestedAccordionCollapse-{{ $uid }}-attendance-integrity" class="accordion-collapse collapse"
+            aria-labelledby="nestedAccordionHeader-{{ $uid }}-attendance-integrity">
+            <div class="accordion-body pl-5 text-slate-600 leading-relaxed">
+                <div class="p-3 rounded-lg my-2 mx-4 bg-white">
+                    <div class="grid grid-cols-12 gap-4 items-start">
+                        <div class="col-span-12 sm:col-span-6">
+                            <div class="flex items-center">
+                                <input id="attendance-integrity-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][attendance_integrity]" {{ isset($values['attendance_integrity']) && $values['attendance_integrity'] ? 'checked' : '' }}>
+                                <label for="attendance-integrity-{{ $uid }}" class="ml-2 font-medium">Attendance Integrity</label>
+                            </div>
+                            <div class="pl-8 mt-2">
+                                <div class="flex items-center mt-2">
+                                    <input id="attendance-integrity-view-dashboard-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][attendance_integrity_view_dashboard]" {{ isset($values['attendance_integrity_view_dashboard']) && $values['attendance_integrity_view_dashboard'] ? 'checked' : '' }}>
+                                    <label for="attendance-integrity-view-dashboard-{{ $uid }}" class="ml-2">View dashboard</label>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <input id="attendance-integrity-view-staff-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][attendance_integrity_view_staff]" {{ isset($values['attendance_integrity_view_staff']) && $values['attendance_integrity_view_staff'] ? 'checked' : '' }}>
+                                    <label for="attendance-integrity-view-staff-{{ $uid }}" class="ml-2">View staff analysis</label>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <input id="attendance-integrity-view-students-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][attendance_integrity_view_students]" {{ isset($values['attendance_integrity_view_students']) && $values['attendance_integrity_view_students'] ? 'checked' : '' }}>
+                                    <label for="attendance-integrity-view-students-{{ $uid }}" class="ml-2">View student analysis</label>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <input id="attendance-integrity-view-audit-logs-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][attendance_integrity_view_audit_logs]" {{ isset($values['attendance_integrity_view_audit_logs']) && $values['attendance_integrity_view_audit_logs'] ? 'checked' : '' }}>
+                                    <label for="attendance-integrity-view-audit-logs-{{ $uid }}" class="ml-2">View attendance history</label>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <input id="attendance-integrity-view-investigations-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][attendance_integrity_view_investigations]" {{ isset($values['attendance_integrity_view_investigations']) && $values['attendance_integrity_view_investigations'] ? 'checked' : '' }}>
+                                    <label for="attendance-integrity-view-investigations-{{ $uid }}" class="ml-2">View investigations</label>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <input id="attendance-integrity-manage-investigations-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][attendance_integrity_manage_investigations]" {{ isset($values['attendance_integrity_manage_investigations']) && $values['attendance_integrity_manage_investigations'] ? 'checked' : '' }}>
+                                    <label for="attendance-integrity-manage-investigations-{{ $uid }}" class="ml-2">Manage investigations</label>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <input id="attendance-integrity-export-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][attendance_integrity_export]" {{ isset($values['attendance_integrity_export']) && $values['attendance_integrity_export'] ? 'checked' : '' }}>
+                                    <label for="attendance-integrity-export-{{ $uid }}" class="ml-2">Export</label>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <input id="attendance-integrity-manage-settings-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][attendance_integrity_manage_settings]" {{ isset($values['attendance_integrity_manage_settings']) && $values['attendance_integrity_manage_settings'] ? 'checked' : '' }}>
+                                    <label for="attendance-integrity-manage-settings-{{ $uid }}" class="ml-2">Manage settings</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-6 text-xs">For senior management, compliance and named investigators only. Needs the Attendance Integrity switch plus each area.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Result Management Privileges -->
     <div class="accordion-item bg-gray-100 rounded-lg my-2 p-4">
         <div id="nestedAccordionHeader-{{ $uid }}-result-management" class="accordion-header flex justify-between">

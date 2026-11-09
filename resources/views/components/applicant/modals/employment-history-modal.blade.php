@@ -1,214 +1,176 @@
+{{--
+    Add / Edit employment history.
 
-    <!-- BEGIN: Add Employement History Modal -->
-    <div id="addEmployementHistoryModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <form method="POST" action="#" id="addEmployementHistoryForm" enctype="multipart/form-data">
+    The design's wide dialog: a three-up field grid, the organisation address
+    inline, then the reference block under its own subheading.
+
+    Two things differ from the design on purpose:
+      * the address is the structured `.theAddressWrap` lookup, not one free
+        text line - the table and `applicant_employments` keep line 1/2, city,
+        state, post code and country separately, and a single field would
+        throw that away. It is inline here for the same reason it is inline on
+        the page: `INTAddressLookUps()` loops every wrap, so the old
+        "Add Address" popup is no longer needed.
+      * start and end are MM-YYYY, which is what the column holds, so they
+        carry `monthYearMask` (00-0000) rather than the design's full date,
+        and open a month-only Litepicker (`applicationMonthpicker`). A start
+        date cannot be in the future (`data-no-future`); an end date can.
+
+    Hooks kept: modal and form ids, `saveEmpHistory` / `updateEmpHistory` with
+    their spinners, every field name, the `error-<field>` holders, the
+    `continuing` checkbox the JS enables/disables `end_date` from, and the
+    hidden `applicant_id` / `id` / `ref_id`.
+--}}
+@php
+    $apdEmpApplicantId = isset($apply->id) && $apply->id > 0 ? $apply->id : 0;
+@endphp
+
+@foreach([
+    ['mode' => 'add',  'prefix' => '',      'modal' => 'addEmployementHistoryModal',  'form' => 'addEmployementHistoryForm',  'title' => 'Add employment history', 'btn' => 'saveEmpHistory',   'cta' => 'Save'],
+    ['mode' => 'edit', 'prefix' => 'edit_', 'modal' => 'editEmployementHistoryModal', 'form' => 'editEmployementHistoryForm', 'title' => 'Edit employment',        'btn' => 'updateEmpHistory', 'cta' => 'Update'],
+] as $apdE)
+    <!-- BEGIN: {{ $apdE['title'] }} Modal -->
+    <div id="{{ $apdE['modal'] }}" class="modal apd-modal-skin apd-modal-skin--wide" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="#" id="{{ $apdE['form'] }}" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Add Employment Details</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
+                        <h3 class="apd-modal__title">{{ $apdE['title'] }}</h3>
+                        <button type="button" data-tw-dismiss="modal" class="apd-modal__x" aria-label="Close">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                        </button>
                     </div>
+
                     <div class="modal-body">
-                        <div class="grid grid-cols-12 gap-4">
-                            <div class="col-span-12">
-                                <label for="company_name" class="form-label">Organization Name <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="Company Name" id="company_name" class="form-control w-full" name="company_name">
-                                <div class="acc__input-error error-company_name text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-6">
-                                <label for="company_phone" class="form-label">Organization Phone <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="Company Phone" id="company_phone" class="form-control w-full applicationPhoneMask" name="company_phone">
-                                <div class="acc__input-error error-company_phone text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-6">
-                                <label for="position" class="form-label">Position <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="Position" id="position" class="form-control w-full" name="position">
-                                <div class="acc__input-error error-position text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-5">
-                                <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="MM-YYYY" id="start_date" class="form-control datepicker" name="start_date" data-format="MM-YYYY" data-single-mode="true">
-                                <div class="acc__input-error error-start_date text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-2 text-center">
-                                <label for="continuing" class="form-label">Continuing</label>
-                                <div class="form-check form-switch mt-2 justify-center">
-                                    <input id="continuing" class="form-check-input" type="checkbox" name="continuing" value="1">
-                                    <label class="form-check-label" for="continuing">&nbsp;</label>
+                        <div class="apd-modal__stack">
+                            <div class="apd-grid-3">
+                                <div class="apd-field">
+                                    <label for="{{ $apdE['prefix'] }}company_name">Organisation name <span class="text-danger">*</span></label>
+                                    <input type="text" id="{{ $apdE['prefix'] }}company_name" name="company_name" class="form-control apd-ctl company_name">
+                                    <div class="acc__input-error error-company_name apd-err text-danger"></div>
                                 </div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-5">
-                                <label for="end_date" class="form-label">End Date <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="MM-YYYY" id="end_date" class="form-control datepicker" name="end_date" data-format="MM-YYYY" data-single-mode="true">
-                                <div class="acc__input-error error-end_date text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-12">
-                                <label for="company_address" class="form-label">Organization Address <span class="text-danger">*</span></label>
-                                <div class="addressWrap mb-2" id="empHistoryAddress" style="display: none;"></div>
-                                <div>
-                                    <button type="button" data-tw-toggle="modal" data-prefix="employment" data-address-wrap="#empHistoryAddress" data-tw-target="#addressModal" class="addressPopupToggler btn btn-linkedin w-auto">
-                                        <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> <span>Add Address</span>
-                                    </button>
+                                <div class="apd-field">
+                                    <label for="{{ $apdE['prefix'] }}company_phone">Organisation phone <span class="text-danger">*</span></label>
+                                    <input type="text" id="{{ $apdE['prefix'] }}company_phone" name="company_phone" class="form-control apd-ctl company_phone">
+                                    <div class="acc__input-error error-company_phone apd-err text-danger"></div>
                                 </div>
-                                <div class="acc__input-error error-employment_address text-danger mt-2"></div>
+                                <div class="apd-field">
+                                    <label for="{{ $apdE['prefix'] }}position">Position <span class="text-danger">*</span></label>
+                                    <input type="text" id="{{ $apdE['prefix'] }}position" name="position" class="form-control apd-ctl position">
+                                    <div class="acc__input-error error-position apd-err text-danger"></div>
+                                </div>
+                                <div class="apd-field">
+                                    <label for="{{ $apdE['prefix'] }}start_date">Start date <span class="text-danger">*</span></label>
+                                    <input type="text" id="{{ $apdE['prefix'] }}start_date" name="start_date" class="form-control apd-ctl monthYearMask applicationMonthpicker start_date" placeholder="MM-YYYY" autocomplete="off" data-no-future>
+                                    <div class="acc__input-error error-start_date apd-err text-danger"></div>
+                                </div>
+                                <div class="apd-field">
+                                    <label for="{{ $apdE['prefix'] }}end_date">End date</label>
+                                    <input type="text" id="{{ $apdE['prefix'] }}end_date" name="end_date" class="form-control apd-ctl monthYearMask applicationMonthpicker end_date" placeholder="MM-YYYY" autocomplete="off">
+                                    <div class="acc__input-error error-end_date apd-err text-danger"></div>
+                                </div>
+                                <div class="apd-field apd-field--bottom">
+                                    <label class="apd-opt chk">
+                                        <input class="sr" id="{{ $apdE['prefix'] }}continuing" type="checkbox" name="continuing" value="1">
+                                        <span class="box"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+                                        <span>Continuing (current job)</span>
+                                    </label>
+                                </div>
                             </div>
 
-                            <div class="col-span-12">
-                                <div class="pt-2 mb-2 border-t border-slate-200/60 dark:border-darkmode-400"></div>
-                                <div class="font-medium text-base">Reference</div>
+                            {{-- Inline lookup, the project's standard `.theAddressWrap` block. --}}
+                            <div class="apd-field">
+                                <label for="{{ $apdE['prefix'] }}employment_address_lookup">Organisation address</label>
+                                <div id="{{ $apdE['mode'] }}EmpHistoryAddress" class="theAddressWrap apd-address">
+                                    <div class="apd-field">
+                                        <input type="text" id="{{ $apdE['prefix'] }}employment_address_lookup" class="form-control apd-ctl theAddressLookup" placeholder="e.g. E15 4BZ" autocomplete="off">
+                                        <span class="apd-hint">UK postcode, then pick the address &mdash; or type it below.</span>
+                                    </div>
+                                    <div class="apd-grid-3">
+                                        <div class="apd-field">
+                                            <label for="{{ $apdE['prefix'] }}employment_address_line_1">Address line 1 <span class="text-danger">*</span></label>
+                                            <input type="text" id="{{ $apdE['prefix'] }}employment_address_line_1" name="employment_address_line_1" class="form-control apd-ctl address_line_1 employment_address_line_1">
+                                            <div class="acc__input-error error-employment_address_line_1 apd-err text-danger"></div>
+                                        </div>
+                                        <div class="apd-field">
+                                            <label for="{{ $apdE['prefix'] }}employment_address_line_2">Address line 2</label>
+                                            <input type="text" id="{{ $apdE['prefix'] }}employment_address_line_2" name="employment_address_line_2" class="form-control apd-ctl address_line_2 employment_address_line_2">
+                                        </div>
+                                        <div class="apd-field">
+                                            <label for="{{ $apdE['prefix'] }}employment_address_city">City / Town <span class="text-danger">*</span></label>
+                                            <input type="text" id="{{ $apdE['prefix'] }}employment_address_city" name="employment_address_city" class="form-control apd-ctl city employment_address_city">
+                                            <div class="acc__input-error error-employment_address_city apd-err text-danger"></div>
+                                        </div>
+                                        <div class="apd-field">
+                                            <label for="{{ $apdE['prefix'] }}employment_address_state">State / County</label>
+                                            <input type="text" id="{{ $apdE['prefix'] }}employment_address_state" name="employment_address_state" class="form-control apd-ctl state employment_address_state">
+                                        </div>
+                                        <div class="apd-field">
+                                            <label for="{{ $apdE['prefix'] }}employment_address_postal_zip_code">Post code <span class="text-danger">*</span></label>
+                                            <input type="text" id="{{ $apdE['prefix'] }}employment_address_postal_zip_code" name="employment_address_postal_zip_code" class="form-control apd-ctl postal_code employment_address_postal_zip_code">
+                                            <div class="acc__input-error error-employment_address_postal_zip_code apd-err text-danger"></div>
+                                        </div>
+                                        <div class="apd-field">
+                                            <label for="{{ $apdE['prefix'] }}employment_address_country">Country <span class="text-danger">*</span></label>
+                                            <input type="text" id="{{ $apdE['prefix'] }}employment_address_country" name="employment_address_country" class="form-control apd-ctl country employment_address_country" value="United Kingdom">
+                                            <div class="acc__input-error error-employment_address_country apd-err text-danger"></div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" class="latitude" name="employment_address_latitude" value="">
+                                    <input type="hidden" class="longitude" name="employment_address_longitude" value="">
+                                </div>
                             </div>
-                            <div class="col-span-12 sm:col-span-6">
-                                <label for="contact_name" class="form-label">Contact Name <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="Contact Name" id="contact_name" class="form-control w-full" name="contact_name">
-                                <div class="acc__input-error error-contact_name text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-6">
-                                <label for="contact_position" class="form-label">Contact Position <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="Contact Position" id="contact_position" class="form-control w-full" name="contact_position">
-                                <div class="acc__input-error error-contact_position text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-6">
-                                <label for="contact_phone" class="form-label">Contact Phone <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="Contact Phone" id="contact_phone" class="form-control w-full applicationPhoneMask" name="contact_phone">
-                                <div class="acc__input-error error-contact_phone text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-6">
-                                <label for="contact_email" class="form-label">Contact Email</label>
-                                <input type="email" placeholder="Contact Email" id="contact_email" class="form-control w-full" name="contact_email">
+
+                            <h4 class="apd-modal__sub">Reference at this organisation</h4>
+                            <div class="apd-grid-3">
+                                <div class="apd-field">
+                                    <label for="{{ $apdE['prefix'] }}contact_name">Contact name <span class="text-danger">*</span></label>
+                                    <input type="text" id="{{ $apdE['prefix'] }}contact_name" name="contact_name" class="form-control apd-ctl contact_name">
+                                    <div class="acc__input-error error-contact_name apd-err text-danger"></div>
+                                </div>
+                                <div class="apd-field">
+                                    <label for="{{ $apdE['prefix'] }}contact_position">Contact position <span class="text-danger">*</span></label>
+                                    <input type="text" id="{{ $apdE['prefix'] }}contact_position" name="contact_position" class="form-control apd-ctl contact_position">
+                                    <div class="acc__input-error error-contact_position apd-err text-danger"></div>
+                                </div>
+                                <div class="apd-field">
+                                    <label for="{{ $apdE['prefix'] }}contact_phone">Contact phone <span class="text-danger">*</span></label>
+                                    <input type="text" id="{{ $apdE['prefix'] }}contact_phone" name="contact_phone" class="form-control apd-ctl contact_phone">
+                                    <div class="acc__input-error error-contact_phone apd-err text-danger"></div>
+                                </div>
+                                <div class="apd-field">
+                                    <label for="{{ $apdE['prefix'] }}contact_email">Contact email</label>
+                                    <input type="email" id="{{ $apdE['prefix'] }}contact_email" name="contact_email" class="form-control apd-ctl contact_email">
+                                    <div class="acc__input-error error-contact_email apd-err text-danger"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
+
                     <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="saveEmpHistory" class="btn btn-primary w-auto">     
-                            Save                      
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
+                        <button type="button" data-tw-dismiss="modal" class="apd-btn apd-btn--ghost">Cancel</button>
+                        <button type="submit" id="{{ $apdE['btn'] }}" class="apd-btn apd-btn--primary">
+                            {{ $apdE['cta'] }}
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" class="w-4 h-4 ml-2">
                                 <g fill="none" fill-rule="evenodd">
                                     <g transform="translate(1 1)" stroke-width="4">
                                         <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
                                         <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
                                         </path>
                                     </g>
                                 </g>
                             </svg>
                         </button>
-                        <input type="hidden" name="applicant_id" value="{{ isset($apply->id) && $apply->id > 0 ? $apply->id : 0 }}"/>
+                        <input type="hidden" name="applicant_id" value="{{ $apdEmpApplicantId }}"/>
+                        @if($apdE['mode'] === 'edit')
+                            <input type="hidden" name="id" value="0"/>
+                            <input type="hidden" name="ref_id" value="0"/>
+                        @endif
                     </div>
                 </div>
             </form>
         </div>
     </div>
-    <!-- END: Add Employement History Modal -->
-
-    <!-- BEGIN: Edit Employement History Modal -->
-    <div id="editEmployementHistoryModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <form method="POST" action="#" id="editEmployementHistoryForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Edit Employment Details</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
-                    </div>
-                    <div class="modal-body">
-                        <div class="grid grid-cols-12 gap-4">
-                            <div class="col-span-12">
-                                <label for="edit_company_name" class="form-label">Organization Name <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="Company Name" id="edit_company_name" class="form-control w-full" name="company_name">
-                                <div class="acc__input-error error-company_name text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-6">
-                                <label for="edit_company_phone" class="form-label">Organization Phone <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="Company Phone" id="edit_company_phone" class="form-control w-full applicationPhoneMask" name="company_phone">
-                                <div class="acc__input-error error-company_phone text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-6">
-                                <label for="edit_position" class="form-label">Position <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="Position" id="edit_position" class="form-control w-full" name="position">
-                                <div class="acc__input-error error-position text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-5">
-                                <label for="edit_start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="MM-YYYY" id="edit_start_date" class="form-control datepicker" name="start_date" data-format="MM-YYYY" data-single-mode="true">
-                                <div class="acc__input-error error-start_date text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-2 text-center">
-                                <label for="edit_continuing" class="form-label">Continuing</label>
-                                <div class="form-check form-switch mt-2 justify-center">
-                                    <input id="edit_continuing" class="form-check-input" type="checkbox" name="continuing" value="1">
-                                    <label class="form-check-label" for="continuing">&nbsp;</label>
-                                </div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-5">
-                                <label for="edit_end_date" class="form-label">End Date <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="MM-YYYY" id="edit_end_date" class="form-control datepicker" name="end_date" data-format="MM-YYYY" data-single-mode="true">
-                                <div class="acc__input-error error-end_date text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-12">
-                                <label for="company_address" class="form-label">Organization Address <span class="text-danger">*</span></label>
-                                <div class="addressWrap mb-2" id="editEmpHistoryAddress" style="display: none;"></div>
-                                <div>
-                                    <button type="button" data-tw-toggle="modal" data-prefix="employment" data-address-wrap="#editEmpHistoryAddress" data-tw-target="#addressModal" class="addressPopupToggler btn btn-linkedin w-auto">
-                                        <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> <span>Add Address</span>
-                                    </button>
-                                </div>
-                                <div class="acc__input-error error-employment_address text-danger mt-2"></div>
-                            </div>
-
-                            <div class="col-span-12">
-                                <div class="pt-2 mb-2 border-t border-slate-200/60 dark:border-darkmode-400"></div>
-                                <div class="font-medium text-base">Reference</div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-6">
-                                <label for="edit_contact_name" class="form-label">Contact Name <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="Contact Name" id="edit_contact_name" class="form-control w-full" name="contact_name">
-                                <div class="acc__input-error error-contact_name text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-6">
-                                <label for="edit_contact_position" class="form-label">Contact Position <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="Contact Position" id="edit_contact_position" class="form-control w-full" name="contact_position">
-                                <div class="acc__input-error error-contact_position text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-6">
-                                <label for="edit_contact_phone" class="form-label">Contact Phone <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="Contact Phone" id="edit_contact_phone" class="form-control w-full applicationPhoneMask" name="contact_phone">
-                                <div class="acc__input-error error-contact_phone text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-6">
-                                <label for="edit_contact_email" class="form-label">Contact Email</label>
-                                <input type="email" placeholder="Contact Email" id="edit_contact_email" class="form-control w-full" name="contact_email">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="updateEmpHistory" class="btn btn-primary w-auto">     
-                            update                      
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                        </button>
-                        <input type="hidden" name="applicant_id" value="{{ isset($apply->id) && $apply->id > 0 ? $apply->id : 0 }}"/>
-                        <input type="hidden" name="id" value="0"/>
-                        <input type="hidden" name="ref_id" value="0"/>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    <!-- END: Edit Employement History Modal -->
+    <!-- END: {{ $apdE['title'] }} Modal -->
+@endforeach
