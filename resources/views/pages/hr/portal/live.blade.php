@@ -29,6 +29,8 @@
                     <button type="button" data-live-filter="off" aria-pressed="false" title="Filter not working staff" class="hr-live-stat hr-live-stat--off"><span></span><strong id="liveCountOff">{{ $liveMeta['off'] ?? 0 }}</strong> Not working</button>
                     --}}
                     <button type="button" data-live-filter="leave" aria-pressed="false" title="Filter staff on leave" class="hr-live-stat hr-live-stat--leave"><span></span><strong id="liveCountLeave">{{ $liveMeta['leave'] ?? 0 }}</strong> On leave</button>
+                    {{-- Active staff with no working pattern on the date (user, 11 Nov 2026) --}}
+                    <button type="button" data-live-filter="unscheduled" aria-pressed="false" title="Filter staff not in schedule" class="hr-live-stat hr-live-stat--unscheduled"><span></span><strong id="liveCountUnscheduled">{{ $liveMeta['unscheduled'] ?? 0 }}</strong> Not In Schedule</button>
                 </div>
             </section>
 
@@ -57,6 +59,12 @@
                         <i data-lucide="calendar-days"></i>
                         <input type="text" name="class_date" class="liveAttendanceDate" id="liveAttendanceDate" value="{{ date('d-m-Y') }}"/>
                     </label>
+
+                    {{-- Group the list by department (user, 11 Nov 2026); A–Z by name when off --}}
+                    <button type="button" id="liveGroupByDept" class="hr-live-tool-btn hr-live-tool-btn--group" aria-pressed="false" title="Group the list by department">
+                        <i data-lucide="layers"></i>
+                        <span>By Department</span>
+                    </button>
 
                     <a href="{{ route('hr.portal.leave.calendar') }}" class="hr-live-tool-btn hr-live-tool-btn--planner">
                         <i data-lucide="calendar-check"></i>

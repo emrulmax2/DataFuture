@@ -4563,6 +4563,17 @@ body.hr-live-attendance-body .content.content--top-nav::before {
     background: #8a5cb5;
 }
 
+/* Live Attendance › "Not in schedule": active staff with no working pattern on the date */
+.hr-live-stat--unscheduled {
+    border-color: #d6dce6;
+    background: #eef1f6;
+    color: #4a5a75;
+}
+
+.hr-live-stat--unscheduled > span {
+    background: #5b6b86;
+}
+
 .hr-live-toolbar-card {
     padding: 15px 26px;
 }
@@ -4685,6 +4696,153 @@ body.hr-live-attendance-body .content.content--top-nav::before {
 .hr-live-tool-btn--planner:hover {
     background: #d6ebe6;
     color: #0f4e47;
+}
+
+/* Live Attendance › By Department (user, 11 Nov 2026) */
+.hr-live-tool-btn--group {
+    border-color: #ded7c6;
+    background: #fff;
+    color: #3f524f;
+    cursor: pointer;
+}
+
+.hr-live-tool-btn--group:hover {
+    background: #f7f5ee;
+    color: #0f2d2a;
+}
+
+.hr-live-tool-btn--group.hr-live-tool-btn--active {
+    border-color: #0d7c73;
+    background: #e4f1ee;
+    color: #0f4e47;
+    box-shadow: inset 0 0 0 1px #0d7c73;
+}
+
+/* Each department a box (its own tbody): a header button that opens / closes it, the column
+   headings, its staff; space below each box. The table's own header and card frame step aside. */
+.hr-live-table-card.hr-live-table-card--grouped {
+    overflow: visible;
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+}
+
+.hr-live-table.hr-live-table--grouped thead {
+    display: none;
+}
+
+.hr-live-table tbody.hr-live-group {
+    margin: 0 0 16px;
+    overflow: hidden;
+    border: 1px solid #e6e1d3;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(16, 49, 46, .05);
+}
+
+.hr-live-table tbody.hr-live-group--empty {
+    display: none;
+}
+
+.hr-live-table tbody tr.hr-live-group-row {
+    display: block;
+}
+
+.hr-live-table .hr-live-group-row td {
+    display: block;
+    padding: 0;
+}
+
+.hr-live-group-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px 22px 14px 18px;
+    border: 0;
+    border-left: 4px solid #c6a44e;
+    background: linear-gradient(90deg, #fbf8f0 0%, #fff 70%);
+    color: #0f2d2a;
+    text-align: left;
+    cursor: pointer;
+    transition: background .15s ease;
+}
+
+.hr-live-group-toggle:hover {
+    background: #f7f2e6;
+}
+
+.hr-live-group-toggle:focus-visible {
+    outline: 2px solid #c6a44e;
+    outline-offset: -2px;
+}
+
+.hr-live-group-toggle__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: #e4f1ee;
+    color: #0d7c73;
+}
+
+.hr-live-group-row__name {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: .01em;
+}
+
+.hr-live-group-row__count {
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 9px;
+    border: 1px solid #e0e4dc;
+    border-radius: 999px;
+    background: #f4f6f1;
+    color: #5b6d6a;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.hr-live-group-toggle__chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 30px;
+    height: 30px;
+    margin-left: auto;
+    border: 1px solid #e6e1d3;
+    border-radius: 999px;
+    background: #fff;
+    color: #3f524f;
+    transition: transform .2s ease;
+}
+
+.hr-live-group--collapsed .hr-live-group-toggle__chevron {
+    transform: rotate(-90deg);
+}
+
+/* the column headings inside each box, laid out as the table's own header */
+.hr-live-table tbody tr.hr-live-group-colhead {
+    display: grid;
+    grid-template-columns: minmax(360px, 1.35fr) 200px minmax(240px, 1.2fr) 132px;
+    align-items: center;
+    gap: 18px;
+    padding: 12px 26px;
+    border-top: 1px solid #eef0ea;
+    border-bottom: 2px solid #eef0ea;
+    background: #fff;
+}
+
+/* a closed box: only its header (beats ".hr-live-table tbody tr.hr-live-row { display: grid }" further down) */
+.hr-live-table tbody.hr-live-group--collapsed tr.hr-live-group-colhead,
+.hr-live-table tbody.hr-live-group--collapsed tr.hr-live-row {
+    display: none;
 }
 
 .hr-live-tool-btn--primary {
@@ -4970,6 +5128,12 @@ body.hr-live-attendance-body .content.content--top-nav::before {
     border-color: #e0e4dc;
     background: #eef0ea;
     color: #5b6d6a;
+}
+
+.hr-live-status-pill--unscheduled {
+    border-color: #d6dce6;
+    background: #eef1f6;
+    color: #4a5a75;
 }
 
 .hr-live-status__detail {
