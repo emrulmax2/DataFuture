@@ -26,6 +26,7 @@
         </div>
     </section>
 
+    <StepSearch v-if="withErr.length" v-model="q" id="search-att-check" :shown="items.length" :total="filtered.length" />
     <div class="row" style="justify-content: space-between">
         <div class="filters" role="group" aria-label="Show students">
             <button type="button" class="chip" :aria-pressed="show === 'data'" @click="show = 'data'">To sort <span class="num">{{ counts.data }}</span></button>
@@ -41,7 +42,7 @@
     </div>
 
     <div v-if="!imp" class="card empty">Upload the SIS Attendance Confirmation Report on the Overview first.</div>
-    <div v-else-if="!items.length" class="card empty">{{ fieldFilter !== 'all' ? 'No students with that difference match these filters.' : 'No students to sort here.' }}</div>
+    <div v-else-if="!items.length" class="card empty">{{ q.trim() && filtered.length ? 'No students on this step match “' + q.trim() + '”.' : fieldFilter !== 'all' ? 'No students with that difference match these filters.' : 'No students to sort here.' }}</div>
     <div v-else-if="groupBy === 'issue'" class="muted small">{{ plural(groups.length, 'issue') }} · {{ plural(groups.reduce((a, g) => a + g.rows.length, 0), 'difference') }} · undecided first</div>
 
     <template v-if="groupBy === 'issue'">
@@ -147,7 +148,8 @@
 
 <script>
 import { computed, inject, ref, watch } from "vue";
-import { ATT_COC_TYPE, ATT_FIELD_ROUTES, ROUTES, contactMessage, plural } from "./helpers";
+import { ATT_COC_TYPE, ATT_FIELD_ROUTES, ROUTES, contactMessage, matchesSearch, plural, searchText } from "./helpers";
+import StepSearch from "./StepSearch.vue";
 import AttRoute from "./AttRoute.vue";
 import AttDiff from "./AttDiff.vue";
 import BoxValue from "./BoxValue.vue";
@@ -177,7 +179,7 @@ const andList = (xs) => (xs.length < 2 ? xs.join("") : xs.slice(0, -1).join(", "
 const upFirst = (t) => t.charAt(0).toUpperCase() + t.slice(1);
 
 export default {
-    components: { StatusTag, AttRoute, AttDiff, BoxValue },
+    components: { StatusTag, AttRoute, AttDiff, BoxValue, StepSearch },
     setup() {
         const { store, post } = inject("slr");
         const att = computed(() => store.state.attendance);
@@ -192,7 +194,10 @@ export default {
         const withErr = computed(() => att.value.rows.filter((i) => i.s && errors(i).length));
         const shown = computed(() => (show.value === "data" ? withErr.value.filter((i) => i.stage === "data") : withErr.value));
         const boxOf = (key) => BOX[key] || key;
-        const items = computed(() => (fieldFilter.value === "all" ? shown.value : shown.value.filter((i) => errors(i).some((c) => boxOf(c.key) === fieldFilter.value))));
+        const filtered = computed(() => (fieldFilter.value === "all" ? shown.value : shown.value.filter((i) => errors(i).some((c) => boxOf(c.key) === fieldFilter.value))));
+        // this step's search (user, 13 Nov 2026), after the chips and the field filter
+        const q = ref("");
+        const items = computed(() => (q.value.trim() ? filtered.value.filter((i) => matchesSearch(q.value, searchText(i))) : filtered.value));
         const fieldSummary = computed(() => {
             const by = {};
             shown.value.forEach((i) => errors(i).forEach((c) => {
@@ -275,7 +280,7 @@ export default {
             })
             .filter((g) => g.rows.length));
 
-        return { store, post, imp, counts, yearName, show, fieldFilter, errors, unrouted, sugg, withErr, shown, items, fieldSummary, boxSummary, fieldTotal, fieldMax, noReg, chosen, pendingSugg, groupBy, groups, NOTE, plural,
+        return { q, filtered, store, post, imp, counts, yearName, show, fieldFilter, errors, unrouted, sugg, withErr, shown, items, fieldSummary, boxSummary, fieldTotal, fieldMax, noReg, chosen, pendingSugg, groupBy, groups, NOTE, plural,
             cardRows, toggleEach, copied, copy, contactMessage, ROUTES, ATT_COC_TYPE };
     },
 };

@@ -22,7 +22,7 @@
                 <div v-if="imp" class="row small" style="gap: 6px 18px">
                     <span><span class="muted">File</span> {{ imp.fileName }}</span>
                     <span><span class="muted">Header</span> <span class="mono">{{ imp.hei }}</span> · {{ imp.heiName }} · report {{ fmtIso(imp.reportDate) }}</span>
-                    <span><span class="muted">Term</span> {{ imp.termName }} {{ imp.year }}</span>
+                    <span><span class="muted">Course start</span> {{ imp.termName }} · {{ imp.year }}</span>
                     <span><span class="muted">Students</span> <b class="num">{{ counts.all }}</b> · {{ counts.ssn }} matched by SSN · {{ counts.linked }} matched here</span>
                     <span><span class="muted">Totals</span> {{ imp.totals.map((t) => money(t)).join(' · ') }}</span>
                     <span><span class="muted">Uploaded</span> {{ imp.at }} by {{ imp.by }}</span>
@@ -32,12 +32,12 @@
         </section>
 
         <ol v-if="imp" class="pipeline" aria-label="Where students are">
-            <li><button type="button" class="stage t-ok" @click="$emit('go', 'overview')"><span class="s-n">STEP 1</span><span class="s-l">Uploaded</span><span class="s-v">{{ counts.all }}</span><span class="s-m">{{ imp.termName }} {{ imp.year }} · report {{ fmtIso(imp.reportDate) }}</span></button></li>
+            <li><button type="button" class="stage t-ok" @click="$emit('go', 'overview')"><span class="s-n">STEP 1</span><span class="s-l">Uploaded</span><span class="s-v">{{ counts.all }}</span><span class="s-m">{{ imp.year }} · report {{ fmtIso(imp.reportDate) }}</span></button></li>
             <li><button type="button" :class="'stage ' + (counts.unmatched ? 't-warn' : 't-ok')" @click="$emit('go', 'match', counts.unmatched ? 'open' : 'matched')"><span class="s-n">STEP 2</span><span class="s-l">Matched</span><span class="s-v">{{ counts.matched }}</span><span class="s-m">{{ counts.unmatched }} to match · {{ counts.ssn }} by SSN · {{ counts.linked }} matched here</span></button></li>
             <li><button type="button" :class="'stage ' + (counts.data ? 't-bad' : 't-ok')" @click="$emit('go', 'check')"><span class="s-n">STEP 3</span><span class="s-l">Data check</span><span class="s-v">{{ counts.data }}</span><span class="s-m">To sort · {{ counts.clean }} fully matched · {{ noReg }} with no SLC registration for {{ imp.year }}</span></button></li>
             <li><button type="button" :class="'stage ' + (counts.codeReady ? 't-info' : counts.noAttendance ? 't-bad' : 't-ok')" @click="$emit('go', 'codes')"><span class="s-n">STEP 4</span><span class="s-l">Attendance &amp; codes</span><span class="s-v">{{ counts.codeReady }}</span><span class="s-m">Ready to confirm · {{ counts.attending }} attending, {{ counts.noAttendance }} with no attendance in the {{ imp.termName }} term · {{ counts.codeNoReg }} with no SLC registration · {{ counts.confirmed }} confirmed</span></button></li>
             <li><button type="button" :class="'stage ' + (counts.cocToSubmit ? 't-bad' : 't-ok')" @click="$emit('go', 'cocs')"><span class="s-n">STEP 5</span><span class="s-l">CoCs</span><span class="s-v">{{ counts.cocToSubmit }}</span><span class="s-m">To submit · {{ counts.cocQueued }} queued by codes</span></button></li>
-            <li><button type="button" :class="'stage ' + (counts.awaiting ? 't-warn' : 't-ok')" @click="$emit('go', 'batches')"><span class="s-n">STEP 6</span><span class="s-l">Batches</span><span class="s-v">{{ counts.awaiting }}</span><span class="s-m">Awaiting download · {{ batchCount }} {{ batchCount === 1 ? 'batch' : 'batches' }} in all</span></button></li>
+            <li><button type="button" :class="'stage ' + (counts.awaiting ? 't-warn' : 't-ok')" @click="$emit('go', 'batches')"><span class="s-n">STEP 6</span><span class="s-l">Batches</span><span class="s-v">{{ counts.awaiting }}</span><span class="s-m">Awaiting download · {{ counts.toRecord }} uploaded, still to record on the SLC tab · {{ batchCount }} {{ batchCount === 1 ? 'batch' : 'batches' }} in all</span></button></li>
         </ol>
 
         <section class="card"><div class="card-h"><h2>How it will work</h2></div>
@@ -65,10 +65,11 @@
                 <button type="button" class="chip" :aria-pressed="show === 'matched'" @click="$emit('show', 'matched')">Matched <span class="num">{{ counts.matched }}</span></button>
             </div>
         </div>
+        <StepSearch v-if="imp" v-model="q" id="search-att-match" :shown="(show === 'open' ? unmatched : matched).length" :total="(show === 'open' ? allUnmatched : allMatched).length" />
         <div v-if="!imp" class="card empty">Upload the SIS Attendance Confirmation Report on the Overview first.</div>
         <section v-else-if="show === 'open'" class="card" aria-labelledby="att-open-h">
             <div class="card-h"><h2 id="att-open-h">Students to match</h2><span class="muted small">Their SSN is on no student record · {{ strong }} with a strong likely match</span></div>
-            <div v-if="!unmatched.length" class="empty">Every student in this upload is matched.</div>
+            <div v-if="!unmatched.length" class="empty">{{ q.trim() && allUnmatched.length ? 'No students on this step match “' + q.trim() + '”.' : 'Every student in this upload is matched.' }}</div>
             <div v-else class="tablebox"><table class="tbl" style="min-width: 1080px">
                 <thead><tr><th scope="col">Student (as SLC sent)</th><th scope="col">SSN</th><th scope="col">Date of birth</th><th scope="col">SLC course · year</th><th scope="col">Likely student</th><th scope="col"></th></tr></thead>
                 <tbody>
@@ -127,8 +128,9 @@
 </template>
 
 <script>
-import { computed, inject, ref } from "vue";
-import { PLANNED, fmtIso, fmtSlc, money, plural, titleCase } from "./helpers";
+import { computed, inject, ref, watch } from "vue";
+import { PLANNED, fmtIso, fmtSlc, matchesSearch, money, plural, searchText, titleCase } from "./helpers";
+import StepSearch from "./StepSearch.vue";
 import Ico from "./Ico.vue";
 import AttFind from "./AttFind.vue";
 import AttCell from "./AttCell.vue";
@@ -144,21 +146,27 @@ import StatusTag from "./StatusTag.vue";
  * by SSN). Steps 3–6 are their own components (step 4, Attendance & codes, was two steps until 6 Nov 2026).
  */
 export default {
-    components: { StatusTag, Ico, AttFind, AttCell, AttCheck, AttCodes, AttCocs, AttBatches },
+    components: { StatusTag, Ico, AttFind, AttCell, AttCheck, AttCodes, AttCocs, AttBatches, StepSearch },
     props: { view: { type: String, default: "overview" }, show: { type: String, default: "open" } },
     emits: ["go", "show"],
-    setup() {
+    setup(props) {
         const { store, post } = inject("slr");
         const att = computed(() => store.state.attendance);
         const imp = computed(() => att.value.import);
         const counts = computed(() => att.value.counts);
-        const unmatched = computed(() => att.value.rows.filter((i) => !i.s));
-        const matched = computed(() => att.value.rows.filter((i) => i.s));
-        const noReg = computed(() => matched.value.filter((i) => !i.s.registration).length);
+        const allUnmatched = computed(() => att.value.rows.filter((i) => !i.s));
+        const allMatched = computed(() => att.value.rows.filter((i) => i.s));
+        // step 2's search (user, 13 Nov 2026): SLC's name and SSN, or the student / likely student's name, reg no., email
+        const q = ref("");
+        watch(() => props.view, () => { q.value = ""; }); // only this step
+        const hit = (i) => !q.value.trim() || matchesSearch(q.value, searchText(i));
+        const unmatched = computed(() => allUnmatched.value.filter(hit));
+        const matched = computed(() => allMatched.value.filter(hit));
+        const noReg = computed(() => allMatched.value.filter((i) => !i.s.registration).length);
         const codes = computed(() => att.value.codes || []);
         const batchCount = computed(() => (att.value.batches || []).length);
         // To match: Save SSN to the likely student (confirmed in the row), or Review — all candidates and the search
-        const strong = computed(() => unmatched.value.filter((i) => i.cands.length && i.cands[0].pct >= 85).length);
+        const strong = computed(() => allUnmatched.value.filter((i) => i.cands.length && i.cands[0].pct >= 85).length);
         const pending = ref(null);
         const expanded = ref(null);
         async function saveBest(i) {
@@ -177,7 +185,7 @@ export default {
         }
         const onDrop = (e) => { over.value = false; readFile(e.dataTransfer.files[0]); };
         const onPick = (e) => { readFile(e.target.files[0]); e.target.value = ""; };
-        return { strong, pending, expanded, saveBest, fmtSlc, titleCase, store, post, imp, counts, unmatched, matched, noReg, over, uploading, onDrop, onPick, steps: PLANNED.attendance.steps, codes, batchCount, fmtIso, money, plural };
+        return { q, allUnmatched, allMatched, strong, pending, expanded, saveBest, fmtSlc, titleCase, store, post, imp, counts, unmatched, matched, noReg, over, uploading, onDrop, onPick, steps: PLANNED.attendance.steps, codes, batchCount, fmtIso, money, plural };
     },
 };
 </script>

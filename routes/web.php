@@ -1141,12 +1141,18 @@ Route::middleware('auth')->group(function() {
         Route::post('slc-registration/att/routes/clear', 'attClearRoutes')->name('slc.registration.att.routes.clear');
         Route::post('slc-registration/att/suggested', 'attSuggested')->name('slc.registration.att.suggested');
         Route::post('slc-registration/att/code', 'attCode')->name('slc.registration.att.code');
+        Route::post('slc-registration/att/record-term', 'attRecordTerm')->name('slc.registration.att.term');
         Route::post('slc-registration/att/confirm', 'attConfirm')->name('slc.registration.att.confirm');
         Route::post('slc-registration/att/undo', 'attUndo')->name('slc.registration.att.undo');
         Route::post('slc-registration/att/coc', 'attCocDone')->name('slc.registration.att.coc');
         Route::post('slc-registration/att/batch/download', 'attDownload')->name('slc.registration.att.batch.download');
         Route::get('slc-registration/att/batch/file', 'attBatchFile')->name('slc.registration.att.batch.file');
         Route::post('slc-registration/att/batch/uploaded', 'attUploaded')->name('slc.registration.att.batch.uploaded');
+        Route::post('slc-registration/att/batch/attendance', 'attBulkAttendance')->name('slc.registration.att.batch.attendance');
+        Route::get('slc-registration/att/batch/preview', 'attBatchPreview')->name('slc.registration.att.batch.preview');
+        Route::post('slc-registration/att/batch/regenerate', 'attRegenerateBatch')->name('slc.registration.att.batch.regenerate');
+        Route::post('slc-registration/att/batch/rejected', 'attRejected')->name('slc.registration.att.batch.rejected');
+        Route::post('slc-registration/att/batch/rejected/undo', 'attRejectedUndo')->name('slc.registration.att.batch.rejected.undo');
         // Bulk payment upload (SLC remittance → money receipts)
         Route::post('slc-registration/pay/upload', 'payUpload')->name('slc.registration.pay.upload');
         Route::post('slc-registration/pay/link', 'payLink')->name('slc.registration.pay.link');

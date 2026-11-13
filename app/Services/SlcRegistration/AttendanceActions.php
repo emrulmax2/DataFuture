@@ -346,6 +346,16 @@ class AttendanceActions
         if ($code !== null && !isset(AttendanceCodes::table()[$code])) {
             $this->fail('Unknown attendance code '.$code.'.');
         }
+        if ($code !== null && !AttendanceCodes::importable($code)) {
+            $this->fail('SLC’s attendance import only accepts A, C, D, F, L, N, S or X, so '.$code.' can’t go in the file. Record it for this student directly in SIS.');
+        }
+        if ($code === 'D' && ($why = $this->neverAttendedRefusal($row))) {
+            $this->fail($why);
+        }
+        // spec v9.0 §7.2.3: no "in attendance" code (nor D) for a student who is Not Registered — X or S only
+        if ($code !== null && !in_array($code, AttendanceCodes::NOT_REGISTERED, true) && $this->registrationStatus($row) === 'not') {
+            $this->fail('This student is recorded as Not Registered with SLC for the year, so SIS takes only X (not in attendance) or S (suspended).');
+        }
         $row->update(['attendance_code' => $code, 'code_by' => $code ? $this->user() : null, 'code_at' => $code ? now() : null]);
         $who = $this->who($row);
         $this->log($code ? 'chose code '.$code.' ('.(AttendanceCodes::MEANING[$code] ?? '').') for '.$who : 'put '.$who.' back to the suggested code');
@@ -354,16 +364,72 @@ class AttendanceActions
     }
 
     /**
+     * Step 4's Session Term and Attendance Term (user, 13 Nov 2026): what Bulk Attendance & Installment records the
+     * attendance (and instalment) with on the SLC tab — null for either goes back to the suggested one (RecordTerm).
+     * Only until the line is recorded there; a line whose confirmation is in an earlier upload's batch is set too.
+     */
+    public function setRecordTerm(int $rowId, ?int $session, ?int $termDeclarationId): string
+    {
+        $row = SlcAttendanceImportRow::find($rowId) ?? $this->fail('That line is no longer in the upload.');
+        if (!$row->student_id) {
+            $this->fail('Match the student first.');
+        }
+        if ($session !== null && !in_array($session, RecordTerm::SESSIONS, true)) {
+            $this->fail('Session Term is 1 to 4.');
+        }
+        if ($termDeclarationId !== null && !DB::table('term_declarations')->where('id', $termDeclarationId)->whereNull('deleted_at')->exists()) {
+            $this->fail('That attendance term no longer exists.');
+        }
+        $lines = collect([$row]);
+        if ($row->earlier_batch_id) {
+            $lines = $lines->merge(SlcAttendanceImportRow::where('slc_attendance_batch_id', $row->earlier_batch_id)->where('ssn', $row->ssn)->get());
+        }
+        if ($lines->contains(fn ($l) => $l->slc_recorded)) {
+            $this->fail('This attendance is already recorded on the SLC tab – change it there.');
+        }
+        $chosen = $session !== null || $termDeclarationId !== null;
+        $lines->each(fn ($l) => $l->update(['record_session_term' => $session, 'record_term_declaration_id' => $termDeclarationId,
+            'record_term_by' => $chosen ? $this->user() : null, 'record_term_at' => $chosen ? now() : null]));
+        $who = $this->who($row);
+        $what = trim(($session ? 'Term '.$session : '').($termDeclarationId ? ' · '.DB::table('term_declarations')->where('id', $termDeclarationId)->value('name') : ''), ' ·');
+        $this->log($chosen ? 'chose '.$what.' for the SLC tab attendance of '.$who : 'put '.$who.' back to the suggested SLC tab term');
+
+        return $chosen ? $what.' chosen for '.$who.'.' : $who.' is back on the suggested term.';
+    }
+
+    /**
      * Confirm the code of each line that is ready (matched, an SLC registration recorded for the year —
      * user, 2 Nov 2026: without one the code must not be submitted — the Data check sorted, a code
      * chosen or suggested): it goes into the batch awaiting download for the academic year, HEI and
      * term, and a code that needs a CoC queues one on the student's SLC tab.
      */
-    public function confirm(array $rowIds): string
+    public function confirm(array $rowIds, array $includeOnSlcTab = []): string
     {
         $state = app(AttendanceState::class)->build();
         $asked = collect($state['rows'])->whereIn('id', $rowIds);
-        $items = $asked->where('codeStage', 'ready')->values();
+        // the period already on the SLC tab (entered by hand after SIS issued the report — probably confirmed in SIS
+        // too, and SIS refuses a second confirmation): only those ticked to send anyway go in (user, 13 Nov 2026)
+        $leftOut = $asked->where('codeStage', 'ready')->filter(fn ($i) => self::onSlcTab($i) && !in_array($i['id'], $includeOnSlcTab, true));
+        $asked = $asked->reject(fn ($i) => $leftOut->contains('id', $i['id']));
+        if ($asked->isEmpty() && $leftOut->isNotEmpty()) {
+            $this->fail('Nothing confirmed: '.($leftOut->count() === 1 ? 'that student’s' : 'those students’').' attendance for the term is already on the SLC tab or in SIS.');
+        }
+        // only codes SLC's import accepts (spec v9.0 Appendix B) go into a batch, and D only where SLC takes it
+        $ready = $asked->where('codeStage', 'ready');
+        $notImportable = $ready->reject(fn ($i) => AttendanceCodes::importable($i['code']['final']))->count();
+        $dRefused = [];
+        foreach ($ready->where('code.final', 'D') as $i) {
+            if ($why = $this->neverAttendedRefusal(SlcAttendanceImportRow::with('import')->find($i['id']))) {
+                $dRefused[$i['id']] = $why;
+            }
+        }
+        $items = $ready->filter(fn ($i) => AttendanceCodes::importable($i['code']['final']) && !isset($dRefused[$i['id']]))->values();
+        if ($items->isEmpty() && $dRefused) {
+            $this->fail(count($dRefused) === 1 ? reset($dRefused) : Text::plural(count($dRefused), 'student').' can’t be sent with D: SLC only takes it for a student with no registration for the year and no attendance confirmed.');
+        }
+        if ($items->isEmpty() && $notImportable) {
+            $this->fail('SLC’s attendance import only accepts A, C, D, F, L, N, S or X. Choose one of those, or record the code directly in SIS.');
+        }
         if ($items->isEmpty()) {
             $noReg = $asked->where('codeStage', 'noreg')->count();
             $this->fail($noReg ? ($noReg === 1 ? 'This student has' : $noReg.' students have').' no SLC registration recorded for the year. Record it first (SLC tab or Bulk registration).' : 'None of those students can be confirmed yet.');
@@ -391,9 +457,35 @@ class AttendanceActions
         $who = $items->count() === 1 ? $first['first'].' '.$first['last'].' ('.$items->first()['code']['final'].')' : Text::plural($items->count(), 'student');
         $coc = $cocs ? ' – '.Text::plural($cocs, 'CoC').' queued' : '';
         $this->log('confirmed codes for '.$who.' – added to batch '.implode(', ', $batches).$coc);
-        $skipped = count(array_unique($rowIds)) - $items->count();
+        $skipped = count(array_unique($rowIds)) - $items->count() - $leftOut->count();
+        if ($leftOut->isNotEmpty()) {
+            $this->log('left out of the batch, their attendance for the term already on the SLC tab or in SIS: '.$leftOut->map(fn ($i) => $i['s']['id'])->implode(', '));
+        }
 
-        return 'Confirmed '.$who.' into batch '.implode(', ', $batches).'.'.($cocs ? ' '.Text::plural($cocs, 'CoC').' queued.' : '').($skipped > 0 ? ' '.Text::plural($skipped, 'student').' not ready yet were left out.' : '');
+        return 'Confirmed '.$who.' into batch '.implode(', ', $batches).'.'.($cocs ? ' '.Text::plural($cocs, 'CoC').' queued.' : '')
+            .($leftOut->isNotEmpty() ? ' '.Text::plural($leftOut->count(), 'student').' left out – already on the SLC tab or in SIS.' : '')
+            .($skipped > 0 ? ' '.Text::plural($skipped, 'student').' not ready yet were left out.' : '');
+    }
+
+    /**
+     * A step 4 row that may already be confirmed: its liability period on the SLC tab, entered by hand (not recorded
+     * by this module), or a code SIS already has saved or submitted for it (the report's column 28).
+     */
+    private static function onSlcTab(array $i): bool
+    {
+        return (!empty($i['slcTab']['attendance']) && empty($i['slcTab']['recorded'])) || !empty($i['sisCode']);
+    }
+
+    /** Ticked students ready to confirm whose period is already on the SLC tab: the page asks about them first. */
+    public function alreadyOnSlcTab(array $rowIds): array
+    {
+        return collect(app(AttendanceState::class)->build()['rows'])->whereIn('id', $rowIds)->where('codeStage', 'ready')
+            ->filter(fn ($i) => self::onSlcTab($i))->map(fn ($i) => [
+                'rowId' => $i['id'], 'name' => trim($i['s']['first'].' '.$i['s']['last']), 'sid' => $i['s']['id'], 'status' => $i['s']['status'] ?? null,
+                'code' => $i['code']['final'], 'term' => $i['liab']['decl'] ?? null, 'sessionTerm' => $i['liab']['sessionTerm'] ?? null,
+                'onTab' => !empty($i['slcTab']['recorded']) ? null : $i['slcTab'], 'sisCode' => $i['sisCode'] ?? null,
+                'slcUrl' => $i['s']['slcUrl'] ?? null, 'accountsUrl' => $i['s']['accountsUrl'] ?? null,
+            ])->values()->all();
     }
 
     /** One waiting batch per academic year + HEI + term; it sends the newest upload's header. */
@@ -493,30 +585,160 @@ class AttendanceActions
             if ($items->isEmpty()) {
                 $this->fail('The batch is empty.');
             }
-            $lines = [];
-            foreach ($items as $it) {
-                $lines[$it->raw] = $it->confirmed_code;
-            }
-            $text = AttendanceFile::build($batch->header, $lines, now());
+            $text = $this->buildBatchText($batch, now());
             $name = AttendanceFile::fileName(explode('~', $batch->header)[0], (string) $batch->term, $batch->code);
             $disk = FileDisk::name();
             $path = 'slc-registration/attendance-batches/'.$name;
-            Storage::disk($disk)->put($path, $text);
+            try {
+                $saved = (bool) Storage::disk($disk)->put($path, $text);
+            } catch (\Throwable $e) {
+                $saved = false;
+            }
+            if (!$saved) { // the disks don't throw: say so in the log, it is built again when needed
+                \Illuminate\Support\Facades\Log::warning('SLC attendance: the batch file '.$path.' could not be saved to the '.$disk.' disk.');
+            }
             $batch->update(['status' => 'downloaded', 'file_name' => $name, 'disk' => $disk, 'path' => $path, 'file_date' => now()->toDateString(), 'downloaded_by' => $this->user(), 'downloaded_at' => now()]);
             $this->log('generated SIS file '.$name.' for batch '.$batch->code.' ('.Text::plural($items->count(), 'code').')');
 
             return ['name' => $name, 'text' => $text, 'message' => 'Saved '.$name.'.'];
         }
-        $this->log('downloaded '.$batch->file_name);
+        $file = $this->batchFile($batch);
+        $this->log('downloaded '.$batch->file_name.($file['rebuilt'] ? ' (built again from the batch: the saved copy could not be read)' : ''));
 
-        return ['name' => $batch->file_name, 'text' => (string) Storage::disk($batch->disk)->get($batch->path), 'message' => 'Saved '.$batch->file_name.'.'];
+        return ['name' => $batch->file_name, 'text' => $file['text'], 'rebuilt' => $file['rebuilt'], 'message' => 'Saved '.$batch->file_name.'.'];
     }
 
     public function fileText(string $code): array
     {
         $batch = SlcAttendanceBatch::where('code', $code)->whereNotNull('path')->first() ?? $this->fail('That batch has no file yet.');
+        $file = $this->batchFile($batch);
 
-        return ['name' => $batch->file_name, 'text' => (string) Storage::disk($batch->disk)->get($batch->path)];
+        return ['name' => $batch->file_name, 'text' => $file['text'], 'rebuilt' => $file['rebuilt']];
+    }
+
+    /**
+     * Regenerate file (user, 13 Nov 2026, as Bulk registration's batches): build the batch's file again from its
+     * lines, dated as before or today, save it over the saved copy and hand it back. SIS refuses a file whose
+     * content it has already imported, so a resubmission needs today's date (a new header).
+     */
+    public function regenerate(string $code, bool $today): array
+    {
+        $batch = SlcAttendanceBatch::where('code', $code)->first() ?? $this->fail('Batch not found.');
+        if ($batch->status === 'awaiting') {
+            $this->fail('Download the SIS file first.');
+        }
+        $date = $today ? now() : \Carbon\Carbon::parse($batch->file_date ?: now());
+        $text = $this->buildBatchText($batch, $date);
+        $name = $batch->file_name ?: AttendanceFile::fileName(explode('~', $batch->header)[0], (string) $batch->term, $batch->code);
+        $disk = FileDisk::name();
+        $path = 'slc-registration/attendance-batches/'.$name;
+        try {
+            $saved = (bool) Storage::disk($disk)->put($path, $text);
+        } catch (\Throwable $e) {
+            $saved = false;
+        }
+        if (!$saved) {
+            \Illuminate\Support\Facades\Log::warning('SLC attendance: the batch file '.$path.' could not be saved to the '.$disk.' disk.');
+        }
+        $batch->update(['file_name' => $name, 'disk' => $disk, 'path' => $path, 'file_date' => $date->toDateString()]);
+        $lines = substr_count($text, "\r\n") - 1;
+        $this->log('regenerated SIS file '.$name.' for batch '.$batch->code.' ('.Text::plural($lines, 'line').', dated '.$date->format('d/m/Y').')');
+
+        return ['name' => $name, 'text' => $text, 'rebuilt' => false,
+            'message' => 'Regenerated '.$name.' ('.Text::plural($lines, 'student').', dated '.$date->format('d/m/Y').').'.($saved ? '' : ' It could not be saved to storage; it is built again when needed.')];
+    }
+
+    /** The batch's file: its students' lines with their confirmed codes (AttendanceFile::build), dated $date. */
+    private function buildBatchText(SlcAttendanceBatch $batch, \DateTimeInterface $date): string
+    {
+        $items = SlcAttendanceImportRow::where('slc_attendance_batch_id', $batch->id)->orderBy('confirmed_at')->orderBy('id')->get();
+        if ($items->isEmpty()) {
+            $this->fail('The batch is empty.');
+        }
+        $bad = $items->reject(fn ($it) => AttendanceCodes::importable($it->confirmed_code))->count();
+        if ($bad) {
+            $this->fail(Text::plural($bad, 'line').' in this batch '.($bad === 1 ? 'has a code' : 'have codes').' SLC’s import doesn’t accept (only A, C, D, F, L, N, S, X). Remove '.($bad === 1 ? 'it' : 'them').' from the batch first.');
+        }
+        // spec v9.0 §6.12: one row per student, no duplicated rows, at most 50,000 students
+        $twice = $items->countBy('ssn')->filter(fn ($n) => $n > 1)->keys();
+        if ($twice->isNotEmpty()) {
+            $this->fail('SLC takes one line per student, but '.$twice->implode(', ').' '.($twice->count() === 1 ? 'is' : 'are').' in this batch twice. Remove the extra line first.');
+        }
+        if ($items->count() > AttendanceFile::MAX_RECORDS) {
+            $this->fail('SLC’s import takes at most 50,000 students a file.');
+        }
+        $lines = [];
+        foreach ($items as $it) {
+            $lines[$it->raw] = $it->confirmed_code;
+        }
+
+        return AttendanceFile::build($batch->header, $lines, $date);
+    }
+
+    /**
+     * Why SLC would refuse D (never attended) for this line, or null (spec v9.0 §7.2.3): not for a student
+     * who is Registered or Not Registered for the year (our Yes / No / N/R registration on the active course),
+     * nor once their first liability period is confirmed as in attendance (a code A C F L N confirmed here for
+     * the year, or on their SLC tab).
+     */
+    /** The student's SLC registration for the year on the active course: registered (Yes), not (No, N/R) or none. */
+    private function registrationStatus(SlcAttendanceImportRow $row): string
+    {
+        $yearId = $row->import?->academic_year_id;
+        $crel = (StudentSnapshots::load([(int) $row->student_id], $yearId)[(int) $row->student_id] ?? [])['crel_id'] ?? null;
+        $statuses = $yearId && $crel ? DB::table('slc_registrations')->where('student_id', $row->student_id)->where('academic_year_id', $yearId)
+            ->where('student_course_relation_id', $crel)->whereNull('deleted_at')->pluck('slc_registration_status_id')->map(fn ($v) => (int) $v)->all() : [];
+
+        return in_array(1, $statuses, true) ? 'yes' : (array_intersect([2, 4], $statuses) ? 'not' : 'none');
+    }
+
+    private function neverAttendedRefusal(?SlcAttendanceImportRow $row): ?string
+    {
+        if (!$row || !$row->student_id) {
+            return 'Match the student first.';
+        }
+        $yearId = $row->import?->academic_year_id;
+        $crel = (StudentSnapshots::load([(int) $row->student_id], $yearId)[(int) $row->student_id] ?? [])['crel_id'] ?? null;
+        $reg = $this->registrationStatus($row);
+        if ($reg !== 'none') {
+            return 'SLC won’t take D (never attended) for a student recorded as '.($reg === 'yes' ? 'Registered' : 'Not Registered').' for the year. Use X (not in attendance), or record it in SIS by hand.';
+        }
+        // (spec §7.2.3) nor when the year's liability periods aren't all with this course — e.g. after a transfer
+        $elsewhere = $yearId && $crel && (DB::table('slc_registrations')->where('student_id', $row->student_id)->where('academic_year_id', $yearId)
+            ->where('student_course_relation_id', '!=', $crel)->whereNull('deleted_at')->exists()
+            || DB::table('slc_attendances as a')->join('slc_registrations as g', 'g.id', '=', 'a.slc_registration_id')->where('a.student_id', $row->student_id)
+                ->where('g.academic_year_id', $yearId)->where('a.student_course_relation_id', '!=', $crel)->whereNull('a.deleted_at')->exists());
+        if ($elsewhere) {
+            return 'SLC won’t take D (never attended) when the year’s liability periods aren’t all on this course – the student has an SLC record for the year on another course (a transfer?). Record it in SIS by hand.';
+        }
+        $confirmedHere = $yearId && SlcAttendanceImportRow::where('student_id', $row->student_id)->where('id', '!=', $row->id)
+            ->whereIn('confirmed_code', AttendanceCodes::IN_ATTENDANCE)->whereHas('import', fn ($q) => $q->where('academic_year_id', $yearId))->exists();
+        $codeIds = DB::table('attendance_codes')->whereIn('code', AttendanceCodes::IN_ATTENDANCE)->whereNull('deleted_at')->pluck('id');
+        $onSlcTab = $yearId && $crel && DB::table('slc_attendances as a')->join('slc_registrations as g', 'g.id', '=', 'a.slc_registration_id')
+            ->where('a.student_course_relation_id', $crel)->where('g.academic_year_id', $yearId)->whereIn('a.attendance_code_id', $codeIds)
+            ->whereNull('a.deleted_at')->exists();
+
+        return $confirmedHere || $onSlcTab ? 'SLC won’t take D (never attended) once the student’s attendance is confirmed for the year. Use X (not in attendance) instead.' : null;
+    }
+
+    /**
+     * The saved file, or — when it can't be read (a database copied from another server, a save that
+     * failed) — built again from the batch's lines with its file date, which gives the same file.
+     */
+    private function batchFile(SlcAttendanceBatch $batch): array
+    {
+        $text = '';
+        if ($batch->path) {
+            try {
+                $text = (string) Storage::disk($batch->disk ?: FileDisk::name())->get($batch->path);
+            } catch (\Throwable $e) {
+                $text = '';
+            }
+        }
+
+        return $text !== ''
+            ? ['text' => $text, 'rebuilt' => false]
+            : ['text' => $this->buildBatchText($batch, \Carbon\Carbon::parse($batch->file_date ?: now())), 'rebuilt' => true];
     }
 
     public function markUploaded(string $code): string
@@ -530,6 +752,325 @@ class AttendanceActions
         $this->log('marked batch '.$batch->code.' as uploaded to SIS ('.Text::plural($n, 'student').')');
 
         return 'Batch '.$batch->code.' marked uploaded to SIS.';
+    }
+
+    /* ------------------------------------------------ Rejected by SIS (user, 13 Nov 2026) */
+
+    /**
+     * Lines of an uploaded batch that SIS rejected (its Attendance Confirmation Import Results, spec v9.0 §7.3): they
+     * leave the batch and go back to step 4 with their code, to be confirmed into a new batch and sent again. The
+     * batch keeps them listed as rejected (its saved file stays as sent); a newer upload's copy of the line, which
+     * showed the batch as its earlier one, is freed with it. A line already recorded on the SLC tab can't be.
+     */
+    public function markRejected(string $code, array $rowIds, string $reason): string
+    {
+        $batch = SlcAttendanceBatch::where('code', $code)->first() ?? $this->fail('Batch not found.');
+        if ($batch->status !== 'uploaded') {
+            $this->fail('Only a batch uploaded to SIS has results to record.');
+        }
+        $rows = SlcAttendanceImportRow::where('slc_attendance_batch_id', $batch->id)->whereIn('id', $rowIds)->whereNull('slc_recorded')->get();
+        if ($rows->isEmpty()) {
+            $this->fail('Tick students of this batch whose attendance isn’t recorded on the SLC tab.');
+        }
+        $reason = trim($reason);
+        DB::transaction(function () use ($rows, $batch, $reason) {
+            foreach ($rows as $row) {
+                $mark = ['sis_rejected_batch_id' => $batch->id, 'sis_rejected_code' => $row->confirmed_code, 'sis_rejected_reason' => $reason ?: null,
+                    'sis_rejected_by' => $this->user(), 'sis_rejected_at' => now()];
+                $free = ['confirmed_code' => null, 'confirmed_by' => null, 'confirmed_at' => null, 'slc_attendance_batch_id' => null, 'earlier_batch_id' => null];
+                $row->update($free + $mark + ['sis_rejected_item' => true]);
+                SlcAttendanceImportRow::where('ssn', $row->ssn)->where('id', '!=', $row->id)->where('earlier_batch_id', $batch->id)
+                    ->get()->each(fn ($copy) => $copy->update($free + $mark + ['sis_rejected_item' => false]));
+            }
+        });
+        $who = $rows->count() === 1 ? $this->who($rows->first()) : Text::plural($rows->count(), 'student');
+        $this->log('recorded '.$who.' as rejected by SIS in batch '.$batch->code.($reason !== '' ? ' ('.$reason.')' : '').' – back to step 4 to send again');
+
+        return $who.' back on step 4 to be confirmed into a new batch.';
+    }
+
+    /** A line marked rejected by mistake goes back into its batch — while it hasn't been confirmed again. */
+    public function undoRejected(int $rowId): string
+    {
+        $row = SlcAttendanceImportRow::where('id', $rowId)->where('sis_rejected_item', true)->first() ?? $this->fail('That line isn’t marked rejected.');
+        $batchId = $row->sis_rejected_batch_id;
+        $copies = SlcAttendanceImportRow::where('ssn', $row->ssn)->where('id', '!=', $row->id)->where('sis_rejected_batch_id', $batchId)->where('sis_rejected_item', false)->get();
+        if ($row->confirmed_code || $copies->contains(fn ($c) => $c->confirmed_code)) {
+            $this->fail('It has been confirmed again since – remove it from the new batch first.');
+        }
+        $clear = ['sis_rejected_batch_id' => null, 'sis_rejected_item' => false, 'sis_rejected_code' => null, 'sis_rejected_reason' => null, 'sis_rejected_by' => null, 'sis_rejected_at' => null];
+        $back = ['confirmed_code' => $row->sis_rejected_code, 'confirmed_by' => $this->user(), 'confirmed_at' => now()];
+        DB::transaction(function () use ($row, $copies, $clear, $back, $batchId) {
+            $row->update($back + ['slc_attendance_batch_id' => $batchId] + $clear);
+            $copies->each(fn ($c) => $c->update($back + ['earlier_batch_id' => $batchId] + $clear));
+        });
+        $code = SlcAttendanceBatch::find($batchId)?->code;
+        $this->log('took back the SIS rejection of '.$this->who($row).' – back in batch '.$code);
+
+        return $this->who($row).' is back in batch '.$code.'.';
+    }
+
+    /* ------------------------------------------------ Bulk Attendance & Installment (user, 13 Nov 2026) */
+
+    /**
+     * What Bulk Attendance & Installment records for each line of a batch — and what the batch's student list
+     * shows beforehand (user, 13 Nov 2026) — filled as staff fill them by hand:
+     *   attendance (SLC tab › Add Attendance): the year's SLC registration (Yes, active course), confirmation
+     *     date = the day the batch was marked uploaded, the liability period's term and session term
+     *     (AttendanceState::liability: the earliest period without an attendance), the confirmed code,
+     *     attendance year = the registration year; the CoC the code needed (queued on confirming) is linked;
+     *   instalment (Accounts tab), for a fee-paying code only (A, L — spec v9.0 Appendix A): SLC pays the
+     *     Tuition Fee Loan in three — 25% for term 1, 25% for term 2, 50% for term 3 — of the line's TFL
+     *     (field 11), not the course fee; on the registration's agreement (slc_installments needs one).
+     * D (never attended) has no registration: the attendance is recorded without one. A line already recorded
+     * shows what was saved.
+     *
+     * @return array<int, array> by row id
+     */
+    private function plans(SlcAttendanceBatch $batch, ?array $rowIds = null): array
+    {
+        $q = SlcAttendanceImportRow::where('slc_attendance_batch_id', $batch->id)->orderBy('confirmed_at')->orderBy('id');
+        $rows = ($rowIds === null ? $q : $q->whereIn('id', $rowIds))->get();
+        if ($rows->isEmpty()) {
+            return [];
+        }
+        $open = $rows->whereNull('slc_recorded');
+        [$students, $periods] = $open->isNotEmpty() ? app(AttendanceState::class)->periodsFor($open, $batch->academic_year_id) : [[], []];
+        $date = $batch->uploaded_at?->toDateString();
+        $codeIds = DB::table('attendance_codes')->whereNull('deleted_at')->pluck('id', 'code')->mapWithKeys(fn ($id, $c) => [strtoupper($c) => (int) $id])->all();
+        $notReg = AttendanceState::notRegistered($students, $batch->academic_year_id);
+        $out = [];
+        foreach ($rows as $row) {
+            $out[$row->id] = $row->slc_recorded ? $this->recordedPlan($row)
+                : $this->plan($row, $students[(int) $row->student_id] ?? null, $periods[(int) $row->student_id] ?? null, $date, $codeIds, $notReg[(int) $row->student_id] ?? null);
+        }
+
+        return $out;
+    }
+
+    private function plan(SlcAttendanceImportRow $row, ?array $s, ?array $l, ?string $date, array $codeIds, ?array $notReg = null): array
+    {
+        $code = strtoupper((string) $row->confirmed_code);
+        // a Not Registered student's X or S (spec §7.2.3) is recorded against that registration, with no instalment
+        $reg = ($s['registration'] ?? null) ?: ($notReg && in_array($code, AttendanceCodes::NOT_REGISTERED, true) ? $notReg : null);
+        $tfl = (float) ($row->data['tfl'] ?? 0);
+        $p = ['rowId' => $row->id, 'recorded' => false, 'status' => null, 'problem' => null, 'attendance' => null, 'installment' => null, 'noInstallment' => null,
+            'taken' => [], 'moved' => false, 'tfl' => $tfl, 'row' => $row, 's' => $s];
+        $p['problem'] = !$s ? 'student not matched' : (!$s['crel_id'] ? 'no active course' : (!$s['instance'] ? 'no course instance for the year'
+            : (!isset($codeIds[$code]) ? 'code '.$code.' is not in the attendance code list'
+            : (!$reg && $code !== 'D' ? 'no SLC registration recorded for the year' : null))));
+        if (!$s || !$s['crel_id'] || !$s['instance']) {
+            return $p;
+        }
+
+        // the year's Term 1–3 (course instance), and what the SLC tab / Accounts tab already have for each
+        $terms = DB::table('instance_terms as t')->join('term_declarations as d', 'd.id', '=', 't.term_declaration_id')
+            ->where('t.course_creation_instance_id', $s['instance']['id'])->whereNull('t.deleted_at')->whereNotNull('t.session_term')
+            ->orderBy('t.session_term')->get(['t.session_term', 'd.id', 'd.name'])->keyBy(fn ($t) => (int) $t->session_term);
+        if ($terms->isEmpty() && $l && $l['termDeclarationId'] && $l['sessionTerm']) {
+            $terms = collect([(int) $l['sessionTerm'] => (object) ['session_term' => $l['sessionTerm'], 'id' => $l['termDeclarationId'], 'name' => $l['decl']]]); // class plans
+        }
+        $termOfDecl = $terms->mapWithKeys(fn ($t) => [(int) $t->id => (int) $t->session_term]);
+        $agr = $reg ? DB::table('slc_agreements')->where('slc_registration_id', $reg['id'])->where('year', $reg['year'])->where('student_id', $s['id'])
+            ->where('student_course_relation_id', $s['crel_id'])->whereNull('deleted_at')->orderBy('id')->first(['id', 'year']) : null;
+        $atts = DB::table('slc_attendances as a')->leftJoin('attendance_codes as c', 'c.id', '=', 'a.attendance_code_id')->where('a.student_id', $s['id'])->whereNull('a.deleted_at')
+            ->where(function ($q) use ($s, $reg, $termOfDecl) {
+                $q->where(fn ($w) => $w->where('a.student_course_relation_id', $s['crel_id'])->whereIn('a.term_declaration_id', $termOfDecl->keys()->all() ?: [0]));
+                if ($reg) {
+                    $q->orWhere('a.slc_registration_id', $reg['id']);
+                }
+            })->orderBy('a.id')->get(['a.id', 'a.session_term', 'a.term_declaration_id', 'a.confirmation_date', 'a.created_by', 'c.code']);
+        $insts = DB::table('slc_installments')->where('student_id', $s['id'])->whereNull('deleted_at')
+            ->where(function ($q) use ($s, $agr, $termOfDecl) {
+                $q->where(fn ($w) => $w->where('student_course_relation_id', $s['crel_id'])->whereIn('term_declaration_id', $termOfDecl->keys()->all() ?: [0]));
+                if ($agr) {
+                    $q->orWhere('slc_agreement_id', $agr->id);
+                }
+            })->orderBy('id')->get(['id', 'session_term', 'term_declaration_id', 'installment_date', 'amount', 'slc_money_receipt_id']);
+        $termNo = fn ($x) => (int) ($x->session_term ?: ($termOfDecl[(int) $x->term_declaration_id] ?? 0));
+        $names = RegistrationState::names($atts->pluck('created_by')->all());
+        $day = fn ($d) => $d ? substr((string) $d, 0, 10) : null;
+
+        // (user, 13 Nov 2026) no overwriting: a term already on the SLC tab is passed over and the line is recorded as
+        // a new attendance (and instalment) for the year's first term that has none — Term 1 there → Term 2, …
+        $taken = [];
+        foreach (RecordTerm::SESSIONS as $n) {
+            $a = $atts->first(fn ($x) => $termNo($x) === $n);
+            if (!$a) {
+                continue;
+            }
+            $i = $insts->first(fn ($x) => $termNo($x) === $n);
+            $taken[$n] = ['sessionTerm' => $n, 'term' => $terms[$n]->name ?? null,
+                'attendance' => ['id' => (int) $a->id, 'code' => $a->code, 'date' => $day($a->confirmation_date), 'by' => $names[$a->created_by] ?? ''],
+                'installment' => $i ? ['id' => (int) $i->id, 'amount' => (float) $i->amount, 'date' => $day($i->installment_date), 'receiptId' => $i->slc_money_receipt_id ? (int) $i->slc_money_receipt_id : null] : null];
+        }
+        // the Session Term and Attendance Term: as chosen on step 4, else the suggested one (RecordTerm)
+        $termList = $terms->map(fn ($t) => ['id' => (int) $t->id, 'name' => $t->name])->all();
+        $res = RecordTerm::resolve($termList, RecordTerm::suggest($termList, array_keys($taken)), $row->record_session_term ? (int) $row->record_session_term : null,
+            $row->record_term_declaration_id ? (int) $row->record_term_declaration_id : null);
+        $period = $res['sessionTerm'];
+        $p['taken'] = array_values($taken);
+        $p['chosen'] = $res['chosen'];
+        $p['moved'] = !$res['chosen'] && $period && $taken && $period > min(array_keys($taken)) && $l && (int) $l['sessionTerm'] !== $period;
+        if (!$period) {
+            $p['problem'] ??= 'Terms 1–3 of '.($reg ? 'Year '.$reg['year'] : 'the year').' are already on the SLC tab';
+
+            return $p;
+        }
+        if (isset($taken[$period])) {
+            $p['problem'] ??= 'Term '.$period.' is already on the SLC tab (#'.$taken[$period]['attendance']['id'].') – choose a free Session Term on step 4';
+
+            return $p;
+        }
+        if (!$res['termDeclarationId']) {
+            $p['problem'] ??= 'no Term '.$period.' on the course instance – choose the Attendance Term on step 4'.($taken ? ' (Term '.implode(', ', array_keys($taken)).' already on the SLC tab)' : '');
+
+            return $p;
+        }
+        $t = (object) ['id' => $res['termDeclarationId'], 'name' => $res['term']];
+        $p['attendance'] = [
+            'registrationId' => $reg['id'] ?? null, 'registrationYear' => $reg['year'] ?? null, 'date' => $date,
+            'termDeclarationId' => (int) $t->id, 'term' => $t->name, 'sessionTerm' => $period,
+            'code' => $code, 'codeId' => $codeIds[$code] ?? null, 'attendanceYear' => $reg['year'] ?? ((int) ($s['instance']['rank'] ?? 0) ?: null),
+        ];
+
+        // the instalment: fee-paying codes only, a share of the TFL by the term — 25%, 25%, 50%
+        $already = $insts->first(fn ($x) => $termNo($x) === $period);
+        if (!in_array($code, AttendanceCodes::FEE_PAYING, true)) {
+            $p['noInstallment'] = $code.' releases no tuition fee payment';
+        } elseif ($tfl <= 0) {
+            $p['noInstallment'] = 'No Tuition Fee Loan on SLC’s line, so SLC pays the college nothing';
+        } elseif ($already) {
+            $p['noInstallment'] = 'Term '.$period.' instalment already on Accounts (#'.$already->id.' · '.Text::money($already->amount).')'; // not added twice
+        } elseif (!isset(AttendanceCodes::PERIOD_SHARE[$period])) {
+            $p['noInstallment'] = 'No instalment share for Term '.$period.' (25%, 25%, 50% over Terms 1–3)';
+        } elseif ($reg) {
+            $share = AttendanceCodes::PERIOD_SHARE[$period];
+            $p['installment'] = [
+                'agreementId' => $agr ? (int) $agr->id : null, 'agreementYear' => $agr ? (int) $agr->year : null, 'date' => $date,
+                'termDeclarationId' => (int) $t->id, 'term' => $t->name, 'sessionTerm' => $period,
+                'amount' => round($tfl * $share, 2), 'share' => (int) round($share * 100),
+            ];
+            if (!$agr) {
+                $p['problem'] ??= 'no SLC agreement for Year '.$reg['year'].' on the Accounts tab, needed for the instalment';
+            }
+        }
+
+        return $p;
+    }
+
+    /** A line already recorded: the attendance and instalment it saved. */
+    private function recordedPlan(SlcAttendanceImportRow $row): array
+    {
+        $a = $row->slc_attendance_id ? DB::table('slc_attendances as a')->leftJoin('term_declarations as d', 'd.id', '=', 'a.term_declaration_id')
+            ->leftJoin('attendance_codes as c', 'c.id', '=', 'a.attendance_code_id')->leftJoin('slc_registrations as g', 'g.id', '=', 'a.slc_registration_id')
+            ->where('a.id', $row->slc_attendance_id)->first(['a.id', 'a.slc_registration_id', 'g.registration_year', 'a.confirmation_date', 'a.term_declaration_id', 'd.name', 'a.session_term', 'c.code', 'a.deleted_at']) : null;
+        $i = $row->slc_installment_id ? DB::table('slc_installments as i')->leftJoin('term_declarations as d', 'd.id', '=', 'i.term_declaration_id')
+            ->leftJoin('slc_agreements as g', 'g.id', '=', 'i.slc_agreement_id')
+            ->where('i.id', $row->slc_installment_id)->first(['i.id', 'i.slc_agreement_id', 'g.year', 'i.installment_date', 'i.term_declaration_id', 'd.name', 'i.session_term', 'i.amount', 'i.deleted_at']) : null;
+        $day = fn ($d) => $d ? substr((string) $d, 0, 10) : null;
+
+        return ['rowId' => $row->id, 'recorded' => true, 'status' => $row->slc_recorded, 'problem' => null, 'taken' => [], 'moved' => false, 'tfl' => (float) ($row->data['tfl'] ?? 0),
+            'attendance' => $a ? ['id' => (int) $a->id, 'registrationId' => $a->slc_registration_id ? (int) $a->slc_registration_id : null, 'registrationYear' => $a->registration_year ? (int) $a->registration_year : null,
+                'date' => $day($a->confirmation_date), 'termDeclarationId' => (int) $a->term_declaration_id, 'term' => $a->name, 'sessionTerm' => (int) $a->session_term, 'code' => $a->code, 'deleted' => (bool) $a->deleted_at] : null,
+            'installment' => $i ? ['id' => (int) $i->id, 'agreementId' => (int) $i->slc_agreement_id, 'agreementYear' => $i->year ? (int) $i->year : null, 'date' => $day($i->installment_date),
+                'termDeclarationId' => (int) $i->term_declaration_id, 'term' => $i->name, 'sessionTerm' => (int) $i->session_term, 'amount' => (float) $i->amount, 'deleted' => (bool) $i->deleted_at] : null,
+            'noInstallment' => $i ? null : (in_array(strtoupper((string) $row->confirmed_code), AttendanceCodes::FEE_PAYING, true) ? 'No instalment was added' : strtoupper((string) $row->confirmed_code).' releases no tuition fee payment'),
+        ];
+    }
+
+    /** Batches › View students: each line's attendance and instalment, to be recorded or recorded (user, 13 Nov 2026). */
+    public function batchPreview(string $code): array
+    {
+        $batch = SlcAttendanceBatch::where('code', $code)->first() ?? $this->fail('Batch not found.');
+        $rows = [];
+        $expected = 0.0;
+        $paid = 0.0;
+        $n = ['toRecord' => 0, 'moved' => 0, 'problem' => 0];
+        foreach ($this->plans($batch) as $id => $p) {
+            unset($p['row'], $p['s']);
+            $amount = (float) ($p['installment']['amount'] ?? 0);
+            if ($p['recorded']) {
+                $paid += empty($p['installment']['deleted']) ? $amount : 0;
+            } elseif ($p['problem']) {
+                $n['problem']++;
+            } else {
+                $expected += $amount;
+                $n['toRecord']++;
+                $n['moved'] += $p['moved'] ? 1 : 0; // recorded as a later term: the one asked about is already there
+            }
+            $rows[$id] = $p;
+        }
+
+        return ['code' => $batch->code, 'date' => $batch->uploaded_at?->toDateString(), 'rows' => $rows, 'expected' => round($expected, 2), 'recorded' => round($paid, 2)] + $n;
+    }
+
+    /**
+     * Bulk Attendance & Installment: for the ticked students of a batch uploaded to SIS, a new attendance on the
+     * SLC tab and, for a fee-paying code, a new instalment on the Accounts tab, as their plan shows (plans()).
+     * Nothing already there is changed (user, 13 Nov 2026): a term already on the SLC tab is passed over for the
+     * year's next free term (Term 1 there → Term 2). A student the plan can't record is skipped with the reason.
+     */
+    public function bulkAttendance(string $code, array $rowIds): string
+    {
+        $batch = SlcAttendanceBatch::where('code', $code)->first() ?? $this->fail('Batch not found.');
+        if ($batch->status !== 'uploaded') {
+            $this->fail('Mark the batch uploaded to SIS first.');
+        }
+        $all = $this->plans($batch, $rowIds);
+        $plans = array_filter($all, fn ($p) => !$p['recorded']);
+        if (!$plans) {
+            $this->fail($all ? 'Those students’ attendance is already recorded.' : 'Tick at least one student of this batch.');
+        }
+        $done = [];
+        $moved = [];
+        $skipped = [];
+        $paid = [0, 0.0]; // instalments added, their total
+        $note = 'Confirmed in bulk (SLC attendance batch '.$batch->code.')';
+
+        DB::transaction(function () use ($plans, $note, &$done, &$moved, &$skipped, &$paid) {
+            foreach ($plans as $p) {
+                $row = $p['row'];
+                $s = $p['s'];
+                $who = $s['reg_no'] ?? $row->ssn;
+                if ($p['problem']) {
+                    $skipped[] = $who.' ('.$p['problem'].')';
+                    continue;
+                }
+                $a = $p['attendance'];
+                $att = \App\Models\SlcAttendance::create([
+                    'student_id' => $s['id'], 'course_relation_id' => $s['course_creation_id'], 'student_course_relation_id' => $s['crel_id'],
+                    'course_creation_instance_id' => $s['instance']['id'], 'slc_registration_id' => $a['registrationId'] ?? 0, 'confirmation_date' => $a['date'],
+                    'attendance_year' => $a['attendanceYear'], 'term_declaration_id' => $a['termDeclarationId'], 'session_term' => $a['sessionTerm'],
+                    'attendance_code_id' => $a['codeId'], 'note' => $note, 'created_by' => $this->user(),
+                ]);
+                if ($row->slc_coc_id) {
+                    \App\Models\SlcCoc::where('id', $row->slc_coc_id)->whereNull('slc_attendance_id')->update(['slc_attendance_id' => $att->id]);
+                }
+                $i = $p['installment'];
+                $installment = $i ? \App\Models\SlcInstallment::create([
+                    'student_id' => $s['id'], 'student_course_relation_id' => $s['crel_id'], 'course_creation_instance_id' => $s['instance']['id'],
+                    'slc_attendance_id' => $att->id, 'slc_agreement_id' => $i['agreementId'], 'installment_date' => $i['date'], 'amount' => $i['amount'],
+                    'session_term' => $i['sessionTerm'], 'term_declaration_id' => $i['termDeclarationId'], 'created_by' => $this->user(),
+                ]) : null;
+                if ($installment) {
+                    $paid = [$paid[0] + 1, $paid[1] + (float) $i['amount']];
+                }
+                $row->update(['slc_attendance_id' => $att->id, 'slc_installment_id' => $installment?->id, 'slc_recorded' => 'created', 'slc_recorded_by' => $this->user(), 'slc_recorded_at' => now()]);
+                $done[] = $who.' (Term '.$a['sessionTerm'].')';
+                if ($p['moved']) {
+                    $moved[] = $who.': Term '.implode(', ', array_column($p['taken'], 'sessionTerm')).' already there → Term '.$a['sessionTerm'];
+                }
+            }
+        });
+
+        $inst = $paid[0] ? ', with '.Text::plural($paid[0], 'instalment').' ('.Text::money($paid[1]).')' : '';
+        $this->log('Bulk Attendance & Installment for batch '.$batch->code.': '.($done ? Text::plural(count($done), 'SLC attendance').' recorded ('.implode(', ', $done).')'.$inst : 'nothing recorded')
+            .($moved ? '; recorded as the next free term: '.implode('; ', $moved) : '').($skipped ? '; not recorded: '.implode(', ', $skipped) : ''));
+
+        return ($done ? 'Recorded for '.Text::plural(count($done), 'student').$inst : 'Nothing recorded')
+            .($moved ? ' ('.count($moved).' as the next free term – the earlier term was already on the SLC tab)' : '')
+            .'.'.($skipped ? ' Not recorded: '.implode(', ', $skipped).'.' : '');
     }
 
     /* ------------------------------------------------------- carry-over */
@@ -569,6 +1110,11 @@ class AttendanceActions
                 }
                 if ($prev->attendance_code) {
                     $upd += ['attendance_code' => $prev->attendance_code, 'code_by' => $prev->code_by, 'code_at' => $prev->code_at];
+                    $did = true;
+                }
+                if ($prev->record_session_term || $prev->record_term_declaration_id) { // step 4's chosen SLC tab term
+                    $upd += ['record_session_term' => $prev->record_session_term, 'record_term_declaration_id' => $prev->record_term_declaration_id,
+                        'record_term_by' => $prev->record_term_by, 'record_term_at' => $prev->record_term_at];
                     $did = true;
                 }
                 $batch = $batches->get($prev->slc_attendance_batch_id ?: $prev->earlier_batch_id);

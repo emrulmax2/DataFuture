@@ -58,6 +58,22 @@
         </table></div>
     </section>
 
+    <!-- Not registered (user, 13 Nov 2026: "where are my not registered students"): marked on Identify, the
+         Data check or Pre-confirm; they leave every step, so they are listed here, with Undo -->
+    <section v-if="tab === 'notreg'" class="card">
+        <div class="card-h"><h2>Not registered</h2><span class="muted small">Record these as not registered in SIS’s registration worklist: the import file only carries Yes</span></div>
+        <div v-if="notreg.length === 0" class="empty">{{ q.trim() ? 'No students on this tab match “' + q.trim() + '”.' : 'No students marked not registered.' }}</div>
+        <div v-else class="tablebox"><table class="tbl" style="min-width: 760px">
+            <thead><tr><th scope="col">Student</th><th scope="col">SLC course</th><th scope="col">Marked by</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
+            <tbody><tr v-for="i in notreg" :key="i.id">
+                <th scope="row">{{ i.s ? i.s.first + ' ' + i.s.last : titleCase(i.r.first + ' ' + i.r.last) }}<StatusTag :status="i.s && i.s.status" /><div class="mono muted small" style="font-weight: 400">{{ i.r.ssn }}{{ i.s ? ' · ' + i.s.id : '' }}</div><StudentMobile v-if="i.s" :mobile="i.s.mobile" /></th>
+                <td>{{ i.r.slcCode }} · Year {{ i.r.year }}<div class="muted small">{{ i.r.courseName }}</div></td>
+                <td class="muted">{{ i.dec.by }} · {{ i.dec.at }}<div v-if="i.dec.reason" class="small">{{ i.dec.reason }}</div><div v-if="i.dec.carried" class="carried small">Carried over from an earlier upload</div></td>
+                <td><button type="button" class="btn btn-sm" :disabled="store.busy" title="Back to the step its checks put it in" @click="post('slc.registration.undo', { row_id: i.id })">Undo – back to checks</button><CommsLinks v-if="i.s" @open="(k) => openComms(k, i.s.sid, i.s.first + ' ' + i.s.last)" /></td>
+            </tr></tbody>
+        </table></div>
+    </section>
+
     <section v-if="tab === 'updates'" class="card">
         <div class="card-h"><h2>Changes made to our records</h2><span class="muted small">Taken from SLC data</span></div>
         <div v-if="updates.length === 0" class="empty">{{ q.trim() ? 'No students on this tab match “' + q.trim() + '”.' : 'No records updated yet.' }}</div>
@@ -87,6 +103,7 @@ export default {
         const tab = ref("coc");
         const copied = ref("");
         const allHolds = computed(() => list.value.filter((i) => i.stage === "held"));
+        const allNotreg = computed(() => list.value.filter((i) => i.stage === "notreg"));
         const allUpdates = computed(() => store.state.updates);
         // this step's search (user, 13 Nov 2026): every tab's list, by name, reg no., email, SLC name or SSN
         const q = ref("");
@@ -94,9 +111,10 @@ export default {
         const cocItems = computed(() => allCoc.value.filter(({ i }) => hit(searchText(i))));
         const contactItems = computed(() => allContact.value.filter(({ i }) => hit(searchText(i))));
         const holds = computed(() => allHolds.value.filter((i) => hit(searchText(i))));
+        const notreg = computed(() => allNotreg.value.filter((i) => hit(searchText(i))));
         const updates = computed(() => allUpdates.value.filter((u) => hit(searchJoin(u.name, u.sid, u.emails))));
-        const tabs = computed(() => [["coc", "CoC to issue", cocItems.value.length], ["contact", "Contact student", contactItems.value.length], ["holds", "Other holds", holds.value.length], ["updates", "Our record updated", updates.value.length]]);
-        const allTabs = computed(() => [["coc", "", allCoc.value.length], ["contact", "", allContact.value.length], ["holds", "", allHolds.value.length], ["updates", "", allUpdates.value.length]]);
+        const tabs = computed(() => [["coc", "CoC to issue", cocItems.value.length], ["contact", "Contact student", contactItems.value.length], ["holds", "Other holds", holds.value.length], ["notreg", "Not registered", notreg.value.length], ["updates", "Our record updated", updates.value.length]]);
+        const allTabs = computed(() => [["coc", "", allCoc.value.length], ["contact", "", allContact.value.length], ["holds", "", allHolds.value.length], ["notreg", "", allNotreg.value.length], ["updates", "", allUpdates.value.length]]);
         const copy = (k, text) => {
             try { navigator.clipboard.writeText(text).then(() => { copied.value = k; }, () => { copied.value = "fail"; }); } catch (e) { copied.value = "fail"; }
         };
@@ -107,7 +125,7 @@ export default {
         const openComms = (kind, studentId, name, contact = null) => {
             comms.value = { k: Date.now(), kind, studentId, name, contact, preset: contact ? { subject: "Your Student Finance details", text: contact.text } : null };
         };
-        return { q, allTabs, store, post, tab, tabs, comms, openComms, copied, holds, updates, cocItems, contactItems, copy, mark, clear, contactMessage, COC_TYPE, titleCase };
+        return { q, allTabs, store, post, tab, tabs, comms, openComms, copied, holds, notreg, updates, cocItems, contactItems, copy, mark, clear, contactMessage, COC_TYPE, titleCase };
     },
 };
 </script>
