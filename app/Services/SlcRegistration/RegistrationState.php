@@ -81,6 +81,8 @@ class RegistrationState
             'counts' => $counts,
             'batches' => $batches->map(fn ($b) => [
                 'id' => $b->code, 'key' => $b->id, 'status' => $b->status, 'header' => $b->header,
+                // the header number Regenerate suggests (the next file number, this batch left out)
+                'nextNumber' => $b->status !== 'awaiting' && $b->header ? SisFile::nextNumber($b->header, $b->id) : null,
                 'items' => $batchItems->where('slc_bulk_batch_id', $b->id)->values()->map(fn ($it) => [
                     'rowId' => $it->id, 'r' => ['ssn' => $it->ssn],
                     'name' => trim(($itemStudents[$it->student_id]->first_name ?? '').' '.($itemStudents[$it->student_id]->last_name ?? '')),
@@ -90,7 +92,8 @@ class RegistrationState
                     // Bulk SLC Registration: what was done for the line, or what the student already has
                     'record' => $itemRecords[$it->id],
                 ])->all(),
-                'file' => $b->path ? ['name' => $b->file_name] : null,
+                // the date in field 1 (Batches › Regenerate file offers to keep it or use today)
+                'file' => $b->path ? ['name' => $b->file_name, 'date' => $b->file_date ? \Carbon\Carbon::parse($b->file_date)->toDateString() : null] : null,
                 'createdBy' => $this->name($b->created_by), 'createdAt' => $this->when($b->created_at),
                 'downloadedBy' => $b->downloaded_by ? $this->name($b->downloaded_by) : null, 'downloadedAt' => $this->when($b->downloaded_at),
                 'uploadedBy' => $b->uploaded_by ? $this->name($b->uploaded_by) : null, 'uploadedAt' => $this->when($b->uploaded_at),

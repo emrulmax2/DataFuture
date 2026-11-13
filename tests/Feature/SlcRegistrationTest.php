@@ -195,17 +195,50 @@ class SlcRegistrationTest extends TestCase
         $before = count($batch['items']) - count($ids); // students already waiting in this batch on this install
         $this->assertSame(['awaiting', count($ids)], [$batch['status'], count($batch['items']) - $before]);
 
+        // the file's header takes the next file number (SLC numbers its files in a running sequence)
+        $header = SisFile::withNumber('HH26LCHC00001CR', SisFile::nextNumber('HH26LCHC00001CR', $batch['key']));
+        $this->assertGreaterThan(1, SisFile::number($header));
         $res = $this->postJson(route('slc.registration.batch.download'), ['code' => $batch['id']])->assertOk();
         $text = $res->json('file.text');
-        $this->assertSame(SisFile::fileName('HH26LCHC00001CR', $batch['id']), $res->json('file.name'));
+        $this->assertSame(SisFile::fileName($header, $batch['id']), $res->json('file.name'));
         $lines = explode("\r\n", rtrim($text));
-        $this->assertSame('HH26LCHC00001CR', $lines[0]);
+        $this->assertSame($header, $lines[0]);
+        $this->assertSame($header, collect($res->json('state.batches'))->firstWhere('id', $batch['id'])['header']);
         $this->assertSame('TT'.str_pad((string) (count($ids) + $before), 6, '0', STR_PAD_LEFT), end($lines));
         $fields = explode('~', $lines[1]);
         $this->assertSame([now()->format('dmY'), 'Y'], [$fields[0], $fields[28]]);
         Storage::disk('local')->assertExists('slc-registration/batches/'.$res->json('file.name'));
         $this->assertSame('downloaded', collect($res->json('state.batches'))->firstWhere('id', $batch['id'])['status']);
         $this->postJson(route('slc.registration.undo'), ['row_id' => $ids[0]])->assertStatus(422)->assertJsonPath('flash.text', 'That batch has already been downloaded.');
+
+        // the saved copy can't be read (a database copied from another server, a failed save): View file and
+        // Download again build the same file from the batch; Regenerate saves a fresh copy (user, 12 Nov 2026)
+        $name = $res->json('file.name');
+        $line1Date = fn ($fileText) => explode('~', explode("\r\n", $fileText)[1])[0];
+        Storage::disk('local')->delete('slc-registration/batches/'.$name);
+        $view = $this->getJson(route('slc.registration.batch.file', ['code' => $batch['id']]))->assertOk();
+        $this->assertSame([$text, true], [$view->json('text'), $view->json('rebuilt')]);
+        $again = $this->postJson(route('slc.registration.batch.download'), ['code' => $batch['id']])->assertOk();
+        $this->assertSame([$text, true], [$again->json('file.text'), $again->json('file.rebuilt')]);
+        $regen = $this->postJson(route('slc.registration.batch.regenerate'), ['code' => $batch['id'], 'date' => 'original'])->assertOk();
+        $this->assertSame($text, $regen->json('file.text'));
+        Storage::disk('local')->assertExists('slc-registration/batches/'.$name);
+        $this->assertFalse($this->getJson(route('slc.registration.batch.file', ['code' => $batch['id']]))->json('rebuilt'));
+        $this->assertSame('downloaded', collect($regen->json('state.batches'))->firstWhere('id', $batch['id'])['status']);
+        // keep the file's own date, or use today's
+        \App\Models\SlcBulkBatch::where('code', $batch['id'])->update(['file_date' => now()->subDay()->toDateString()]);
+        $kept = $this->postJson(route('slc.registration.batch.regenerate'), ['code' => $batch['id'], 'date' => 'original'])->assertOk();
+        $this->assertSame(now()->subDay()->format('dmY'), $line1Date($kept->json('file.text')));
+        $fresh = $this->postJson(route('slc.registration.batch.regenerate'), ['code' => $batch['id'], 'date' => 'today'])->assertOk();
+        $this->assertSame(now()->format('dmY'), $line1Date($fresh->json('file.text')));
+        $this->assertSame(now()->toDateString(), collect($fresh->json('state.batches'))->firstWhere('id', $batch['id'])['file']['date']);
+        $this->assertTrue(\App\Models\SlcBulkActivity::where('text', 'like', 'Regenerated SIS file '.$name.'%')->exists());
+        $this->postJson(route('slc.registration.batch.regenerate'), ['code' => $batch['id'], 'date' => 'someday'])->assertStatus(422);
+        // a header number chosen on Regenerate (SLC may give one); none chosen → the next file number
+        $chosen = $this->postJson(route('slc.registration.batch.regenerate'), ['code' => $batch['id'], 'date' => 'today', 'number' => 42])->assertOk();
+        $this->assertSame('HH26LCHC00042CR', explode("\r\n", $chosen->json('file.text'))[0]);
+        $this->assertSame('HH26LCHC00042CR', collect($chosen->json('state.batches'))->firstWhere('id', $batch['id'])['header']);
+        $this->postJson(route('slc.registration.batch.regenerate'), ['code' => $batch['id'], 'date' => 'today', 'number' => 0])->assertStatus(422);
 
         // Bulk SLC Registration needs the batch marked uploaded first
         $this->postJson(route('slc.registration.batch.register'), ['code' => $batch['id'], 'row_ids' => $ids])->assertStatus(422)->assertJsonPath('flash.text', 'Mark the batch uploaded to SIS first.');

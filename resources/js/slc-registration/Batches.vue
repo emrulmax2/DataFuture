@@ -101,13 +101,32 @@
         <div class="card-h"><h2 class="mono">{{ shown.file.name }}</h2>
             <div class="row">
                 <button type="button" class="btn btn-sm" :disabled="store.busy" @click="downloadAgain(shown)"><Ico name="down" />Download again</button>
+                <button type="button" class="btn btn-sm" :disabled="store.busy" :aria-expanded="regenFor === shown.id ? 'true' : 'false'" @click="openRegen(shown)">Regenerate file</button>
                 <button type="button" class="btn btn-sm" :disabled="!texts[shown.id]" @click="copy(texts[shown.id])">{{ copied || 'Copy text' }}</button>
             </div>
         </div>
         <div class="card-b stack">
+            <!-- Regenerate (user, 12 Nov 2026): build the file again from the batch's students, save it, download it -->
+            <div v-if="regenFor === shown.id" class="confirmrow">
+                <span style="flex: 1 1 100%">Build <b class="mono">{{ shown.file.name }}</b> again from the batch’s {{ plural(shown.items.length, 'student') }}, save it and download it.</span>
+                <!-- the header's file number: SLC numbers its files in a running sequence; suggested = the next one -->
+                <label class="row small" style="gap: 6px" for="regen-number">Header number
+                    <input id="regen-number" v-model="regenNumber" class="input mono" style="width: 84px" inputmode="numeric" maxlength="5" :aria-invalid="regenValid ? 'false' : 'true'" aria-describedby="regen-header">
+                </label>
+                <span id="regen-header" class="small">Header <b class="mono">{{ regenValid ? headerWith(shown.header, regenNumber) : '–' }}</b><span class="muted"> (was {{ shown.header }})</span></span>
+                <span class="small muted" style="flex: 1 1 100%; margin-top: -4px">Date in field 1:</span>
+                <template v-if="shown.file.date && shown.file.date !== today">
+                    <button type="button" class="btn btn-sm" :disabled="store.busy || !regenValid" @click="regenerate(shown, 'original')">Keep {{ fmtIso(shown.file.date) }}</button>
+                    <button type="button" class="btn btn-sm btn-primary" :disabled="store.busy || !regenValid" @click="regenerate(shown, 'today')">Use today ({{ fmtIso(today) }})</button>
+                </template>
+                <button v-else type="button" class="btn btn-sm btn-primary" :disabled="store.busy || !regenValid" @click="regenerate(shown, 'today')">Regenerate ({{ fmtIso(today) }})</button>
+                <button type="button" class="btn btn-sm" @click="regenFor = null">Cancel</button>
+            </div>
             <span v-if="msg" class="muted">{{ msg }}</span>
-            <pre class="file" aria-label="File preview">{{ texts[shown.id] || 'Loading…' }}</pre>
-            <div class="notice warn"><Ico name="info" /><span>Each row is the student’s original SIS line with field 1 set to today and field 29 set to <span class="mono">Y</span>. The <span class="mono">TT</span> + 6-digit count footer is assumed: check it against SLC’s import technical specification before the first live upload.</span></div>
+            <div v-if="rebuilt[shown.id]" class="notice"><Ico name="info" /><span>The saved copy of this file couldn’t be read here, so it was built again from the batch’s students with its original date – the same file. Use Regenerate file to save a fresh copy.</span></div>
+            <div v-if="texts[shown.id] === null" class="notice bad"><Ico name="info" /><span>The file couldn’t be loaded. Use Regenerate file to build it again from the batch.</span></div>
+            <pre v-else class="file" aria-label="File preview">{{ texts[shown.id] || 'Loading…' }}</pre>
+            <div class="notice warn"><Ico name="info" /><span>Each row is the student’s original SIS line with field 1 set to the file date and field 29 set to <span class="mono">Y</span>. The <span class="mono">HH</span> header and <span class="mono">TT</span> + record-count footer match SLC’s guide. Which column carries the confirmation is not yet confirmed against SLC’s import technical specification: SLC failed the first upload (12 Nov 2026) without reading any records.</span></div>
         </div>
     </section>
 </template>
@@ -126,6 +145,17 @@ export default {
         const copied = ref("");
         const viewId = ref(null);
         const texts = reactive({});
+        const rebuilt = reactive({}); // the saved copy couldn't be read, so the file shown was built again
+        const regenFor = ref(null);   // the batch whose Regenerate choice is open
+        const regenNumber = ref("");  // its header number (5 digits), the next file number suggested
+        const regenValid = computed(() => /^\d{1,5}$/.test(regenNumber.value) && Number(regenNumber.value) > 0);
+        const headerWith = (header, n) => header.slice(0, 8) + String(Number(n)).padStart(5, "0") + header.slice(13);
+        const openRegen = (b) => {
+            if (regenFor.value === b.id) { regenFor.value = null; return; }
+            regenFor.value = b.id;
+            regenNumber.value = String(b.nextNumber || Number(b.header.slice(8, 13)) || 1).padStart(5, "0");
+        };
+        const today = new Date().toLocaleDateString("en-CA"); // yyyy-mm-dd, local
         const batches = computed(() => store.state.batches);
         const shown = computed(() => batches.value.find((b) => b.id === viewId.value) || [...batches.value].reverse().find((b) => b.file));
 
@@ -157,7 +187,17 @@ export default {
         async function downloadAgain(b) {
             msg.value = "";
             const data = await post("slc.registration.batch.download", { code: b.id });
-            if (data && data.file) { texts[b.id] = data.file.text; save(data.file); }
+            if (data && data.file) { texts[b.id] = data.file.text; rebuilt[b.id] = !!data.file.rebuilt; save(data.file); }
+        }
+        async function regenerate(b, date) {
+            msg.value = "";
+            const data = await post("slc.registration.batch.regenerate", { code: b.id, date, number: Number(regenNumber.value) });
+            if (data && data.file) {
+                texts[b.id] = data.file.text;
+                rebuilt[b.id] = false;
+                regenFor.value = null;
+                save(data.file);
+            }
         }
         function copy(text) {
             try { navigator.clipboard.writeText(text).then(() => { copied.value = "Copied"; }, () => { copied.value = "Select the text below and copy it"; }); } catch (e) { copied.value = "Select the text below and copy it"; }
@@ -166,7 +206,8 @@ export default {
             copied.value = "";
             if (b && b.file && !texts[b.id]) {
                 const data = await get("slc.registration.batch.file", { code: b.id });
-                if (data) texts[b.id] = data.text;
+                texts[b.id] = data && data.text ? data.text : null; // null: say it couldn't be loaded (not "Loading…" for ever)
+                rebuilt[b.id] = !!(data && data.rebuilt);
             }
         }, { immediate: true });
 
@@ -230,7 +271,7 @@ export default {
         watch(sb, (b) => { if (!b) return; picked.value = picked.value.filter((id) => b.items.some((it) => it.rowId === id && isPickable(it))); });
 
         return { modal, mxGo, allowed, allAllowed, continueWithPermission, recordLabel, studentsOf, panel, picked, sb, canPick, isPickable, pickable, allPicked, somePicked, recorded, toggleAll, statusLine, openStudents, closeStudents, markUploaded, bulkRegister, fmtIso, plural,
-            store, post, awaitingList, yearOf, batches, shown, viewId, texts, msg, copied, downloadAwaiting, downloadAgain, copy };
+            store, post, awaitingList, yearOf, batches, shown, viewId, texts, rebuilt, regenFor, regenNumber, regenValid, headerWith, openRegen, today, regenerate, msg, copied, downloadAwaiting, downloadAgain, copy };
     },
 };
 </script>

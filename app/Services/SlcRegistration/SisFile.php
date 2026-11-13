@@ -59,6 +59,40 @@ class SisFile
         return ['raw' => $raw, 'ay' => substr($raw, 2, 2), 'hei' => substr($raw, 4, 4), 'seq' => substr($raw, 8, 5), 'type' => substr($raw, 13, 2)];
     }
 
+    /**
+     * The header with another 5-digit number in characters 9–13 (HH26LCHC00005CR → HH26LCHC00006CR).
+     * SLC's exports number their files in a running sequence (00003 on a 57-line report, later 00005 on a
+     * 47-line one), so the number is not a record count; a file we send takes the next number (user,
+     * 12 Nov 2026 — SLC's public guide doesn't define it; the import technical specification does).
+     */
+    public static function withNumber(string $headerRaw, int $number): string
+    {
+        return substr($headerRaw, 0, 8).str_pad((string) $number, 5, '0', STR_PAD_LEFT).substr($headerRaw, 13);
+    }
+
+    /** The 5-digit number of a header (characters 9–13), 0 when it isn't one. */
+    public static function number(?string $headerRaw): int
+    {
+        $n = substr((string) $headerRaw, 8, 5);
+
+        return ctype_digit($n) ? (int) $n : 0;
+    }
+
+    /**
+     * The number the next file we send should carry: one more than the highest number seen for that
+     * HEI — on SIS reports uploaded here and on batch files made here (leaving out $exceptBatchId, the
+     * batch being made again).
+     */
+    public static function nextNumber(string $headerRaw, ?int $exceptBatchId = null): int
+    {
+        $hei = substr($headerRaw, 4, 4);
+        $headers = \App\Models\SlcBulkImport::whereNotNull('header')->pluck('header')
+            ->merge(\App\Models\SlcBulkBatch::when($exceptBatchId, fn ($q) => $q->where('id', '!=', $exceptBatchId))->whereNotNull('header')->pluck('header'))
+            ->filter(fn ($h) => substr((string) $h, 4, 4) === $hei);
+
+        return (int) ($headers->map(fn ($h) => self::number($h))->max() ?? 0) + 1;
+    }
+
     /** Each student's original line with field 1 = the file date (ddmmyyyy) and field 29 = Y. */
     public static function build(string $headerRaw, array $rawLines, \DateTimeInterface $date): string
     {

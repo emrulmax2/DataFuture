@@ -414,7 +414,26 @@ class SlcRegistrationController extends Controller
         });
         if ($file) {
             $data = $response->getData(true);
-            $data['file'] = ['name' => $file['name'], 'text' => $file['text']];
+            $data['file'] = ['name' => $file['name'], 'text' => $file['text'], 'rebuilt' => $file['rebuilt'] ?? false];
+            $response->setData($data);
+        }
+
+        return $response;
+    }
+
+    /** Batches › Regenerate file (user, 12 Nov 2026): built again from the batch, saved, handed back to download. */
+    public function regenerateBatch(Request $request)
+    {
+        $request->validate(['code' => 'required|string|max:20', 'date' => 'required|in:original,today', 'number' => 'nullable|integer|min:1|max:99999']);
+        $file = null;
+        $response = $this->run(function () use ($request, &$file) {
+            $file = $this->actions->regenerate($request->code, $request->date === 'today', $request->filled('number') ? (int) $request->number : null);
+
+            return $file['message'];
+        });
+        if ($file) {
+            $data = $response->getData(true);
+            $data['file'] = ['name' => $file['name'], 'text' => $file['text'], 'rebuilt' => false];
             $response->setData($data);
         }
 

@@ -591,11 +591,16 @@ class DashboardController extends Controller
 
         return PlansDateList::with(['plan' => function($query) {
             $query->whereNull('deleted_at');
+        }, 'plan.group' => function($query) {
+            // a group deleted after the class was scheduled still names the class (as the tutor dashboard does)
+            $query->withTrashed();
         }, 'attendanceInformation', 'attendances'])
         ->where('date', $theDate)
         ->where('proxy_tutor_id', $proxyTutorId)
         ->orderBy('id', 'ASC')
         ->get()
+        // a deleted plan is left out (it used to reach the page as null and break it)
+        ->filter(fn ($classes) => $classes->plan !== null)
         ->sortBy(function($classes) {
             return isset($classes->plan->start_time) ? $classes->plan->start_time : '00:00:00';
         });
