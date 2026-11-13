@@ -399,9 +399,17 @@
                                 <input {{ (isset($priv['dashboard']['applicant_analysis']) && $priv['dashboard']['applicant_analysis'] == 1 ? 'checked' : '') }} id="permission_application_analysis_1" class="form-check-input" type="checkbox" value="1" name="permission[dashboard][applicant_analysis]">
                                 <label class="form-check-label ml-4" for="permission_application_analysis_1">Application Analysis</label>
                             </div>
-                            <div class="form-check form-switch">
+                            <div class="form-check form-switch mb-4">
                                 <input {{ (isset($priv['dashboard']['applicant_rejected']) && $priv['dashboard']['applicant_rejected'] == 1 ? 'checked' : '') }} id="permission_applicant_rejected_1" class="form-check-input" type="checkbox" value="1" name="permission[dashboard][applicant_rejected]">
                                 <label class="form-check-label ml-4" for="permission_applicant_rejected_1">Reject / In Progress Application</label>
+                            </div>
+                            <div class="form-check form-switch mb-4">
+                                <input {{ (isset($priv['dashboard']['applicant_add_task']) && $priv['dashboard']['applicant_add_task'] == 1 ? 'checked' : '') }} id="permission_applicant_add_task_1" class="form-check-input" type="checkbox" value="1" name="permission[dashboard][applicant_add_task]">
+                                <label class="form-check-label ml-4" for="permission_applicant_add_task_1">Add Task</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['dashboard']['applicant_delete_task']) && $priv['dashboard']['applicant_delete_task'] == 1 ? 'checked' : '') }} id="permission_applicant_delete_task_1" class="form-check-input" type="checkbox" value="1" name="permission[dashboard][applicant_delete_task]">
+                                <label class="form-check-label ml-4" for="permission_applicant_delete_task_1">Delete Task</label>
                             </div>
                         </div>
                     </div>

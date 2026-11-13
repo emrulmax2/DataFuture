@@ -739,30 +739,111 @@ class RegistrationActions
     {
         $batch = SlcBulkBatch::where('code', $code)->first() ?? $this->fail('Batch not found.');
         if ($batch->status === 'awaiting') {
-            $items = SlcBulkImportRow::where('slc_bulk_batch_id', $batch->id)->orderBy('decided_at')->orderBy('id')->get();
-            if ($items->isEmpty()) {
+            $lines = $this->batchLines($batch);
+            if (!$lines) {
                 $this->fail('The batch is empty.');
             }
-            $text = SisFile::build($batch->header, $items->pluck('raw')->all(), now());
-            $name = SisFile::fileName($batch->header, $batch->code);
+            // the header carries the batch's number (SLC-B001 → 00001), kept on the batch
+            $header = SisFile::withNumber($batch->header, SisFile::batchNumber($batch->code));
+            $text = SisFile::build($header, $lines, now());
+            $name = SisFile::fileName($header, $batch->code);
             $disk = FileDisk::name();
             $path = 'slc-registration/batches/'.$name;
-            Storage::disk($disk)->put($path, $text);
-            $batch->update(['status' => 'downloaded', 'file_name' => $name, 'disk' => $disk, 'path' => $path, 'file_date' => now()->toDateString(), 'downloaded_by' => $this->user(), 'downloaded_at' => now()]);
-            $this->log('Generated SIS file '.$name.' for batch '.$batch->code.' ('.Text::plural($items->count(), 'confirmation').')');
+            $this->storeBatchFile($disk, $path, $text);
+            $batch->update(['header' => $header, 'status' => 'downloaded', 'file_name' => $name, 'disk' => $disk, 'path' => $path, 'file_date' => now()->toDateString(), 'downloaded_by' => $this->user(), 'downloaded_at' => now()]);
+            $this->log('Generated SIS file '.$name.' for batch '.$batch->code.' ('.Text::plural(count($lines), 'confirmation').')');
 
-            return ['name' => $name, 'text' => $text, 'message' => 'Saved '.$name.'.'];
+            return ['name' => $name, 'text' => $text, 'rebuilt' => false, 'message' => 'Saved '.$name.'.'];
         }
-        $this->log('Downloaded '.$batch->file_name);
+        $file = $this->batchFile($batch);
+        $this->log('Downloaded '.$batch->file_name.($file['rebuilt'] ? ' (rebuilt from the batch: the saved copy could not be read)' : ''));
 
-        return ['name' => $batch->file_name, 'text' => (string) Storage::disk($batch->disk)->get($batch->path), 'message' => 'Saved '.$batch->file_name.'.'];
+        return ['name' => $batch->file_name, 'text' => $file['text'], 'rebuilt' => $file['rebuilt'], 'message' => 'Saved '.$batch->file_name.'.'];
     }
 
     public function fileText(string $code): array
     {
         $batch = SlcBulkBatch::where('code', $code)->whereNotNull('path')->first() ?? $this->fail('That batch has no file yet.');
+        $file = $this->batchFile($batch);
 
-        return ['name' => $batch->file_name, 'text' => (string) Storage::disk($batch->disk)->get($batch->path)];
+        return ['name' => $batch->file_name, 'text' => $file['text'], 'rebuilt' => $file['rebuilt']];
+    }
+
+    /**
+     * Regenerate a downloaded batch's SIS file (user, 12 Nov 2026): built again from the batch's
+     * students — field 1 the original file date, or today's — saved again and handed back to
+     * download. The batch's status (downloaded / uploaded) does not change.
+     */
+    public function regenerate(string $code, bool $today, ?int $number = null): array
+    {
+        $batch = SlcBulkBatch::where('code', $code)->first() ?? $this->fail('Batch not found.');
+        if ($batch->status === 'awaiting') {
+            $this->fail('Download the SIS file first.');
+        }
+        $lines = $this->batchLines($batch);
+        if (!$lines) {
+            $this->fail('The batch has no students to build the file from.');
+        }
+        $date = $today ? now() : \Carbon\Carbon::parse($batch->file_date ?: now());
+        // the header's number: as chosen, else the batch's own (SLC-B001 → 00001)
+        $header = SisFile::withNumber($batch->header, $number ?: SisFile::batchNumber($batch->code));
+        $text = SisFile::build($header, $lines, $date);
+        $name = SisFile::fileName($header, $batch->code); // REG_LCHC_26_B001.txt
+        $disk = FileDisk::name();
+        $path = 'slc-registration/batches/'.$name;
+        $saved = $this->storeBatchFile($disk, $path, $text);
+        $batch->update(['header' => $header, 'file_name' => $name, 'disk' => $disk, 'path' => $path, 'file_date' => $date->toDateString()]);
+        $this->log('Regenerated SIS file '.$name.' for batch '.$batch->code.' ('.Text::plural(count($lines), 'confirmation').', dated '.$date->format('d/m/Y').', header '.$header.')');
+
+        return ['name' => $name, 'text' => $text, 'rebuilt' => false,
+            'message' => 'Regenerated '.$name.' ('.Text::plural(count($lines), 'student').', dated '.$date->format('d/m/Y').', header '.$header.').'.($saved ? '' : ' It could not be saved to storage; it is built again whenever it is needed.')];
+    }
+
+    /** The batch's students' SIS lines, in the order the file lists them. */
+    private function batchLines(SlcBulkBatch $batch): array
+    {
+        return SlcBulkImportRow::where('slc_bulk_batch_id', $batch->id)->orderBy('decided_at')->orderBy('id')->pluck('raw')->all();
+    }
+
+    /**
+     * The batch's SIS file: the saved copy, or — when that can't be read (a database copied from
+     * another server, whose storage this one can't see; a save that failed) — built again from the
+     * batch's students with its file date, which gives the same file.
+     */
+    private function batchFile(SlcBulkBatch $batch): array
+    {
+        $text = '';
+        if ($batch->path) {
+            try {
+                $text = (string) Storage::disk($batch->disk ?: FileDisk::name())->get($batch->path);
+            } catch (\Throwable $e) {
+                $text = '';
+            }
+        }
+        if ($text !== '') {
+            return ['text' => $text, 'rebuilt' => false];
+        }
+        $lines = $this->batchLines($batch);
+        if (!$lines) {
+            $this->fail('The saved file could not be read and the batch has no students to build it from.');
+        }
+
+        return ['text' => SisFile::build($batch->header, $lines, \Carbon\Carbon::parse($batch->file_date ?: now())), 'rebuilt' => true];
+    }
+
+    /** Save a batch file; a failed save (the disks don't throw) is logged, not hidden. */
+    private function storeBatchFile(string $disk, string $path, string $text): bool
+    {
+        try {
+            $saved = (bool) Storage::disk($disk)->put($path, $text);
+        } catch (\Throwable $e) {
+            $saved = false;
+        }
+        if (!$saved) {
+            \Illuminate\Support\Facades\Log::warning('SLC registration: the batch file '.$path.' could not be saved to the '.$disk.' disk; it is built again from the batch when needed.');
+        }
+
+        return $saved;
     }
 
     /**

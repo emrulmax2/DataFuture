@@ -106,3 +106,21 @@ export function derive(i) {
         actions: errors.filter((c) => c.route === "coc" || c.route === "contact"),
     };
 }
+
+/*
+ * The search box on Bulk registration steps 1–4 (user, 13 Nov 2026): every word typed must appear in the
+ * line's text — the student's name, registration no. and emails, SLC's name and SSN for the line (and,
+ * for a line not yet identified, its best match). Case and accents are ignored.
+ */
+const searchNorm = (t) => String(t ?? "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+export function searchText(i) {
+    const s = i.s || (i.cands && i.cands[0] ? i.cands[0].s : null) || {};
+    const r = i.r || {};
+    return searchNorm([s.title, s.first, s.last, s.id, ...(s.emails || []), r.title, r.first, r.other, r.last, r.ssn].filter(Boolean).join(" "));
+}
+export function matchesSearch(q, text) {
+    const words = searchNorm(q).split(/\s+/).filter(Boolean);
+    return words.every((w) => text.includes(w));
+}
+/* searchText for any other shape of line: the parts given (strings or arrays of strings). */
+export const searchJoin = (...parts) => searchNorm(parts.flat().filter(Boolean).join(" "));

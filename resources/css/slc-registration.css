@@ -432,3 +432,10 @@ body {
   --ck-color-input-background: var(--surface); --ck-color-input-border: var(--line); --ck-color-input-text: var(--fg);
   --ck-color-labeled-field-label-background: var(--surface); --ck-color-focus-border: var(--accent);
 }
+
+/* Bulk registration steps 1–4 › search box (user, 13 Nov 2026) */
+.step-search { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.step-search__box { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 12px; min-width: 280px; max-width: 100%; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--muted); }
+.step-search__box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.step-search__box input { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: transparent; color: var(--fg); font: inherit; font-size: 14px; }
+.step-search__box input::placeholder { color: var(--muted); }

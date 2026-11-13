@@ -63,6 +63,9 @@ class LegacyPrivilegeMap
         'dashboard.applicant' => 'dashboard_applicant',
         'dashboard.applicant_analysis' => 'dashboard_applicant_analysis',
         'dashboard.applicant_rejected' => 'dashboard_applicant_rejected',
+        // Admission › applicant process page › "Add tasks" and a task's archive (bin) button (user, 13 Nov 2026)
+        'dashboard.applicant_add_task' => 'dashboard_applicant_add_task',
+        'dashboard.applicant_delete_task' => 'dashboard_applicant_delete_task',
         'dashboard.live' => 'dashboard_live_student',
         'dashboard.tutor_2' => 'dashboard_tutor',
         'dashboard.personal_tutor' => 'dashboard_personal_tutor',

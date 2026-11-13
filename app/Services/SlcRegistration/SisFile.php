@@ -3,16 +3,13 @@
 namespace App\Services\SlcRegistration;
 
 /**
- * The SIS "Registration Confirmation Report": an HH header line, one "~"-delimited line of 30
- * fields per student, and (perhaps) a TT footer. Reading and the confirmation file we hand back
- * follow the prototype exactly; the TT + six-digit count footer is its assumption, flagged on the
- * Batches page until it is checked against SLC's import specification.
+ * The SIS "Registration Confirmation Report" we read: an HH header line, one "~"-delimited line of
+ * 30 fields per student and a TT footer. The confirmation file we hand back (build) has its own,
+ * shorter layout — see build().
  */
 class SisFile
 {
     public const FIELDS = ['confirmDate', 'ay', 'title', 'first', 'other', 'last', 'gender', 'dob', 'ucasNo', 'ucasCourse', 'slcCode', 'courseName', 'year', 'start', 'address', 'postcode', 'ssn', 'fee', 'tfl', 'tfg', 'stp', 'f22', 'f23', 'f24', 'f25', 'f26', 'f27', 'f28', 'regConf', 'credits'];
-
-    public const REG_CONF_INDEX = 28; // field 29
 
     /**
      * @return array{header: ?array, footer: ?string, rows: array, errors: string[]}
@@ -59,27 +56,58 @@ class SisFile
         return ['raw' => $raw, 'ay' => substr($raw, 2, 2), 'hei' => substr($raw, 4, 4), 'seq' => substr($raw, 8, 5), 'type' => substr($raw, 13, 2)];
     }
 
-    /** Each student's original line with field 1 = the file date (ddmmyyyy) and field 29 = Y. */
+    /** The header with another 5-digit number in characters 9–13 (HH26LCHC00005CR → HH26LCHC00001CR). */
+    public static function withNumber(string $headerRaw, int $number): string
+    {
+        return substr($headerRaw, 0, 8).str_pad((string) $number, 5, '0', STR_PAD_LEFT).substr($headerRaw, 13);
+    }
+
+    /** The 5-digit number of a header (characters 9–13), 0 when it isn't one. */
+    public static function number(?string $headerRaw): int
+    {
+        $n = substr((string) $headerRaw, 8, 5);
+
+        return ctype_digit($n) ? (int) $n : 0;
+    }
+
+    /**
+     * The header number of a batch's file: the batch's own number (SLC-B001 → 00001), as in the
+     * confirmation file layout the user gave (REG_LCHC_26_B001: HH26LCHC00001CR, 13 Nov 2026).
+     */
+    public static function batchNumber(string $batchCode): int
+    {
+        return preg_match('/(\d+)\s*$/', $batchCode, $m) ? max(1, (int) $m[1]) : 1;
+    }
+
+    /**
+     * The registration confirmation file SLC imports (user, 13 Nov 2026, "the file format should be the
+     * same as the attached"): the header, then one line per confirmed student —
+     *   confirmation date (ddmmyyyy) ~ academic year ~ HEI code ~ SSN ~ ~ ~
+     * e.g. 13112026~26~LCHC~SFDU22528926L~~~ — then TT + the number of lines (6 digits). The academic
+     * year and SSN come from the student's SIS line, the HEI code from the header.
+     */
     public static function build(string $headerRaw, array $rawLines, \DateTimeInterface $date): string
     {
         $d = $date->format('dmY');
-        $details = array_map(function ($raw) use ($d) {
-            $p = explode('~', $raw);
-            while (count($p) < 30) {
-                $p[] = '';
-            }
-            $p[0] = $d;
-            $p[self::REG_CONF_INDEX] = 'Y';
+        $hei = substr($headerRaw, 4, 4);
+        $headerAy = substr($headerRaw, 2, 2);
+        $ayAt = array_search('ay', self::FIELDS, true);
+        $ssnAt = array_search('ssn', self::FIELDS, true);
+        $details = array_map(function ($raw) use ($d, $hei, $headerAy, $ayAt, $ssnAt) {
+            $p = explode('~', (string) $raw);
+            $ay = trim((string) ($p[$ayAt] ?? '')) ?: $headerAy;
+            $ssn = strtoupper(trim((string) ($p[$ssnAt] ?? '')));
 
-            return implode('~', $p);
+            return implode('~', [$d, $ay, $hei, $ssn, '', '', '']);
         }, $rawLines);
         $footer = 'TT'.str_pad((string) count($details), 6, '0', STR_PAD_LEFT);
 
         return implode("\r\n", array_merge([$headerRaw], $details, [$footer]))."\r\n";
     }
 
+    /** REG_<HEI>_<academic year>_<batch> (REG_LCHC_26_B001.txt), as the user's file is named. */
     public static function fileName(string $headerRaw, string $batchCode): string
     {
-        return 'REG_'.substr($headerRaw, 4, 4).'_'.substr($headerRaw, 2, 2).'_'.$batchCode.'.txt';
+        return 'REG_'.substr($headerRaw, 4, 4).'_'.substr($headerRaw, 2, 2).'_'.preg_replace('/^SLC-/i', '', $batchCode).'.txt';
     }
 }

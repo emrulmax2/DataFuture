@@ -75,7 +75,14 @@ class EmployeeAttendanceLiveController extends Controller
                                     $query->whereNull('end_to')->orWhere('end_to', '>=', $theDate);
                               })->pluck('employee_id')->unique()->toArray();
         
-        $query = Employee::whereIn('id', $employeeHasPattern)->where('status', 1)->orderBy('first_name', 'ASC');
+        /* Every active employee (user, 11 Nov 2026): those with a working pattern on the date as before,
+           and those without one, listed as "Not in Schedule" (status key 'unscheduled'). */
+        $scheduledIds = array_flip($employeeHasPattern);
+        $query = Employee::where('status', 1)->orderBy('first_name', 'ASC');
+        // never the site super admin (employee / user id 1; user, 11 Nov 2026) — staff with no user still listed
+        $query->where('id', '!=', 1)->where(function($q){
+            $q->whereNull('user_id')->orWhere('user_id', '!=', 1);
+        });
         if($department > 0):
             $query->whereHas('employment', function($q) use($department){
                 $q->where('department_id', $department);
@@ -97,6 +104,7 @@ class EmployeeAttendanceLiveController extends Controller
             'absent' => 0,
             'off' => 0,
             'leave' => 0,
+            'unscheduled' => 0,
             'shownCount' => 0,
             'totalCount' => $Query->count(),
         ];
@@ -109,10 +117,12 @@ class EmployeeAttendanceLiveController extends Controller
                 $department = (isset($list->employment->department->name) ? $list->employment->department->name : '');
                 $job_title = (isset($list->employment->employeeJobTitle->name) ? $list->employment->employeeJobTitle->name : '');
                 $hasTooltip = ($day['attendances']->count() > 0 && !empty($day['tooltip']) ? true : false);
-                $statusKey = $this->getLiveAttendanceStatusKey($day);
-                $countKey = $this->getLiveAttendanceCountKey($statusKey);
+                // no working pattern on the date: "Not in Schedule" in place of the working status (never skipped as "Not Working Today")
+                $notInSchedule = !isset($scheduledIds[$list->id]);
+                $statusKey = ($notInSchedule ? 'unscheduled' : $this->getLiveAttendanceStatusKey($day));
+                $countKey = ($notInSchedule ? 'unscheduled' : $this->getLiveAttendanceCountKey($statusKey));
                 $meta[$countKey]++;
-                $displayLabel = $this->getLiveAttendanceDisplayLabel($day['label'] ?? '');
+                $displayLabel = ($notInSchedule ? 'Not in Schedule' : $this->getLiveAttendanceDisplayLabel($day['label'] ?? ''));
                 $roleText = trim($job_title.(!empty($department) ? ' - '.$department : ''));
                 $schedule = (isset($day['schedule']) && !empty($day['schedule']) && $day['schedule'] != '---') ? $day['schedule'] : '—';
 
@@ -124,7 +134,7 @@ class EmployeeAttendanceLiveController extends Controller
 
                 $shownCount++;
 
-                $html .= '<tr class="hr-live-row hr-live-row--'.$statusKey.' '.($i % 2 === 0 ? 'hr-live-row--even' : 'hr-live-row--odd').'" data-status-group="'.$countKey.'">';
+                $html .= '<tr class="hr-live-row hr-live-row--'.$statusKey.' '.($i % 2 === 0 ? 'hr-live-row--even' : 'hr-live-row--odd').'" data-status-group="'.$countKey.'" data-department="'.e($department).'">';
 
                     $html .= '<td class="hr-live-name-cell">';
                         $html .= '<span class="hr-live-person">';

@@ -64,7 +64,40 @@ class StudentEmailCheck extends Command
             }
         }
 
-        $this->line('Organisational unit: '.config('student_email.google.org_unit', '/').' (must exist in Admin console › Directory › Organisational units; "/" = top level)');
+        $this->line('Organisational unit: '.config('student_email.google.org_unit', '/').' (must exist in Admin console › Directory › Organisational units; "/" = top level) — used when a student has no intake');
+
+        // the intake OUs (/Students/2027 January …) and the student group: read only, nothing is made here
+        $parent = trim((string) config('student_email.google.intake_ou_parent', ''));
+        if ($parent === '') {
+            $this->line('Intake OUs: off (GOOGLE_WORKSPACE_INTAKE_OU_PARENT is empty).');
+        } else {
+            try {
+                $orgunits = (new Directory($client([Directory::ADMIN_DIRECTORY_ORGUNIT])))->orgunits;
+                $kids = trim($parent, '/') === '' ? $orgunits->listOrgunits('my_customer', ['type' => 'children']) : $orgunits->listOrgunits('my_customer', ['orgUnitPath' => trim($parent, '/'), 'type' => 'children']);
+                $names = collect($kids->getOrganizationUnits() ?: [])->map(fn ($o) => $o->getName())->sort()->values()->all();
+                $this->info('Intake OUs: OK. '.$parent.' has '.(count($names) ? implode(', ', $names) : 'no OUs yet').'; a missing intake OU is made when a student account is created.');
+            } catch (\Throwable $e) {
+                if ((int) $e->getCode() === 404) {
+                    // the scope works: Google answered, the parent just isn't there yet
+                    $this->info('Intake OUs: OK. '.$parent.' doesn\'t exist yet; it is made, with the intake OU (e.g. '.rtrim($parent, '/').'/2027 January), when the next student account is created.');
+                } else {
+                    $this->error('Intake OUs ('.$parent.'): '.$this->explain($e).' Needs scope admin.directory.orgunit.');
+                    $ok = false;
+                }
+            }
+        }
+        $group = trim((string) config('student_email.google.student_group', ''));
+        if ($group === '') {
+            $this->line('Student group: off (GOOGLE_WORKSPACE_STUDENT_GROUP is empty).');
+        } else {
+            try {
+                (new Directory($client([Directory::ADMIN_DIRECTORY_GROUP_MEMBER])))->members->listMembers($group, ['maxResults' => 1]);
+                $this->info('Student group: OK. New accounts join '.$group.(config('student_email.address_prefix') !== '' ? ' (not test addresses: STUDENT_EMAIL_ADDRESS_PREFIX is set here)' : '').'.');
+            } catch (\Throwable $e) {
+                $this->error('Student group ('.$group.'): '.$this->explain($e).' Needs scope admin.directory.group.member.');
+                $ok = false;
+            }
+        }
         $this->line('New addresses look like: '.config('student_email.address_prefix').'lcc20270001@'.config('student_email.domain').' · first password = date of birth as DDMMYYYY');
         return $ok ? self::SUCCESS : self::FAILURE;
     }

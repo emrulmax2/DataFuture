@@ -7,7 +7,9 @@
             <button type="button" class="chip" :aria-pressed="show === 'done'" @click="show = 'done'">Identified <span class="num">{{ counts.linked }}</span></button>
         </div>
     </div>
-    <div v-if="items.length === 0" class="card empty">
+    <StepSearch v-if="base.length" v-model="q" id="search-identify" :shown="items.length" :total="base.length" />
+    <div v-if="items.length === 0 && q.trim() && base.length" class="card empty">No students on this step match “{{ q.trim() }}”.</div>
+    <div v-else-if="items.length === 0" class="card empty">
         {{ show === 'open' ? 'Every student in this upload is identified. Go to the data check.' : 'No students identified yet.' }}
         <div v-if="show === 'open'" style="margin-top: 10px"><button type="button" class="btn btn-primary" @click="go('data')">Open data check</button></div>
     </div>
@@ -30,19 +32,23 @@
 
 <script>
 import { computed, inject, ref } from "vue";
-import { fmtSlc, titleCase } from "./helpers";
+import { fmtSlc, matchesSearch, searchText, titleCase } from "./helpers";
 import Identified from "./Identified.vue";
 import FindStudent from "./FindStudent.vue";
+import StepSearch from "./StepSearch.vue";
 
 export default {
-    components: { Identified, FindStudent },
+    components: { Identified, FindStudent, StepSearch },
     setup() {
         const { store, list, go } = inject("slr");
         const show = ref("open");
         const counts = computed(() => store.state.counts);
-        const items = computed(() => list.value.filter((i) => (show.value === "open" ? i.stage === "identify" : i.link && i.link.method === "linked")));
+        const base = computed(() => list.value.filter((i) => (show.value === "open" ? i.stage === "identify" : i.link && i.link.method === "linked")));
+        // this step's search (user, 13 Nov 2026): SLC's name and SSN, or the student / best match's name, reg no., email
+        const q = ref("");
+        const items = computed(() => (q.value.trim() ? base.value.filter((i) => matchesSearch(q.value, searchText(i))) : base.value));
         const cur = computed(() => items.value.find((i) => i.id === store.selected) || items.value[0]);
-        return { store, go, show, counts, items, cur, fmtSlc, titleCase };
+        return { store, go, show, counts, base, q, items, cur, fmtSlc, titleCase };
     },
 };
 </script>

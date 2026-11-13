@@ -4,7 +4,8 @@
             <p>These students match SLC on every field. The system has pulled their awarding body registration and attendance. When you’re happy, confirm registration Yes and they go into the batch awaiting download.</p></div>
         <button type="button" class="btn btn-primary" :disabled="!clear.length || store.busy" @click="confirm(clear.map((i) => i.id))">Confirm Yes for all clear ({{ clear.length }})</button>
     </div>
-    <div v-if="items.length === 0" class="card empty">No students are ready for pre-confirm checks.</div>
+    <StepSearch v-if="base.length" v-model="q" id="search-precheck" :shown="items.length" :total="base.length" />
+    <div v-if="items.length === 0" class="card empty">{{ q.trim() && base.length ? 'No students on this step match “' + q.trim() + '”.' : 'No students are ready for pre-confirm checks.' }}</div>
     <section v-else class="card">
         <div class="pc-bar"><span class="muted small">{{ plural(items.length, 'student') }}</span><button type="button" class="btn-link small" :aria-pressed="allOpen ? 'true' : 'false'" @click="toggleAll">{{ allOpen ? 'Hide all fields' : 'View all fields for every student' }}</button></div>
         <div class="tablebox"><table class="tbl" style="min-width: 1020px">
@@ -38,7 +39,8 @@
 
 <script>
 import { computed, inject, ref } from "vue";
-import { fmtIso, plural } from "./helpers";
+import { fmtIso, matchesSearch, plural, searchText } from "./helpers";
+import StepSearch from "./StepSearch.vue";
 import Ico from "./Ico.vue";
 import RowHistory from "./RowHistory.vue";
 import AttCell from "./AttCell.vue";
@@ -46,10 +48,13 @@ import AllFields from "./AllFields.vue";
 import StatusTag from "./StatusTag.vue";
 
 export default {
-    components: { StatusTag, Ico, RowHistory, AttCell, AllFields },
+    components: { StatusTag, Ico, RowHistory, AttCell, AllFields, StepSearch },
     setup() {
         const { store, list, post } = inject("slr");
-        const items = computed(() => list.value.filter((i) => i.stage === "precheck"));
+        const base = computed(() => list.value.filter((i) => i.stage === "precheck"));
+        // this step's search (user, 13 Nov 2026); "Confirm Yes for all clear" then acts on the students shown
+        const q = ref("");
+        const items = computed(() => (q.value.trim() ? base.value.filter((i) => matchesSearch(q.value, searchText(i))) : base.value));
         const clear = computed(() => items.value.filter((i) => i.ab.st === "ok" && i.att.st === "ok"));
         const canConfirm = (i) => i.ab.st === "ok" && (i.att.st === "ok" || (i.att.st === "warn" && i.attChecked));
         const confirm = (ids) => post("slc.registration.confirm", { row_ids: ids, checked: items.value.filter((i) => ids.includes(i.id) && i.attChecked).map((i) => i.id) });
@@ -58,7 +63,7 @@ export default {
         const toggle = (id) => { open.value = { ...open.value, [id]: !open.value[id] }; };
         const allOpen = computed(() => items.value.length > 0 && items.value.every((i) => open.value[i.id]));
         const toggleAll = () => { const to = !allOpen.value; open.value = Object.fromEntries(items.value.map((i) => [i.id, to])); };
-        return { store, post, items, clear, canConfirm, confirm, fmtIso, plural, open, toggle, allOpen, toggleAll };
+        return { base, q, store, post, items, clear, canConfirm, confirm, fmtIso, plural, open, toggle, allOpen, toggleAll };
     },
 };
 </script>

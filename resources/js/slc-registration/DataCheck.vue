@@ -25,6 +25,7 @@
         </div>
     </section>
 
+    <StepSearch v-if="withErr.length" v-model="q" id="search-data" :shown="items.length" :total="filtered.length" />
     <div class="row" style="justify-content: space-between">
         <div class="filters" role="group" aria-label="Show students">
             <button type="button" class="chip" :aria-pressed="show === 'data'" @click="show = 'data'">To sort <span class="num">{{ counts.data }}</span></button>
@@ -44,7 +45,7 @@
         </div>
     </div>
 
-    <div v-if="items.length === 0" class="card empty">{{ fieldFilter !== 'all' ? 'No students with that error match these filters.' : 'No students to sort here.' }}
+    <div v-if="items.length === 0" class="card empty">{{ q.trim() && filtered.length ? 'No students on this step match “' + q.trim() + '”.' : fieldFilter !== 'all' ? 'No students with that error match these filters.' : 'No students to sort here.' }}
         <div v-if="clean > 0" style="margin-top: 10px"><button type="button" class="btn btn-primary" @click="go('precheck')">{{ plural(clean, 'fully matched student') }} – go to pre-confirm</button></div>
     </div>
 
@@ -157,7 +158,8 @@
 
 <script>
 import { computed, inject, ref, watch } from "vue";
-import { ADDRESS_UPDATE_TIP, COC_TYPE, DIFF, FIELD_ORDER, FIELD_ROUTES, ROUTES, plural } from "./helpers";
+import { ADDRESS_UPDATE_TIP, COC_TYPE, DIFF, FIELD_ORDER, FIELD_ROUTES, ROUTES, matchesSearch, plural, searchText } from "./helpers";
+import StepSearch from "./StepSearch.vue";
 import Ico from "./Ico.vue";
 import AllFields from "./AllFields.vue";
 import RowHistory from "./RowHistory.vue";
@@ -206,7 +208,7 @@ const NOTE = {
 };
 
 export default {
-    components: { StatusTag, Ico, AllFields, RowHistory, RegRoute, DiffText, BoxValue, UploadsLink },
+    components: { StatusTag, Ico, AllFields, RowHistory, RegRoute, DiffText, BoxValue, UploadsLink, StepSearch },
     setup() {
         const { store, list, post, go } = inject("slr");
         const show = ref("data");
@@ -246,10 +248,16 @@ export default {
         const fieldMax = computed(() => Math.max(1, ...boxSummary.value.map((f) => f.count)));
         const boxOf = (key) => BOX[key] || key;
         watch(boxSummary, (list) => { if (fieldFilter.value !== "all" && !list.some((f) => f.key === fieldFilter.value)) fieldFilter.value = "all"; });
-        const items = computed(() => {
+        // this step's search (user, 13 Nov 2026): after the chips and filters, by name, reg no., email, SLC name or SSN
+        const q = ref("");
+        const filtered = computed(() => {
             let out = shown.value;
             if (fieldFilter.value !== "all") out = out.filter((i) => i.errors.some((c) => boxOf(c.key) === fieldFilter.value));
             if (routeFilter.value !== "all") out = out.filter((i) => i.errors.some((c) => (c.route || c.sugg) === routeFilter.value));
+            return out;
+        });
+        const items = computed(() => {
+            const out = q.value.trim() ? filtered.value.filter((i) => matchesSearch(q.value, searchText(i))) : filtered.value;
             const sel = store.selected;
             // fewest issues first (user, 5 Nov 2026); the student just opened from elsewhere stays on top
             return [...out].sort((a, b) => (a.id === sel ? -1 : b.id === sel ? 1 : 0) || a.errors.length - b.errors.length || a.line - b.line);
@@ -316,7 +324,7 @@ export default {
             })
             .filter((g) => g.rows.length));
 
-        return { store, post, go, show, routeFilter, fieldFilter, shown, fieldSummary, boxSummary, fieldTotal, fieldMax, counts, withErr, items, sugCount, pendingSugg, clean, linkedCount, sortedErrors, suggCount, outcomeFilters, groupBy, groups, NOTE, cardRows, toggleEach, ROUTES, COC_TYPE, DIFF, ADDRESS_UPDATE_TIP, BOX, ID_KEYS, plural };
+        return { q, filtered, store, post, go, show, routeFilter, fieldFilter, shown, fieldSummary, boxSummary, fieldTotal, fieldMax, counts, withErr, items, sugCount, pendingSugg, clean, linkedCount, sortedErrors, suggCount, outcomeFilters, groupBy, groups, NOTE, cardRows, toggleEach, ROUTES, COC_TYPE, DIFF, ADDRESS_UPDATE_TIP, BOX, ID_KEYS, plural };
     },
 };
 </script>

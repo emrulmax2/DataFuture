@@ -102,6 +102,8 @@ import tippy, { roundArrow } from "tippy.js";
         const $rows = $('#liveAttendanceTable tbody tr.hr-live-row');
         let shown = 0;
 
+        let stripe = 0;
+        let stripeDept = null;
         $rows.each(function(){
             const visible = (activeStatusFilter === '' || $(this).attr('data-status-group') === activeStatusFilter);
 
@@ -109,14 +111,21 @@ import tippy, { roundArrow } from "tippy.js";
                    .removeClass('hr-live-row--even hr-live-row--odd');
 
             if (visible) {
-                $(this).addClass(shown % 2 === 0 ? 'hr-live-row--even' : 'hr-live-row--odd');
+                // grouped by department: the stripes start again under each heading
+                const rowDept = (this.getAttribute('data-department') || '').trim();
+                if (groupByDept && rowDept !== stripeDept) {
+                    stripe = 0;
+                    stripeDept = rowDept;
+                }
+                $(this).addClass(stripe % 2 === 0 ? 'hr-live-row--even' : 'hr-live-row--odd');
+                stripe++;
                 shown++;
             }
         });
 
         $('#liveAttendanceTable tbody tr.hr-live-filter-empty').remove();
         if ($rows.length > 0 && shown === 0) {
-            $('#liveAttendanceTable tbody').append('<tr class="hr-live-empty-row hr-live-filter-empty"><td colspan="4">No staff match the current filters.</td></tr>');
+            $('#liveAttendanceTable tbody').not('.hr-live-group').first().append('<tr class="hr-live-empty-row hr-live-filter-empty"><td colspan="4">No staff match the current filters.</td></tr>');
         }
 
         $('.hr-live-stat').each(function(){
@@ -131,7 +140,116 @@ import tippy, { roundArrow } from "tippy.js";
             $('#liveShownCount').text(shown);
             $('#liveCountAll').text($rows.length);
         }
+
+        updateDepartmentHeadings();
     }
+
+    /* By Department (user, 11 Nov 2026): one box per department — its own <tbody> with a header button
+       that opens / closes it, the column headings, then its staff (still A–Z by name). Departments A–Z,
+       "No department" last; a department with no row showing (e.g. under a status chip) is hidden. Only
+       the rows already on the page are moved (nothing is reloaded); turned off, they go back to the one
+       list in their first order. The choice is remembered in this browser; every box starts open. */
+    const GROUP_BY_DEPT_KEY = 'hr-live-group-by-dept';
+    // departments closed by the user (each box open by default, any can be closed);
+    // kept while the list reloads (date, department, search), all open again on a new page load
+    const collapsedDepts = new Set();
+    const GROUP_ICON = '<span class="hr-live-group-toggle__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg></span>';
+    const GROUP_CHEVRON = '<span class="hr-live-group-toggle__chevron" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>';
+    let groupByDept = false;
+    try { groupByDept = window.localStorage.getItem(GROUP_BY_DEPT_KEY) === '1'; } catch (e) { groupByDept = false; }
+
+    function applyDepartmentGrouping() {
+        const $table = $('#liveAttendanceTable');
+        const $main = $table.children('tbody').not('.hr-live-group').first(); // the list's own tbody
+        const $rows = $table.find('tbody tr.hr-live-row');
+        const deptOf = (el) => (el.getAttribute('data-department') || '').trim();
+        const orderOf = (el) => parseInt(el.getAttribute('data-order'), 10) || 0;
+
+        // the order the list came in (A–Z by name), kept to go back to when grouping is turned off
+        $rows.each(function(i){
+            if (this.getAttribute('data-order') === null) {
+                this.setAttribute('data-order', i);
+            }
+        });
+
+        // every row back into the list's own tbody, in that order; then the boxes go
+        const list = $rows.get().sort((a, b) => orderOf(a) - orderOf(b));
+        list.forEach((el) => $main.append(el));
+        $table.children('tbody.hr-live-group').remove();
+
+        $table.toggleClass('hr-live-table--grouped', groupByDept);
+        $table.closest('.hr-live-table-card').toggleClass('hr-live-table-card--grouped', groupByDept);
+        $('#liveGroupByDept').toggleClass('hr-live-tool-btn--active', groupByDept).attr('aria-pressed', groupByDept ? 'true' : 'false');
+        if (!groupByDept) {
+            return;
+        }
+
+        const grouped = list.slice().sort((a, b) => {
+            const da = deptOf(a);
+            const db = deptOf(b);
+            if (da !== db) {
+                if (da === '') return 1;
+                if (db === '') return -1;
+                return da.localeCompare(db, undefined, { sensitivity: 'base' });
+            }
+            return orderOf(a) - orderOf(b);
+        });
+        // the column headings, as the table's own header shows them
+        const $headCells = $table.children('thead').find('tr').first().children();
+
+        let $box = null;
+        let current = null;
+        grouped.forEach((el) => {
+            if ($box === null || deptOf(el) !== current) {
+                current = deptOf(el);
+                $box = $('<tbody class="hr-live-group"></tbody>').attr('data-department', current);
+                const $heading = $('<tr class="hr-live-group-row"><td colspan="4"><button type="button" class="hr-live-group-toggle" aria-expanded="true">' + GROUP_ICON + '<span class="hr-live-group-row__name"></span><span class="hr-live-group-row__count"></span>' + GROUP_CHEVRON + '</button></td></tr>');
+                $heading.find('.hr-live-group-row__name').text(current !== '' ? current : 'No department');
+                $box.append($heading).append($('<tr class="hr-live-group-colhead"></tr>').append($headCells.clone()));
+                $table.append($box);
+            }
+            $box.append(el);
+        });
+
+        applyDepartmentCollapse();
+    }
+
+    // a closed box keeps its header (with its count); its column headings and staff are hidden
+    function applyDepartmentCollapse() {
+        $('#liveAttendanceTable tbody.hr-live-group').each(function(){
+            const closed = collapsedDepts.has($(this).attr('data-department') || '');
+            $(this).toggleClass('hr-live-group--collapsed', closed)
+                   .find('.hr-live-group-toggle').attr('aria-expanded', closed ? 'false' : 'true')
+                   .attr('title', (closed ? 'Open ' : 'Close ') + ($(this).find('.hr-live-group-row__name').text() || 'this department'));
+        });
+    }
+
+    $('#liveAttendanceTable').on('click', '.hr-live-group-toggle', function(){
+        const dept = $(this).closest('tbody.hr-live-group').attr('data-department') || '';
+        if (collapsedDepts.has(dept)) {
+            collapsedDepts.delete(dept);
+        } else {
+            collapsedDepts.add(dept);
+        }
+        applyDepartmentCollapse();
+    });
+
+    // each box: how many of its staff are showing (status chips); none → the box is hidden
+    function updateDepartmentHeadings() {
+        $('#liveAttendanceTable tbody.hr-live-group').each(function(){
+            const showing = $(this).find('tr.hr-live-row').not('.hr-live-row--filtered-out').length;
+
+            $(this).toggleClass('hr-live-group--empty', showing === 0)
+                   .find('.hr-live-group-row__count').text(showing + ' staff');
+        });
+    }
+
+    $('#liveGroupByDept').on('click', function(){
+        groupByDept = !groupByDept;
+        try { window.localStorage.setItem(GROUP_BY_DEPT_KEY, groupByDept ? '1' : '0'); } catch (e) { /* not remembered */ }
+        applyDepartmentGrouping();
+        applyLiveStatusFilter();
+    });
 
     $('.hr-live-stats').on('click', '.hr-live-stat', function(){
         const filterKey = $(this).attr('data-live-filter') || '';
@@ -149,6 +267,7 @@ import tippy, { roundArrow } from "tippy.js";
         $('#liveCountAbsent').text(meta.absent ?? 0);
         $('#liveCountOff').text(meta.off ?? 0);
         $('#liveCountLeave').text(meta.leave ?? 0);
+        $('#liveCountUnscheduled').text(meta.unscheduled ?? 0);
         $('#liveCountAll').text(meta.shownCount ?? 0);
         $('#liveShownCount').text(meta.shownCount ?? 0);
         $('#liveTotalCount').text(meta.totalCount ?? 0);
@@ -156,9 +275,11 @@ import tippy, { roundArrow } from "tippy.js";
 
     function renderLiveAttendanceResponse(res) {
         $('.theDateHolder').html(res.the_date);
+        $('#liveAttendanceTable tbody.hr-live-group').remove(); // By Department boxes (rebuilt below)
         $('#liveAttendanceTable tbody').html(res.htm);
         updateLiveAttendanceMeta(res.meta);
         initLiveAttendanceRows();
+        applyDepartmentGrouping();
         applyLiveStatusFilter();
     }
 
@@ -193,6 +314,7 @@ import tippy, { roundArrow } from "tippy.js";
         ...dateOption
     });
     initLiveAttendanceRows();
+    applyDepartmentGrouping();
     applyLiveStatusFilter();
 
     liveAttendanceDate.on('selected', (date) => {

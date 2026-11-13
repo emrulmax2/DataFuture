@@ -25,7 +25,9 @@ use Illuminate\Support\Facades\Storage;
  * and Notification" task is assigned (user, 26 Oct 2026):
  *
  *  1. create the Google Workspace account (lower-case registration no @ domain) with the
- *     date of birth as the password (DDMMYYYY), changed by the student at first sign-in;
+ *     date of birth as the password (DDMMYYYY), changed by the student at first sign-in, in
+ *     the intake's OU (/Students/2027 January, made when missing) and the student@ group
+ *     (user, 13 Nov 2026 — either failing is reported, the account still goes ahead);
  *  2. assign the configured Workspace licence;
  *  3. institutional email = that address (verified); the login email becomes it too,
  *     and the old login email stays as the personal email;
@@ -78,6 +80,23 @@ class StudentEmailProvisioner
         return $fallback !== '' ? $fallback : null;
     }
 
+    /**
+     * The organisational unit for the student's account: the intake parent (GOOGLE_WORKSPACE_INTAKE_OU_PARENT,
+     * /Students) + their intake semester, e.g. /Students/2027 January. Without an intake (or with no
+     * parent set) it is GOOGLE_WORKSPACE_STUDENT_OU, as before.
+     */
+    public static function orgUnitFor(Student $student): string
+    {
+        $default = (string) config('student_email.google.org_unit', '/');
+        $parent = trim((string) config('student_email.google.intake_ou_parent', ''));
+        $intake = trim(str_replace('/', '-', (string) optional(optional($student->activeCR)->semester)->name));
+        if ($parent === '' || $intake === '') {
+            return $default;
+        }
+
+        return rtrim($parent, '/').'/'.$intake;
+    }
+
     /** @return array{status:string, email:?string, message:string} */
     public function provision(Student $student, ?StudentTask $task, int $actorId): array
     {
@@ -89,14 +108,29 @@ class StudentEmailProvisioner
         // 1-2. Google
         $google = null;
         $licence = null;
+        $placed = [];   // the intake OU and the student group, as done
+        $problems = []; // what Google refused there (reported; the account still goes ahead)
         $password = self::initialPassword($student);
         if ($this->directory->configured()) {
             if ($password === null || strlen($password) < 8) {
                 return $this->finish($task, self::FAILED, $email, 'No date of birth (or fallback password), so the Google account was not created.', $actorId);
             }
+            // the intake's OU (/Students/2027 January), made when missing; if Google refuses, the usual OU
+            $defaultOu = (string) config('student_email.google.org_unit', '/');
+            $orgUnit = self::orgUnitFor($student);
+            $ouReady = $orgUnit === $defaultOu;
+            if (!$ouReady) {
+                try {
+                    $ouNew = $this->directory->ensureOrgUnit($orgUnit) === 'created';
+                    $ouReady = true;
+                } catch (\Throwable $e) {
+                    $problems[] = 'OU '.$orgUnit.' not used ('.$e->getMessage().'); the account went in '.$defaultOu;
+                    $orgUnit = $defaultOu;
+                }
+            }
             try {
                 $google = $this->directory->createUser($email, (string) $student->first_name, (string) $student->last_name, $password,
-                    (bool) config('student_email.change_at_first_login', true), (string) config('student_email.google.org_unit', '/'));
+                    (bool) config('student_email.change_at_first_login', true), $orgUnit);
                 if ($google === 'exists' && $this->createdBefore($student, $email)) {
                     $google = 'created_before'; // ours from an earlier, unfinished run (student-email:create retries)
                 }
@@ -109,6 +143,21 @@ class StudentEmailProvisioner
                 // the account may exist without its licence; our records are left alone
                 return $this->finish($task, self::FAILED, $email, $e->getMessage(), $actorId);
             }
+            if (in_array($google, ['created', 'created_before'], true)) {
+                if ($google === 'created_before' && $orgUnit !== $defaultOu) {
+                    try {
+                        $this->directory->moveUser($email, $orgUnit); // an earlier run may have put it elsewhere
+                    } catch (\Throwable $e) {
+                        $problems[] = 'not moved to '.$orgUnit.' ('.$e->getMessage().')';
+                        $ouReady = false;
+                    }
+                }
+                if ($ouReady && $orgUnit !== $defaultOu) {
+                    $placed[] = 'OU '.$orgUnit.(!empty($ouNew) ? ' (new)' : '');
+                }
+                $this->joinStudentGroup($email, $placed, $problems);
+            }
+            $this->reportPlacement($student, $task, $email, $problems, $actorId);
         }
 
         // 3. Our records
@@ -145,7 +194,43 @@ class StudentEmailProvisioner
 
         // 5. Done
         return $this->finish($task, self::DONE, $email,
-            'Created '.$email.($licence ? ' (licence '.$licence.')' : '').'; details emailed to '.$personal.'.', $actorId, true);
+            'Created '.$email.($licence ? ' (licence '.$licence.')' : '').($placed ? ' · '.implode(' · ', $placed) : '').'; details emailed to '.$personal.'.', $actorId, true);
+    }
+
+    /** The new account joins the student group (GOOGLE_WORKSPACE_STUDENT_GROUP, student@lcc.ac.uk); test addresses never do. */
+    private function joinStudentGroup(string $email, array &$placed, array &$problems): void
+    {
+        $group = trim((string) config('student_email.google.student_group', ''));
+        if ($group === '') {
+            return;
+        }
+        if ((string) config('student_email.address_prefix', '') !== '') {
+            $placed[] = 'not added to '.$group.' (test address)';
+
+            return;
+        }
+        try {
+            $placed[] = ($this->directory->addToGroup($group, $email) === 'member' ? 'already in ' : 'added to ').$group;
+        } catch (\Throwable $e) {
+            $problems[] = 'not added to '.$group.' ('.$e->getMessage().')';
+        }
+    }
+
+    /** What Google refused about the OU or the group: logged, on the task log, and mailed to CONVERSION_ERROR_REPORT_TO. */
+    private function reportPlacement(Student $student, ?StudentTask $task, string $email, array $problems, int $actorId): void
+    {
+        if (!$problems) {
+            return;
+        }
+        $text = implode(' · ', $problems);
+        Log::warning('Student email: OU / group not set', ['student_id' => $student->id, 'email' => $email, 'problems' => $problems]);
+        if ($task) {
+            \App\Services\Conversion\ConversionErrorReport::report('Action: Create student email (OU / group)', $email.': '.$text, ['student_id' => $task->student_id, 'task_id' => $task->id, 'rule_id' => $task->rule_id]);
+            StudentTaskLog::create([
+                'student_tasks_id' => $task->id, 'actions' => 'Student email: OU / group', 'field_name' => 'institutional_email',
+                'prev_field_value' => '', 'current_field_value' => mb_substr($text, 0, 145), 'created_by' => $actorId, // varchar(145)
+            ]);
+        }
     }
 
     /**

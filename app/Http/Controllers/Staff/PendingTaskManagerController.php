@@ -350,7 +350,10 @@ class PendingTaskManagerController extends Controller
                     
                     $sudentTaskDocumentRequest = (isset($theStudentTask->student_document_request_form_id) && $theStudentTask->student_document_request_form_id > 0 ? 1 : 0);
                     
-                    $createOrUpdateBy = (isset($theStudentTask->updatedBy->employee->full_name) && !empty($theStudentTask->updatedBy->employee->full_name) ? $theStudentTask->updatedBy->employee->full_name : $theStudentTask->createdBy->employee->full_name);
+                    // a task made by Task Automation is created by user 1 ("System"), who has no employee record:
+                    // fall back to the user's own name instead of failing the whole table
+                    $createOrUpdateBy = (isset($theStudentTask->updatedBy->employee->full_name) && !empty($theStudentTask->updatedBy->employee->full_name) ? $theStudentTask->updatedBy->employee->full_name
+                        : ($theStudentTask->createdBy->employee->full_name ?? $theStudentTask->updatedBy->name ?? $theStudentTask->createdBy->name ?? ''));
                         
                     if($status != 'Pending'):
                         $createOrUpdate = (isset($theStudentTask->updated_at) && !empty($theStudentTask->updated_at) ? date('jS M, Y', strtotime($theStudentTask->updated_at)) : '');

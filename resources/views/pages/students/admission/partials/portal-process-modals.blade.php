@@ -12,7 +12,9 @@
             <div class="modal-content">
                 <div class="modal-header"><h3>Add tasks</h3>{!! $adpClose !!}</div>
                 <div class="modal-body">
-                    <p class="adp-copy">Ticked tasks are on the board. Untick one to archive it; tick it again later to restore it.</p>
+                    {{-- without Delete Task (user, 13 Nov 2026) the tasks already on the board stay ticked; the save ignores removals too --}}
+                    @php $adpCanRemove = (int) (auth()->user()->priv()['applicant_delete_task'] ?? 0) === 1; @endphp
+                    <p class="adp-copy">{{ $adpCanRemove ? 'Ticked tasks are on the board. Untick one to archive it; tick it again later to restore it.' : 'Ticked tasks are on the board. Tick a task to add it. Removing a task needs the Delete Task permission.' }}</p>
                     @foreach($process as $adpPro)
                         @if(isset($adpPro->tasks) && $adpPro->tasks->count() > 0)
                             <div class="adp-task-pick__group">
@@ -21,7 +23,7 @@
                                     @foreach($adpPro->tasks as $adpTl)
                                         @php $adpInputId = 'process_task_'.$adpPro->id.'_'.$adpTl->id; @endphp
                                         <label class="adp-opt adp-opt--chk" for="{{ $adpInputId }}">
-                                            <input id="{{ $adpInputId }}" class="adp-opt__input task_list_id" name="task_list_ids[]" type="checkbox" value="{{ $adpTl->id }}" {{ in_array($adpTl->id, $adpExisting) ? 'checked' : '' }}>
+                                            <input id="{{ $adpInputId }}" class="adp-opt__input task_list_id" name="task_list_ids[]" type="checkbox" value="{{ $adpTl->id }}" {{ in_array($adpTl->id, $adpExisting) ? 'checked' : '' }} {{ !$adpCanRemove && in_array($adpTl->id, $adpExisting) ? 'disabled' : '' }}>
                                             <span class="adp-opt__box">{!! $adpCheck !!}</span>
                                             <span>{{ $adpTl->name }}@if(!empty($adpTl->short_description) && trim($adpTl->short_description) !== trim($adpTl->name))<span class="adp-opt__hint">{{ $adpTl->short_description }}</span>@endif</span>
                                         </label>

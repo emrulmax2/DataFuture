@@ -68,7 +68,7 @@ class RegistrationState
         $this->names = self::names($userIds);
         $updateStudents = DB::table('students')->whereIn('id', $updates->pluck('student_id')->unique())->get(['id', 'first_name', 'last_name', 'registration_no'])->keyBy('id');
         // their mobile numbers (student_contacts, the newest row), shown on Actions › Our record updated
-        $updateMobiles = DB::table('student_contacts')->whereIn('student_id', $updates->pluck('student_id')->unique())->whereNull('deleted_at')->orderBy('id')->get(['student_id', 'mobile'])->keyBy('student_id');
+        $updateMobiles = DB::table('student_contacts')->whereIn('student_id', $updates->pluck('student_id')->unique())->whereNull('deleted_at')->orderBy('id')->get(['student_id', 'mobile', 'institutional_email', 'personal_email'])->keyBy('student_id');
 
         return [
             'import' => $import ? [
@@ -81,6 +81,8 @@ class RegistrationState
             'counts' => $counts,
             'batches' => $batches->map(fn ($b) => [
                 'id' => $b->code, 'key' => $b->id, 'status' => $b->status, 'header' => $b->header,
+                // the header number Regenerate suggests: the batch's own (SLC-B001 → 1)
+                'nextNumber' => $b->status !== 'awaiting' ? SisFile::batchNumber($b->code) : null,
                 'items' => $batchItems->where('slc_bulk_batch_id', $b->id)->values()->map(fn ($it) => [
                     'rowId' => $it->id, 'r' => ['ssn' => $it->ssn],
                     'name' => trim(($itemStudents[$it->student_id]->first_name ?? '').' '.($itemStudents[$it->student_id]->last_name ?? '')),
@@ -90,7 +92,8 @@ class RegistrationState
                     // Bulk SLC Registration: what was done for the line, or what the student already has
                     'record' => $itemRecords[$it->id],
                 ])->all(),
-                'file' => $b->path ? ['name' => $b->file_name] : null,
+                // the date in field 1 (Batches › Regenerate file offers to keep it or use today)
+                'file' => $b->path ? ['name' => $b->file_name, 'date' => $b->file_date ? \Carbon\Carbon::parse($b->file_date)->toDateString() : null] : null,
                 'createdBy' => $this->name($b->created_by), 'createdAt' => $this->when($b->created_at),
                 'downloadedBy' => $b->downloaded_by ? $this->name($b->downloaded_by) : null, 'downloadedAt' => $this->when($b->downloaded_at),
                 'uploadedBy' => $b->uploaded_by ? $this->name($b->uploaded_by) : null, 'uploadedAt' => $this->when($b->uploaded_at),
@@ -100,6 +103,7 @@ class RegistrationState
                 'name' => trim(($updateStudents[$u->student_id]->first_name ?? '').' '.($updateStudents[$u->student_id]->last_name ?? '')),
                 'field' => $u->field, 'from' => $u->from_value, 'to' => $u->to_value, 'status' => $statuses[$u->student_id] ?? null,
                 'mobile' => trim((string) ($updateMobiles[$u->student_id]->mobile ?? '')),
+                'emails' => array_values(array_unique(array_filter([trim((string) ($updateMobiles[$u->student_id]->institutional_email ?? '')), trim((string) ($updateMobiles[$u->student_id]->personal_email ?? ''))]))),
             ])->all(),
             'log' => $log->map(fn ($e) => ['at' => $this->when($e->created_at), 'user' => $e->user_id ? $this->name($e->user_id) : 'System', 'text' => $e->text])->all(),
             'courses' => $this->courses($rows, $codeMap, $yearId),
@@ -256,7 +260,8 @@ class RegistrationState
      * For each batch line, for the Batches › students list: what Bulk SLC Registration did
      * (status = slc_recorded, with the registration and agreement dates) or, not yet recorded, the
      * SLC registration and agreement the student already has for that academic year and year of
-     * study (entered on their SLC / Accounts tab).
+     * study (entered on their SLC / Accounts tab) — on their ACTIVE course relation only (user,
+     * 13 Nov 2026: an earlier course's registration or agreement doesn't count).
      */
     private function itemRecords($items): array
     {
@@ -268,7 +273,10 @@ class RegistrationState
         $regs = DB::table('slc_registrations')->whereIn('student_id', $studentIds)->whereNull('deleted_at')->orderBy('id')
             ->get(['id', 'student_id', 'student_course_relation_id', 'academic_year_id', 'registration_year', 'confirmation_date', 'created_by']);
         $agrs = DB::table('slc_agreements')->whereIn('student_id', $studentIds)->whereNull('deleted_at')->orderBy('id')
-            ->get(['id', 'student_id', 'slc_registration_id', 'year', 'date']);
+            ->get(['id', 'student_id', 'student_course_relation_id', 'slc_registration_id', 'year', 'date']);
+        // each student's active course relation (the newest if several, as StudentSnapshots picks it)
+        $activeCrel = DB::table('student_course_relations')->whereIn('student_id', $studentIds)->where('active', 1)->whereNull('deleted_at')
+            ->orderBy('id')->pluck('id', 'student_id');
         $names = self::names(array_merge($items->pluck('slc_recorded_by')->all(), $regs->pluck('created_by')->all()));
         $out = [];
         foreach ($items as $it) {
@@ -277,9 +285,10 @@ class RegistrationState
                 $reg = $regs->firstWhere('id', $it->slc_registration_id);
                 $agr = $it->slc_agreement_id ? $agrs->firstWhere('id', $it->slc_agreement_id) : null;
             } else {
-                $reg = $regs->filter(fn ($g) => (int) $g->student_id === (int) $it->student_id && (int) $g->academic_year_id === (int) ($years[$it->slc_bulk_import_id] ?? 0) && (int) $g->registration_year === $year)->last();
+                $crel = (int) ($activeCrel[$it->student_id] ?? 0);
+                $reg = $regs->filter(fn ($g) => (int) $g->student_id === (int) $it->student_id && (int) $g->student_course_relation_id === $crel && (int) $g->academic_year_id === (int) ($years[$it->slc_bulk_import_id] ?? 0) && (int) $g->registration_year === $year)->last();
                 $agr = ($reg ? $agrs->filter(fn ($a) => (int) $a->slc_registration_id === (int) $reg->id)->last() : null)
-                    ?? $agrs->filter(fn ($a) => (int) $a->student_id === (int) $it->student_id && (int) $a->year === $year)->last();
+                    ?? $agrs->filter(fn ($a) => (int) $a->student_id === (int) $it->student_id && (int) $a->student_course_relation_id === $crel && (int) $a->year === $year)->last();
             }
             $out[$it->id] = [
                 'status' => $it->slc_recorded,
@@ -367,6 +376,7 @@ class RegistrationState
             'year' => $s['instance']['rank'] ?? null, 'fee' => $s['instance']['fee'] ?? null, 'url' => $s['url'],
             'uploadsUrl' => route('student.uploads', $s['id']), // the Data check's address rows link here (proof of address)
             'mobile' => $s['mobile'] ?? '', // student_contacts.mobile, shown on Actions (user, 6 Nov 2026)
+            'emails' => $s['emails'] ?? [], // institutional + personal: the steps' search box (user, 13 Nov 2026)
             'status' => $s['status'] ?? null,
             'registration' => $s['registration'],
         ];

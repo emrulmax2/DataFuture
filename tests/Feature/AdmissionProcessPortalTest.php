@@ -30,7 +30,7 @@ class AdmissionProcessPortalTest extends TestCase
 
     private function liveTask(): ApplicantTask
     {
-        $task = ApplicantTask::whereHas('task')->orderBy('id', 'desc')->first();
+        $task = ApplicantTask::whereHas('task')->whereHas('applicant')->orderBy('id', 'desc')->first(); // (a deleted applicant's task can't open the page)
         $this->assertNotNull($task, 'An applicant task is needed for this test.');
 
         return $task;
@@ -173,6 +173,7 @@ class AdmissionProcessPortalTest extends TestCase
         $task = ApplicantTask::where('status', 'Completed')
             ->whereHas('task', fn ($q) => $q->where('status', 'No')->where('upload', 'Yes'))
             ->has('documents')
+            ->whereHas('applicant') // (a deleted applicant's task can't be reopened)
             ->orderBy('id', 'desc')->first();
         if (!$task) {
             $this->markTestSkipped('No completed task with its upload in.');
@@ -198,5 +199,61 @@ class AdmissionProcessPortalTest extends TestCase
         $response->assertOk();
         $this->assertStringContainsString('class="adp-namecell"', $response->json('res'));
         $this->assertStringNotContainsString('btn-success', $response->json('res'));
+    }
+
+    /** Dashboard › Applicant › Add Task (user, 13 Nov 2026): the button and its save route need the permission. */
+    public function test_add_tasks_needs_the_add_task_permission(): void
+    {
+        config(['privileges.source' => 'new']);
+        $task = $this->liveTask();
+        $button = 'data-tw-target="#addTasksModal"';
+        $staff = User::where('active', 1)->orderBy('id')->get()
+            ->first(fn ($u) => !$u->isSuperAdmin() && empty($u->priv()['applicant_add_task']));
+        if (!$staff) {
+            $this->markTestSkipped('No staff user without the Add Task permission.');
+        }
+
+        // without it: no button, and the save route is refused before anything is written
+        $this->actingAs($staff)->get(route('admission.process', $task->applicant_id))->assertOk()->assertDontSee($button, false);
+        $before = ApplicantTask::withTrashed()->where('applicant_id', $task->applicant_id)->count();
+        $this->actingAs($staff)->postJson(route('admission.process.store.task.list'), ['applicant_id' => $task->applicant_id, 'task_list_ids' => [$task->task_list_id]])->assertForbidden();
+        $this->assertSame($before, ApplicantTask::withTrashed()->where('applicant_id', $task->applicant_id)->count());
+
+        // with it (the new key, reverse-mapped to applicant_add_task): the button shows
+        \App\Models\EmployeePermission::create(['user_id' => $staff->id, 'key' => 'dashboard_applicant_add_task', 'value' => 1]);
+        $this->actingAs(User::find($staff->id))->get(route('admission.process', $task->applicant_id))->assertOk()->assertSee($button, false);
+
+        // super admins always see it
+        $this->actingAs($this->staff())->get(route('admission.process', $task->applicant_id))->assertOk()->assertSee($button, false);
+    }
+
+    /** Dashboard › Applicant › Delete Task (user, 13 Nov 2026): the archive route and the dialog's removals need it. */
+    public function test_removing_a_task_needs_the_delete_task_permission(): void
+    {
+        config(['privileges.source' => 'new']);
+        \Illuminate\Support\Facades\Bus::fake();
+        \Illuminate\Support\Facades\Mail::fake();
+        \Illuminate\Support\Facades\Http::fake();
+        $task = $this->liveTask();
+        $staff = User::where('active', 1)->orderBy('id')->get()
+            ->first(fn ($u) => !$u->isSuperAdmin() && empty($u->priv()['applicant_add_task']) && empty($u->priv()['applicant_delete_task']));
+        if (!$staff) {
+            $this->markTestSkipped('No staff user without the task permissions.');
+        }
+        \App\Models\EmployeePermission::create(['user_id' => $staff->id, 'key' => 'dashboard_applicant_add_task', 'value' => 1]);
+        $others = ApplicantTask::where('applicant_id', $task->applicant_id)->where('id', '!=', $task->id)->pluck('task_list_id')->all();
+
+        // Add Task alone: the archive route is refused, and unticking a task in the dialog keeps it
+        $this->actingAs(User::find($staff->id))->deleteJson(route('admission.destory.task'), ['recordid' => $task->id])->assertForbidden();
+        $page = $this->actingAs(User::find($staff->id))->get(route('admission.process', $task->applicant_id))->assertOk();
+        $page->assertSee('Removing a task needs the Delete Task permission.');
+        $this->actingAs(User::find($staff->id))->postJson(route('admission.process.store.task.list'), ['applicant_id' => $task->applicant_id, 'task_list_ids' => $others ?: [0]])->assertOk();
+        $this->assertNull(ApplicantTask::withTrashed()->find($task->id)->deleted_at);
+
+        // with Delete Task too: unticking archives it
+        \App\Models\EmployeePermission::create(['user_id' => $staff->id, 'key' => 'dashboard_applicant_delete_task', 'value' => 1]);
+        $this->actingAs(User::find($staff->id))->get(route('admission.process', $task->applicant_id))->assertOk()->assertDontSee('Removing a task needs the Delete Task permission.');
+        $this->actingAs(User::find($staff->id))->postJson(route('admission.process.store.task.list'), ['applicant_id' => $task->applicant_id, 'task_list_ids' => $others ?: [0]])->assertOk();
+        $this->assertNotNull(ApplicantTask::withTrashed()->find($task->id)->deleted_at);
     }
 }

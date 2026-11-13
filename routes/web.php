@@ -1121,6 +1121,7 @@ Route::middleware('auth')->group(function() {
         Route::post('slc-registration/confirm', 'confirm')->name('slc.registration.confirm');
         Route::post('slc-registration/batch/download', 'download')->name('slc.registration.batch.download');
         Route::get('slc-registration/batch/file', 'batchFile')->name('slc.registration.batch.file');
+        Route::post('slc-registration/batch/regenerate', 'regenerateBatch')->name('slc.registration.batch.regenerate');
         Route::post('slc-registration/batch/uploaded', 'uploaded')->name('slc.registration.batch.uploaded');
         Route::post('slc-registration/batch/register', 'bulkRegister')->name('slc.registration.batch.register');
         Route::post('slc-registration/course/map', 'mapCourse')->name('slc.registration.course.map');

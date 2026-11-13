@@ -90,9 +90,11 @@
                         <p class="adp-proc__desc">Tasks {{ $adpProc['auto'] ? 'are generated on submission' : 'are assigned by the admissions team' }}. Tasks with an outcome or upload stay Pending until both are in, then move to In Progress, where they can be marked complete; tasks needing neither are completed from Pending. Archive any that do not apply.</p>
                     </div>
                     <div class="adp-proc__tools">
-                        {{-- Add tasks: hidden for now at the user's request (22 Oct 2026); the dialog and its script stay in place.
-                        <button type="button" class="adp-btn adp-btn--ghost adp-btn--sm" data-tw-toggle="modal" data-tw-target="#addTasksModal">{!! $adpIcon('plus', 13) !!}Add tasks</button>
-                        --}}
+                        {{-- Add tasks: back on the user's request (13 Nov 2026), for staff with Dashboard › Applicant › Add Task
+                             (applicant_add_task; its save route is enforced in config/privileges.php) --}}
+                        @if(isset(auth()->user()->priv()['applicant_add_task']) && auth()->user()->priv()['applicant_add_task'] == 1)
+                            <button type="button" class="adp-btn adp-btn--ghost adp-btn--sm" data-tw-toggle="modal" data-tw-target="#addTasksModal">{!! $adpIcon('plus', 13) !!}Add tasks</button>
+                        @endif
                         <span class="adp-tprog" title="{{ $adpDone }} of {{ $adpLive }} tasks complete"><span class="adp-tprog__bar"><i style="width:{{ $adpPct }}%"></i></span><small>{{ $adpDone }} of {{ $adpLive }} complete</small></span>
                         <div class="adp-seg" role="group" aria-label="{{ $adpProc['name'] }} view">
                             <button type="button" class="on" aria-pressed="true" data-adp-view="board">{!! $adpIcon('list', 13) !!}Board<b>{{ $adpLive }}</b></button>

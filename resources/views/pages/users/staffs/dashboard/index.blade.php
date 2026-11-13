@@ -176,8 +176,8 @@
                         <div class="lccd-class">
                             <div class="lccd-class__head">
                                 <div class="lccd-class__name">
-                                    {{ $class->plan->creations->module_name }}
-                                    ({{ $class->plan->group->name }})
+                                    {{ $class->plan->creations->module_name ?? '' }}
+                                    @if(!empty($class->plan->group->name))({{ $class->plan->group->name }})@endif
                                     {{ (isset($class->plan->class_type) && !empty($class->plan->class_type) ? ' - '.$class->plan->class_type : '') }}
                                 </div>
                                 <div class="lccd-class__time">{{ (isset($class->plan->start_time) && !empty($class->plan->start_time) ? date('h:i A', strtotime($class->plan->start_time)) : '') }}</div>
