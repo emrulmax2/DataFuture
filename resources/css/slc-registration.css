@@ -323,6 +323,12 @@ a.route { color: inherit; text-decoration: none; }
 .codes-tbl .pill { white-space: normal; }
 .codes-tbl .code-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .codes-tbl .code-sel { flex: 0 0 auto; width: 160px; }
+/* step 4: the SLC tab Session Term / Attendance Term (user, 13 Nov 2026) */
+.codes-tbl .term-box { margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--line); }
+.codes-tbl .term-h { margin-bottom: 4px; }
+.codes-tbl .term-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+.codes-tbl .term-sel .code-sel { width: 160px; }
+.codes-tbl .term-sel-wide .code-sel { width: 220px; }
 
 /* Bulk payment upload: the payments table fits the page (fixed columns); scrolls only on narrow screens */
 .pay-tbl { table-layout: fixed; min-width: 900px; }
@@ -439,3 +445,24 @@ body {
 .step-search__box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .step-search__box input { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: transparent; color: var(--fg); font: inherit; font-size: 14px; }
 .step-search__box input::placeholder { color: var(--muted); }
+
+/* Attendance batches › View students: each line's attendance and instalment (user, 13 Nov 2026) */
+.ab-tbl td { vertical-align: top; }
+.ab-kv { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 6px 0 0; font-size: 12.5px; line-height: 1.45; }
+.ab-kv dt { color: var(--muted); }
+.ab-kv dd { margin: 0; }
+.ab-kv dd.ab-bad { color: var(--bad); font-weight: 600; }
+.ab-amt { font-weight: 700; font-variant-numeric: tabular-nums; }
+.ab-note { margin-top: 6px; font-size: 12.5px; line-height: 1.4; }
+.ab-note.bad { color: var(--bad); }
+.ab-note.warn { color: var(--warn); }
+.ab-note.ok { color: var(--ok); font-weight: 600; }
+/* a note that opens the record it names (SLC tab / Accounts tab): its own colour, underlined */
+.ab-note a.ab-link, a.ab-link { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+.ab-note a.ab-link:hover, a.ab-link:hover { text-decoration-thickness: 2px; }
+.ab-note a.ab-link:focus-visible, a.ab-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+.ab-totals { margin-top: 4px; color: var(--muted); }
+.ab-totals b { color: var(--fg); font-variant-numeric: tabular-nums; }
+/* the step 4 dialog (period already on the SLC tab) */
+.mx-box.ab-mx { max-width: 1040px; }
+

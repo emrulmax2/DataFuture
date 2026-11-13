@@ -94,7 +94,7 @@ export const PLANNED = {
         ],
     },
 };
-export const ATT_CODES = [["A", "In attendance"], ["C", "Course mismatch – CoC"], ["D", "Applied for the new year but not returning"], ["F", "In attendance, fee disputed – CoC"], ["L", "In attendance, liability disputed, we will resolve"], ["N", "In attendance, liability disputed, we will not resolve – CoC"], ["S", "Suspended – CoC"], ["X", "Not in attendance – CoC"]];
+export const ATT_CODES = [["A", "In attendance"], ["C", "Course mismatch – CoC"], ["D", "Never attended – off the worklists, maintenance and fees set to zero"], ["F", "In attendance, fee disputed – CoC"], ["L", "In attendance, liability disputed, we will resolve"], ["N", "In attendance, liability disputed, we will not resolve – CoC"], ["S", "Suspended – CoC"], ["X", "Not in attendance – CoC"]];
 export const COC_KINDS = ["Suspension", "Resumption", "Withdrawal", "Transfer", "Repetition", "Credit", "Fee revision"];
 
 /* A row's errors as the prototype derives them from its checks. */
@@ -116,7 +116,7 @@ const searchNorm = (t) => String(t ?? "").toLowerCase().normalize("NFD").replace
 export function searchText(i) {
     const s = i.s || (i.cands && i.cands[0] ? i.cands[0].s : null) || {};
     const r = i.r || {};
-    return searchNorm([s.title, s.first, s.last, s.id, ...(s.emails || []), r.title, r.first, r.other, r.last, r.ssn].filter(Boolean).join(" "));
+    return searchNorm([s.title, s.first, s.last, s.id, ...(s.emails || []), r.title, r.first, r.other, r.last, r.forename, r.surname, r.ssn].filter(Boolean).join(" "));
 }
 export function matchesSearch(q, text) {
     const words = searchNorm(q).split(/\s+/).filter(Boolean);

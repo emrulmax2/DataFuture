@@ -67,7 +67,7 @@ class AttendanceChecks
             $c('fee', Text::money($r['fee']), $agr ? Text::money($gross).' (agreement)' : 'No agreement on the registration', $agr && abs((float) $r['fee'] - $gross) < 0.005, 'Course fee on the agreement');
             $tfl = (float) $r['tfl'];
             $c('tfl', Text::money($tfl), $agr ? Text::money($total).' (agreement total)' : 'No agreement on the registration', $agr && abs($tfl - $total) < 0.005,
-                $tfl <= 0 ? 'No Tuition Fee Loan'.((float) ($r['f13'] ?? 0) > 0 ? ' – '.Text::money($r['f13']).' paid another way' : '') : 'TFL should equal the agreement total', ['tflZero' => $tfl <= 0]);
+                $tfl <= 0 ? 'No Tuition Fee Loan'.((float) ($r['tfs'] ?? $r['f13'] ?? 0) > 0 ? ' – '.Text::money($r['tfs'] ?? $r['f13']).' paid another way' : '') : 'TFL should equal the agreement total', ['tflZero' => $tfl <= 0]);
         }
 
         return $out;

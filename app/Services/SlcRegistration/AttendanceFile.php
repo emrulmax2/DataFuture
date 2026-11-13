@@ -3,24 +3,48 @@
 namespace App\Services\SlcRegistration;
 
 /**
- * The SIS "Attendance Confirmation Report" (the user's sample of 2 Nov 2026): a header line —
- * HEI code ~ HEI name ~ report date (ddmmyyyy) ~ number of students ~ three amount totals — then one
- * "~"-delimited line of 21 fields per student. The header totals are the sums of fields 11–13.
- *
- * Fields whose meaning the sample makes plain are named; the others keep a neutral name until it is
- * confirmed (field 21 is empty in every line: the attendance code SIS expects back, as field 29 is for
- * registration). Each line is kept as sent, for the confirmation file to come.
+ * The SIS "Attendance Confirmation Report" and the Attendance Confirmation import file: one layout, SLC's
+ * "Attendance and Student Information Import & Export Files" technical specification v9.0, Appendix B
+ * (user, 13 Nov 2026). A "~"-delimited header of 7 columns —
+ *   1 HEI code · 2 HEI name · 3 schedule issue date (DDMMYYYY) · 4 number of records ·
+ *   5 total Tuition Fee Loan · 6 total Tuition Fee Grant · 7 total Tuition Fees Student Pays
+ * — then one line of 21 columns (spec columns 8–28) per student, in FIELDS order below; column 28 (field 21)
+ * is the attendance confirmation code, empty in the export. No footer (§6.12: that is the registration file's).
+ * Each student's line is kept exactly as SIS sent it, for the confirmation file.
  */
 class AttendanceFile
 {
     public const FIELDS = [
-        'term', 'ssn', 'surname', 'forename', 'dob', 'f6', 'slcCode', 'courseName', 'year',
-        'fee', 'tfl', 'f12', 'f13', 'mode', 'f15', 'newStudent', 'f17', 'f18', 'f19', 'f20', 'attendanceCode',
+        'term',          // 8  Course Start Period (AUT, WIN, SPR, SUM)
+        'ssn',           // 9  Student Support Number
+        'surname',       // 10
+        'forename',      // 11
+        'dob',           // 12 Birth Date (may be empty)
+        'ucasNumber',    // 13 UCAS Number (may be empty)
+        'slcCode',       // 14 Course Code (SLC)
+        'courseName',    // 15
+        'year',          // 16 Course Year
+        'fee',           // 17 Course Fee Amount
+        'tfl',           // 18 Tuition Fee Loan
+        'tfg',           // 19 Tuition Fee Grant
+        'tfs',           // 20 Tuition Fee Student (paid by the student)
+        'studentStatus', // 21 latest Support Notification status (F, P, S, N)
+        'issueDate',     // 22 Issue Date of the Support Notification
+        'newRecord',     // 23 NEW or blank
+        'revision',      // 24 Revision Indicator (R, N)
+        'bursary',       // 25 Bursary Student flag (Y, N)
+        'validNino',     // 26 Valid NINO flag (Y, N)
+        'disabledDistance', // 27 Disabled Distance Learner (Y, N)
+        'attendanceCode',   // 28 Attendance Confirmation Code
     ];
 
-    public const CODE_INDEX = 20; // field 21
+    public const CODE_INDEX = 20; // field 21 = spec column 28
 
-    public const TERMS = ['AUT' => 'Autumn', 'SPR' => 'Spring', 'SUM' => 'Summer'];
+    public const AMOUNT_INDEXES = [10, 11, 12]; // fields 11–13 = spec columns 18–20, totalled in header columns 5–7
+
+    public const MAX_RECORDS = 50000; // spec §6.12 / §8
+
+    public const TERMS = ['AUT' => 'Autumn', 'WIN' => 'Winter', 'SPR' => 'Spring', 'SUM' => 'Summer']; // column 8's values (Appendix B)
 
     /** @return array{header: ?array, rows: array, errors: string[]} */
     public static function parse(string $text): array
@@ -36,8 +60,10 @@ class AttendanceFile
                 $header = self::header($parts, rtrim($line, "\r"));
                 continue;
             }
-            if (count($parts) < 9) {
-                $errors[] = 'Line '.($i + 1).' has '.count($parts).' fields (expected 21)';
+            // SIS checks every line has the right number of columns (spec v9.0 §7.2.2): 21 here (Appendix B columns 8–28);
+            // a line that hasn't would fail the whole confirmation file, so it is left out and listed
+            if (count($parts) !== count(self::FIELDS)) {
+                $errors[] = 'Line '.($i + 1).' has '.count($parts).' fields, not the 21 SLC’s layout has – left out';
                 continue;
             }
             $row = [];
@@ -62,10 +88,16 @@ class AttendanceFile
     }
 
     /**
-     * The SIS attendance import file for a batch: the header line recounted for these lines (count and
-     * the totals of fields 11–13, date = today) and each student's line as sent with field 21 set to the
-     * confirmed code. The header's recount is an assumption, flagged on the page until checked against
-     * SLC's import specification.
+     * The Attendance Confirmation import file for a batch (spec v9.0 Appendix B, §6.12, §7.2):
+     *  - header: HEI code ~ HEI name ~ schedule issue date (DDMMYYYY, the file date) ~ number of records ~
+     *    total TFL ~ total TFG ~ total Tuition Fees Student Pays, 2 decimals — SLC's File Header Validation
+     *    checks the count and the three totals against the detail records, so they are recounted for the batch
+     *    (summed in pence, so they can't drift);
+     *  - each student's line exactly as SIS exported it — SLC matches HEP, course, course year, academic year
+     *    and student, and the TFL / TFG / Student Pays against its most recent tuition fee data — with column 28
+     *    = the code (A, C, D, F, L, N, S or X; AttendanceCodes::IMPORTABLE);
+     *  - no footer; lines end CR LF, as SIS's own export; UTF-8 (§7.2.2 footnote); a .txt file (accepted
+     *    with .out, §7.2.1).
      *
      * @param array $lines [raw line => code]
      */
@@ -73,21 +105,27 @@ class AttendanceFile
     {
         $h = explode('~', $headerRaw);
         $out = [];
-        $totals = [0.0, 0.0, 0.0];
+        $pence = [0, 0, 0];
         foreach ($lines as $raw => $code) {
             $p = explode('~', $raw);
             while (count($p) < count(self::FIELDS)) {
                 $p[] = '';
             }
-            $p[self::CODE_INDEX] = $code;
-            foreach ([10, 11, 12] as $k => $i) {
-                $totals[$k] += (float) ($p[$i] ?? 0);
+            if (!AttendanceCodes::importable($code)) {
+                throw new \InvalidArgumentException('Attendance code '.$code.' is not accepted by SLC’s import (A, C, D, F, L, N, S, X).');
+            }
+            $p[self::CODE_INDEX] = strtoupper($code);
+            foreach (self::AMOUNT_INDEXES as $k => $i) {
+                $pence[$k] += (int) round(((float) ($p[$i] ?? 0)) * 100);
             }
             $out[] = implode('~', $p);
         }
-        $header = implode('~', [$h[0] ?? '', $h[1] ?? '', $date->format('dmY'), count($out), number_format($totals[0], 2, '.', ''), number_format($totals[1], 2, '.', ''), number_format($totals[2], 2, '.', '')]);
+        $money = fn (int $p) => number_format($p / 100, 2, '.', '');
+        $header = implode('~', [$h[0] ?? '', $h[1] ?? '', $date->format('dmY'), count($out), $money($pence[0]), $money($pence[1]), $money($pence[2])]);
+        $text = implode("\r\n", array_merge([$header], $out))."\r\n";
 
-        return implode("\r\n", array_merge([$header], $out))."\r\n";
+        // SLC reads UTF-8 (§7.2.2): a report saved by a Windows editor may come back as Windows-1252
+        return mb_check_encoding($text, 'UTF-8') ? $text : mb_convert_encoding($text, 'UTF-8', 'Windows-1252');
     }
 
     public static function fileName(string $hei, string $term, string $batchCode): string

@@ -10,6 +10,7 @@
         <div v-for="t in byType" :key="t.type" class="kpi t-info"><span class="k-label">{{ t.type }}</span><span class="k-val">{{ t.count }}</span><span class="k-note">Code {{ t.codes.join(', ') }}</span></div>
     </section>
 
+    <StepSearch v-if="all.length" v-model="q" id="search-att-cocs" :shown="items.length" :total="unsearched.length" />
     <div class="row">
         <div class="filters" role="group" aria-label="Show CoCs">
             <button type="button" class="chip" :aria-pressed="show === 'open'" @click="show = 'open'">To submit <span class="num">{{ open.length }}</span></button>
@@ -20,7 +21,7 @@
 
     <div v-if="!imp" class="card empty">Upload the SIS Attendance Confirmation Report on the Overview first.</div>
     <section v-else class="card">
-        <div v-if="!items.length" class="empty">{{ all.length ? 'No CoCs here.' : 'No CoCs queued yet. Confirming a code that needs one (step 4) queues it here.' }}</div>
+        <div v-if="!items.length" class="empty">{{ q.trim() && unsearched.length ? 'No students on this step match “' + q.trim() + '”.' : all.length ? 'No CoCs here.' : 'No CoCs queued yet. Confirming a code that needs one (step 4) queues it here.' }}</div>
         <div v-else class="tablebox"><table class="tbl" style="min-width: 1080px">
             <thead><tr><th scope="col">Student</th><th scope="col">Code</th><th scope="col">CoC type</th><th scope="col">Liability period</th><th scope="col">Confirmed</th><th scope="col">State</th><th scope="col"></th></tr></thead>
             <tbody><tr v-for="i in items" :key="i.id">
@@ -43,15 +44,16 @@
 
 <script>
 import { computed, inject, ref } from "vue";
-import { fmtIso } from "./helpers";
+import { fmtIso, matchesSearch, searchText } from "./helpers";
 import StatusTag from "./StatusTag.vue";
+import StepSearch from "./StepSearch.vue";
 
 /*
  * Bulk attendance › step 5 (step 6 until 6 Nov 2026; user, 2 Nov 2026): the CoCs that confirmed codes queued on the students'
  * SLC tab (AttendanceActions::confirm), and "Mark done in SIS" (slc_cocs.actioned, ::cocDone).
  */
 export default {
-    components: { StatusTag },
+    components: { StatusTag, StepSearch },
     setup() {
         const { store, post } = inject("slr");
         const att = computed(() => store.state.attendance);
@@ -64,14 +66,17 @@ export default {
         const open = computed(() => all.value.filter((i) => !i.coc.actioned));
         const done = computed(() => all.value.filter((i) => i.coc.actioned));
         const show = ref("open");
-        const items = computed(() => (show.value === "open" ? open.value : show.value === "done" ? done.value : all.value));
+        const unsearched = computed(() => (show.value === "open" ? open.value : show.value === "done" ? done.value : all.value));
+        // this step's search (user, 13 Nov 2026)
+        const q = ref("");
+        const items = computed(() => (q.value.trim() ? unsearched.value.filter((i) => matchesSearch(q.value, searchText(i))) : unsearched.value));
         const byType = computed(() => {
             const t = {};
             all.value.forEach((i) => { const x = (t[i.coc.type] = t[i.coc.type] || { type: i.coc.type, count: 0, codes: [] }); x.count++; if (!x.codes.includes(i.confirm.code)) x.codes.push(i.confirm.code); });
             return Object.values(t);
         });
 
-        return { store, post, imp, yearName, cocCodes, meaning, all, open, done, show, items, byType, fmtIso };
+        return { q, unsearched, store, post, imp, yearName, cocCodes, meaning, all, open, done, show, items, byType, fmtIso };
     },
 };
 </script>

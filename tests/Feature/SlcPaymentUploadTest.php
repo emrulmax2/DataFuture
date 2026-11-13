@@ -293,7 +293,14 @@ class SlcPaymentUploadTest extends TestCase
     public function test_a_term_that_differs_from_the_instalment_is_flagged(): void
     {
         [$a] = $this->st;
-        $other = collect(['AUT', 'SPR', 'SUM', 'WIN'])->first(fn ($t) => $t !== $a['term']);
+        // a term the student has no instalment for (a student with instalments for two terms matches both)
+        $has = DB::table('slc_installments as i')->leftJoin('term_declarations as td', 'td.id', '=', 'i.term_declaration_id')
+            ->join('term_types as tt', 'tt.id', '=', DB::raw('COALESCE(td.term_type_id, i.term_type_id)'))
+            ->where('i.slc_agreement_id', $a['agr'])->whereNull('i.deleted_at')->pluck('tt.code')->map(fn ($c) => strtoupper((string) $c))->all();
+        $other = collect(['AUT', 'SPR', 'SUM', 'WIN'])->first(fn ($t) => $t !== $a['term'] && !in_array($t, $has, true));
+        if (!$other) {
+            $this->markTestSkipped('The sample student has instalments for every term.');
+        }
         $pay = $this->upload($this->remittance([$this->line($a, $a['amount']), str_replace($a['term'].',', $other.',', $this->line($a, $a['amount']))]), 'terms.csv')->json('state.payments');
         // same term: ready; another term: still matched to an instalment, flagged
         $this->assertSame('ready', $this->rowAt($pay, 2)['status']);

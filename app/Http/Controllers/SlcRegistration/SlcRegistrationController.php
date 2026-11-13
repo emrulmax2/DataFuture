@@ -159,11 +159,29 @@ class SlcRegistrationController extends Controller
         return $this->run(fn () => $this->attendance->setCode((int) $request->row_id, $request->code));
     }
 
+    /** Step 4 › Session Term / Attendance Term for the SLC tab record (user, 13 Nov 2026); empty = the suggested one. */
+    public function attRecordTerm(Request $request)
+    {
+        $request->validate(['row_id' => 'required|integer', 'session_term' => 'nullable|integer|min:1|max:4', 'term_declaration_id' => 'nullable|integer']);
+
+        return $this->run(fn () => $this->attendance->setRecordTerm((int) $request->row_id, $request->filled('session_term') ? (int) $request->session_term : null,
+            $request->filled('term_declaration_id') ? (int) $request->term_declaration_id : null));
+    }
+
     public function attConfirm(Request $request)
     {
-        $request->validate(['row_ids' => 'required|array', 'row_ids.*' => 'integer']);
+        $request->validate(['row_ids' => 'required|array', 'row_ids.*' => 'integer', 'confirmed' => 'nullable|boolean', 'include_ids' => 'nullable|array', 'include_ids.*' => 'integer']);
+        $ids = array_map('intval', $request->row_ids);
+        // (user, 13 Nov 2026) ticked students whose period is already on the SLC tab: the page asks first (409 + the
+        // list), then sends the ones to put in the batch anyway — the others are left out
+        if (!$request->boolean('confirmed')) {
+            $existing = $this->attendance->alreadyOnSlcTab($ids);
+            if ($existing) {
+                return response()->json(['existing' => $existing, 'others' => count($ids) - count($existing)], 409);
+            }
+        }
 
-        return $this->run(fn () => $this->attendance->confirm(array_map('intval', $request->row_ids)));
+        return $this->run(fn () => $this->attendance->confirm($ids, array_map('intval', $request->include_ids ?? [])));
     }
 
     public function attUndo(Request $request)
@@ -191,7 +209,7 @@ class SlcRegistrationController extends Controller
         });
         if ($file) {
             $data = $response->getData(true);
-            $data['file'] = ['name' => $file['name'], 'text' => $file['text']];
+            $data['file'] = ['name' => $file['name'], 'text' => $file['text'], 'rebuilt' => $file['rebuilt'] ?? false];
             $response->setData($data);
         }
 
@@ -212,6 +230,61 @@ class SlcRegistrationController extends Controller
         $request->validate(['code' => 'required|string|max:20']);
 
         return $this->run(fn () => $this->attendance->markUploaded($request->code));
+    }
+
+    /** Batches › View students › Rejected by SIS (user, 13 Nov 2026): the ticked lines back to step 4, to send again. */
+    public function attRejected(Request $request)
+    {
+        $request->validate(['code' => 'required|string|max:20', 'row_ids' => 'required|array|min:1', 'row_ids.*' => 'integer', 'reason' => 'nullable|string|max:255']);
+
+        return $this->run(fn () => $this->attendance->markRejected($request->code, array_map('intval', $request->row_ids), (string) $request->reason));
+    }
+
+    public function attRejectedUndo(Request $request)
+    {
+        $request->validate(['row_id' => 'required|integer']);
+
+        return $this->run(fn () => $this->attendance->undoRejected((int) $request->row_id));
+    }
+
+    /** Batches › Regenerate file (user, 13 Nov 2026): the batch's file built again, dated as before or today. */
+    public function attRegenerateBatch(Request $request)
+    {
+        $request->validate(['code' => 'required|string|max:20', 'date' => 'required|in:original,today']);
+        $file = null;
+        $response = $this->run(function () use ($request, &$file) {
+            $file = $this->attendance->regenerate($request->code, $request->date === 'today');
+
+            return $file['message'];
+        });
+        if ($file) {
+            $data = $response->getData(true);
+            $data['file'] = ['name' => $file['name'], 'text' => $file['text'], 'rebuilt' => false];
+            $response->setData($data);
+        }
+
+        return $response;
+    }
+
+    /** Batches › View students: each line's attendance and instalment, to be recorded or recorded (user, 13 Nov 2026). */
+    public function attBatchPreview(Request $request)
+    {
+        try {
+            return response()->json($this->attendance->batchPreview((string) $request->query('code')));
+        } catch (SlcRegistrationException $e) {
+            return response()->json(['message' => $e->getMessage()], 404);
+        }
+    }
+
+    /**
+     * Batches › View students › Bulk Attendance & Installment (user, 13 Nov 2026): the ticked students' attendance and
+     * instalment, always new rows — a term already on the SLC tab is passed over for the next free one.
+     */
+    public function attBulkAttendance(Request $request)
+    {
+        $request->validate(['code' => 'required|string|max:20', 'row_ids' => 'required|array|min:1', 'row_ids.*' => 'integer']);
+
+        return $this->run(fn () => $this->attendance->bulkAttendance($request->code, array_map('intval', $request->row_ids)));
     }
 
     /* ---------------------------------------------------- Bulk payment upload */

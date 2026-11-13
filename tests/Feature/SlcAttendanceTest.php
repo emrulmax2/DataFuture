@@ -34,6 +34,9 @@ class SlcAttendanceTest extends TestCase
         parent::setUp();
         Storage::fake('local');
         $this->actingAs(User::find(7));
+        // a real batch awaiting download on the dev database would take the test's confirmations: set aside for the test
+        // (inside its transaction — rolled back with it; the tables are InnoDB)
+        \App\Models\SlcAttendanceBatch::where('status', 'awaiting')->update(['status' => 'downloaded']);
         $year = RegistrationState::academicYear(now()->subMonths(7)->format('y'));
         $ids = DB::table('students as s')->join('student_course_relations as r', fn ($j) => $j->on('r.student_id', '=', 's.id')->where('r.active', 1)->whereNull('r.deleted_at'))
             ->join('course_creation_instances as i', fn ($j) => $j->on('i.course_creation_id', '=', 'r.course_creation_id')->where('i.academic_year_id', $year?->id))
@@ -236,7 +239,17 @@ class SlcAttendanceTest extends TestCase
         $att = $this->upload()->assertOk()->json('state.attendance');
         $i = $this->rowOf($att, $this->withSsn[0]['ssn']);
         $l = $i['liab'];
-        $this->assertSame(['AUT', 'Autumn'], [$l['term'], $l['termName']]);
+        // the period: the earliest session term of the year with no attendance on the SLC tab (SIS applies a code
+        // to the earliest outstanding period), its term the course instance's term with that session term
+        $this->assertContains($l['period'], [1, 2, 3, null]);
+        $own = DB::table('instance_terms as t')->join('term_declarations as d', 'd.id', '=', 't.term_declaration_id')->leftJoin('term_types as y', 'y.id', '=', 'd.term_type_id')
+            ->where('t.course_creation_instance_id', $this->withSsn[0]['instance']['id'])->where('t.session_term', $l['period'])->whereNull('t.deleted_at')->first(['y.code', 'd.name']);
+        if ($own) {
+            $this->assertSame([strtoupper($own->code), $own->name], [$l['term'], $l['decl']]);
+            $this->assertSame(\App\Services\SlcRegistration\AttendanceFile::termName($l['term']), $l['termName']);
+        } else {
+            $this->assertSame(['AUT', 'Autumn'], [$l['term'], $l['termName']]); // no such term: the line's own (AUT)
+        }
         $this->assertSame($l['a']['attended'], $l['a']['physical'] + $l['a']['online'] + $l['a']['other']);
         $this->assertLessThanOrEqual($l['a']['held'], $l['a']['attended']);
         if ($l['start']) {
@@ -257,7 +270,12 @@ class SlcAttendanceTest extends TestCase
         $this->assertSame('X', $suggest('SLC Enrolled', $liab(10, 0), [])['code']);
         $this->assertNull($suggest('SLC Enrolled', $liab(0, 0), [])['code']);
         $this->assertSame('C', $suggest('SLC Enrolled', $liab(10, 8), [['key' => 'course', 'ok' => false]])['code']);
-        $this->assertSame('F', $suggest('SLC Enrolled', $liab(10, 8), [['key' => 'tfl', 'ok' => false]])['code']);
+        // spec v9.0 Appendix A: C – a different course or year; F – the course fee; N (or L, checked) – the liability (TFL)
+        $this->assertSame('C', $suggest('SLC Enrolled', $liab(10, 8), [['key' => 'year', 'ok' => false]])['code']);
+        $this->assertSame('F', $suggest('SLC Enrolled', $liab(10, 8), [['key' => 'fee', 'ok' => false], ['key' => 'tfl', 'ok' => false]])['code']);
+        $tflOnly = $suggest('SLC Enrolled', $liab(10, 8), [['key' => 'tfl', 'ok' => false]]);
+        $this->assertSame(['N', true], [$tflOnly['code'], $tflOnly['review']]);
+        $this->assertStringContainsString('L if we’ll put it right', $tflOnly['reason']);
         $this->assertSame('A', $suggest('SLC Enrolled', $liab(10, 8), [['key' => 'dob', 'ok' => false]])['code']);
         $this->assertNull($suggest('SLC Enrolled', ['start' => null, 'started' => false, 'termName' => 'Autumn'] + $liab(0, 0), [])['code']);
     }
@@ -274,6 +292,11 @@ class SlcAttendanceTest extends TestCase
         $this->assertSame(['X', 'X', true, 'ready'], [$this->rowOf($att, $a['ssn'])['code']['chosen'], $this->rowOf($att, $a['ssn'])['code']['final'], $this->rowOf($att, $a['ssn'])['code']['coc'], $this->rowOf($att, $a['ssn'])['codeStage']]);
         $this->postJson(route('slc.registration.att.code'), ['row_id' => $rb, 'code' => 'A'])->assertOk();
         $this->postJson(route('slc.registration.att.code'), ['row_id' => $rb, 'code' => 'Q'])->assertStatus(422);
+        // D (never attended): SLC refuses it for a student recorded as Registered (spec v9.0 §7.2.3)
+        if (isset(\App\Services\SlcRegistration\AttendanceCodes::table()['D'])) {
+            $res = $this->postJson(route('slc.registration.att.code'), ['row_id' => $rb, 'code' => 'D'])->assertStatus(422);
+            $this->assertStringContainsString('Registered', $res->json('flash.text'));
+        }
 
         // Confirm: both into one awaiting batch; X queues a Withdrawal CoC on the SLC tab
         $res = $this->postJson(route('slc.registration.att.confirm'), ['row_ids' => [$ra, $rb]])->assertOk();
@@ -318,6 +341,12 @@ class SlcAttendanceTest extends TestCase
         $this->assertSame(SlcAttendanceImportRow::find($ra)->raw, implode('~', array_slice($f, 0, 20)).'~');
         $this->assertSame('downloaded', collect($res->json('state.attendance.batches'))->firstWhere('id', $code)['status']);
         $this->getJson(route('slc.registration.att.batch.file', ['code' => $code]))->assertOk()->assertJsonPath('text', $file['text']);
+        // the saved copy can't be read (another server's storage, a failed save): built again, the same file
+        $batchRow = \App\Models\SlcAttendanceBatch::where('code', $code)->first();
+        Storage::disk($batchRow->disk)->delete($batchRow->path);
+        $this->getJson(route('slc.registration.att.batch.file', ['code' => $code]))->assertOk()->assertJsonPath('text', $file['text'])->assertJsonPath('rebuilt', true);
+        $again = $this->postJson(route('slc.registration.att.batch.download'), ['code' => $code])->assertOk();
+        $this->assertSame([$file['text'], true], [$again->json('file.text'), $again->json('file.rebuilt')]);
         // once downloaded, a line can't leave the batch
         $this->postJson(route('slc.registration.att.undo'), ['row_id' => $ra])->assertStatus(422);
         $this->postJson(route('slc.registration.att.batch.uploaded'), ['code' => $code])->assertOk();
@@ -346,6 +375,348 @@ class SlcAttendanceTest extends TestCase
         $this->postJson(route('slc.registration.att.confirm'), ['row_ids' => [$i['id']]])->assertOk();
     }
 
+    public function test_never_attended_d_goes_in_the_file_only_without_a_registration(): void
+    {
+        if (!isset(\App\Services\SlcRegistration\AttendanceCodes::table()['D'])) {
+            $this->markTestSkipped('Code D is not in the attendance code list.');
+        }
+        $c = $this->withSsn[2];
+        $att = $this->uploadReady();
+        $i = $this->rowOf($att, $c['ssn']);
+        // no registration for the year: D (spec v9.0 §7.2.3) is the one code that can still be confirmed
+        \App\Models\SlcRegistration::where('student_id', $c['id'])->where('academic_year_id', $this->yearId())->delete(); // rolled back with the test
+        $att = $this->postJson(route('slc.registration.att.code'), ['row_id' => $i['id'], 'code' => 'D'])->assertOk()->json('state.attendance');
+        $this->assertSame('ready', $this->rowOf($att, $c['ssn'])['codeStage']);
+        $code = $this->rowOf($this->postJson(route('slc.registration.att.confirm'), ['row_ids' => [$i['id']]])->assertOk()->json('state.attendance'), $c['ssn'])['confirm']['batchId'];
+        $text = $this->postJson(route('slc.registration.att.batch.download'), ['code' => $code])->assertOk()->json('file.text');
+        $lines = explode("\r\n", rtrim($text, "\r\n"));
+        $this->assertSame(['1', 'D'], [explode('~', $lines[0])[3], explode('~', $lines[1])[20]]);
+        $this->assertTrue(mb_check_encoding($text, 'UTF-8'));
+        // another code still needs the registration
+        $j = $this->rowOf($att, $this->withSsn[0]['ssn']);
+        \App\Models\SlcRegistration::where('student_id', $this->withSsn[0]['id'])->where('academic_year_id', $this->yearId())->delete();
+        $this->postJson(route('slc.registration.att.code'), ['row_id' => $j['id'], 'code' => 'A'])->assertOk();
+        $this->postJson(route('slc.registration.att.confirm'), ['row_ids' => [$j['id']]])->assertStatus(422);
+    }
+
+    public function test_bulk_attendance_confirmation_records_the_slc_attendance(): void
+    {
+        [$a, $b, $c] = [$this->withSsn[0], $this->withSsn[1], $this->withSsn[2]];
+        $d = $this->withSsn[3] ?? null;
+        if ($d) {
+            $this->register($d);
+        }
+        $att = $this->uploadReady();
+        [$ra, $rb, $rc] = [$this->rowOf($att, $a['ssn']), $this->rowOf($att, $b['ssn']), $this->rowOf($att, $c['ssn'])];
+        $rd = $d ? $this->rowOf($att, $d['ssn']) : null;
+        foreach (array_filter([$ra, $rb, $rc, $rd]) as $r) {
+            if (!$r['liab'] || !$r['liab']['termDeclarationId'] || !$r['liab']['sessionTerm']) {
+                $this->markTestSkipped('The sample students have no term on their course instance.');
+            }
+        }
+        foreach ([[$ra, 'A'], [$rb, 'X'], [$rc, 'A'], [$rd, 'A']] as [$r, $k]) {
+            if ($r) {
+                $this->postJson(route('slc.registration.att.code'), ['row_id' => $r['id'], 'code' => $k])->assertOk();
+            }
+        }
+        $code = $this->rowOf($this->postJson(route('slc.registration.att.confirm'), ['row_ids' => array_column(array_filter([$ra, $rb, $rc, $rd]), 'id')])->assertOk()->json('state.attendance'), $a['ssn'])['confirm']['batchId'];
+        $go = fn (array $ids, array $extra = []) => $this->postJson(route('slc.registration.att.batch.attendance'), ['code' => $code, 'row_ids' => $ids] + $extra);
+
+        // not before the batch is uploaded to SIS
+        $go([$ra['id']])->assertStatus(422);
+        $this->postJson(route('slc.registration.att.batch.download'), ['code' => $code])->assertOk();
+        $go([$ra['id']])->assertStatus(422);
+        $this->postJson(route('slc.registration.att.batch.uploaded'), ['code' => $code])->assertOk();
+
+        // A needs the registration's agreement for its instalment: without one the student is skipped, nothing saved
+        $reg = \App\Models\SlcRegistration::where('student_id', $a['id'])->where('academic_year_id', $this->yearId())->where('slc_registration_status_id', 1)->latest('id')->first();
+        \App\Models\SlcAgreement::where('slc_registration_id', $reg->id)->delete(); // rolled back with the test
+        $res = $go([$ra['id']])->assertOk();
+        $this->assertStringContainsString('no SLC agreement', $res->json('flash.text'));
+        $this->assertNull(SlcAttendanceImportRow::find($ra['id'])->slc_recorded);
+        \App\Models\SlcAgreement::create(['student_id' => $a['id'], 'student_course_relation_id' => $reg->student_course_relation_id, 'course_creation_instance_id' => $reg->course_creation_instance_id,
+            'slc_registration_id' => $reg->id, 'year' => $reg->registration_year, 'fees' => 6350, 'total' => 6350, 'created_by' => 1]);
+
+        // the student list shows each line's attendance and instalment before anything is recorded
+        $pv = $this->getJson(route('slc.registration.att.batch.preview', ['code' => $code]))->assertOk()->json();
+        $pa = $pv['rows'][$ra['id']];
+        $this->assertSame([false, null, $reg->id, (int) $reg->registration_year, now()->toDateString(), $ra['liab']['termDeclarationId'], $ra['liab']['sessionTerm'], 'A'],
+            [$pa['recorded'], $pa['problem'], $pa['attendance']['registrationId'], $pa['attendance']['registrationYear'], $pa['attendance']['date'], $pa['attendance']['termDeclarationId'], $pa['attendance']['sessionTerm'], $pa['attendance']['code']]);
+        $share = (int) $ra['liab']['sessionTerm'] === 3 ? 0.5 : 0.25;
+        $this->assertEqualsWithDelta(round((float) SlcAttendanceImportRow::find($ra['id'])->data['tfl'] * $share, 2), $pa['installment']['amount'], 0.001);
+        $this->assertSame(\App\Models\SlcAgreement::where('slc_registration_id', $reg->id)->value('id'), $pa['installment']['agreementId']);
+        $pb = $pv['rows'][$rb['id']];
+        $this->assertSame([null, 'X releases no tuition fee payment'], [$pb['installment'], $pb['noInstallment']]);
+
+        // (user, 13 Nov 2026) no overwriting: a term already on the SLC tab is passed over for the year's next free one —
+        //   B has its Term n attendance (X: no instalment); C its Term n attendance and instalment; D only a Term n instalment
+        $existingAtt = fn (array $st, array $r) => \App\Models\SlcAttendance::create(['student_id' => $st['id'], 'student_course_relation_id' => $this->crelOf($st['id']),
+            'term_declaration_id' => $r['liab']['termDeclarationId'], 'session_term' => $r['liab']['sessionTerm'], 'attendance_code_id' => 1, 'confirmation_date' => '2026-10-01', 'created_by' => 1]);
+        $agreementOf = function (array $st) {
+            $g = \App\Models\SlcRegistration::where('student_id', $st['id'])->where('academic_year_id', $this->yearId())->where('slc_registration_status_id', 1)->latest('id')->first();
+            return \App\Models\SlcAgreement::where('slc_registration_id', $g->id)->whereNull('deleted_at')->value('id') ?? \App\Models\SlcAgreement::create(['student_id' => $st['id'],
+                'student_course_relation_id' => $g->student_course_relation_id, 'course_creation_instance_id' => $g->course_creation_instance_id, 'slc_registration_id' => $g->id,
+                'year' => $g->registration_year, 'fees' => 6350, 'total' => 6350, 'created_by' => 1])->id;
+        };
+        $instAt = fn (array $st, array $r) => \App\Models\SlcInstallment::create(['student_id' => $st['id'], 'student_course_relation_id' => $this->crelOf($st['id']), 'slc_agreement_id' => $agreementOf($st),
+            'installment_date' => '2026-10-01', 'amount' => 1.00, 'session_term' => $r['liab']['sessionTerm'], 'term_declaration_id' => $r['liab']['termDeclarationId'], 'created_by' => 1]);
+        $termNo = fn (array $st, int $n) => DB::table('instance_terms')->where('course_creation_instance_id', $st['instance']['id'])->where('session_term', $n)->whereNull('deleted_at')->value('term_declaration_id');
+        $earlier = $existingAtt($b, $rb);
+        $keptC = $existingAtt($c, $rc);
+        $instC = $instAt($c, $rc);
+        $oldInst = $d ? $instAt($d, $rd) : null;
+        $pv = $this->getJson(route('slc.registration.att.batch.preview', ['code' => $code]))->assertOk()->json('rows');
+        $this->assertSame([(int) $rc['liab']['sessionTerm'], $keptC->id, $instC->id], [$pv[$rc['id']]['taken'][0]['sessionTerm'], $pv[$rc['id']]['taken'][0]['attendance']['id'], $pv[$rc['id']]['taken'][0]['installment']['id']]);
+
+        // no question asked: everyone recordable gets new rows, and nothing already there changes
+        $before = [\App\Models\SlcAttendance::count(), \App\Models\SlcInstallment::count()];
+        $res = $go(array_column(array_filter([$ra, $rb, $rc, $rd]), 'id'))->assertOk();
+        $this->assertSame(['2026-10-01', '2026-10-01', 1.0], [\App\Models\SlcAttendance::find($earlier->id)->getRawOriginal('confirmation_date'), \App\Models\SlcAttendance::find($keptC->id)->getRawOriginal('confirmation_date'), (float) \App\Models\SlcInstallment::find($instC->id)->amount]);
+        $recorded = SlcAttendanceImportRow::whereIn('id', array_column(array_filter([$ra, $rb, $rc, $rd]), 'id'))->whereNotNull('slc_recorded')->get();
+        $this->assertSame([$before[0] + $recorded->count(), $before[1] + $recorded->whereNotNull('slc_installment_id')->count()], [\App\Models\SlcAttendance::count(), \App\Models\SlcInstallment::count()]);
+        // B and C: recorded as Term n+1 — C's instalment at that term's share (25%, or 50% for Term 3)
+        foreach ([[$b, $rb], [$c, $rc]] as [$st, $r]) {
+            $n = (int) $r['liab']['sessionTerm'];
+            $next = $n < 3 ? $termNo($st, $n + 1) : null;
+            $row = SlcAttendanceImportRow::find($r['id']);
+            if (!$next) {
+                $this->assertNull($row->slc_recorded);
+                continue;
+            }
+            $sa = \App\Models\SlcAttendance::find($row->slc_attendance_id);
+            $this->assertSame(['created', $n + 1, (int) $next], [$row->slc_recorded, (int) $sa->session_term, (int) $sa->term_declaration_id]);
+            $this->assertNotContains($row->slc_attendance_id, [$earlier->id, $keptC->id]);
+            if ($st === $c) {
+                $inst = \App\Models\SlcInstallment::find($row->slc_installment_id);
+                $this->assertSame([$n + 1, $sa->id], [(int) $inst->session_term, (int) $inst->slc_attendance_id]);
+                $this->assertEqualsWithDelta(round((float) $row->data['tfl'] * ($n + 1 === 3 ? 0.5 : 0.25), 2), (float) $inst->amount, 0.001);
+            }
+            $this->assertStringContainsString('as the next free term', $res->json('flash.text'));
+        }
+        if ($d) {
+            // D: its Term n attendance added; the Term n instalment is already on Accounts, so no second one
+            $rowD = SlcAttendanceImportRow::find($rd['id']);
+            $this->assertSame([(int) $rd['liab']['sessionTerm'], null, 1.0], [(int) \App\Models\SlcAttendance::find($rowD->slc_attendance_id)->session_term, $rowD->slc_installment_id, (float) $oldInst->fresh()->amount]);
+        }
+
+        // A: the attendance as the SLC tab records it, with the instalment (25% / 50% of the instance fee) and the line marked
+        $row = SlcAttendanceImportRow::find($ra['id']);
+        $sa = \App\Models\SlcAttendance::find($row->slc_attendance_id);
+        $this->assertSame(['created', $ra['liab']['termDeclarationId'], $ra['liab']['sessionTerm'], (int) DB::table('attendance_codes')->where('code', 'A')->value('id')],
+            [$row->slc_recorded, (int) $sa->term_declaration_id, (int) $sa->session_term, (int) $sa->attendance_code_id]);
+        $this->assertSame(now()->toDateString(), $sa->getRawOriginal('confirmation_date'));
+        $this->assertNotNull($sa->slc_registration_id);
+        // the instalment: the line's Tuition Fee Loan × 25% (term 1, 2) or 50% (term 3), on the agreement
+        $inst = \App\Models\SlcInstallment::find($row->slc_installment_id);
+        $tfl = (float) $row->data['tfl'];
+        $this->assertEqualsWithDelta(round($tfl * ((int) $sa->session_term === 3 ? 0.5 : 0.25), 2), (float) $inst->amount, 0.001);
+        $this->assertSame([(int) $sa->term_declaration_id, (int) $sa->session_term], [(int) $inst->term_declaration_id, (int) $inst->session_term]);
+        $item = collect(collect($res->json('state.attendance.batches'))->firstWhere('id', $code)['items'])->firstWhere('rowId', $ra['id']);
+        $this->assertSame('created', $item['record']['status']);
+
+        // B's queued CoC is linked to its new attendance
+        $rowB = SlcAttendanceImportRow::find($rb['id']);
+        if ($rowB->slc_recorded && $rowB->slc_coc_id) {
+            $this->assertSame($rowB->slc_attendance_id, (int) \App\Models\SlcCoc::find($rowB->slc_coc_id)->slc_attendance_id);
+        }
+        // a recorded student can't be recorded twice
+        $go([$ra['id']])->assertStatus(422);
+    }
+
+    private function crelOf(int $studentId): ?int
+    {
+        return DB::table('student_course_relations')->where('student_id', $studentId)->where('active', 1)->whereNull('deleted_at')->orderByDesc('id')->value('id');
+    }
+
+    public function test_a_period_already_on_the_slc_tab_is_asked_about_before_confirming(): void
+    {
+        [$a, $b] = [$this->withSsn[0], $this->withSsn[1]];
+        $att = $this->uploadReady();
+        [$ra, $rb] = [$this->rowOf($att, $a['ssn']), $this->rowOf($att, $b['ssn'])];
+        if (!$ra['liab'] || !$ra['liab']['termDeclarationId']) {
+            $this->markTestSkipped('The sample student has no term on their course instance.');
+        }
+        // A's attendance for the period entered by hand on the SLC tab after SIS issued the report
+        $byHand = \App\Models\SlcAttendance::create(['student_id' => $a['id'], 'student_course_relation_id' => $this->crelOf($a['id']), 'term_declaration_id' => $ra['liab']['termDeclarationId'],
+            'session_term' => $ra['liab']['sessionTerm'], 'attendance_code_id' => 1, 'confirmation_date' => now()->toDateString(), 'created_by' => 1]);
+        $att = $this->postJson(route('slc.registration.att.code'), ['row_id' => $ra['id'], 'code' => 'A'])->assertOk()->json('state.attendance');
+        $this->postJson(route('slc.registration.att.code'), ['row_id' => $rb['id'], 'code' => 'A'])->assertOk();
+        $this->assertSame([$byHand->id, false], [$this->rowOf($att, $a['ssn'])['slcTab']['attendance']['id'], $this->rowOf($att, $a['ssn'])['slcTab']['recorded']]);
+        $this->assertGreaterThanOrEqual(1, $att['counts']['onSlcTab']);
+
+        // asked first; not ticked: left out of the batch, B confirmed
+        $conflict = $this->postJson(route('slc.registration.att.confirm'), ['row_ids' => [$ra['id'], $rb['id']]])->assertStatus(409)->json();
+        $this->assertSame([[$ra['id']], 1, $byHand->id], [array_column($conflict['existing'], 'rowId'), $conflict['others'], $conflict['existing'][0]['onTab']['attendance']['id']]);
+        $res = $this->postJson(route('slc.registration.att.confirm'), ['row_ids' => [$ra['id'], $rb['id']], 'confirmed' => true])->assertOk();
+        $this->assertStringContainsString('left out – already on the SLC tab', $res->json('flash.text'));
+        $this->assertSame([null, 'confirmed'], [SlcAttendanceImportRow::find($ra['id'])->confirmed_code, $this->rowOf($res->json('state.attendance'), $b['ssn'])['codeStage']]);
+        // ticked to send anyway: confirmed
+        $this->postJson(route('slc.registration.att.confirm'), ['row_ids' => [$ra['id']], 'confirmed' => true, 'include_ids' => [$ra['id']]])->assertOk();
+        $this->assertSame('A', SlcAttendanceImportRow::find($ra['id'])->confirmed_code);
+    }
+
+    public function test_step_4_says_what_would_stop_the_slc_tab_record_and_a_batch_file_can_be_regenerated(): void
+    {
+        $a = $this->withSsn[0];
+        $att = $this->uploadReady();
+        $ra = $this->rowOf($att, $a['ssn']);
+        // A with a Tuition Fee Loan and no agreement on the registration: the instalment couldn't be recorded later
+        $reg = \App\Models\SlcRegistration::where('student_id', $a['id'])->where('academic_year_id', $this->yearId())->where('slc_registration_status_id', 1)->latest('id')->first();
+        \App\Models\SlcAgreement::where('slc_registration_id', $reg->id)->delete(); // rolled back with the test
+        $att = $this->postJson(route('slc.registration.att.code'), ['row_id' => $ra['id'], 'code' => 'A'])->assertOk()->json('state.attendance');
+        $row = $this->rowOf($att, $a['ssn']);
+        if ($row['liab'] && $row['liab']['sessionTerm'] && (float) $row['r']['tfl'] > 0) {
+            $this->assertStringContainsString('no SLC agreement', (string) $row['recordBlock']);
+        }
+
+        // Regenerate: the same lines, dated as before or today; a batch awaiting download can't be
+        $code = $this->rowOf($this->postJson(route('slc.registration.att.confirm'), ['row_ids' => [$ra['id']], 'confirmed' => true, 'include_ids' => [$ra['id']]])->assertOk()->json('state.attendance'), $a['ssn'])['confirm']['batchId'];
+        $this->postJson(route('slc.registration.att.batch.regenerate'), ['code' => $code, 'date' => 'today'])->assertStatus(422);
+        $first = $this->postJson(route('slc.registration.att.batch.download'), ['code' => $code])->assertOk()->json('file.text');
+        \App\Models\SlcAttendanceBatch::where('code', $code)->update(['file_date' => '2026-11-01']);
+        $kept = $this->postJson(route('slc.registration.att.batch.regenerate'), ['code' => $code, 'date' => 'original'])->assertOk()->json('file.text');
+        $this->assertSame('01112026', explode('~', explode("\r\n", $kept)[0])[2]);
+        $this->assertSame(array_slice(explode("\r\n", $first), 1), array_slice(explode("\r\n", $kept), 1)); // the same lines
+        $fresh = $this->postJson(route('slc.registration.att.batch.regenerate'), ['code' => $code, 'date' => 'today'])->assertOk();
+        $this->assertSame(now()->format('dmY'), explode('~', explode("\r\n", $fresh->json('file.text'))[0])[2]);
+        $this->assertSame(now()->toDateString(), collect($fresh->json('state.attendance.batches'))->firstWhere('id', $code)['file']['date']);
+        $this->getJson(route('slc.registration.att.batch.file', ['code' => $code]))->assertOk()->assertJsonPath('text', $fresh->json('file.text'));
+        // once uploaded, its lines count as still to record on the SLC tab (the Dashboard's last step)
+        $up = $this->postJson(route('slc.registration.att.batch.uploaded'), ['code' => $code])->assertOk()->json('state.attendance.counts');
+        $this->assertGreaterThanOrEqual(1, $up['toRecord']);
+    }
+
+    public function test_the_spec_rules_for_codes_not_registered_students_and_the_report(): void
+    {
+        [$a, $b, $c] = [$this->withSsn[0], $this->withSsn[1], $this->withSsn[2]];
+        // spec v9.0 §7.2.2: a student line must have 21 fields — one that hasn't is left out and listed; WIN is a start period
+        $p = AttendanceFile::parse("LCHC~X~02112026~1~0~0~0\r\nAUT~SSN1~DOE~JANE~15041985~~134138~C~1~0~0~0~0~F~22102026~NEW~N~N~N~N\r\n");
+        $this->assertSame([[], 1], [$p['rows'], count($p['errors'])]);
+        $this->assertSame('Winter', AttendanceFile::termName('WIN'));
+
+        // the report's column 28: SIS already has A for this period (saved or submitted)
+        $text = implode("\r\n", array_map(fn ($l) => str_contains($l, '~'.$a['ssn'].'~') ? substr($l, 0, -1).'~A' : $l, explode("\r\n", rtrim($this->text, "\r\n"))))."\r\n";
+        $att = $this->uploadReady($text);
+        $ra = $this->rowOf($att, $a['ssn']);
+        $this->assertSame(['A', 'A'], [$ra['sisCode'], $ra['code']['suggested']]);
+        $this->assertStringContainsString('report column 28', $ra['code']['reason']);
+        if ($ra['codeStage'] === 'ready') {
+            $conflict = $this->postJson(route('slc.registration.att.confirm'), ['row_ids' => [$ra['id']]])->assertStatus(409)->json('existing');
+            $this->assertSame(['A', $ra['id']], [$conflict[0]['sisCode'], $conflict[0]['rowId']]);
+        }
+
+        // Not Registered (registration No): SIS takes only X or S (spec §7.2.3) — suggested X, an "in attendance" code refused
+        \App\Models\SlcRegistration::where('student_id', $b['id'])->where('academic_year_id', $this->yearId())->update(['slc_registration_status_id' => 2]); // rolled back
+        $rb = $this->rowOf($this->postJson(route('slc.registration.att.code'), ['row_id' => $ra['id'], 'code' => null])->assertOk()->json('state.attendance'), $b['ssn']);
+        $this->assertSame(['X', 'No'], [$rb['code']['final'], $rb['notReg']['status']]);
+        $res = $this->postJson(route('slc.registration.att.code'), ['row_id' => $rb['id'], 'code' => 'A'])->assertStatus(422);
+        $this->assertStringContainsString('Not Registered', $res->json('flash.text'));
+        $this->postJson(route('slc.registration.att.code'), ['row_id' => $rb['id'], 'code' => 'D'])->assertStatus(422);
+        $rb = $this->rowOf($this->postJson(route('slc.registration.att.code'), ['row_id' => $rb['id'], 'code' => 'X'])->assertOk()->json('state.attendance'), $b['ssn']);
+        if ($rb['codeStage'] === 'ready') {
+            $code = $this->rowOf($this->postJson(route('slc.registration.att.confirm'), ['row_ids' => [$rb['id']], 'confirmed' => true, 'include_ids' => [$rb['id']]])->assertOk()->json('state.attendance'), $b['ssn'])['confirm']['batchId'];
+            $this->postJson(route('slc.registration.att.batch.download'), ['code' => $code])->assertOk();
+            $this->postJson(route('slc.registration.att.batch.uploaded'), ['code' => $code])->assertOk();
+            $plan = $this->getJson(route('slc.registration.att.batch.preview', ['code' => $code]))->assertOk()->json('rows.'.$rb['id']);
+            if (!$plan['problem']) {
+                // recorded on the SLC tab against the Not Registered registration, with no instalment
+                $notRegId = \App\Models\SlcRegistration::where('student_id', $b['id'])->where('academic_year_id', $this->yearId())->latest('id')->value('id');
+                $this->assertSame([$notRegId, null, 'X releases no tuition fee payment'], [$plan['attendance']['registrationId'], $plan['installment'], $plan['noInstallment']]);
+            }
+        }
+
+        // D after a transfer (spec §7.2.3): an SLC registration for the year on another course
+        $rc = $this->rowOf($att, $c['ssn']);
+        \App\Models\SlcRegistration::where('student_id', $c['id'])->where('academic_year_id', $this->yearId())->delete(); // rolled back
+        \App\Models\SlcRegistration::create(['student_id' => $c['id'], 'student_course_relation_id' => 0, 'academic_year_id' => $this->yearId(), 'registration_year' => 1,
+            'slc_registration_status_id' => 3, 'confirmation_date' => '2026-10-01', 'created_by' => 1]);
+        $res = $this->postJson(route('slc.registration.att.code'), ['row_id' => $rc['id'], 'code' => 'D'])->assertStatus(422);
+        $this->assertStringContainsString('another course', $res->json('flash.text'));
+    }
+
+    public function test_a_line_sis_rejected_goes_back_to_step_4_and_can_be_sent_again(): void
+    {
+        $a = $this->withSsn[0];
+        $att = $this->uploadReady();
+        $ra = $this->rowOf($att, $a['ssn']);
+        $this->postJson(route('slc.registration.att.code'), ['row_id' => $ra['id'], 'code' => 'A'])->assertOk();
+        $code = $this->rowOf($this->postJson(route('slc.registration.att.confirm'), ['row_ids' => [$ra['id']], 'confirmed' => true, 'include_ids' => [$ra['id']]])->assertOk()->json('state.attendance'), $a['ssn'])['confirm']['batchId'];
+        $this->postJson(route('slc.registration.att.batch.rejected'), ['code' => $code, 'row_ids' => [$ra['id']]])->assertStatus(422); // only once uploaded
+        $file = $this->postJson(route('slc.registration.att.batch.download'), ['code' => $code])->assertOk()->json('file.text');
+        $toRecord = $this->postJson(route('slc.registration.att.batch.uploaded'), ['code' => $code])->assertOk()->json('state.attendance.counts.toRecord');
+
+        // SIS's Import Results rejected it: out of the batch, back on step 4 with its code; the batch lists it, its file unchanged
+        $att = $this->postJson(route('slc.registration.att.batch.rejected'), ['code' => $code, 'row_ids' => [$ra['id']], 'reason' => 'Confirmation has already been submitted'])->assertOk()->json('state.attendance');
+        $row = $this->rowOf($att, $a['ssn']);
+        $this->assertSame([null, 'ready', $code, 'A'], [$row['confirm'], $row['codeStage'], $row['sisRejected']['batchId'], $row['sisRejected']['code']]);
+        $item = collect(collect($att['batches'])->firstWhere('id', $code)['items'])->firstWhere('rowId', $ra['id']);
+        $this->assertSame(['Confirmation has already been submitted', null, 'A'], [$item['rejected']['reason'], $item['rejected']['resent'], $item['code']]);
+        $this->assertSame($toRecord - 1, $att['counts']['toRecord']); // no longer to record on the SLC tab
+        $this->getJson(route('slc.registration.att.batch.file', ['code' => $code]))->assertOk()->assertJsonPath('text', $file);
+        $this->postJson(route('slc.registration.att.batch.attendance'), ['code' => $code, 'row_ids' => [$ra['id']]])->assertStatus(422); // not recorded on the SLC tab
+
+        // marked by mistake: Undo puts it back in the batch
+        $att = $this->postJson(route('slc.registration.att.batch.rejected.undo'), ['row_id' => $ra['id']])->assertOk()->json('state.attendance');
+        $this->assertSame(['confirmed', $code], [$this->rowOf($att, $a['ssn'])['codeStage'], $this->rowOf($att, $a['ssn'])['confirm']['batchId']]);
+
+        // rejected again and confirmed into a new batch: the first batch shows where it went; Undo no longer applies
+        $this->postJson(route('slc.registration.att.batch.rejected'), ['code' => $code, 'row_ids' => [$ra['id']]])->assertOk();
+        $att = $this->postJson(route('slc.registration.att.confirm'), ['row_ids' => [$ra['id']], 'confirmed' => true, 'include_ids' => [$ra['id']]])->assertOk()->json('state.attendance');
+        $again = $this->rowOf($att, $a['ssn'])['confirm']['batchId'];
+        $this->assertNotSame($code, $again);
+        $this->assertSame($again, collect(collect($att['batches'])->firstWhere('id', $code)['items'])->firstWhere('rowId', $ra['id'])['rejected']['resent']);
+        $this->postJson(route('slc.registration.att.batch.rejected.undo'), ['row_id' => $ra['id']])->assertStatus(422);
+    }
+
+    public function test_the_slc_tab_session_and_attendance_term_can_be_chosen_on_step_4(): void
+    {
+        $a = $this->withSsn[0];
+        $att = $this->uploadReady();
+        $ra = $this->rowOf($att, $a['ssn']);
+        $rt = $ra['recordTerm'];
+        $terms = collect($rt['options'])->keyBy('sessionTerm');
+        if (!$terms->has(3) || isset($rt['taken'][3])) {
+            $this->markTestSkipped('The sample student has no free Term 3 on their course instance.');
+        }
+        $this->assertSame(collect([1, 2, 3])->first(fn ($n) => !isset($rt['taken'][$n])), $rt['suggested']['sessionTerm']);
+        $set = fn (array $body) => $this->postJson(route('slc.registration.att.term'), ['row_id' => $ra['id']] + $body);
+
+        // Term 3: its Attendance Term follows (the instance's Term 3)
+        $row = $this->rowOf($set(['session_term' => 3])->assertOk()->json('state.attendance'), $a['ssn']);
+        $this->assertSame([3, $terms[3]['id'], null], [$row['recordTerm']['final']['sessionTerm'], $row['recordTerm']['final']['termDeclarationId'], $row['recordTerm']['problem']]);
+        // another attendance term keeps the chosen Session Term
+        $other = DB::table('term_declarations')->whereNotIn('id', $terms->pluck('id'))->whereNull('deleted_at')->value('id');
+        $row = $this->rowOf($set(['session_term' => 3, 'term_declaration_id' => $other])->assertOk()->json('state.attendance'), $a['ssn']);
+        $this->assertSame([3, (int) $other], [$row['recordTerm']['final']['sessionTerm'], $row['recordTerm']['final']['termDeclarationId']]);
+        $set(['session_term' => 5])->assertStatus(422);
+
+        // back to Term 3 of the instance; the final step records it so, with Term 3's share (50% of the TFL)
+        $set(['session_term' => 3])->assertOk();
+        $this->postJson(route('slc.registration.att.code'), ['row_id' => $ra['id'], 'code' => 'A'])->assertOk();
+        $code = $this->rowOf($this->postJson(route('slc.registration.att.confirm'), ['row_ids' => [$ra['id']], 'confirmed' => true, 'include_ids' => [$ra['id']]])->assertOk()->json('state.attendance'), $a['ssn'])['confirm']['batchId'];
+        $this->postJson(route('slc.registration.att.batch.download'), ['code' => $code])->assertOk();
+        $this->postJson(route('slc.registration.att.batch.uploaded'), ['code' => $code])->assertOk();
+        $plan = $this->getJson(route('slc.registration.att.batch.preview', ['code' => $code]))->assertOk()->json('rows.'.$ra['id']);
+        $this->assertSame([3, $terms[3]['id'], true], [$plan['attendance']['sessionTerm'], $plan['attendance']['termDeclarationId'], $plan['chosen']]);
+        if ($plan['installment']) {
+            $this->assertEqualsWithDelta(round((float) SlcAttendanceImportRow::find($ra['id'])->data['tfl'] * 0.5, 2), $plan['installment']['amount'], 0.001);
+        }
+
+        // a term already on the SLC tab is never overwritten: chosen, the line can't be recorded
+        $first = $terms->first();
+        \App\Models\SlcAttendance::create(['student_id' => $a['id'], 'student_course_relation_id' => $this->crelOf($a['id']), 'term_declaration_id' => $first['id'],
+            'session_term' => $first['sessionTerm'], 'attendance_code_id' => 1, 'confirmation_date' => '2026-10-01', 'created_by' => 1]);
+        $row = $this->rowOf($set(['session_term' => $first['sessionTerm']])->assertOk()->json('state.attendance'), $a['ssn']);
+        $this->assertStringContainsString('already on the SLC tab', (string) $row['recordTerm']['problem']);
+        $this->assertStringContainsString('already on the SLC tab', $this->getJson(route('slc.registration.att.batch.preview', ['code' => $code]))->json('rows.'.$ra['id'].'.problem'));
+
+        // back to the suggestion; once recorded on the SLC tab it can't change here
+        $row = $this->rowOf($set([])->assertOk()->json('state.attendance'), $a['ssn']);
+        $this->assertSame([null, null], [$row['recordTerm']['chosen']['sessionTerm'], $row['recordTerm']['chosen']['termDeclarationId']]);
+        SlcAttendanceImportRow::where('id', $ra['id'])->update(['slc_recorded' => 'created']);
+        $set(['session_term' => 3])->assertStatus(422);
+    }
+
     public function test_removing_the_last_line_drops_its_coc_and_the_empty_batch(): void
     {
         $att = $this->uploadReady();
@@ -365,7 +736,7 @@ class SlcAttendanceTest extends TestCase
         $att = $this->uploadReady();
         $ra = $this->rowOf($att, $a['ssn'])['id'];
         $this->postJson(route('slc.registration.att.code'), ['row_id' => $ra, 'code' => 'X'])->assertOk();
-        $this->postJson(route('slc.registration.att.code'), ['row_id' => $this->rowOf($att, $b['ssn'])['id'], 'code' => 'D'])->assertOk();
+        $this->postJson(route('slc.registration.att.code'), ['row_id' => $this->rowOf($att, $b['ssn'])['id'], 'code' => 'L'])->assertOk(); // (D can't be chosen: not in SLC's import)
         $first = $this->rowOf($this->postJson(route('slc.registration.att.confirm'), ['row_ids' => [$ra]])->assertOk()->json('state.attendance'), $a['ssn']);
         $code = $first['confirm']['batchId'];
 
@@ -376,7 +747,7 @@ class SlcAttendanceTest extends TestCase
         $ia = $this->rowOf($att, $a['ssn']);
         $this->assertNotSame($ra, $ia['id']);
         $this->assertSame(['confirmed', 'X', $code, false, $first['coc']['id']], [$ia['codeStage'], $ia['confirm']['code'], $ia['confirm']['batchId'], $ia['confirm']['earlier'], $ia['coc']['id']]);
-        $this->assertSame('D', $this->rowOf($att, $b['ssn'])['code']['chosen']);
+        $this->assertSame('L', $this->rowOf($att, $b['ssn'])['code']['chosen']);
         $this->assertSame([$ia['id']], array_column(collect($att['batches'])->firstWhere('id', $code)['items'], 'rowId'));
 
         // downloaded, then a third upload: the line shows the earlier batch and can't be removed
@@ -408,7 +779,17 @@ class SlcAttendanceTest extends TestCase
         $p = AttendanceFile::parse("LCHC~LONDON CHURCHILL COLLEGE~02112026~1~6350.00~0.00~0.00\r\nAUT~SSN1~DOE~JANE~15041985~~134138~HOSPITALITY~1~6350.00~6350.00~0.00~0.00~F~22102026~NEW~N~N~N~N~\r\n");
         $this->assertSame(['LCHC', '02112026', 1, [6350.0, 0.0, 0.0]], [$p['header']['hei'], $p['header']['date'], $p['header']['count'], $p['header']['totals']]);
         $r = $p['rows'][0];
-        $this->assertSame(['AUT', 'SSN1', 'DOE', 'JANE', '15041985', '134138', '1', '6350.00', 'NEW', ''], [$r['term'], $r['ssn'], $r['surname'], $r['forename'], $r['dob'], $r['slcCode'], $r['year'], $r['tfl'], $r['newStudent'], $r['attendanceCode']]);
+        $this->assertSame(['AUT', 'SSN1', 'DOE', 'JANE', '15041985', '134138', '1', '6350.00', '0.00', '0.00', 'F', 'NEW', ''], [$r['term'], $r['ssn'], $r['surname'], $r['forename'], $r['dob'], $r['slcCode'], $r['year'], $r['tfl'], $r['tfg'], $r['tfs'], $r['studentStatus'], $r['newRecord'], $r['attendanceCode']]);
+        // the import file (spec v9.0 Appendix B): header count and totals recounted for the lines, code in column 28, no footer
+        $text = AttendanceFile::build('LCHC~LONDON CHURCHILL COLLEGE~02112026~55~1~1~1', [
+            'AUT~SSN1~DOE~JANE~15041985~~134138~HOSPITALITY~1~6350.10~6350.10~0.00~0.20~F~22102026~NEW~N~N~N~N~' => 'A',
+            'AUT~SSN2~ROE~JOHN~01011990~~134138~HOSPITALITY~1~9535.00~9534.20~0.00~0.70~F~22102026~NEW~N~N~N~N~' => 'x',
+        ], new \DateTime('2026-11-13'));
+        $this->assertSame("LCHC~LONDON CHURCHILL COLLEGE~13112026~2~15884.30~0.00~0.90\r\n"
+            ."AUT~SSN1~DOE~JANE~15041985~~134138~HOSPITALITY~1~6350.10~6350.10~0.00~0.20~F~22102026~NEW~N~N~N~N~A\r\n"
+            ."AUT~SSN2~ROE~JOHN~01011990~~134138~HOSPITALITY~1~9535.00~9534.20~0.00~0.70~F~22102026~NEW~N~N~N~N~X\r\n", $text);
         $this->assertSame('Autumn', AttendanceFile::termName('AUT'));
+        $this->expectException(\InvalidArgumentException::class); // a code outside SLC's list never reaches the file
+        AttendanceFile::build('LCHC~X~02112026~1~0~0~0', ['AUT~SSN1~DOE~JANE~~~1~C~1~0~0~0~0~F~~~N~N~N~N~' => 'Q'], new \DateTime());
     }
 }
