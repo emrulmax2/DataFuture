@@ -77,6 +77,81 @@ class StudentEmailProvisionerTest extends TestCase
         $this->assertTrue(DB::table('student_archives')->where('student_id', $student)->where('table', 'google_workspace')->where('field_new_value', $email)->exists(), 'marked as created by us');
     }
 
+    /** A student on a 2027 January course (their intake). */
+    private function onIntake(int $student): string
+    {
+        $creation = DB::table('course_creations as cc')->join('semesters as s', 's.id', '=', 'cc.semester_id')->whereNull('cc.deleted_at')
+            ->orderByDesc('s.id')->first(['cc.id', 's.name']);
+        if (!$creation) {
+            $this->markTestSkipped('No course creation with a semester.');
+        }
+        DB::table('student_course_relations')->insert(['student_id' => $student, 'course_creation_id' => $creation->id, 'active' => 1, 'created_by' => 1, 'created_at' => now()]);
+
+        return $creation->name;
+    }
+
+    /** User / IT manager, 13 Nov 2026: the account goes in /Students/<intake> (made when missing) and joins student@lcc.ac.uk. */
+    public function test_the_account_goes_in_the_intake_ou_and_joins_the_student_group(): void
+    {
+        config(['student_email.google.intake_ou_parent' => '/Students', 'student_email.google.student_group' => 'student@lcc.ac.uk']);
+        $this->google->configured = true;
+        [$student, $task, , $email] = $this->student(['personal_email' => 'own@example.com']);
+        $intake = $this->onIntake($student);
+
+        $this->provision($student, $task);
+
+        $ou = '/Students/'.$intake;
+        $this->assertSame([$ou], $this->google->ensured);
+        $this->assertContains($ou, $this->google->orgUnits, 'made when it was missing');
+        $this->assertSame($ou, $this->google->created[0][5], 'the account is created in it');
+        $this->assertSame([$email], $this->google->groups['student@lcc.ac.uk']);
+        $this->assertSame('Completed', DB::table('student_tasks')->where('id', $task)->value('status'));
+        $log = (string) DB::table('student_task_log')->where('student_tasks_id', $task)->where('actions', 'Student email created')->value('current_field_value');
+        $this->assertStringContainsString('OU '.$ou.' (new)', $log);
+        $this->assertStringContainsString('added to student@lcc.ac.uk', $log);
+        Mail::assertNotSent(\App\Mail\ConversionErrorReportMail::class);
+
+        // a second student on the same intake: the OU is already there
+        [$student2, $task2] = $this->student(['personal_email' => 'own2@example.com']);
+        $this->onIntake($student2);
+        $this->provision($student2, $task2);
+        $this->assertStringContainsString('OU '.$ou.' ·', (string) DB::table('student_task_log')->where('student_tasks_id', $task2)->where('actions', 'Student email created')->value('current_field_value'));
+    }
+
+    public function test_if_google_refuses_the_ou_or_group_the_account_still_goes_ahead_and_it_is_reported(): void
+    {
+        config(['student_email.google.intake_ou_parent' => '/Students', 'student_email.google.student_group' => 'student@lcc.ac.uk']);
+        $this->google->configured = true;
+        $this->google->ouFail = 'unauthorized_client';
+        $this->google->groupFail = 'unauthorized_client';
+        [$student, $task] = $this->student(['personal_email' => 'own@example.com']);
+        $this->onIntake($student);
+
+        $this->provision($student, $task);
+
+        $this->assertSame('/Students', $this->google->created[0][5], 'the usual OU (GOOGLE_WORKSPACE_STUDENT_OU)');
+        $this->assertSame([], $this->google->groups);
+        $this->assertSame('Completed', DB::table('student_tasks')->where('id', $task)->value('status'));
+        $problem = (string) DB::table('student_task_log')->where('student_tasks_id', $task)->where('actions', 'Student email: OU / group')->value('current_field_value');
+        $this->assertStringContainsString('not used', $problem);
+        $this->assertStringContainsString('not added to student@lcc.ac.uk', $problem);
+        Mail::assertSent(\App\Mail\ConversionErrorReportMail::class, fn ($m) => $m->step === 'Action: Create student email (OU / group)');
+    }
+
+    public function test_test_addresses_never_join_the_student_group_and_no_intake_keeps_the_usual_ou(): void
+    {
+        config(['student_email.address_prefix' => 'test.', 'student_email.google.intake_ou_parent' => '/Students', 'student_email.google.student_group' => 'student@lcc.ac.uk']);
+        $this->google->configured = true;
+        [$student, $task] = $this->student(['personal_email' => 'own@example.com']); // no course: no intake
+
+        $this->provision($student, $task);
+
+        $this->assertSame([], $this->google->ensured);
+        $this->assertSame('/Students', $this->google->created[0][5]);
+        $this->assertSame([], $this->google->groups);
+        $this->assertStringContainsString('not added to student@lcc.ac.uk (test address)', (string) DB::table('student_task_log')->where('student_tasks_id', $task)->where('actions', 'Student email created')->value('current_field_value'));
+    }
+
     public function test_without_google_it_sets_the_address_and_leaves_the_task_for_staff(): void
     {
         [$student, $task, $login, $email] = $this->student(['personal_email' => 'own@example.com']);

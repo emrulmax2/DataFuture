@@ -15,6 +15,14 @@ class FakeWorkspace implements WorkspaceDirectory
     public array $deleted = [];
     /** email => creationTime, as Google would report */
     public array $accounts = [];
+    /** organisational units Google has; ensureOrgUnit adds to them */
+    public array $orgUnits = ['/', '/Students'];
+    public array $ensured = [];
+    public array $moved = [];
+    /** group => member emails */
+    public array $groups = [];
+    public ?string $ouFail = null;
+    public ?string $groupFail = null;
 
     public function configured(): bool
     {
@@ -51,5 +59,37 @@ class FakeWorkspace implements WorkspaceDirectory
     {
         $this->deleted[] = $email;
         unset($this->accounts[$email]);
+    }
+
+    public function ensureOrgUnit(string $path): string
+    {
+        if ($this->ouFail) {
+            throw new \RuntimeException($this->ouFail);
+        }
+        $this->ensured[] = $path;
+        if (in_array($path, $this->orgUnits, true)) {
+            return 'exists';
+        }
+        $this->orgUnits[] = $path;
+
+        return 'created';
+    }
+
+    public function moveUser(string $email, string $orgUnit): void
+    {
+        $this->moved[] = [$email, $orgUnit];
+    }
+
+    public function addToGroup(string $group, string $email): string
+    {
+        if ($this->groupFail) {
+            throw new \RuntimeException($this->groupFail);
+        }
+        if (in_array($email, $this->groups[$group] ?? [], true)) {
+            return 'member';
+        }
+        $this->groups[$group][] = $email;
+
+        return 'added';
     }
 }

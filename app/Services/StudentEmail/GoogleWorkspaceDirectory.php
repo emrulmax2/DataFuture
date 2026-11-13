@@ -12,7 +12,10 @@ use Google\Service\Licensing;
  * super admin in config('student_email.google.admin_email'):
  *  - Admin SDK Directory API, scope admin.directory.user (create / read / delete accounts);
  *  - Enterprise License Manager API, scope apps.licensing (only asked for when a licence
- *    product + SKU are configured, so an unlicensed setup needs just the first scope).
+ *    product + SKU are configured, so an unlicensed setup needs just the first scope);
+ *  - Directory API, scope admin.directory.orgunit (the intake OU, e.g. /Students/2027 January);
+ *  - Directory API, scope admin.directory.group.member (the student@ group).
+ * Each call asks only for the scope it needs, so a missing scope fails that step alone.
  */
 class GoogleWorkspaceDirectory implements WorkspaceDirectory
 {
@@ -96,6 +99,62 @@ class GoogleWorkspaceDirectory implements WorkspaceDirectory
         }
     }
 
+    public function ensureOrgUnit(string $path): string
+    {
+        $path = '/'.trim($path, '/');
+        if ($path === '/') {
+            return 'exists';
+        }
+        $orgunits = (new Directory($this->client([Directory::ADMIN_DIRECTORY_ORGUNIT])))->orgunits;
+        $result = 'exists';
+        $parent = '/';
+        foreach (explode('/', trim($path, '/')) as $name) {
+            $here = rtrim($parent, '/').'/'.$name;
+            try {
+                $orgunits->get('my_customer', ltrim($here, '/'));
+            } catch (GoogleException $e) {
+                if ((int) $e->getCode() !== 404) {
+                    throw $this->fail('read the organisational unit '.$here, $e);
+                }
+                try {
+                    $orgunits->insert('my_customer', new Directory\OrgUnit(['name' => $name, 'parentOrgUnitPath' => $parent]));
+                    $result = 'created';
+                } catch (GoogleException $e) {
+                    if ((int) $e->getCode() !== 409) { // made meanwhile by another run
+                        throw $this->fail('create the organisational unit '.$here, $e);
+                    }
+                }
+            }
+            $parent = $here;
+        }
+
+        return $result;
+    }
+
+    public function moveUser(string $email, string $orgUnit): void
+    {
+        try {
+            $this->directory()->users->update($email, new Directory\User(['orgUnitPath' => $orgUnit ?: '/']));
+        } catch (GoogleException $e) {
+            throw $this->fail('move '.$email.' to '.$orgUnit, $e);
+        }
+    }
+
+    public function addToGroup(string $group, string $email): string
+    {
+        $members = (new Directory($this->client([Directory::ADMIN_DIRECTORY_GROUP_MEMBER])))->members;
+        try {
+            $members->insert($group, new Directory\Member(['email' => $email, 'role' => 'MEMBER']));
+        } catch (GoogleException $e) {
+            if ((int) $e->getCode() === 409) {
+                return 'member'; // "Member already exists"
+            }
+            throw $this->fail('add '.$email.' to '.$group, $e);
+        }
+
+        return 'added';
+    }
+
     private function directory(): Directory
     {
         return new Directory($this->client([Directory::ADMIN_DIRECTORY_USER]));
@@ -115,7 +174,10 @@ class GoogleWorkspaceDirectory implements WorkspaceDirectory
     {
         $reason = collect($e->getErrors())->pluck('message')->filter()->implode('; ');
         if (str_contains($reason.$e->getMessage(), 'INVALID_OU_ID')) {
-            $reason = 'organisational unit "'.config('student_email.google.org_unit').'" does not exist (GOOGLE_WORKSPACE_STUDENT_OU; paths are case-sensitive, "/" = top level)';
+            $reason = 'the organisational unit does not exist (paths are case-sensitive, "/" = top level)';
+        }
+        if (str_contains($reason.$e->getMessage(), 'unauthorized_client')) {
+            $reason = 'the service account is not authorised for this scope yet (Admin console › Security › API controls › Domain-wide delegation)';
         }
 
         return new \RuntimeException('Google could not '.$what.': '.($reason ?: $e->getMessage()), (int) $e->getCode(), $e);
