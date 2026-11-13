@@ -204,9 +204,17 @@
                         <input {{ $on('dashboard_applicant_analysis') }} {{ $off('dashboard_applicant') }} id="applicant-analysis-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][dashboard_applicant_analysis]">
                         <label class="form-check-label ml-4" for="applicant-analysis-{{ $d }}">Application Analysis</label>
                     </div>
-                    <div class="form-check form-switch">
+                    <div class="form-check form-switch mb-4">
                         <input {{ $on('dashboard_applicant_rejected') }} {{ $off('dashboard_applicant') }} id="applicant-rejected-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][dashboard_applicant_rejected]">
                         <label class="form-check-label ml-4" for="applicant-rejected-{{ $d }}">Reject / In Progress Application</label>
+                    </div>
+                    <div class="form-check form-switch mb-4">
+                        <input {{ $on('dashboard_applicant_add_task') }} {{ $off('dashboard_applicant') }} id="applicant-add-task-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][dashboard_applicant_add_task]">
+                        <label class="form-check-label ml-4" for="applicant-add-task-{{ $d }}">Add Task</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input {{ $on('dashboard_applicant_delete_task') }} {{ $off('dashboard_applicant') }} id="applicant-delete-task-{{ $d }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $d }}][dashboard_applicant_delete_task]">
+                        <label class="form-check-label ml-4" for="applicant-delete-task-{{ $d }}">Delete Task</label>
                     </div>
                 </div>
             </div>

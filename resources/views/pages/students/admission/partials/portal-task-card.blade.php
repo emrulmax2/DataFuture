@@ -23,7 +23,9 @@
     $canManage = in_array($adpUserId, $assigned->pluck('user_id')->all());
     $isCompleted = $task->status === 'Completed';
     $canComplete = (!$needsOutcome || $task->task_status_id > 0) && (!$needsUpload || $docCount > 0);
-    $canDelete = (!$needsOutcome || empty($task->task_status_id)) && (!$needsUpload || $docCount === 0);
+    $canDelete = (!$needsOutcome || empty($task->task_status_id)) && (!$needsUpload || $docCount === 0)
+        // Dashboard › Applicant › Delete Task (user, 13 Nov 2026); its route is enforced in config/privileges.php
+        && (int) (auth()->user()->priv()['applicant_delete_task'] ?? 0) === 1;
     $interview = isset($interviews[$task->id]) ? $interviews[$task->id]->first() : null;
     $interviewWhen = '';
     if ($interview && !empty($interview->interview_date)) {

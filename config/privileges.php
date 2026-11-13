@@ -173,6 +173,12 @@ return [
         // Settings page. New screens holding staff and student investigation data,
         // so they are enforced from day one. Each controller action also checks its own
         // key plus the parent switch (IntegrityAccess::authorize()).
+        // Admission › process page › Add tasks (adds / removes an applicant's tasks). The button
+        // shows only with Dashboard › Applicant › Add Task (user, 13 Nov 2026); its save route too.
+        'admission.process.store.task.list' => 'applicant_add_task',
+        // …and a task's bin button (archive): Dashboard › Applicant › Delete Task.
+        'admission.destory.task' => 'applicant_delete_task',
+
         'attendance.integrity*' => ['ai_view_dashboard', 'ai_view_staff', 'ai_view_students', 'ai_view_audit_logs', 'ai_view_investigations', 'ai_manage_investigations', 'ai_export', 'ai_manage_settings'],
     ],
 
@@ -195,6 +201,8 @@ return [
         'error.logs*',
         'slc.registration*',
         'attendance.integrity*',
+        'admission.process.store.task.list',
+        'admission.destory.task',
     ],
 
     /*

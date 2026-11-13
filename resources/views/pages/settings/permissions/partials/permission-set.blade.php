@@ -283,6 +283,14 @@
                                      <input id="applicant-rejected-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][dashboard_applicant_rejected]" {{ isset($values['dashboard_applicant_rejected']) && $values['dashboard_applicant_rejected'] ? 'checked' : '' }}>
                                     <label for="applicant-rejected-{{ $uid }}" class="ml-2">Reject / In Progress Application</label>
                                 </div>
+                                <div class="flex items-center mt-2">
+                                    <input id="applicant-add-task-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][dashboard_applicant_add_task]" {{ isset($values['dashboard_applicant_add_task']) && $values['dashboard_applicant_add_task'] ? 'checked' : '' }}>
+                                    <label for="applicant-add-task-{{ $uid }}" class="ml-2">Add Task</label>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <input id="applicant-delete-task-{{ $uid }}" class="form-check-input" type="checkbox" value="1" name="permissions[{{ $department->id }}][{{ $category->id }}][dashboard_applicant_delete_task]" {{ isset($values['dashboard_applicant_delete_task']) && $values['dashboard_applicant_delete_task'] ? 'checked' : '' }}>
+                                    <label for="applicant-delete-task-{{ $uid }}" class="ml-2">Delete Task</label>
+                                </div>
                             </div>
                         </div>
                         <div class="col-span-12 sm:col-span-3">

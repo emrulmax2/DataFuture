@@ -1159,6 +1159,10 @@ class AdmissionController extends Controller
         if(!empty($task_list_ids) && $applicant_id > 0):
             $existingTaskIds = ApplicantTask::where('applicant_id', $applicant_id)->pluck('task_list_id')->toArray();
             $existingDiff = array_diff($existingTaskIds, $task_list_ids);
+            // unticked tasks are archived only with Dashboard › Applicant › Delete Task (user, 13 Nov 2026)
+            if ((int) (auth()->user()->priv()['applicant_delete_task'] ?? 0) !== 1):
+                $existingDiff = [];
+            endif;
             $taskListDiff = array_diff($task_list_ids, $existingTaskIds);
 
             $numInsert = 0;
