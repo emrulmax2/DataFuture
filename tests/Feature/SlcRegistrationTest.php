@@ -195,18 +195,23 @@ class SlcRegistrationTest extends TestCase
         $before = count($batch['items']) - count($ids); // students already waiting in this batch on this install
         $this->assertSame(['awaiting', count($ids)], [$batch['status'], count($batch['items']) - $before]);
 
-        // the file's header takes the next file number (SLC numbers its files in a running sequence)
-        $header = SisFile::withNumber('HH26LCHC00001CR', SisFile::nextNumber('HH26LCHC00001CR', $batch['key']));
-        $this->assertGreaterThan(1, SisFile::number($header));
+        // the file's header carries the batch's number (SLC-B001 → 00001), as in the user's file (13 Nov 2026)
+        $header = SisFile::withNumber('HH26LCHC00001CR', SisFile::batchNumber($batch['id']));
         $res = $this->postJson(route('slc.registration.batch.download'), ['code' => $batch['id']])->assertOk();
         $text = $res->json('file.text');
         $this->assertSame(SisFile::fileName($header, $batch['id']), $res->json('file.name'));
+        $this->assertStringStartsWith('REG_LCHC_26_B', $res->json('file.name'));
         $lines = explode("\r\n", rtrim($text));
         $this->assertSame($header, $lines[0]);
         $this->assertSame($header, collect($res->json('state.batches'))->firstWhere('id', $batch['id'])['header']);
         $this->assertSame('TT'.str_pad((string) (count($ids) + $before), 6, '0', STR_PAD_LEFT), end($lines));
+        // one line per student: confirmation date ~ academic year ~ HEI ~ SSN ~ ~ ~
         $fields = explode('~', $lines[1]);
-        $this->assertSame([now()->format('dmY'), 'Y'], [$fields[0], $fields[28]]);
+        $this->assertCount(7, $fields);
+        $this->assertSame([now()->format('dmY'), '26', 'LCHC', '', '', ''], [$fields[0], $fields[1], $fields[2], $fields[4], $fields[5], $fields[6]]);
+        $fileSsns = collect(array_slice($lines, 1, -1))->map(fn ($l) => explode('~', $l)[3])->sort()->values()->all();
+        $batchSsns = collect(collect($res->json('state.batches'))->firstWhere('id', $batch['id'])['items'])->pluck('r.ssn')->map(fn ($x) => strtoupper($x))->sort()->values()->all();
+        $this->assertSame($batchSsns, $fileSsns);
         Storage::disk('local')->assertExists('slc-registration/batches/'.$res->json('file.name'));
         $this->assertSame('downloaded', collect($res->json('state.batches'))->firstWhere('id', $batch['id'])['status']);
         $this->postJson(route('slc.registration.undo'), ['row_id' => $ids[0]])->assertStatus(422)->assertJsonPath('flash.text', 'That batch has already been downloaded.');
@@ -288,6 +293,16 @@ class SlcRegistrationTest extends TestCase
         SlcAgreement::create(['student_id' => $sb['id'], 'student_course_relation_id' => $sb['crel_id'], 'course_creation_instance_id' => $sb['instance']['id'], 'slc_registration_id' => $manual->id, 'slc_coursecode' => $sb['slc_code'], 'is_self_funded' => 0, 'date' => '2026-10-31', 'year' => $year($b), 'fees' => 6350, 'total' => 6350, 'created_by' => 7]);
         $sc = $snap[$c['s']['sid']];
         $cAgreement = SlcAgreement::create(['student_id' => $sc['id'], 'student_course_relation_id' => $sc['crel_id'], 'course_creation_instance_id' => $sc['instance']['id'], 'slc_coursecode' => $sc['slc_code'], 'is_self_funded' => 0, 'date' => '2026-10-30', 'year' => $year($c), 'fees' => 6350, 'total' => 6350, 'created_by' => 7]);
+        // A has a registration + agreement for the year on an OLD (inactive) course relation: only the active
+        // relation counts (user, 13 Nov 2026) — not on the badge, not as registered, not in the 409 list below
+        $sa = $snap[$a['s']['sid']];
+        $oldCrel = DB::table('student_course_relations')->insertGetId(['student_id' => $sa['id'], 'course_creation_id' => $sa['course_creation_id'], 'active' => 0, 'created_by' => 7, 'created_at' => now()]);
+        $old = SlcRegistration::create(['student_id' => $sa['id'], 'student_course_relation_id' => $oldCrel, 'course_creation_instance_id' => $sa['instance']['id'], 'ssn' => $sa['ssn'], 'confirmation_date' => '2026-06-30', 'academic_year_id' => $yearId, 'registration_year' => $year($a), 'slc_registration_status_id' => 1, 'note' => '', 'created_by' => 7]);
+        SlcAgreement::create(['student_id' => $sa['id'], 'student_course_relation_id' => $oldCrel, 'course_creation_instance_id' => $sa['instance']['id'], 'slc_registration_id' => $old->id, 'slc_coursecode' => $sa['slc_code'], 'is_self_funded' => 0, 'date' => '2026-06-30', 'year' => $year($a), 'fees' => 6350, 'total' => 6350, 'created_by' => 7]);
+        $badge = collect(collect(app(\App\Services\SlcRegistration\RegistrationState::class)->build()['batches'])->firstWhere('id', $code)['items'])->firstWhere('rowId', $a['id'])['record'];
+        $this->assertSame([false, false], [$badge['hasReg'], $badge['hasAgr']]);
+        $this->assertNull(\App\Services\SlcRegistration\StudentSnapshots::load([$sa['id']], $yearId)[$sa['id']]['registration']);
+
         $attendances = \App\Models\SlcAttendance::count();
         $installments = \App\Models\SlcInstallment::count();
 
@@ -299,7 +314,7 @@ class SlcRegistrationTest extends TestCase
         sort($expected);
         $this->assertSame($expected, $listed);
         $this->assertSame(1, $res->json('others'));
-        $this->assertSame(0, SlcRegistration::where('student_id', $a['s']['sid'])->where('academic_year_id', $yearId)->count()); // nothing done yet
+        $this->assertSame(0, SlcRegistration::where('student_id', $a['s']['sid'])->where('student_course_relation_id', $sa['crel_id'])->where('academic_year_id', $yearId)->count()); // nothing done yet
 
         // permission for C only
         $res = $this->postJson(route('slc.registration.batch.register'), ['code' => $code, 'row_ids' => [$a['id'], $b['id'], $c['id']], 'confirmed' => true, 'overwrite_ids' => [$c['id']]])->assertOk();
@@ -309,7 +324,7 @@ class SlcRegistrationTest extends TestCase
         // A: registration as the SLC tab makes it…
         $sa = $snap[$a['s']['sid']];
         $uploaded = \App\Models\SlcBulkBatch::where('code', $code)->first()->uploaded_at->toDateString();
-        $reg = SlcRegistration::where('student_id', $sa['id'])->where('academic_year_id', $yearId)->sole();
+        $reg = SlcRegistration::where('student_id', $sa['id'])->where('student_course_relation_id', $sa['crel_id'])->where('academic_year_id', $yearId)->sole();
         $this->assertSame([$sa['crel_id'], $sa['instance']['id'], $sa['ssn'], $uploaded, $year($a), 1], [(int) $reg->student_course_relation_id, (int) $reg->course_creation_instance_id, $reg->ssn, $reg->getRawOriginal('confirmation_date'), (int) $reg->registration_year, (int) $reg->slc_registration_status_id]);
         // …and the agreement as the Accounts tab makes it (fee less the university commission)
         $agr = SlcAgreement::where('slc_registration_id', $reg->id)->sole();
@@ -335,7 +350,7 @@ class SlcRegistrationTest extends TestCase
         // no SLC attendance or instalment; and a student done is not done again
         $this->assertSame([$attendances, $installments], [\App\Models\SlcAttendance::count(), \App\Models\SlcInstallment::count()]);
         $this->postJson(route('slc.registration.batch.register'), ['code' => $code, 'row_ids' => [$a['id'], $b['id'], $c['id']]])->assertOk()->assertJsonPath('flash.text', 'No new SLC registrations.');
-        $this->assertSame(1, SlcRegistration::where('student_id', $sa['id'])->where('academic_year_id', $yearId)->count());
+        $this->assertSame(1, SlcRegistration::where('student_id', $sa['id'])->where('student_course_relation_id', $sa['crel_id'])->where('academic_year_id', $yearId)->count());
     }
 
     public function test_a_newer_upload_keeps_all_the_work_done_on_the_earlier_one(): void
@@ -836,11 +851,10 @@ class SlcRegistrationTest extends TestCase
         $this->assertCount(1, $p['rows']);
         $this->assertSame(['Line 3 has 2 fields (expected 30)'], $p['errors']);
         $this->assertSame('14 GREEN LANE LONDON', $p['rows'][0]['address']);
+        // the confirmation file (user's layout, 13 Nov 2026): date ~ academic year ~ HEI ~ SSN ~ ~ ~, CRLF, TT + count
         $out = SisFile::build('HH26LCHC00001CR', [$p['rows'][0]['raw']], new \DateTime('2026-11-02'));
-        $line = explode("\r\n", $out)[1];
-        $this->assertCount(30, explode('~', $line));
-        $this->assertStringStartsWith('02112026~26~Mr~JOHN', $line);
-        $this->assertStringContainsString('14 GREEN LANE   LONDON ', $line); // SLC's own spacing kept
+        $this->assertSame("HH26LCHC00001CR\r\n02112026~26~LCHC~SSN1~~~\r\nTT000001\r\n", $out);
+        $this->assertSame([7, 'REG_LCHC_26_B007.txt', 'HH26LCHC00007CR'], [SisFile::batchNumber('SLC-B007'), SisFile::fileName('HH26LCHC00007CR', 'SLC-B007'), SisFile::withNumber('HH26LCHC00005CR', 7)]);
 
         $this->assertSame(['line1' => '14', 'line2' => 'GREEN LANE', 'city' => 'LONDON'], RegistrationActions::addressParts('14 GREEN LANE   LONDON '));
 

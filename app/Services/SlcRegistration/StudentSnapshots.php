@@ -45,7 +45,7 @@ class StudentSnapshots
                 'url' => route('student.show', $s->id), // the student profile
                 'status' => StudentStatus::of($s->status_name, $s->status_active), // shown beside the name
                 'crel_id' => null, 'course_creation_id' => null, 'course_name' => '', 'intake' => '', 'awarding_body' => '', 'slc_code' => '', 'venue' => '',
-                'instance' => null, 'addresses' => [], 'contact_id' => null, 'mobile' => '', 'abody' => null,
+                'instance' => null, 'addresses' => [], 'contact_id' => null, 'mobile' => '', 'emails' => [], 'abody' => null,
                 'att' => ['held' => 0, 'attended' => 0, 'last' => null, 'physical' => 0, 'online' => 0, 'other' => 0, 'otherNames' => ''], 'att_from' => null, 'registration' => null,
             ];
         }
@@ -55,12 +55,14 @@ class StudentSnapshots
         }
 
         // contact → permanent and term-time addresses and the mobile number (the newest contact row, as the profile shows)
-        $contacts = DB::table('student_contacts')->whereIn('student_id', $ids)->whereNull('deleted_at')->orderBy('id')->get(['id', 'student_id', 'permanent_address_id', 'term_time_address_id', 'mobile'])->keyBy('student_id');
+        $contacts = DB::table('student_contacts')->whereIn('student_id', $ids)->whereNull('deleted_at')->orderBy('id')->get(['id', 'student_id', 'permanent_address_id', 'term_time_address_id', 'mobile', 'institutional_email', 'personal_email'])->keyBy('student_id');
         $addressIds = $contacts->flatMap(fn ($c) => [$c->permanent_address_id, $c->term_time_address_id])->filter()->unique()->all();
         $addresses = $addressIds ? DB::table('addresses')->whereIn('id', $addressIds)->get(['id', 'address_line_1', 'address_line_2', 'city', 'post_code'])->keyBy('id') : collect();
         foreach ($contacts as $sid => $c) {
             $out[$sid]['contact_id'] = (int) $c->id;
             $out[$sid]['mobile'] = trim((string) $c->mobile);
+            // the steps' search box finds students by email too (user, 13 Nov 2026)
+            $out[$sid]['emails'] = array_values(array_unique(array_filter([trim((string) $c->institutional_email), trim((string) $c->personal_email)])));
             foreach (['permanent' => $c->permanent_address_id, 'term' => $c->term_time_address_id] as $type => $aid) {
                 $a = $aid ? $addresses->get($aid) : null;
                 if (!$a) {
@@ -165,11 +167,16 @@ class StudentSnapshots
             }
         }
 
-        // an SLC registration (Yes) already recorded for this academic year
+        // an SLC registration (Yes) already recorded for this academic year, on the student's ACTIVE course
+        // relation only (user, 13 Nov 2026: an earlier course's registration doesn't count); the newest wins
         if ($academicYearId) {
             $regs = DB::table('slc_registrations')->whereIn('student_id', $ids)->where('academic_year_id', $academicYearId)
-                ->where('slc_registration_status_id', 1)->whereNull('deleted_at')->orderBy('id')->get(['id', 'student_id', 'registration_year', 'confirmation_date'])->keyBy('student_id');
-            foreach ($regs as $sid => $g) {
+                ->where('slc_registration_status_id', 1)->whereNull('deleted_at')->orderBy('id')->get(['id', 'student_id', 'student_course_relation_id', 'registration_year', 'confirmation_date']);
+            foreach ($regs as $g) {
+                $sid = (int) $g->student_id;
+                if (empty($out[$sid]['crel_id']) || (int) $g->student_course_relation_id !== (int) $out[$sid]['crel_id']) {
+                    continue;
+                }
                 $out[$sid]['registration'] = ['id' => (int) $g->id, 'year' => (int) $g->registration_year, 'date' => $g->confirmation_date ? substr((string) $g->confirmation_date, 0, 10) : null];
             }
         }

@@ -3,13 +3,14 @@
         <div><span class="eyebrow">Stage 3</span><h1>Actions</h1>
             <p>Students with a CoC or student contact stay on hold and are not confirmed in this round. Once SLC reassesses them, they come back on the next SIS export.</p></div>
     </div>
+    <StepSearch v-model="q" id="search-actions" :shown="(tabs.find((t) => t[0] === tab) || [])[2] || 0" :total="(allTabs.find((t) => t[0] === tab) || [])[2] || 0" />
     <div class="filters" role="tablist" aria-label="Action lists">
         <button v-for="[k, l, n] in tabs" :key="k" type="button" role="tab" class="chip" :aria-selected="tab === k" :aria-pressed="tab === k" @click="tab = k">{{ l }} <span class="num">{{ n }}</span></button>
     </div>
 
     <section v-if="tab === 'coc'" class="card">
         <div class="card-h"><h2>Change of Circumstances to raise in SIS</h2><span class="muted small">SIS → CoC Home → Create CoC, or bulk CSV upload</span></div>
-        <div v-if="cocItems.length === 0" class="empty">No CoCs to issue.</div>
+        <div v-if="cocItems.length === 0" class="empty">{{ q.trim() ? 'No students on this tab match “' + q.trim() + '”.' : 'No CoCs to issue.' }}</div>
         <div v-else class="tablebox"><table class="tbl" style="min-width: 900px">
             <thead><tr><th scope="col">Student</th><th scope="col">CoC type</th><th scope="col">SLC gives us</th><th scope="col">We hold</th><th scope="col">Status</th></tr></thead>
             <tbody><tr v-for="{ i, ch } in cocItems" :key="i.id + ch.key">
@@ -27,7 +28,7 @@
 
     <section v-if="tab === 'contact'" class="card">
         <div class="card-h"><h2>Students to contact</h2><span class="muted small">{{ copied === 'fail' ? 'Copy isn’t available here – select the message text instead' : 'Email or SMS the student with the message, or copy it' }}</span></div>
-        <div v-if="contactItems.length === 0" class="empty">No students to contact.</div>
+        <div v-if="contactItems.length === 0" class="empty">{{ q.trim() ? 'No students on this tab match “' + q.trim() + '”.' : 'No students to contact.' }}</div>
         <div v-else class="tablebox"><table class="tbl" style="min-width: 960px">
             <thead><tr><th scope="col">Student</th><th scope="col">Field</th><th scope="col">Message</th><th scope="col">Status</th></tr></thead>
             <tbody><tr v-for="{ i, ch } in contactItems" :key="i.id + ch.key">
@@ -46,7 +47,7 @@
 
     <section v-if="tab === 'holds'" class="card">
         <div class="card-h"><h2>Other holds</h2><span class="muted small">Awarding body registration, student not identified</span></div>
-        <div v-if="holds.length === 0" class="empty">No other holds.</div>
+        <div v-if="holds.length === 0" class="empty">{{ q.trim() ? 'No students on this tab match “' + q.trim() + '”.' : 'No other holds.' }}</div>
         <div v-else class="tablebox"><table class="tbl" style="min-width: 700px">
             <thead><tr><th scope="col">Student</th><th scope="col">Reason</th><th scope="col">By</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
             <tbody><tr v-for="i in holds" :key="i.id">
@@ -59,7 +60,7 @@
 
     <section v-if="tab === 'updates'" class="card">
         <div class="card-h"><h2>Changes made to our records</h2><span class="muted small">Taken from SLC data</span></div>
-        <div v-if="updates.length === 0" class="empty">No records updated yet.</div>
+        <div v-if="updates.length === 0" class="empty">{{ q.trim() ? 'No students on this tab match “' + q.trim() + '”.' : 'No records updated yet.' }}</div>
         <div v-else class="tablebox"><table class="tbl" style="min-width: 840px">
             <thead><tr><th scope="col">Student</th><th scope="col">Field</th><th scope="col">Was</th><th scope="col">Now</th><th scope="col">By</th><th scope="col"><span class="sr-only">Message the student</span></th></tr></thead>
             <tbody><tr v-for="(u, k) in updates" :key="k"><th scope="row">{{ u.name }}<StatusTag :status="u.status" /><div class="mono muted small" style="font-weight: 400">{{ u.sid }}</div><StudentMobile v-if="u.studentId" :mobile="u.mobile" /></th><td>{{ u.field }}</td><td class="ours">{{ u.from }}</td><td class="slc">{{ u.to }}</td><td class="muted">{{ u.by }} · {{ u.at }}</td><td><CommsLinks v-if="u.studentId" @open="(k) => openComms(k, u.studentId, u.name)" /></td></tr></tbody>
@@ -76,16 +77,26 @@ import StatusTag from "./StatusTag.vue";
 import CommsLinks from "./CommsLinks.vue";
 import StudentMobile from "./StudentMobile.vue";
 import CommsDialog from "./CommsDialog.vue";
+import StepSearch from "./StepSearch.vue";
+import { matchesSearch, searchJoin, searchText } from "./helpers";
 
 export default {
-    components: { StatusTag, CommsLinks, CommsDialog, StudentMobile },
+    components: { StatusTag, CommsLinks, CommsDialog, StudentMobile, StepSearch },
     setup() {
-        const { store, list, post, cocItems, contactItems } = inject("slr");
+        const { store, list, post, cocItems: allCoc, contactItems: allContact } = inject("slr");
         const tab = ref("coc");
         const copied = ref("");
-        const holds = computed(() => list.value.filter((i) => i.stage === "held"));
-        const updates = computed(() => store.state.updates);
+        const allHolds = computed(() => list.value.filter((i) => i.stage === "held"));
+        const allUpdates = computed(() => store.state.updates);
+        // this step's search (user, 13 Nov 2026): every tab's list, by name, reg no., email, SLC name or SSN
+        const q = ref("");
+        const hit = (text) => !q.value.trim() || matchesSearch(q.value, text);
+        const cocItems = computed(() => allCoc.value.filter(({ i }) => hit(searchText(i))));
+        const contactItems = computed(() => allContact.value.filter(({ i }) => hit(searchText(i))));
+        const holds = computed(() => allHolds.value.filter((i) => hit(searchText(i))));
+        const updates = computed(() => allUpdates.value.filter((u) => hit(searchJoin(u.name, u.sid, u.emails))));
         const tabs = computed(() => [["coc", "CoC to issue", cocItems.value.length], ["contact", "Contact student", contactItems.value.length], ["holds", "Other holds", holds.value.length], ["updates", "Our record updated", updates.value.length]]);
+        const allTabs = computed(() => [["coc", "", allCoc.value.length], ["contact", "", allContact.value.length], ["holds", "", allHolds.value.length], ["updates", "", allUpdates.value.length]]);
         const copy = (k, text) => {
             try { navigator.clipboard.writeText(text).then(() => { copied.value = k; }, () => { copied.value = "fail"; }); } catch (e) { copied.value = "fail"; }
         };
@@ -96,7 +107,7 @@ export default {
         const openComms = (kind, studentId, name, contact = null) => {
             comms.value = { k: Date.now(), kind, studentId, name, contact, preset: contact ? { subject: "Your Student Finance details", text: contact.text } : null };
         };
-        return { store, post, tab, tabs, comms, openComms, copied, holds, updates, cocItems, contactItems, copy, mark, clear, contactMessage, COC_TYPE, titleCase };
+        return { q, allTabs, store, post, tab, tabs, comms, openComms, copied, holds, updates, cocItems, contactItems, copy, mark, clear, contactMessage, COC_TYPE, titleCase };
     },
 };
 </script>

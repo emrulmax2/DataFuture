@@ -123,10 +123,10 @@
                 <button type="button" class="btn btn-sm" @click="regenFor = null">Cancel</button>
             </div>
             <span v-if="msg" class="muted">{{ msg }}</span>
-            <div v-if="rebuilt[shown.id]" class="notice"><Ico name="info" /><span>The saved copy of this file couldn’t be read here, so it was built again from the batch’s students with its original date – the same file. Use Regenerate file to save a fresh copy.</span></div>
+            <div v-if="rebuilt[shown.id]" class="notice"><Ico name="info" /><span>The saved copy of this file couldn’t be read here, so it was built again from the batch’s students with its original date. Use Regenerate file to save a fresh copy.</span></div>
             <div v-if="texts[shown.id] === null" class="notice bad"><Ico name="info" /><span>The file couldn’t be loaded. Use Regenerate file to build it again from the batch.</span></div>
             <pre v-else class="file" aria-label="File preview">{{ texts[shown.id] || 'Loading…' }}</pre>
-            <div class="notice warn"><Ico name="info" /><span>Each row is the student’s original SIS line with field 1 set to the file date and field 29 set to <span class="mono">Y</span>. The <span class="mono">HH</span> header and <span class="mono">TT</span> + record-count footer match SLC’s guide. Which column carries the confirmation is not yet confirmed against SLC’s import technical specification: SLC failed the first upload (12 Nov 2026) without reading any records.</span></div>
+            <div class="notice"><Ico name="info" /><span>One line per confirmed student: <span class="mono">confirmation date~academic year~HEI~SSN~~~</span> (e.g. <span class="mono">13112026~26~LCHC~SFDU22528926L~~~</span>), under an <span class="mono">HH</span> header carrying the batch number (B001 → <span class="mono">00001</span>) and a <span class="mono">TT</span> + record-count footer.</span></div>
         </div>
     </section>
 </template>

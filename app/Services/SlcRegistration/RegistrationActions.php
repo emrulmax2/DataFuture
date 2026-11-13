@@ -743,8 +743,8 @@ class RegistrationActions
             if (!$lines) {
                 $this->fail('The batch is empty.');
             }
-            // the header takes the next file number (SisFile::nextNumber), kept on the batch
-            $header = SisFile::withNumber($batch->header, SisFile::nextNumber($batch->header, $batch->id));
+            // the header carries the batch's number (SLC-B001 → 00001), kept on the batch
+            $header = SisFile::withNumber($batch->header, SisFile::batchNumber($batch->code));
             $text = SisFile::build($header, $lines, now());
             $name = SisFile::fileName($header, $batch->code);
             $disk = FileDisk::name();
@@ -785,10 +785,10 @@ class RegistrationActions
             $this->fail('The batch has no students to build the file from.');
         }
         $date = $today ? now() : \Carbon\Carbon::parse($batch->file_date ?: now());
-        // the header's file number: as chosen, else the next one (SisFile::nextNumber)
-        $header = SisFile::withNumber($batch->header, $number ?: SisFile::nextNumber($batch->header, $batch->id));
+        // the header's number: as chosen, else the batch's own (SLC-B001 → 00001)
+        $header = SisFile::withNumber($batch->header, $number ?: SisFile::batchNumber($batch->code));
         $text = SisFile::build($header, $lines, $date);
-        $name = $batch->file_name ?: SisFile::fileName($batch->header, $batch->code);
+        $name = SisFile::fileName($header, $batch->code); // REG_LCHC_26_B001.txt
         $disk = FileDisk::name();
         $path = 'slc-registration/batches/'.$name;
         $saved = $this->storeBatchFile($disk, $path, $text);
