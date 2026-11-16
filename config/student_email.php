@@ -39,7 +39,14 @@ return [
     'google' => [
         'credentials' => env('GOOGLE_WORKSPACE_CREDENTIALS'),   // path to the service-account JSON key
         'admin_email' => env('GOOGLE_WORKSPACE_ADMIN_EMAIL'),   // the super admin it acts as
-        'org_unit' => env('GOOGLE_WORKSPACE_STUDENT_OU', '/'), // e.g. /Students
+        'org_unit' => env('GOOGLE_WORKSPACE_STUDENT_OU', '/'), // e.g. /Students — used when a student has no intake
+        /* Each intake gets its own OU (user / IT manager, 13 Nov 2026): this parent + the student's intake
+           semester, e.g. /Students/2027 January, created when it doesn't exist yet (scope
+           admin.directory.orgunit). Empty: everyone goes in org_unit, as before. */
+        'intake_ou_parent' => env('GOOGLE_WORKSPACE_INTAKE_OU_PARENT', '/Students'),
+        /* Every new student account joins this group (scope admin.directory.group.member). Empty: none.
+           Test addresses (STUDENT_EMAIL_ADDRESS_PREFIX) are never added. */
+        'student_group' => env('GOOGLE_WORKSPACE_STUDENT_GROUP', 'student@lcc.ac.uk'),
         /* The licence to assign (Enterprise License Manager API, scope
            apps.licensing). Leave empty when Google assigns licences itself. */
         'licence_product' => env('GOOGLE_WORKSPACE_LICENCE_PRODUCT', ''),

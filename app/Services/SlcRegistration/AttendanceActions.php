@@ -839,10 +839,16 @@ class AttendanceActions
         $date = $batch->uploaded_at?->toDateString();
         $codeIds = DB::table('attendance_codes')->whereNull('deleted_at')->pluck('id', 'code')->mapWithKeys(fn ($id, $c) => [strtoupper($c) => (int) $id])->all();
         $notReg = AttendanceState::notRegistered($students, $batch->academic_year_id);
+        $statusIds = DB::table('students')->whereIn('id', $rows->pluck('student_id')->filter()->all())->pluck('status_id', 'id');
         $out = [];
         foreach ($rows as $row) {
             $out[$row->id] = $row->slc_recorded ? $this->recordedPlan($row)
                 : $this->plan($row, $students[(int) $row->student_id] ?? null, $periods[(int) $row->student_id] ?? null, $date, $codeIds, $notReg[(int) $row->student_id] ?? null);
+            // (user, 16 Nov 2026) a Year 1, Term 1 attendance moves an SLC REGISTERED student to SLC Enrolled (StudentEnrolment)
+            $a = $out[$row->id]['attendance'] ?? null;
+            $out[$row->id]['statusChange'] = !$row->slc_recorded && $a && (int) $a['attendanceYear'] === 1 && (int) $a['sessionTerm'] === 1
+                && StudentEnrolment::due(isset($statusIds[$row->student_id]) ? (int) $statusIds[$row->student_id] : null)
+                ? ['from' => 'SLC REGISTERED', 'to' => 'SLC Enrolled'] : null;
         }
 
         return $out;
@@ -1025,10 +1031,11 @@ class AttendanceActions
         $done = [];
         $moved = [];
         $skipped = [];
+        $enrolled = [];
         $paid = [0, 0.0]; // instalments added, their total
         $note = 'Confirmed in bulk (SLC attendance batch '.$batch->code.')';
 
-        DB::transaction(function () use ($plans, $note, &$done, &$moved, &$skipped, &$paid) {
+        DB::transaction(function () use ($plans, $note, $batch, &$done, &$moved, &$skipped, &$enrolled, &$paid) {
             foreach ($plans as $p) {
                 $row = $p['row'];
                 $s = $p['s'];
@@ -1058,6 +1065,11 @@ class AttendanceActions
                 }
                 $row->update(['slc_attendance_id' => $att->id, 'slc_installment_id' => $installment?->id, 'slc_recorded' => 'created', 'slc_recorded_by' => $this->user(), 'slc_recorded_at' => now()]);
                 $done[] = $who.' (Term '.$a['sessionTerm'].')';
+                // Year 1, Term 1: SLC REGISTERED → SLC Enrolled, as the Change Student Status dialog does it (user, 16 Nov 2026)
+                if (!empty($p['statusChange']) && StudentEnrolment::enrol((int) $s['id'], $a['termDeclarationId'],
+                    'SLC attendance confirmed in bulk – Year 1, Term 1 (attendance batch '.$batch->code.')', $this->user())) {
+                    $enrolled[] = $who;
+                }
                 if ($p['moved']) {
                     $moved[] = $who.': Term '.implode(', ', array_column($p['taken'], 'sessionTerm')).' already there → Term '.$a['sessionTerm'];
                 }
@@ -1066,11 +1078,13 @@ class AttendanceActions
 
         $inst = $paid[0] ? ', with '.Text::plural($paid[0], 'instalment').' ('.Text::money($paid[1]).')' : '';
         $this->log('Bulk Attendance & Installment for batch '.$batch->code.': '.($done ? Text::plural(count($done), 'SLC attendance').' recorded ('.implode(', ', $done).')'.$inst : 'nothing recorded')
-            .($moved ? '; recorded as the next free term: '.implode('; ', $moved) : '').($skipped ? '; not recorded: '.implode(', ', $skipped) : ''));
+            .($moved ? '; recorded as the next free term: '.implode('; ', $moved) : '')
+            .($enrolled ? '; status SLC REGISTERED → SLC Enrolled (Year 1, Term 1): '.implode(', ', $enrolled) : '').($skipped ? '; not recorded: '.implode(', ', $skipped) : ''));
 
         return ($done ? 'Recorded for '.Text::plural(count($done), 'student').$inst : 'Nothing recorded')
             .($moved ? ' ('.count($moved).' as the next free term – the earlier term was already on the SLC tab)' : '')
-            .'.'.($skipped ? ' Not recorded: '.implode(', ', $skipped).'.' : '');
+            .'.'.($enrolled ? ' '.Text::plural(count($enrolled), 'student').' moved from SLC REGISTERED to SLC Enrolled.' : '')
+            .($skipped ? ' Not recorded: '.implode(', ', $skipped).'.' : '');
     }
 
     /* ------------------------------------------------------- carry-over */
