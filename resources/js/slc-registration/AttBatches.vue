@@ -101,6 +101,8 @@
                             <div v-for="t in pv(it).taken" :key="t.sessionTerm" class="ab-note warn"><a class="ab-link" :href="it.slcUrl" target="_blank" rel="noopener">Term {{ t.sessionTerm }}{{ t.term ? ' · ' + t.term : '' }} already on the SLC tab: #{{ t.attendance.id }} · {{ t.attendance.code || '–' }} · {{ fmtIso(t.attendance.date) }}{{ t.attendance.by ? ' · ' + t.attendance.by : '' }} ↗</a><template v-if="t.installment"> · <a class="ab-link" :href="it.accountsUrl" target="_blank" rel="noopener">instalment #{{ t.installment.id }} {{ money(t.installment.amount) }}{{ t.installment.receiptId ? ' (paid)' : '' }} ↗</a></template></div>
                             <div v-if="pv(it).attendance" class="ab-note ok">→ {{ pv(it).recorded ? 'Recorded as' : 'Will be recorded as' }} a new row for Term {{ pv(it).attendance.sessionTerm }} · {{ pv(it).attendance.term }}</div>
                         </template>
+                        <!-- (user, 16 Nov 2026) a Year 1, Term 1 attendance moves an SLC REGISTERED student to SLC Enrolled -->
+                        <div v-if="pv(it).statusChange && !pv(it).problem" class="ab-note ok">Student status: {{ pv(it).statusChange.from }} → {{ pv(it).statusChange.to }} (Year 1 · Term 1)</div>
                         <div v-if="pv(it).recorded && it.record" class="muted small">{{ it.record.by }}{{ it.record.by ? ' · ' : '' }}{{ it.record.at }}{{ recordedNote(it.record.status) }}</div>
                     </template>
                 </td>

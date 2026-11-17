@@ -316,10 +316,14 @@ class SlcRegistrationTest extends TestCase
         $this->assertSame(1, $res->json('others'));
         $this->assertSame(0, SlcRegistration::where('student_id', $a['s']['sid'])->where('student_course_relation_id', $sa['crel_id'])->where('academic_year_id', $yearId)->count()); // nothing done yet
 
+        // A is SLC REGISTERED (29): Bulk SLC Registration leaves the status alone — the move to SLC Enrolled is
+        // Bulk Attendance & Installment's, on a Year 1, Term 1 attendance (user, 16 Nov 2026)
+        DB::table('students')->where('id', $sa['id'])->update(['status_id' => 29]); // rolled back with the test
+
         // permission for C only
         $res = $this->postJson(route('slc.registration.batch.register'), ['code' => $code, 'row_ids' => [$a['id'], $b['id'], $c['id']], 'confirmed' => true, 'overwrite_ids' => [$c['id']]])->assertOk();
-        $items = collect(collect($res->json('state.batches'))->firstWhere('id', $code)['items'])->keyBy('rowId');
-        $this->assertSame(['created', null, 'created_anyway'], [$items[$a['id']]['record']['status'], $items[$b['id']]['record']['status'], $items[$c['id']]['record']['status']]);
+        $this->assertSame(29, (int) DB::table('students')->where('id', $sa['id'])->value('status_id'));
+        $this->assertStringNotContainsString('SLC Enrolled', $res->json('flash.text'));
 
         // A: registration as the SLC tab makes it…
         $sa = $snap[$a['s']['sid']];

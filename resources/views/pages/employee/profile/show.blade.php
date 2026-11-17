@@ -133,18 +133,24 @@
                         }
                     }
                 @endphp
-                @include('pages.employee.profile.partials.field', ['label' => 'Eligible To Work', 'value' => $employeeEligibilites->eligible_to_work ?? null])
-                @include('pages.employee.profile.partials.field', ['label' => 'Proof of ID Type', 'value' => $employeeEligibilites->employeeDocType->name ?? null])
-                @include('pages.employee.profile.partials.field', ['label' => 'Employee Work Permit', 'value' => $employeeEligibilites->employeeWorkPermitType->name ?? null])
-                @include('pages.employee.profile.partials.field', ['label' => 'ID Number', 'value' => $employeeEligibilites->doc_number ?? null])
-                @if(!$isBritish)
-                    @include('pages.employee.profile.partials.field', ['label' => 'Workpermit Number', 'value' => $employeeEligibilites->workpermit_number ?? null])
-                @endif
-                @include('pages.employee.profile.partials.field', ['label' => 'Expiry Date', 'value' => (isset($employeeEligibilites->doc_expire) && !empty($employeeEligibilites->doc_expire) ? date('jS M, Y', strtotime($employeeEligibilites->doc_expire)) : null)])
-                @if(!$isBritish)
-                    @include('pages.employee.profile.partials.field', ['label' => 'Workpermit Expire', 'value' => ($wpExpire ? date('jS M, Y', strtotime($wpExpire)) : null), 'badge' => $wpBadge])
-                @endif
-                @include('pages.employee.profile.partials.field', ['label' => 'Issuing Country', 'value' => $employeeEligibilites->docIssueCountry->name ?? null])
+                {{-- (user, 17 Nov 2026) the right to work on the left — column 1 Eligible To Work over Workpermit Number, column 2
+                     Employee Work Permit over Workpermit Expire — then a vertical border, then the ID document in columns 3–4 --}}
+                <div class="col-span-full grid grid-cols-1 lg:grid-cols-2">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 lg:pr-8">
+                        @include('pages.employee.profile.partials.field', ['label' => 'Eligible To Work', 'value' => $employeeEligibilites->eligible_to_work ?? null])
+                        @include('pages.employee.profile.partials.field', ['label' => 'Employee Work Permit', 'value' => $employeeEligibilites->employeeWorkPermitType->name ?? null])
+                        @if(!$isBritish)
+                            @include('pages.employee.profile.partials.field', ['label' => 'Workpermit Number', 'value' => $employeeEligibilites->workpermit_number ?? null])
+                            @include('pages.employee.profile.partials.field', ['label' => 'Workpermit Expire', 'value' => ($wpExpire ? date('jS M, Y', strtotime($wpExpire)) : null), 'badge' => $wpBadge])
+                        @endif
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 mt-5 pt-5 border-t border-slate-200 lg:mt-0 lg:pt-0 lg:border-t-0 lg:border-l lg:pl-8 dark:border-darkmode-400">
+                        @include('pages.employee.profile.partials.field', ['label' => 'Proof of ID Type', 'value' => $employeeEligibilites->employeeDocType->name ?? null])
+                        @include('pages.employee.profile.partials.field', ['label' => 'ID Number', 'value' => $employeeEligibilites->doc_number ?? null])
+                        @include('pages.employee.profile.partials.field', ['label' => 'Expiry Date', 'value' => (isset($employeeEligibilites->doc_expire) && !empty($employeeEligibilites->doc_expire) ? date('jS M, Y', strtotime($employeeEligibilites->doc_expire)) : null)])
+                        @include('pages.employee.profile.partials.field', ['label' => 'Issuing Country', 'value' => $employeeEligibilites->docIssueCountry->name ?? null])
+                    </div>
+                </div>
             </div>
         </div>
 

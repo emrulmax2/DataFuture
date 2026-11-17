@@ -717,6 +717,63 @@ class SlcAttendanceTest extends TestCase
         $set(['session_term' => 3])->assertStatus(422);
     }
 
+    public function test_a_year_1_term_1_attendance_moves_an_slc_registered_student_to_slc_enrolled(): void
+    {
+        [$a, $b] = [$this->withSsn[0], $this->withSsn[1]];
+        $att = $this->uploadReady();
+        [$ra, $rb] = [$this->rowOf($att, $a['ssn']), $this->rowOf($att, $b['ssn'])];
+        // A: SLC REGISTERED, Year 1 registration; B: SLC REGISTERED, Year 2 registration (rolled back with the test)
+        foreach ([[$a, 1], [$b, 2]] as [$st, $yr]) {
+            DB::table('students')->where('id', $st['id'])->update(['status_id' => 29]);
+            $g = \App\Models\SlcRegistration::where('student_id', $st['id'])->where('academic_year_id', $this->yearId())->latest('id')->first();
+            $g->update(['registration_year' => $yr]);
+            if (!\App\Models\SlcAgreement::where('slc_registration_id', $g->id)->exists()) { // the instalment goes on it
+                \App\Models\SlcAgreement::create(['student_id' => $st['id'], 'student_course_relation_id' => $g->student_course_relation_id, 'course_creation_instance_id' => $g->course_creation_instance_id,
+                    'slc_registration_id' => $g->id, 'year' => $yr, 'fees' => 6350, 'total' => 6350, 'created_by' => 1]);
+            } else {
+                \App\Models\SlcAgreement::where('slc_registration_id', $g->id)->update(['year' => $yr]);
+            }
+        }
+        // the new registration year can differ from SLC's line: sort that Data check difference (No action)
+        $att = $this->postJson(route('slc.registration.att.code'), ['row_id' => $ra['id'], 'code' => null])->assertOk()->json('state.attendance');
+        foreach ([$a, $b] as $st) {
+            foreach ($this->rowOf($att, $st['ssn'])['checks'] as $ch) {
+                if (!$ch['ok'] && !$ch['route'] && $ch['key'] !== 'registration') {
+                    $att = $this->postJson(route('slc.registration.att.route'), ['row_id' => $this->rowOf($att, $st['ssn'])['id'], 'key' => $ch['key'], 'route' => 'accept'])->assertOk()->json('state.attendance');
+                }
+            }
+        }
+        [$ra, $rb] = [$this->rowOf($att, $a['ssn']), $this->rowOf($att, $b['ssn'])];
+        foreach ([$ra, $rb] as $r) {
+            if (!$r['recordTerm'] || ($r['recordTerm']['final']['sessionTerm'] ?? null) !== 1) {
+                $this->markTestSkipped('The sample students’ Term 1 is not free on their course instance.');
+            }
+            $this->postJson(route('slc.registration.att.code'), ['row_id' => $r['id'], 'code' => 'A'])->assertOk();
+        }
+        $code = $this->rowOf($this->postJson(route('slc.registration.att.confirm'), ['row_ids' => [$ra['id'], $rb['id']], 'confirmed' => true, 'include_ids' => [$ra['id'], $rb['id']]])->assertOk()->json('state.attendance'), $a['ssn'])['confirm']['batchId'];
+        $this->postJson(route('slc.registration.att.batch.download'), ['code' => $code])->assertOk();
+        $this->postJson(route('slc.registration.att.batch.uploaded'), ['code' => $code])->assertOk();
+
+        // the student list says so before anything is recorded
+        $pv = $this->getJson(route('slc.registration.att.batch.preview', ['code' => $code]))->assertOk()->json('rows');
+        $this->assertSame([[1, 1], 'SLC Enrolled', null], [[$pv[$ra['id']]['attendance']['attendanceYear'], $pv[$ra['id']]['attendance']['sessionTerm']], $pv[$ra['id']]['statusChange']['to'], $pv[$rb['id']]['statusChange']]);
+
+        $res = $this->postJson(route('slc.registration.att.batch.attendance'), ['code' => $code, 'row_ids' => [$ra['id'], $rb['id']]])->assertOk();
+        $this->assertStringContainsString('1 student moved from SLC REGISTERED to SLC Enrolled', $res->json('flash.text'));
+        $this->assertSame([23, 29], [(int) DB::table('students')->where('id', $a['id'])->value('status_id'), (int) DB::table('students')->where('id', $b['id'])->value('status_id')]);
+
+        // as the Change Student Status dialog does it: the change logged, a status history row for the attendance's term,
+        // that term's class assignments' attendance indicator on (SLC Enrolled is an active status)
+        $sa = \App\Models\SlcAttendance::find(SlcAttendanceImportRow::find($ra['id'])->slc_attendance_id);
+        $archive = \App\Models\StudentArchive::where('student_id', $a['id'])->where('field_name', 'status_id')->latest('id')->first();
+        $this->assertSame(['students', '29', '23'], [$archive->table, (string) $archive->field_value, (string) $archive->field_new_value]);
+        $history = \App\Models\StudentAttendanceTermStatus::where('student_id', $a['id'])->latest('id')->first();
+        $this->assertSame([23, (int) $sa->term_declaration_id], [(int) $history->status_id, (int) $history->term_declaration_id]);
+        $this->assertStringContainsString('Year 1, Term 1', $history->status_change_reason);
+        $planIds = \App\Models\Plan::where('term_declaration_id', $sa->term_declaration_id)->pluck('id');
+        $this->assertSame(0, \App\Models\Assign::whereIn('plan_id', $planIds)->where('student_id', $a['id'])->where('attendance', '!=', 1)->count());
+    }
+
     public function test_removing_the_last_line_drops_its_coc_and_the_empty_batch(): void
     {
         $att = $this->uploadReady();
