@@ -57,6 +57,23 @@
             }
         }
 
+        // Attendance Integrity (user, 18 Nov 2026). Its access is per page (the parent privilege plus a page one),
+        // so it can't use the single-key list above: the box shows to whoever may open at least one page and goes
+        // straight to the first of them (the dashboard for most) — or to Settings for someone who may only change
+        // those. Same clock-in gate as its neighbours.
+        if ($lccdUnlocked) {
+            $lccdAimHref = \App\Services\AttendanceIntegrity\IntegrityAccess::home()
+                ?? (\App\Services\AttendanceIntegrity\IntegrityAccess::can('manage_settings') ? route('attendance.integrity.settings') : null);
+            if ($lccdAimHref) {
+                $lccdModules[] = [
+                    'label' => 'Attendance Integrity',
+                    'icon' => 'shield-check',
+                    'href' => $lccdAimHref,
+                    'count' => null,
+                ];
+            }
+        }
+
         // Operations Management lives on another domain and is entered through
         // single sign-on, so it carries an absolute URL rather than a route
         // name and cannot go through the privilege-gated list above. It still
