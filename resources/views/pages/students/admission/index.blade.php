@@ -181,6 +181,8 @@
             </div>
 
             <div class="adp-searchbox__foot">
+                {{-- Total the list below holds; admission-list.js repaints it on every load. --}}
+                <span class="adp-result" data-adp-result role="status" aria-live="polite" hidden></span>
                 <button id="tabulator-html-filter-reset-ADM" type="button" class="adp-btn adp-btn--ghost">Reset</button>
                 <button id="tabulator-html-filter-go-ADM" type="button" class="adp-btn adp-btn--primary">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
