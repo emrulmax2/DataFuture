@@ -728,7 +728,14 @@ class ApplicationController extends Controller
             }
             //Auth::guard('applicant')->logout();
 
-            FacadesDebugbar::info("Application updated with agent: ".$applicant->agent_user_id );
+            /* This file never imported FacadesDebugbar, so the bare call (added 9 Nov 2026) threw "Class
+               App\Http\Controllers\Applicant\FacadesDebugbar not found" on every agent submission — after the
+               submission was saved, before Task Automation, the e-signature request, the acknowledgement email
+               and the SMS (applicant 3907, 14 Nov 2026). Fully qualified, and only where the dev-only package
+               (require-dev) is meant to be. */
+            if (app()->environment(['development', 'local', 'testing']) && class_exists(\Barryvdh\Debugbar\Facades\Debugbar::class)) {
+                \Barryvdh\Debugbar\Facades\Debugbar::info('Application updated with agent: '.$applicant->agent_user_id);
+            }
         }
 
         /* Task Automation: assign the admission tasks the rules call for.
