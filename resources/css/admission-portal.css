@@ -286,7 +286,16 @@ body.adp-body [hidden] { display: none !important; }
 .adp-panel__tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .adp-searchbox { display: grid; gap: 14px; padding: 16px; background: var(--paper); border: 1px solid var(--rule); border-radius: 14px; margin: 0; }
 .adp-grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: start; }
-.adp-searchbox__foot { display: flex; gap: 8px; justify-content: flex-end; }
+.adp-searchbox__foot { display: flex; gap: 8px; justify-content: flex-end; align-items: center; flex-wrap: wrap; }
+/* result total, left of Reset / Search */
+.adp-result { margin-right: auto; display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 12px 0 10px; border: 1px solid var(--rule); border-radius: 999px; background: var(--card); color: var(--ink-2); font-size: 13px; white-space: nowrap; }
+.adp-result[hidden] { display: none; }
+.adp-result b { color: var(--ink); font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.adp-result__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--steel); flex: none; }
+.adp-result.is-busy { color: var(--muted); }
+.adp-result.is-busy .adp-result__dot { background: var(--gold); animation: adp-result-pulse 1s ease-in-out infinite; }
+@keyframes adp-result-pulse { 50% { opacity: .3; } }
+@media (prefers-reduced-motion: reduce) { .adp-result.is-busy .adp-result__dot { animation: none; } }
 
 /* --- tag selector (Tom Select, multiple) --------------------------------
    The wrapper carries the select's own class, so `.ts-control.adp-msel` is

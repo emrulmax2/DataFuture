@@ -280,6 +280,17 @@ import Litepicker from "litepicker";
 
     /* ---------- the table -------------------------------------------------- */
     let table = null, total = 0;
+    /* the search box's result total: follows every load of the list */
+    const resultEl = document.querySelector("[data-adp-result]");
+    const paintResult = (state) => {
+        if (!resultEl) return;
+        resultEl.classList.toggle("is-busy", state === "busy");
+        if (state === "error") { resultEl.hidden = true; return; }
+        resultEl.innerHTML = state === "busy"
+            ? `<span class="adp-result__dot" aria-hidden="true"></span>Searching…`
+            : `<span class="adp-result__dot" aria-hidden="true"></span><b>${total.toLocaleString("en-GB")}</b> application${total === 1 ? "" : "s"} found`;
+        resultEl.hidden = false;
+    };
     const counter = () => {
         const foot = table && table.element.querySelector(".tabulator-footer");
         if (!foot) return;
@@ -348,7 +359,8 @@ import Litepicker from "litepicker";
             ajaxParams: { ...applied },
             ajaxFiltering: true,
             ajaxSorting: true,
-            ajaxResponse: (url, p, res) => { total = Number(res && res.total_rows) || 0; return res; },
+            ajaxResponse: (url, p, res) => { total = Number(res && res.total_rows) || 0; paintResult(); return res; },
+            ajaxError: () => { paintResult("error"); },
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
@@ -369,6 +381,7 @@ import Litepicker from "litepicker";
             },
         });
     };
+    paintResult("busy");
     build();
 
     window.addEventListener("resize", () => { if (table) table.redraw(); });
@@ -379,6 +392,7 @@ import Litepicker from "litepicker";
         if (brk !== null && !(applied.statuses.length === 1 && Number(applied.statuses[0]) === brk)) brk = null;
         paintFilterState();
         paintHero();
+        paintResult("busy");
         table.setData(route("admission.list"), { ...applied });
     };
 
