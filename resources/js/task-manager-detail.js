@@ -104,13 +104,40 @@ async function download(url, params, filename) {
 /* Chrome — row menus and their shared dismiss                        */
 /* ------------------------------------------------------------------ */
 
+const FLOAT_PROPS = ["position", "top", "left", "right", "bottom"];
+
 function closePopovers(except = null) {
     $$(".tkm-pop.is-open").forEach((node) => {
         if (except && node === except) return;
-        node.classList.remove("is-open", "tkm-pop--up");
+        node.classList.remove("is-open", "tkm-pop--up", "tkm-pop--float");
+        const panel = $(".tkm-pop__panel", node);
+        if (panel) FLOAT_PROPS.forEach((prop) => panel.style.removeProperty(prop));
         const trigger = $("[aria-expanded]", node);
         if (trigger) trigger.setAttribute("aria-expanded", "false");
     });
+}
+
+/* Row menus sit inside the table's horizontal scroller, and overflow-x: auto
+   clips vertically too, so the last rows' menus were cut off by the table
+   card. An open row menu is lifted out with position: fixed, pinned to its
+   kebab, and opened upward when the window has no room below it. */
+function placeFloating(node) {
+    const panel = $(".tkm-pop__panel", node);
+    const trigger = $("[aria-expanded]", node) || node;
+    if (!panel) return;
+    const r = trigger.getBoundingClientRect();
+    const vh = window.innerHeight, vw = document.documentElement.clientWidth;
+    if (r.bottom < 0 || r.top > vh) { closePopovers(); return; }
+    const gap = 10, edge = 8, w = panel.offsetWidth, h = panel.offsetHeight;
+    const up = vh - r.bottom < h + gap + edge && r.top > vh - r.bottom;
+    const left = Math.max(edge, Math.min(r.right - w, vw - w - edge));
+    const top = up ? Math.max(edge, r.top - gap - h) : r.bottom + gap;
+    Object.assign(panel.style, { position: "fixed", top: `${top}px`, left: `${left}px`, right: "auto", bottom: "auto" });
+    node.classList.toggle("tkm-pop--up", up);
+}
+
+function placeOpenFloating() {
+    $$(".tkm-pop--float.is-open").forEach(placeFloating);
 }
 
 function togglePopover(node) {
@@ -122,12 +149,17 @@ function togglePopover(node) {
     const trigger = $("[aria-expanded]", node);
     if (trigger) trigger.setAttribute("aria-expanded", "true");
 
-    // Row menus near the bottom of the viewport open upwards instead.
-    if (node.classList.contains("tkm-pop")) {
-        const panel = $(".tkm-pop__panel", node);
-        if (panel && node.getBoundingClientRect().bottom + panel.offsetHeight + 24 > window.innerHeight) {
-            node.classList.add("tkm-pop--up");
-        }
+    if (!node.classList.contains("tkm-pop")) return;
+    if (node.closest("[data-tkm-tablewrap]")) {
+        node.classList.add("tkm-pop--float");
+        placeFloating(node);
+        return;
+    }
+
+    // Other menus near the bottom of the viewport open upwards instead.
+    const panel = $(".tkm-pop__panel", node);
+    if (panel && node.getBoundingClientRect().bottom + panel.offsetHeight + 24 > window.innerHeight) {
+        node.classList.add("tkm-pop--up");
     }
 }
 
@@ -419,14 +451,18 @@ function rowActions(row) {
  * the actions cell, and they are mutually exclusive — same as the old table.
  */
 function statusButton(row) {
+    const cardButton = () =>
+        `<button type="button" class="tkm-icobtn tkm-icobtn--green" title="Download ID card" data-tkm-act="idcard"${rowAttrs(
+            row
+        )}>${ICONS.idcard}</button>`;
     if (config.flags.idCard) {
         // A pending card goes through "Download & Mark as Complete", which also uploads it to the
         // task; the one-off download only appears once the task has moved on (user, 28 Oct 2026).
         if (row.task_status === "Pending") return "";
-        return `<button type="button" class="tkm-icobtn tkm-icobtn--green" title="Download ID card" data-tkm-act="idcard"${rowAttrs(
-            row
-        )}>${ICONS.idcard}</button>`;
+        return cardButton();
     }
+    // Document requests: a "Replacement of Student ID Card" order offers the same card, whatever its status (user, 23 Nov 2026).
+    if (row.id_card_request) return cardButton();
     if (config.flags.interview && row.task_status === "Pending") {
         return `<button type="button" class="tkm-icobtn tkm-icobtn--gold" title="Unlock profile for interview" data-tkm-act="unlock"${rowAttrs(
             row
@@ -641,6 +677,7 @@ async function load({ resetPage = false } = {}) {
 }
 
 const selectedIds = () => Array.from(state.selected.values()).map((row) => row.ids);
+const selectedTaskIds = () => Array.from(state.selected.values()).map((row) => Number(row.student_task_id) || 0).filter(Boolean);
 const selectedRows = () => Array.from(state.selected.values());
 
 /* ------------------------------------------------------------------ */
@@ -741,7 +778,7 @@ London Churchill College`;
 /* Bulk + row operations                                               */
 /* ------------------------------------------------------------------ */
 
-async function updateStatus({ ids, status, studentTaskId = 0, button }) {
+async function updateStatus({ ids, status, studentTaskId = 0, taskIds = [], button }) {
     if (!ids.length) return;
     spin(button, true);
 
@@ -751,6 +788,8 @@ async function updateStatus({ ids, status, studentTaskId = 0, button }) {
         status,
         phase: config.phase,
         student_task_id: studentTaskId,
+        // document-request rows: the ticked requests themselves, not every request of the student
+        ...(taskIds.length ? { student_task_ids: taskIds } : {}),
     });
 
     spin(button, false);
@@ -1186,7 +1225,8 @@ const ACTIONS = {
     },
 
     /* bulk */
-    "bulk-complete": (button) => updateStatus({ ids: selectedIds(), status: "Completed", button }),
+    "bulk-complete": (button) =>
+        updateStatus({ ids: selectedIds(), status: "Completed", taskIds: config.flags.docRequest ? selectedTaskIds() : [], button }),
     "bulk-idcards": () => downloadIdCards(),
     "bulk-icp": () => sendClassRoutines(),
     "icp-send": () => runClassRoutines(),
@@ -1620,6 +1660,10 @@ function boot() {
         node.tagName === "SELECT" || (node.tagName === "INPUT" && (node.type === "checkbox" || node.type === "radio"));
 
     const TOGGLES = ["pop-toggle"];
+
+    // A lifted row menu follows its kebab while the page or the table scrolls.
+    document.addEventListener("scroll", placeOpenFloating, true);
+    window.addEventListener("resize", placeOpenFloating);
 
     document.addEventListener("click", (event) => {
         const trigger = event.target.closest("[data-tkm-act]");

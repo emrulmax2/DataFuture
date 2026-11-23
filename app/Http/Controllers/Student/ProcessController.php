@@ -188,6 +188,8 @@ class ProcessController extends Controller
         ]);
         // Task Automation "Change student status to SLC New": the last open task of the process completes it
         \App\Services\TaskAssignment\StudentProcessWrapUp::checkMany($student);
+        // a document request from the student portal: its order is Completed once nothing on it is open
+        \App\Services\DocumentRequestOrderStatus::syncForTasks([(int) $recordid]);
         return response()->json(['message' => 'Data deleted'], 200);
     }
 

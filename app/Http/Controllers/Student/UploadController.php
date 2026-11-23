@@ -188,7 +188,7 @@ class UploadController extends Controller
             $PDFHTML .= '</div>';
             $PDFHTML .= '<div class="profileIdentificationWrap">';
                 $PDFHTML .= '<p class="registrationNo">'.$student->registration_no.'</p>';
-                $PDFHTML .= '<p class="expireDate">Exp Date: '.(isset($student->crel->creation->availability[0]->course_end_date) && !empty($student->crel->creation->availability[0]->course_end_date) ? date('F Y', strtotime($student->crel->creation->availability[0]->course_end_date)) : '').'</p>';
+                $PDFHTML .= '<p class="expireDate">Exp Date: '.(isset($student->crel->creation->availability[0]->course_end_date) && !empty($student->crel->creation->availability[0]->course_end_date) ? date('jS F Y', strtotime($student->crel->creation->availability[0]->course_end_date)) : '').'</p>';
             $PDFHTML .= '</div>';
             $PDFHTML .= '<div class="qrcodeCol">';
                 $PDFHTML .= QrCode::format('svg')->size(106)->generate($student->registration_no);
