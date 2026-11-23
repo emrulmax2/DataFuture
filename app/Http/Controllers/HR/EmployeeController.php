@@ -66,6 +66,7 @@ class EmployeeController extends Controller
         $can_access_all = (isset($currentEmp->id) && $currentEmp->id > 0 ? (isset($currentEmp->can_access_all) && $currentEmp->can_access_all > 0 ? $currentEmp->can_access_all : 0) : 0);
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
         $status = (isset($request->status) ? $request->status : 1);
+        $departmentId = (isset($request->department) && (int) $request->department > 0 ? (int) $request->department : 0);
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
@@ -90,10 +91,16 @@ class EmployeeController extends Controller
                  ->leftJoin('departments as dpt', 'empt.department_id', '=', 'dpt.id')
                  ->leftJoin('employee_work_types as ewt', 'empt.employee_work_type_id', '=', 'ewt.id');
         if(!empty($queryStr)):
-            $query->where('emp.first_name','LIKE','%'.$queryStr.'%');
-            $query->orWhere('emp.last_name','LIKE','%'.$queryStr.'%');
-            $query->orWhere('emp.mobile','LIKE','%'.$queryStr.'%');
-            $query->orWhere('emp.email','LIKE','%'.$queryStr.'%');
+            // grouped so the status and department filters apply to every search match
+            $query->where(function($q) use ($queryStr){
+                $q->where('emp.first_name','LIKE','%'.$queryStr.'%')
+                  ->orWhere('emp.last_name','LIKE','%'.$queryStr.'%')
+                  ->orWhere('emp.mobile','LIKE','%'.$queryStr.'%')
+                  ->orWhere('emp.email','LIKE','%'.$queryStr.'%');
+            });
+        endif;
+        if($departmentId > 0):
+            $query->where('empt.department_id', $departmentId);
         endif;
         if($status == 3):
             $query->onlyTrashed();
@@ -153,7 +160,7 @@ class EmployeeController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'total' => $total_rows, 'data' => $data]);
     }
 
     /**

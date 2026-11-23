@@ -2,6 +2,9 @@
 
 @section('subhead')
     <title>{{ $title }}</title>
+    {{-- The report body is set in Inter, as in the Admission Report design. --}}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    @vite('resources/css/application-analysis-report.css')
 @endsection
 
 @section('subcontent')

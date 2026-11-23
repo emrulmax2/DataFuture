@@ -108,6 +108,11 @@ class ContinuationReportController extends Controller
 
     public function getHtml($semester_ids = []){
         $res = $this->refineResult($semester_ids);
+        // Continuation = registered students who did not drop out. With nobody
+        // registered (e.g. the 380-day window has not ended yet) there is no rate.
+        $rateText = function($registered, $droppedout){
+            return ($registered > 0 ? number_format((($registered - $droppedout) / $registered) * 100, 2).'%' : '&ndash;');
+        };
         
         $html = '';
         $html .= '<table class="table table-bordered attenRateReportTable  table-sm" id="continuationListTable">';
@@ -131,7 +136,6 @@ class ContinuationReportController extends Controller
                         $registered = (isset($theResult['registered']) && !empty($theResult['registered']) ? $theResult['registered'] : 0);
                         $droppedout = (isset($theResult['droppedout']) && !empty($theResult['droppedout']) ? $theResult['droppedout'] : 0);
                         $actualAdmission = $registered;
-                        $rate = (($actualAdmission - $droppedout) / $actualAdmission) * 100;
 
                         $totalAdmission += $admission;
                         $totalRegistered += $registered;
@@ -139,10 +143,14 @@ class ContinuationReportController extends Controller
 
                         $html .= '<tr class="semesterRow">';
                             $html .= '<th class="w-2/6"><a href="javascript:void(0);" class="semisterToggle" data-semesterid="'.$theSemesterId.'">+ '.$theResult['name'].'</a></th>';
-                            $html .= '<th>'.$admission.'</th>';
-                            $html .= '<th>'.$actualAdmission.'</th>';
-                            $html .= '<th>'.$droppedout.'</th>';
-                            $html .= '<th style="text-align: right;">'.number_format($rate, 2).'%</th>';
+                            if(empty($theResult['course']) && !empty($theResult['due_from'])):
+                                $html .= '<td colspan="4">Not due until '.date('j M Y', strtotime($theResult['due_from'])).' (380 days after the course start).</td>';
+                            else:
+                                $html .= '<th>'.$admission.'</th>';
+                                $html .= '<th>'.$actualAdmission.'</th>';
+                                $html .= '<th>'.$droppedout.'</th>';
+                                $html .= '<th style="text-align: right;">'.$rateText($actualAdmission, $droppedout).'</th>';
+                            endif;
                         $html .= '</tr>';
 
                         if(isset($theResult['course']) && !empty($theResult['course'])):
@@ -151,28 +159,26 @@ class ContinuationReportController extends Controller
                                 $registeredCrs = (isset($theCrsResult['registered']) && !empty($theCrsResult['registered']) ? $theCrsResult['registered'] : 0);
                                 $droppedoutCrs = (isset($theCrsResult['droppedout']) && !empty($theCrsResult['droppedout']) ? $theCrsResult['droppedout'] : 0);
                                 $actualAdmissionCrs = $registeredCrs;
-                                $rateCrs = (($actualAdmissionCrs - $droppedoutCrs) / $actualAdmissionCrs) * 100;
                                 
                                 $html .= '<tr class="courseRow courseRow_'.$theSemesterId.'" style="display: none;">';
                                     $html .= '<th class="w-2/6">'.$theCrsResult['name'].'</th>';
                                     $html .= '<td>'.$admissionCrs.'</td>';
                                     $html .= '<td>'.$actualAdmissionCrs.'</td>';
                                     $html .= '<td>'.$droppedoutCrs.'</td>';
-                                    $html .= '<td style="text-align: right;">'.number_format($rateCrs, 2).'%</td>';
+                                    $html .= '<td style="text-align: right;">'.$rateText($actualAdmissionCrs, $droppedoutCrs).'</td>';
                                 $html .= '</tr>';
                                 
                             endforeach;
                         endif;
                     endforeach;
                     $totalActualAdmission = $totalRegistered;
-                    $totalRate = (($totalActualAdmission - $totalDroppedout) / $totalActualAdmission) * 100;
                     
                     $html .= '<tr>';
                         $html .= '<th class="w-2/6">Total</th>';
                         $html .= '<th>'.$totalAdmission.'</th>';
                         $html .= '<th>'.$totalActualAdmission.'</th>';
                         $html .= '<th>'.$totalDroppedout.'</th>';
-                        $html .= '<th style="text-align: right;">'.number_format($totalRate, 2).'%</th>';
+                        $html .= '<th style="text-align: right;">'.$rateText($totalActualAdmission, $totalDroppedout).'</th>';
                     $html .= '</tr>';
                     
                 else:
@@ -200,6 +206,7 @@ class ContinuationReportController extends Controller
                 $semesterAdmission = 0;
                 $semesterRegistered = 0;
                 $semesterDroppedOut = 0;
+                $dueDates = [];
                 if(!empty($course_ids)):
                     foreach($course_ids as $course_id):
                         $course = Course::find($course_id);
@@ -233,11 +240,15 @@ class ContinuationReportController extends Controller
                                 $semesterRegistered += (!empty($registered_std_ids) ? count($registered_std_ids) : 0);
                                 $semesterDroppedOut += (!empty($droppedOutStdents) ? count($droppedOutStdents) : 0);
                             endif;
+                        else:
+                            // Still inside its 380-day window: left out until that date.
+                            $dueDates[] = $completion_date;
                         endif;
                     endforeach;
                     $res['result'][$semester_id]['admissions'] = $semesterAdmission;
                     $res['result'][$semester_id]['registered'] = $semesterRegistered;
                     $res['result'][$semester_id]['droppedout'] = $semesterDroppedOut;
+                    $res['result'][$semester_id]['due_from'] = (!empty($dueDates) ? min($dueDates) : null);
                 endif;
             endforeach;
             $res['course_count'] = $courseCount;

@@ -17,14 +17,27 @@ var employeeListTable = (function () {
         });
     };
 
+    // Count pill in the "All Employees" header: rows matching the current filters
+    var paintCount = function (total) {
+        var pill = document.querySelector("[data-hrd-employee-count]");
+        if (!pill) return;
+        if (total === null) {
+            pill.hidden = true;
+            return;
+        }
+        pill.textContent = Number(total || 0).toLocaleString("en-GB");
+        pill.hidden = false;
+    };
+
     var _tableGen = function () {
         
         let querystr = $("#query").val() != "" ? $("#query").val() : "";
         let status = $("#status").val() != "" ? $("#status").val() : "";
+        let department = $("#department").val() || "";
 
         let tableContent = new Tabulator("#employeeListTable", {
             ajaxURL: route("employee.list"),
-            ajaxParams: { querystr: querystr, status: status },
+            ajaxParams: { querystr: querystr, status: status, department: department },
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -35,6 +48,13 @@ var employeeListTable = (function () {
             layout: "fitColumns",
             responsiveLayout: false,
             placeholder: "No matching records found",
+            ajaxResponse: function (url, params, response) {
+                paintCount(response && response.total !== undefined ? response.total : null);
+                return response;
+            },
+            ajaxError: function () {
+                paintCount(null);
+            },
             columns: [
                 {
                     title: "Name",
@@ -175,10 +195,16 @@ var employeeListTable = (function () {
             filterTitleHTMLForm();
         });
 
+        // Department dropdown filters immediately, like Status
+        $("#department").on("change", function (event) {
+            filterTitleHTMLForm();
+        });
+
         // On reset filter form
         $("#tabulator-html-filter-reset").on("click", function (event) {
             $("#query").val("");
             $("#status").val("1");
+            $("#department").val("");
             filterTitleHTMLForm();
         });
     }

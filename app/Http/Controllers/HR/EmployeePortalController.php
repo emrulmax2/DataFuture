@@ -64,7 +64,9 @@ class EmployeePortalController extends Controller
                            ->whereHas('employee', function($q){
                                 $q->where('status', 1);
                            })->orderBy('due_on', 'ASC')->get(),//->skip(0)->limit(5)
-            'policyTotals' => (PolicyAssessmentService::canManage() ? app(PolicyAssessmentService::class)->assignmentTotals() : null)
+            'policyTotals' => (PolicyAssessmentService::canManage() ? app(PolicyAssessmentService::class)->assignmentTotals() : null),
+            // "All Employees" list filter (employee → employment → department)
+            'departments' => Department::orderBy('name', 'ASC')->get(['id', 'name']),
         ]);
     }
 

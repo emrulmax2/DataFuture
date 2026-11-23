@@ -2069,8 +2069,7 @@ body.hr-dashboard-v2-body .content::before {
 }
 .hrd-card__toolbar {
     flex-wrap: wrap;
-    padding: 16px 20px;
-    background: #fafbfb;
+    padding: 14px 16px;
 }
 .hrd-card__toolbar h2,
 .hrd-card__head h3 {
@@ -2079,14 +2078,37 @@ body.hr-dashboard-v2-body .content::before {
     font-size: 15px;
     font-weight: 700;
 }
+/* same header as the side cards: icon tile, title, count pill */
 .hrd-card__toolbar h2 {
-    margin-right: 4px;
+    font-size: 13.5px;
+}
+.hrd-count[hidden] {
+    display: none;
 }
 .hrd-filter {
     flex: 1 1 360px;
 }
 .hrd-table-actions {
     margin-left: auto;
+}
+/* "All Employees": the search form sits in the card body, on one line under the header */
+.hrd-card__filterbar {
+    padding: 14px 16px;
+    border-bottom: 1px solid #edf3f2;
+}
+.hrd-card__filterbar .hrd-filter {
+    flex-wrap: nowrap;
+}
+.hrd-card__filterbar .hrd-search {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.hrd-card__filterbar .hrd-search input {
+    width: 100%;
+}
+.hrd-card__filterbar .hrd-select,
+.hrd-card__filterbar .hrd-btn {
+    flex: 0 0 auto;
 }
 .hrd-search {
     position: relative;
@@ -2117,6 +2139,19 @@ body.hr-dashboard-v2-body .content::before {
     min-width: 138px;
     padding: 0 30px 0 12px;
     font-weight: 600;
+    /* the theme strips the native arrow; draw our own chevron in the 30px right padding */
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b8a87' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 15px;
+    cursor: pointer;
+}
+/* long department names would otherwise widen the filter bar */
+.hrd-select--dept {
+    max-width: 220px;
+    text-overflow: ellipsis;
 }
 .hrd-search input:focus,
 .hrd-select:focus {
@@ -2622,8 +2657,7 @@ body.hr-dashboard-v2-body .content::before {
     .hrd-shell {
         padding: 20px 16px 88px;
     }
-    .hrd-hero,
-    .hrd-card__toolbar {
+    .hrd-hero {
         align-items: flex-start;
         flex-direction: column;
     }
@@ -2665,6 +2699,12 @@ body.hr-dashboard-v2-body .content::before {
     .hrd-select,
     .hrd-btn {
         width: 100%;
+    }
+    .hrd-select--dept {
+        max-width: none;
+    }
+    .hrd-card__filterbar .hrd-filter {
+        flex-wrap: wrap;
     }
     .hrd-icon-btn {
         flex: 1;

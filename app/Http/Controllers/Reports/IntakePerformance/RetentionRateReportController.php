@@ -112,6 +112,11 @@ class RetentionRateReportController extends Controller
 
     public function getHtml($semester_ids = []){
         $res = $this->refineResult($semester_ids);
+        // Retention = registered students who did not drop out. With nobody
+        // registered (e.g. a course whose students never registered) there is no rate.
+        $rateText = function($registered, $droppedout){
+            return ($registered > 0 ? number_format((($registered - $droppedout) / $registered) * 100, 2).'%' : '&ndash;');
+        };
         
         $html = '';
         $html .= '<table class="table table-bordered attenRateReportTable  table-sm" id="continuationListTable">';
@@ -135,7 +140,6 @@ class RetentionRateReportController extends Controller
                         $registered = (isset($theResult['registered']) && !empty($theResult['registered']) ? $theResult['registered'] : 0);
                         $droppedout = (isset($theResult['droppedout']) && !empty($theResult['droppedout']) ? $theResult['droppedout'] : 0);
                         $actualAdmission = $registered;
-                        $rate = (($actualAdmission - $droppedout) / $actualAdmission) * 100;
 
                         $totalAdmission += $admission;
                         $totalRegistered += $registered;
@@ -146,7 +150,7 @@ class RetentionRateReportController extends Controller
                             $html .= '<th>'.$admission.'</th>';
                             $html .= '<th>'.$actualAdmission.'</th>';
                             $html .= '<th>'.$droppedout.'</th>';
-                            $html .= '<th style="text-align: right;">'.number_format($rate, 2).'%</th>';
+                            $html .= '<th style="text-align: right;">'.$rateText($actualAdmission, $droppedout).'</th>';
                         $html .= '</tr>';
 
                         if(isset($theResult['course']) && !empty($theResult['course'])):
@@ -155,28 +159,26 @@ class RetentionRateReportController extends Controller
                                 $registeredCrs = (isset($theCrsResult['registered']) && !empty($theCrsResult['registered']) ? $theCrsResult['registered'] : 0);
                                 $droppedoutCrs = (isset($theCrsResult['droppedout']) && !empty($theCrsResult['droppedout']) ? $theCrsResult['droppedout'] : 0);
                                 $actualAdmissionCrs = $registeredCrs;
-                                $rateCrs = (($actualAdmissionCrs - $droppedoutCrs) / $actualAdmissionCrs) * 100;
                                 
                                 $html .= '<tr class="courseRow courseRow_'.$theSemesterId.'" style="display: none;">';
                                     $html .= '<th class="w-2/6">'.$theCrsResult['name'].' '.($theCrsResult['status'] == 0 ? ' <span class="text-danger">(Incomplete)</span>' : '').'</th>';
                                     $html .= '<td>'.$admissionCrs.'</td>';
                                     $html .= '<td>'.$actualAdmissionCrs.'</td>';
                                     $html .= '<td>'.$droppedoutCrs.'</td>';
-                                    $html .= '<td style="text-align: right;">'.number_format($rateCrs, 2).'%</td>';
+                                    $html .= '<td style="text-align: right;">'.$rateText($actualAdmissionCrs, $droppedoutCrs).'</td>';
                                 $html .= '</tr>';
                                 
                             endforeach;
                         endif;
                     endforeach;
                     $totalActualAdmission = $totalRegistered;
-                    $totalRate = (($totalActualAdmission - $totalDroppedout) / $totalActualAdmission) * 100;
                     
                     $html .= '<tr>';
                         $html .= '<th class="w-2/6">Total</th>';
                         $html .= '<th>'.$totalAdmission.'</th>';
                         $html .= '<th>'.$totalActualAdmission.'</th>';
                         $html .= '<th>'.$totalDroppedout.'</th>';
-                        $html .= '<th style="text-align: right;">'.number_format($totalRate, 2).'%</th>';
+                        $html .= '<th style="text-align: right;">'.$rateText($totalActualAdmission, $totalDroppedout).'</th>';
                     $html .= '</tr>';
                     
                 else:
@@ -341,7 +343,7 @@ class RetentionRateReportController extends Controller
 
         if($courseCount > 0):
             $actualAdmission = $semesterRegistered;
-            $rate = (($actualAdmission - $semesterDroppedOut) / $actualAdmission) * 100;
+            $rate = ($actualAdmission > 0 ? (($actualAdmission - $semesterDroppedOut) / $actualAdmission) * 100 : null);
 
             $theCollection[2][] = $semesterAdmission;
             $theCollection[2][] = (!empty($semester_ids) ? count($semester_ids) : '0');
@@ -350,7 +352,7 @@ class RetentionRateReportController extends Controller
             $theCollection[2][] = '';
             $theCollection[2][] = $actualAdmission;
             $theCollection[2][] = $semesterDroppedOut;
-            $theCollection[2][] = number_format($rate, 2).'%';
+            $theCollection[2][] = ($rate !== null ? number_format($rate, 2).'%' : '-');
         else:
             $excelArray[2][] = 'Too early to do the calculation.';
         endif;
