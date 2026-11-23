@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Staff;
 use App\Exports\ArrayCollectionExport;
 use App\Exports\StudentEmailIdTaskExport;
 use App\Http\Controllers\Controller;
+use App\Services\DocumentRequestCatalogue;
+use App\Services\DocumentRequestOrderStatus;
 use App\Services\StudentIdCardPalette;
 use App\Http\Requests\BulkStatusUpdateReqest;
 use App\Http\Requests\InterviewerUnlockDirectRequest;
@@ -137,6 +139,10 @@ class PendingTaskManagerController extends Controller
             // $task alone whether it needs the request/letter dialogs.
             'hasDocumentRequests' => StudentTask::where('task_list_id', $id)
                 ->whereNotNull('student_document_request_form_id')
+                ->exists(),
+            // Replacement student ID card orders get the ID card dialog (user, 23 Nov 2026).
+            'hasIdCardRequests' => StudentTask::where('task_list_id', $id)
+                ->whereHas('studentDocumentRequestForm', fn ($q) => $q->where('letter_set_id', DocumentRequestCatalogue::ID_CARD_REPLACEMENT))
                 ->exists(),
             'courses' => Course::where('active', 1)->orderBy('name', 'ASC')->get(),
             'statuses' => Status::where('type', 'Student')->orderBy('name', 'ASC')->get(),
@@ -430,6 +436,8 @@ class PendingTaskManagerController extends Controller
                                 'task_address_request' => 'No',
                                 'student_task_id' => (isset($theStudentTaskId) && $theStudentTaskId > 0 ? $theStudentTaskId : 0),
                                 'student_document_request_form_id' => $documentRequest,
+                                // a replacement student ID card order: the status cell offers the card, whatever the task status
+                                'id_card_request' => (isset($documentRequest->letter_set_id) && (int) $documentRequest->letter_set_id === DocumentRequestCatalogue::ID_CARD_REPLACEMENT),
                                 'venue_name' => $venueName          
                             ];
                             
@@ -881,7 +889,7 @@ class PendingTaskManagerController extends Controller
                     $PDFHTML .= '</div>';
                     $PDFHTML .= '<div class="profileIdentificationWrap">';
                         $PDFHTML .= '<p class="registrationNo">'.e($student->registration_no).'</p>';
-                        $PDFHTML .= '<p class="expireDate">Exp Date: '.(isset($student->crel->creation->availability[0]->course_end_date) && !empty($student->crel->creation->availability[0]->course_end_date) ? date('F Y', strtotime($student->crel->creation->availability[0]->course_end_date)) : '').'</p>';
+                        $PDFHTML .= '<p class="expireDate">Exp Date: '.(isset($student->crel->creation->availability[0]->course_end_date) && !empty($student->crel->creation->availability[0]->course_end_date) ? date('jS F Y', strtotime($student->crel->creation->availability[0]->course_end_date)) : '').'</p>';
                     $PDFHTML .= '</div>';
                     $PDFHTML .= '<div class="qrcodeCol">';
                         $PDFHTML .= QrCode::format('svg')->size(106)->generate($student->registration_no);
@@ -959,6 +967,16 @@ class PendingTaskManagerController extends Controller
         $phase = $request->phase;
         $student_task_id = isset($request->student_task_id) && !empty($request->student_task_id) ? $request->student_task_id : 0;
 
+        // Document-request pages list one row per request, so a bulk action names the ticked
+        // requests: only those are changed, not every request the student has (user, 23 Nov 2026).
+        $pickedTaskIds = [];
+        if($phase != 'Applicant' && $student_task_id == 0 && !empty($request->student_task_ids)):
+            $pickedTaskIds = StudentTask::whereIn('id', array_filter(array_map('intval', (array) $request->student_task_ids)))
+                ->where('task_list_id', $task_id)->whereNotNull('student_document_request_form_id')
+                ->get(['id', 'student_id'])->groupBy('student_id')->map(fn ($rows) => $rows->pluck('id')->all())->all();
+        endif;
+        $touchedTaskIds = [];
+
         foreach($student_ids as $student_id):
             if($phase == 'Applicant'):
                 $taskOldRow = ApplicantTask::where('applicant_id', $student_id)->where('task_list_id', $task_id)->get()->first();
@@ -1007,55 +1025,64 @@ class PendingTaskManagerController extends Controller
                     */
                 endif;
             else:
+                $rowIds = ($student_task_id == 0 && !empty($pickedTaskIds[$student_id]) ? $pickedTaskIds[$student_id] : [$student_task_id]);
+                foreach($rowIds as $rowTaskId):
 
-                if($student_task_id > 0):
-                    $taskOldRow = StudentTask::where('id', $student_task_id)->get()->first();
-                else:
-                    $taskOldRow = StudentTask::where('student_id', $student_id)->where('task_list_id', $task_id)->get()->first();
-                endif;
-                if($task_id==20 && $taskOldRow->student_document_request_form_id!=null) {
+                    if($rowTaskId > 0):
+                        $taskOldRow = StudentTask::where('id', $rowTaskId)->get()->first();
+                    else:
+                        $taskOldRow = StudentTask::where('student_id', $student_id)->where('task_list_id', $task_id)->get()->first();
+                    endif;
+                    if($task_id==20 && $taskOldRow->student_document_request_form_id!=null) {
                     
-                    $studentDoucmentRequestForm = StudentDocumentRequestForm::find($taskOldRow->student_document_request_form_id);
+                        $studentDoucmentRequestForm = StudentDocumentRequestForm::find($taskOldRow->student_document_request_form_id);
 
-                    $AllDocumentRequestForm = StudentDocumentRequestForm::where('student_order_id', $studentDoucmentRequestForm->student_order_id )->get();
-                    $totalLetterGeneratedCount = 0;
-                    $rejectedFoundCount=0;
-                    foreach($AllDocumentRequestForm as $key => $value) {
-                        $totalLetterGeneratedCount += $value->letter_generated_count;
+                        $AllDocumentRequestForm = StudentDocumentRequestForm::where('student_order_id', $studentDoucmentRequestForm->student_order_id )->get();
+                        $totalLetterGeneratedCount = 0;
+                        $rejectedFoundCount=0;
+                        foreach($AllDocumentRequestForm as $key => $value) {
+                            $totalLetterGeneratedCount += $value->letter_generated_count;
 
-                        if($value->status=="Rejected") {
-                            $rejectedFoundCount+=1;
+                            if($value->status=="Rejected") {
+                                $rejectedFoundCount+=1;
+                            }
+                        }
+                        $totalLetterGeneratedDiffFound = $AllDocumentRequestForm->count() - ($totalLetterGeneratedCount + $rejectedFoundCount);
+                        if($totalLetterGeneratedDiffFound <=0) {
+                            StudentOrder::where('id', $studentDoucmentRequestForm->student_order_id )->update(['status' => 'Completed']);
                         }
                     }
-                    $totalLetterGeneratedDiffFound = $AllDocumentRequestForm->count() - ($totalLetterGeneratedCount + $rejectedFoundCount);
-                    if($totalLetterGeneratedDiffFound <=0) {
-                        StudentOrder::where('id', $studentDoucmentRequestForm->student_order_id )->update(['status' => 'Completed']);
-                    }
-                }
 
-                if($taskOldRow->status != $status):
+                    if($taskOldRow->status != $status):
 
-                    if($student_task_id > 0):
-                        $studentTask = StudentTask::where('id', $student_task_id)->update(['status' => $status, 'canceled_reason' => null, 'updated_by' => auth()->user()->id]);
-                    else:    
-                        $studentTask = StudentTask::where('task_list_id', $task_id)->where('student_id', $student_id)->update(['status' => $status, 'canceled_reason' => null, 'updated_by' => auth()->user()->id]);
-                    endif;
+                        if($rowTaskId > 0):
+                            $studentTask = StudentTask::where('id', $rowTaskId)->update(['status' => $status, 'canceled_reason' => null, 'updated_by' => auth()->user()->id]);
+                        else:    
+                            $studentTask = StudentTask::where('task_list_id', $task_id)->where('student_id', $student_id)->update(['status' => $status, 'canceled_reason' => null, 'updated_by' => auth()->user()->id]);
+                        endif;
                     
-                    $studentTaskLog = StudentTaskLog::create([
-                        'student_tasks_id' => $taskOldRow->id,
-                        'actions' => 'Status Changed',
-                        'field_name' => 'status',
-                        'prev_field_value' => $taskOldRow->status,
-                        'current_field_value' => $status,
-                        'created_by' => auth()->user()->id
-                    ]);
-                endif;
+                        $studentTaskLog = StudentTaskLog::create([
+                            'student_tasks_id' => $taskOldRow->id,
+                            'actions' => 'Status Changed',
+                            'field_name' => 'status',
+                            'prev_field_value' => $taskOldRow->status,
+                            'current_field_value' => $status,
+                            'created_by' => auth()->user()->id
+                        ]);
+                    endif;
+                    $touchedTaskIds = array_merge($touchedTaskIds, ($rowTaskId > 0 ? [$rowTaskId] : StudentTask::where('student_id', $student_id)->where('task_list_id', $task_id)->pluck('id')->all()));
+                endforeach;
             endif;
         endforeach;
 
         // Task Automation "Change student status to SLC New": the last open task of the process completes it
         if($phase != 'Applicant'):
             \App\Services\TaskAssignment\StudentProcessWrapUp::checkMany($student_ids);
+        endif;
+
+        // Student portal orders: a completed request leaves its order Completed once nothing on it is open
+        if($phase != 'Applicant' && $status == 'Completed'):
+            DocumentRequestOrderStatus::syncForTasks($touchedTaskIds);
         endif;
 
         return response()->json(['res' => 'Selected student task status successfully updated.'], 200);
@@ -1561,6 +1588,10 @@ class PendingTaskManagerController extends Controller
         }
         
         if($studentTaskDoucmentRequest->save()) {
+            // the rejected request no longer holds its order open: the rest may all be done
+            if($request->status == 'Rejected'):
+                DocumentRequestOrderStatus::syncForTasks([(int) $studentTask->id]);
+            endif;
             
             if($email_sent=='Sent') {
                 $commonSmtp = ComonSmtp::find(4);

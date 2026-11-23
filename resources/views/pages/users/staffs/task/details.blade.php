@@ -26,6 +26,8 @@
     $hasExcuse   = $task->attendance_excuses == 'Yes';
     $hasAddress  = $task->address_request == 'Yes';
     $hasDocReq   = (bool) ($hasDocumentRequests ?? false);
+    // Document requests: replacement student ID card orders can open the card too.
+    $hasIdCardReq = (bool) ($hasIdCardRequests ?? false);
 
     // Mirrors the old `rowSelectionChanged`: which buttons a ticked row can
     // reveal. Excuse / address-request tasks reveal none, so those pages get
@@ -467,7 +469,7 @@
     </div>
 @endif
 
-@if($hasIdCard)
+@if($hasIdCard || $hasIdCardReq)
     {{-- ID card preview (body markup comes from task.manager.download.id.card) --}}
     <div class="tkm-modal" data-tkm-modal="idcard" hidden>
         <div class="tkm-modal__box tkm-modal__box--lg">
