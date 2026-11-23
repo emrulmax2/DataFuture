@@ -141,21 +141,10 @@
             <div class="hrd-main-grid">
                 <section class="hrd-card hrd-employee-card">
                     <div class="hrd-card__toolbar">
+                        <span class="hrd-small-icon hrd-small-icon--teal"><i data-lucide="users"></i></span>
                         <h2>All Employees</h2>
-                        <form id="tabulatorFilterForm" class="hrd-filter">
-                            <label class="hrd-search" for="query">
-                                <i data-lucide="search"></i>
-                                <input id="query" name="query" type="text" placeholder="Search employees...">
-                            </label>
-                            <select id="status" name="status" class="hrd-select">
-                                <option value="1">Active</option>
-                                <option value="0">Inactive</option>
-                                <option value="2">Temporary</option>
-                                <option value="4">Submitted</option>
-                                <option value="3">Archived</option>
-                            </select>
-                            <button id="tabulator-html-filter-reset" type="button" class="hrd-btn hrd-btn--muted">Reset</button>
-                        </form>
+                        {{-- employees matching the filters below; hr-portal.js sets it after every load --}}
+                        <span class="hrd-count hrd-count--teal" data-hrd-employee-count title="Employees matching the filters" hidden></span>
                         <div class="hrd-table-actions">
                             <button id="tabulator-print" type="button" class="hrd-icon-btn" title="Print">
                                 <i data-lucide="printer"></i>
@@ -180,6 +169,28 @@
                                 Temp
                             </button>
                         </div>
+                    </div>
+                    <div class="hrd-card__filterbar">
+                        <form id="tabulatorFilterForm" class="hrd-filter">
+                            <label class="hrd-search" for="query">
+                                <i data-lucide="search"></i>
+                                <input id="query" name="query" type="text" placeholder="Search employees...">
+                            </label>
+                            <select id="status" name="status" class="hrd-select">
+                                <option value="1">Active</option>
+                                <option value="0">Inactive</option>
+                                <option value="2">Temporary</option>
+                                <option value="4">Submitted</option>
+                                <option value="3">Archived</option>
+                            </select>
+                            <select id="department" name="department" class="hrd-select hrd-select--dept" aria-label="Department">
+                                <option value="">All Departments</option>
+                                @foreach(($departments ?? []) as $dept)
+                                    <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                                @endforeach
+                            </select>
+                            <button id="tabulator-html-filter-reset" type="button" class="hrd-btn hrd-btn--muted">Reset</button>
+                        </form>
                     </div>
                     <div class="hrd-table-wrap">
                         <div id="employeeListTable" class="table-report table-report--tabulator hrd-tabulator"></div>

@@ -4021,7 +4021,13 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(ContinuationReportController::class)->group(function(){
         Route::post('reports/intake-performance/get-continuation-report', 'getContinuationReport')->name('reports.intake.performance.get.continuation.report'); 
-        Route::get('reports/intake-performance/print-continuation-rate/{semesters?}', 'printContinuationRateReport')->name('reports.intake.performance.print.continuation.rate'); 
+        Route::get('reports/intake-performance/print-continuation-rate/{semesters?}', 'printContinuationRateReport')->name('reports.intake.performance.print.continuation.rate');
+    });
+
+    /* Continuation Rate, new version (23 Nov 2026): the "New version" tab beside the old report. */
+    Route::controller(\App\Http\Controllers\Reports\IntakePerformance\ContinuationRateController::class)->group(function(){
+        Route::post('reports/intake-performance/continuation-rate', 'generate')->name('reports.intake.performance.continuation.rate.generate');
+        Route::get('reports/intake-performance/continuation-rate/{semesters}/pdf', 'pdf')->where('semesters', '[0-9]+(_[0-9]+)*')->name('reports.intake.performance.continuation.rate.pdf');
     });
 
     Route::controller(ConnectTransactionController::class)->group(function(){
@@ -4037,10 +4043,23 @@ Route::middleware('auth')->group(function() {
         Route::get('reports/intake-performance/print-attendance-rate/{semesters?}', 'printAttendanceRateReport')->name('reports.intake.performance.print.attendance.rate'); 
     });
 
+    /* Attendance Rate, new version (23 Nov 2026): the "New version" tab beside the old report. */
+    Route::controller(\App\Http\Controllers\Reports\IntakePerformance\AttendanceRateController::class)->group(function(){
+        Route::post('reports/intake-performance/attendance-rate', 'generate')->name('reports.intake.performance.attendance.rate.generate');
+        Route::get('reports/intake-performance/attendance-rate/{semesters}/pdf', 'pdf')->where('semesters', '[0-9]+(_[0-9]+)*')->name('reports.intake.performance.attendance.rate.pdf');
+    });
+
     Route::controller(RetentionRateReportController::class)->group(function(){
         Route::post('reports/intake-performance/get-retention-report', 'getRetentionReport')->name('reports.intake.performance.get.retention.report'); 
         Route::get('reports/intake-performance/print-retention-rate/{semesters?}', 'printRetentionRateReport')->name('reports.intake.performance.print.retention.rate'); 
-        Route::get('reports/intake-performance/export-retention-rate/{semesters?}', 'exportRetentionRateReport')->name('reports.intake.performance.export.retention.rate'); 
+        Route::get('reports/intake-performance/export-retention-rate/{semesters?}', 'exportRetentionRateReport')->name('reports.intake.performance.export.retention.rate');
+    });
+
+    /* Retention Rate, new version (23 Nov 2026): the "New version" tab beside the old report. */
+    Route::controller(\App\Http\Controllers\Reports\IntakePerformance\RetentionRateController::class)->group(function(){
+        Route::post('reports/intake-performance/retention-rate', 'generate')->name('reports.intake.performance.retention.rate.generate');
+        Route::get('reports/intake-performance/retention-rate/{semesters}/pdf', 'pdf')->where('semesters', '[0-9]+(_[0-9]+)*')->name('reports.intake.performance.retention.rate.pdf');
+        Route::get('reports/intake-performance/retention-rate/{semesters}/excel', 'excel')->where('semesters', '[0-9]+(_[0-9]+)*')->name('reports.intake.performance.retention.rate.excel');
     });
 
     Route::controller(TermAttendancePerformanceReportController::class)->group(function(){
@@ -4111,9 +4130,21 @@ Route::middleware('auth')->group(function() {
         Route::get('reports/intake-performance/print-submission-pass-rate-report/{semesters?}', 'printSubmissionPassRatReport')->name('reports.intake.performance.print.submission.pass.rate.report'); 
     });
 
+    /* Submission & Pass Rate, new version (23 Nov 2026): the "New version" tab beside the old report. */
+    Route::controller(\App\Http\Controllers\Reports\IntakePerformance\SubmissionPassRateController::class)->group(function(){
+        Route::post('reports/intake-performance/submission-rate', 'generate')->name('reports.intake.performance.submission.rate.generate');
+        Route::get('reports/intake-performance/submission-rate/{semesters}/pdf', 'pdf')->where('semesters', '[0-9]+(_[0-9]+)*')->name('reports.intake.performance.submission.rate.pdf');
+    });
+
     Route::controller(AwardRateReportController::class)->group(function(){
         Route::post('reports/intake-performance/get-award-rate-report', 'getAwardRatReport')->name('reports.intake.performance.get.award.rate.report'); 
-        Route::get('reports/intake-performance/print-award-rate-report/{semesters?}', 'printAwardRatReport')->name('reports.intake.performance.print.award.rate.report'); 
+        Route::get('reports/intake-performance/print-award-rate-report/{semesters?}', 'printAwardRatReport')->name('reports.intake.performance.print.award.rate.report');
+    });
+
+    /* Award Rate, new version (23 Nov 2026): the "New version" tab beside the old report. */
+    Route::controller(\App\Http\Controllers\Reports\IntakePerformance\AwardRateController::class)->group(function(){
+        Route::post('reports/intake-performance/award-rate', 'generate')->name('reports.intake.performance.award.rate.generate');
+        Route::get('reports/intake-performance/award-rate/{semesters}/pdf', 'pdf')->where('semesters', '[0-9]+(_[0-9]+)*')->name('reports.intake.performance.award.rate.pdf');
     });
 
     Route::controller(ApplicantAnalysisReportController::class)->group(function(){

@@ -343,6 +343,8 @@ export default defineConfig({
                 'resources/js/student-result-progress-form.js',
                 
                 'resources/js/intake-continuation-reports.js',
+                'resources/js/intake-rate-reports.js',
+                'resources/css/application-analysis-report.css',
                 'resources/js/intake-attendance-rate-reports.js',
                 'resources/js/agent-application.js',
                 'resources/js/intake-retention-reports.js',

@@ -1,0 +1,646 @@
+/*
+ * Admission Report (pages/reports/application-analysis/report.blade.php),
+ * screen styles. Loaded by the report page (admission shell) and by Reports ›
+ * Intake Performance, whose Application Analysis accordion shows the same
+ * report, so nothing here may rely on either page's own stylesheet: the
+ * admission shell variables have fallbacks.
+ *
+ * The markup is tables because the PDF renders the same view through
+ * DomPDF; here those layout tables become grids, and stack on narrow
+ * screens. Values follow the design artboard (Inter / Georgia, #0e5a54 teal,
+ * #8a3d0c for shortfalls).
+ */
+
+.aar {
+    color: #16242b;
+    font-family: Inter, "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.aar table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.aar td,
+.aar th {
+    padding: 0;
+    text-align: left;
+    vertical-align: top;
+}
+
+.aar-sheet {
+    background: #fff;
+    border: 1px solid var(--adm-line, #e5eaec);
+    border-radius: var(--adm-radius, 18px);
+    box-shadow: var(--adm-shadow, 0 2px 10px rgba(16, 38, 58, 0.05));
+    padding: 34px 44px 36px;
+}
+
+.aar-sheet + .aar-sheet {
+    margin-top: 20px;
+}
+
+.aar-eyebrow {
+    color: #55616b;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.aar-h2 {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.aar-h2--spaced {
+    margin: 24px 0 10px;
+}
+
+.aar-h2--table {
+    margin: 24px 0 6px;
+}
+
+/* --- header (first sheet; the PDF repeats it on every page) --- */
+
+.aar-head {
+    margin-bottom: 20px;
+}
+
+.aar-head td {
+    border-bottom: 2px solid #16242b;
+    padding-bottom: 10px;
+    vertical-align: bottom;
+}
+
+.aar-head__title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+.aar-head__meta {
+    text-align: right !important;
+}
+
+.aar-head__intake {
+    color: #0e5a54;
+    font-weight: 700;
+}
+
+.aar-head__by {
+    color: #55616b;
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+/* --- page 1: two columns --- */
+
+.aar-split,
+.aar-split > tbody,
+.aar-cols,
+.aar-cols > tbody,
+.aar-course__row,
+.aar-course__row > tbody {
+    display: block;
+}
+
+.aar-split > tbody > tr,
+.aar-cols > tbody > tr,
+.aar-course__row > tbody > tr {
+    display: grid;
+}
+
+.aar-split > tbody > tr > td,
+.aar-cols > tbody > tr > td,
+.aar-course__row > tbody > tr > td {
+    display: block;
+    min-width: 0;
+}
+
+.aar-split > tbody > tr {
+    column-gap: 44px;
+    grid-template-columns: 400px minmax(0, 1fr);
+    row-gap: 28px;
+}
+
+.aar-split__gap,
+.aar-cols__gap {
+    display: none !important;
+}
+
+.aar-hero {
+    margin-top: 6px;
+}
+
+.aar-hero td {
+    vertical-align: middle;
+}
+
+.aar-hero__big {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 44px;
+    font-weight: 700;
+    line-height: 1.05;
+}
+
+.aar-hero__of {
+    color: #55616b;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 24px;
+}
+
+.aar-hero__chipcell {
+    padding-left: 16px !important;
+    text-align: right !important;
+    width: 1%;
+}
+
+.aar-hero__chip {
+    border-radius: 8px;
+    padding: 8px 14px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.aar-hero__chip.is-up,
+.aar-gap.is-up {
+    background: #e2f1ee;
+    color: #0e5a54;
+}
+
+.aar-hero__chip.is-down,
+.aar-gap.is-down {
+    background: #fbeadb;
+    color: #8a3d0c;
+}
+
+.aar-gap.is-none {
+    background: #eef1f3;
+    color: #55616b;
+}
+
+.aar-hero__gap {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.aar-hero__pct {
+    font-size: 12px;
+}
+
+.aar-summary {
+    font-size: 14px;
+    margin-top: 6px;
+}
+
+/* Stacked bar and gender split: proportional cells with 2px white gaps. */
+.aar-stack,
+.aar-gender {
+    border-radius: 4px;
+    overflow: hidden;
+    table-layout: fixed;
+}
+
+.aar-stack__seg,
+.aar-gender__seg {
+    border-left: 2px solid #fff;
+    font-size: 13px;
+    height: 34px;
+    overflow: hidden;
+    vertical-align: middle !important;
+    white-space: nowrap;
+}
+
+.aar-stack__seg {
+    color: #fff;
+    font-weight: 600;
+}
+
+.aar-stack__seg.is-first {
+    border-left: 0;
+    padding-left: 12px !important;
+}
+
+.aar-legend {
+    margin-top: 10px;
+    table-layout: fixed;
+}
+
+.aar-legend > tbody > tr > td {
+    padding: 0 16px 10px 0;
+    width: 50%;
+}
+
+.aar-legend__swatchcell {
+    padding-top: 4px !important;
+    width: 18px;
+}
+
+.aar-legend__swatch {
+    border-radius: 2px;
+    display: block;
+    height: 10px;
+    width: 10px;
+}
+
+.aar-legend__title {
+    font-weight: 700;
+}
+
+.aar-legend__sub,
+.aar-caption,
+.aar-sechead__meta,
+.aar-course__venue,
+.aar-course__note {
+    color: #55616b;
+    font-size: 12px;
+}
+
+/* --- page 1: target vs accepted by course --- */
+
+.aar-sechead td {
+    border-bottom: 1px solid #c3c9d1;
+    padding-bottom: 8px;
+    vertical-align: bottom;
+}
+
+.aar-sechead__meta {
+    text-align: right !important;
+}
+
+.aar-course {
+    border-bottom: 1px solid #e3e7ea;
+    padding: 13px 0;
+}
+
+.aar-course.is-last {
+    border-bottom: 0;
+}
+
+.aar-course__row > tbody > tr {
+    align-items: center;
+    column-gap: 18px;
+    grid-template-columns: 200px minmax(0, 1fr) 90px 60px;
+}
+
+.aar-course__name {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.aar-track {
+    background: #e9edf0;
+    border-radius: 2px;
+    height: 14px;
+    position: relative;
+}
+
+.aar-track__fill {
+    background: #0e5a54;
+    border-radius: 2px;
+    height: 100%;
+}
+
+.aar-track__tick {
+    background: #16242b;
+    height: 26px;
+    margin-left: -1px;
+    position: absolute;
+    top: -6px;
+    width: 2px;
+}
+
+.aar-course__fig {
+    text-align: right !important;
+    white-space: nowrap;
+}
+
+.aar-course__accepted {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.aar-course__target {
+    color: #55616b;
+}
+
+.aar-gap {
+    border-radius: 6px;
+    font-weight: 700;
+    padding: 4px 0;
+    text-align: center;
+}
+
+.aar-course__note {
+    padding-top: 5px;
+}
+
+.aar-course__note.is-warn,
+.aar-caption.is-warn {
+    color: #8a3d0c;
+    font-weight: 600;
+}
+
+/* --- page 1: by delivery pattern --- */
+
+.aar-tablewrap {
+    overflow-x: auto;
+}
+
+.aar-table {
+    min-width: 720px;
+}
+
+.aar-table th {
+    border-bottom: 1px solid #16242b;
+    color: #55616b;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 0 6px 12px !important;
+    text-align: right !important;
+}
+
+.aar-table td {
+    border-bottom: 1px solid #e3e7ea;
+    padding: 6px 0 6px 12px !important;
+    text-align: right !important;
+}
+
+.aar-table .aar-table__label {
+    padding-left: 0 !important;
+    text-align: left !important;
+}
+
+.aar-table tr.is-last td {
+    border-bottom-color: #16242b;
+}
+
+.aar-table td.is-strong,
+.aar-table__total td {
+    font-weight: 700;
+}
+
+.aar-table__total td {
+    border-bottom: 0;
+}
+
+.aar-table .is-up {
+    color: #0e5a54;
+}
+
+.aar-table .is-down {
+    color: #8a3d0c;
+}
+
+.aar-table .is-none {
+    color: #55616b;
+}
+
+/* --- page 2: who accepted --- */
+
+.aar-titlerow {
+    margin-bottom: 22px;
+}
+
+.aar-titlerow td {
+    vertical-align: bottom;
+}
+
+.aar-title {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.15;
+    margin-top: 4px;
+}
+
+.aar-titlerow__note {
+    font-size: 14px;
+    padding-bottom: 6px !important;
+    padding-left: 24px !important;
+    text-align: right !important;
+}
+
+.aar-cols > tbody > tr {
+    column-gap: 44px;
+    grid-template-columns: 250px minmax(0, 1fr) minmax(0, 1fr);
+    row-gap: 32px;
+}
+
+.aar-sechead--spaced {
+    margin-top: 28px;
+}
+
+.aar-gender {
+    margin-top: 12px;
+}
+
+.aar-gender__seg {
+    font-weight: 700;
+    padding-left: 10px !important;
+}
+
+.aar-gender__seg.is-first {
+    border-left: 0;
+}
+
+.aar-gender__seg--male {
+    background: #0e5a54;
+    color: #fff;
+}
+
+.aar-gender__seg--female {
+    background: #bfdfda;
+    color: #16242b;
+}
+
+.aar-gender__seg--other {
+    background: #7b8490;
+    color: #fff;
+}
+
+.aar-gender__seg--unknown {
+    background: #e3e7ea;
+    color: #16242b;
+}
+
+.aar-caption {
+    margin-top: 8px;
+}
+
+.aar-entry {
+    margin-top: 8px;
+}
+
+.aar-entry th {
+    border-bottom: 1px solid #16242b;
+    color: #55616b;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 0 6px 10px !important;
+    text-align: right !important;
+}
+
+.aar-entry td {
+    border-bottom: 1px solid #e3e7ea;
+    padding: 8px 0 8px 10px !important;
+    text-align: right !important;
+}
+
+.aar-entry .aar-entry__course {
+    padding-left: 0 !important;
+    text-align: left !important;
+}
+
+.aar-caption .viewUnknownEntryBtn {
+    color: #0e5a54;
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+.aar-share {
+    margin-top: 6px;
+}
+
+.aar-share td {
+    padding: 13px 0 !important;
+    vertical-align: middle !important;
+}
+
+.aar-share__label {
+    font-weight: 700;
+    width: 140px;
+}
+
+.aar-share__barcell {
+    padding: 13px 12px 13px 4px !important;
+}
+
+.aar-share__track {
+    background: #e9edf0;
+    border-radius: 2px;
+    height: 10px;
+}
+
+.aar-share__fill {
+    background: #0e5a54;
+    border-radius: 2px;
+    height: 100%;
+}
+
+.aar-share__count {
+    font-weight: 700;
+    text-align: right !important;
+    width: 40px;
+}
+
+.aar-share__pct {
+    color: #55616b;
+    text-align: right !important;
+    width: 46px;
+}
+
+.aar-share tr.is-muted .aar-share__label {
+    color: #55616b;
+}
+
+.aar-share tr.is-muted .aar-share__fill {
+    background: #7b8490;
+}
+
+/* --- empty --- */
+
+.aar-empty {
+    padding: 44px 24px;
+    text-align: center;
+}
+
+.aar-empty__title {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.aar-empty__text {
+    color: #55616b;
+    margin-top: 6px;
+}
+
+/* --- narrower screens --- */
+
+@media (max-width: 1180px) {
+    .aar-split > tbody > tr {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .aar-split__left {
+        max-width: 560px;
+    }
+
+    .aar-cols > tbody > tr {
+        grid-template-columns: 250px minmax(0, 1fr);
+    }
+
+    .aar-cols__last {
+        grid-column: 2;
+    }
+}
+
+@media (max-width: 767px) {
+    .aar-sheet {
+        padding: 22px 16px 24px;
+    }
+
+    .aar-head td,
+    .aar-titlerow td {
+        display: block;
+        text-align: left !important;
+    }
+
+    .aar-head__meta {
+        border-bottom: 2px solid #16242b;
+        padding-top: 4px;
+    }
+
+    .aar-head td:first-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .aar-titlerow__note {
+        padding: 6px 0 0 !important;
+    }
+
+    .aar-hero__big {
+        font-size: 36px;
+    }
+
+    .aar-hero__of {
+        font-size: 19px;
+    }
+
+    .aar-course__row > tbody > tr {
+        column-gap: 12px;
+        grid-template-columns: minmax(0, 1fr) auto 56px;
+        row-gap: 8px;
+    }
+
+    .aar-course__id {
+        grid-column: 1 / -1;
+    }
+
+    .aar-cols > tbody > tr {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .aar-cols__last {
+        grid-column: auto;
+    }
+
+    .aar-share__label {
+        width: 120px;
+    }
+}
