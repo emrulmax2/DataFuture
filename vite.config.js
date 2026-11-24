@@ -47,6 +47,8 @@ export default defineConfig({
                 'resources/css/group-leader-dashboard.css',
                 'resources/css/task-manager-detail.css',
                 'resources/css/slc-registration.css',
+                'resources/css/attendance-report.css',
+                'resources/css/term-attendance-report.css',
                 'resources/js/app.js',
                 'resources/js/ckeditor-classic.js',
                 'resources/js/ckeditor-inline.js',
@@ -327,6 +329,8 @@ export default defineConfig({
                 'resources/js/student-slc-history-merge.js',
                 'resources/js/student-group-search-form.js',
                 'resources/js/student-attendance-reports.js',
+                'resources/js/attendance-report-new.js',
+                'resources/js/term-attendance-report-new.js',
                 'resources/js/non-tutor-attendance-report.js',
                 'resources/js/attendance-integrity.js',
 
