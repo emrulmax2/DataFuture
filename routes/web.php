@@ -277,6 +277,7 @@ use App\Http\Controllers\Reports\ActiveStudentByDateController;
 use App\Http\Controllers\Reports\ApplicantAnalysisReportController;
 use App\Http\Controllers\Reports\ApplicationAnalysisController;
 use App\Http\Controllers\Reports\AttendanceReportController as ReportsAttendanceReportController;
+use App\Http\Controllers\Reports\AttendanceReportNewController;
 use App\Http\Controllers\Reports\NonTutorAttendanceUpdateController;
 use App\Http\Controllers\Reports\ClassStatusByTermController;
 use App\Http\Controllers\Reports\DatafutureReportController;
@@ -296,6 +297,7 @@ use App\Http\Controllers\Reports\StudentResultReportController;
 use App\Http\Controllers\Reports\StudentWorkplacementReportController;
 use App\Http\Controllers\Reports\SystemReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermAttendancePerformanceReportController;
+use App\Http\Controllers\Reports\TermPerformance\TermAttendanceRateController;
 use App\Http\Controllers\Reports\TermPerformance\TermProgressionReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermRetentionReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermSubmissionPerformanceReportController;
@@ -3929,6 +3931,12 @@ Route::middleware('auth')->group(function() {
         Route::post('reports/attendance-excel-download', 'excelDownload')->name('report.attendance.reports.excel'); 
     });
 
+    // Attendance Reports "New version" tab (24 Nov 2026); the page and the old version stay above.
+    Route::controller(AttendanceReportNewController::class)->group(function(){
+        Route::get('reports/attendance-reports/new/list', 'list')->name('report.attendance.reports.new.list');
+        Route::post('reports/attendance-reports/new/export', 'export')->name('report.attendance.reports.new.export');
+    });
+
     // Staff who changed attendance in classes they are not the tutor or personal tutor of.
     Route::controller(NonTutorAttendanceUpdateController::class)->group(function(){
         Route::get('reports/non-tutor-attendance-updates', 'index')->name('reports.non.tutor.attendance');
@@ -4073,6 +4081,12 @@ Route::middleware('auth')->group(function() {
 
         Route::any('reports/term-performance/group/{terms}/{course}/{group}', 'groupView')->name('reports.term.performance.group.view'); 
         Route::any('reports/term-performance/group/trend/{terms}/{course}/{group}', 'groupTrendView')->name('reports.term.performance.group.trend.view'); 
+    });
+
+    // Term Performance › Attendance Rates "New version" tab (24 Nov 2026); the old version stays above.
+    Route::controller(TermAttendanceRateController::class)->group(function(){
+        Route::get('reports/term-performance/attendance-rate/{term}', 'generate')->whereNumber('term')->name('reports.term.performance.attendance.rate.generate');
+        Route::get('reports/term-performance/attendance-rate/{term}/pdf', 'pdf')->whereNumber('term')->name('reports.term.performance.attendance.rate.pdf');
     });
 
     Route::controller(StudentFlagController::class)->group(function() {

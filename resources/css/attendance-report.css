@@ -1,0 +1,485 @@
+/*
+ * Reports › Attendance Reports, new version (user's attendance-report design, 24 Nov 2026).
+ * Everything is scoped to .atr (page body) or .atr-ts-dropdown (Tom Select lists, which live in
+ * <body>), so the app header and the old version keep their theme styles.
+ */
+.atr {
+    --atr-bg: #eef1f5;
+    --atr-surface: #ffffff;
+    --atr-ink: #101828;
+    --atr-ink-2: #344054;
+    --atr-muted: #475467;
+    --atr-faint: #667085;
+    --atr-line: #e4e7ec;
+    --atr-line-2: #eaecf0;
+    --atr-head: #f9fafb;
+    --atr-input: #d0d5dd;
+    --atr-primary: #0f5a66;
+    --atr-primary-h: #0b4650;
+    --atr-primary-soft: #e6f2f4;
+    --atr-navy: #1e3a8a;
+    --atr-navy-h: #172e6e;
+    --atr-zero: #55160c;
+    --atr-low: #b42318;
+    --atr-warn: #c2410c;
+    --atr-mid: #7a5f00;
+    --atr-high: #067647;
+    --atr-r: 10px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 8px;
+    padding-bottom: 32px;
+    color: var(--atr-ink);
+    font: 14px/1.45 Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.atr *, .atr *::before, .atr *::after { box-sizing: border-box; }
+.atr [hidden] { display: none !important; }
+/* :where() keeps this reset at zero weight, so the button classes' own colours win. */
+:where(.atr) :where(button, select, input) { font: inherit; color: inherit; }
+.atr :focus-visible { outline: 2px solid var(--atr-primary); outline-offset: 2px; }
+.atr svg { flex: none; }
+.atr-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ── Page head ── */
+/* Page title: the Intake Performance Reports header (.ipr-pagehead), with this report's actions. */
+.atr-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 24px; }
+.atr-head__lead { flex: 1 1 420px; display: flex; align-items: center; gap: 16px; min-width: 0; }
+.atr-head__icon {
+    flex: 0 0 52px; display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 14px;
+    background: linear-gradient(135deg, #0e5a54 0%, #1b8a7f 100%); color: #ffffff; box-shadow: 0 6px 16px rgba(14, 90, 84, 0.22);
+}
+.atr-head__icon svg { width: 26px; height: 26px; stroke-width: 1.75; }
+.atr-head__text { min-width: 0; }
+.atr-head__title { margin: 0; color: #16242b; font-size: 20px; font-weight: 700; line-height: 1.25; }
+.atr-head__sub { margin: 3px 0 0; color: #55616b; font-size: 13px; line-height: 1.45; }
+.atr-head__sub b { color: #16242b; font-weight: 600; }
+.atr-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.atr-actions .atr-btn { height: 40px; }
+.atr-back {
+    display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border: 1px solid #c3c9d1; border-radius: 8px;
+    background: #ffffff; color: #16242b !important; font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap;
+    transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+.atr-back svg { width: 16px; height: 16px; transition: transform 0.2s ease; }
+.atr-back:hover { border-color: #0e5a54; color: #0e5a54 !important; box-shadow: 0 2px 8px rgba(22, 36, 43, 0.08); }
+.atr-back:hover svg { transform: translateX(-3px); }
+/* Each tab's cards keep the page's 16px rhythm (the panes are single children of .atr). */
+.atr [data-atr-pane] { display: flex; flex-direction: column; gap: 16px; }
+
+/* ── Buttons ── */
+.atr-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 42px; padding: 0 16px;
+    border: 1px solid transparent; border-radius: 8px; background: none; font-weight: 600; line-height: 1; white-space: nowrap;
+    cursor: pointer; text-decoration: none; transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.atr-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.atr-btn svg, .atr-btn i svg { width: 16px; height: 16px; }
+.atr-btn--primary { background: var(--atr-primary); color: #ffffff; }
+.atr-btn--primary:hover:not(:disabled) { background: var(--atr-primary-h); color: #ffffff; }
+.atr-btn--navy { background: var(--atr-navy); color: #ffffff; }
+.atr-btn--navy:hover:not(:disabled) { background: var(--atr-navy-h); color: #ffffff; }
+.atr-btn--ghost { border-color: var(--atr-input); background: #ffffff; color: var(--atr-ink-2); }
+.atr-btn--ghost:hover:not(:disabled) { background: var(--atr-head); color: var(--atr-ink); }
+.atr-btn--text { color: var(--atr-muted); }
+.atr-btn--text:hover:not(:disabled) { color: var(--atr-ink); }
+.atr-btn--sm { height: 34px; padding: 0 12px; font-size: 13px; gap: 6px; }
+.atr-btn--sm svg { width: 15px; height: 15px; }
+/* Busy: the spinner takes the icon's place. */
+.atr-spinner {
+    display: none; width: 15px; height: 15px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%;
+    animation: atr-spin 0.8s linear infinite;
+}
+.atr-spinner--lg { display: inline-block; width: 22px; height: 22px; border-width: 3px; color: var(--atr-primary); }
+.atr-btn.is-busy .atr-spinner { display: inline-block; }
+.atr-btn.is-busy .atr-btn__icon, .atr-btn.is-busy > i, .atr-btn.is-busy > svg:not(.atr-spinner) { display: none; }
+@keyframes atr-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .atr-spinner { animation-duration: 2.4s; } }
+
+/* ── Version switch ── */
+/* Same 42px as the buttons beside it, with a gap before Back to Dashboard. */
+.atr-versions { display: inline-flex; gap: 2px; height: 40px; margin-right: 8px; padding: 3px; border: 1px solid var(--atr-line); border-radius: 8px; background: #e9edf2; }
+.atr-versions button {
+    height: 32px; padding: 0 14px; border: 0; border-radius: 6px; background: none; color: var(--atr-muted); font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.atr-versions button:hover { color: var(--atr-ink); }
+.atr-versions button.is-active { background: #ffffff; color: var(--atr-primary); box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08); }
+
+/* ── Cards ── */
+.atr-card { border: 1px solid var(--atr-line); border-radius: var(--atr-r); background: var(--atr-surface); }
+
+/* ── Filters ── */
+.atr-filters { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)) auto; gap: 12px; align-items: end; padding: 16px; }
+.atr-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.atr-field > label { color: var(--atr-ink-2); font-size: 12px; font-weight: 600; }
+.atr-field > label i { color: #c8102e; font-style: normal; }
+.atr-native {
+    width: 100%; height: 42px; padding: 0 32px 0 12px; border: 1px solid var(--atr-input); border-radius: 8px; background-color: #ffffff;
+    color: var(--atr-ink); font-size: 14px; box-shadow: none;
+    -webkit-appearance: none; appearance: none; cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23667085' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center; background-size: 16px;
+}
+.atr-native.is-set { border-color: var(--atr-primary); background-color: var(--atr-primary-soft); color: var(--atr-primary); font-weight: 600; }
+.atr-filter-actions { display: flex; gap: 4px; }
+.atr-form-error { grid-column: 1 / -1; margin: 0; padding: 10px 12px; border-radius: 8px; background: #fef3f2; color: var(--atr-low); font-size: 13px; font-weight: 500; }
+@media (max-width: 1280px) {
+    .atr-filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .atr-filter-actions { grid-column: 1 / -1; justify-content: flex-end; }
+}
+@media (max-width: 640px) { .atr-filters { grid-template-columns: 1fr; } }
+
+/* Tom Select 1.7.8 in the filters: .ts-control (wrapper) > .ts-input (box). The theme pins a
+   chevron on .ts-input/.dropdown-active with !important, hence the !important below. */
+.atr-filters .ts-control { position: relative; width: 100%; }
+.atr-filters .ts-control .ts-input {
+    display: flex; flex-wrap: nowrap; align-items: center; height: 42px; min-height: 42px; padding: 0 34px 0 12px; overflow: hidden;
+    border: 1px solid var(--atr-input); border-radius: 8px; background: #ffffff; box-shadow: none;
+    color: var(--atr-ink); font-size: 14px; line-height: 1.3; cursor: pointer;
+}
+.atr-filters .ts-control .ts-input, .atr-filters .ts-control .ts-input.dropdown-active { background-image: none !important; }
+.atr-filters .ts-control .ts-input.focus, .atr-filters .ts-control .ts-input.dropdown-active { border-color: var(--atr-primary); box-shadow: 0 0 0 3px rgba(15, 90, 102, 0.14); }
+.atr-filters .ts-control .ts-input::after {
+    content: ""; position: absolute; top: 50%; right: 10px; width: 16px; height: 16px; margin-top: -8px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23667085' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / 16px no-repeat;
+    transition: transform 0.2s ease;
+}
+.atr-filters .ts-control .ts-input.dropdown-active::after { transform: rotate(180deg); }
+/* Reads like the design's select: "All intakes", or the chosen value(s) as text
+   (attendance-report-new.js writes data-summary). The items stay in the DOM, unseen; the
+   list's ticks add and remove them (checkbox_options). */
+.atr-filters .ts-control .ts-input::before {
+    content: attr(data-summary); display: block; position: static; flex: 1 1 auto; min-width: 0; height: auto; overflow: hidden;
+    background: none; color: var(--atr-ink); white-space: nowrap; text-overflow: ellipsis;
+}
+.atr-filters .ts-control .ts-input > .item { display: none !important; }
+.atr-filters .ts-control .ts-input > input { position: absolute !important; width: 1px !important; min-width: 0 !important; opacity: 0; }
+.atr-filters .ts-control.is-set .ts-input { border-color: var(--atr-primary); background: var(--atr-primary-soft); }
+.atr-filters .ts-control.is-set .ts-input::before { color: var(--atr-primary); font-weight: 600; }
+.atr-filters .ts-control.disabled .ts-input { background: #f9fafb; cursor: not-allowed; opacity: 1; }
+.atr-filters .ts-control.disabled .ts-input::before { color: #98a2b3; }
+
+.ts-dropdown.atr-ts-dropdown {
+    z-index: 70; margin-top: 6px; padding: 6px; border: 1px solid var(--atr-line, #e4e7ec); border-radius: 10px; background: #ffffff;
+    color: #101828; font: 14px/1.35 Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    box-shadow: 0 14px 32px rgba(16, 24, 40, 0.14), 0 2px 6px rgba(16, 24, 40, 0.06);
+}
+.ts-dropdown.atr-ts-dropdown .dropdown-input-wrap { padding: 0 0 6px; margin-bottom: 4px; border-bottom: 1px solid #eaecf0; }
+.ts-dropdown.atr-ts-dropdown .dropdown-input {
+    width: 100%; height: 36px; padding: 0 10px; border: 1px solid #d0d5dd; border-radius: 8px; background: #f9fafb; box-shadow: none; font-size: 13.5px;
+}
+.ts-dropdown.atr-ts-dropdown .dropdown-input:focus { outline: none; border-color: #0f5a66; background: #ffffff; box-shadow: 0 0 0 3px rgba(15, 90, 102, 0.12); }
+.ts-dropdown.atr-ts-dropdown .ts-dropdown-content { max-height: 260px; }
+.ts-dropdown.atr-ts-dropdown .option { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; cursor: pointer; }
+.ts-dropdown.atr-ts-dropdown .option:hover, .ts-dropdown.atr-ts-dropdown .option.active { background: #e6f2f4; color: #0f5a66; }
+.ts-dropdown.atr-ts-dropdown .option.selected { color: #0f5a66; font-weight: 600; }
+.ts-dropdown.atr-ts-dropdown .option input[type="checkbox"] {
+    flex: none; width: 16px; height: 16px; margin: 0; padding: 0; border: 1px solid #98a2b3; border-radius: 4px; box-shadow: none;
+    accent-color: #0f5a66; pointer-events: none;
+}
+.ts-dropdown.atr-ts-dropdown .highlight { border-radius: 2px; background: rgba(224, 160, 48, 0.3); color: inherit; }
+.ts-dropdown.atr-ts-dropdown .no-results { padding: 10px; color: #475467; font-size: 13px; }
+
+/* ── Results card ── */
+.atr-results { position: relative; overflow: hidden; }
+.atr-start { display: flex; align-items: center; gap: 14px; padding: 40px 24px; color: var(--atr-muted); }
+.atr-start p { margin: 0; }
+.atr-start b { color: var(--atr-ink); font-weight: 600; }
+.atr-start__icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 10px; background: var(--atr-primary-soft); color: var(--atr-primary); }
+.atr-start__icon svg { width: 22px; height: 22px; }
+
+.atr-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--atr-line); }
+.atr-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.atr-chip {
+    display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border: 1px solid var(--atr-input); border-radius: 18px;
+    background: #ffffff; color: var(--atr-ink-2); font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.atr-chip:hover { border-color: #98a2b3; }
+.atr-chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.atr-chip small { color: var(--atr-faint); font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.atr-chip[aria-pressed="true"] { border-color: var(--atr-primary); background: var(--atr-primary); color: #ffffff; }
+.atr-chip[aria-pressed="true"] i { background: #ffffff; }
+.atr-chip[aria-pressed="true"] small { color: rgba(255, 255, 255, 0.8); }
+.atr-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.atr-quick { position: relative; }
+.atr-quick input {
+    width: 230px; height: 36px; padding: 0 10px 0 34px; border: 1px solid var(--atr-input); border-radius: 8px; background: #ffffff; font-size: 13px;
+}
+.atr-quick input:focus { outline: none; border-color: var(--atr-primary); box-shadow: 0 0 0 3px rgba(15, 90, 102, 0.12); }
+.atr-quick svg { position: absolute; top: 10px; left: 11px; color: var(--atr-faint); }
+
+/* Ticked students: the design's selection pill, with the old version's SMS / Email / Letter added. */
+.atr-bulk {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 4px 4px 4px 12px; border-radius: 8px;
+    background: var(--atr-primary-soft); color: var(--atr-primary); font-size: 13px; font-weight: 600;
+}
+.atr-bulk > span { margin-right: 2px; white-space: nowrap; }
+.atr-bulk .atr-btn--ghost { border-color: #b9d7dc; color: var(--atr-primary); }
+.atr-bulk .atr-btn--ghost:hover:not(:disabled) { border-color: var(--atr-primary); background: #ffffff; color: var(--atr-primary-h); }
+
+.atr-key { display: flex; flex-wrap: wrap; gap: 4px 18px; padding: 9px 16px; border-bottom: 1px solid var(--atr-line); color: var(--atr-muted); font-size: 12px; }
+.atr-key b { color: var(--atr-ink); font-weight: 600; }
+.atr-key__title { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+
+/* ── Table ── */
+/* No height limit (user): a page of rows shows in full; it scrolls sideways only on narrow screens. */
+.atr-scroll { position: relative; overflow-x: auto; }
+.atr-table { width: 100%; min-width: 1180px; border-collapse: separate; border-spacing: 0; }
+.atr-table th, .atr-table td { padding: 12px 8px; border-bottom: 1px solid var(--atr-line-2); text-align: left; vertical-align: top; }
+.atr-table th:first-child, .atr-table td:first-child { width: 44px; padding-left: 16px; }
+.atr-table td:first-child { padding-top: 15px; }
+.atr-table th:last-child, .atr-table td:last-child { padding-right: 16px; }
+.atr-table thead th {
+    position: sticky; top: 0; z-index: 2; height: 48px; vertical-align: middle; border-bottom: 1px solid var(--atr-line); background: var(--atr-head);
+    color: var(--atr-muted); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap;
+}
+.atr-table th button { all: unset; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+.atr-table th button:hover { color: var(--atr-ink); }
+.atr-table th button:focus-visible { outline: 2px solid var(--atr-primary); outline-offset: 2px; }
+.atr-table th[aria-sort="ascending"] button::after { content: "▲"; font-size: 8px; }
+.atr-table th[aria-sort="descending"] button::after { content: "▼"; font-size: 8px; }
+.atr-table th[aria-sort] { color: var(--atr-ink); }
+/* Column widths (user): Student is fixed and narrower than the design's share; the spare width of a
+   wide screen goes to Course · Group, References and the counts. */
+.atr-table th.atr-col-student { width: 230px; }
+.atr-table th.atr-num, .atr-table td.atr-num { text-align: right; font-variant-numeric: tabular-nums; }
+.atr-table th.atr-num button { justify-content: flex-end; }
+.atr-table td.atr-num { font-size: 13px; font-weight: 600; }
+.atr-table td.atr-num.is-zero { color: #98a2b3; font-weight: 400; }
+.atr-table tbody tr:hover { background: #f7fafb; }
+.atr-table tbody tr.is-sel { background: #eff7f8; }
+.atr-table input[type="checkbox"] {
+    width: 16px; height: 16px; margin: 0; padding: 0; border: 1px solid #98a2b3; border-radius: 4px; box-shadow: none;
+    accent-color: var(--atr-primary); cursor: pointer; vertical-align: middle;
+}
+.atr-stu { display: flex; flex-direction: column; gap: 3px; max-width: 230px; }
+.atr-stu a { overflow: hidden; color: var(--atr-primary); font-weight: 600; text-decoration: none; white-space: nowrap; text-overflow: ellipsis; }
+.atr-stu a:hover { text-decoration: underline; }
+.atr-sub { color: var(--atr-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.atr-flag {
+    display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; padding: 1px 6px; border-radius: 4px;
+    background: #fef3f2; color: var(--atr-low); font-size: 11px; font-weight: 600; vertical-align: 1px;
+}
+.atr-course { max-width: 330px; overflow: hidden; font-size: 13px; white-space: nowrap; text-overflow: ellipsis; }
+.atr-badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.atr-badge--enrolled { background: #dcfae6; color: #085d3a; }
+.atr-badge--registered { background: #dbeafe; color: #1e3a8a; }
+.atr-badge--extended { background: #ede9fe; color: #5b21b6; }
+.atr-badge--discarded { background: #fee4e2; color: #b42318; }
+.atr-badge--other { background: #f2f4f7; color: #344054; }
+.atr-kv { color: var(--atr-ink-2); font-size: 12px; line-height: 1.55; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.atr-kv span { display: inline-block; min-width: 54px; color: var(--atr-muted); font-size: 11px; }
+.atr-table th.atr-att, .atr-table td.atr-att { width: 240px; padding-left: 16px; }
+.atr-att-row { display: grid; grid-template-columns: 74px 1fr 56px; align-items: center; gap: 8px; height: 24px; }
+.atr-att-row span { color: var(--atr-muted); font-size: 11.5px; white-space: nowrap; }
+.atr-att-row b { font-size: 13px; text-align: right; font-variant-numeric: tabular-nums; }
+.atr-bar { height: 6px; overflow: hidden; border-radius: 3px; background: var(--atr-line-2); }
+.atr-bar i { display: block; height: 100%; border-radius: 3px; }
+.atr .is-low { color: var(--atr-low); }
+.atr .is-warn { color: var(--atr-warn); }
+.atr .is-mid { color: var(--atr-mid); }
+.atr .is-high { color: var(--atr-high); }
+.atr-bar .is-low { background: var(--atr-low); }
+.atr-bar .is-warn { background: var(--atr-warn); }
+.atr-bar .is-mid { background: var(--atr-mid); }
+.atr-bar .is-high { background: var(--atr-high); }
+.atr-empty { padding: 56px 16px; color: var(--atr-muted); text-align: center; }
+.atr-loading {
+    position: absolute; inset: 0; z-index: 3; display: flex; align-items: flex-start; justify-content: center; gap: 10px; padding-top: 96px;
+    background: rgba(255, 255, 255, 0.72); color: var(--atr-muted); font-weight: 500;
+}
+
+/* ── Footer ── */
+.atr-foot {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px;
+    border-top: 1px solid var(--atr-line); color: var(--atr-muted); font-size: 13px;
+}
+.atr-foot b { color: var(--atr-ink); font-weight: 600; }
+.atr-foot select {
+    height: 36px; margin-left: 8px; padding: 0 28px 0 10px; border: 1px solid var(--atr-input); border-radius: 8px; background-color: #ffffff;
+    color: var(--atr-ink); font-size: 13px; box-shadow: none;
+    -webkit-appearance: none; appearance: none; cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23667085' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 8px center; background-size: 14px;
+}
+.atr-pager { display: flex; flex-wrap: wrap; gap: 4px; }
+.atr-pager button {
+    min-width: 36px; height: 36px; padding: 0 8px; border: 1px solid transparent; border-radius: 8px; background: none;
+    color: var(--atr-ink-2); font-weight: 600; cursor: pointer;
+}
+.atr-pager button:hover:not(:disabled) { border-color: var(--atr-line); background: var(--atr-head); }
+.atr-pager button[aria-current] { background: var(--atr-primary); color: #ffffff; }
+.atr-pager button:disabled { color: #98a2b3; cursor: default; }
+
+/* Old version pane: the theme box sits under the switch. */
+.atr [data-atr-pane="old"] > .box { margin-top: 0; }
+
+@media (max-width: 900px) {
+    .atr-tools, .atr-quick { flex: 1 1 auto; }
+    .atr-quick input { width: 100%; }
+    .atr-start { align-items: flex-start; }
+}
+/* Below md the theme's mobile menu bar is fixed over the top of the content (as on Intake Performance). */
+@media (max-width: 767px) { .atr { margin-top: 40px; } }
+@media (max-width: 640px) {
+    .atr-head__icon { flex-basis: 44px; width: 44px; height: 44px; border-radius: 12px; }
+    .atr-head__icon svg { width: 22px; height: 22px; }
+    .atr-head__title { font-size: 18px; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   Page dialogs (SMS / Email / Letter / alerts) in the report's design.
+   Scoped to .modal.atr-modal: the theme moves an open modal to <body>.
+   ════════════════════════════════════════════════════════════════════════ */
+.modal.atr-modal {
+    --atr-ink: #101828; --atr-ink-2: #344054; --atr-muted: #475467; --atr-faint: #667085;
+    --atr-line: #e4e7ec; --atr-line-2: #eaecf0; --atr-head: #f9fafb; --atr-input: #d0d5dd;
+    --atr-primary: #0f5a66; --atr-primary-h: #0b4650; --atr-primary-soft: #e6f2f4; --atr-low: #b42318;
+    overflow-y: auto;
+    font: 14px/1.45 Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.modal.atr-modal *, .modal.atr-modal *::before, .modal.atr-modal *::after { box-sizing: border-box; }
+.modal.atr-modal .modal-dialog.atr-modal__dialog { width: min(560px, calc(100vw - 32px)); }
+.modal.atr-modal .modal-dialog.atr-modal__dialog--lg { width: min(840px, calc(100vw - 32px)); }
+.modal.atr-modal .modal-dialog.atr-modal__dialog--alert { width: min(420px, calc(100vw - 32px)); }
+.modal.atr-modal .modal-content {
+    border: 1px solid var(--atr-line); border-radius: 12px; background: #ffffff; color: var(--atr-ink);
+    box-shadow: 0 24px 48px -12px rgba(16, 24, 40, 0.25);
+}
+
+/* Head: icon tile, title, who it goes to, close. */
+.modal.atr-modal .modal-header.atr-modal__head {
+    display: flex; align-items: center; gap: 12px; padding: 18px 20px; border-bottom: 1px solid var(--atr-line-2);
+}
+.atr-modal__icon {
+    flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px;
+    background: var(--atr-primary-soft); color: var(--atr-primary);
+}
+.atr-modal__icon svg { width: 20px; height: 20px; }
+.atr-modal__titles { min-width: 0; }
+.modal.atr-modal .atr-modal__title { margin: 0; color: var(--atr-ink); font-size: 16px; font-weight: 600; line-height: 1.35; }
+.modal.atr-modal .atr-modal__sub { margin: 2px 0 0; color: var(--atr-muted); font-size: 13px; }
+.atr-modal__close {
+    display: grid; place-items: center; width: 36px; height: 36px; margin-left: auto; border-radius: 8px; color: var(--atr-faint);
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+.atr-modal__close:hover { background: #f2f4f7; color: var(--atr-ink); }
+.atr-modal__close svg { width: 18px; height: 18px; }
+
+/* Body: the report's fields. */
+.modal.atr-modal .modal-body.atr-modal__body { display: flex; flex-direction: column; gap: 16px; padding: 20px; }
+.atr-mgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.atr-mfield { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.atr-mfield > label:not(.atr-mattach), .atr-mfield__row > label { margin: 0; color: var(--atr-ink-2); font-size: 12px; font-weight: 600; }
+.atr-mfield label i { color: #c8102e; font-style: normal; }
+.atr-mfield__row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.modal.atr-modal .atr-minput {
+    width: 100%; height: 42px; padding: 0 12px; border: 1px solid var(--atr-input); border-radius: 8px; background-color: #ffffff;
+    box-shadow: none; color: var(--atr-ink); font-size: 14px;
+}
+.modal.atr-modal textarea.atr-minput { height: auto; min-height: 160px; padding: 10px 12px; line-height: 1.5; resize: vertical; }
+.modal.atr-modal .atr-minput:focus { border-color: var(--atr-primary); outline: none; box-shadow: 0 0 0 3px rgba(15, 90, 102, 0.14); }
+.modal.atr-modal .atr-mselect {
+    padding-right: 34px; -webkit-appearance: none; appearance: none; cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23667085' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center; background-size: 16px;
+}
+.modal.atr-modal .acc__input-error { margin: 0; color: var(--atr-low); font-size: 12px; font-weight: 500; }
+.modal.atr-modal .acc__input-error:empty { display: none; }
+.atr-mcount {
+    padding: 2px 8px; border-radius: 999px; background: #f2f4f7; color: var(--atr-ink-2);
+    font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums;
+}
+
+/* Template / letter pickers (Tom Select 1.7.8, made by the old script). */
+.modal.atr-modal .ts-control { position: relative; width: 100%; }
+.modal.atr-modal .ts-control .ts-input {
+    display: flex; align-items: center; min-height: 42px; padding: 0 34px 0 12px; border: 1px solid var(--atr-input); border-radius: 8px;
+    background: #ffffff; box-shadow: none; color: var(--atr-ink); font-size: 14px; cursor: pointer;
+}
+.modal.atr-modal .ts-control .ts-input, .modal.atr-modal .ts-control .ts-input.dropdown-active { background-image: none !important; }
+.modal.atr-modal .ts-control .ts-input.focus, .modal.atr-modal .ts-control .ts-input.dropdown-active { border-color: var(--atr-primary); box-shadow: 0 0 0 3px rgba(15, 90, 102, 0.14); }
+.modal.atr-modal .ts-control .ts-input::after {
+    content: ""; position: absolute; top: 50%; right: 10px; width: 16px; height: 16px; margin-top: -8px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23667085' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / 16px no-repeat;
+    transition: transform 0.2s ease;
+}
+.modal.atr-modal .ts-control .ts-input.dropdown-active::after { transform: rotate(180deg); }
+.modal.atr-modal .ts-control .ts-input > .item { overflow: hidden; color: var(--atr-ink); white-space: nowrap; text-overflow: ellipsis; }
+.modal.atr-modal .ts-control .ts-input > .item[data-value=""] { color: var(--atr-faint); }
+
+/* CKEditor (email and letter text). */
+.modal.atr-modal .document-editor { max-height: none; overflow: hidden; border: 1px solid var(--atr-input); border-radius: 8px; background: #ffffff; }
+.modal.atr-modal .document-editor__toolbar .ck.ck-toolbar { border: 0; border-bottom: 1px solid var(--atr-line-2); border-radius: 0; background: var(--atr-head); }
+.modal.atr-modal .document-editor .document-editor__editable-container { max-height: 360px; }
+.modal.atr-modal .document-editor .document-editor__editable-container .ck-editor__editable { min-height: 220px; padding: 14px 16px; }
+
+/* Letter: tags button, "Send Email" switch row. */
+.atr-mtags .adm-tags__button {
+    display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border: 1px solid var(--atr-input); border-radius: 6px;
+    background: #ffffff; color: var(--atr-ink-2); font-size: 12.5px; font-weight: 600; cursor: pointer;
+}
+.atr-mtags .adm-tags__button:hover { border-color: var(--atr-primary); color: var(--atr-primary); }
+.atr-mtags .adm-tags__button svg { width: 14px; height: 14px; }
+.atr-mswitch {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 14px;
+    border: 1px solid var(--atr-line-2); border-radius: 10px; background: var(--atr-head);
+}
+.atr-mswitch__text b { display: block; color: var(--atr-ink); font-size: 13.5px; font-weight: 600; }
+.atr-mswitch__text span { color: var(--atr-muted); font-size: 12.5px; }
+.atr-mswitch .form-check { margin: 0; }
+
+/* Email: attachments. */
+.atr-mattach {
+    display: flex; align-items: center; gap: 12px; margin: 0; padding: 12px 14px; border: 1.5px dashed var(--atr-input); border-radius: 10px;
+    background: #fcfcfd; color: var(--atr-muted); font-size: 13px; cursor: pointer; transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.atr-mattach:hover { border-color: var(--atr-primary); background: var(--atr-primary-soft); }
+.atr-mattach svg { flex: none; width: 18px; height: 18px; color: var(--atr-primary); }
+.atr-mattach b { margin-right: 6px; color: var(--atr-primary); font-weight: 600; }
+.atr-mfiles > div {
+    display: inline-flex !important; align-items: center; gap: 6px; margin: 0 6px 6px 0 !important; padding: 4px 10px; border-radius: 999px;
+    background: var(--atr-primary-soft); color: var(--atr-primary) !important; font-size: 12.5px; font-weight: 600;
+}
+.atr-mfiles > div svg { width: 12px !important; height: 12px !important; margin: 0 !important; }
+.modal.atr-modal .atr-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Foot and buttons. */
+.modal.atr-modal .modal-footer.atr-modal__foot {
+    display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 14px 20px;
+    border-top: 1px solid var(--atr-line-2); border-radius: 0 0 12px 12px; background: var(--atr-head);
+}
+.atr-mbtn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px;
+    border: 1px solid transparent; border-radius: 8px; font-size: 14px; font-weight: 600; line-height: 1; white-space: nowrap; cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.atr-mbtn svg { flex: none; width: 16px; height: 16px; }
+.atr-mbtn:disabled { opacity: 0.6; cursor: not-allowed; }
+.modal.atr-modal .atr-mbtn--primary { background: var(--atr-primary); color: #ffffff; }
+.modal.atr-modal .atr-mbtn--primary:hover:not(:disabled) { background: var(--atr-primary-h); }
+.modal.atr-modal .atr-mbtn--ghost { border-color: var(--atr-input); background: #ffffff; color: var(--atr-ink-2); }
+.modal.atr-modal .atr-mbtn--ghost:hover:not(:disabled) { background: var(--atr-head); color: var(--atr-ink); }
+.modal.atr-modal .atr-mbtn--danger { background: var(--atr-low); color: #ffffff; }
+.modal.atr-modal .atr-mbtn--danger:hover:not(:disabled) { background: #912018; }
+/* While sending, the old script shows the loader (the button's first svg); it takes the icon's place. */
+.atr-mbtn__spin[style*="inline-block"] ~ .atr-mbtn__lead { display: none; }
+
+/* Alerts (success / warning / confirm). */
+.modal.atr-modal .modal-body.atr-alert { padding: 28px 24px 4px; text-align: center; }
+.atr-alert__icon { display: inline-grid; place-items: center; width: 56px; height: 56px; margin-bottom: 14px; border-radius: 50%; }
+.atr-alert__icon svg { width: 26px; height: 26px; }
+.atr-alert__icon--ok { background: #dcfae6; color: #067647; box-shadow: 0 0 0 8px #ecfdf3; }
+.atr-alert__icon--warn { background: #fef0c7; color: #b54708; box-shadow: 0 0 0 8px #fffaeb; }
+.atr-alert__icon--danger { background: #fee4e2; color: #b42318; box-shadow: 0 0 0 8px #fef3f2; }
+.atr-alert__title { color: var(--atr-ink); font-size: 18px; font-weight: 600; line-height: 1.35; }
+.atr-alert__desc { margin-top: 6px; color: var(--atr-muted); font-size: 14px; }
+.atr-alert__desc:empty { display: none; }
+.atr-alert__foot { display: flex; justify-content: center; gap: 8px; padding: 18px 24px 24px; }
+.atr-alert__foot .atr-mbtn { min-width: 120px; }
+
+@media (max-width: 640px) {
+    .atr-mgrid { grid-template-columns: 1fr; }
+    .modal.atr-modal .modal-footer.atr-modal__foot .atr-mbtn { flex: 1; }
+}

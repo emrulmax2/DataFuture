@@ -122,4 +122,64 @@ import TomSelect from "tom-select";
                 .finally(() => busy(false));
         });
     });
+
+    /*
+     * New and old versions search together (user, 24 Nov 2026). Within a report,
+     * choosing intakes in one tab chooses the same intakes in the other, and
+     * Generate in either tab also generates the other version in its hidden tab,
+     * so both are ready whichever tab is opened next.
+     *
+     * The old scripts own their forms and are not changed: they are driven only
+     * through their select's Tom Select (its change event runs their own reset)
+     * and a submit event their handler already listens for.
+     */
+    const valuesOf = (select) =>
+        (select.tomselect ? [].concat(select.tomselect.getValue() || []) : Array.from(select.selectedOptions).map((o) => o.value))
+            .map(String)
+            .filter(Boolean);
+    const sameValues = (a, b) => a.length === b.length && a.every((v) => b.includes(v));
+    const copyValues = (from, to) => {
+        const values = valuesOf(from);
+        if (sameValues(values, valuesOf(to))) return; // also stops the two selects echoing each other
+        if (to.tomselect) {
+            to.tomselect.setValue(values);
+        } else {
+            Array.from(to.options).forEach((o) => (o.selected = values.includes(o.value)));
+            to.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+    };
+
+    // A generate started by the other tab must not bounce back to it.
+    let mirroring = false;
+    const generateToo = (form) => {
+        mirroring = true;
+        try {
+            // A script-made submit event never submits the page; both handlers call preventDefault anyway.
+            form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+        } finally {
+            mirroring = false;
+        }
+    };
+
+    document.querySelectorAll("[data-version-tabs]").forEach((group) => {
+        const newForm = group.querySelector(':scope > [data-version-pane="new"] [data-rate-form]');
+        const oldForm = group.querySelector(':scope > [data-version-pane="old"] form');
+        const newSelect = newForm && newForm.querySelector("[data-rate-semester]");
+        const oldSelect = oldForm && oldForm.querySelector("select[multiple]");
+        if (!newSelect || !oldSelect) return;
+
+        newSelect.addEventListener("change", () => copyValues(newSelect, oldSelect));
+        oldSelect.addEventListener("change", () => copyValues(oldSelect, newSelect));
+
+        newForm.addEventListener("submit", () => {
+            if (mirroring || !valuesOf(newSelect).length) return;
+            copyValues(newSelect, oldSelect);
+            generateToo(oldForm);
+        });
+        oldForm.addEventListener("submit", () => {
+            if (mirroring || !valuesOf(oldSelect).length) return;
+            copyValues(oldSelect, newSelect);
+            generateToo(newForm);
+        });
+    });
 })();

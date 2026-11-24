@@ -2,27 +2,42 @@
 
 @section('subhead')
     <title>{{ $title }}</title>
+    {{-- Inter for the new Attendance Rates version, as in its design. --}}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    @vite('resources/css/term-attendance-report.css')
 @endsection
 
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Term Performance Reports</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('reports') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Reports</a>
+    {{-- Page title as on Intake Performance Reports (user, 24 Nov 2026). --}}
+    <div class="intro-y ipr-pagehead">
+        <div class="ipr-pagehead__lead">
+            <span class="ipr-pagehead__icon" aria-hidden="true"><i data-lucide="calendar-range"></i></span>
+            <div class="ipr-pagehead__text">
+                <h2 class="ipr-pagehead__title">Term Performance Reports</h2>
+                <p class="ipr-pagehead__sub">Follow a term's attendance, submissions and retention. Open a report, choose the term and generate it.</p>
+            </div>
         </div>
+        <a href="{{ route('reports') }}" class="ipr-back"><i data-lucide="arrow-left"></i> Back to Reports</a>
     </div>
     <!-- BEGIN: HTML Table Data -->
-    <div class="intro-y box p-5 mt-5">
-        <div id="termPerformanceReportAccordion" class="accordion accordion-boxed pt-2">
-            <div class="accordion-item">
-                <div id="termPerformanceReportAccordion-1" class="accordion-header">
-                    <button id="studentSearchBtn" class="accordion-button collapsed relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#termPerformanceReportAccordion-collapse-1" aria-expanded="false" aria-controls="termPerformanceReportAccordion-collapse-1">
-                        Attendance Rates
-                        <span class="accordionCollaps"></span>
-                    </button>
-                </div>
+    {{-- One card per report, no wrapper box (as on Intake Performance). --}}
+    <div class="intro-y mt-5">
+        <div id="termPerformanceReportAccordion" class="accordion ipr-list">
+            <div class="accordion-item ipr-item ipr-tone-teal">
+                @include('pages.reports.term-performance.partials.report-head', ['n' => 1, 'title' => 'Attendance Rates', 'desc' => 'Attendance by course, group and module, week by week', 'icon' => 'calendar-check', 'formats' => ['PDF']])
                 <div id="termPerformanceReportAccordion-collapse-1" class="accordion-collapse collapse" aria-labelledby="termPerformanceReportAccordion-1" data-tw-parent="#termPerformanceReportAccordion">
                     <div class="accordion-body">
+                        {{-- New version beside the old one until the old report is retired (as on Intake Performance).
+                             Toggle buttons, not role="tab": the theme's tab script grabs every [role=tab]. --}}
+                        <div data-version-tabs>
+                        <div class="crn-tabs" aria-label="Attendance Rates report version">
+                            <button type="button" class="crn-tab is-active" aria-pressed="true" aria-controls="tarPaneNew" data-version="new">New version</button>
+                            <button type="button" class="crn-tab" aria-pressed="false" aria-controls="tarPaneOld" data-version="old">Old version</button>
+                        </div>
+                        <div id="tarPaneNew" data-version-pane="new">
+                            @include('pages.reports.term-performance.attendance.new')
+                        </div>
+                        <div id="tarPaneOld" data-version-pane="old" hidden>
                         <form method="post" action="#" id="termAttendanceRateSearchForm">
                             @csrf
                             <div class="grid grid-cols-12 gap-4">
@@ -63,16 +78,13 @@
                         </form>
 
                         <div class="overflow-x-auto scrollbar-hidden mt-5" id="termAttendanceRateWrap" style="display: none;"></div>
+                        </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="accordion-item">
-                <div id="termPerformanceReportAccordion-5" class="accordion-header">
-                    <button id="studentSearchBtn" class="accordion-button collapsed relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#termPerformanceReportAccordion-collapse-5" aria-expanded="false" aria-controls="termPerformanceReportAccordion-collapse-5">
-                        Class Status
-                        <span class="accordionCollaps"></span>
-                    </button>
-                </div>
+            <div class="accordion-item ipr-item ipr-tone-amber">
+                @include('pages.reports.term-performance.partials.report-head', ['n' => 5, 'title' => 'Class Status', 'desc' => 'Classes held, not held, cancelled and covered, by course', 'icon' => 'clipboard-list', 'formats' => ['Excel']])
                 <div id="termPerformanceReportAccordion-collapse-5" class="accordion-collapse collapse" aria-labelledby="termPerformanceReportAccordion-5" data-tw-parent="#termPerformanceReportAccordion">
                     <div class="accordion-body">
                         <div class="intro-y">
@@ -106,13 +118,8 @@
                     </div>
                 </div>
             </div>
-            <div class="accordion-item">
-                <div id="termPerformanceReportAccordion-6" class="accordion-header">
-                    <button id="studentSearchBtn" class="accordion-button collapsed relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#termPerformanceReportAccordion-collapse-6" aria-expanded="false" aria-controls="termPerformanceReportAccordion-collapse-6">
-                        Submission Performance
-                        <span class="accordionCollaps"></span>
-                    </button>
-                </div>
+            <div class="accordion-item ipr-item ipr-tone-violet">
+                @include('pages.reports.term-performance.partials.report-head', ['n' => 6, 'title' => 'Submission Performance', 'desc' => 'Assignments submitted and passed in the term, by course', 'icon' => 'file-check-2', 'formats' => ['PDF', 'Excel']])
                 <div id="termPerformanceReportAccordion-collapse-6" class="accordion-collapse collapse" aria-labelledby="termPerformanceReportAccordion-6" data-tw-parent="#termPerformanceReportAccordion">
                     <div class="accordion-body">
                         <form method="post" action="#" id="submissionPerformanceReportForm">
@@ -208,13 +215,8 @@
                     </div>
                 </div>
             </div>-->
-            <div class="accordion-item">
-                <div id="termPerformanceReportAccordion-8" class="accordion-header">
-                    <button id="studentSearchBtn" class="accordion-button collapsed relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#termPerformanceReportAccordion-collapse-8" aria-expanded="false" aria-controls="termPerformanceReportAccordion-collapse-8">
-                        Retention Report
-                        <span class="accordionCollaps"></span>
-                    </button>
-                </div>
+            <div class="accordion-item ipr-item ipr-tone-blue">
+                @include('pages.reports.term-performance.partials.report-head', ['n' => 8, 'title' => 'Retention Report', 'desc' => 'Students who stayed through the term, by course', 'icon' => 'user-check', 'formats' => ['PDF', 'Excel']])
                 <div id="termPerformanceReportAccordion-collapse-8" class="accordion-collapse collapse" aria-labelledby="termPerformanceReportAccordion-8" data-tw-parent="#termPerformanceReportAccordion">
                     <div class="accordion-body">
                         <form method="post" action="#" id="termRetentionReportForm">
@@ -347,6 +349,7 @@
 @section('script')
     @vite('resources/js/term-performance-reports.js')
     @vite('resources/js/term-attendance-performance-reports.js')
+    @vite('resources/js/term-attendance-report-new.js')
 
     @vite('resources/js/student-class-status-reports.js')
     @vite('resources/js/term-submission-performance-reports.js')
