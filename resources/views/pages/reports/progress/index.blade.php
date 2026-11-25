@@ -2,17 +2,46 @@
 
 @section('subhead')
     <title>{{ $title }}</title>
+    {{-- Inter for the new version, as in its design. --}}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    @vite('resources/css/student-result-report.css')
 @endsection
 
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Progress Monitoring Report</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('dashboard') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Dashboard</a>
+    {{-- New version (user's design, 25 Nov 2026) beside the old one until the old report is retired.
+         Same shell, form and styles as the Student Result Report (.srp). --}}
+    <div class="srp" data-spm
+         data-options='@json($srpOptions)'
+         data-data-url="{{ route('report.student.progress.new.data') }}"
+         data-excel-url="{{ route('report.student.progress.new.excel') }}"
+         data-student-url="{{ route('student.show', '__ID__') }}">
+        <div class="srp-head">
+            <div class="srp-head__lead">
+                <span class="srp-head__icon" aria-hidden="true"><i data-lucide="list-checks"></i></span>
+                <div>
+                    <h1 class="srp-head__title">Progress Monitoring Report</h1>
+                    <p class="srp-head__sub">Each student's modules by term, credits by level and certificate steps, from published results.</p>
+                </div>
+            </div>
+            <div class="srp-head__actions">
+                <div class="srp-versions" role="group" aria-label="Report version">
+                    <button type="button" aria-pressed="true" data-srp-version="new">New version</button>
+                    <button type="button" aria-pressed="false" data-srp-version="old">Old version</button>
+                </div>
+                <a class="srp-back" href="{{ route('dashboard') }}">
+                    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+                    Back to Dashboard
+                </a>
+            </div>
         </div>
-    </div>
+
+        <div data-srp-pane="new">
+            @include('pages.reports.progress.new')
+        </div>
+
+        <div data-srp-pane="old" hidden>
     <!-- BEGIN: HTML Table Data -->
-    <div class="intro-y box p-5 mt-5">
+    <div class="intro-y box p-5">
         <form action="#" method="post" id="studentGroupSearchForm">
             @csrf
             <div class="grid grid-cols-12 gap-0 gap-y-2 gap-x-4">
@@ -156,8 +185,11 @@
         </div>
     </div>
     <!-- END: HTML Table Data -->
+        </div>
+    </div>
 @endsection
 
 @section('script')
+    @vite('resources/js/student-progress-report-new.js')
     @vite('resources/js/student-result-progress-form.js')
 @endsection
