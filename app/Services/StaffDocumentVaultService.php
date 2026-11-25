@@ -824,6 +824,7 @@ class StaffDocumentVaultService
                 'ip_address' => (!empty($list->ip_address) ? $list->ip_address : ''),
                 'date' => (!empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                 'time' => (!empty($list->created_at) ? date('h:i:s A', strtotime($list->created_at)) : ''),
+                'date_iso' => (!empty($list->created_at) ? date('Y-m-d', strtotime($list->created_at)) : ''),
             ];
         endforeach;
 

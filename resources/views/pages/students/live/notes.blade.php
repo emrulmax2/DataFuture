@@ -3,6 +3,7 @@
 @section('subhead')
     <title>{{ $title }}</title>
     @vite('resources/css/student-service-desk.css')
+    @vite('resources/css/student-notes.css')
 @endsection
 
 @section('subcontent')
@@ -11,64 +12,98 @@
     @include('pages.students.live.show-info')
     <!-- END: Profile Info -->
 
-    <div class="intro-y box mt-5 student-profile-notes">
-        <div class="student-profile-secthead">
-            <div class="student-profile-secthead-title">
-                <div class="font-medium text-base">Notes</div>
+    {{-- Notes, read as a history rather than spreadsheet rows: a rail of
+         filters with counts on the left, the notes grouped by term on the
+         right, and a table view one click away. The list itself is drawn by
+         resources/js/student-note.js from student.note.list; everything here
+         is the frame it draws into. --}}
+    <section id="studentNotesApp" class="snt intro-y mt-5" aria-labelledby="sntTitle"
+             data-student="{{ $student->id }}"
+             data-student-name="{{ $student->full_name }}"
+             data-student-ref="{{ $student->registration_no }}">
+        <header class="snt-head">
+            <div>
+                <h2 id="sntTitle" class="snt-title">Notes</h2>
+                <p class="snt-summary" id="sntSummary">Loading notes…</p>
             </div>
-            <div class="student-profile-secthead-actions student-profile-notes-actions">
-                <button data-tw-toggle="modal" data-tw-target="#addNoteModal" type="button" class="btn student-profile-addbtn"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Note</button>
-            </div>
-        </div>
-        <div class="intro-y">
-            <div class="student-profile-tablefilter student-profile-notes-filter">
-                <form id="tabulatorFilterForm-AN" class="student-profile-tablefilter-form" >
-                    <select id="term-SN" name="term" class="student-profile-tablefilter-term tom-selects" >
-                        <option selected value="">All Terms</option>
-                        @if($terms->count() > 0)
-                            @foreach($terms as $trm)
-                                <option value="{{ $trm->id }}">{{ $trm->name }}</option>
-                            @endforeach
-                        @endif
-                    </select>
-                    <input id="query-AN" name="query" type="text" class="form-control student-profile-tablefilter-search"  placeholder="Search notes...">
-                    <select id="status-AN" name="status" class="form-select student-profile-tablefilter-status" >
-                        <option selected value="1">Active</option>
-                        <option value="2">Archived</option>
-                    </select>
-                    <button id="tabulator-html-filter-go-AN" type="button" class="btn btn-primary" >Go</button>
-                    <button id="tabulator-html-filter-reset-AN" type="button" class="btn btn-outline-secondary student-profile-tablefilter-reset" >Reset</button>
-                </form>
-                <div class="student-profile-tablefilter-actions hidden md:flex">
-                    <button id="tabulator-print-AN" class="btn btn-outline-secondary">
-                        <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
+            <div class="snt-head-acts">
+                <button type="button" class="snt-btn snt-btn--ghost" id="sntPrint">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6z"/></svg>
+                    Print
+                </button>
+                <div class="snt-menu">
+                    <button type="button" class="snt-btn snt-btn--ghost" id="sntExportBtn" aria-haspopup="true" aria-expanded="false" aria-controls="sntExportMenu">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 11v6m-3-3 3 3 3-3"/></svg>
+                        Export
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
                     </button>
-                    <div class="dropdown">
-                        <button class="dropdown-toggle btn btn-outline-secondary" aria-expanded="false" data-tw-toggle="dropdown">
-                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                        </button>
-                        <div class="dropdown-menu w-40">
-                            <ul class="dropdown-content">
-                                <li>
-                                    <a id="tabulator-export-csv-AN" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                    </a>
-                                </li>
-                                <li>
-                                    <a id="tabulator-export-xlsx-AN" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                    <div class="snt-menu-list" id="sntExportMenu" hidden>
+                        <button type="button" data-export="csv">Export CSV</button>
+                        <button type="button" data-export="xlsx">Export XLSX</button>
                     </div>
                 </div>
+                <button type="button" class="snt-btn snt-btn--primary" data-tw-toggle="modal" data-tw-target="#addNoteModal">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                    Add Note
+                </button>
             </div>
-            <div class="student-profile-tablebody">
-                <div id="studentNotesListTable" data-student="{{ $student->id }}" class="table-report table-report--tabulator"></div>
+        </header>
+
+        <div class="snt-body">
+            <aside class="snt-rail" id="sntRail" aria-label="Filter notes"></aside>
+
+            <div class="snt-content">
+                <div class="snt-bar">
+                    <label class="snt-field">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                        <input id="sntQuery" type="search" placeholder="Search note, staff or ID" aria-label="Search notes" autocomplete="off">
+                    </label>
+                    <select id="sntStatus" class="snt-select" aria-label="Note status">
+                        <option value="1" selected>Active</option>
+                        <option value="2">Archived</option>
+                    </select>
+                    <div class="snt-seg" role="group" aria-label="View" id="sntViews">
+                        <button type="button" data-view="feed" aria-pressed="true">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>
+                            Timeline
+                        </button>
+                        <button type="button" data-view="table" aria-pressed="false">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>
+                            Table
+                        </button>
+                    </div>
+                </div>
+
+                <div class="snt-result">
+                    <span id="sntResult"></span>
+                    <button type="button" class="snt-sort" id="sntSort" aria-label="Sort order: newest first. Change to oldest first.">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 16 4 4 4-4M7 20V4M21 8l-4-4-4 4M17 4v16"/></svg>
+                        <span>Newest first</span>
+                    </button>
+                    <button type="button" class="snt-link" id="sntReset" hidden>Clear filters</button>
+                </div>
+
+                <div id="sntView" aria-busy="true">
+                    <div class="snt-empty">Loading notes…</div>
+                </div>
+
+                <footer class="snt-foot">
+                    <div class="snt-size">
+                        <label for="sntSize">Rows per page</label>
+                        <select id="sntSize" class="snt-select snt-select--sm">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="0">All</option>
+                        </select>
+                        <span id="sntRange"></span>
+                    </div>
+                    <nav class="snt-pager" id="sntPager" aria-label="Pages"></nav>
+                </footer>
             </div>
         </div>
-    </div>
+    </section>
+    <div class="snt-toast" id="sntToast" role="status" aria-live="polite"></div>
 
     <!-- BEGIN: View Modal -->
     <div id="viewNoteModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
@@ -429,43 +464,6 @@
     </div>
     <!-- END: View Modal -->
 
-    <!-- BEGIN: Success Modal Content -->
-    <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitle"></div>
-                        <div class="text-slate-500 mt-2 successModalDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-action="DISMISS" class="successCloser btn btn-primary w-24">Ok</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Success Modal Content -->
-
-    <!-- BEGIN: Warning Modal Content -->
-    <div id="warningModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="alert-octagon" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 warningModalTitle"></div>
-                        <div class="text-slate-500 mt-2 warningModalDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-action="DISMISS" class="warningCloser btn btn-primary w-24">Ok</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Warning Modal Content -->
 
     <!-- BEGIN: Service Desk tickets -->
     @include('pages.students.live.service-desk-tickets')
@@ -545,25 +543,6 @@
     </div>
     <!-- END: Confidential ticket PIN -->
 
-    <!-- BEGIN: Delete Confirm Modal Content -->
-    <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
-                        <div class="text-slate-500 mt-2 confModDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" class="disAgreeWith btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                        <button type="button" data-recordid="0" data-status="none" data-student="{{ $student->id }}" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Delete Confirm Modal Content -->
 @endsection
 
 @section('script')

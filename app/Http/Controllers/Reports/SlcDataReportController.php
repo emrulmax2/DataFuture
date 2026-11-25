@@ -36,7 +36,19 @@ class SlcDataReportController extends Controller
             'termDeclarations' => TermDeclaration::orderBy('id', 'DESC')->get(),
             'academicYears' => AcademicYear::orderBy('id', 'DESC')->get(),
             'slcRegistrationStatuses' => SlcRegistrationStatus::orderBy('name', 'ASC')->get(),
-            'semesters' => Semester::orderBY('id', 'DESC')->get()
+            'semesters' => Semester::orderBY('id', 'DESC')->get(),
+            // SLC Attendance History "New version" search form (25 Nov 2026).
+            'sahCodes' => \App\Services\Reports\SlcAttendanceHistory::codes(),
+            'sahCourses' => \App\Services\Reports\SlcAttendanceHistory::courses(),
+            // SLC Registration History "New version" search form (25 Nov 2026).
+            'srhStatuses' => \App\Services\Reports\SlcRegistrationHistory::statuses(),
+            'srhYears' => \App\Services\Reports\SlcRegistrationHistory::academicYears(),
+            'srhCourses' => \App\Services\Reports\SlcRegistrationHistory::courses(),
+            // SLC COC History "New version" search form (25 Nov 2026).
+            'schTypes' => \App\Services\Reports\SlcCocHistory::types(),
+            'schCourses' => \App\Services\Reports\SlcCocHistory::courses(),
+            // SLC Record Report "New version" intake picker, newest first (25 Nov 2026).
+            'srrSemesters' => collect(\App\Services\Reports\SlcRecord::order(Semester::pluck('name', 'id')->all()))->map(fn ($name, $id) => [(int) $id, (string) $name])->values()->all(),
         ]);
     }
 

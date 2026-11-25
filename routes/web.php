@@ -289,6 +289,10 @@ use App\Http\Controllers\Reports\IntakePerformance\RetentionRateReportController
 use App\Http\Controllers\Reports\IntakePerformance\SubmissionPassRateReportController;
 use App\Http\Controllers\Reports\SlcDataReportController;
 use App\Http\Controllers\Reports\SlcReports\SlcRecordReportController;
+use App\Http\Controllers\Reports\SlcReports\SlcAttendanceHistoryController;
+use App\Http\Controllers\Reports\SlcReports\SlcRegistrationHistoryController;
+use App\Http\Controllers\Reports\SlcReports\SlcCocHistoryController;
+use App\Http\Controllers\Reports\SlcReports\SlcRecordController;
 use App\Http\Controllers\Reports\StudentDueReportController;
 use App\Http\Controllers\Reports\StudentExpectedResultReportController;
 use App\Http\Controllers\Reports\StudentPerformanceReportController;
@@ -298,6 +302,9 @@ use App\Http\Controllers\Reports\StudentWorkplacementReportController;
 use App\Http\Controllers\Reports\SystemReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermAttendancePerformanceReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermAttendanceRateController;
+use App\Http\Controllers\Reports\TermPerformance\ClassStatusReportController;
+use App\Http\Controllers\Reports\TermPerformance\SubmissionPerformanceController;
+use App\Http\Controllers\Reports\TermPerformance\RetentionByIntakeController;
 use App\Http\Controllers\Reports\TermPerformance\TermProgressionReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermRetentionReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermSubmissionPerformanceReportController;
@@ -4089,6 +4096,29 @@ Route::middleware('auth')->group(function() {
         Route::get('reports/term-performance/attendance-rate/{term}/pdf', 'pdf')->whereNumber('term')->name('reports.term.performance.attendance.rate.pdf');
     });
 
+    // Term Performance › Class Status "New version" tab (25 Nov 2026); the old version stays on ClassStatusByTermController.
+    Route::controller(ClassStatusReportController::class)->group(function(){
+        Route::get('reports/term-performance/class-status/{term}', 'generate')->whereNumber('term')->name('reports.term.performance.class.status.generate');
+        Route::get('reports/term-performance/class-status/{term}/pdf', 'pdf')->whereNumber('term')->name('reports.term.performance.class.status.pdf');
+        Route::get('reports/term-performance/class-status/{term}/excel', 'excel')->whereNumber('term')->name('reports.term.performance.class.status.excel');
+    });
+
+    // Term Performance › Submission Performance "New version" tab (25 Nov 2026); the old version stays on TermSubmissionPerformanceReportController.
+    Route::controller(SubmissionPerformanceController::class)->group(function(){
+        Route::get('reports/term-performance/submission/{term}', 'generate')->whereNumber('term')->name('reports.term.performance.submission.new.generate');
+        Route::get('reports/term-performance/submission/{term}/pdf', 'pdf')->whereNumber('term')->name('reports.term.performance.submission.new.pdf');
+        Route::get('reports/term-performance/submission/{term}/excel', 'excel')->whereNumber('term')->name('reports.term.performance.submission.new.excel');
+        Route::get('reports/term-performance/submission/{term}/students', 'students')->whereNumber('term')->name('reports.term.performance.submission.new.students');
+    });
+
+    // Term Performance › Retention "New version" tab (25 Nov 2026); the old version stays on TermRetentionReportController.
+    Route::controller(RetentionByIntakeController::class)->group(function(){
+        Route::get('reports/term-performance/retention/{terms}', 'generate')->where('terms', '[0-9]+(_[0-9]+)*')->name('reports.term.performance.retention.new.generate');
+        Route::get('reports/term-performance/retention/{terms}/pdf', 'pdf')->where('terms', '[0-9]+(_[0-9]+)*')->name('reports.term.performance.retention.new.pdf');
+        Route::get('reports/term-performance/retention/{terms}/excel', 'excel')->where('terms', '[0-9]+(_[0-9]+)*')->name('reports.term.performance.retention.new.excel');
+        Route::get('reports/term-performance/retention/{term}/students', 'students')->whereNumber('term')->name('reports.term.performance.retention.new.students');
+    });
+
     Route::controller(StudentFlagController::class)->group(function() {
         Route::get('site-settings/flags', 'index')->name('flags'); 
         Route::get('site-settings/flags/list', 'list')->name('flags.list'); 
@@ -4175,6 +4205,33 @@ Route::middleware('auth')->group(function() {
         Route::get('reports/slc-report/export-slc-record-details/{semester?}/{francise?}', 'exportDetailsReport')->name('reports.slc.record.export.details.report'); 
 
         Route::post('reports/slc-report/export-student-list', 'exportStudentList')->name('reports.slc.record.export.student.list'); 
+    });
+
+    // SLC Reports › SLC Attendance History "New version" tab (25 Nov 2026); the old Excel-only form stays on SlcDataReportController.
+    Route::controller(SlcAttendanceHistoryController::class)->group(function(){
+        Route::get('reports/slc-report/attendance-history', 'data')->name('reports.slc.attendance.history.data');
+        Route::get('reports/slc-report/attendance-history/excel', 'excel')->name('reports.slc.attendance.history.excel');
+    });
+
+    // SLC Reports › SLC Registration History "New version" tab (25 Nov 2026); the old Excel-only form stays on SlcDataReportController.
+    Route::controller(SlcRegistrationHistoryController::class)->group(function(){
+        Route::get('reports/slc-report/registration-history', 'data')->name('reports.slc.registration.history.data');
+        Route::get('reports/slc-report/registration-history/excel', 'excel')->name('reports.slc.registration.history.excel');
+    });
+
+    // SLC Reports › SLC COC History "New version" tab (25 Nov 2026); the old Excel-only form stays on SlcDataReportController.
+    Route::controller(SlcCocHistoryController::class)->group(function(){
+        Route::get('reports/slc-report/coc-history', 'data')->name('reports.slc.coc.history.data');
+        Route::get('reports/slc-report/coc-history/excel', 'excel')->name('reports.slc.coc.history.excel');
+    });
+
+    // SLC Reports › SLC Record Report "New version" tab (25 Nov 2026); the old version stays on SlcRecordReportController.
+    Route::controller(SlcRecordController::class)->group(function(){
+        Route::get('reports/slc-report/record/{semesters}', 'data')->where('semesters', '[0-9]+(_[0-9]+)*')->name('reports.slc.record.new.data');
+        Route::get('reports/slc-report/record/{semesters}/excel', 'excel')->where('semesters', '[0-9]+(_[0-9]+)*')->name('reports.slc.record.new.excel');
+        Route::get('reports/slc-report/record/{semesters}/pdf', 'pdf')->where('semesters', '[0-9]+(_[0-9]+)*')->name('reports.slc.record.new.pdf');
+        Route::get('reports/slc-report/record/{semester}/students', 'students')->whereNumber('semester')->name('reports.slc.record.new.students');
+        Route::get('reports/slc-report/record/{semester}/details', 'details')->whereNumber('semester')->name('reports.slc.record.new.details');
     });
 
     Route::controller(TermSubmissionPerformanceReportController::class)->group(function(){

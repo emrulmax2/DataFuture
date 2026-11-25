@@ -84,9 +84,19 @@
                 </div>
             </div>
             <div class="accordion-item ipr-item ipr-tone-amber">
-                @include('pages.reports.term-performance.partials.report-head', ['n' => 5, 'title' => 'Class Status', 'desc' => 'Classes held, not held, cancelled and covered, by course', 'icon' => 'clipboard-list', 'formats' => ['Excel']])
+                @include('pages.reports.term-performance.partials.report-head', ['n' => 5, 'title' => 'Class Status', 'desc' => 'Classes held, not held, cancelled and covered, by course and group', 'icon' => 'clipboard-list', 'formats' => ['PDF', 'Excel']])
                 <div id="termPerformanceReportAccordion-collapse-5" class="accordion-collapse collapse" aria-labelledby="termPerformanceReportAccordion-5" data-tw-parent="#termPerformanceReportAccordion">
                     <div class="accordion-body">
+                        {{-- New version beside the old one until the old report is retired (as Attendance Rates). --}}
+                        <div data-version-tabs>
+                        <div class="crn-tabs" aria-label="Class Status report version">
+                            <button type="button" class="crn-tab is-active" aria-pressed="true" aria-controls="tcsPaneNew" data-version="new">New version</button>
+                            <button type="button" class="crn-tab" aria-pressed="false" aria-controls="tcsPaneOld" data-version="old">Old version</button>
+                        </div>
+                        <div id="tcsPaneNew" data-version-pane="new">
+                            @include('pages.reports.term-performance.class-status.new')
+                        </div>
+                        <div id="tcsPaneOld" data-version-pane="old" hidden>
                         <div class="intro-y">
                             <form action="#" method="post" id="classStatusForm">
                                 @csrf
@@ -115,13 +125,25 @@
                                 <div id="statusListTable" class="mt-5 table-report table-report--tabulator"></div>
                             </div>
                         </div>
+                        </div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="accordion-item ipr-item ipr-tone-violet">
-                @include('pages.reports.term-performance.partials.report-head', ['n' => 6, 'title' => 'Submission Performance', 'desc' => 'Assignments submitted and passed in the term, by course', 'icon' => 'file-check-2', 'formats' => ['PDF', 'Excel']])
+                @include('pages.reports.term-performance.partials.report-head', ['n' => 6, 'title' => 'Submission Performance', 'desc' => 'Assignments submitted and passed, first submission against final result', 'icon' => 'file-check-2', 'formats' => ['PDF', 'Excel']])
                 <div id="termPerformanceReportAccordion-collapse-6" class="accordion-collapse collapse" aria-labelledby="termPerformanceReportAccordion-6" data-tw-parent="#termPerformanceReportAccordion">
                     <div class="accordion-body">
+                        {{-- New version beside the old one until the old report is retired (as Attendance Rates). --}}
+                        <div data-version-tabs>
+                        <div class="crn-tabs" aria-label="Submission Performance report version">
+                            <button type="button" class="crn-tab is-active" aria-pressed="true" aria-controls="tspPaneNew" data-version="new">New version</button>
+                            <button type="button" class="crn-tab" aria-pressed="false" aria-controls="tspPaneOld" data-version="old">Old version</button>
+                        </div>
+                        <div id="tspPaneNew" data-version-pane="new">
+                            @include('pages.reports.term-performance.submission.new')
+                        </div>
+                        <div id="tspPaneOld" data-version-pane="old" hidden>
                         <form method="post" action="#" id="submissionPerformanceReportForm">
                             @csrf
                             <div class="grid grid-cols-12 gap-4">
@@ -161,6 +183,8 @@
                             </div>
                         </form>
                         <div class="overflow-x-auto scrollbar-hidden mt-5" id="submissionPerformanceReportWrap" style="display: none;"></div>
+                        </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -219,6 +243,16 @@
                 @include('pages.reports.term-performance.partials.report-head', ['n' => 8, 'title' => 'Retention Report', 'desc' => 'Students who stayed through the term, by course', 'icon' => 'user-check', 'formats' => ['PDF', 'Excel']])
                 <div id="termPerformanceReportAccordion-collapse-8" class="accordion-collapse collapse" aria-labelledby="termPerformanceReportAccordion-8" data-tw-parent="#termPerformanceReportAccordion">
                     <div class="accordion-body">
+                        {{-- New version beside the old one until the old report is retired (as Attendance Rates). --}}
+                        <div data-version-tabs>
+                        <div class="crn-tabs" aria-label="Retention report version">
+                            <button type="button" class="crn-tab is-active" aria-pressed="true" aria-controls="trtPaneNew" data-version="new">New version</button>
+                            <button type="button" class="crn-tab" aria-pressed="false" aria-controls="trtPaneOld" data-version="old">Old version</button>
+                        </div>
+                        <div id="trtPaneNew" data-version-pane="new">
+                            @include('pages.reports.term-performance.retention.new')
+                        </div>
+                        <div id="trtPaneOld" data-version-pane="old" hidden>
                         <form method="post" action="#" id="termRetentionReportForm">
                             @csrf
                             <div class="grid grid-cols-12 gap-4">
@@ -258,6 +292,8 @@
                             </div>
                         </form>
                         <div class="overflow-x-auto scrollbar-hidden mt-5" id="termRetentionReportWrap" style="display: none;"></div>
+                        </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -350,6 +386,9 @@
     @vite('resources/js/term-performance-reports.js')
     @vite('resources/js/term-attendance-performance-reports.js')
     @vite('resources/js/term-attendance-report-new.js')
+    @vite('resources/js/term-class-status-new.js')
+    @vite('resources/js/term-submission-new.js')
+    @vite('resources/js/term-retention-new.js')
 
     @vite('resources/js/student-class-status-reports.js')
     @vite('resources/js/term-submission-performance-reports.js')

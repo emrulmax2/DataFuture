@@ -142,13 +142,21 @@ class NoteController extends Controller
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
         $term = (isset($request->term) && $request->term > 0 ? $request->term : 0);
 
-        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
+        /* Only real columns, only ASC/DESC: the sorters arrive from the browser
+           and go into ORDER BY verbatim otherwise. */
+        $sortable = ['id', 'opening_date', 'created_at', 'term_declaration_id', 'note', 'followed_up', 'created_by'];
+        $sorters = (isset($request->sorters) && is_array($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
         foreach($sorters as $sort):
-            $sorts[] = $sort['field'].' '.$sort['dir'];
+            $field = (is_array($sort) && in_array($sort['field'] ?? '', $sortable, true) ? $sort['field'] : null);
+            if($field):
+                $sorts[] = $field.' '.(strtoupper((string) ($sort['dir'] ?? '')) === 'ASC' ? 'ASC' : 'DESC');
+            endif;
         endforeach;
+        if(empty($sorts)): $sorts[] = 'id DESC'; endif;
 
-        $query = StudentNote::orderByRaw(implode(',', $sorts))->where('student_id', $student_id);
+        $query = StudentNote::with(['term', 'user.employee', 'completed.employee', 'document', 'flag', 'follows.user.employee'])
+            ->orderByRaw(implode(',', $sorts))->where('student_id', $student_id);
         if(!empty($queryStr)):
             $query->where('note','LIKE','%'.$queryStr.'%');
         endif;
@@ -171,19 +179,35 @@ class NoteController extends Controller
 
         $data = array();
 
+        /* Looked up once for the whole page rather than once per note: a
+           student can carry a hundred-odd notes and the page asks for all of
+           them at once. */
+        $meId = auth()->user()->id;
+        $flagRaisers = StudentFlagRaiser::whereIn('student_flag_id', $Query->pluck('student_flag_id')->filter()->unique())
+            ->get(['student_flag_id', 'user_id'])->groupBy('student_flag_id')
+            ->map(fn ($rows) => $rows->pluck('user_id')->unique()->all());
+        $unreadCounts = \App\Models\StudentNoteFollowupCommentRead::whereIn('student_note_id', $Query->pluck('id'))
+            ->where('user_id', $meId)->where('read', '!=', 1)
+            ->selectRaw('student_note_id, COUNT(*) as c')->groupBy('student_note_id')
+            ->pluck('c', 'student_note_id');
+
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
-                $is_ownere = (isset($list->created_by) && $list->created_by == auth()->user()->id ? 1 : 0);
+                $is_ownere = (isset($list->created_by) && $list->created_by == $meId ? 1 : 0);
                 if($list->is_flaged == 'Yes' && isset($list->student_flag_id) && $list->student_flag_id > 0):
-                    $raisers = StudentFlagRaiser::where('student_flag_id', $list->student_flag_id)->pluck('user_id')->unique()->toArray();
-                    $is_ownere = (!empty($raisers) && in_array(auth()->user()->id, $raisers) ? 1 : $is_ownere);
+                    $raisers = $flagRaisers->get($list->student_flag_id, []);
+                    $is_ownere = (!empty($raisers) && in_array($meId, $raisers) ? 1 : $is_ownere);
                 endif;
                 $amIFollowed = 0;
                 if(isset($list->follows) && $list->follows->count() > 0):
                     $followsBy = $list->follows->pluck('user_id')->unique()->toArray();
-                    $amIFollowed = (!empty($followsBy) && in_array(auth()->user()->id, $followsBy) ? 1 : 0);
+                    $amIFollowed = (!empty($followsBy) && in_array($meId, $followsBy) ? 1 : 0);
                 endif;
+                $followedNames = $list->follows->map(fn ($f) => $f->user->employee->full_name ?? ($f->user->name ?? ''))
+                    ->filter()->unique()->values()->all();
+                $openingRaw = $list->getRawOriginal('opening_date');
+                $dateIso = (!empty($openingRaw) && $openingRaw !== '0000-00-00' ? date('Y-m-d', strtotime($openingRaw)) : (isset($list->created_at) ? $list->created_at->format('Y-m-d') : ''));
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -195,11 +219,11 @@ class NoteController extends Controller
                     'followed_up_status' => (isset($list->followed_up_status) && !empty($list->followed_up_status) ? $list->followed_up_status : ''),
                     //'follow_up_start' => (isset($list->follow_up_start) && !empty($list->follow_up_start) ? date('jS F, Y', strtotime($list->follow_up_start)) : ''),
                     //'follow_up_end' => (isset($list->follow_up_end) && !empty($list->follow_up_end) ? date('jS F, Y', strtotime($list->follow_up_end)) : ''),
-                    'followed' => (isset($list->followed_tag) && !empty($list->followed_tag) ? $list->followed_tag : ''),
+                    'followed' => implode('', array_map(fn ($n) => '<span class="bg-slate-200 text-xs text-primary font-medium inline-flex px-2 py-1 mr-1 mb-1 whitespace-nowrap">'.e($n).'</span>', $followedNames)),
                     'completed_by' => (isset($list->completed->employee->full_name) && !empty($list->completed->employee->full_name) ? $list->completed->employee->full_name : ''),
                     'completed_at' => (isset($list->followup_completed_at) && !empty($list->followup_completed_at) ? date('jS F, Y', strtotime($list->followup_completed_at)) : ''),
                     'am_i_followed' => $amIFollowed,
-                    'unread_comment' => (isset($list->unread_comment_count) ? $list->unread_comment_count : 0),
+                    'unread_comment' => (int) $unreadCounts->get($list->id, 0),
                     'is_flaged' => (isset($list->is_flaged) && !empty($list->is_flaged) ? $list->is_flaged : 'No'),
                     'flaged_status' => (isset($list->flaged_status) && !empty($list->flaged_status) ? $list->flaged_status : ''),
                     'student_flag_id' => ($list->student_flag_id > 0 ? $list->student_flag_id : '0'),
@@ -208,12 +232,42 @@ class NoteController extends Controller
                     'created_by'=> (isset($list->user->employee->full_name) && !empty($list->user->employee->full_name) ? $list->user->employee->full_name : (isset($list->user->name) && !empty($list->user->name) ? $list->user->name : '')),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at,
-                    'is_ownere' => $is_ownere
+                    'is_ownere' => $is_ownere,
+
+                    /* For the timeline: readable text with its paragraphs
+                       kept, sortable dates, and names rather than markup. */
+                    'note_text' => static::plainText($list->note),
+                    'note_rich' => (bool) preg_match('~<(table|ul|ol|a\s)~i', (string) $list->note),
+                    'term_id' => (int) ($list->term_declaration_id ?? 0),
+                    'term_start' => (isset($list->term) && !empty($list->term->getRawOriginal('start_date')) ? date('Y-m-d', strtotime($list->term->getRawOriginal('start_date'))) : ''),
+                    'date_iso' => $dateIso,
+                    'completed_iso' => (!empty($list->followup_completed_at) ? date('Y-m-d', strtotime($list->followup_completed_at)) : ''),
+                    'followed_names' => $followedNames,
+                    'document_name' => (isset($list->document->display_file_name) ? preg_replace('/^\d+_/', '', $list->document->display_file_name) : ''),
                 ];
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'total_rows' => $total_rows, 'data' => $data]);
+    }
+
+    /**
+     * A CKEditor note as plain text, with its paragraphs, line breaks and list
+     * items kept as new lines so the page can show it with `white-space:
+     * pre-line` instead of injecting stored HTML.
+     */
+    protected static function plainText(?string $html): string
+    {
+        $text = preg_replace('~<\s*br\s*/?\s*>~i', "\n", (string) $html);
+        $text = preg_replace('~<\s*li[^>]*>~i', '• ', $text);
+        $text = preg_replace('~</\s*(p|div|li|tr|h[1-6]|blockquote|ul|ol|table)\s*>~i', "\n", $text);
+        $text = preg_replace('~</\s*t[dh]\s*>~i', '  ', $text);
+        $text = html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = str_replace("\xC2\xA0", ' ', $text);
+        $text = preg_replace("/[ \t]+\n/", "\n", $text);
+        $text = preg_replace("/\n{3,}/", "\n\n", $text);
+
+        return trim($text);
     }
 
     public function show(Request $request){

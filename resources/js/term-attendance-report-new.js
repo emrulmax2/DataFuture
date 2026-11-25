@@ -33,8 +33,8 @@ import { createIcons, icons } from "lucide";
     const COLOURS = ["#1668a8", "#c8601a", "#7a4fb5", "#2f9e8f", "#b3261e", "#8a6d1b", "#c2478a", "#4a5560"];
     const MAX_DEFAULT = 7; // more lines than this: only "Overall" until switched on (as the PDF)
 
-    /* ── Version tabs (as Intake Performance; toggle buttons, not role=tab) ── */
-    document.querySelectorAll("[data-version-tabs]").forEach((group) => {
+    /* ── Version tabs of this report (as Intake Performance; toggle buttons, not role=tab) ── */
+    [root.closest("[data-version-tabs]")].filter(Boolean).forEach((group) => {
         const buttons = group.querySelectorAll(":scope > .crn-tabs [data-version]");
         const panes = group.querySelectorAll(":scope > [data-version-pane]");
         buttons.forEach((button) =>
