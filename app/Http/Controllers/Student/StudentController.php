@@ -632,7 +632,7 @@ class  StudentController extends Controller
             'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
             'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
         ]);
-    }
+    } 
 
     /**
      * The student's open "Change student status to SLC New" task and the other tasks of its process
