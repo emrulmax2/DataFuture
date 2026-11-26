@@ -147,6 +147,18 @@ echo "assets   : manifest present ($(find public/build -type f | wc -l) files)"
 phase "2/6 Pull latest code"
 
 echo "was at: $(git rev-parse --short HEAD) $(git log -1 --format=%s)"
+# storage/fonts/installed-fonts.json is DOMPDF's font registry. DOMPDF rewrites it
+# on the server whenever a PDF uses a font it has not seen before, so the server's
+# copy drifts from git and the pull below refuses to overwrite it. The copy in git
+# is the one deploys should use; DOMPDF rebuilds any missing entries on demand.
+# Keep the server's copy in storage/deploy-backups/ first so nothing is lost silently.
+if ! git diff --quiet -- storage/fonts/installed-fonts.json; then
+    mkdir -p storage/deploy-backups
+    cp storage/fonts/installed-fonts.json "storage/deploy-backups/installed-fonts.$(date +%Y%m%d%H%M%S).json"
+    echo "reset    : storage/fonts/installed-fonts.json had server-side changes; backed up and restored from git"
+    git checkout -- storage/fonts/installed-fonts.json
+fi
+
 git pull origin main
 echo "now at: $(git rev-parse --short HEAD) $(git log -1 --format=%s)"
 
