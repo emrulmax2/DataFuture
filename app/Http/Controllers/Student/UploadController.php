@@ -65,13 +65,20 @@ class UploadController extends Controller
         $queryStr = (isset($request->queryStr) && $request->queryStr != '' ? $request->queryStr : '');
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
 
-        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
+        /* Only real columns, only ASC/DESC: the sorters arrive from the browser
+           and would otherwise go into ORDER BY verbatim. */
+        $sortable = ['id', 'display_file_name', 'hard_copy_check', 'doc_type', 'created_by', 'created_at'];
+        $sorters = (isset($request->sorters) && is_array($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
         foreach($sorters as $sort):
-            $sorts[] = $sort['field'].' '.$sort['dir'];
+            $field = (is_array($sort) && in_array($sort['field'] ?? '', $sortable, true) ? $sort['field'] : null);
+            if($field):
+                $sorts[] = $field.' '.(strtoupper((string) ($sort['dir'] ?? '')) === 'ASC' ? 'ASC' : 'DESC');
+            endif;
         endforeach;
+        if(empty($sorts)): $sorts[] = 'id DESC'; endif;
 
-        $query = StudentDocument::orderByRaw(implode(',', $sorts))->where('student_id', $studentId);
+        $query = StudentDocument::with('user')->orderByRaw(implode(',', $sorts))->where('student_id', $studentId);
         if(!empty($queryStr)):
             $query->where('display_file_name','LIKE','%'.$queryStr.'%');
         endif;
@@ -92,15 +99,11 @@ class UploadController extends Controller
                ->get();
 
         $data = array();
+        $canDelete = (isset(auth()->user()->priv()['document_delete']) && auth()->user()->priv()['document_delete'] == 1 ? 1 : 0);
 
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
-                $url = '';
-                if(isset($list->current_file_name) && !empty($list->current_file_name) && Storage::disk('public')->exists('public/students/'.$list->student_id.'/'.$list->current_file_name)):
-                    $disk = Storage::disk('s3');
-                    $url = $disk->url('public/students/'.$list->student_id.'/'.$list->current_file_name);
-                endif;
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -111,14 +114,16 @@ class UploadController extends Controller
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at,
-                    'can_delete' => (isset(auth()->user()->priv()['document_delete']) && auth()->user()->priv()['document_delete'] == 1 ? 1 : 0),
+                    'can_delete' => $canDelete,
                     'is_encrypted' => ($list->is_encrypted == 1 ? 1 : 0),
-                    'viewable' => (StaffDocumentVaultService::isViewable($list) ? 1 : 0)
+                    'viewable' => (StaffDocumentVaultService::isViewable($list) ? 1 : 0),
+                    // For the redesigned list: a sortable date.
+                    'created_iso' => (isset($list->created_at) && !empty($list->created_at) ? $list->created_at->format('Y-m-d') : ''),
                 ];
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'total_rows' => $total_rows, 'data' => $data]);
     }
 
     public function destroy(Request $request){
@@ -133,7 +138,7 @@ class UploadController extends Controller
         $recordid = $request->recordid;
         $data = StudentDocument::where('id', $recordid)->withTrashed()->restore();
 
-        response()->json($data);
+        return response()->json($data);
     }
 
     /**

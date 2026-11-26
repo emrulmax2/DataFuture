@@ -2,27 +2,40 @@
 
 @section('subhead')
     <title>{{ $title }}</title>
+    {{-- Page title and report cards as Intake / Term Performance (user, 25 Nov 2026). --}}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    @vite('resources/css/slc-reports.css')
 @endsection
 
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">SLC Reports</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('reports') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Reports</a>
+    <div class="intro-y ipr-pagehead">
+        <div class="ipr-pagehead__lead">
+            <span class="ipr-pagehead__icon" aria-hidden="true"><i data-lucide="landmark"></i></span>
+            <div class="ipr-pagehead__text">
+                <h2 class="ipr-pagehead__title">SLC Reports</h2>
+                <p class="ipr-pagehead__sub">Student Loans Company records: attendance confirmations, registrations, changes of circumstances and each intake's SLC position. Open a report, set the filters and export it.</p>
+            </div>
         </div>
+        <a href="{{ route('reports') }}" class="ipr-back"><i data-lucide="arrow-left"></i> Back to Reports</a>
     </div>
     <!-- BEGIN: HTML Table Data -->
-    <div class="intro-y box p-5 mt-5">
-        <div id="intakePerformanceReportAccordion" class="accordion accordion-boxed pt-2">
-            <div class="accordion-item">
-                <div id="intakePerformanceReportAccordion-1" class="accordion-header">
-                    <button id="studentSearchBtn" class="accordion-button collapsed relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#intakePerformanceReportAccordion-collapse-1" aria-expanded="false" aria-controls="intakePerformanceReportAccordion-collapse-1">
-                        SLC Attendance History
-                        <span class="accordionCollaps"></span>
-                    </button>
-                </div>
+    {{-- One card per report, no wrapper box. The ids stay: student-slc-reports.js opens the card in the URL hash. --}}
+    <div class="intro-y mt-5">
+        <div id="intakePerformanceReportAccordion" class="accordion ipr-list">
+            <div class="accordion-item ipr-item ipr-tone-teal">
+                @include('pages.reports.slc.partials.report-head', ['n' => 1, 'title' => 'SLC Attendance History', 'desc' => 'Attendance confirmations sent to SLC, by date, attendance code, year and term', 'icon' => 'calendar-check-2', 'formats' => ['Excel']])
                 <div id="intakePerformanceReportAccordion-collapse-1" class="accordion-collapse collapse" aria-labelledby="intakePerformanceReportAccordion-1" data-tw-parent="#intakePerformanceReportAccordion">
                     <div class="accordion-body">
+                        {{-- New version beside the old Excel-only form until the old one is retired (user, 25 Nov 2026). --}}
+                        <div data-version-tabs>
+                        <div class="crn-tabs" aria-label="SLC Attendance History version">
+                            <button type="button" class="crn-tab is-active" aria-pressed="true" aria-controls="sahPaneNew" data-version="new">New version</button>
+                            <button type="button" class="crn-tab" aria-pressed="false" aria-controls="sahPaneOld" data-version="old">Old version</button>
+                        </div>
+                        <div id="sahPaneNew" data-version-pane="new">
+                            @include('pages.reports.slc.attendance.new')
+                        </div>
+                        <div id="sahPaneOld" data-version-pane="old" hidden>
                         <form method="post" action="{{ route('reports.slc.attendance.excel.export') }}" id="attendanceSLCReportForm">
                             @csrf
                             <div class="grid grid-cols-12 gap-4">
@@ -91,18 +104,25 @@
                         </form>
 
                         <div class="overflow-x-auto scrollbar-hidden mt-5" id="continuationRateWrap" style="display: none;"></div>
+                        </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="accordion-item">
-                <div id="intakePerformanceReportAccordion-2" class="accordion-header">
-                    <button id="studentSearchBtn" class="accordion-button collapsed relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#intakePerformanceReportAccordion-collapse-2" aria-expanded="false" aria-controls="intakePerformanceReportAccordion-collapse-2">
-                        SLC Registration History
-                        <span class="accordionCollaps"></span>
-                    </button>
-                </div>
+            <div class="accordion-item ipr-item ipr-tone-blue">
+                @include('pages.reports.slc.partials.report-head', ['n' => 2, 'title' => 'SLC Registration History', 'desc' => 'SLC registrations by date, registration status and academic year', 'icon' => 'badge-check', 'formats' => ['Excel']])
                 <div id="intakePerformanceReportAccordion-collapse-2" class="accordion-collapse collapse" aria-labelledby="intakePerformanceReportAccordion-2" data-tw-parent="#intakePerformanceReportAccordion">
                     <div class="accordion-body">
+                        {{-- New version beside the old Excel-only form until the old one is retired (user, 25 Nov 2026). --}}
+                        <div data-version-tabs>
+                        <div class="crn-tabs" aria-label="SLC Registration History version">
+                            <button type="button" class="crn-tab is-active" aria-pressed="true" aria-controls="srhPaneNew" data-version="new">New version</button>
+                            <button type="button" class="crn-tab" aria-pressed="false" aria-controls="srhPaneOld" data-version="old">Old version</button>
+                        </div>
+                        <div id="srhPaneNew" data-version-pane="new">
+                            @include('pages.reports.slc.registration.new')
+                        </div>
+                        <div id="srhPaneOld" data-version-pane="old" hidden>
                     <form method="post" action="#" id="registrationSLCForm">
                             @csrf
                             <div class="grid grid-cols-12 gap-4">
@@ -175,18 +195,25 @@
                         </form>
 
                         <div class="overflow-x-auto scrollbar-hidden mt-5" id="retentionRateWrap" style="display: none;"></div>
+                        </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="accordion-item">
-                <div id="intakePerformanceReportAccordion-3" class="accordion-header">
-                    <button id="studentSearchBtn" class="accordion-button collapsed relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#intakePerformanceReportAccordion-collapse-3" aria-expanded="false" aria-controls="intakePerformanceReportAccordion-collapse-3">
-                        SLC COC History
-                        <span class="accordionCollaps"></span>
-                    </button>
-                </div>
+            <div class="accordion-item ipr-item ipr-tone-amber">
+                @include('pages.reports.slc.partials.report-head', ['n' => 3, 'title' => 'SLC COC History', 'desc' => 'Changes of circumstances reported to SLC, by date, type and whether actioned', 'icon' => 'file-diff', 'formats' => ['Excel']])
                 <div id="intakePerformanceReportAccordion-collapse-3" class="accordion-collapse collapse" aria-labelledby="intakePerformanceReportAccordion-3" data-tw-parent="#intakePerformanceReportAccordion">
                     <div class="accordion-body">
+                        {{-- New version beside the old Excel-only form until the old one is retired (user, 25 Nov 2026). --}}
+                        <div data-version-tabs>
+                        <div class="crn-tabs" aria-label="SLC COC History version">
+                            <button type="button" class="crn-tab is-active" aria-pressed="true" aria-controls="schPaneNew" data-version="new">New version</button>
+                            <button type="button" class="crn-tab" aria-pressed="false" aria-controls="schPaneOld" data-version="old">Old version</button>
+                        </div>
+                        <div id="schPaneNew" data-version-pane="new">
+                            @include('pages.reports.slc.coc.new')
+                        </div>
+                        <div id="schPaneOld" data-version-pane="old" hidden>
                         <form method="post" action="#" id="SLCcocReportForm">
                             @csrf
                             <div class="grid grid-cols-12 gap-4">
@@ -247,18 +274,25 @@
                         </form>
 
                         <div class="overflow-x-auto scrollbar-hidden mt-5" id="attendanceRateWrap" style="display: none;"></div>
+                        </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="accordion-item">
-                <div id="intakePerformanceReportAccordion-4" class="accordion-header">
-                    <button id="studentSearchBtn" class="accordion-button collapsed relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#intakePerformanceReportAccordion-collapse-4" aria-expanded="false" aria-controls="intakePerformanceReportAccordion-collapse-4">
-                        SLC Record Report
-                        <span class="accordionCollaps"></span>
-                    </button>
-                </div>
+            <div class="accordion-item ipr-item ipr-tone-violet">
+                @include('pages.reports.slc.partials.report-head', ['n' => 4, 'title' => 'SLC Record Report', 'desc' => 'Each intake from first registration to SLC registration, attendance confirmed, withdrawn and self funded', 'icon' => 'table-properties', 'formats' => ['PDF', 'Excel']])
                 <div id="intakePerformanceReportAccordion-collapse-4" class="accordion-collapse collapse" aria-labelledby="intakePerformanceReportAccordion-4" data-tw-parent="#intakePerformanceReportAccordion">
                     <div class="accordion-body">
+                        {{-- New version beside the old one until the old report is retired (user, 25 Nov 2026). --}}
+                        <div data-version-tabs>
+                        <div class="crn-tabs" aria-label="SLC Record Report version">
+                            <button type="button" class="crn-tab is-active" aria-pressed="true" aria-controls="srrPaneNew" data-version="new">New version</button>
+                            <button type="button" class="crn-tab" aria-pressed="false" aria-controls="srrPaneOld" data-version="old">Old version</button>
+                        </div>
+                        <div id="srrPaneNew" data-version-pane="new">
+                            @include('pages.reports.slc.record.new')
+                        </div>
+                        <div id="srrPaneOld" data-version-pane="old" hidden>
                         <form method="post" action="#" id="slcRecoredReportForm">
                             @csrf
                             <div class="grid grid-cols-12 gap-4">
@@ -299,6 +333,8 @@
                         </form>
 
                         <div class="overflow-x-auto scrollbar-hidden mt-5" id="slcRecoredReportWrap" style="display: none;"></div>
+                        </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -345,6 +381,10 @@
 @endsection
 
 @section('script')
+    @vite('resources/js/slc-attendance-history.js')
+    @vite('resources/js/slc-registration-history.js')
+    @vite('resources/js/slc-coc-history.js')
+    @vite('resources/js/slc-record.js')
     @vite('resources/js/student-slc-reports.js')
     @vite('resources/js/student-slc-recored-reports.js')
 @endsection

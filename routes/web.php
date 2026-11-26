@@ -289,15 +289,27 @@ use App\Http\Controllers\Reports\IntakePerformance\RetentionRateReportController
 use App\Http\Controllers\Reports\IntakePerformance\SubmissionPassRateReportController;
 use App\Http\Controllers\Reports\SlcDataReportController;
 use App\Http\Controllers\Reports\SlcReports\SlcRecordReportController;
+use App\Http\Controllers\Reports\SlcReports\SlcAttendanceHistoryController;
+use App\Http\Controllers\Reports\SlcReports\SlcRegistrationHistoryController;
+use App\Http\Controllers\Reports\SlcReports\SlcCocHistoryController;
+use App\Http\Controllers\Reports\SlcReports\SlcRecordController;
 use App\Http\Controllers\Reports\StudentDueReportController;
 use App\Http\Controllers\Reports\StudentExpectedResultReportController;
+use App\Http\Controllers\Reports\StudentExpectedResultReportNewController;
 use App\Http\Controllers\Reports\StudentPerformanceReportController;
+use App\Http\Controllers\Reports\StudentPerformanceReportNewController;
 use App\Http\Controllers\Reports\StudentProgressMonitoringReportController;
+use App\Http\Controllers\Reports\StudentProgressReportNewController;
 use App\Http\Controllers\Reports\StudentResultReportController;
+use App\Http\Controllers\Reports\StudentResultReportNewController;
 use App\Http\Controllers\Reports\StudentWorkplacementReportController;
+use App\Http\Controllers\Reports\StudentWorkPlacementReportNewController;
 use App\Http\Controllers\Reports\SystemReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermAttendancePerformanceReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermAttendanceRateController;
+use App\Http\Controllers\Reports\TermPerformance\ClassStatusReportController;
+use App\Http\Controllers\Reports\TermPerformance\SubmissionPerformanceController;
+use App\Http\Controllers\Reports\TermPerformance\RetentionByIntakeController;
 use App\Http\Controllers\Reports\TermPerformance\TermProgressionReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermRetentionReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermSubmissionPerformanceReportController;
@@ -3905,16 +3917,34 @@ Route::middleware('auth')->group(function() {
         Route::post('student-result-excel-download', 'excelDownload')->name('report.student.result.excel'); 
     });
 
+    // Student Result Report, new version (user's design, 25 Nov 2026); the old routes above stay.
+    Route::controller(StudentResultReportNewController::class)->prefix('reports')->group(function(){
+        Route::get('student-result-reports/data', 'data')->name('report.student.result.new.data');
+        Route::get('student-result-reports/excel', 'excel')->name('report.student.result.new.excel');
+    });
+
     Route::controller(StudentExpectedResultReportController::class)->prefix('reports')->group(function(){
         Route::get('student-expected-result-reports', 'index')->name('report.student.expected.result.view'); 
         Route::post('student-expected-result-list', 'totalCount')->name('report.student.expected.result.total'); 
         Route::post('student-expected-result-excel-download', 'excelDownload')->name('report.student.expected.result.excel'); 
+    });
+
+    // Student Expected Result Report, new version (user's design, 25 Nov 2026); the old routes above stay.
+    Route::controller(StudentExpectedResultReportNewController::class)->prefix('reports')->group(function(){
+        Route::get('student-expected-result-reports/data', 'data')->name('report.student.expected.result.new.data');
+        Route::get('student-expected-result-reports/excel', 'excel')->name('report.student.expected.result.new.excel');
     });
     
     Route::controller(StudentPerformanceReportController::class)->prefix('reports')->group(function(){
         Route::get('student-performance-reports', 'index')->name('report.student.performance.view'); 
         Route::post('student-performance-list', 'totalCount')->name('report.student.performance.total'); 
         Route::post('student-performance-excel-download', 'excelDownload')->name('report.student.performance.excel'); 
+    });
+
+    // Result Grade Performance Report, new version (user's design, 25 Nov 2026); the old routes above stay.
+    Route::controller(StudentPerformanceReportNewController::class)->prefix('reports')->group(function(){
+        Route::get('student-performance-reports/data', 'data')->name('report.student.performance.new.data');
+        Route::get('student-performance-reports/excel', 'excel')->name('report.student.performance.new.excel');
     });
     
 
@@ -3923,6 +3953,12 @@ Route::middleware('auth')->group(function() {
         Route::post('student-progress-list', 'totalCount')->name('report.student.progress.total'); 
         Route::post('student-progress-excel-download', 'excelDownload')->name('report.student.progress.excel'); 
         Route::post('student-progress-details', 'listProgressReport')->name('report.student.progress.details'); 
+    });
+
+    // Progress Monitoring Report, new version (user's design, 25 Nov 2026); the old routes above stay.
+    Route::controller(StudentProgressReportNewController::class)->prefix('reports')->group(function(){
+        Route::get('student-progress-reports/data', 'data')->name('report.student.progress.new.data');
+        Route::get('student-progress-reports/excel', 'excel')->name('report.student.progress.new.excel');
     });
 
     Route::controller(ReportsAttendanceReportController::class)->group(function(){
@@ -4007,6 +4043,12 @@ Route::middleware('auth')->group(function() {
         Route::post('student-workplacement-excel-download', 'excelDownload')->name('report.workplacement.reports.excel'); 
     });
 
+    // Student Work Placement Report, new version (user's design, 25 Nov 2026); the old routes above stay.
+    Route::controller(StudentWorkPlacementReportNewController::class)->prefix('reports')->group(function(){
+        Route::get('student-workplacement-reports/data', 'data')->name('report.student.workplacement.new.data');
+        Route::get('student-workplacement-reports/excel', 'excel')->name('report.student.workplacement.new.excel');
+    });
+
     Route::controller(CollectionReportController::class)->group(function(){
         Route::post('reports/accounts/export-collection-report', 'exportCollectionReport')->name('reports.account.collection.export'); 
     });
@@ -4087,6 +4129,29 @@ Route::middleware('auth')->group(function() {
     Route::controller(TermAttendanceRateController::class)->group(function(){
         Route::get('reports/term-performance/attendance-rate/{term}', 'generate')->whereNumber('term')->name('reports.term.performance.attendance.rate.generate');
         Route::get('reports/term-performance/attendance-rate/{term}/pdf', 'pdf')->whereNumber('term')->name('reports.term.performance.attendance.rate.pdf');
+    });
+
+    // Term Performance › Class Status "New version" tab (25 Nov 2026); the old version stays on ClassStatusByTermController.
+    Route::controller(ClassStatusReportController::class)->group(function(){
+        Route::get('reports/term-performance/class-status/{term}', 'generate')->whereNumber('term')->name('reports.term.performance.class.status.generate');
+        Route::get('reports/term-performance/class-status/{term}/pdf', 'pdf')->whereNumber('term')->name('reports.term.performance.class.status.pdf');
+        Route::get('reports/term-performance/class-status/{term}/excel', 'excel')->whereNumber('term')->name('reports.term.performance.class.status.excel');
+    });
+
+    // Term Performance › Submission Performance "New version" tab (25 Nov 2026); the old version stays on TermSubmissionPerformanceReportController.
+    Route::controller(SubmissionPerformanceController::class)->group(function(){
+        Route::get('reports/term-performance/submission/{term}', 'generate')->whereNumber('term')->name('reports.term.performance.submission.new.generate');
+        Route::get('reports/term-performance/submission/{term}/pdf', 'pdf')->whereNumber('term')->name('reports.term.performance.submission.new.pdf');
+        Route::get('reports/term-performance/submission/{term}/excel', 'excel')->whereNumber('term')->name('reports.term.performance.submission.new.excel');
+        Route::get('reports/term-performance/submission/{term}/students', 'students')->whereNumber('term')->name('reports.term.performance.submission.new.students');
+    });
+
+    // Term Performance › Retention "New version" tab (25 Nov 2026); the old version stays on TermRetentionReportController.
+    Route::controller(RetentionByIntakeController::class)->group(function(){
+        Route::get('reports/term-performance/retention/{terms}', 'generate')->where('terms', '[0-9]+(_[0-9]+)*')->name('reports.term.performance.retention.new.generate');
+        Route::get('reports/term-performance/retention/{terms}/pdf', 'pdf')->where('terms', '[0-9]+(_[0-9]+)*')->name('reports.term.performance.retention.new.pdf');
+        Route::get('reports/term-performance/retention/{terms}/excel', 'excel')->where('terms', '[0-9]+(_[0-9]+)*')->name('reports.term.performance.retention.new.excel');
+        Route::get('reports/term-performance/retention/{term}/students', 'students')->whereNumber('term')->name('reports.term.performance.retention.new.students');
     });
 
     Route::controller(StudentFlagController::class)->group(function() {
@@ -4175,6 +4240,33 @@ Route::middleware('auth')->group(function() {
         Route::get('reports/slc-report/export-slc-record-details/{semester?}/{francise?}', 'exportDetailsReport')->name('reports.slc.record.export.details.report'); 
 
         Route::post('reports/slc-report/export-student-list', 'exportStudentList')->name('reports.slc.record.export.student.list'); 
+    });
+
+    // SLC Reports › SLC Attendance History "New version" tab (25 Nov 2026); the old Excel-only form stays on SlcDataReportController.
+    Route::controller(SlcAttendanceHistoryController::class)->group(function(){
+        Route::get('reports/slc-report/attendance-history', 'data')->name('reports.slc.attendance.history.data');
+        Route::get('reports/slc-report/attendance-history/excel', 'excel')->name('reports.slc.attendance.history.excel');
+    });
+
+    // SLC Reports › SLC Registration History "New version" tab (25 Nov 2026); the old Excel-only form stays on SlcDataReportController.
+    Route::controller(SlcRegistrationHistoryController::class)->group(function(){
+        Route::get('reports/slc-report/registration-history', 'data')->name('reports.slc.registration.history.data');
+        Route::get('reports/slc-report/registration-history/excel', 'excel')->name('reports.slc.registration.history.excel');
+    });
+
+    // SLC Reports › SLC COC History "New version" tab (25 Nov 2026); the old Excel-only form stays on SlcDataReportController.
+    Route::controller(SlcCocHistoryController::class)->group(function(){
+        Route::get('reports/slc-report/coc-history', 'data')->name('reports.slc.coc.history.data');
+        Route::get('reports/slc-report/coc-history/excel', 'excel')->name('reports.slc.coc.history.excel');
+    });
+
+    // SLC Reports › SLC Record Report "New version" tab (25 Nov 2026); the old version stays on SlcRecordReportController.
+    Route::controller(SlcRecordController::class)->group(function(){
+        Route::get('reports/slc-report/record/{semesters}', 'data')->where('semesters', '[0-9]+(_[0-9]+)*')->name('reports.slc.record.new.data');
+        Route::get('reports/slc-report/record/{semesters}/excel', 'excel')->where('semesters', '[0-9]+(_[0-9]+)*')->name('reports.slc.record.new.excel');
+        Route::get('reports/slc-report/record/{semesters}/pdf', 'pdf')->where('semesters', '[0-9]+(_[0-9]+)*')->name('reports.slc.record.new.pdf');
+        Route::get('reports/slc-report/record/{semester}/students', 'students')->whereNumber('semester')->name('reports.slc.record.new.students');
+        Route::get('reports/slc-report/record/{semester}/details', 'details')->whereNumber('semester')->name('reports.slc.record.new.details');
     });
 
     Route::controller(TermSubmissionPerformanceReportController::class)->group(function(){

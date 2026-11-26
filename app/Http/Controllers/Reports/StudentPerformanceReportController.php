@@ -70,6 +70,8 @@ class StudentPerformanceReportController extends Controller
             'academicYear' => AcademicYear::all()->sortByDesc('from_date'),
             'terms' => TermDeclaration::all()->sortByDesc('id'),
             'groups' => Group::all(),
+            // New version tab (user's design, 25 Nov 2026).
+            'srpOptions' => app(\App\Services\Reports\StudentResultReport::class)->formOptions($semesters, $courses, $statuses),
         ]);
     }
 

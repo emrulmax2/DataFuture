@@ -4,5 +4,48 @@
     },
     "robotonormal": {
         "normal": "robotonormal_normal_ca9b52056df7f226caf325433610b3bf"
+    },
+    "public sans": {
+        "normal": "public_sans_normal_26e53e56b39caf7f3755bea92e4edcb8",
+        "bold": "public_sans_bold_54586e007dbdfd49947a75ad29a456ca",
+        "600": "public_sans_600_0884e3018f1bb7f5f82c96c2d5021c8e"
+    },
+    "lccpdfsans": {
+        "normal": "\/Volumes\/KINGSTON\/Server\/lcc_datafuture\/storage\/fonts\/lccpdfsans_normal_04066fe3aef780d5a1dd9c5c9d5b5038",
+        "600": "\/Volumes\/KINGSTON\/Server\/lcc_datafuture\/storage\/fonts\/lccpdfsans_600_19a09fa3049538725231696080e2420a",
+        "bold": "lccpdfsans_bold_39f514f5bf1960434c483c55d18055d7"
+    },
+    "plus jakarta sans": {
+        "normal": "\/Volumes\/KINGSTON\/Server\/lcc_datafuture\/storage\/fonts\/plus_jakarta_sans_normal_e858d69e157b281811d622c9544f18b9",
+        "600": "\/Volumes\/KINGSTON\/Server\/lcc_datafuture\/storage\/fonts\/plus_jakarta_sans_600_71830273c58f0d99eab18f0f0d2110c2",
+        "bold": "\/Volumes\/KINGSTON\/Server\/lcc_datafuture\/storage\/fonts\/plus_jakarta_sans_bold_20631f352b033ad87366465e8d270c6e",
+        "800": "plus_jakarta_sans_800_35f0a1dfef06fe9d15dae6dd50ad877f"
+    },
+    "hanken grotesk": {
+        "normal": "\/Volumes\/KINGSTON\/Server\/lcc_datafuture\/storage\/fonts\/hanken_grotesk_normal_5bacdd0152702ad2dbb16a8a63b83bec",
+        "500": "\/Volumes\/KINGSTON\/Server\/lcc_datafuture\/storage\/fonts\/hanken_grotesk_500_19f2dd48dad82e69d3b289e2ec97789d",
+        "600": "\/Volumes\/KINGSTON\/Server\/lcc_datafuture\/storage\/fonts\/hanken_grotesk_600_7ed17b4f6c6a2b20bf7371c867e7078c",
+        "bold": "hanken_grotesk_bold_b518c58c61286ef687597bcff328f7fb"
+    },
+    "source serif 4": {
+        "500": "\/Volumes\/KINGSTON\/Server\/lcc_datafuture\/storage\/fonts\/source_serif_4_500_9f08ceb92c9a6ab54375fea3aa643f0d",
+        "600": "\/Volumes\/KINGSTON\/Server\/lcc_datafuture\/storage\/fonts\/source_serif_4_600_e7597da7e18e8bbc64ee4fa158fb9396",
+        "normal": "\/Volumes\/KINGSTON\/Server\/lcc_datafuture\/storage\/fonts\/source_serif_4_normal_9f08ceb92c9a6ab54375fea3aa643f0d",
+        "bold": "source_serif_4_bold_e7597da7e18e8bbc64ee4fa158fb9396"
+    },
+    "jetbrains mono": {
+        "500": "\/Volumes\/KINGSTON\/Server\/lcc_datafuture\/storage\/fonts\/jetbrains_mono_500_8c2c5616bb97370ff4b61a808f16cfe7",
+        "600": "\/Volumes\/KINGSTON\/Server\/lcc_datafuture\/storage\/fonts\/jetbrains_mono_600_7eec5dcca65bc3516e93dac75a79454a",
+        "normal": "jetbrains_mono_normal_8c2c5616bb97370ff4b61a808f16cfe7"
+    },
+    "hg": {
+        "normal": "\/Volumes\/KINGSTON\/Server\/lcc_datafuture\/storage\/fonts\/hg_normal_5bacdd0152702ad2dbb16a8a63b83bec",
+        "bold": "hg_bold_b518c58c61286ef687597bcff328f7fb"
+    },
+    "ss": {
+        "normal": "ss_normal_9f08ceb92c9a6ab54375fea3aa643f0d"
+    },
+    "jm": {
+        "normal": "jm_normal_8c2c5616bb97370ff4b61a808f16cfe7"
     }
 }

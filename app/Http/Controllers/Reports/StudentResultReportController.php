@@ -66,6 +66,7 @@ class StudentResultReportController extends Controller
             'academicYear' => AcademicYear::all()->sortByDesc('from_date'),
             'terms' => TermDeclaration::all()->sortByDesc('id'),
             'groups' => Group::all(),
+            'srpOptions' => app(\App\Services\Reports\StudentResultReport::class)->formOptions($semesters, $courses, $statuses),
         ]);
     }
 
