@@ -162,14 +162,22 @@ use App\Http\Controllers\HR\EmployeePrivilegeController;
 use App\Http\Controllers\HR\EmployeeTimeKeepingController;
 use App\Http\Controllers\HR\EmployeeUpcomingAppraisalController;
 use App\Http\Controllers\HR\Reports\BirthdayReportController;
+use App\Http\Controllers\HR\Reports\BirthdayReportNewController;
 use App\Http\Controllers\HR\Reports\DiversityReportController;
+use App\Http\Controllers\HR\Reports\DiversityReportNewController;
 use App\Http\Controllers\HR\Reports\EligibilityReportController;
+use App\Http\Controllers\HR\Reports\EligibilityReportNewController;
 use App\Http\Controllers\HR\Reports\EmployeeContactDetailController;
+use App\Http\Controllers\HR\Reports\EmployeeContactDetailNewController;
 use App\Http\Controllers\HR\Reports\EmploymentReportController;
 use App\Http\Controllers\HR\Reports\StarterReportController;
+use App\Http\Controllers\HR\Reports\StarterReportNewController;
 use App\Http\Controllers\HR\Reports\LengthServiceController;
+use App\Http\Controllers\HR\Reports\LengthServiceNewController;
 use App\Http\Controllers\HR\Reports\RecordCardController;
+use App\Http\Controllers\HR\Reports\RecordCardNewController;
 use App\Http\Controllers\HR\Reports\TelephoneDirectoryController;
+use App\Http\Controllers\HR\Reports\TelephoneDirectoryNewController;
 use App\Http\Controllers\HR\PolicyAssessment\EmployeePolicyAssessmentController;
 use App\Http\Controllers\HR\PolicyAssessment\PolicyAssignmentController;
 use App\Http\Controllers\HR\PolicyAssessment\PolicyCategoryController;
@@ -251,8 +259,11 @@ use App\Http\Controllers\HR\portal\reports\DataReportController;
 use App\Http\Controllers\HR\portal\VacancyController;
 use App\Http\Controllers\HR\Reports\AttendanceReportController;
 use App\Http\Controllers\HR\Reports\HolidayHourReportController;
+use App\Http\Controllers\HR\Reports\HolidayHourReportNewController;
 use App\Http\Controllers\HR\Reports\OutstandingHolidayReportController;
+use App\Http\Controllers\HR\Reports\OutstandingHolidayReportNewController;
 use App\Http\Controllers\HR\Reports\SickLeaveController;
+use App\Http\Controllers\HR\Reports\SickLeaveNewController;
 use App\Http\Controllers\InternalLinkController;
 use App\Http\Controllers\IssueTypeController;
 use App\Http\Controllers\LibraryLocationController;
@@ -1951,11 +1962,25 @@ Route::middleware('auth')->group(function() {
         Route::get('hr/portal/reports/birthdaylist/birthdaylistbysearchpdf', 'generateSearchPDF')->name('hr.portal.reports.birthdaylistbysearch.pdf');
     });
 
+    // Birthday List, new version (user's design, 26 Nov 2026); the old routes above stay.
+    Route::controller(BirthdayReportNewController::class)->group(function(){
+        Route::get('hr/portal/reports/birthdaylist/new/data', 'data')->name('hr.portal.reports.birthdaylist.new.data');
+        Route::get('hr/portal/reports/birthdaylist/new/pdf', 'pdf')->name('hr.portal.reports.birthdaylist.new.pdf');
+        Route::get('hr/portal/reports/birthdaylist/new/excel', 'excel')->name('hr.portal.reports.birthdaylist.new.excel');
+    });
+
     Route::controller(DiversityReportController::class)->group(function(){
         Route::get('hr/portal/reports/diversityreport', 'index')->name('hr.portal.reports.diversityreport');
         Route::get('hr/portal/reports/diversityreport/list', 'list')->name('hr.portal.reports.diversityreport.list'); 
         Route::get('hr/portal/reports/diversityreport/diversitypdf', 'generatePDF')->name('hr.portal.reports.diversityreport.pdf');
         Route::get('hr/portal/reports/diversityreport/diversitybysearchpdf', 'generateSearchPDF')->name('hr.portal.reports.diversitybysearch.pdf');
+    });
+
+    // Diversity Information, new version (user's design, 26 Nov 2026); the old routes above stay.
+    Route::controller(DiversityReportNewController::class)->group(function(){
+        Route::get('hr/portal/reports/diversityreport/new/data', 'data')->name('hr.portal.reports.diversityreport.new.data');
+        Route::get('hr/portal/reports/diversityreport/new/pdf', 'pdf')->name('hr.portal.reports.diversityreport.new.pdf');
+        Route::get('hr/portal/reports/diversityreport/new/excel', 'excel')->name('hr.portal.reports.diversityreport.new.excel');
     });         
 
     Route::controller(EmployeeContactDetailController::class)->group(function(){
@@ -1965,6 +1990,13 @@ Route::middleware('auth')->group(function() {
         Route::get('hr/portal/reports/contactdetail/contactexcel', 'generateContactExcel')->name('hr.portal.reports.contactdetail.excel');
         Route::get('hr/portal/reports/contactdetail/contactbysearchexcel', 'generateSearchExcel')->name('hr.portal.reports.contactbysearch.excel');
         Route::get('hr/portal/reports/contactdetail/contactbysearchpdf', 'generateSearchPDF')->name('hr.portal.reports.contactbysearch.pdf');
+    });
+
+    // Employee Contact Details, new version (user's design, 26 Nov 2026); the old routes above stay.
+    Route::controller(EmployeeContactDetailNewController::class)->group(function(){
+        Route::get('hr/portal/reports/contactdetail/new/data', 'data')->name('hr.portal.reports.contactdetail.new.data');
+        Route::get('hr/portal/reports/contactdetail/new/pdf', 'pdf')->name('hr.portal.reports.contactdetail.new.pdf');
+        Route::get('hr/portal/reports/contactdetail/new/excel', 'excel')->name('hr.portal.reports.contactdetail.new.excel');
     }); 
     
     Route::controller(LengthServiceController::class)->group(function(){
@@ -1977,17 +2009,32 @@ Route::middleware('auth')->group(function() {
         Route::get('hr/portal/reports/lengthservice/lengthservicebysearchpdf', 'generateSearchPDF')->name('hr.portal.reports.lengthservicebysearch.pdf');
     });
 
+    // Employee Service Lengths, new version (user's design, 26 Nov 2026); the old routes above stay.
+    Route::controller(LengthServiceNewController::class)->group(function(){
+        Route::get('hr/portal/reports/lengthservice/new/data', 'data')->name('hr.portal.reports.lengthservice.new.data');
+        Route::get('hr/portal/reports/lengthservice/new/pdf', 'pdf')->name('hr.portal.reports.lengthservice.new.pdf');
+        Route::get('hr/portal/reports/lengthservice/new/excel', 'excel')->name('hr.portal.reports.lengthservice.new.excel');
+    });
+
     Route::controller(StarterReportController::class)->group(function(){
         Route::get('hr/portal/reports/starterreport', 'index')->name('hr.portal.reports.starterreport');
         Route::get('hr/portal/reports/starterreport/list', 'list')->name('hr.portal.reports.starterreport.list'); 
         Route::get('hr/portal/reports/starterreport/starterpdf', 'generatePDF')->name('hr.portal.reports.starterreport.pdf');
         Route::get('hr/portal/reports/starterreport/starterreportbysearchpdf', 'generateSearchPDF')->name('hr.portal.reports.starterreportbysearch.pdf');
+    });
+
+    // Employee Starter Information, new version (user's design, 26 Nov 2026); the old routes above stay.
+    Route::controller(StarterReportNewController::class)->group(function(){
+        Route::get('hr/portal/reports/starterreport/new/data', 'data')->name('hr.portal.reports.starterreport.new.data');
+        Route::get('hr/portal/reports/starterreport/new/pdf', 'pdf')->name('hr.portal.reports.starterreport.new.pdf');
+        Route::get('hr/portal/reports/starterreport/new/excel', 'excel')->name('hr.portal.reports.starterreport.new.excel');
     });            
     
     Route::controller(DataReportController::class)->group(function(){
         Route::get('hr/portal/reports/datareport', 'index')->name('hr.portal.reports.datareport');
         Route::post('hr/portal/reports/datareport', 'genrateDataReport')->name('employee.hr.datareport');
         Route::get('hr/portal/reports/datareport/list', 'list')->name('hr.portal.reports.datareport.list'); 
+        Route::get('hr/portal/reports/datareport/count', 'count')->name('hr.portal.reports.datareport.count');
     });       
 
     Route::controller(RecordCardController::class)->group(function(){
@@ -1997,6 +2044,13 @@ Route::middleware('auth')->group(function() {
         Route::get('hr/portal/reports/recordcard/recordcardexcel', 'generateRecordCardExcel')->name('hr.portal.reports.recordcard.excel');
         Route::get('hr/portal/reports/recordcard/recordcardbysearchexcel', 'generateSearchExcel')->name('hr.portal.reports.recordcardbysearch.excel');
         Route::get('hr/portal/reports/recordcard/recordcardbysearchpdf', 'generateSearchPDF')->name('hr.portal.reports.recordcardbysearch.pdf');
+    });
+
+    // Employee Record Card, new version (user's design, 26 Nov 2026); the old routes above stay.
+    Route::controller(RecordCardNewController::class)->group(function(){
+        Route::get('hr/portal/reports/recordcard/new/data', 'data')->name('hr.portal.reports.recordcard.new.data');
+        Route::get('hr/portal/reports/recordcard/new/pdf', 'pdf')->name('hr.portal.reports.recordcard.new.pdf');
+        Route::get('hr/portal/reports/recordcard/new/excel', 'excel')->name('hr.portal.reports.recordcard.new.excel');
     });     
 
     Route::controller(TelephoneDirectoryController::class)->group(function(){
@@ -2009,6 +2063,13 @@ Route::middleware('auth')->group(function() {
         Route::get('hr/portal/reports/telephonedirectory/telephonedirectorybysearchpdf', 'generateSearchPDF')->name('hr.portal.reports.telephonedirectorybysearch.pdf');
     });
 
+    // Employee Telephone Directory, new version (user's design, 26 Nov 2026); the old routes above stay.
+    Route::controller(TelephoneDirectoryNewController::class)->group(function(){
+        Route::get('hr/portal/reports/telephonedirectory/new/data', 'data')->name('hr.portal.reports.telephonedirectory.new.data');
+        Route::get('hr/portal/reports/telephonedirectory/new/pdf', 'pdf')->name('hr.portal.reports.telephonedirectory.new.pdf');
+        Route::get('hr/portal/reports/telephonedirectory/new/excel', 'excel')->name('hr.portal.reports.telephonedirectory.new.excel');
+    });
+
     Route::controller(EligibilityReportController::class)->group(function(){
         Route::get('hr/portal/reports/eligibilityreport', 'index')->name('hr.portal.reports.eligibilityreport');
         Route::get('hr/portal/reports/eligibilityreport/visaexpiry-list', 'visaList')->name('hr.portal.reports.eligibilityreport.visaexpirylist'); 
@@ -2017,9 +2078,21 @@ Route::middleware('auth')->group(function() {
         Route::get('hr/portal/reports/eligibilityreport/eligibilitypdf/passport', 'generatePassportPDF')->name('hr.portal.reports.eligibilityreport.passport.pdf');
     });
 
+    // Eligibility Expiry, new version (user's design, 26 Nov 2026); the old routes above stay.
+    Route::controller(EligibilityReportNewController::class)->group(function(){
+        Route::get('hr/portal/reports/eligibilityreport/new/data', 'data')->name('hr.portal.reports.eligibilityreport.new.data');
+        Route::get('hr/portal/reports/eligibilityreport/new/pdf', 'pdf')->name('hr.portal.reports.eligibilityreport.new.pdf');
+        Route::get('hr/portal/reports/eligibilityreport/new/excel', 'excel')->name('hr.portal.reports.eligibilityreport.new.excel');
+    });
+
     Route::controller(HolidayHourReportController::class)->group(function(){
         Route::any('hr/portal/employee-holiday-hour-reports', 'index')->name('hr.portal.reports.holiday.hour');
         Route::get('hr/portal/employee-holiday-hour-export/{from_date}/{to_date?}', 'exportExcel')->name('hr.portal.reports.holiday.hour.export');
+    });
+    Route::controller(HolidayHourReportNewController::class)->group(function(){
+        Route::get('hr/portal/employee-holiday-hour-reports/new/data', 'data')->name('hr.portal.reports.holiday.hour.new.data');
+        Route::get('hr/portal/employee-holiday-hour-reports/new/old', 'old')->name('hr.portal.reports.holiday.hour.new.old');
+        Route::get('hr/portal/employee-holiday-hour-reports/new/excel', 'excel')->name('hr.portal.reports.holiday.hour.new.excel');
     });
 
     Route::controller(EmployeeUpcomingAppraisalController::class)->group(function(){
@@ -4580,6 +4653,10 @@ Route::middleware('auth')->group(function() {
         Route::get('hr/portal/reports/outstanding-holiday/list', 'list')->name('hr.portal.reports.outstanding.holiday.list'); 
         Route::post('hr/portal/reports/outstanding-holiday/export', 'export')->name('hr.portal.reports.outstanding.holiday.export'); 
     });
+    Route::controller(OutstandingHolidayReportNewController::class)->group(function() {
+        Route::get('hr/portal/reports/outstanding-holiday/new/data', 'data')->name('hr.portal.reports.outstanding.holiday.new.data');
+        Route::get('hr/portal/reports/outstanding-holiday/new/excel', 'excel')->name('hr.portal.reports.outstanding.holiday.new.excel');
+    });
 
     
     Route::controller(AgentPaymentSettingController::class)->group(function(){
@@ -4773,6 +4850,10 @@ Route::middleware('auth')->group(function() {
         Route::get('hr/portal/reports/sick-leave', 'index')->name('hr.portal.reports.sick.leave');
         Route::get('hr/portal/reports/sick-leave/list', 'list')->name('hr.portal.reports.sick.leave.list');
         Route::post('hr/portal/reports/sick-leave/export', 'exportList')->name('hr.portal.reports.sick.leave.export');
+    });
+    Route::controller(SickLeaveNewController::class)->group(function() {
+        Route::get('hr/portal/reports/sick-leave/new/data', 'data')->name('hr.portal.reports.sick.leave.new.data');
+        Route::get('hr/portal/reports/sick-leave/new/excel', 'excel')->name('hr.portal.reports.sick.leave.new.excel');
     });
 
     Route::controller(ResultGradeController::class)->group(function() {

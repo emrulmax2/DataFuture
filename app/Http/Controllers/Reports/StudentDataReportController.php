@@ -82,6 +82,11 @@ class StudentDataReportController extends Controller
                 $itemSelected = true;
             }
         endforeach;
+        // Evening / Weekend "No" is "0", which empty() above drops: keep it as a filter (26 Nov 2026).
+        if(isset($groupParams['evening_weekend']) && is_scalar($groupParams['evening_weekend']) && in_array((string) $groupParams['evening_weekend'], ['0', '1'], true)) {
+            $evening_weekend = (string) $groupParams['evening_weekend'];
+            $itemSelected = true;
+        }
         if($itemSelected==true) {
             $studentsIds = [];
                 $myRequest = new Request();
@@ -149,8 +154,18 @@ class StudentDataReportController extends Controller
 
         $QueryInner = StudentCourseRelation::with('activeCreation');
         $QueryInner->where('active','=',1);
-        if(!empty($evening_weekends) && ($evening_weekends==0 || $evening_weekends==1))
-            $QueryInner->where('full_time',$evening_weekends);
+        // Evening / Weekend is the relation's proposed course full_time (26 Nov 2026). It used to filter
+        // student_course_relations.full_time, which does not exist: "Yes" failed and "No" was skipped.
+        // Same rule as the new Student Result reports (App\Services\Reports\StudentResultReport).
+        if(isset($evening_weekends) && is_scalar($evening_weekends) && in_array((string) $evening_weekends, ['0', '1'], true)) {
+            $QueryInner->whereExists(function($q) use($evening_weekends) {
+                $q->select(DB::raw(1))
+                    ->from('student_proposed_courses as spc')
+                    ->whereColumn('spc.student_course_relation_id', 'student_course_relations.id')
+                    ->whereNull('spc.deleted_at')
+                    ->where('spc.full_time', (int) $evening_weekends);
+            });
+        }
         if(!empty($academic_years) && count($academic_years)>0)
             $QueryInner->where('academic_year_id',$academic_years);
         

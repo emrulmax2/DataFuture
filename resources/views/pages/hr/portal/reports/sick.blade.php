@@ -2,15 +2,66 @@
 
 @section('subhead')
     <title>{{ $title }}</title>
+    {{-- Inter for the new version, as in its design. --}}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    @vite('resources/css/hr-sick-leave.css')
 @endsection
 
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Employee's Sick Leave</u></h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('hr.portal.employment.reports.show') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Report</a>
+    {{-- New version (user's employee-sick-leave design, 26 Nov 2026) beside the old one, as on the other HR
+         reports. The Old pane is moved off screen rather than display:none, so a New search can fill its form
+         and run it while hidden; an old Search fills the New form and runs it. --}}
+    <div class="esk" data-esk
+         data-data-url="{{ route('hr.portal.reports.sick.leave.new.data') }}"
+         data-excel-url="{{ route('hr.portal.reports.sick.leave.new.excel') }}"
+         data-profile-url="{{ route('profile.employee.view', '__ID__') }}">
+        <div class="esk-head">
+            <div class="esk-head__lead">
+                <span class="esk-head__icon" aria-hidden="true"><i data-lucide="thermometer"></i></span>
+                <div>
+                    <h1 class="esk-head__title">Employee Sick Leave</h1>
+                    <p class="esk-head__sub" id="eskSub">London Churchill College · HR reports</p>
+                </div>
+            </div>
+            <div class="esk-head__actions">
+                <div class="esk-versions" role="group" aria-label="Report version">
+                    <button type="button" aria-pressed="true" data-esk-version="new">New version</button>
+                    <button type="button" aria-pressed="false" data-esk-version="old">Old version</button>
+                </div>
+                <button type="button" class="esk-btn" data-esk-export data-esk-new-only disabled>Export XL</button>
+                <a class="esk-back" href="{{ route('hr.portal.employment.reports.show') }}">
+                    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+                    Back to Employment Reports
+                </a>
+            </div>
         </div>
-    </div>
+
+        <div class="esk-pane" data-esk-pane="new">
+            <form class="esk-panel esk-filters" role="search" aria-label="Report filters" data-esk-form novalidate>
+                <div class="esk-form">
+                    <label class="esk-field"><span>Employee</span>
+                        <select class="esk-ctl" data-esk-f="emp">
+                            <option value="">All employees</option>
+                            @foreach($employees as $emp)<option value="{{ $emp->id }}">{{ trim($emp->first_name.' '.$emp->last_name) }}</option>@endforeach
+                        </select>
+                    </label>
+                    <label class="esk-field"><span>Period</span>
+                        <select class="esk-ctl" data-esk-f="period">
+                            @foreach(\App\Services\HR\SickLeave::PERIODS as $v => $label)<option value="{{ $v }}" @selected((string) $v === '30')>{{ $label }}</option>@endforeach
+                        </select>
+                    </label>
+                    <label class="esk-field"><span>From</span><input class="esk-ctl" type="text" data-hr-date data-esk-f="from" disabled></label>
+                    <label class="esk-field"><span>To</span><input class="esk-ctl" type="text" data-hr-date data-esk-f="to" disabled></label>
+                    <div class="esk-form__end"><button type="submit" class="esk-btn esk-btn--primary">Search</button></div>
+                </div>
+                <p class="esk-formnote" data-esk-formnote hidden></p>
+            </form>
+            <div class="esk-panel esk-app" data-esk-app aria-live="polite">
+                <div class="esk-empty">Choose a period and select Search.</div>
+            </div>
+        </div>
+
+        <div class="esk-pane is-off" data-esk-pane="old" aria-hidden="true">
     <div class="intro-y box p-5 mt-5">
         <form method="POST" action="#">
             <div class="grid grid-cols-12 gap-4">
@@ -68,8 +119,11 @@
             <div id="empSickLeaveListTable" class="table-report table-report--tabulator"></div>
         </div>
     </div>
+        </div>
+    </div>
 @endsection
 
 @section('script')
     @vite('resources/js/hr-employee-sick-leave-report.js')
+    @vite('resources/js/hr-sick-leave-new.js')
 @endsection

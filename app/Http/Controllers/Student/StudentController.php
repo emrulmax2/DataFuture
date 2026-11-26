@@ -2141,8 +2141,17 @@ class  StudentController extends Controller
 
         $QueryInner = StudentCourseRelation::with('creation');
         $QueryInner->where('active','=',1);
-        if(!empty($evening_weekends) && ($evening_weekends==0 || $evening_weekends==1))
-            $QueryInner->where('full_time',$evening_weekends);
+        // Evening / Weekend is the relation's proposed course full_time (26 Nov 2026). It used to filter
+        // student_course_relations.full_time, which does not exist: "Yes" failed and "No" was skipped.
+        if(isset($evening_weekends) && is_scalar($evening_weekends) && in_array((string) $evening_weekends, ['0', '1'], true)) {
+            $QueryInner->whereExists(function($q) use($evening_weekends) {
+                $q->select(DB::raw(1))
+                    ->from('student_proposed_courses as spc')
+                    ->whereColumn('spc.student_course_relation_id', 'student_course_relations.id')
+                    ->whereNull('spc.deleted_at')
+                    ->where('spc.full_time', (int) $evening_weekends);
+            });
+        }
         if(!empty($academic_years) && count($academic_years)>0)
             $QueryInner->where('academic_year_id',$academic_years);
         
@@ -2249,8 +2258,16 @@ class  StudentController extends Controller
 
         $QueryInner = StudentCourseRelation::with('creation');
         $QueryInner->where('active', '=', 1);
-        if(!empty($evening_weekends) && ($evening_weekends==0 || $evening_weekends==1))
-            $QueryInner->where('full_time',$evening_weekends);
+        // Evening / Weekend: the relation's proposed course full_time, as callTheStudentListForGroup (26 Nov 2026).
+        if(isset($evening_weekends) && is_scalar($evening_weekends) && in_array((string) $evening_weekends, ['0', '1'], true)) {
+            $QueryInner->whereExists(function($q) use($evening_weekends) {
+                $q->select(DB::raw(1))
+                    ->from('student_proposed_courses as spc')
+                    ->whereColumn('spc.student_course_relation_id', 'student_course_relations.id')
+                    ->whereNull('spc.deleted_at')
+                    ->where('spc.full_time', (int) $evening_weekends);
+            });
+        }
         if(!empty($academic_years) && count($academic_years)>0)
             $QueryInner->where('academic_year_id',$academic_years);
             

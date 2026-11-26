@@ -1,19 +1,50 @@
-@php
-    //dd($dataList);
-@endphp
 @extends('../layout/' . $layout)
 
 @section('subhead')
     <title>{{ $title }}</title>
+    {{-- Inter for the new version, as in its design. --}}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    @vite('resources/css/hr-record-card.css')
 @endsection
 
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Employee Record Card</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('hr.portal.employment.reports.show') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Employment Reports</a>
+    {{-- New version (user's employee-record-card design, 26 Nov 2026) beside the old one, as on the other
+         HR reports. The Old pane is moved off screen rather than display:none, so a New search can fill it
+         and run it while hidden. --}}
+    @php($ercEthnicities = $ethnicity->map(fn ($e) => [$e->id, $e->name, (int) $e->active])->values())
+    <div class="erc" data-erc
+         data-data-url="{{ route('hr.portal.reports.recordcard.new.data') }}"
+         data-pdf-url="{{ route('hr.portal.reports.recordcard.new.pdf') }}"
+         data-excel-url="{{ route('hr.portal.reports.recordcard.new.excel') }}"
+         data-profile-url="{{ route('profile.employee.view', '__ID__') }}"
+         data-ethnicities='@json($ercEthnicities)'>
+        <div class="erc-head">
+            <div class="erc-head__lead">
+                <span class="erc-head__icon" aria-hidden="true"><i data-lucide="user-square"></i></span>
+                <div>
+                    <h1 class="erc-head__title">Employee Record Card</h1>
+                    <p class="erc-head__sub" id="ercSub">Each member of staff's personal, employment and contact details.</p>
+                </div>
+            </div>
+            <div class="erc-head__actions">
+                <div class="erc-versions" role="group" aria-label="Report version">
+                    <button type="button" aria-pressed="true" data-erc-version="new">New version</button>
+                    <button type="button" aria-pressed="false" data-erc-version="old">Old version</button>
+                </div>
+                <button type="button" class="erc-btn" data-erc-export="excel" data-erc-new-only>Export XLSX</button>
+                <button type="button" class="erc-btn erc-btn--primary" data-erc-export="pdf" data-erc-new-only>Download PDF</button>
+                <a class="erc-back" href="{{ route('hr.portal.employment.reports.show') }}">
+                    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+                    Back to Employment Reports
+                </a>
+            </div>
         </div>
-    </div>
+
+        <div class="erc-pane" data-erc-pane="new">
+            @include('pages.hr.portal.reports.record.new')
+        </div>
+
+        <div class="erc-pane is-off" data-erc-pane="old" aria-hidden="true">
     <div class="intro-y box p-5 mt-5">
         <form id="tabulatorFilterForm-RCD">
             <div class="grid grid-cols-12 gap-4">
@@ -109,7 +140,10 @@
             </div>
         </div>
     </div>
+        </div>
+    </div>
 @endsection
 @section('script')
     @vite('resources/js/hr-portal-recordcard.js')
+    @vite('resources/js/hr-record-card-new.js')
 @endsection

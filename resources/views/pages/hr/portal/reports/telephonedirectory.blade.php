@@ -1,19 +1,50 @@
-@php
-    //dd($dataList);
-@endphp
 @extends('../layout/' . $layout)
 
 @section('subhead')
     <title>{{ $title }}</title>
+    {{-- Inter for the new version, as in its design. --}}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    @vite('resources/css/hr-telephone-directory.css')
 @endsection
 
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Employee Telephone Directory</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('hr.portal.employment.reports.show') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Employment Reports</a>
+    {{-- New version (user's employee-telephone-directory design, 26 Nov 2026) beside the old one, as on the other
+         HR reports. The Old pane is moved off screen rather than display:none, so a New search can fill it
+         and run it while hidden. --}}
+    @php($etdEthnicities = $ethnicity->map(fn ($e) => [$e->id, $e->name, (int) $e->active])->values())
+    <div class="etd" data-etd
+         data-data-url="{{ route('hr.portal.reports.telephonedirectory.new.data') }}"
+         data-pdf-url="{{ route('hr.portal.reports.telephonedirectory.new.pdf') }}"
+         data-excel-url="{{ route('hr.portal.reports.telephonedirectory.new.excel') }}"
+         data-profile-url="{{ route('profile.employee.view', '__ID__') }}"
+         data-ethnicities='@json($etdEthnicities)'>
+        <div class="etd-head">
+            <div class="etd-head__lead">
+                <span class="etd-head__icon" aria-hidden="true"><i data-lucide="phone"></i></span>
+                <div>
+                    <h1 class="etd-head__title">Employee Telephone Directory</h1>
+                    <p class="etd-head__sub" id="etdSub">Phone numbers and emails for every member of staff, A to Z.</p>
+                </div>
+            </div>
+            <div class="etd-head__actions">
+                <div class="etd-versions" role="group" aria-label="Report version">
+                    <button type="button" aria-pressed="true" data-etd-version="new">New version</button>
+                    <button type="button" aria-pressed="false" data-etd-version="old">Old version</button>
+                </div>
+                <button type="button" class="etd-btn" data-etd-export="excel" data-etd-new-only>Export XLSX</button>
+                <button type="button" class="etd-btn etd-btn--primary" data-etd-export="pdf" data-etd-new-only>Download PDF</button>
+                <a class="etd-back" href="{{ route('hr.portal.employment.reports.show') }}">
+                    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+                    Back to Employment Reports
+                </a>
+            </div>
         </div>
-    </div>
+
+        <div class="etd-pane" data-etd-pane="new">
+            @include('pages.hr.portal.reports.directory.new')
+        </div>
+
+        <div class="etd-pane is-off" data-etd-pane="old" aria-hidden="true">
     <div class="intro-y box p-5 mt-5">
         <form id="tabulatorFilterForm-TD">
             <div class="grid grid-cols-12 gap-4">
@@ -104,7 +135,10 @@
             <div id="telephonedirectoryTable" class="mt-5 table-report table-report--tabulator"></div>
         </div>
     </div>
+        </div>
+    </div>
 @endsection
 @section('script')
     @vite('resources/js/hr-portal-telephonedirectory.js')
+    @vite('resources/js/hr-telephone-directory-new.js')
 @endsection
