@@ -547,7 +547,9 @@ class EmployeePortalController extends Controller
             'breadcrumbs' => [
                 ['label' => 'HR Portal', 'href' => route('hr.portal')],
                 ['label' => 'Employment Reports', 'href' => 'javascript:void(0);']
-            ]
+            ],
+            'reports' => \App\Services\HR\EmploymentReports::all(),
+            'categories' => \App\Services\HR\EmploymentReports::CATEGORIES,
         ]);
     }
 
