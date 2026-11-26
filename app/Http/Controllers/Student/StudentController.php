@@ -762,6 +762,13 @@ class  StudentController extends Controller
         $venue_id = (isset($currentCourse->venue_id) && $currentCourse->venue_id > 0 ? $currentCourse->venue_id : 0);
         $CourseCreationVenue = CourseCreationVenue::where('course_creation_id', $courseCreationID)->where('venue_id', $venue_id)->get()->first();
 
+        // Instance Year list: the current course's instances plus any instance the student has
+        // Stuload records against under this course relation (same list as the SLC History page).
+        $default_inst_ids = CourseCreationInstance::where('course_creation_id', $courseCreationID)->pluck('id')->unique()->toArray();
+        $default_inst_ids = (!empty($default_inst_ids) ? $default_inst_ids : [0]);
+        $stuload_instance_ids = StudentStuloadInformation::where('student_id', $student_id)->whereNotIn('course_creation_instance_id', $default_inst_ids)->where('student_course_relation_id', $courseRelationId)->pluck('course_creation_instance_id')->unique()->toArray();
+        $availableInstanc_ids = array_merge($default_inst_ids, $stuload_instance_ids);
+
         return view('pages.students.live.accounts', [
             'title' => 'Live Students - London Churchill College',
             'layout' => 'student-top-menu',
@@ -784,7 +791,7 @@ class  StudentController extends Controller
                             ])->where('student_id', $student_id)->where(function($q) use($courseRelationId){
                                 $q->where('student_course_relation_id', $courseRelationId)->orWhere('student_course_relation_id', 0)->orWhereNull('student_course_relation_id');
                             })->orderBy('id', 'ASC')->get(),
-            'instances' => CourseCreationInstance::where('course_creation_id', $courseCreationID)->orderBy('academic_year_id', 'ASC')->get(),
+            'instances' => CourseCreationInstance::with('year')->whereIn('id', $availableInstanc_ids)->orderBy('academic_year_id', 'ASC')->get(),
             'term_declarations' => TermDeclaration::orderBy('id', 'desc')->get(),
             'lastAssigns' => Assign::where('student_id', $student_id)->orderBy('id', 'desc')->get()->first(),
             'paymentMethods' => SlcPaymentMethod::orderBy('name', 'ASC')->get(),

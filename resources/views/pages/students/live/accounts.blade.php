@@ -424,7 +424,7 @@
                                     <option value="">Please Select</option>
                                     @if(!empty($instances) && $instances->count())
                                         @foreach($instances as $inst)
-                                            <option value="{{ $inst->id }}">{{ $inst->year->name }}</option>
+                                            <option value="{{ $inst->id }}">{{ $inst->year->name ?? ('Instance #'.$inst->id) }}</option>
                                         @endforeach
                                     @endif
                                 </select>
