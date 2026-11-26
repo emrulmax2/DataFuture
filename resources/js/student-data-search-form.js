@@ -849,236 +849,324 @@ import TomSelect from 'tom-select';
             });
         }
     });
-    $('.resetSearch').on('click', function (e) {
+    /* ---------- Student Data Report screen (26 Nov 2026, user's student-data-report design) ----------
+       Same requests as before: the search posts #studentGroupSearchForm to report.student.data.total,
+       the export posts the ticked column names + studentIds to report.student.data.excel. */
+    const csrfHeader = () => ({ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') });
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const plural = (n, word) => `${n.toLocaleString()} ${word}${n === 1 ? '' : 's'}`;
+
+    const filterSelects = [intake_semester, attendance_semester, course, group, is_self_funded, evening_weekend, student_type, group_student_status];
+    const singleSelects = [is_self_funded, evening_weekend];
+    // Each filter's options as the page loaded them. The cascade above narrows the lists; Reset puts them back.
+    const initialOptions = new Map(
+        filterSelects.map((ts) => [
+            ts,
+            Object.values(ts.options)
+                .sort((a, b) => (a.$order || 0) - (b.$order || 0))
+                .map((o) => ({ value: o.value, text: o.text })),
+        ])
+    );
+
+    // Empty-state text ("All intakes"…) on the control; the dropdown's search box keeps "Search Here...".
+    filterSelects.forEach((ts) => (ts.control.dataset.placeholder = $(ts.input).data('placeholder') || ''));
+
+    let studentCount = null; // null = no current search result
+    let foundIds = []; // student ids of the current result (sent with the export, as before)
+    localStorage.removeItem('studentIdsList2024'); // left over from the old screen
+
+    /* --- filters --- */
+    function filterIsSet(ts) {
+        const v = ts.getValue();
+        return Array.isArray(v) ? v.filter((x) => x !== '').length > 0 : v !== '' && v != null;
+    }
+    function syncGroupHint() {
+        $('#sdrGroupHint').prop('hidden', !group.isDisabled);
+    }
+    function syncFilters() {
+        let n = 0;
+        filterSelects.forEach((ts) => {
+            const set = filterIsSet(ts);
+            $(ts.input).closest('[data-sdr-filter]').toggleClass('is-set', set);
+            if (set) n++;
+        });
+        $('#sdrFilterCount').text(n ? `${n} filter${n > 1 ? 's' : ''} applied` : 'No filters applied');
+        syncGroupHint();
+    }
+    // The cascade enables Master Group without a change event: keep its hint in step.
+    ['enable', 'disable'].forEach((method) => {
+        const original = group[method].bind(group);
+        group[method] = (...args) => {
+            const result = original(...args);
+            syncGroupHint();
+            return result;
+        };
+    });
+    filterSelects.forEach((ts) =>
+        ts.on('change', () => {
+            syncFilters();
+            // A result found with other filters is stale: search again before exporting.
+            if (studentCount !== null) {
+                foundIds = [];
+                setResult(null, 'Filters changed. Search again to update the count.');
+            }
+        })
+    );
+
+    $('.resetSearch').on('click', function () {
         resetGroupSearch();
     });
 
     function resetGroupSearch() {
-        intake_semester.clear(true);
-        attendance_semester.clear(true);
-        course.clear(true);
-        group.clear(true);
-
-        student_type.clear(true);
-        group_student_status.clear(true);
-        $('#evening_weekend').val('');
+        filterSelects.forEach((ts) => {
+            ts.clear(true);
+            ts.clearOptions();
+            initialOptions.get(ts).forEach((o) => ts.addOption(o));
+            if (singleSelects.includes(ts)) ts.setValue('', true);
+        });
+        group.disable();
         $('#groupSearchStatus').val('0');
-
-        intake_semester.refreshOptions();
-        student_type.refreshOptions(false);
-        course.refreshOptions(false);
-        group.refreshOptions(false);
-        student_type.refreshOptions(false);
-        group_student_status.refreshOptions(false);
-        evening_weekend.refreshOptions(false);
+        syncFilters();
+        foundIds = [];
+        setResult(null);
     }
-    localStorage.removeItem('studentIdsList2024');
-    /* Start List Table Inits */
+
+    function setResult(n, message) {
+        studentCount = n;
+        const $res = $('#sdrResult').removeClass('is-warn is-error');
+        $res.find('.sdr-dot').toggleClass('is-on', n !== null && n > 0);
+        $('#sdrResultText').html(
+            n === null
+                ? esc(message || 'Run a search to see how many students match.')
+                : `<b>${n.toLocaleString()}</b> student${n === 1 ? '' : 's'} found`
+        );
+        $('#sdrStatStudents, #sdrMobileStudents').text(n === null ? '–' : n.toLocaleString());
+        syncPicker();
+    }
+    function setResultMessage(kind, message) {
+        setResult(null, message);
+        $('#sdrResult').addClass(kind === 'error' ? 'is-error' : 'is-warn');
+    }
 
     $('#studentGroupSearchForm').on('submit', function (event) {
         event.preventDefault();
-        const form = document.getElementById('studentGroupSearchForm');
-        let form_data = new FormData(form);
-        document
-            .querySelector('#studentGroupSearchSubmitBtn')
-            .setAttribute('disabled', 'disabled');
-        document.querySelector(
-            '#studentGroupSearchSubmitBtn svg.loadingCall'
-        ).style.cssText = 'display: inline-block;';
+        const btn = document.getElementById('studentGroupSearchSubmitBtn');
+        btn.disabled = true;
+        btn.classList.add('is-busy');
+        foundIds = [];
+        setResult(null, 'Searching…');
 
         axios({
             method: 'post',
             url: route('report.student.data.total'),
-            data: form_data,
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-            },
+            data: new FormData(this),
+            headers: csrfHeader(),
         })
             .then((response) => {
-                document
-                    .querySelector('#studentGroupSearchSubmitBtn')
-                    .removeAttribute('disabled');
-                document.querySelector(
-                    '#studentGroupSearchSubmitBtn svg.loadingCall'
-                ).style.cssText = 'display: none;';
-                let total_student = response.data.all_rows;
-
                 if (response.status == 200) {
-                    if (total_student > 0)
-                        $('#reportTotalRowCount').html(
-                            'Total Student(s) Found: <div id="totalCount" class="inline-block ml-2"><button class="rounded bg-success text-white cursor-pointer font-medium inline-flex justify-center items-center w-auto mr-2 px-4 py-2">' +
-                                total_student +
-                                '</button></div>'
-                        );
-                    else
-                        $('#reportTotalRowCount').html(
-                            'Total Student(s) Found: <div id="totalCount" class="inline-block ml-2"><button class="rounded bg-danger text-white cursor-pointer font-medium inline-flex justify-center items-center w-auto mr-2 px-4 py-2">' +
-                                total_student +
-                                '</button></div>'
-                        );
-
-                    localStorage.setItem(
-                        'studentIdsList2024',
-                        response.data.student_ids
-                    );
+                    foundIds = Array.isArray(response.data.student_ids) ? response.data.student_ids : [];
+                    setResult(parseInt(response.data.all_rows, 10) || 0);
+                } else {
+                    setResult(null);
                 }
             })
             .catch((error) => {
-                document
-                    .querySelector('#studentGroupSearchSubmitBtn')
-                    .removeAttribute('disabled');
-                document.querySelector(
-                    '#studentGroupSearchSubmitBtn svg.loadingCall'
-                ).style.cssText = 'display: none;';
-                localStorage.setItem('studentIdsList2024', []);
-                if (error.response) {
-                    if (error.response.status == 422) {
-                        let total_student = 'OOPS! something went wrong.';
-                        $('#reportTotalRowCount').html(
-                            '<button class="rounded bg-danger text-white cursor-pointer font-medium inline-flex justify-center items-center w-auto mr-2 px-4 py-2">' +
-                                total_student +
-                                '</button>'
-                        );
-                    } else if (error.response.status == 302) {
-                        let html =
-                            '<div role="alert" class="alert relative border rounded-md px-5 py-4 bg-pending border-pending text-white dark:border-pending mb-2 flex items-center"><i data-tw-merge data-lucide="alert-triangle" class="stroke-1.5 w-5 h-5 mr-2  "></i>\
-                        Please, select an item from abobe\
-                        <button data-tw-merge data-tw-dismiss="alert" type="button" aria-label="Close" type="button" aria-label="Close" class="text-slate-800 py-2 px-3 absolute right-0 my-auto mr-2 btn-close"><i data-tw-merge data-lucide="x" class="stroke-1.5 w-5 h-5 "></i></button>\
-                    </div>';
-
-                        $('#reportTotalRowCount').html(html);
-                        createIcons({
-                            icons,
-                            'stroke-width': 1.5,
-                            nameAttr: 'data-lucide',
-                        });
-                    } else {
-                        $('#reportTotalRowCount').html('No Data Found');
-                    }
-                }
+                foundIds = [];
+                const status = error.response ? error.response.status : 0;
+                if (status == 302) setResultMessage('warn', 'Choose at least one filter, then search.');
+                else if (status == 422) setResultMessage('error', 'Oops! Something went wrong.');
+                else setResultMessage('error', 'No data found. Please try again.');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.classList.remove('is-busy');
             });
     });
 
-    $('input[type=checkbox]').on('click', function () {
-        let studentIds = localStorage.getItem('studentIdsList2024');
-        if (studentIds != null && studentIds.length > 0) {
-            if ($('input[type=checkbox]').is(':checked')) {
-                $('#studentDataReportExcelBtn').removeAttr('disabled');
+    /* --- column picker --- */
+    const groupsEl = document.getElementById('studentExcelForm');
+    const groupEls = () => Array.from(groupsEl.querySelectorAll('[data-sdr-group]'));
+    const fieldBoxes = (root) => Array.from(root.querySelectorAll('.sdr-field input'));
+    const visibleBoxes = (root) => Array.from(root.querySelectorAll('.sdr-field:not([hidden]) input'));
+    const fieldLabel = (box) => box.nextElementSibling.textContent;
+    fieldBoxes(groupsEl).forEach((box, i) => (box.dataset.i = i));
+
+    function syncPicker() {
+        let total = 0;
+        let html = '';
+        groupEls().forEach((el) => {
+            const boxes = fieldBoxes(el);
+            const on = boxes.filter((b) => b.checked);
+            total += on.length;
+            el.classList.toggle('has', on.length > 0);
+            el.querySelector('.sdr-count').textContent = `${on.length}/${boxes.length}`;
+            const vis = visibleBoxes(el);
+            const visOn = vis.filter((b) => b.checked).length;
+            const all = el.querySelector('[data-sdr-all]');
+            all.checked = vis.length > 0 && visOn === vis.length;
+            all.indeterminate = visOn > 0 && visOn < vis.length;
+            if (on.length) {
+                html +=
+                    `<h4>${esc(el.dataset.title)}</h4><div class="sdr-chips">` +
+                    on.map((b) => `<span class="sdr-chip">${esc(fieldLabel(b))}<button type="button" data-rm="${b.dataset.i}" aria-label="Remove ${esc(fieldLabel(b))}">×</button></span>`).join('') +
+                    '</div>';
             }
-        } else {
-            $('#studentDataReportExcelBtn').attr('disabled', 'disabled');
+        });
+        $('#sdrSelection').html(
+            html ||
+                '<div class="sdr-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg><div>No columns selected yet.<br>Tick fields to build your export.</div></div>'
+        );
+        $('#sdrStatCols, #sdrMobileCols').text(total);
+        $('#sdrClearAll').prop('disabled', total === 0);
+        const vis = visibleBoxes(groupsEl);
+        $('#sdrSelectAll').text(vis.length && vis.every((b) => b.checked) ? 'Deselect all' : 'Select all');
+
+        const busy = $('[data-sdr-export]').first().hasClass('is-busy');
+        const ready = total > 0 && studentCount > 0 && foundIds.length > 0;
+        $('[data-sdr-export]').prop('disabled', !ready || busy);
+        $('#sdrWhy').text(
+            ready
+                ? `${plural(total, 'column')} × ${plural(studentCount, 'student')}`
+                : studentCount === null
+                  ? 'Run a search first'
+                  : studentCount === 0
+                    ? 'No students match these filters'
+                    : 'Select at least one column'
+        );
+    }
+
+    groupsEl.addEventListener('submit', (e) => e.preventDefault());
+    groupsEl.addEventListener('change', (e) => {
+        if (e.target.matches('[data-sdr-all]')) {
+            visibleBoxes(e.target.closest('[data-sdr-group]')).forEach((b) => (b.checked = e.target.checked));
         }
+        syncPicker();
     });
-    $('#studentDataReportExcelBtn').on('click', function (e) {
+    groupsEl.addEventListener('click', (e) => {
+        const toggle = e.target.closest('.sdr-g-toggle');
+        if (!toggle) return;
+        const closed = toggle.closest('[data-sdr-group]').classList.toggle('closed');
+        toggle.setAttribute('aria-expanded', String(!closed));
+        syncExpand();
+    });
+    function syncExpand() {
+        $('#sdrExpandAll').text(groupsEl.querySelectorAll('[data-sdr-group]:not(.closed)').length ? 'Collapse all' : 'Expand all');
+    }
+    $('#sdrExpandAll').on('click', function () {
+        const close = groupsEl.querySelectorAll('[data-sdr-group]:not(.closed)').length > 0;
+        groupEls().forEach((g) => {
+            g.classList.toggle('closed', close);
+            g.querySelector('.sdr-g-toggle').setAttribute('aria-expanded', String(!close));
+        });
+        syncExpand();
+    });
+    $('#sdrSelectAll').on('click', function () {
+        const vis = visibleBoxes(groupsEl);
+        const on = !vis.every((b) => b.checked);
+        vis.forEach((b) => (b.checked = on));
+        syncPicker();
+    });
+    $('#sdrClearAll').on('click', function () {
+        fieldBoxes(groupsEl).forEach((b) => (b.checked = false));
+        syncPicker();
+    });
+    $('#sdrSelection').on('click', '[data-rm]', function () {
+        const box = groupsEl.querySelector(`.sdr-field input[data-i="${this.dataset.rm}"]`);
+        if (box) box.checked = false;
+        syncPicker();
+    });
+
+    $('#sdrFind').on('input', function () {
+        const q = this.value.trim().toLowerCase();
+        let any = false;
+        groupEls().forEach((g) => {
+            const whole = q && g.dataset.title.toLowerCase().includes(q);
+            let hit = false;
+            g.querySelectorAll('.sdr-field').forEach((f) => {
+                const span = f.querySelector('span');
+                const text = span.textContent;
+                const i = q ? text.toLowerCase().indexOf(q) : -1;
+                const show = !q || whole || i > -1;
+                f.hidden = !show;
+                hit = hit || show;
+                span.innerHTML = i > -1 ? esc(text.slice(0, i)) + '<mark>' + esc(text.slice(i, i + q.length)) + '</mark>' + esc(text.slice(i + q.length)) : esc(text);
+            });
+            g.hidden = !hit;
+            any = any || hit;
+            if (q && hit) {
+                g.classList.remove('closed');
+                g.querySelector('.sdr-g-toggle').setAttribute('aria-expanded', 'true');
+            }
+        });
+        $('#sdrNone').prop('hidden', any);
+        $('#sdrNoneQ').text(this.value);
+        syncExpand();
+        syncPicker();
+    });
+
+    /* --- export --- */
+    function toast(message) {
+        const t = document.getElementById('sdrToast');
+        t.textContent = message;
+        t.classList.add('show');
+        clearTimeout(toast.timer);
+        toast.timer = setTimeout(() => t.classList.remove('show'), 2600);
+    }
+
+    $('[data-sdr-export]').on('click', function (e) {
         e.preventDefault();
+        // Ticked columns in the old page's order: the server lays out the sheet in the order the names arrive.
+        const ticked = fieldBoxes(groupsEl)
+            .filter((b) => b.checked)
+            .sort((a, b) => a.dataset.order - b.dataset.order);
+        if (!ticked.length || !foundIds.length) return;
 
-        document.querySelector(
-            '#studentDataReportExcelBtn svg.loadingCall'
-        ).style.cssText = 'display: inline-block;';
-        $('#studentExcelForm').submit();
-    });
+        const formData = new FormData();
+        ticked.forEach((b) => formData.append(b.name, b.value));
+        formData.append('studentIds', foundIds.join(','));
 
-    $('#studentExcelForm').on('submit', function (event) {
-        event.preventDefault();
-        let studentIds = localStorage.getItem('studentIdsList2024');
-        if (studentIds.length > 0) {
-            const form = document.getElementById('studentExcelForm');
-            let form_data = new FormData(form);
-            form_data.append('studentIds', studentIds);
-            axios({
-                method: 'post',
-                url: route('report.student.data.excel'),
-                data: form_data,
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
-                        'content'
-                    ),
-                },
-                responseType: 'blob',
+        const $buttons = $('[data-sdr-export]').addClass('is-busy').prop('disabled', true);
+        toast(`Exporting ${plural(ticked.length, 'column')} for ${plural(studentCount, 'student')}…`);
+
+        axios({
+            method: 'post',
+            url: route('report.student.data.excel'),
+            data: formData,
+            headers: csrfHeader(),
+            responseType: 'blob',
+        })
+            .then((response) => {
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'student_data_report_download.xlsx');
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+                toast('Excel downloaded.');
             })
-                .then((response) => {
-                    document.querySelector(
-                        '#studentDataReportExcelBtn svg.loadingCall'
-                    ).style.cssText = 'display: none;';
-                    document
-                        .querySelector('#studentDataReportExcelBtn')
-                        .setAttribute('disabled', 'disabled');
-                    localStorage.removeItem('studentIdsList2024');
-                    $('#totalCount').html('');
-                    const url = window.URL.createObjectURL(
-                        new Blob([response.data])
-                    );
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.setAttribute(
-                        'download',
-                        'student_data_report_download.xlsx'
-                    );
-                    document.body.appendChild(link);
-                    link.click();
-                })
-                .catch((error) => {
-                    console.log(error);
-                    $('.loadingCallFromApart').remove();
-                });
-        }
+            .catch((error) => {
+                console.log(error);
+                toast('The export failed. Please try again.');
+            })
+            .finally(() => {
+                $buttons.removeClass('is-busy');
+                syncPicker();
+            });
     });
 
-    $('#checkbox-all-personal').on('click', function (e) {
-        for (let i = 1; i < 15; i++) {
-            $('#checkbox-switch-' + i).trigger('click');
-        }
-    });
+    // Narrow report (container query hides the panel's button): show the bottom bar instead.
+    const panelFoot = document.getElementById('sdrPanelFoot');
+    const mobileBar = document.getElementById('sdrMobileBar');
+    const syncMobileBar = () => (mobileBar.hidden = getComputedStyle(panelFoot).display !== 'none');
+    if (window.ResizeObserver) new ResizeObserver(syncMobileBar).observe(document.getElementById('studentDataReport'));
+    syncMobileBar();
 
-    $('#checkbox-all-course').on('click', function (e) {
-        for (let i = 15; i < 24; i++) {
-            $('#checkbox-switch-' + i).trigger('click');
-        }
-    });
+    syncFilters();
+    syncPicker();
+    syncExpand();
 
-    $('#checkbox-all-proof').on('click', function (e) {
-        for (let i = 24; i < 27; i++) {
-            $('#checkbox-switch-' + i).trigger('click');
-        }
-    });
-
-    $('#checkbox-all-address').on('click', function (e) {
-        for (let i = 27; i < 36; i++) {
-            $('#checkbox-switch-' + i).trigger('click');
-        }
-    });
-
-    $('#checkbox-all-kin').on('click', function (e) {
-        for (let i = 36; i < 41; i++) {
-            $('#checkbox-switch-' + i).trigger('click');
-        }
-    });
-
-    $('#checkbox-all-qual').on('click', function (e) {
-        for (let i = 41; i < 43; i++) {
-            $('#checkbox-switch-' + i).trigger('click');
-        }
-    });
-
-    $('#checkbox-all-ref').on('click', function (e) {
-        for (let i = 43; i < 49; i++) {
-            $('#checkbox-switch-' + i).trigger('click');
-        }
-    });
-
-    $('#checkbox-all-acc').on('click', function (e) {
-        for (let i = 60; i < 66; i++) {
-            $('#checkbox-switch-' + i).trigger('click');
-        }
-    });
-
-    
-    $('#checkbox-all-additional').on('click', function (e) {
-        for (let i = 67; i < 73; i++) {
-            $('#checkbox-switch-' + i).trigger('click');
-        }
-    });
-    /* End List Table Inits */
 
     function resetList() {
         let intake_semesters = intake_semester.getValue();

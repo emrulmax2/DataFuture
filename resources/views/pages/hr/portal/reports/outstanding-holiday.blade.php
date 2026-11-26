@@ -2,15 +2,74 @@
 
 @section('subhead')
     <title>{{ $title }}</title>
+    {{-- Inter for the new version, as in its design. --}}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    @vite('resources/css/hr-outstanding-holiday.css')
 @endsection
 
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Outstanding Holiday Reports</u></h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('hr.portal.employment.reports.show') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Report</a>
+    {{-- New version (user's outstanding-holiday-report design, 26 Nov 2026) beside the old one, as on the other
+         HR reports. The Old pane is moved off screen rather than display:none, so a New search can fill its
+         form and run it while hidden; an Old search fills the New form and runs it. --}}
+    @php
+        $eohToday = date('Y-m-d');
+        $eohYear = $holiday_years->first(fn ($y) => date('Y-m-d', strtotime($y->start_date)) <= $eohToday && date('Y-m-d', strtotime($y->end_date)) >= $eohToday) ?? $holiday_years->first();
+    @endphp
+    <div class="eoh" data-eoh
+         data-data-url="{{ route('hr.portal.reports.outstanding.holiday.new.data') }}"
+         data-excel-url="{{ route('hr.portal.reports.outstanding.holiday.new.excel') }}"
+         data-profile-url="{{ route('profile.employee.view', '__ID__') }}">
+        <div class="eoh-head">
+            <div class="eoh-head__lead">
+                <span class="eoh-head__icon" aria-hidden="true"><i data-lucide="calendar-clock"></i></span>
+                <div>
+                    <h1 class="eoh-head__title">Outstanding Holiday Report</h1>
+                    <p class="eoh-head__sub" id="eohSub">London Churchill College · holiday allocated, taken and still owed</p>
+                </div>
+            </div>
+            <div class="eoh-head__actions">
+                <div class="eoh-versions" role="group" aria-label="Report version">
+                    <button type="button" aria-pressed="true" data-eoh-version="new">New version</button>
+                    <button type="button" aria-pressed="false" data-eoh-version="old">Old version</button>
+                </div>
+                <button type="button" class="eoh-btn" data-eoh-export data-eoh-new-only disabled>Download Excel</button>
+                <a class="eoh-back" href="{{ route('hr.portal.employment.reports.show') }}">
+                    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+                    Back to Employment Reports
+                </a>
+            </div>
         </div>
-    </div>
+
+        <div class="eoh-pane" data-eoh-pane="new">
+            <form class="eoh-panel eoh-filters" role="search" aria-label="Report filters" data-eoh-form novalidate>
+                <div class="eoh-form">
+                    <label class="eoh-field"><span>Holiday year<span class="eoh-req" aria-hidden="true"> *</span></span>
+                        <select class="eoh-ctl" data-eoh-f="year" required>
+                            @foreach($holiday_years as $y)
+                                <option value="{{ $y->id }}" data-start="{{ date('Y-m-d', strtotime($y->start_date)) }}" data-end="{{ date('Y-m-d', strtotime($y->end_date)) }}" @selected($eohYear && $eohYear->id === $y->id)>{{ date('Y', strtotime($y->start_date)).' - '.date('Y', strtotime($y->end_date)) }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <label class="eoh-field"><span>From<span class="eoh-req" aria-hidden="true"> *</span></span><input class="eoh-ctl" type="text" data-hr-date data-eoh-f="from" required></label>
+                    <label class="eoh-field"><span>To<span class="eoh-req" aria-hidden="true"> *</span></span><input class="eoh-ctl" type="text" data-hr-date data-eoh-f="to" required></label>
+                    <label class="eoh-field"><span>Status</span>
+                        <select class="eoh-ctl" data-eoh-f="status">
+                            @foreach(\App\Services\HR\OutstandingHoliday::STATUSES as $v => $label)<option value="{{ $v }}">{{ $label }}</option>@endforeach
+                        </select>
+                    </label>
+                    <div class="eoh-form__end">
+                        <button type="button" class="eoh-btn" data-eoh-reset>Reset</button>
+                        <button type="submit" class="eoh-btn eoh-btn--primary">Search</button>
+                    </div>
+                </div>
+                <p class="eoh-formnote" data-eoh-formnote hidden></p>
+            </form>
+            <div class="eoh-panel eoh-app" data-eoh-app aria-live="polite">
+                <div class="eoh-empty">Choose a holiday year and dates, then select Search.</div>
+            </div>
+        </div>
+
+        <div class="eoh-pane is-off" data-eoh-pane="old" aria-hidden="true">
     <div class="intro-y box p-5 mt-5">
         <form method="POST" action="#" id="outstandingHolidayReportForm">
             @csrf
@@ -86,8 +145,11 @@
             <div id="outStandingHolidayReportTable" class="table-report table-report--tabulator"></div>
         </div>
     </div>
+        </div>
+    </div>
 @endsection
 
 @section('script')
     @vite('resources/js/outstanding-holiday-report.js')
+    @vite('resources/js/hr-outstanding-holiday-new.js')
 @endsection

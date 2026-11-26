@@ -1,0 +1,161 @@
+/*
+ * HR Portal › Reports › Diversity Information, new version (user's diversity-information-report design,
+ * 26 Nov 2026). Scoped to .dvr; the shell (head, version switch, off-screen Old pane) is Birthday List's.
+ * Class names carry a dvr- prefix: the design's .card/.btn/.bar/.count collide with theme classes.
+ */
+.dvr {
+    --dvr-ink: #16242b; --dvr-muted: #55616b; --dvr-teal: #0e5a54; --dvr-orange: #c8601a; --dvr-warn: #8a3d0c;
+    --dvr-band: #e6ecef; --dvr-stripe: #f4f6f8; --dvr-line: #d9dee3; --dvr-edge: #c3c9d1; --dvr-link: #1668a8;
+    position: relative; /* the Old pane is placed off screen against this box */
+    container: dvr / inline-size;
+    display: flex; flex-direction: column; gap: 16px; margin-top: 8px; padding-bottom: 32px;
+}
+.dvr [hidden] { display: none !important; }
+.dvr-head, [data-dvr-pane="new"] { color: var(--dvr-ink); font: 15px/1.45 Inter, system-ui, -apple-system, "Segoe UI", Arial, Helvetica, sans-serif; }
+.dvr-head *, .dvr-head *::before, .dvr-head *::after,
+[data-dvr-pane="new"] *, [data-dvr-pane="new"] *::before, [data-dvr-pane="new"] *::after { box-sizing: border-box; }
+:where([data-dvr-pane="new"], .dvr-head) :where(button, input, select) { font: inherit; color: inherit; }
+[data-dvr-pane="new"] button, .dvr-head button { cursor: pointer; }
+[data-dvr-pane="new"] :focus-visible, .dvr-head :focus-visible { outline: 2px solid var(--dvr-link); outline-offset: 2px; }
+
+/* Panes: the hidden one leaves the flow but keeps its width, so the old Tabulator can lay itself out. */
+.dvr-pane { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.dvr-pane.is-off { position: absolute; top: 0; left: 0; right: 0; height: 0; overflow: hidden; visibility: hidden; pointer-events: none; }
+/* The old box keeps its own top margin inside the pane. */
+[data-dvr-pane="old"] > .box { margin-top: 0 !important; }
+
+/* ── Page head (as on Student Result Report) ── */
+.dvr-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 24px; }
+.dvr-head__lead { flex: 1 1 360px; display: flex; align-items: center; gap: 16px; min-width: 0; }
+.dvr-head__icon {
+    flex: 0 0 52px; display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 14px;
+    background: linear-gradient(135deg, #0e5a54 0%, #1b8a7f 100%); color: #ffffff; box-shadow: 0 6px 16px rgba(14, 90, 84, 0.22);
+}
+.dvr-head__icon svg { width: 26px; height: 26px; stroke-width: 1.75; }
+.dvr-head__title { margin: 0; color: var(--dvr-ink); font-size: 20px; font-weight: 700; line-height: 1.25; }
+.dvr-head__sub { margin: 3px 0 0; color: var(--dvr-muted); font-size: 13px; line-height: 1.45; }
+.dvr-head__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.dvr-versions { display: inline-flex; gap: 2px; height: 40px; margin-right: 8px; padding: 3px; border: 1px solid #e4e7ec; border-radius: 8px; background: #e9edf2; }
+.dvr-versions button { height: 32px; padding: 0 14px; border: 0; border-radius: 6px; background: none; color: #475467; font-size: 13px; font-weight: 600; }
+.dvr-versions button:hover { color: var(--dvr-ink); }
+.dvr-versions button[aria-pressed="true"] { background: #ffffff; color: var(--dvr-teal); box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08); }
+.dvr-back {
+    display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border: 1px solid var(--dvr-edge); border-radius: 8px;
+    background: #ffffff; color: var(--dvr-ink) !important; font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap;
+    transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+.dvr-back svg { width: 16px; height: 16px; transition: transform 0.2s ease; }
+.dvr-back:hover { border-color: var(--dvr-teal); color: var(--dvr-teal) !important; box-shadow: 0 2px 8px rgba(22, 36, 43, 0.08); }
+.dvr-back:hover svg { transform: translateX(-3px); }
+.dvr-btn { height: 40px; padding: 0 16px; border: 1px solid var(--dvr-edge); border-radius: 6px; background: #ffffff; color: var(--dvr-ink); font-size: 14px; font-weight: 600; white-space: nowrap; }
+.dvr-btn:hover:not(:disabled) { border-color: #9aa5b1; }
+.dvr-btn--primary { background: var(--dvr-teal); border-color: var(--dvr-teal); color: #ffffff; }
+.dvr-btn--primary:hover:not(:disabled) { background: #0b4843; border-color: #0b4843; }
+.dvr-btn:disabled, .dvr-btn.is-busy { opacity: .6; cursor: progress; }
+
+/* ── Panels, filters ── */
+.dvr-panel { background: #ffffff; border: 1px solid var(--dvr-line); border-radius: 8px; padding: 22px 24px; min-width: 0; }
+.dvr-app { display: flex; flex-direction: column; gap: 24px; }
+.dvr-form { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; align-items: start; }
+.dvr-field { display: flex; flex-direction: column; gap: 6px; margin: 0; font-size: 13px; font-weight: 600; color: var(--dvr-muted); min-width: 0; }
+.dvr-ctl { height: 40px; width: 100%; padding: 0 10px; border: 1px solid var(--dvr-edge); border-radius: 6px; background-color: #ffffff; box-shadow: none; font-size: 14px; font-weight: 500; color: var(--dvr-ink); }
+.dvr-ctl:focus { border-color: var(--dvr-teal); box-shadow: 0 0 0 3px rgba(14, 90, 84, 0.15); outline: 0; }
+select.dvr-ctl { padding-right: 30px; }
+
+.dvr { --dvr-c0: #0e5a54; --dvr-c1: #c8601a; --dvr-c2: #3d6fb4; --dvr-c3: #8a5aa8; --dvr-c4: #b8922a; --dvr-c5: #8b949c; --dvr-track: #e9edf0; }
+.dvr-field small { font-size: 11.5px; font-weight: 500; color: #7b858d; margin-top: -2px; }
+.dvr-form__end { display: flex; gap: 8px; justify-content: flex-end; grid-column: 1 / -1; }
+
+/* ── Sections, text ── */
+.dvr-sec { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.dvr-sechead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px; }
+.dvr h2 { margin: 0; font-size: 15px; font-weight: 700; color: var(--dvr-ink); }
+.dvr-hint { font-size: 13px; color: var(--dvr-muted); }
+.dvr-muted { color: var(--dvr-muted); }
+.dvr-empty { padding: 26px; text-align: center; color: var(--dvr-muted); border: 1px dashed var(--dvr-edge); border-radius: 8px; }
+.dvr-notes { margin: 0; padding-left: 18px; font-size: 13px; color: var(--dvr-muted); display: flex; flex-direction: column; gap: 4px; list-style: disc; }
+.dvr-notes b { color: var(--dvr-warn); }
+.dvr-name { color: inherit !important; text-decoration: none; }
+.dvr-name:hover { color: var(--dvr-link) !important; text-decoration: underline; }
+.dvr-miss { color: var(--dvr-warn); font-weight: 600; }
+.dvr-yes { display: inline-block; padding: 1px 9px; border-radius: 10px; background: var(--dvr-teal); color: #ffffff; font-size: 12.5px; font-weight: 700; }
+.dvr-seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--dvr-edge); border-radius: 6px; overflow: hidden; background: #ffffff; }
+.dvr-seg button { min-height: 36px; padding: 4px 14px; border: 0; border-right: 1px solid var(--dvr-edge); background: transparent; font-size: 14px; font-weight: 600; }
+.dvr-seg button:last-child { border-right: 0; }
+.dvr-seg button[aria-pressed="true"] { background: var(--dvr-teal); color: #ffffff; }
+
+/* ── Everyone at a glance ── */
+.dvr-colourby { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.dvr-count { display: flex; align-items: baseline; gap: 10px; }
+.dvr-count b { font-size: 40px; font-weight: 700; line-height: 1; }
+.dvr-count span { color: var(--dvr-muted); }
+.dvr-glance { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(240px, 1fr); gap: 28px; align-items: center; }
+.dvr-dots { display: grid; grid-template-columns: repeat(17, 1fr); gap: 6px; max-width: 560px; }
+.dvr-dots.is-many { grid-template-columns: repeat(25, 1fr); gap: 4px; }
+.dvr-dots i { display: block; aspect-ratio: 1; border-radius: 50%; background: var(--dvr-c5); transition: opacity .15s; }
+.dvr-dots i.is-dim { opacity: .15; }
+.dvr-lg { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.dvr-lg button { width: 100%; display: grid; grid-template-columns: 14px minmax(0, 1fr) auto 52px; gap: 10px; align-items: center; border: 1px solid transparent; border-radius: 6px; background: transparent; padding: 7px 8px; text-align: left; }
+.dvr-lg button:hover { background: var(--dvr-stripe); }
+.dvr-lg button[aria-pressed="true"] { background: var(--dvr-stripe); border-color: var(--dvr-edge); }
+.dvr-lg .dvr-sw { width: 14px; height: 14px; border-radius: 50%; }
+.dvr-lg b { font-variant-numeric: tabular-nums; }
+.dvr-lg .dvr-pc { text-align: right; color: var(--dvr-muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+
+/* ── Breakdown cards ── */
+.dvr-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.dvr-card { border: 1px solid var(--dvr-line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.dvr-split { display: flex; height: 30px; border-radius: 6px; overflow: hidden; background: var(--dvr-track); }
+.dvr-split i { display: flex; align-items: center; justify-content: center; font-style: normal; font-size: 13px; font-weight: 700; color: #ffffff; min-width: 4px; }
+.dvr-kv { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.dvr-kv div { display: flex; justify-content: space-between; gap: 10px; }
+.dvr-kv span span { color: var(--dvr-muted); font-size: 13px; margin-left: 6px; }
+.dvr-bars { display: flex; flex-direction: column; gap: 9px; }
+.dvr-bar .dvr-t { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; }
+.dvr-bar .dvr-t b { font-variant-numeric: tabular-nums; }
+.dvr-bar .dvr-t span span { color: var(--dvr-muted); font-size: 13px; margin-left: 6px; }
+.dvr-meter { height: 8px; border-radius: 4px; background: var(--dvr-track); overflow: hidden; margin-top: 3px; }
+.dvr-meter i { display: block; height: 100%; background: var(--dvr-teal); }
+.dvr-subl { margin: 4px 0 0; padding: 0 0 0 12px; list-style: none; border-left: 2px solid var(--dvr-band); font-size: 13px; color: var(--dvr-muted); display: flex; flex-direction: column; gap: 2px; }
+.dvr-subl li { display: flex; justify-content: space-between; gap: 10px; }
+.dvr-subl b { color: var(--dvr-ink); font-variant-numeric: tabular-nums; }
+.dvr-big2 { font-size: 30px; font-weight: 700; line-height: 1.1; }
+
+/* ── Gender within each ethnic group ── */
+.dvr-legend { display: inline-flex; gap: 12px; font-size: 13px; color: var(--dvr-muted); }
+.dvr-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.dvr-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.dvr-x { display: grid; grid-template-columns: 150px minmax(0, 1fr) 190px; gap: 8px 14px; align-items: center; font-size: 14px; }
+.dvr-x .dvr-split { height: 16px; }
+.dvr-x .dvr-split i { font-size: 0; }
+.dvr-x .dvr-r { text-align: right; color: var(--dvr-muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+
+/* ── Staff list ── */
+.dvr-tools { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
+.dvr-chip { display: inline-flex; align-items: center; gap: 8px; padding: 4px 6px 4px 12px; border-radius: 16px; background: var(--dvr-band); font-size: 13px; font-weight: 600; }
+.dvr-chip button { border: 0; background: transparent; font-size: 16px; line-height: 1; width: 22px; height: 22px; border-radius: 50%; padding: 0; }
+.dvr-chip button:hover { background: #d3dbe0; }
+.dvr-scroll { overflow-x: auto; }
+.dvr-table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 14px; }
+.dvr-table th, .dvr-table td { padding: 8px 10px; text-align: left; vertical-align: middle; }
+.dvr-table thead th { font-size: 13px; font-weight: 600; color: var(--dvr-muted); border-bottom: 1px solid var(--dvr-ink); white-space: nowrap; }
+.dvr-table tbody tr:nth-child(odd) td { background: var(--dvr-stripe); }
+.dvr-table tbody td { border-top: 1px solid #eceff2; }
+.dvr-table td.dvr-nm { font-weight: 600; white-space: nowrap; }
+.dvr-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 13px; color: var(--dvr-muted); }
+
+/* Toast */
+.dvr-toast { position: fixed; left: 50%; bottom: 28px; z-index: 70; transform: translate(-50%, 20px); padding: 10px 16px; border-radius: 8px; background: #16242b; color: #ffffff; font: 13px/1.4 Inter, system-ui, sans-serif; opacity: 0; pointer-events: none; transition: .2s; }
+.dvr-toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@container dvr (max-width: 1000px) {
+    .dvr-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .dvr-cards, .dvr-glance { grid-template-columns: 1fr; }
+}
+@container dvr (max-width: 600px) {
+    .dvr-panel { padding: 16px; }
+    .dvr-form { grid-template-columns: 1fr; }
+    .dvr-dots { gap: 4px; }
+    .dvr-x { grid-template-columns: 96px minmax(0, 1fr) 120px; }
+}
+@media (prefers-reduced-motion: reduce) { .dvr *, .dvr-toast { transition: none !important; } }
